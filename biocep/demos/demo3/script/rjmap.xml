@@ -1,0 +1,11 @@
+<rj>	
+  <publish>
+	  <s4classes>
+		<class name="ExpressionSet"/>
+		<class name="vsn"/>
+	  </s4classes>	
+  </publish>    
+  <scripts>
+	  <initScript name="globals.r" embed="true"/>	 	  	   	  
+  </scripts>  
+</rj>
