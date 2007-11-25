@@ -1,0 +1,26 @@
+<rj>	
+  <publish>
+	  	
+	<functions>
+		<function name="square"/>
+		<function name="distance" returnType="numeric" />		
+		<function name="vsn2" returnType="vsn" />
+		<function name="justvsn" />					
+	</functions>
+		
+	<s4classes>
+		<class name="Point"/>
+	</s4classes>	
+	  
+  </publish>  
+ 
+  <scripts>
+	  
+	  <initScript name="globals.r" embed="true"/>	 
+	    	  	   
+	  <packageScript inline="library(vsn)" package="vsn" />
+ 	  <packageScript name="vsnconfig.r" package="vsn" />
+	  
+  </scripts>
+  
+</rj>

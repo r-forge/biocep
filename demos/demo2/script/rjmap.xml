@@ -1,0 +1,18 @@
+<rj>	
+  <publish>
+	  	
+	<functions>
+		<function name="square" />
+		<function name="distance" returnType="numeric" />				
+		<function name="vsn2" />											
+	</functions>
+	  
+	<s4classes>		
+	</s4classes>
+	  	
+  </publish>  
+  <scripts>
+	  <initScript name="globals.r" embed="true"/>	 	  	   	  
+  </scripts>
+  
+</rj>

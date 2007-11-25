@@ -1,0 +1,50 @@
+/*
+ * Copyright (C) 2007 EMBL-EBI
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package uk.ac.ebi.microarray.pools.db;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+/**
+ * @author Karim Chine kchine@ebi.ac.uk
+ */
+public class DBLayerDerby extends DBLayer {
+	public DBLayerDerby(Connection conn) {
+		super(conn);
+	}
+
+	protected String sysdateFunctionName() {
+		return "CURRENT_TIMESTAMP";
+	}
+
+	protected void lock(Statement stmt) throws SQLException {
+		stmt.execute("LOCK TABLE SERVANTS IN EXCLUSIVE MODE");
+	}
+
+	protected void unlock(Statement stmt) throws SQLException {
+	}
+
+	@Override
+	boolean isNoConnectionError(SQLException sqle) {
+		return true;
+	}
+
+	@Override
+	boolean isConstraintViolationError(SQLException sqle) {
+		return true;
+	}
+}

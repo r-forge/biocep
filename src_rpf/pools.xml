@@ -1,0 +1,12 @@
+<pools default="P2">
+	
+	<pool name="P1" borrowTimeout="12" >
+		<node prefix="RSERVANT_" registryHost="localhost" registryPort="1099"/>
+	</pool>
+	
+	<pool name="P2" borrowTimeout="30000" >
+		<node prefix="toto" registryHost="localhost" registryPort="1099"/>
+		<node prefix="titi" registryHost="localhost" registryPort="1099"/>	
+	</pool>
+	
+</pools>

@@ -1,0 +1,746 @@
+<!--
+ * Copyright (C) 2007 EMBL-EBI
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!--
+ * author Karim Chine   kchine@ebi.ac.uk
+-->
+
+<project name="MyProject" default="compile" basedir=".">
+	
+	<property environment="env"/>
+	
+	<property name="JRI_LIB_PATH" value="${env.R_HOME}/library/rJava/jri"/>
+	<property name="JGD_LIB_PATH" value="${env.R_HOME}/library/JavaGD/libs"/>
+	
+	<!-- 
+	<property name="JRI_LIB_PATH" value="${env.R_LIBS}/rJava/jri"/>
+	<property name="JGD_LIB_PATH" value="${env.R_LIBS}/JavaGD/libs"/>		
+	-->
+	
+	<property name="CORE_JAR" value="${basedir}/RJB.jar"/>
+	<property name="RPF_JAR" value="${basedir}/RPF.jar"/>
+	<property name="JRI_JAR" value="${basedir}/lib/desktop/JRI.jar"/>
+	<property name="LOGGING_JAR" value="${basedir}/lib/log/commons-logging-1.1.jar"/>
+	<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.14.jar"/>	
+	<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>
+	
+	<property name="ORACLE_JAR" value="${basedir}/lib/jdbc/ojdbc-14.jar"/>
+	<property name="MYSQL_JAR" value="${basedir}/lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>
+	<property name="DERBY_JAR" value="${basedir}/lib/jdbc/derbyclient.jar"/>
+	<property name="PSTOOLS_HOME" value="${basedir}/PsTools"/>
+	
+	<taskdef name="if" classpath="lib/beangenlibs/ant-contrib-1.0b3.jar"
+		classname="net.sf.antcontrib.logic.IfTask"/>
+	
+	<target name="setWinAwareProps">
+		<if>
+			<os family="windows"/>
+			<then>
+				<property name="R_LIB_PATH" value="${env.R_HOME}/bin"/>
+				<property name="windows.root.slash" value="/"/>
+			</then>
+			<else>
+				<property name="R_LIB_PATH" value="${env.R_HOME}/lib"/>
+				<property name="windows.root.slash" value=""/>
+			</else>
+		</if>
+	</target>
+	
+	<target name="gen" depends="compile,setWinAwareProps">
+		
+		<if><not><isset property="file"/></not>	<then><property name="file" value=""/>	</then></if>
+		<if><not><isset property="dir"/></not><then><property name="dir" value=""/></then></if>
+		<if><not><isset property="outputdir"/></not><then><property name="outputdir" value="distrib"/></then></if>
+		<if><not><isset property="mappingjar"/></not><then><property name="mappingjar" value=""/></then></if>
+		<if><not><isset property="warname"/></not><then><property name="warname" value=""/></then></if>
+		<if><not><isset property="propsembed"/></not><then><property name="propsembed" value=""/></then></if>
+		<if><not><isset property="keepintermediate"/></not><then><property name="keepintermediate" value=""/></then></if>
+		<if><not><isset property="formatsource"/></not><then><property name="formatsource" value=""/></then></if>
+		<if><not><isset property="ws.r.api"/></not><then><property name="ws.r.api" value=""/></then></if>
+		<if><not><isset property="targetjdk"/></not><then><property name="targetjdk" value=""/></then></if>
+		
+		<java maxmemory="1024m" classname="generator.Gen" fork="true">
+			
+			<classpath>
+				<pathelement path="${JRI_JAR}"/>
+				<pathelement path="${CORE_JAR}"/>
+				<fileset dir="lib/beangenlibs">
+					<include name="**/*.jar"/>
+				</fileset>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
+				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
+			</classpath>
+			
+			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			<jvmarg value="-Dfile=${file}"/>
+			<jvmarg value="-Ddir=${dir}"/>
+			<jvmarg value="-Doutputdir=${outputdir}"/>
+			<jvmarg value="-Dmappingjar=${mappingjar}"/>
+			<jvmarg value="-Dwarname=${warname}"/>
+			<jvmarg value="-Dpropsembed=${propsembed}"/>
+			<jvmarg value="-Dkeepintermediate=${keepintermediate}"/>
+			<jvmarg value="-Dformatsource=${formatsource}"/>
+			<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
+			<jvmarg value="-Djri.jar=${JRI_JAR}"/>
+			<jvmarg value="-Dws.r.api=${ws.r.api}"/>
+			<jvmarg value="-Dtargetjdk=${targetjdk}"/>
+			
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+		
+		<if>
+			<or>
+				<equals arg1="${keepintermediate}" arg2="false"/>
+				<equals arg1="${keepintermediate}" arg2="FALSE"/>
+			</or>
+			<then>
+				<delete>
+					<fileset dir="${outputdir}">
+						<include name="**/_temp*.jar"/>
+					</fileset>
+				</delete>
+				<delete dir="${outputdir}/src"/>
+				<delete dir="${outputdir}/test/"/>
+			</then>
+		</if>
+		
+	</target>
+	
+	<target name="server" depends="setWinAwareProps">
+		
+		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
+		<if><not><isset property="prefix"/></not><then><property name="prefix" value=""/></then></if>		
+		<if><not><isset property="name"/></not><then><property name="name" value=""/></then></if>
+		<if><not><isset property="autoname"/></not><then><property name="autoname" value=""/></then></if>
+		<if><not><isset property="node"/></not><then><property name="node" value=""/></then></if>				
+		<if><not><isset property="registryhost"/></not><then><property name="registryhost" value=""/></then></if>
+		<if><not><isset property="registryport"/></not><then><property name="registryport" value=""/></then></if>
+		<if><not><isset property="working.dir.root"/></not><then><property name="working.dir.root" value=""/></then></if>		
+		<if><not><isset property="properties.extension"/></not><then><property name="properties.extension" value=""/></then></if>
+		<if><not><isset property="listener.stub"/></not><then><property name="listener.stub" value=""/></then></if>
+		<if><not><isset property="private"/></not><then><property name="private" value=""/></then></if>		
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>		
+		<if><not><isset property="servant.classpath"/></not><then><property name="servant.classpath" value=""/></then></if>
+		<if><not><isset property="preprocess.help"/></not><then><property name="preprocess.help" value=""/></then></if>
+		<if><not><isset property="apply.sandbox"/></not><then><property name="apply.sandbox" value=""/></then></if>
+		<if><not><isset property="attr.lsf.processid"/></not><then><property name="attr.lsf.processid" value=""/></then></if>
+		<if><not><isset property="node.manager.name"/></not><then><property name="node.manager.name" value="NODE_MANAGER"/></then></if>
+		
+		<java maxmemory="256m" classname="uk.ac.ebi.microarray.pools.MainServer"
+			fork="true" spawn="${spawn}">
+			
+			<classpath>
+				
+				<pathelement path="${JRI_JAR}"/>
+				<pathelement path="${RPF_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="${servant.classpath}"/>
+				
+			</classpath>
+			
+			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			<jvmarg
+				value="-Djava.library.path=${JRI_LIB_PATH}${path.separator}${JGD_LIB_PATH}"/>
+			<jvmarg value="-Djava.rmi.server.codebase=${servant.codebase}"/>
+			<jvmarg value="-Dservantclass=${servantclass}"/>
+			<jvmarg value="-Dname=${name}"/>
+			<jvmarg value="-Dautoname=${autoname}"/>
+			<jvmarg value="-Dprefix=${prefix}"/>
+			<jvmarg value="-Dnode=${node}"/>
+			<jvmarg value="-Dlistener.stub=${listener.stub}"/>
+			<jvmarg value="-Dprivate=${private}"/>
+			<jvmarg value="-Dpreprocess.help=${preprocess.help}"/>
+			<jvmarg value="-Dapply.sandbox=${apply.sandbox}"/>
+			<jvmarg value="-Dattr.lsf.processid=${attr.lsf.processid}"/>
+			<jvmarg value="-Dnode.manager.name=${node.manager.name}"/>
+			
+			<!-- REG MODE -->
+			<jvmarg value="-Dregistryhost=${registryhost}"/>
+			<jvmarg value="-Dregistryport=${registryport}"/>
+			<jvmarg value="-Dworking.dir.root=${working.dir.root}"/>
+			
+			<!-- DB MODE -->
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.password}"/>
+			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
+			<jvmarg value="-Dproperties.extension=${properties.extension}"/>
+			
+			<!-- LOG PARAMS -->
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1,A2"/>
+			<jvmarg value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			<jvmarg	value="-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+		
+	</target>
+	
+	<target name="derby.startup">
+		<if>
+			<not>
+				<isset property="derby.port"/>
+			</not>
+			<then>
+				<property name="derby.port" value="1527"/>
+			</then>
+		</if>
+		<if>
+			<not>
+				<isset property="spawn"/>
+			</not>
+			<then>
+				<property name="spawn" value="false"/>
+			</then>
+		</if>
+		<java jar="${env.DERBY_HOME}/lib/derbynet.jar" fork="true"
+			spawn="${spawn}">
+			<arg value="start"/>
+			<arg value="-h"/>
+			<arg value="0.0.0.0"/>
+			<arg value="-p"/>
+			<arg value="${derby.port}"/>
+		</java>
+	</target>
+	
+	<target name="derby.shutdown">
+		<if>
+			<not>
+				<isset property="derby.port"/>
+			</not>
+			<then>
+				<property name="derby.port" value="1527"/>
+			</then>
+		</if>
+		<if>
+			<not>
+				<isset property="spawn"/>
+			</not>
+			<then>
+				<property name="spawn" value="false"/>
+			</then>
+		</if>
+		<java jar="${env.DERBY_HOME}/lib/derbynet.jar" fork="true"
+			spawn="${spawn}">
+			<arg value="shutdown"/>
+			<arg value="-h"/>
+			<arg value="0.0.0.0"/>
+			<arg value="-p"/>
+			<arg value="${derby.port}"/>
+		</java>
+	</target>
+	
+	<target name="tomcat.startup">
+		<if>
+			<not>
+				<isset property="spawn"/>
+			</not>
+			<then>
+				<property name="spawn" value="false"/>
+			</then>
+		</if>
+		<java jar="${env.TOMCAT_HOME}/bin/bootstrap.jar" fork="true"
+			spawn="${spawn}">
+			<jvmarg value="-Dcatalina.home=${env.TOMCAT_HOME}"/>
+			<arg value="start"/>
+		</java>
+	</target>
+	
+	<target name="tomcat.shutdown">
+		<if>
+			<not>
+				<isset property="spawn"/>
+			</not>
+			<then>
+				<property name="spawn" value="true"/>
+			</then>
+		</if>
+		<java jar="${env.TOMCAT_HOME}/bin/bootstrap.jar" fork="true"
+			spawn="${spawn}">
+			<jvmarg value="-Dcatalina.home=${env.TOMCAT_HOME}"/>
+			<arg value="stop"/>
+		</java>
+	</target>
+	
+	<target name="rmiregistry">
+		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
+		<if><not><isset property="port"/></not><then><property name="port" value="1099"/></then></if>
+		<if><not><isset property="kill"/></not><then><property name="kill" value=""/></then></if>
+		<if><not><isset property="show"/></not><then><property name="show" value=""/></then></if>
+		<if><not><isset property="unbindall"/></not><then><property name="unbindall" value=""/></then></if>
+		<if><not><isset property="invoke"/></not><then><property name="invoke" value=""/></then></if>
+		
+		<java classname="uk.ac.ebi.microarray.pools.MainRegistry" fork="true"
+			spawn="${spawn}">
+			<classpath>
+				<pathelement path="${RPF_JAR}"/>
+			</classpath>
+			<jvmarg value="-Dport=${port}"/>
+			<jvmarg value="-Dshow=${show}"/>
+			<jvmarg value="-Dkill=${kill}"/>
+			<jvmarg value="-Dunbindall=${unbindall}"/>
+			<jvmarg value="-Dinvoke=${invoke}"/>
+			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
+		</java>
+	</target>
+	
+	<target name="db">
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>		
+		<if><not><isset property="db.initscript"/></not><then><property name="db.initscript" value=""/></then></if>		
+
+		<java classname="uk.ac.ebi.microarray.pools.db.RegenerateDB" fork="true">
+			
+			<classpath>
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+			</classpath>
+			
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.password}"/>
+			<jvmarg value="-Ddb.initscript=${db.initscript}"/>
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+	</target>
+	
+	<target name="top">
+		
+		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
+		
+		
+		<java classname="uk.ac.ebi.microarray.pools.db.monitor.Supervisor"
+			fork="true" spawn="${spawn}">
+			
+			<classpath>
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
+				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
+				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
+			</classpath>
+			
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.password}"/>
+			
+			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
+			
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+	</target>
+	
+	<target name="node">
+		
+		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
+		<if><not><isset property="node.manager.name"/></not><then><property name="node.manager.name" value="NODE_MANAGER"/></then></if>				
+		<if><not><isset property="node.name"/></not><then><property name="node.name" value=""/></then></if>						
+		<if><not><isset property="job"/></not><then><property name="job" value="java"/></then></if>
+		<if><not><isset property="server"/></not><then><property name="server" value="true"/></then></if>		
+		
+		<java classname="uk.ac.ebi.microarray.pools.db.MainNodeManager"
+			fork="true" spawn="${spawn}">
+			
+			<classpath>
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
+				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
+				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
+			</classpath>
+			
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.password}"/>
+			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
+			<jvmarg value="-Dnode.manager.name=${node.manager.name}"/>
+			<jvmarg value="-Dnode.name=${node.name}"/>
+			<jvmarg value="-Djob=${job}"/>
+			<jvmarg value="-Dserver=${server}"/>			
+			
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+	</target>
+	
+	<target name="client">
+		
+		<if>
+			<not>
+				<isset property="clientjarurls"/>
+			</not>
+			<then>
+				<property name="clientjarurls" value=""/>
+			</then>
+		</if>
+		
+		<java maxmemory="1024m" classname="${client.mainclass}" fork="true">
+			<classpath>
+				
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
+				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
+				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
+				<path refid="${client.path.id}"/>
+			</classpath>
+			
+			<jvmarg value="-Djava.rmi.server.codebase=${clientjarurls}"/>			
+			<jvmarg	value="-Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB"/>
+			<jvmarg value="-Dpools.dbmode.driver=${client.db.driver}"/>
+			<jvmarg value="-Dpools.dbmode.url=${client.db.url}"/>
+			<jvmarg value="-Dpools.dbmode.user=${client.db.user}"/>
+			<jvmarg value="-Dpools.dbmode.password=${client.db.password}"/>
+			<jvmarg	value="-Dpools.dbmode.defaultpoolname=${client.defaultpoolname}"/>
+			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
+			<jvmarg value="-Durl=${url}"/>
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+		
+	</target>
+	
+	<target name="gui" depends="compile,setWinAwareProps">
+		
+			
+		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
+		<if><not><isset property="lf"/></not><then><property name="lf" value="0"/></then></if>
+		<if><not><isset property="mode"/></not><then><property name="mode" value="local"/></then></if>
+		<if><not><isset property="stub"/></not><then><property name="stub" value=""/></then></if>				
+		<if><not><isset property="localtomcat.port"/></not><then><property name="localtomcat.port" value="9999"/></then></if>
+		<if><not><isset property="url"/></not><then><property name="url" value=""/></then></if>
+		<if><not><isset property="name"/></not><then><property name="name" value=""/></then></if>
+		<if><not><isset property="save"/></not><then><property name="save" value="true"/></then></if>
+
+		<if><not><isset property="registryhost"/></not><then><property name="registryhost" value=""/></then></if>
+		<if><not><isset property="registryport"/></not><then><property name="registryport" value=""/></then></if>		
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
+							
+
+		<java maxmemory="1024m" classname="graphics.rmi.GDAppletLauncher"
+			fork="true" spawn="${spawn}">
+			<classpath>
+				
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${JRI_JAR}"/>
+				
+				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="lib/j2ee/servlet-api.jar"/>
+				<pathelement path="lib/desktop/webserver.jar"/>
+				<pathelement path="lib/desktop/jeditmodes.jar"/>
+				<pathelement path="lib/desktop/jedit.jar"/>
+				<pathelement path="lib/desktop/OpenXLS.jar"/>
+				<pathelement path="lib/desktop/pf-joi-full.jar"/>
+				<pathelement path="lib/desktop/idw-gpl.jar"/>
+				
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+				
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
+				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
+				
+				<!--optional-->
+				<pathelement
+					path="VirtualRWorkbench/frontendapp/WEB-INF/lib/mapping.jar"/>
+				
+			</classpath>
+			
+			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
+			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
+			<jvmarg value="-Dpreprocess.help=true"/>
+			<jvmarg value="-Dapply.sandbox=false"/>
+			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
+			
+			<jvmarg value="-Dmode=${mode}"/>
+			<jvmarg value="-Dautologon=true"/>
+			<jvmarg value="-Durl=${url}"/>
+			<jvmarg value="-Dlf=${lf}"/>
+			<jvmarg value="-Dstub=${stub}"/>
+			<jvmarg value="-Dname=${name}"/>
+			<jvmarg value="-Dsave=${save}" />
+			<jvmarg value="-Dlocaltomcat.port=${localtomcat.port}"/>
+			
+			<jvmarg value="-Dregistryhost=${registryhost}"/>
+			<jvmarg value="-Dregistryport=${registryport}"/>
+			
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.password}"/>
+			
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+	</target>
+	
+	<target name="killdb">
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>		
+		<if><not><isset property="db.initscript"/></not><then><property name="db.initscript" value=""/></then></if>		
+	
+		<java classname="uk.ac.ebi.microarray.pools.db.KillAllDB" fork="true">
+			<classpath>
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
+			</classpath>
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.password}"/>
+			<jvmarg value="-Ddb.initscript=${db.initscript}"/>
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+		</java>
+	</target>
+	
+	<target name="killall">
+		
+		<if><not><isset property="registryhost"/></not><then><property name="registryhost" value=""/></then></if>
+		<if><not><isset property="registryport"/></not><then><property name="registryport" value=""/></then></if>
+		<if><not><isset property="prefix"/></not><then><property name="prefix" value=""/></then></if>
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>			
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>		
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>		
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>						
+		<if><not><isset property="stub"/></not><then><property name="stub" value=""/></then></if>
+		
+		<java classname="uk.ac.ebi.microarray.pools.KillAll" fork="true">
+			<classpath>
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+			</classpath>
+			<jvmarg value="-Djava.rmi.server.codebase=file:///${CORE_JAR}"/>
+			
+			<jvmarg value="-Dstub=${stub}"/>
+			
+			<jvmarg value="-Dregistryhost=${registryhost}"/>
+			<jvmarg value="-Dregistryport=${registryport}"/>
+			<jvmarg value="-Dprefix=${prefix}"/>
+			
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.user}"/>
+			
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+	</target>
+	
+	<target name="clean">
+		<delete dir="bin" failonerror="true"/>
+		<mkdir dir="bin"/>
+		
+		<delete dir="binrpf" failonerror="true"/>
+		<mkdir dir="binrpf"/>
+		
+		<delete>
+			<fileset dir="demos">
+				<include name="**/*.class"/>
+			</fileset>
+		</delete>
+		
+		<delete>
+			
+			<fileset dir=".">
+				<include name="*.jar"/>
+			</fileset>
+		</delete>
+	</target>
+	
+	<target name="compile" depends="compile.rpf">
+		<echo message="${basedir}"/>
+		
+		<javac
+			srcdir="src_rpf:src:rwebservices:src_masq:src_jgd:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"
+			destdir="bin" debug="true" source="1.5" target="1.5">
+			<classpath>
+				<pathelement path="${JRI_JAR}"/>
+				<fileset dir="lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+		
+		<copy todir="bin">
+			
+			<fileset dir="src">
+				<include name="**/*.xml"/>
+				<include name="**/*.R"/>
+				<include name="**/*.r"/>
+				<include name="**/*.png"/>
+				<include name="**/*.gif"/>
+			</fileset>
+			
+			<fileset dir="src_rpf">
+				<include name="**/*.*"/>
+				<exclude name="**/*.java"/>
+			</fileset>
+			
+			<fileset dir="rwebservices">
+				<include name="**/*.R"/>
+			</fileset>
+			
+			<fileset dir="src_patch_jedit">
+				<include name="**/*.xml"/>
+				<include name="**/*.props"/>
+				<include name="**/*.png"/>
+			</fileset>
+			
+		</copy>
+		
+		<jar destfile="${CORE_JAR}">
+			<fileset dir="bin"/>
+		</jar>
+		
+	</target>
+	
+	<target name="compile.rpf">
+		
+		<javac srcdir="src_rpf" destdir="binrpf" debug="true" source="1.5"
+			target="1.5">
+			<classpath>
+				<pathelement path="${JRI_JAR}"/>
+				<fileset dir="lib">
+					<include name="**/*.jar"/>
+				</fileset>
+				
+			</classpath>
+		</javac>
+		
+		<copy todir="binrpf">
+			<fileset dir="src_rpf">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+		
+		<jar destfile="${RPF_JAR}">
+			<fileset dir="binrpf"/>
+		</jar>
+	</target>
+	
+	<target name="download.pstools">
+		<java classname="uk.ac.ebi.microarray.pools.MainPsToolsDownload" fork="true"
+			spawn="false">
+			<classpath>
+				<pathelement path="${RPF_JAR}"/>
+			</classpath>
+			<jvmarg value="-Dlocation=${PSTOOLS_HOME}"/>
+		</java>
+	</target>
+	
+</project>
