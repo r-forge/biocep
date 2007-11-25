@@ -1,0 +1,41 @@
+<rj>	
+	   
+  <publish>
+	
+	<functions>
+
+			
+		<!--	
+		<function name="vsn2" returnType="vsn" />
+		<function name="justvsn"  />					
+		
+		
+		<function name="webVsn" />
+    	<function name="foo" returnType="B" />
+		<function name="square" />
+        -->
+		
+	</functions>
+	
+	
+	<s4classes>
+
+		<class name="A"/>
+		<class name="B"/>
+		<class name="C"/>
+		<class name="D"/>
+		<class name="E"/>				
+
+	</s4classes>
+	
+  </publish>  
+  
+  
+  <scripts>
+	  <initScript name="globals.r" embed="true"/>	 	  	   
+	  <packageScript inline="library(vsn)" package="vsn" />
+ 	  <packageScript name="vsnconfig.r" package="vsn" />
+	  
+  </scripts>
+  
+</rj>

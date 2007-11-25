@@ -1,0 +1,21 @@
+<rj>	
+	   
+  <publish>
+	
+	<functions>											
+		<function name="square" />
+		<function name="vsn2" returnType="vsn" signature="ExpressionSet" forWeb="true" renameTo="vsn2Web"/> 					
+	</functions>
+		
+	<s4classes>
+		<class name="Point"/>
+	</s4classes>
+	
+  </publish>  
+    
+  <scripts>
+	  <initScript name="globals.r" embed="true"/>
+	  <initScript inline="library(vsn)" embed="true"/>
+  </scripts>
+  
+</rj>
