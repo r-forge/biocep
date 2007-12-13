@@ -1,14 +1,11 @@
 Project : biocep
-Public Web Resources : http://www.ebi.ac.uk/microarray-srv/frontendapp/
-Public Svn :  
-   url : https://svn.ebi.ac.uk/ma/branches/biocep/
-   login : ma-guest
-   password : CN85JIZ5
+Home Page : http://biocep.r-forge.r-project.org/
+public svn link (anonymous access) : svn://svn.r-forge.r-project.org/svnroot/biocep
          
 presentations(conferences) : https://secure.bioconductor.org/BioC2007/labs.php#EBIServices
                              http://www.statistik.uni-dortmund.de/useR-2008/tutorials/
      
-Local R Workbench Installer : http://www.ebi.ac.uk/microarray-srv/frontendapp/rworkbench.jnlp
+Local R Workbench Installer : http://biocep.r-forge.r-project.org/rworkbench.jnlp
 
 Author : Karim Chine   kchine@ebi.ac.uk
 
