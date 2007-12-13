@@ -1,3 +1,0 @@
-public svn URL : https://svn.ebi.ac.uk/ma/branches/biocep/
-login : ma-guest
-password : CN85JIZ5
