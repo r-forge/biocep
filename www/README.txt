@@ -35,7 +35,7 @@ It includes Frameworks, tools and a Workbench for the following use cases:
 Prerequisites
 -------------
 
-1/ 1.1/ JDK 5 or 6 installed  (Web Services Publishing requires Java SE 6)
+1/ 1.1/ JDK 5 or 6 installed  (Web Services Publishing requires Java SE 6 update 2 or later version)
    --> http://java.sun.com/javase/downloads/index_jdk5.jsp   
    --> http://java.sun.com/javase/downloads/index.jsp
       	
