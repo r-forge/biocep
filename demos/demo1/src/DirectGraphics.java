@@ -38,17 +38,41 @@ public class DirectGraphics {
 		DirectJNI.init();
 		RServices r = DirectJNI.getInstance().getRServices();
 
-		JPanel panel = new JGDPanelPop(r.newDevice(400, 500));
+		GDDevice d1=r.newDevice(400, 500);
+		GDDevice d2=r.newDevice(400, 500);
+		GDDevice d3=r.newDevice(400, 500);
+		
+		JPanel panel1 = new JGDPanelPop(d1);
+		JPanel panel2 = new JGDPanelPop(d2);
+		JPanel panel3 = new JGDPanelPop(d3);
 		//RemotePanel panel=r.getPanel(450, 600);
 		//panel.init();
 
-		JFrame f = new JFrame();
-		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(panel, BorderLayout.CENTER);
-		panel.repaint();
-		f.pack();
-		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		f.setVisible(true);
+		JFrame f1 = new JFrame();
+		f1.getContentPane().setLayout(new BorderLayout());
+		f1.getContentPane().add(panel1, BorderLayout.CENTER);
+		panel1.repaint();
+		f1.pack();
+		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f1.setVisible(true);
+		
+		
+		JFrame f2 = new JFrame();
+		f2.getContentPane().setLayout(new BorderLayout());
+		f2.getContentPane().add(panel2, BorderLayout.CENTER);
+		panel2.repaint();
+		f2.pack();
+		f2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f2.setVisible(true);
+	
+		JFrame f3 = new JFrame();
+		f3.getContentPane().setLayout(new BorderLayout());
+		f3.getContentPane().add(panel3, BorderLayout.CENTER);
+		panel3.repaint();
+		f3.pack();
+		f3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f3.setVisible(true);
+		
 		r.evaluate("hist(rnorm(451))");
 		ConsoleDialog console = new ConsoleDialog(null, r, new ServantStatus() {
 			public boolean isLocked() {

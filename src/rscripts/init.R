@@ -5,19 +5,22 @@ library(JavaGD)
 .PrivateEnv<-new.env(parent = .GlobalEnv)
 library(TypeInfo)
 
-assign('q', q , env=.PrivateEnv)
-assign('dir', dir , env=.PrivateEnv)
-assign('ls', ls , env=.PrivateEnv)
-assign('objects', objects , env=.PrivateEnv)
-assign('help', help , env=.PrivateEnv)
-assign('setwd', setwd , env=.PrivateEnv)
-assign('getwd', getwd , env=.PrivateEnv)
-assign('dev.set', dev.set , env=.PrivateEnv)
-assign('dev.off', dev.off , env=.PrivateEnv)
-assign('graphics.off', graphics.off , env=.PrivateEnv)
-try(assign('win.graph', win.graph , env=.PrivateEnv),silent=TRUE)
-try(assign('x11', x11 , env=.PrivateEnv),silent=TRUE)
-try(assign('X11', X11 , env=.PrivateEnv),silent=TRUE)
+assign('q', q , env=.PrivateEnv);
+assign('dir', dir , env=.PrivateEnv);
+assign('ls', ls , env=.PrivateEnv);
+assign('objects', objects , env=.PrivateEnv);
+assign('help', help , env=.PrivateEnv);
+assign('setwd', setwd , env=.PrivateEnv);
+assign('getwd', getwd , env=.PrivateEnv);
+assign('dev.set', dev.set , env=.PrivateEnv);
+assign('dev.off', dev.off , env=.PrivateEnv);
+assign('dev.cur', dev.cur , env=.PrivateEnv);
+assign('dev.list', dev.list , env=.PrivateEnv);
+assign('dev.copy', dev.copy , env=.PrivateEnv);
+assign('graphics.off', graphics.off , env=.PrivateEnv);
+try(assign('win.graph', win.graph , env=.PrivateEnv),silent=TRUE);
+try(assign('x11', x11 , env=.PrivateEnv),silent=TRUE);
+try(assign('X11', X11 , env=.PrivateEnv),silent=TRUE);
 
 load.lightpack <- function( s )  {
 	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"loadLightPack", s ); 
@@ -32,6 +35,22 @@ list.lightpack <- function()  {
 assign('callbackPercentage', function(percentage, phaseDesciption='', phasePercentage=0)  {
 	.jcall( obj="server/RListener" , "V" ,"progress", .jfloat(percentage), phaseDesciption, .jfloat(phasePercentage) )	
 }, env=.PrivateEnv)
+
+
+assign('dev.broadcast',  function () {
+	temp_dev_list<-.PrivateEnv$dev.list();
+ 	if (!is.null(temp_dev_list)) {
+		temp_dev_cur<-.PrivateEnv$dev.cur();	
+		for (i in 1:length(temp_dev_list)) {
+			if (temp_dev_list[i]!=temp_dev_cur) {	
+				.PrivateEnv$dev.copy(which=temp_dev_list[i]);	
+			}
+			.PrivateEnv$dev.set(temp_dev_cur);
+		}
+	}
+	return(invisible(NULL)); 
+}, env=.PrivateEnv)
+
 
 help <- function (topic, offline = FALSE, package = NULL, lib.loc = NULL, 
     verbose = getOption("verbose"), try.all.packages = getOption("help.try.all.packages"), 

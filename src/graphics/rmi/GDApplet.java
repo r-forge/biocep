@@ -251,6 +251,9 @@ public class GDApplet extends GDAppletBase {
 				}
 
 				public void unprotect() {
+					if (_login.indexOf("@@")!=-1) {
+						try {_rForConsole.consoleSubmit(".PrivateEnv$dev.broadcast();");} catch (Exception e) { e.printStackTrace(); }
+					}
 					((JGDPanelPop) _graphicPanel).setAutoModes(true, true);
 					rUnderProtection = false;
 				}
@@ -287,8 +290,6 @@ public class GDApplet extends GDAppletBase {
 
 								String oldSessionId = _sessionId;
 								HashMap<String, Object> options = new HashMap<String, Object>();
-								options.put("panel.height", _graphicPanel.getHeight());
-								options.put("panel.width", _graphicPanel.getWidth());
 								options.put("nopool", new Boolean(_nopool).toString());
 								options.put("save", new Boolean(_save).toString());
 								options.put("wait", new Boolean(_wait).toString());
@@ -312,8 +313,8 @@ public class GDApplet extends GDAppletBase {
 
 								_rSpreadsheetHolder[0] = _rForConsole;
 
-								d = (GDDevice) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "device",
-										GDDevice.class, new HttpClient(new MultiThreadedHttpConnectionManager()));
+								d=RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
+								System.out.println("device id:"+d.getDeviceNumber());
 							} else {
 
 								LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane(), _mode);
@@ -360,7 +361,7 @@ public class GDApplet extends GDAppletBase {
 							}
 
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] {
-									_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") });
+									_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, _protectR);
 
 							_rootGraphicPanel.removeAll();
 							_rootGraphicPanel.setLayout(new BorderLayout());
@@ -424,6 +425,7 @@ public class GDApplet extends GDAppletBase {
 						try {
 							_protectR.protect();
 							result = _rForConsole.consoleSubmit(expression);
+							
 						} catch (NotLoggedInException nle) {
 							noSession();
 							result = "Not Logged on, type 'logon' to connect\n";
@@ -596,6 +598,7 @@ public class GDApplet extends GDAppletBase {
 			graphicsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
 					graphicsMenu.removeAll();
+					graphicsMenu.add(_actions.get("createdevice"));
 					graphicsMenu.add(_actions.get("clone"));
 					graphicsMenu.add(_actions.get("save_png"));
 					graphicsMenu.add(_actions.get("save_jpg"));
@@ -684,20 +687,25 @@ public class GDApplet extends GDAppletBase {
 								final int index = i;
 								demoMenu.add(new AbstractAction(PoolUtils.replaceAll(demos[i], "_", " ")) {
 									public void actionPerformed(ActionEvent e) {
-										try {
+										
+										if (_protectR.isProtected()) {
+											JOptionPane.showMessageDialog(null, "R is busy");
+										} else {
 											try {
-												((JGDPanelPop) _graphicPanel).setAutoModes(true, false);
+												_protectR.protect();
 												String log = _rForConsole.sourceFromBuffer(_rForConsole
 														.getDemoSource(demos[index]));
 												_consolePanel.print("sourcing demo "
 														+ PoolUtils.replaceAll(demos[index], "_", " "), log);
+												
+											} catch (Exception ex) {
+												ex.printStackTrace();
 											} finally {
-												((JGDPanelPop) _graphicPanel).setAutoModes(true, true);
+												_protectR.unprotect();
 											}
-
-										} catch (Exception ex) {
-											ex.printStackTrace();
 										}
+										
+
 									}
 
 									@Override
@@ -1956,6 +1964,38 @@ public class GDApplet extends GDAppletBase {
 			}
 		});
 
+		_actions.put("createdevice", new AbstractAction("New Device") {
+			public void actionPerformed(final ActionEvent e) {
+
+				JPanel rootGraphicPanel = new JPanel();
+				rootGraphicPanel.setLayout(new BorderLayout());
+				JPanel graphicPanel = new JPanel();
+				rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
+				NewWindow.create(rootGraphicPanel, "Graphic Device");
+				
+				try  {
+					GDDevice newDevice=RHttpProxy.newDevice(_commandServletUrl, _sessionId, graphicPanel.getWidth(), graphicPanel.getHeight());
+					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
+							_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, _protectR);
+
+					rootGraphicPanel.removeAll();
+					rootGraphicPanel.setLayout(new BorderLayout());
+					rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
+					
+				} catch (TunnelingException te) {
+					te.printStackTrace();
+				} catch (RemoteException re) {
+					re.printStackTrace();
+				}
+
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+		
 		_actions.put("logview", new AbstractAction("Console Log Viewer") {
 			public void actionPerformed(final ActionEvent e) {
 				if (getOpenedLogViewer() == null) {

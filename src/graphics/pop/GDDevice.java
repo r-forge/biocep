@@ -38,4 +38,10 @@ public interface GDDevice extends Remote {
 	public void putLocation(Point2D p) throws RemoteException;
 
 	public Point2D[] getRealPoints(Point2D[] points) throws RemoteException;
+	
+	public int getDeviceNumber() throws RemoteException;
+	
+	public boolean isCurrentDevice() throws RemoteException;
+	
+	public void setAsCurrentDevice() throws RemoteException;
 }

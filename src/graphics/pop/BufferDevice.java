@@ -50,6 +50,19 @@ public class BufferDevice implements GDDevice {
 
 	public void putLocation(Point2D p) throws RemoteException {
 	}
+	
+	public int getDeviceNumber() throws RemoteException {
+		return -1;
+	}
+	
+	@Override
+	public boolean isCurrentDevice() throws RemoteException {
+		return false;
+	}
+	
+	@Override
+	public void setAsCurrentDevice() throws RemoteException {
+	}
 
 	public Point2D[] getRealPoints(Point2D[] points) throws RemoteException {
 		return null;
