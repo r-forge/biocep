@@ -15,6 +15,8 @@
  */
 package http;
 
+import graphics.pop.GDDevice;
+
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -167,5 +169,39 @@ public class RHttpProxy {
 			}
 		}
 	}
+	
+	public static GDDevice newDevice(String url, String sessionId, int width, int height) throws TunnelingException {
+		GetMethod getNewDevice = null;
+		try {
+			Object result = null;
+			mainHttpClient = new HttpClient();
+			getNewDevice = new GetMethod(url
+					+ (sessionId == null || sessionId.equals("") ? "" : ";jsessionid=" + sessionId)
+					+ "?method=newdevice" +
+					"&width="+width+"&height="+height);
+			try {
+				mainHttpClient.executeMethod(getNewDevice);
+				result = new ObjectInputStream(getNewDevice.getResponseBodyAsStream()).readObject();
+			} catch (Exception e) {
+				throw new TunnelingException("", e);
+			}
+			if (result != null && result instanceof TunnelingException) {
+				throw (TunnelingException) result;
+			}
+			
+			String deviceName=(String)result;
+			return (GDDevice) RHttpProxy.getDynamicProxy(url, sessionId, deviceName,
+					GDDevice.class, new HttpClient(new MultiThreadedHttpConnectionManager()));
+
+		} finally {
+			if (getNewDevice != null) {
+				getNewDevice.releaseConnection();
+			}
+			if (mainHttpClient != null) {
+			}
+		}
+	}
+	
+	
 
 }

@@ -15,6 +15,8 @@
  */
 package http;
 
+import graphics.pop.GDDevice;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -158,12 +160,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("NOPOOL", nopool);
 					session.setAttribute("SAVE", save);
 					session.setAttribute("LOGIN", login);
-					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
-
-					if (options.get("panel.height") != null && options.get("panel.width") != null) {
-						session.setAttribute("device", r.newDevice((Integer) options.get("panel.width"),
-								(Integer) options.get("panel.height")));
-					}
+					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);					
+					
 					session.setAttribute("threads", new ThreadsHolder());
 
 					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session
@@ -306,7 +304,15 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 							.getAttribute("R"));
 					result = null;
 					break;
+				} else if (command.equals("newdevice")) {
+					GDDevice deviceProxy=((RServices) session	.getAttribute("R")).newDevice(Integer.decode(request.getParameter("width")), Integer.decode(request.getParameter("height")));
+					String deviceName="device"+"_"+deviceProxy.getDeviceNumber();
+					System.out.println("deviceName="+deviceName);
+					session.setAttribute(deviceName, deviceProxy);
+					result = deviceName;
+					break;
 				}
+				
 
 			} while (true);
 

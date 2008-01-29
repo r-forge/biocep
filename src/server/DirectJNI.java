@@ -2573,8 +2573,29 @@ public class DirectJNI {
 			gdBag = new GDContainerBag(w, h);
 			JavaGD.setGDContainer(gdBag);
 			Dimension dim = gdBag.getSize();
+			
+			
+			RInteger devicesBefore=(RInteger)DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+			Vector<Integer> devicesVector=new Vector<Integer>();
+			if (devicesBefore!=null) { 
+				for (int i=0; i<devicesBefore.getValue().length; ++i) devicesVector.add(devicesBefore.getValue()[i]);
+			}
+			System.out.println("devices before :"+devicesBefore);
+			
+			
 			System.out.println(DirectJNI.getInstance().getRServices().evaluate(
 					"JavaGD(name='JavaGD', width=" + dim.getWidth() + ", height=" + dim.getHeight() + ", ps=12)"));
+			
+			
+			RInteger devicesAfter=(RInteger)DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+			for (int i=0; i<devicesAfter.getValue().length; ++i) if (!devicesVector.contains(devicesAfter.getValue()[i])) {
+				System.out.println("caught:"+	devicesAfter.getValue()[i] );
+				gdBag.setDeviceNumber(devicesAfter.getValue()[i]);
+				break;
+			}
+			
+			
+			System.out.println(DirectJNI.getInstance().getRServices().consoleSubmit(".PrivateEnv$dev.list()"));
 
 		}
 
@@ -2597,7 +2618,23 @@ public class DirectJNI {
 					"try({ .PrivateEnv$dev.set(" + (gdBag.getDeviceNumber() + 1)
 							+ "); .PrivateEnv$dev.off()},silent=TRUE)");
 		};
-
+		
+		
+		public int getDeviceNumber() throws RemoteException {
+			return gdBag.getDeviceNumber();
+		}
+		
+		@Override
+		public boolean isCurrentDevice() throws RemoteException {
+			int d=((RInteger)DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+			return d==gdBag.getDeviceNumber();
+		}
+		
+		@Override
+		public void setAsCurrentDevice() throws RemoteException {
+			DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ")");			
+		}
+		
 		public Dimension getSize() throws RemoteException {
 			return gdBag.getSize();
 		}

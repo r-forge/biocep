@@ -84,7 +84,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 				if (command==null) {command="hist(rnorm(100))";}				
 				r.sourceFromBuffer(new StringBuffer(command));				
 				long t5=System.currentTimeMillis();
-				JGDPanelPop panel = new JGDPanelPop(device, false, false, null);
+				JGDPanelPop panel = new JGDPanelPop(device, false, false, null,null);
 				panel.popNow();
 				long t6=System.currentTimeMillis();
 				response.setContentType("image/jpg");

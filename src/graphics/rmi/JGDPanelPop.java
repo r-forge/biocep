@@ -25,6 +25,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -58,10 +59,17 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private Point2D mouseLocation = null;
 	private Point2D[] realLocations = null;
 	private boolean trackMouse = false;
+	private ProtectR _protectR = null;
 
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions)
+	throws RemoteException {
+		this( gdDevice, autoPop, autoResize, actions, null);
+	}
+
+	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions, ProtectR protectR)
 			throws RemoteException {
 		_gdDevice = gdDevice;
+		_protectR = protectR;
 		Dimension sz = null;
 		try {
 			sz = gdDevice.getSize();
@@ -83,6 +91,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_actions = actions;
 
 		;
+		
 		this.addMouseListener(new MouseListener() {
 			public void mouseEntered(MouseEvent e) {
 				mouseInside = true;
@@ -121,11 +130,37 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			}
 
 			private void checkPopup(MouseEvent e) {
-				if (e.isPopupTrigger() && _actions != null) {
+				if (e.isPopupTrigger() ) {
 					JPopupMenu popupMenu = new JPopupMenu();
-					for (int i = 0; i < _actions.length; ++i) {
-						popupMenu.add(_actions[i]);
+					if (_actions!=null) {
+						for (int i = 0; i < _actions.length; ++i) {
+							popupMenu.add(_actions[i]);
+						}
 					}
+					popupMenu.add(new AbstractAction("info") {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							try  {
+							System.out.println("device number :"
+									+_gdDevice.getDeviceNumber());
+							} catch (Exception ex) {
+								ex.printStackTrace();	
+							}
+													}
+					});
+					
+					popupMenu.add(new AbstractAction("Set As Current Device") {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							try  {						
+								_gdDevice.setAsCurrentDevice();
+							} catch (Exception ex) {
+								ex.printStackTrace();	
+							}
+							
+						}
+					});					
+					
 					popupMenu.show(JGDPanelPop.this, e.getX(), e.getY());
 				}
 			}
@@ -171,7 +206,19 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					while (true) {
 						if (_autoResize) {
 							if (_lastResizeTime != null && ((System.currentTimeMillis() - _lastResizeTime) > 50)) {
-								resizeNow();
+								
+								if (_protectR!=null) {
+									while (_protectR.isProtected()) try {Thread.sleep(500);} catch (Exception e) {}
+									_protectR.protect();
+									try {
+										resizeNow();
+									} finally {
+										_protectR.unprotect();
+									}
+								} else {
+									resizeNow();
+								}
+																
 								if (!_autoPop)
 									popNow();
 								_lastResizeTime = null;
@@ -203,7 +250,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	}
 
 	public JGDPanelPop(GDDevice gdDevice) throws RemoteException {
-		this(gdDevice, true, true, null);
+		this(gdDevice, true, true, null,null);
 	}
 
 	synchronized public void popNow() {

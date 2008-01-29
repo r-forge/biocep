@@ -37,7 +37,7 @@ public class GDContainerBag implements GDContainer {
 	private Vector<GDObject> _actions = new Vector<GDObject>();
 	private Dimension _size = null;
 	private GDState _gs;
-	private int _devNr;
+	private int _devNr=-1;
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(JGDPanelPop.class);
 
@@ -98,9 +98,8 @@ public class GDContainerBag implements GDContainer {
 	}
 
 	public void setDeviceNumber(int dn) throws RemoteException {
-		_devNr = dn;
-		_actions.add(new GDSetDeviceNumber(dn));
-
+		if (_devNr==-1) _devNr = dn;
+		//_actions.add(new GDSetDeviceNumber(dn));
 	}
 
 	public void setGFont(Font f) throws RemoteException {

@@ -450,6 +450,21 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		public void dispose() throws RemoteException {
 			_localGdDevice.dispose();
 		};
+		
+		@Override
+		public int getDeviceNumber() throws RemoteException {
+			return _localGdDevice.getDeviceNumber();
+		}
+		
+		@Override
+		public boolean isCurrentDevice() throws RemoteException {
+			return _localGdDevice.isCurrentDevice();
+		}
+		
+		@Override
+		public void setAsCurrentDevice() throws RemoteException {
+			_localGdDevice.setAsCurrentDevice();
+		}
 
 		public Dimension getSize() throws RemoteException {
 			return _localGdDevice.getSize();
