@@ -34,6 +34,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.rmi.RemoteException;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
+
 import javax.swing.AbstractAction;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -59,14 +61,14 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private Point2D mouseLocation = null;
 	private Point2D[] realLocations = null;
 	private boolean trackMouse = false;
-	private ProtectR _protectR = null;
+	private ReentrantLock _protectR = null;
 
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions)
 	throws RemoteException {
 		this( gdDevice, autoPop, autoResize, actions, null);
 	}
 
-	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions, ProtectR protectR)
+	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions, ReentrantLock protectR)
 			throws RemoteException {
 		_gdDevice = gdDevice;
 		_protectR = protectR;
@@ -208,13 +210,14 @@ public class JGDPanelPop extends JBufferedImagePanel {
 							if (_lastResizeTime != null && ((System.currentTimeMillis() - _lastResizeTime) > 50)) {
 								
 								if (_protectR!=null) {
-									while (_protectR.isProtected()) try {Thread.sleep(500);} catch (Exception e) {}
-									_protectR.protect();
+									
+									_protectR.lock();
 									try {
 										resizeNow();
 									} finally {
-										_protectR.unprotect();
+										_protectR.unlock();
 									}
+									
 								} else {
 									resizeNow();
 								}
