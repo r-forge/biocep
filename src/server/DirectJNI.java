@@ -2615,8 +2615,7 @@ public class DirectJNI {
 
 		public void dispose() throws RemoteException {
 			DirectJNI.getInstance().getRServices().evaluate(
-					"try({ .PrivateEnv$dev.set(" + (gdBag.getDeviceNumber() + 1)
-							+ "); .PrivateEnv$dev.off()},silent=TRUE)");
+					"try({ .PrivateEnv$dev.off(which="+gdBag.getDeviceNumber()+")},silent=TRUE)");
 		};
 		
 		

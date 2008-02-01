@@ -61,6 +61,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
+
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -143,6 +145,8 @@ public class GDApplet extends GDAppletBase {
 	private RServices _rForFiles;
 	private RServices _rForPopCmd;
 	private RServices[] _rSpreadsheetHolder = new RServices[1];
+	private boolean[] _broadcastFlagHolder = new boolean[1];
+	
 	private JPanel _graphicPanel;
 	private JPanel _rootGraphicPanel;
 	private Vector<FileDescription> _workDirFiles = new Vector<FileDescription>();
@@ -162,7 +166,7 @@ public class GDApplet extends GDAppletBase {
 	private LookAndFeelInfo[] installedLFs = UIManager.getInstalledLookAndFeels();
 	private int _lf;
 	private boolean _isBiocLiteSourced = false;
-	private ProtectR _protectR = null;
+	private final ReentrantLock _protectR = new ReentrantLock();
 	private String[] _packageNameSave = new String[] { "" };
 	private String[] _expressionSave = new String[] { "" };
 
@@ -242,27 +246,6 @@ public class GDApplet extends GDAppletBase {
 			_graphicPanel = new JPanel();
 			_rootGraphicPanel.add(_graphicPanel, BorderLayout.CENTER);
 
-			_protectR = new ProtectR() {
-				private boolean rUnderProtection = false;
-
-				public void protect() {
-					((JGDPanelPop) _graphicPanel).setAutoModes(true, false);
-					rUnderProtection = true;
-				}
-
-				public void unprotect() {
-					if (_login.indexOf("@@")!=-1) {
-						try {_rForConsole.consoleSubmit(".PrivateEnv$dev.broadcast();");} catch (Exception e) { e.printStackTrace(); }
-					}
-					((JGDPanelPop) _graphicPanel).setAutoModes(true, true);
-					rUnderProtection = false;
-				}
-
-				public boolean isProtected() {
-					return rUnderProtection;
-				}
-			};
-
 			_submitInterface = new SubmitInterface() {
 
 				public String submit(String expression) {
@@ -312,6 +295,7 @@ public class GDApplet extends GDAppletBase {
 										"R", RServices.class, new HttpClient(new MultiThreadedHttpConnectionManager()));
 
 								_rSpreadsheetHolder[0] = _rForConsole;
+								_broadcastFlagHolder[0] = _login.indexOf("@@")!=-1;
 
 								d=RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
 								System.out.println("device id:"+d.getDeviceNumber());
@@ -351,6 +335,7 @@ public class GDApplet extends GDAppletBase {
 								_rForFiles = r;
 
 								_rSpreadsheetHolder[0] = _rForConsole;
+								_broadcastFlagHolder[0] = false;
 
 								d = r.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 
@@ -419,13 +404,16 @@ public class GDApplet extends GDAppletBase {
 					}
 
 					Object result = null;
-					if (_protectR.isProtected()) {
+					if (_protectR.isLocked()) {
 						result = "R is busy, please retry\n";
 					} else {
 						try {
-							_protectR.protect();
-							result = _rForConsole.consoleSubmit(expression);
-							
+							_protectR.lock();							
+							if (_mode==HTTP_MODE && _login.indexOf("@@")!=-1) { 
+								result = _rForConsole.consoleSubmit(expression+";.PrivateEnv$dev.broadcast()");
+							} else {
+								result = _rForConsole.consoleSubmit(expression);								
+							}							
 						} catch (NotLoggedInException nle) {
 							noSession();
 							result = "Not Logged on, type 'logon' to connect\n";
@@ -437,7 +425,7 @@ public class GDApplet extends GDAppletBase {
 							e.printStackTrace();
 							result = PoolUtils.getStackTraceAsString(e);
 						} finally {
-							_protectR.unprotect();
+							_protectR.unlock();
 						}
 					}
 					return (String) result;
@@ -688,20 +676,26 @@ public class GDApplet extends GDAppletBase {
 								demoMenu.add(new AbstractAction(PoolUtils.replaceAll(demos[i], "_", " ")) {
 									public void actionPerformed(ActionEvent e) {
 										
-										if (_protectR.isProtected()) {
+										if (_protectR.isLocked()) {
 											JOptionPane.showMessageDialog(null, "R is busy");
 										} else {
 											try {
-												_protectR.protect();
-												String log = _rForConsole.sourceFromBuffer(_rForConsole
-														.getDemoSource(demos[index]));
+												_protectR.lock();
+												String log=null;
+																								
+												if (_mode==HTTP_MODE && _login.indexOf("@@")!=-1) { 
+													log = _rForConsole.sourceFromBuffer(new StringBuffer(_rForConsole.getDemoSource(demos[index])+";.PrivateEnv$dev.broadcast()"));	
+												} else {
+													log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(demos[index]));	
+												}
+												
 												_consolePanel.print("sourcing demo "
 														+ PoolUtils.replaceAll(demos[index], "_", " "), log);
 												
 											} catch (Exception ex) {
 												ex.printStackTrace();
 											} finally {
-												_protectR.unprotect();
+												_protectR.unlock();
 											}
 										}
 										
@@ -710,7 +704,7 @@ public class GDApplet extends GDAppletBase {
 
 									@Override
 									public boolean isEnabled() {
-										return _sessionId != null && !_protectR.isProtected();
+										return _sessionId != null && !_protectR.isLocked();
 									}
 								});
 
@@ -1530,7 +1524,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !_protectR.isProtected();
+				return _sessionId != null && !_protectR.isLocked();
 			}
 		});
 
@@ -1578,7 +1572,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !_protectR.isProtected();
+				return _sessionId != null && !_protectR.isLocked();
 			}
 		});
 
@@ -1689,7 +1683,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return !_protectR.isProtected();
+				return !_protectR.isLocked();
 			}
 		});
 
@@ -1700,7 +1694,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !_protectR.isProtected();
+				return _sessionId != null && !_protectR.isLocked();
 			}
 		});
 
@@ -1711,7 +1705,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !_protectR.isProtected();
+				return _sessionId != null && !_protectR.isLocked();
 			}
 		});
 
@@ -1974,10 +1968,15 @@ public class GDApplet extends GDAppletBase {
 				NewWindow.create(rootGraphicPanel, "Graphic Device");
 				
 				try  {
-					GDDevice newDevice=RHttpProxy.newDevice(_commandServletUrl, _sessionId, graphicPanel.getWidth(), graphicPanel.getHeight());
+					
+					GDDevice newDevice=null;
+					if (_mode==HTTP_MODE) { 
+						newDevice=RHttpProxy.newDevice(_commandServletUrl, _sessionId, graphicPanel.getWidth(), graphicPanel.getHeight());
+					} else {
+						newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
+					}
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 							_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, _protectR);
-
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
 					rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
@@ -2468,12 +2467,20 @@ public class GDApplet extends GDAppletBase {
 	}
 
 	String safeConsoleSubmit(final String cmd) throws RemoteException {
-		if (_protectR.isProtected()) {
+		if (_protectR.isLocked()) {
 			return "R is busy, please retry\n";
 		}
 		try {
-			_protectR.protect();
-			final String log = _rForConsole.consoleSubmit(cmd);
+			_protectR.lock();
+			
+			String consoleLog=null;
+			if (_mode==HTTP_MODE && _login.indexOf("@@")!=-1) { 
+				consoleLog = _rForConsole.consoleSubmit(cmd+";.PrivateEnv$dev.broadcast()");
+			} else {
+				consoleLog = _rForConsole.consoleSubmit(cmd);
+			}
+			
+			final String log = consoleLog;
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					_consolePanel.print(cmd, log);
@@ -2482,7 +2489,7 @@ public class GDApplet extends GDAppletBase {
 			return log;
 
 		} finally {
-			_protectR.unprotect();
+			_protectR.unlock();
 		}
 
 	}

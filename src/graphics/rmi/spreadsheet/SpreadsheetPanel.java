@@ -26,7 +26,6 @@ import net.java.dev.jspreadsheet.SpreadsheetSelectionListener;
 import net.java.dev.jspreadsheet.SpreadsheetTableModel;
 import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GUtils;
-import graphics.rmi.ProtectR;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -49,6 +48,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
+
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -103,17 +104,8 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(new SpreadsheetPanel(null, null, new ProtectR() {
-			public void protect() {
-			}
-
-			public void unprotect() {
-			}
-
-			public boolean isProtected() {
-				return false;
-			}
-		}, null, 300, 40), BorderLayout.CENTER);
+		f.getContentPane().add(new SpreadsheetPanel(null, null, new ReentrantLock()
+		, null, 300, 40), BorderLayout.CENTER);
 		f.setSize(new Dimension(800, 800));
 		f.pack();
 		f.setVisible(true);
@@ -150,8 +142,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private FindAction find = new FindAction();
 	private FindNextAction findNext = new FindNextAction();
 	private String _newWindowClassName = null;
-	private ProtectR _protectR = null;
+	private ReentrantLock _protectR = null;
 	private ConsoleLogger _consoleLogger = null;
+	private boolean[] _broadcastFlagHolder = null;
 
 	private SpreadsheetSelectionListener sl = new SpreadsheetSelectionListener() {
 		public void selectionChanged(SpreadsheetSelectionEvent e) {
@@ -195,11 +188,12 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private boolean matchCase;
 	private boolean matchCell;
 
-	public SpreadsheetPanel(RServices[] rHolder, String newWindowClassName, ProtectR protectR,
-			ConsoleLogger consoleLogger, int nrows, int ncols) {
+	public SpreadsheetPanel(RServices[] rHolder, String newWindowClassName, ReentrantLock protectR,
+			ConsoleLogger consoleLogger, int nrows, int ncols, boolean[] broadcastFlagHolder) {
 		super();
 		_newWindowClassName = newWindowClassName;
 		_protectR = protectR;
+		_broadcastFlagHolder=broadcastFlagHolder;
 		_consoleLogger = consoleLogger;
 
 		ss = new JSpreadsheet(nrows, ncols, rHolder);
@@ -462,7 +456,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 					String tempVarName = "TEMP_____";
 					try {
-						_protectR.protect();
+						_protectR.lock();
 						ss.getR().putObjectAndAssignName(robj, tempVarName);
 						if (ss.getR().getStatus().toUpperCase().contains("ERROR")) {
 							JOptionPane.showMessageDialog(ss, ss.getR().getStatus(), "R Error",
@@ -493,7 +487,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 					} finally {
 						ss.getR().evaluate("rm(" + tempVarName + ")");
-						_protectR.unprotect();
+						_protectR.unlock();
 					}
 
 				} catch (Exception ex) {
@@ -507,11 +501,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public boolean isEnabled() {
-			return (ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isProtected());
+			return (ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked());
 		}
 
 		void update() {
-			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isProtected());
+			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked());
 		}
 	}
 
@@ -519,7 +513,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		StringBuffer sb = new StringBuffer();
 
 		try {
-			_protectR.protect();
+			_protectR.lock();
 			RObject robj = ss.getR().evalAndGetObject(expr);
 			if (ss.getR().getStatus().toUpperCase().contains("ERROR")) {
 				JOptionPane.showMessageDialog(ss, ss.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
@@ -892,7 +886,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			ex.printStackTrace();
 			return null;
 		} finally {
-			_protectR.unprotect();
+			_protectR.unlock();
 		}
 
 	}
@@ -923,11 +917,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public void update() {
-			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isProtected());
+			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked());
 		}
 
 		public boolean isEnabled() {
-			return ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isProtected();
+			return ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked();
 		}
 
 		public void lostOwnership(Clipboard clipboard, Transferable contents) {
@@ -1221,7 +1215,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 						return;
 					String tempVarName = "TEMP_____";
 					try {
-						_protectR.protect();
+						_protectR.lock();
 						ss.getR().putObjectAndAssignName(result, tempVarName);
 
 						if (!ss.getR().getStatus().equals("")) {
@@ -1257,7 +1251,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 								+ " has been assigned a new value for the cell range " + toRData.getCellRange() + "\n");
 					} finally {
 						ss.getR().evaluate("rm(" + tempVarName + ")");
-						_protectR.unprotect();
+						_protectR.unlock();
 					}
 
 				} catch (Exception ex) {
@@ -1278,11 +1272,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public void update() {
-			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isProtected());
+			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked());
 		}
 
 		public boolean isEnabled() {
-			return ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isProtected();
+			return ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked();
 		}
 
 		public void lostOwnership(Clipboard clipboard, Transferable contents) {

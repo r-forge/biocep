@@ -64,6 +64,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	private AssignInterface _assignInterface = null;
 
 	private GraphicNotifier _graphicNotifier = null;
+	
+	private  HashMap<Integer,GDDeviceImpl> _deviceHashMap=new HashMap<Integer, GDDeviceImpl>();
 
 	private boolean _isReady = false;
 
@@ -299,11 +301,21 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 								e.rniEval(e.rniParse("rm(" + allobj[i] + ")", 1), 0);
 					}
 
+					
 					DirectJNI.getInstance().unprotectAll();
 					_log.setLength(0);
 
 				}
 			});
+
+			Vector<Integer> devices=new Vector<Integer>();
+			for (Integer d:_deviceHashMap.keySet()) devices.add(d);
+			
+			System.out.println("ddddddd:"+devices);			
+			
+			for (Integer d:devices) {
+				try {_deviceHashMap.get(d).dispose();} catch (Exception ex) {ex.printStackTrace();}
+			}
 
 			RListener.stopAllClusters();
 			try {
@@ -431,12 +443,13 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().popRActions();
 	}
 
-	public static class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
+	public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 		GDDevice _localGdDevice = null;
 
 		public GDDeviceImpl(int w, int h) throws RemoteException {
 			super();
 			_localGdDevice = new DirectJNI.GDDeviceLocal(w, h);
+			_deviceHashMap.put(_localGdDevice.getDeviceNumber(), this);
 		}
 
 		public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects() throws RemoteException {
@@ -448,7 +461,30 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		};
 
 		public void dispose() throws RemoteException {
+			final int deviceNbr=_localGdDevice.getDeviceNumber();
 			_localGdDevice.dispose();
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					boolean shutdownSucceeded=false;
+					while (true) {
+						try {
+							shutdownSucceeded=unexportObject(GDDeviceImpl.this, false);
+						} catch (Exception e) {
+							e.printStackTrace();
+							shutdownSucceeded=true;
+						}
+						System.out.println("-----shutdownSucceeded:"+shutdownSucceeded);
+						if (shutdownSucceeded) {
+							_deviceHashMap.remove(deviceNbr);
+							break;
+						}
+						try {Thread.sleep(200);} catch (Exception e) {}
+					}
+				}
+			}
+			).start();
+			
 		};
 		
 		@Override
