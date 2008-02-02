@@ -26,9 +26,12 @@ import net.java.dev.jspreadsheet.SpreadsheetSelectionListener;
 import net.java.dev.jspreadsheet.SpreadsheetTableModel;
 import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GUtils;
+import graphics.rmi.RGui;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -104,8 +107,41 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(new SpreadsheetPanel(null, null, new ReentrantLock()
-		, null, 300, 40), BorderLayout.CENTER);
+		f.getContentPane().add(new SpreadsheetPanel(300, 40, new RGui() {
+			@Override
+			public ConsoleLogger getConsoleLogger() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public Container createView(JPanel panel, String title) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public RServices getR() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public ReentrantLock getRLock() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			@Override
+			public boolean isCollaborativeMode() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+			
+			@Override
+			public void synchronizeCollaborators() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			
+		}), BorderLayout.CENTER);
 		f.setSize(new Dimension(800, 800));
 		f.pack();
 		f.setVisible(true);
@@ -141,10 +177,8 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private RemoveRowAction removeRow = new RemoveRowAction();
 	private FindAction find = new FindAction();
 	private FindNextAction findNext = new FindNextAction();
-	private String _newWindowClassName = null;
-	private ReentrantLock _protectR = null;
-	private ConsoleLogger _consoleLogger = null;
-	private boolean[] _broadcastFlagHolder = null;
+	private RGui _rgui=null;
+	
 
 	private SpreadsheetSelectionListener sl = new SpreadsheetSelectionListener() {
 		public void selectionChanged(SpreadsheetSelectionEvent e) {
@@ -188,15 +222,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private boolean matchCase;
 	private boolean matchCell;
 
-	public SpreadsheetPanel(RServices[] rHolder, String newWindowClassName, ReentrantLock protectR,
-			ConsoleLogger consoleLogger, int nrows, int ncols, boolean[] broadcastFlagHolder) {
+	public SpreadsheetPanel(int nrows, int ncols, RGui rgui) {
 		super();
-		_newWindowClassName = newWindowClassName;
-		_protectR = protectR;
-		_broadcastFlagHolder=broadcastFlagHolder;
-		_consoleLogger = consoleLogger;
-
-		ss = new JSpreadsheet(nrows, ncols, rHolder);
+		_rgui = rgui;	
+		ss = new JSpreadsheet(nrows, ncols, rgui);
 
 		ss.addUndoableEditListener(um);
 		ss.addSelectionListener(sl);
@@ -456,10 +485,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 					String tempVarName = "TEMP_____";
 					try {
-						_protectR.lock();
-						ss.getR().putObjectAndAssignName(robj, tempVarName);
-						if (ss.getR().getStatus().toUpperCase().contains("ERROR")) {
-							JOptionPane.showMessageDialog(ss, ss.getR().getStatus(), "R Error",
+						_rgui.getRLock().lock();
+						_rgui.getR().putObjectAndAssignName(robj, tempVarName);
+						if (_rgui.getR().getStatus().toUpperCase().contains("ERROR")) {
+							JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error",
 									JOptionPane.ERROR_MESSAGE);
 							return;
 						}
@@ -467,11 +496,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 						String output = PoolUtils.replaceAll(evalDialog.getEvalInfo().getExpression(), "%%",
 								tempVarName);
 
-						ss.getR().consoleSubmit(
+						_rgui.getR().consoleSubmit(
 								replaceAll(conversionCommandHolder[0], "${VAR}", tempVarName) + tempVarName + "<-("
 										+ output + ")");
-						if (ss.getR().getStatus().toUpperCase().contains("ERROR")) {
-							JOptionPane.showMessageDialog(ss, ss.getR().getStatus(), "R Error",
+						if (_rgui.getR().getStatus().toUpperCase().contains("ERROR")) {
+							JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error",
 									JOptionPane.ERROR_MESSAGE);
 							return;
 						}
@@ -486,8 +515,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 						JOptionPane.showMessageDialog(ss, "Evaluation Done, The result is in the clipboard");
 
 					} finally {
-						ss.getR().evaluate("rm(" + tempVarName + ")");
-						_protectR.unlock();
+						try {
+							_rgui.getR().evaluate("rm(" + tempVarName + ")");
+							if (_rgui.isCollaborativeMode()) _rgui.synchronizeCollaborators();
+						}catch (Exception ex) {
+							ex.printStackTrace();
+						}
+						_rgui.getRLock().unlock();
 					}
 
 				} catch (Exception ex) {
@@ -501,11 +535,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public boolean isEnabled() {
-			return (ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked());
+			return (ss.getSelectedRange() != null && _rgui.getR() != null && !_rgui.getRLock().isLocked());
 		}
 
 		void update() {
-			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked());
+			setEnabled(ss.getSelectedRange() != null && _rgui.getR() != null && !_rgui.getRLock().isLocked());
 		}
 	}
 
@@ -513,10 +547,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		StringBuffer sb = new StringBuffer();
 
 		try {
-			_protectR.lock();
-			RObject robj = ss.getR().evalAndGetObject(expr);
-			if (ss.getR().getStatus().toUpperCase().contains("ERROR")) {
-				JOptionPane.showMessageDialog(ss, ss.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
+			_rgui.getRLock().lock();
+			RObject robj = _rgui.getR().evalAndGetObject(expr);
+			if (_rgui.getR().getStatus().toUpperCase().contains("ERROR")) {
+				JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
 				return null;
 			}
 
@@ -886,7 +920,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			ex.printStackTrace();
 			return null;
 		} finally {
-			_protectR.unlock();
+			_rgui.getRLock().unlock();
 		}
 
 	}
@@ -917,11 +951,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public void update() {
-			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked());
+			setEnabled(ss.getSelectedRange() != null && _rgui.getR() != null && !_rgui.getRLock().isLocked());
 		}
 
 		public boolean isEnabled() {
-			return ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked();
+			return ss.getSelectedRange() != null && _rgui.getR() != null && !_rgui.getRLock().isLocked();
 		}
 
 		public void lostOwnership(Clipboard clipboard, Transferable contents) {
@@ -1215,20 +1249,20 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 						return;
 					String tempVarName = "TEMP_____";
 					try {
-						_protectR.lock();
-						ss.getR().putObjectAndAssignName(result, tempVarName);
+						_rgui.getRLock().lock();
+						_rgui.getR().putObjectAndAssignName(result, tempVarName);
 
-						if (!ss.getR().getStatus().equals("")) {
-							int messageType = getMessageType(ss.getR().getStatus());
-							JOptionPane.showMessageDialog(SpreadsheetPanel.this, ss.getR().getStatus(), "R Message",
+						if (!_rgui.getR().getStatus().equals("")) {
+							int messageType = getMessageType(_rgui.getR().getStatus());
+							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message",
 									messageType);
 							if (messageType == ERROR_MESSAGE)
 								return;
 						}
-						String log = ss.getR().consoleSubmit(toRData.getAssignTo() + "<-" + tempVarName);
+						String log = _rgui.getR().consoleSubmit(toRData.getAssignTo() + "<-" + tempVarName);
 						if (!log.equals("")) {
-							int messageType = getMessageType(ss.getR().getStatus());
-							JOptionPane.showMessageDialog(SpreadsheetPanel.this, ss.getR().getStatus(), "R Message",
+							int messageType = getMessageType(_rgui.getR().getStatus());
+							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message",
 									messageType);
 							if (messageType == ERROR_MESSAGE)
 								return;
@@ -1236,22 +1270,29 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 						System.out.println("--->"
 								+ PoolUtils.replaceAll(conversionCommandHolder[0], "${VAR}", toRData.getAssignTo()));
-						log = ss.getR().consoleSubmit(
+						log = _rgui.getR().consoleSubmit(
 								PoolUtils.replaceAll(conversionCommandHolder[0], "${VAR}", toRData.getAssignTo())
 										+ toRData.getPostAssignCommand());
 						if (!log.equals("")) {
-							int messageType = getMessageType(ss.getR().getStatus());
-							JOptionPane.showMessageDialog(SpreadsheetPanel.this, ss.getR().getStatus(), "R Message",
+							int messageType = getMessageType(_rgui.getR().getStatus());
+							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message",
 									messageType);
 							if (messageType == ERROR_MESSAGE)
 								return;
 						}
 
-						_consoleLogger.printAsOutput("\n" + toRData.getAssignTo()
-								+ " has been assigned a new value for the cell range " + toRData.getCellRange() + "\n");
+						_rgui.getConsoleLogger().printAsOutput("\n" + toRData.getAssignTo()
+								+ " has been assigned a new value from the cell range " + toRData.getCellRange() + "\n");
 					} finally {
-						ss.getR().evaluate("rm(" + tempVarName + ")");
-						_protectR.unlock();
+						try {
+							_rgui.getR().evaluate("rm(" + tempVarName + ")");						
+							if (_rgui.isCollaborativeMode()) {
+								_rgui.synchronizeCollaborators();
+							}
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}						
+						_rgui.getRLock().unlock();
 					}
 
 				} catch (Exception ex) {
@@ -1272,11 +1313,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public void update() {
-			setEnabled(ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked());
+			setEnabled(ss.getSelectedRange() != null && _rgui.getR() != null && !_rgui.getRLock().isLocked());
 		}
 
 		public boolean isEnabled() {
-			return ss.getSelectedRange() != null && ss.getR() != null && !_protectR.isLocked();
+			return ss.getSelectedRange() != null && _rgui.getR() != null && !_rgui.getRLock().isLocked();
 		}
 
 		public void lostOwnership(Clipboard clipboard, Transferable contents) {
@@ -1291,21 +1332,14 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			setEnabled(true);
 		}
 
-		Method newWindowMethod = null;
-
 		public void actionPerformed(ActionEvent e) {
 
 			DimensionsDialog ddialog = new DimensionsDialog(ss);
 			ddialog.setVisible(true);
 			if (ddialog.getDimensions() != null) {
-
-				try {
-					if (newWindowMethod == null)
-						newWindowMethod = jEdit.class.getClassLoader().loadClass(_newWindowClassName).getMethod(
-								"create", JPanel.class, String.class);
-					newWindowMethod.invoke(null, new SpreadsheetPanel(ss.getRHolder(), _newWindowClassName, _protectR,
-							_consoleLogger, (int) ddialog.getDimensions().getHeight(), (int) ddialog.getDimensions()
-									.getWidth()), "Spreadsheet View");
+				try {					
+					_rgui.createView(new SpreadsheetPanel((int) ddialog.getDimensions().getHeight(), (int) ddialog.getDimensions()
+							.getWidth(),_rgui), "Spreadsheet View");										
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}

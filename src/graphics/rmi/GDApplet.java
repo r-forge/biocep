@@ -27,6 +27,7 @@ import http.TunnelingException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -131,7 +132,7 @@ import util.Utils;
 /**
  * @author Karim Chine kchine@ebi.ac.uk
  */
-public class GDApplet extends GDAppletBase {
+public class GDApplet extends GDAppletBase implements RGui {
 
 	public static final int LOCAL_MODE = 0;
 	public static final int RMI_MODE = 1;
@@ -144,9 +145,6 @@ public class GDApplet extends GDAppletBase {
 	private RServices _rForConsole;
 	private RServices _rForFiles;
 	private RServices _rForPopCmd;
-	private RServices[] _rSpreadsheetHolder = new RServices[1];
-	private boolean[] _broadcastFlagHolder = new boolean[1];
-	
 	private JPanel _graphicPanel;
 	private JPanel _rootGraphicPanel;
 	private Vector<FileDescription> _workDirFiles = new Vector<FileDescription>();
@@ -169,6 +167,14 @@ public class GDApplet extends GDAppletBase {
 	private final ReentrantLock _protectR = new ReentrantLock();
 	private String[] _packageNameSave = new String[] { "" };
 	private String[] _expressionSave = new String[] { "" };
+	private ConsoleLogger _consoleLogger= new ConsoleLogger() {
+		public void printAsInput(String message) {
+			_consolePanel.print(message, null);
+		}
+		public void printAsOutput(String message) {
+			_consolePanel.print(null, message);
+		}
+	};
 
 	public GDApplet() throws HeadlessException {
 		super();
@@ -294,9 +300,6 @@ public class GDApplet extends GDAppletBase {
 								_rForFiles = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId,
 										"R", RServices.class, new HttpClient(new MultiThreadedHttpConnectionManager()));
 
-								_rSpreadsheetHolder[0] = _rForConsole;
-								_broadcastFlagHolder[0] = _login.indexOf("@@")!=-1;
-
 								d=RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
 								System.out.println("device id:"+d.getDeviceNumber());
 							} else {
@@ -334,9 +337,6 @@ public class GDApplet extends GDAppletBase {
 								_rForPopCmd = r;
 								_rForFiles = r;
 
-								_rSpreadsheetHolder[0] = _rForConsole;
-								_broadcastFlagHolder[0] = false;
-
 								d = r.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 
 								_sessionId = NON_HTTP_SESSION;
@@ -346,7 +346,7 @@ public class GDApplet extends GDAppletBase {
 							}
 
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] {
-									_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, _protectR);
+									_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, getRLock());
 
 							_rootGraphicPanel.removeAll();
 							_rootGraphicPanel.setLayout(new BorderLayout());
@@ -404,16 +404,15 @@ public class GDApplet extends GDAppletBase {
 					}
 
 					Object result = null;
-					if (_protectR.isLocked()) {
+					if (getRLock().isLocked()) {
 						result = "R is busy, please retry\n";
 					} else {
 						try {
-							_protectR.lock();							
-							if (_mode==HTTP_MODE && _login.indexOf("@@")!=-1) { 
-								result = _rForConsole.consoleSubmit(expression+";.PrivateEnv$dev.broadcast()");
-							} else {
-								result = _rForConsole.consoleSubmit(expression);								
-							}							
+							getRLock().lock();
+							result = _rForConsole.consoleSubmit(expression);
+							if (isCollaborativeMode()) { 
+								synchronizeCollaborators();
+							} 						
 						} catch (NotLoggedInException nle) {
 							noSession();
 							result = "Not Logged on, type 'logon' to connect\n";
@@ -425,7 +424,7 @@ public class GDApplet extends GDAppletBase {
 							e.printStackTrace();
 							result = PoolUtils.getStackTraceAsString(e);
 						} finally {
-							_protectR.unlock();
+							getRLock().unlock();
 						}
 					}
 					return (String) result;
@@ -676,26 +675,23 @@ public class GDApplet extends GDAppletBase {
 								demoMenu.add(new AbstractAction(PoolUtils.replaceAll(demos[i], "_", " ")) {
 									public void actionPerformed(ActionEvent e) {
 										
-										if (_protectR.isLocked()) {
+										if (getRLock().isLocked()) {
 											JOptionPane.showMessageDialog(null, "R is busy");
 										} else {
 											try {
-												_protectR.lock();
-												String log=null;
+												getRLock().lock();
+												String log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(demos[index]));
 																								
-												if (_mode==HTTP_MODE && _login.indexOf("@@")!=-1) { 
-													log = _rForConsole.sourceFromBuffer(new StringBuffer(_rForConsole.getDemoSource(demos[index])+";.PrivateEnv$dev.broadcast()"));	
-												} else {
-													log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(demos[index]));	
-												}
-												
+												if (isCollaborativeMode()) {
+													synchronizeCollaborators();														
+												} 
 												_consolePanel.print("sourcing demo "
 														+ PoolUtils.replaceAll(demos[index], "_", " "), log);
 												
 											} catch (Exception ex) {
 												ex.printStackTrace();
 											} finally {
-												_protectR.unlock();
+												getRLock().unlock();
 											}
 										}
 										
@@ -704,7 +700,7 @@ public class GDApplet extends GDAppletBase {
 
 									@Override
 									public boolean isEnabled() {
-										return _sessionId != null && !_protectR.isLocked();
+										return _sessionId != null && !getRLock().isLocked();
 									}
 								});
 
@@ -1524,7 +1520,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !_protectR.isLocked();
+				return _sessionId != null && !getRLock().isLocked();
 			}
 		});
 
@@ -1572,7 +1568,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !_protectR.isLocked();
+				return _sessionId != null && !getRLock().isLocked();
 			}
 		});
 
@@ -1683,7 +1679,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return !_protectR.isLocked();
+				return !getRLock().isLocked();
 			}
 		});
 
@@ -1694,7 +1690,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !_protectR.isLocked();
+				return _sessionId != null && !getRLock().isLocked();
 			}
 		});
 
@@ -1705,7 +1701,7 @@ public class GDApplet extends GDAppletBase {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !_protectR.isLocked();
+				return _sessionId != null && !getRLock().isLocked();
 			}
 		});
 
@@ -1939,16 +1935,7 @@ public class GDApplet extends GDAppletBase {
 		_actions.put("spreadsheet", new AbstractAction("Spreadsheet Editor") {
 			public void actionPerformed(final ActionEvent e) {
 
-				NewWindow.create(new SpreadsheetPanel(_rSpreadsheetHolder, "graphics.rmi.NewWindow", _protectR,
-						new ConsoleLogger() {
-							public void printAsInput(String message) {
-								_consolePanel.print(message, null);
-							}
-
-							public void printAsOutput(String message) {
-								_consolePanel.print(null, message);
-							}
-						}, 300, 40), "Spreadsheet View");
+				NewWindow.create(new SpreadsheetPanel(300, 40, GDApplet.this), "Spreadsheet View");
 
 			}
 
@@ -1976,7 +1963,7 @@ public class GDApplet extends GDAppletBase {
 						newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 					}
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
-							_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, _protectR);
+							_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, getRLock());
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
 					rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
@@ -2253,7 +2240,6 @@ public class GDApplet extends GDAppletBase {
 		_rForConsole = null;
 		_rForPopCmd = null;
 		_rForFiles = null;
-		_rSpreadsheetHolder[0] = null;
 		_isBiocLiteSourced = false;
 
 	}
@@ -2462,25 +2448,41 @@ public class GDApplet extends GDAppletBase {
 		return _defaultHelpUrl;
 	}
 
-	RServices getR() {
+	public RServices getR() {
 		return _rForConsole;
 	}
 
+	public ReentrantLock getRLock() {
+		return _protectR;
+	}
+	
+	public boolean isCollaborativeMode() {
+		return _mode==HTTP_MODE && _login.indexOf("@@")!=-1;
+	}
+	
+	public ConsoleLogger getConsoleLogger() {
+		return _consoleLogger;
+	}
+	
+	@Override
+	public void synchronizeCollaborators() throws RemoteException{
+		getR().evaluate(".PrivateEnv$dev.broadcast()");
+	}
+	
+	
 	String safeConsoleSubmit(final String cmd) throws RemoteException {
-		if (_protectR.isLocked()) {
+		if (getRLock().isLocked()) {
 			return "R is busy, please retry\n";
 		}
 		try {
-			_protectR.lock();
+			getRLock().lock();
 			
-			String consoleLog=null;
-			if (_mode==HTTP_MODE && _login.indexOf("@@")!=-1) { 
-				consoleLog = _rForConsole.consoleSubmit(cmd+";.PrivateEnv$dev.broadcast()");
-			} else {
-				consoleLog = _rForConsole.consoleSubmit(cmd);
-			}
+			final String log=_rForConsole.consoleSubmit(cmd);
 			
-			final String log = consoleLog;
+			if (isCollaborativeMode()) { 
+				synchronizeCollaborators();
+			} 
+			
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					_consolePanel.print(cmd, log);
@@ -2489,9 +2491,42 @@ public class GDApplet extends GDAppletBase {
 			return log;
 
 		} finally {
-			_protectR.unlock();
+			getRLock().unlock();
 		}
 
 	}
+	
+	public Container createView(final JPanel panel, final String title) {
+		final Container[] result = new Container[1];
+		Runnable createRunnable = new Runnable() {
+			public void run() {
+				try {
+					UIManager.setLookAndFeel(getLookAndFeelClassName());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				SwingUtilities.updateComponentTreeUI(panel);
+
+				int id = getDynamicViewId();
+				graphics.rmi.GDApplet.DynamicView v = new graphics.rmi.GDApplet.DynamicView(title, null, panel, id);
+				((TabWindow) views[2].getWindowParent()).addTab(v);
+				result[0] = v;
+			}
+		};
+
+		if (SwingUtilities.isEventDispatchThread()) {
+			createRunnable.run();
+		} else {
+			try {
+				SwingUtilities.invokeAndWait(createRunnable);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+		return result[0];
+
+	}
+
 
 }
