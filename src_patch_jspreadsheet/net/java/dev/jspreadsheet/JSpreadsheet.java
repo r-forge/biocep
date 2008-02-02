@@ -1,5 +1,7 @@
 package net.java.dev.jspreadsheet;
 
+import graphics.rmi.RGui;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -45,21 +47,20 @@ public class JSpreadsheet extends JComponent
    private History history = new History();
    private JTable table;
    private SpreadsheetTableModel tableModel;
-   
-
    /** Holds value of property columnWidth. */
    private int columnWidth;
+   
 
    /** Create a new spreadsheet
     * @param columns The number of columns in the spreadsheet
     * @param rows The number of rows in the spreadsheet
     */
-   public JSpreadsheet(int rows, int columns, RServices[] rHolder)
+   public JSpreadsheet(int rows, int columns, RGui rgui)
    {
       table = createTable();
 
       setLayout(new BorderLayout());
-      newTableModel(rows, columns,rHolder);
+      newTableModel(rows, columns, rgui);
 
       // clobber resizing of all columns
       table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -161,7 +162,7 @@ public class JSpreadsheet extends JComponent
 
       // create new table model
       CellPoint size = SpreadsheetTableModel.getSize(text, delim);
-      newTableModel(size.getRow(), size.getCol(), tableModel.getRHolder());
+      newTableModel(size.getRow(), size.getCol(), tableModel.getRGui());
       tableModel.fromString(text, delim, 0, 0, new CellRange(0, size.getRow(), 0, size.getCol()));
    }
 
@@ -668,10 +669,9 @@ public class JSpreadsheet extends JComponent
     * @param rows number of rows in new table model
     * @param cols number of columns in new table model
     */
-   private void newTableModel(int rows, int cols, RServices[] rHolder)
+   private void newTableModel(int rows, int cols, RGui rgui)
    {
-      tableModel = new SpreadsheetTableModel(table, rows, cols);
-      tableModel.setRHolder(rHolder);
+      tableModel = new SpreadsheetTableModel(table, rows, cols,rgui);
       table.setModel(tableModel);
 
       //      applyBaseColumnWidth();
@@ -828,12 +828,4 @@ public class JSpreadsheet extends JComponent
 	   return table;
    }
    
-   public RServices getR() {
-		return tableModel.getR();
-	}
-   
-   public RServices[] getRHolder() {
-		return tableModel.getRHolder();
-	}
-
 }

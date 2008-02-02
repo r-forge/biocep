@@ -1,5 +1,7 @@
 package net.java.dev.jspreadsheet;
 
+import graphics.rmi.RGui;
+
 import java.io.BufferedReader;
 import java.io.StringReader;
 
@@ -48,7 +50,7 @@ public class SpreadsheetTableModel extends DefaultTableModel
     */
    private boolean passwordModified;
    
-   private RServices[] rHolder;
+   private RGui rgui;
 
    /**
     * Constructs a default SharpTableModel which is a table of zero columns and
@@ -57,13 +59,14 @@ public class SpreadsheetTableModel extends DefaultTableModel
     * @param sharp
     *            the gui component to tie it to
     */
-   public SpreadsheetTableModel(JTable table)
+   public SpreadsheetTableModel(JTable table, RGui rgui)
    {
       super();
 
       // initialize state to unmodified and file to untitled
       modified = false;
       this.table = table;
+      this.rgui = rgui;
    }
 
    /**
@@ -83,7 +86,7 @@ public class SpreadsheetTableModel extends DefaultTableModel
     * @param numColumns
     *            total number of columns including column header
     */
-   public SpreadsheetTableModel(JTable table, int numRows, int numColumns)
+   public SpreadsheetTableModel(JTable table, int numRows, int numColumns, RGui rgui)
    {
       super(numRows, numColumns);
 
@@ -96,6 +99,7 @@ public class SpreadsheetTableModel extends DefaultTableModel
       // initialize state to unmodified and file to untitled
       modified = false;
       this.table = table;
+      this.rgui=rgui;
    }
 
    /**
@@ -111,9 +115,9 @@ public class SpreadsheetTableModel extends DefaultTableModel
     * @param data
     *            the array of objects to place into the SharpTableModel
     */
-   public SpreadsheetTableModel(JTable table, Object[][] data)
+   public SpreadsheetTableModel(JTable table, Object[][] data, RGui rgui)
    {
-      this(table, data.length, data[0].length);
+      this(table, data.length, data[0].length, rgui);
 
       /* load the data */
       for (int i = 0; i < data.length; i++)
@@ -2030,14 +2034,8 @@ public class SpreadsheetTableModel extends DefaultTableModel
       }
    }
 
-public RServices getR() {
-	return rHolder[0];
-}
+	public RGui getRGui() {
+		return rgui;
+	} 
 
-public void setRHolder(RServices[] rHolder) {	
-	this.rHolder = rHolder;
-}
-public RServices[] getRHolder() {
-	return this.rHolder;
-}
 }

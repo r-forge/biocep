@@ -89,11 +89,11 @@ class FunctionR extends Function {
 
 		try {
 			System.out.println("v="+v);
-			RObject result= (v!=null?(RObject)table.getR().call(rFucntionName, v):(RObject)table.getR().call(rFucntionName)) ;
+			RObject result= (v!=null?(RObject)table.getRGui().getR().call(rFucntionName, v):(RObject)table.getRGui().getR().call(rFucntionName)) ;
 			System.out.println("result="+result);
 			
-			if (table.getR().getStatus().contains("ERROR")) {
-				JOptionPane.showMessageDialog(table.getTable(), table.getR().getStatus());
+			if (table.getRGui().getR().getStatus().contains("ERROR")) {
+				JOptionPane.showMessageDialog(table.getTable(), table.getRGui().getR().getStatus());
 				return null;
 			}
 			

@@ -28,34 +28,6 @@ public class NewWindow {
 	public static GDApplet _applet;
 
 	public static Container create(final JPanel panel, final String title) {
-		final Container[] result = new Container[1];
-		Runnable createRunnable = new Runnable() {
-			public void run() {
-				try {
-					UIManager.setLookAndFeel(_applet.getLookAndFeelClassName());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				SwingUtilities.updateComponentTreeUI(panel);
-
-				int id = _applet.getDynamicViewId();
-				graphics.rmi.GDApplet.DynamicView v = new graphics.rmi.GDApplet.DynamicView(title, null, panel, id);
-				((TabWindow) _applet.views[2].getWindowParent()).addTab(v);
-				result[0] = v;
-			}
-		};
-
-		if (SwingUtilities.isEventDispatchThread()) {
-			createRunnable.run();
-		} else {
-			try {
-				SwingUtilities.invokeAndWait(createRunnable);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		}
-		return result[0];
-
+		return _applet.createView(panel, title);
 	}
 }
