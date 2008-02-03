@@ -386,19 +386,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							}
 
-							_currentDevice=d;
-							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { 
+							_graphicPanel = new JGDPanelPop(  d , true, true, new AbstractAction[] { 
 									new SetCurrentDeviceAction(GDApplet.this, d), 
 									new ShowDeviceInfoAction(GDApplet.this, d),
 									new SnapshotDeviceAction(GDApplet.this),
 									new SaveDeviceAsPngAction(GDApplet.this),
 									new SaveDeviceAsJpgAction(GDApplet.this)}, getRLock());
-							
-
 							_rootGraphicPanel.removeAll();
 							_rootGraphicPanel.setLayout(new BorderLayout());
 							_rootGraphicPanel.add(_graphicPanel, BorderLayout.CENTER);
-
 							SwingUtilities.invokeLater(new Runnable() {
 								public void run() {
 									_rootGraphicPanel.updateUI();
@@ -406,14 +402,50 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								}
 							});
-
-							if (_mode == HTTP_MODE) {
-								if (_demo) {
-									playDemo();
-									LoginDialog.playDemo_bool = false;
+							
+							Vector<DeviceView> deviceViews=getDeviceViews();
+							for (int i=0; i<deviceViews.size(); ++i) {								
+								final JPanel rootComponent=(JPanel)deviceViews.elementAt(i).getComponent();
+								GDDevice newDevice=null;
+								if (_mode==HTTP_MODE) { 
+									newDevice=RHttpProxy.newDevice(_commandServletUrl, _sessionId, rootComponent.getWidth(), rootComponent.getHeight());
+								} else {
+									newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 								}
+								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { 
+										new SetCurrentDeviceAction(GDApplet.this,newDevice), 
+										new ShowDeviceInfoAction(GDApplet.this,newDevice),
+										new SnapshotDeviceAction(GDApplet.this),
+										new SaveDeviceAsPngAction(GDApplet.this),
+										new SaveDeviceAsJpgAction(GDApplet.this) }, getRLock());
+								
+								rootComponent.removeAll();
+								rootComponent.setLayout(new BorderLayout());
+								rootComponent.add(gp, BorderLayout.CENTER);		
+								SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										rootComponent.updateUI();
+										rootComponent.repaint();
+
+									}
+								});
+								
+								deviceViews.elementAt(i).setPanel((JGDPanelPop)gp);
+								
+							}
+														
+							setCurrentDevice(d);
+							d.setAsCurrentDevice();
+
+							if (_demo) {
+								playDemo();
+								LoginDialog.playDemo_bool = false;
+							}
+							
+							if (_mode == HTTP_MODE) {
 								return "Logged on as " + _login + "\n";
 							} else {
+								
 								return "Logged on" + "\n";
 							}
 
@@ -865,8 +897,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							GDDevice d=((DeviceView)window).getPanel().getGdDevice();
 							if (_currentDevice==d) {
 								setCurrentDevice(((JGDPanelPop)_graphicPanel).getGdDevice());
+								_currentDevice.setAsCurrentDevice();
 							}
-							d.dispose();
+							((DeviceView)window).getPanel().dispose();
 							
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -892,8 +925,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 									GDDevice d=((DeviceView)w).getPanel().getGdDevice();
 									if (_currentDevice==d) {
 										setCurrentDevice(((JGDPanelPop)_graphicPanel).getGdDevice());
+										_currentDevice.setAsCurrentDevice();
 									}
-									d.dispose();
+									((DeviceView)w).getPanel().dispose();
 									
 								} catch (Exception e) {
 									e.printStackTrace();
@@ -1935,6 +1969,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							new SnapshotDeviceAction(GDApplet.this),
 							new SaveDeviceAsPngAction(GDApplet.this),
 							new SaveDeviceAsJpgAction(GDApplet.this) }, getRLock());
+					
+					
+					
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
 					rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
@@ -1953,7 +1990,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return true;
+				return getR()!=null;
 			}
 		});
 		
@@ -2210,7 +2247,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void noSession() {
-		((JGDPanelPop) _graphicPanel).setAutoModes(false, false);
+		((JGDPanelPop) _graphicPanel).dispose();
+		Vector<DeviceView> deviceViews=getDeviceViews();
+		for (int i=0; i<deviceViews.size(); ++i) deviceViews.elementAt(i).getPanel().dispose();
+		
 		_sessionId = null;
 		_rForConsole = null;
 		_rForPopCmd = null;
@@ -2341,15 +2381,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 	
 	static class DeviceView extends DynamicView {
 		JGDPanelPop _panel;
+		
 		DeviceView(String title, Icon icon, Component component, int id) {
 			super(title, icon, component,id);
 		}
 		public JGDPanelPop getPanel() {
 			return _panel;
 		}
+		
 		public void setPanel(JGDPanelPop panel) {
 			this._panel = panel;
 		}
+		
+		
+		
 	}
 	
 	static JPanel newPanel(JTextArea a) {

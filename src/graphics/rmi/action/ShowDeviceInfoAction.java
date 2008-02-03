@@ -24,5 +24,12 @@ public class ShowDeviceInfoAction extends AbstractAction {
 		} catch (Exception ex) {
 			ex.printStackTrace();	
 		}
-	}	
+	}
+	
+
+	@Override
+	public boolean isEnabled() {
+		return _rgui.getR()!=null;
+	}
+	
 }

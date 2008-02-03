@@ -25,7 +25,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -62,7 +61,12 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private Point2D[] realLocations = null;
 	private boolean trackMouse = false;
 	private ReentrantLock _protectR = null;
-
+	
+	private boolean _stopPopThread = false;	
+	private boolean _stopResizeThread = false;
+	private Thread _popThread = null;
+	private Thread _resizeThread = null;
+	
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions)
 	throws RemoteException {
 		this( gdDevice, autoPop, autoResize, actions, null);
@@ -162,11 +166,12 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_autoResize = autoResize;
 
 		if (_autoPop) {
-			new Thread(new Runnable() {
+			_popThread=new Thread(new Runnable() {
 
 				public void run() {
 
 					while (true) {
+						if (_stopPopThread) break;
 						if (_autoPop)
 							popNow();
 						try {
@@ -176,13 +181,16 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					}
 
 				}
-			}).start();
+			});
+			_popThread.start();
 		}
 
 		if (_autoResize) {
-			new Thread(new Runnable() {
+			
+			_resizeThread=new Thread(new Runnable() {
 				public void run() {
 					while (true) {
+						if (_stopResizeThread) break;
 						if (_autoResize) {
 							if (_lastResizeTime != null && ((System.currentTimeMillis() - _lastResizeTime) > 50)) {
 								
@@ -211,7 +219,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					}
 
 				}
-			}).start();
+			});
+			_resizeThread.start();
 		}
 
 	}
@@ -369,5 +378,23 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	public GDDevice getGdDevice() {
 		return _gdDevice;
 	}
-
+	
+	public void dispose() {
+		_stopPopThread=true;
+		_stopResizeThread=true;
+		try {
+			_popThread.join();
+			System.out.println("pop thread ended");
+			_resizeThread.join();
+			System.out.println("resize thread ended");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			_gdDevice.dispose();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -26,5 +26,11 @@ public class SetCurrentDeviceAction extends AbstractAction {
 		}
 		
 	}
+	
+
+	@Override
+	public boolean isEnabled() {
+		return _rgui.getR()!=null;
+	}
 
 }
