@@ -16,7 +16,13 @@
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
+import graphics.rmi.action.SaveDeviceAsJpgAction;
+import graphics.rmi.action.SaveDeviceAsPngAction;
+import graphics.rmi.action.SetCurrentDeviceAction;
+import graphics.rmi.action.ShowDeviceInfoAction;
+import graphics.rmi.action.SnapshotDeviceAction;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
+import graphics.rmi.spreadsheet.SpreadsheetPanel.FindDialog;
 import http.FileLoad;
 import http.NoNodeManagerFound;
 import http.NoRegistryAvailableException;
@@ -69,6 +75,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -164,7 +171,34 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private LookAndFeelInfo[] installedLFs = UIManager.getInstalledLookAndFeels();
 	private int _lf;
 	private boolean _isBiocLiteSourced = false;
-	private final ReentrantLock _protectR = new ReentrantLock();
+	private GDDevice _currentDevice;
+	private final ReentrantLock _protectR = new ReentrantLock() {
+		@Override
+		public void lock() {
+			super.lock();
+			if (isCollaborativeMode()) {
+				try {
+					_currentDevice.setAsCurrentDevice();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}			
+			}
+		}
+		
+		@Override
+		public void unlock() {
+			if (isCollaborativeMode()) {
+				try {
+					if (((JGDPanelPop)_graphicPanel).getGdDevice().hasGraphicObjects()) {
+						synchronizeCollaborators();	
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			super.unlock();
+		}
+	};
 	private String[] _packageNameSave = new String[] { "" };
 	private String[] _expressionSave = new String[] { "" };
 	private ConsoleLogger _consoleLogger= new ConsoleLogger() {
@@ -176,6 +210,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	};
 
+	private Icon _currentDeviceIcon=null;
+	
 	public GDApplet() throws HeadlessException {
 		super();
 	}
@@ -194,6 +230,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public void init() {
 		super.init();
 		System.out.println("INIT starts");
+		
+		
 
 		if (getParameter("mode") == null) {
 			_mode = HTTP_MODE;
@@ -227,6 +265,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		try {
 
+			
+			_currentDeviceIcon=new ImageIcon(ImageIO.read(FindDialog.class.getResource("/graphics/rmi/icons/" + "active_device.png")));
+			
 			initActions();
 
 			int lf = 0;
@@ -345,8 +386,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							}
 
-							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] {
-									_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, getRLock());
+							_currentDevice=d;
+							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { 
+									new SetCurrentDeviceAction(GDApplet.this, d), 
+									new ShowDeviceInfoAction(GDApplet.this, d),
+									new SnapshotDeviceAction(GDApplet.this),
+									new SaveDeviceAsPngAction(GDApplet.this),
+									new SaveDeviceAsJpgAction(GDApplet.this)}, getRLock());
+							
 
 							_rootGraphicPanel.removeAll();
 							_rootGraphicPanel.setLayout(new BorderLayout());
@@ -410,9 +457,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 						try {
 							getRLock().lock();
 							result = _rForConsole.consoleSubmit(expression);
-							if (isCollaborativeMode()) { 
-								synchronizeCollaborators();
-							} 						
 						} catch (NotLoggedInException nle) {
 							noSession();
 							result = "Not Logged on, type 'logon' to connect\n";
@@ -585,10 +629,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			graphicsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
 					graphicsMenu.removeAll();
-					graphicsMenu.add(_actions.get("createdevice"));
-					graphicsMenu.add(_actions.get("clone"));
-					graphicsMenu.add(_actions.get("save_png"));
-					graphicsMenu.add(_actions.get("save_jpg"));
+					graphicsMenu.add(_actions.get("createdevice"));	
 					JRadioButtonMenuItem mouseTracker = new JRadioButtonMenuItem("Mouse Tracker", _sessionId != null
 							&& ((JGDPanelPop) _graphicPanel).isTrackMouse());
 					mouseTracker.addActionListener(new ActionListener() {
@@ -681,10 +722,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											try {
 												getRLock().lock();
 												String log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(demos[index]));
-																								
-												if (isCollaborativeMode()) {
-													synchronizeCollaborators();														
-												} 
+																																			
 												_consolePanel.print("sourcing demo "
 														+ PoolUtils.replaceAll(demos[index], "_", " "), log);
 												
@@ -796,6 +834,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			});
 
+			views[1].getViewProperties().setIcon(_currentDeviceIcon);
 			final RootWindow rootWindow = DockingUtil.createRootWindow(viewMap, handler, true);
 			rootWindow.getWindowBar(Direction.DOWN).setEnabled(true);
 
@@ -820,12 +859,46 @@ public class GDApplet extends GDAppletBase implements RGui {
 				public void windowClosing(DockingWindow window) throws OperationAbortedException {
 					if (window == views[0] || window == views[1] || window == views[2])
 						throw new OperationAbortedException("Window close was aborted!");
+					
+					if (window instanceof DeviceView) {
+						try {
+							GDDevice d=((DeviceView)window).getPanel().getGdDevice();
+							if (_currentDevice==d) {
+								setCurrentDevice(((JGDPanelPop)_graphicPanel).getGdDevice());
+							}
+							d.dispose();
+							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					
 					if (window instanceof TabWindow) {
 						TabWindow tw = (TabWindow) window;
 						for (int i = 0; i < tw.getChildWindowCount(); ++i) {
 							DockingWindow w = tw.getChildWindow(i);
 							if (w == views[0] || w == views[1] || w == views[2])
 								throw new OperationAbortedException("Window close was aborted!");
+						}
+					}
+					
+					if (window instanceof TabWindow) {
+						TabWindow tw = (TabWindow) window;
+						for (int i = 0; i < tw.getChildWindowCount(); ++i) {
+							DockingWindow w = tw.getChildWindow(i);
+							if (w instanceof DeviceView) {
+								try {
+									
+									GDDevice d=((DeviceView)w).getPanel().getGdDevice();
+									if (_currentDevice==d) {
+										setCurrentDevice(((JGDPanelPop)_graphicPanel).getGdDevice());
+									}
+									d.dispose();
+									
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
 						}
 					}
 				}
@@ -1035,7 +1108,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 		return null;
 	}
-
+	
+	private Vector<DeviceView> getDeviceViews() {
+		Vector<DeviceView> result=new Vector<DeviceView>();
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof DeviceView) {
+				result.add((DeviceView)dv);
+			}
+		}
+		return result;
+	}
+	
 	private JTextArea getOpenedLogViewerArea() {
 		LogView lv = getOpenedLogViewer();
 		if (lv != null)
@@ -1162,15 +1247,17 @@ public class GDApplet extends GDAppletBase implements RGui {
 					while ((l = br.readLine()) != null) {
 
 						l = l.trim();
-						if (l.equals(""))
-							continue;
+						if (l.equals("")) continue;
+						
 						if (l.equals("#SNAPSHOT")) {
 
+							/*
 							try {
 								Thread.sleep(1400);
 							} catch (Exception ex) {
 							}
 							_actions.get("clone").actionPerformed(new ActionEvent(_graphicPanel, 0, null));
+							*/
 
 						} else {
 							_consolePanel.play(l, true);
@@ -1754,132 +1841,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("clone", new AbstractAction("Create Snapshot") {
-			public void actionPerformed(final ActionEvent e) {
-
-				new Thread(new Runnable() {
-					public void run() {
-						try {
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {
-
-										JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GUtils
-												.getComponentParent((Component) e.getSource(),
-														JBufferedImagePanel.class);
-
-										if (bufferedImagePanel == null) {
-											bufferedImagePanel = (JBufferedImagePanel) _graphicPanel;
-										}
-
-										final JPanel panelclone = new JBufferedImagePanel(bufferedImagePanel.getImage());
-										final AbstractAction[] actions = new AbstractAction[] { _actions.get("clone"),
-												_actions.get("save_png"), _actions.get("save_jpg") };
-										panelclone.addMouseListener(new MouseAdapter() {
-											public void mousePressed(MouseEvent e) {
-												checkPopup(e);
-											}
-
-											public void mouseClicked(MouseEvent e) {
-												checkPopup(e);
-											}
-
-											public void mouseReleased(MouseEvent e) {
-												checkPopup(e);
-											}
-
-											private void checkPopup(MouseEvent e) {
-												if (e.isPopupTrigger() && actions != null) {
-													JPopupMenu popupMenu = new JPopupMenu();
-													for (int i = 0; i < actions.length; ++i) {
-														popupMenu.add(actions[i]);
-													}
-													popupMenu.show(panelclone, e.getX(), e.getY());
-												}
-											}
-										});
-
-										NewWindow.create(panelclone, "Snapshot");
-
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					}
-				}).start();
-
-			}
-
-			@Override
-			public boolean isEnabled() {
-				return _sessionId != null;
-			}
-		});
-
-		_actions.put("save_png", new AbstractAction("Save as PNG") {
-			public void actionPerformed(final ActionEvent e) {
-
-				new Thread(new Runnable() {
-					public void run() {
-						try {
-
-							final JFileChooser chooser = new JFileChooser();
-							int returnVal = chooser.showOpenDialog(GDApplet.this.getContentPane());
-							if (returnVal == JFileChooser.APPROVE_OPTION) {
-								JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GUtils
-										.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
-								if (bufferedImagePanel == null) {
-									bufferedImagePanel = (JBufferedImagePanel) _graphicPanel;
-								}
-								ImageIO.write(bufferedImagePanel.getImage(), "png", chooser.getSelectedFile());
-							}
-
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					}
-				}).start();
-
-			}
-
-			@Override
-			public boolean isEnabled() {
-				return _sessionId != null;
-			}
-		});
-
-		_actions.put("save_jpg", new AbstractAction("Save as JPEG") {
-			public void actionPerformed(final ActionEvent e) {
-				new Thread(new Runnable() {
-					public void run() {
-						try {
-							final JFileChooser chooser = new JFileChooser();
-							int returnVal = chooser.showOpenDialog(GDApplet.this.getContentPane());
-							if (returnVal == JFileChooser.APPROVE_OPTION) {
-								JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GUtils
-										.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
-								if (bufferedImagePanel == null) {
-									bufferedImagePanel = (JBufferedImagePanel) _graphicPanel;
-								}
-								ImageIO.write(bufferedImagePanel.getImage(), "jpg", chooser.getSelectedFile());
-							}
-
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					}
-				}).start();
-			}
-
-			@Override
-			public boolean isEnabled() {
-				return _sessionId != null;
-			}
-		});
 
 		_actions.put("editor", new AbstractAction("Script Editor") {
 			private boolean firstCall = true;
@@ -1952,7 +1913,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 				rootGraphicPanel.setLayout(new BorderLayout());
 				JPanel graphicPanel = new JPanel();
 				rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
-				NewWindow.create(rootGraphicPanel, "Graphic Device");
+				
+				int id = getDynamicViewId();
+				
+				DeviceView deviceView=new graphics.rmi.GDApplet.DeviceView("Graphic Device", null,
+						rootGraphicPanel, id);
+				((TabWindow) views[2].getWindowParent()).addTab(deviceView);				
 				
 				try  {
 					
@@ -1962,11 +1928,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 					} else {
 						newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 					}
-					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
-							_actions.get("clone"), _actions.get("save_png"), _actions.get("save_jpg") }, getRLock());
+					
+					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { 
+							new SetCurrentDeviceAction(GDApplet.this,newDevice), 
+							new ShowDeviceInfoAction(GDApplet.this,newDevice),
+							new SnapshotDeviceAction(GDApplet.this),
+							new SaveDeviceAsPngAction(GDApplet.this),
+							new SaveDeviceAsJpgAction(GDApplet.this) }, getRLock());
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
 					rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
+					
+					deviceView.setPanel((JGDPanelPop)graphicPanel);
+					deviceView.getViewProperties().setIcon(_currentDeviceIcon);
+					setCurrentDevice(newDevice);
 					
 				} catch (TunnelingException te) {
 					te.printStackTrace();
@@ -2363,6 +2338,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
+	
+	static class DeviceView extends DynamicView {
+		JGDPanelPop _panel;
+		DeviceView(String title, Icon icon, Component component, int id) {
+			super(title, icon, component,id);
+		}
+		public JGDPanelPop getPanel() {
+			return _panel;
+		}
+		public void setPanel(JGDPanelPop panel) {
+			this._panel = panel;
+		}
+	}
+	
 	static JPanel newPanel(JTextArea a) {
 		JPanel result = new JPanel(new BorderLayout());
 		result.add(new JScrollPane(a), BorderLayout.CENTER);
@@ -2447,29 +2436,55 @@ public class GDApplet extends GDAppletBase implements RGui {
 	String getDefaultHelpUrl() {
 		return _defaultHelpUrl;
 	}
-
+	
+	@Override
 	public RServices getR() {
 		return _rForConsole;
 	}
 
+	@Override
 	public ReentrantLock getRLock() {
 		return _protectR;
+	}
+	
+	@Override
+	public ConsoleLogger getConsoleLogger() {
+		return _consoleLogger;
+	}
+	
+	public void synchronizeCollaborators() throws RemoteException{
+		getR().evaluate(".PrivateEnv$dev.broadcast()");
 	}
 	
 	public boolean isCollaborativeMode() {
 		return _mode==HTTP_MODE && _login.indexOf("@@")!=-1;
 	}
 	
-	public ConsoleLogger getConsoleLogger() {
-		return _consoleLogger;
+	@Override
+	public void setCurrentDevice(GDDevice device) {
+		_currentDevice=device;		
+		views[1].getViewProperties().setIcon(null);
+		Vector<DeviceView> deviceViews=getDeviceViews();
+		for (int i=0; i<deviceViews.size(); ++i) deviceViews.elementAt(i).getViewProperties().setIcon(null);
+		
+		if (_currentDevice==((JGDPanelPop)_graphicPanel).getGdDevice()) {
+			views[1].getViewProperties().setIcon(_currentDeviceIcon);
+		} else {
+			for (int i=0; i<deviceViews.size(); ++i) {
+				if (deviceViews.elementAt(i).getPanel().getGdDevice()==_currentDevice) {
+					deviceViews.elementAt(i).getViewProperties().setIcon(_currentDeviceIcon);
+					break;
+				}
+			}
+		}
+		
 	}
 	
 	@Override
-	public void synchronizeCollaborators() throws RemoteException{
-		getR().evaluate(".PrivateEnv$dev.broadcast()");
+	public Component getRootComponent() {
+		return getContentPane();		
 	}
-	
-	
+		
 	String safeConsoleSubmit(final String cmd) throws RemoteException {
 		if (getRLock().isLocked()) {
 			return "R is busy, please retry\n";
@@ -2478,10 +2493,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			getRLock().lock();
 			
 			final String log=_rForConsole.consoleSubmit(cmd);
-			
-			if (isCollaborativeMode()) { 
-				synchronizeCollaborators();
-			} 
 			
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {

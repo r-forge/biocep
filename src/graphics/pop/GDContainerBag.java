@@ -63,7 +63,11 @@ public class GDContainerBag implements GDContainer {
 			_actions.remove(0);
 		return result;
 	}
-
+	
+	public boolean hasGraphicObjects() {
+		return _actions.size()>0;
+	}
+	
 	public Dimension getSize() throws RemoteException {
 		return _size;
 	}

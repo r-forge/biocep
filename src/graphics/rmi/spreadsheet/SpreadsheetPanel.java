@@ -24,6 +24,7 @@ import net.java.dev.jspreadsheet.Node;
 import net.java.dev.jspreadsheet.SpreadsheetSelectionEvent;
 import net.java.dev.jspreadsheet.SpreadsheetSelectionListener;
 import net.java.dev.jspreadsheet.SpreadsheetTableModel;
+import graphics.pop.GDDevice;
 import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GUtils;
 import graphics.rmi.RGui;
@@ -128,18 +129,18 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				// TODO Auto-generated method stub
 				return null;
 			}
-			@Override
-			public boolean isCollaborativeMode() {
-				// TODO Auto-generated method stub
-				return false;
-			}
 			
 			@Override
-			public void synchronizeCollaborators() {
+			public void setCurrentDevice(GDDevice device) {
 				// TODO Auto-generated method stub
 				
 			}
-
+			
+			@Override
+			public Component getRootComponent() {
+				// TODO Auto-generated method stub
+				return null;
+			}
 			
 		}), BorderLayout.CENTER);
 		f.setSize(new Dimension(800, 800));
@@ -517,7 +518,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 					} finally {
 						try {
 							_rgui.getR().evaluate("rm(" + tempVarName + ")");
-							if (_rgui.isCollaborativeMode()) _rgui.synchronizeCollaborators();
 						}catch (Exception ex) {
 							ex.printStackTrace();
 						}
@@ -1285,10 +1285,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 								+ " has been assigned a new value from the cell range " + toRData.getCellRange() + "\n");
 					} finally {
 						try {
-							_rgui.getR().evaluate("rm(" + tempVarName + ")");						
-							if (_rgui.isCollaborativeMode()) {
-								_rgui.synchronizeCollaborators();
-							}
+							_rgui.getR().evaluate("rm(" + tempVarName + ")");													
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}						

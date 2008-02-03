@@ -2602,6 +2602,11 @@ public class DirectJNI {
 		public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects() throws RemoteException {
 			return gdBag.popAllGraphicObjects();
 		};
+		
+		@Override
+		public boolean hasGraphicObjects() throws RemoteException {
+			return gdBag.hasGraphicObjects();
+		}
 
 		public void fireSizeChangedEvent(int w, int h) throws RemoteException {
 			gdBag.setSize(w, h);
