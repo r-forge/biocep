@@ -139,29 +139,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 							popupMenu.add(_actions[i]);
 						}
 					}
-					popupMenu.add(new AbstractAction("info") {
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							try  {
-							System.out.println("device number :"
-									+_gdDevice.getDeviceNumber());
-							} catch (Exception ex) {
-								ex.printStackTrace();	
-							}
-													}
-					});
-					
-					popupMenu.add(new AbstractAction("Set As Current Device") {
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							try  {						
-								_gdDevice.setAsCurrentDevice();
-							} catch (Exception ex) {
-								ex.printStackTrace();	
-							}
-							
-						}
-					});					
 					
 					popupMenu.show(JGDPanelPop.this, e.getX(), e.getY());
 				}
@@ -387,6 +364,10 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	public void setTrackMouse(boolean tm) {
 		trackMouse = tm;
 		repaint();
+	}
+
+	public GDDevice getGdDevice() {
+		return _gdDevice;
 	}
 
 }

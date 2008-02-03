@@ -15,6 +15,9 @@
  */
 package graphics.rmi;
 
+import graphics.pop.GDDevice;
+
+import java.awt.Component;
 import java.awt.Container;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -27,9 +30,10 @@ import remoting.RServices;
  */
 public interface RGui {	
 	public RServices getR();
-	public ReentrantLock getRLock();
-	public boolean isCollaborativeMode();
-	public void synchronizeCollaborators() throws java.rmi.RemoteException;	
+	public ReentrantLock getRLock();	
 	public ConsoleLogger getConsoleLogger();
 	public Container createView(JPanel panel,String title);
+	public void setCurrentDevice(GDDevice device);
+	public Component getRootComponent();
+	
 }

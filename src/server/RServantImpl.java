@@ -456,6 +456,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			return _localGdDevice.popAllGraphicObjects();
 		};
 
+		@Override
+		public boolean hasGraphicObjects() throws RemoteException {
+			return _localGdDevice.hasGraphicObjects();
+		}
+		
 		public void fireSizeChangedEvent(int w, int h) throws RemoteException {
 			_localGdDevice.fireSizeChangedEvent(w, h);
 		};

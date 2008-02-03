@@ -1,0 +1,30 @@
+package graphics.rmi.action;
+
+import graphics.pop.GDDevice;
+import graphics.rmi.RGui;
+
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+
+public class SetCurrentDeviceAction extends AbstractAction {
+	private GDDevice _device;
+	private RGui _rgui;
+	public SetCurrentDeviceAction(RGui rgui , GDDevice device) {
+		super("Set As Current Device");
+		_device=device;
+		_rgui=rgui;
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		try  {						
+			_device.setAsCurrentDevice();
+			_rgui.setCurrentDevice(_device);
+		} catch (Exception ex) {
+			ex.printStackTrace();	
+		}
+		
+	}
+
+}

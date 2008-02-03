@@ -48,6 +48,12 @@ public class BufferDevice implements GDDevice {
 		return _l;
 	}
 
+	@Override
+	public boolean hasGraphicObjects() throws RemoteException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 	public void putLocation(Point2D p) throws RemoteException {
 	}
 	

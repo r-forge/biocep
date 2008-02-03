@@ -28,6 +28,8 @@ import org.rosuda.javaGD.GDObject;
  */
 public interface GDDevice extends Remote {
 	public Vector<GDObject> popAllGraphicObjects() throws RemoteException;
+	
+	public boolean hasGraphicObjects() throws RemoteException;
 
 	void fireSizeChangedEvent(int w, int h) throws RemoteException;
 
