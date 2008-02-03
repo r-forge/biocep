@@ -468,6 +468,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					if (expression.equals("logoff") || expression.startsWith("logoff ")) {
 						try {
 							if (_mode == HTTP_MODE) {
+								disposeDevices();
 								RHttpProxy.logOff(_commandServletUrl, _sessionId);
 							} else {
 								persistState();
@@ -1406,6 +1407,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		if (_sessionId != null) {
 			try {
 				if (_mode == HTTP_MODE) {
+					disposeDevices();
 					RHttpProxy.logOff(_commandServletUrl, _sessionId);
 				} else {
 					persistState();
@@ -2246,17 +2248,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
-	private void noSession() {
+	private void disposeDevices() {
 		((JGDPanelPop) _graphicPanel).dispose();
 		Vector<DeviceView> deviceViews=getDeviceViews();
 		for (int i=0; i<deviceViews.size(); ++i) deviceViews.elementAt(i).getPanel().dispose();
 		
+	}
+	private void noSession() {
 		_sessionId = null;
 		_rForConsole = null;
 		_rForPopCmd = null;
 		_rForFiles = null;
 		_isBiocLiteSourced = false;
-
 	}
 
 	class GetExprDialog extends JDialog {
