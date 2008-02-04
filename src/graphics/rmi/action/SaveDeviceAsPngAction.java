@@ -1,7 +1,6 @@
 package graphics.rmi.action;
 import graphics.rmi.GUtils;
 import graphics.rmi.JBufferedImagePanel;
-import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
 
 import java.awt.Component;

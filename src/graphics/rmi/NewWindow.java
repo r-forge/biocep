@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 package graphics.rmi;
-
-import java.awt.Container;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import net.infonode.docking.TabWindow;
-
+import net.infonode.docking.View;
 /**
  * @author Karim Chine   kchine@ebi.ac.uk
  */
 public class NewWindow {
 	public static GDApplet _applet;
-
-	public static Container create(final JPanel panel, final String title) {
+	public static View create(final JPanel panel, final String title) {
 		return _applet.createView(panel, title);
 	}
 }

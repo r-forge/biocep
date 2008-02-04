@@ -15,6 +15,7 @@
  */
 package graphics.rmi.spreadsheet;
 
+import net.infonode.docking.View;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
@@ -28,11 +29,9 @@ import graphics.pop.GDDevice;
 import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GUtils;
 import graphics.rmi.RGui;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -49,11 +48,9 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -93,7 +90,6 @@ import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
-import org.gjt.sp.jedit.jEdit;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
@@ -115,7 +111,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				return null;
 			}
 			@Override
-			public Container createView(JPanel panel, String title) {
+			public View createView(JPanel panel, String title) {
 				// TODO Auto-generated method stub
 				return null;
 			}
@@ -134,6 +130,12 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public void setCurrentDevice(GDDevice device) {
 				// TODO Auto-generated method stub
 				
+			}
+			
+			@Override
+			public GDDevice getCurrentDevice() {
+				// TODO Auto-generated method stub
+				return null;
 			}
 			
 			@Override

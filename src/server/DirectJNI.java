@@ -2646,6 +2646,10 @@ public class DirectJNI {
 		public void putLocation(Point2D p) throws RemoteException {
 			GDInterface.putLocatorLocation(p);
 		}
+		
+		public boolean hasLocations() throws RemoteException {
+			return GDInterface.hasLocations();
+		}
 
 		public Point2D[] getRealPoints(Point2D[] points) throws RemoteException {
 			GDInterface.saveLocations();
@@ -2653,7 +2657,9 @@ public class DirectJNI {
 				for (int i = 0; i < points.length; ++i) {
 					GDInterface.putLocatorLocation(points[i]);
 				}
-				RList l = (RList) DirectJNI.getInstance().getRServices().evalAndGetObject("locator()");
+				
+				RList l = (RList) DirectJNI.getInstance().getRServices().evalAndGetObject("locator()");				
+				
 				Point2D[] result = new Point2D[points.length];
 				for (int i = 0; i < points.length; ++i) {
 					result[i] = new DoublePoint(((RNumeric) l.getValue()[0]).getValue()[i],
