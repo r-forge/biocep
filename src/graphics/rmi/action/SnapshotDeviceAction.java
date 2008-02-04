@@ -2,17 +2,13 @@ package graphics.rmi.action;
 
 import graphics.rmi.GUtils;
 import graphics.rmi.JBufferedImagePanel;
-import graphics.rmi.JGDPanelPop;
 import graphics.rmi.NewWindow;
 import graphics.rmi.RGui;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import javax.swing.AbstractAction;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 

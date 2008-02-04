@@ -55,12 +55,15 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private GDDevice _gdDevice = null;
 	private boolean _autoPop;
 	private boolean _autoResize;
+	private boolean _locatorActive;
+	
 	private AbstractAction[] _actions;
 	private boolean mouseInside;
 	private Point2D mouseLocation = null;
 	private Point2D[] realLocations = null;
 	private boolean trackMouse = false;
 	private ReentrantLock _protectR = null;
+	private ConsoleLogger _consoleLogger = null;
 	
 	private boolean _stopPopThread = false;	
 	private boolean _stopResizeThread = false;
@@ -69,13 +72,14 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions)
 	throws RemoteException {
-		this( gdDevice, autoPop, autoResize, actions, null);
+		this( gdDevice, autoPop, autoResize, actions, null,null);
 	}
 
-	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions, ReentrantLock protectR)
+	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions, ReentrantLock protectR, ConsoleLogger consoleLogger)
 			throws RemoteException {
 		_gdDevice = gdDevice;
 		_protectR = protectR;
+		_consoleLogger = consoleLogger;
 		Dimension sz = null;
 		try {
 			sz = gdDevice.getSize();
@@ -122,10 +126,13 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			public void mouseClicked(final MouseEvent e) {
 				new Thread(new Runnable() {
 					public void run() {
-						try {
-							_gdDevice.putLocation(new Point(e.getX(), e.getY()));
-						} catch (Exception ex) {
-							ex.printStackTrace();
+						if (_locatorActive) {
+							try {
+								_gdDevice.putLocation(new Point(e.getX(), e.getY()));
+								if (_consoleLogger!=null) _consoleLogger.printAsOutput("Location saved\n");
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
 						}
 					}
 				}).start();
@@ -140,7 +147,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					JPopupMenu popupMenu = new JPopupMenu();
 					if (_actions!=null) {
 						for (int i = 0; i < _actions.length; ++i) {
-							popupMenu.add(_actions[i]);
+							if (_actions[i]==null) popupMenu.addSeparator();
+							else popupMenu.add(_actions[i]);
 						}
 					}
 					
@@ -193,18 +201,12 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						if (_stopResizeThread) break;
 						if (_autoResize) {
 							if (_lastResizeTime != null && ((System.currentTimeMillis() - _lastResizeTime) > 50)) {
-								
-								if (_protectR!=null) {
-									
-									_protectR.lock();
-									try {
-										resizeNow();
-									} finally {
-										_protectR.unlock();
-									}
-									
-								} else {
+
+								if (_protectR!=null) _protectR.lock();								
+								try {
 									resizeNow();
+								} finally {
+									if (_protectR!=null) _protectR.unlock();
 								}
 																
 								if (!_autoPop)
@@ -225,12 +227,19 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 	}
 
+	public JGDPanelPop(GDDevice gdDevice) throws RemoteException {
+		this(gdDevice, true, true, null,null,null);
+	}
+	
 	private void updateRatios() {
 		try {
+			if (_protectR!=null) _protectR.lock();
 			realLocations = _gdDevice.getRealPoints(new Point2D[] { new DoublePoint(0, 0), new DoublePoint(1, 1) });
 		} catch (Exception ex) {
 			ex.printStackTrace();
-		}
+		} finally {
+			if (_protectR!=null) _protectR.unlock();
+		}		
 	}
 
 	public void setAutoModes(boolean autoPop, boolean autoResize) {
@@ -238,9 +247,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_autoResize = autoResize;
 	}
 
-	public JGDPanelPop(GDDevice gdDevice) throws RemoteException {
-		this(gdDevice, true, true, null,null);
-	}
+	
 
 	synchronized public void popNow() {
 
@@ -396,5 +403,13 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public boolean isLocatorActive() {
+		return _locatorActive;
+	}
+
+	public void setLocatorActive(boolean active) {
+		_locatorActive = active;
 	}
 }

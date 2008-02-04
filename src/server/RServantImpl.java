@@ -514,6 +514,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		public void putLocation(Point2D p) throws RemoteException {
 			_localGdDevice.putLocation(p);
 		}
+		
+		@Override
+		public boolean hasLocations() throws RemoteException {
+			return _localGdDevice.hasLocations();
+		}
 
 		public Point2D[] getRealPoints(Point2D[] points) throws RemoteException {
 			return _localGdDevice.getRealPoints(points);

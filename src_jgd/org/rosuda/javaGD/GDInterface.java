@@ -108,6 +108,10 @@ public class GDInterface {
 			e.printStackTrace();
 		}
 	}
+	
+	public static boolean hasLocations() {
+		return coords.size()>0;
+	}
 
 	private static ArrayBlockingQueue<Point2D> coords = new ArrayBlockingQueue<Point2D>(200);
 	private static Vector<Point2D> savedCoords = null;

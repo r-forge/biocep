@@ -38,6 +38,8 @@ public interface GDDevice extends Remote {
 	public Dimension getSize() throws RemoteException;
 
 	public void putLocation(Point2D p) throws RemoteException;
+	
+	public boolean hasLocations() throws RemoteException;
 
 	public Point2D[] getRealPoints(Point2D[] points) throws RemoteException;
 	

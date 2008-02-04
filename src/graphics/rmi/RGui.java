@@ -16,13 +16,10 @@
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
-
 import java.awt.Component;
-import java.awt.Container;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.swing.JPanel;
-
+import net.infonode.docking.View;
 
 import remoting.RServices;
 /**
@@ -32,8 +29,8 @@ public interface RGui {
 	public RServices getR();
 	public ReentrantLock getRLock();	
 	public ConsoleLogger getConsoleLogger();
-	public Container createView(JPanel panel,String title);
+	public View createView(JPanel panel,String title);
 	public void setCurrentDevice(GDDevice device);
 	public Component getRootComponent();
-	
+	public GDDevice getCurrentDevice();	
 }

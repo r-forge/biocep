@@ -2,9 +2,7 @@ package graphics.rmi.action;
 
 import graphics.pop.GDDevice;
 import graphics.rmi.RGui;
-
 import java.awt.event.ActionEvent;
-
 import javax.swing.AbstractAction;
 
 public class ShowDeviceInfoAction extends AbstractAction {		
