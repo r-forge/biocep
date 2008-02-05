@@ -681,7 +681,28 @@ public class GDApplet extends GDAppletBase implements RGui {
 				public void menuSelected(MenuEvent e) {
 					graphicsMenu.removeAll();
 					graphicsMenu.add(_actions.get("createdevice"));
+					graphicsMenu.addSeparator();
 					
+					graphicsMenu.add(new AbstractAction("Restore Default Size"){
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							getCurrentJGPanelPop().standardSize();							
+						}
+					});
+					
+					graphicsMenu.addSeparator();
+					JRadioButtonMenuItem noInteracor = new JRadioButtonMenuItem("No Interactor", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_NULL);
+					noInteracor.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								p.setInteractor(INTERACTOR_NULL);
+								
+							}
+						}
+					});
+					graphicsMenu.add(noInteracor);
 					
 					JRadioButtonMenuItem mouseTracker = new JRadioButtonMenuItem("Mouse Tracker", _sessionId != null
 							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_TRACKER);
@@ -700,22 +721,165 @@ public class GDApplet extends GDAppletBase implements RGui {
 					});
 					graphicsMenu.add(mouseTracker);
 					
-					JRadioButtonMenuItem zoomInSelect = new JRadioButtonMenuItem("Zoom In on Region", _sessionId != null
-							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_ZOOM_IN_SELECT);
-					zoomInSelect.addActionListener(new ActionListener() {
+					JRadioButtonMenuItem zoomSelect = new JRadioButtonMenuItem("Zoom In/Out on Region", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_ZOOM_IN_OUT_SELECT);
+					zoomSelect.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
-								if (p.getInteractor()==INTERACTOR_ZOOM_IN_SELECT) {
+								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_SELECT) {
 									p.setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_ZOOM_IN_SELECT);
+									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_SELECT);
 								}
 								
 							}
 						}
 					});
-					graphicsMenu.add(zoomInSelect);
+					graphicsMenu.add(zoomSelect);
+
+					
+					JRadioButtonMenuItem zoomSelectX = new JRadioButtonMenuItem("Zoom In/Out X on Region", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_ZOOM_IN_OUT_X_SELECT);
+					zoomSelectX.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_X_SELECT);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(zoomSelectX);
+					
+					
+					
+					JRadioButtonMenuItem zoomSelectY = new JRadioButtonMenuItem("Zoom In/Out Y on Region", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_ZOOM_IN_OUT_Y_SELECT);
+					zoomSelectY.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_Y_SELECT);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(zoomSelectY);
+					
+					
+					JRadioButtonMenuItem zoom = new JRadioButtonMenuItem("Zoom In/Out", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_ZOOM_IN_OUT);
+					zoom.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_ZOOM_IN_OUT);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(zoom);
+					
+					JRadioButtonMenuItem zoomX = new JRadioButtonMenuItem("Zoom X In/Out", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_ZOOM_IN_OUT_X);
+					zoomX.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_X) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_X);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(zoomX);
+					
+					JRadioButtonMenuItem zoomY = new JRadioButtonMenuItem("Zoom Y In/Out", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_ZOOM_IN_OUT_Y);
+					zoomY.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_Y) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_Y);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(zoomY);
+					
+					JRadioButtonMenuItem scrollX = new JRadioButtonMenuItem("Scroll Left/Right", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_SCROLL_LEFT_RIGHT);
+					scrollX.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_SCROLL_LEFT_RIGHT) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_SCROLL_LEFT_RIGHT);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(scrollX);
+					
+					
+					JRadioButtonMenuItem scrollY = new JRadioButtonMenuItem("Scroll Up/Down", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_SCROLL_UP_DOWN);
+					scrollY.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_SCROLL_UP_DOWN) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_SCROLL_UP_DOWN);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(scrollY);
+					
+					JRadioButtonMenuItem scroll = new JRadioButtonMenuItem("Scroll", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_SCROLL);
+					scroll.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_SCROLL) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_SCROLL);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(scroll);
+					
+					
 					
 				}
 
@@ -2031,7 +2195,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 					
 					deviceView.setPanel((JGDPanelPop)graphicPanel);
 					deviceView.getViewProperties().setIcon(_currentDeviceIcon);
+					
 					setCurrentDevice(newDevice);
+					
+					
 
 					
 				} catch (TunnelingException te) {
