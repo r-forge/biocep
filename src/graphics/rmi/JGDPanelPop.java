@@ -25,6 +25,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -70,6 +71,15 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private Thread _popThread = null;
 	private Thread _resizeThread = null;
 	
+	private double w=Double.NaN;
+	private double h=Double.NaN;	
+	private double x0=Double.NaN;
+	private double y0=Double.NaN;
+	private double fx=Double.NaN;
+	private double fy=Double.NaN;
+	
+	private double z=2;
+	
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions)
 	throws RemoteException {
 		this( gdDevice, autoPop, autoResize, actions, null,null);
@@ -100,7 +110,15 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		setOpaque(true);
 		_actions = actions;
 
-		;
+		
+		x0=getWidth()/2;
+		y0=getHeight()/2;
+		fx=1;
+		fy=1;
+		w=getWidth();
+		h=getHeight();
+		
+		
 		
 		this.addMouseListener(new MouseListener() {
 			public void mouseEntered(MouseEvent e) {
@@ -121,6 +139,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			public void mousePressed(MouseEvent e) {
 				checkPopup(e);
+				
 			}
 
 			public void mouseClicked(final MouseEvent e) {
@@ -145,6 +164,110 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			private void checkPopup(MouseEvent e) {
 				if (e.isPopupTrigger() ) {
 					JPopupMenu popupMenu = new JPopupMenu();
+					
+					popupMenu.add(new AbstractAction("Zoom X"){
+						@Override
+						public void actionPerformed(ActionEvent e) {														
+							fx=fx*z;		
+							x0=x0*z;
+							resizeNow();
+							repaint();
+						}
+					});
+					popupMenu.add(new AbstractAction("Unzoom X"){
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							fx=fx/z;							
+							x0=x0/z;
+							
+							if (fx<1) {
+								fx=1;
+								x0=w/2;
+							}
+							resizeNow();
+							repaint();
+						}
+					});
+					popupMenu.add(new AbstractAction("Zoom Y"){
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							fy=fy*z;
+							y0=y0*z;
+							resizeNow();
+							repaint();
+						}
+					});
+					popupMenu.add(new AbstractAction("Unzoom Y"){
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							fy=fy/z;
+							y0=y0/z;
+							resizeNow();
+							repaint();
+						}
+					});
+					
+					popupMenu.add(new AbstractAction("Standard Size"){
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							x0=getWidth()/2;
+							y0=getHeight()/2;
+							fx=1;
+							fy=1;
+							resizeNow();
+							repaint();
+						}
+					});
+					
+					popupMenu.add(new AbstractAction("Scroll X Left"){
+						@Override
+						public void actionPerformed(ActionEvent e) {														
+							double deltax=w*(fx-1)/10;	
+							x0=x0-deltax;
+							if (x0 < w/2) {
+								x0=w/2;
+							}
+							repaint();
+						}
+					});
+					
+					popupMenu.add(new AbstractAction("Scroll X Right"){
+						@Override
+						public void actionPerformed(ActionEvent e) {		
+							double deltax=w*(fx-1)/10;	
+							x0=x0+deltax;
+							if (x0 > (w*fx)-w/2) {
+								x0=(w*fx)-w/2;
+							}
+							repaint();
+						}
+					});
+					
+					popupMenu.add(new AbstractAction("Scroll Y Up"){
+						@Override
+						public void actionPerformed(ActionEvent e) {														
+							double deltay=h*(fy-1)/10;	
+							y0=y0-deltay;
+							if (y0 < h/2) {
+								y0=h/2;
+							}
+							repaint();
+						}
+					});
+					
+					popupMenu.add(new AbstractAction("Scroll Y Down"){
+						@Override
+						public void actionPerformed(ActionEvent e) {		
+							double deltay=h*(fy-1)/10;	
+							y0=y0+deltay;
+							if (y0 > (h*fy)-h/2) {
+								y0=(h*fy)-h/2;
+							}
+							repaint();
+						}
+					});
+
+					
 					if (_actions!=null) {
 						for (int i = 0; i < _actions.length; ++i) {
 							if (_actions[i]==null) popupMenu.addSeparator();
@@ -278,7 +401,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				}
 
 				if (getWidth() > 0 && getHeight() > 0) {
-					bufferedImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+					bufferedImage = new BufferedImage((int)(getWidth()*fx), (int)(getHeight()*fy), BufferedImage.TYPE_INT_RGB);
 					Graphics2D g2d = bufferedImage.createGraphics();
 					p(g2d);
 					g2d.dispose();
@@ -299,7 +422,25 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	synchronized public void resizeNow() {
 
 		try {
-			_gdDevice.fireSizeChangedEvent((int) getSize().getWidth(), (int) getSize().getHeight());
+			
+			
+			if (getWidth()!=w) {
+				double px=getWidth()/w;
+				x0=x0*px;
+			}
+			
+			if (getHeight()!=h) {
+				double py=getHeight()/h;
+				y0=y0*py;
+			}
+			
+			
+			_gdDevice.fireSizeChangedEvent((int)(getWidth()*fx), (int)(getHeight()*fy));
+			
+			w=getWidth();
+			h=getHeight();
+			
+			
 		} catch (Exception e) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
@@ -323,9 +464,9 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		}
 		int i = 0, j = _l.size();
 		g.setFont(_gs.f);
-		g.setClip(0, 0, getWidth(), getHeight()); // reset clipping rect
+		g.setClip(0, 0, (int)(getWidth()*fx), (int)(getHeight()*fy)); // reset clipping rect
 		g.setColor(Color.white);
-		g.fillRect(0, 0, getWidth(), getHeight());
+		g.fillRect(0, 0, (int)(getWidth()*fx), (int)(getHeight()*fy));
 		while (i < j) {
 			GDObject o = (GDObject) _l.elementAt(i++);
 			if (o instanceof GDActionMarker) {
@@ -346,8 +487,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			_lastSize = d;			
 		}
 
-		if (bufferedImage != null) {
-			((Graphics2D) g).drawRenderedImage(bufferedImage, new AffineTransform());
+		if (bufferedImage != null) {	
+			((Graphics2D) g).drawRenderedImage(bufferedImage, new AffineTransform(1,0,0,1,-(x0-getWidth()/2),-(y0-getHeight()/2)));
 		} else {
 			((Graphics2D) g).setColor(Color.white);
 			((Graphics2D) g).setBackground(Color.white);
