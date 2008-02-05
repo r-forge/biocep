@@ -56,13 +56,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private GDDevice _gdDevice = null;
 	private boolean _autoPop;
 	private boolean _autoResize;
-	private boolean _locatorActive;
 	
 	private AbstractAction[] _actions;
 	private boolean mouseInside;
 	private Point2D mouseLocation = null;
 	private Point2D[] realLocations = null;
-	private boolean trackMouse = false;
 	private ReentrantLock _protectR = null;
 	private ConsoleLogger _consoleLogger = null;
 	
@@ -79,6 +77,32 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private double fy=Double.NaN;
 	
 	private double z=2;
+	
+	public static final int INTERACTOR_NULL=0;
+	
+	public static final int INTERACTOR_ZOOM_IN=1;
+	public static final int INTERACTOR_ZOOM_OUT=2;
+	
+	public static final int INTERACTOR_ZOOM_IN_X=3;
+	public static final int INTERACTOR_ZOOM_OUT_X=4;
+	
+	public static final int INTERACTOR_ZOOM_IN_Y=5;
+	public static final int INTERACTOR_ZOOM_OUT_Y=6;
+	
+	public static final int INTERACTOR_ZOOM_IN_SELECT=7;	
+	public static final int INTERACTOR_ZOOM_OUT_SELECT=8;
+	
+	public static final int INTERACTOR_ZOOM_IN_X_SELECT=9;
+	public static final int INTERACTOR_ZOOM_OUT_X__SELECT=10;
+	
+	public static final int INTERACTOR_ZOOM_IN_Y_SELECT=11;
+	public static final int INTERACTOR_ZOOM_OUT_Y__SELECT=12;
+
+	public static final int INTERACTOR_TRACKER=13;
+	
+	private int _interactor=INTERACTOR_ZOOM_IN_SELECT;
+	private Point _mouseStartPosition=null;
+	
 	
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions)
 	throws RemoteException {
@@ -123,7 +147,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		this.addMouseListener(new MouseListener() {
 			public void mouseEntered(MouseEvent e) {
 				mouseInside = true;
-				if (trackMouse && bufferedImage != null && _autoResize) {
+				if (_interactor==INTERACTOR_TRACKER && bufferedImage != null && _autoResize) {
 					updateRatios();
 					repaint();
 				}
@@ -131,34 +155,66 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			public void mouseExited(MouseEvent e) {
 				mouseInside = false;
-				if (trackMouse && _autoResize) {
+				if (_interactor==INTERACTOR_TRACKER && _autoResize) {
 					realLocations = null;
 					repaint();
+				} if (_interactor==INTERACTOR_ZOOM_IN_SELECT) {
+					repaint();
 				}
+				
 			}
 
 			public void mousePressed(MouseEvent e) {
-				checkPopup(e);
+				System.out.println("mouse pressed");
+				
+				if (_interactor==INTERACTOR_NULL) {checkPopup(e);}
+				else if (e.getButton()==MouseEvent.BUTTON1) 
+					if (_interactor==INTERACTOR_ZOOM_IN_SELECT) {
+					_mouseStartPosition=e.getPoint();
+				}
+				
 				
 			}
 
 			public void mouseClicked(final MouseEvent e) {
-				new Thread(new Runnable() {
-					public void run() {
-						if (_locatorActive) {
-							try {
-								_gdDevice.putLocation(new Point(e.getX(), e.getY()));
-								if (_consoleLogger!=null) _consoleLogger.printAsOutput("Location saved\n");
-							} catch (Exception ex) {
-								ex.printStackTrace();
-							}
+				if (_interactor==INTERACTOR_TRACKER) {
+					new Thread(new Runnable() {
+						public void run() {						
+								try {
+									_gdDevice.putLocation(new Point(e.getX(), e.getY()));
+									if (_consoleLogger!=null) _consoleLogger.printAsOutput("Location saved\n");
+								} catch (Exception ex) {
+									ex.printStackTrace();
+								}						
 						}
-					}
-				}).start();
+					}).start();
+				}
 			}
 
 			public void mouseReleased(MouseEvent e) {
-				checkPopup(e);
+				System.out.println("mouse released");
+				if (_interactor==INTERACTOR_NULL) checkPopup(e); 
+				else if (e.getButton()==MouseEvent.BUTTON1)  {
+					if (_interactor==INTERACTOR_ZOOM_IN_SELECT && _mouseStartPosition!=null) {
+				
+					double x1=	(_mouseStartPosition.getX()+e.getPoint().getX())/2;
+					double y1=	(_mouseStartPosition.getY()+e.getPoint().getY())/2;
+						
+					x0=x0-(w/2-x1);
+					y0=y0-(h/2-y1);
+					
+					double zx=w/Math.abs(_mouseStartPosition.getX()-e.getPoint().getX());
+					double zy=h/Math.abs(_mouseStartPosition.getY()-e.getPoint().getY());					
+					fx=fx*zx;		
+					x0=x0*zx;
+					fy=fy*zy;
+					y0=y0*zy;					
+					_mouseStartPosition=null;
+					resizeNow();
+					repaint();
+					
+					}
+				}
 			}
 
 			private void checkPopup(MouseEvent e) {
@@ -202,6 +258,12 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						public void actionPerformed(ActionEvent e) {
 							fy=fy/z;
 							y0=y0/z;
+							
+							if (fy<1) {
+								fy=1;
+								y0=h/2;
+							}
+							
 							resizeNow();
 							repaint();
 						}
@@ -282,12 +344,17 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 		this.addMouseMotionListener(new MouseMotionListener() {
 			public void mouseDragged(MouseEvent e) {
-
+				mouseLocation = e.getPoint();
+				System.out.println(_mouseStartPosition);
+				if ((_interactor==INTERACTOR_ZOOM_IN_SELECT && _mouseStartPosition!=null) ) {
+					repaint();
+				}
 			}
 
+			
 			public void mouseMoved(MouseEvent e) {
 				mouseLocation = e.getPoint();
-				if (trackMouse) {
+				if (_interactor==INTERACTOR_TRACKER ) {
 					repaint();
 				}
 			}
@@ -482,7 +549,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		Dimension d = getSize();
 
 		if (!d.equals(_lastSize)) {
-			trackMouse=false;			
+			_interactor=INTERACTOR_NULL;			
 			_lastResizeTime = System.currentTimeMillis();
 			_lastSize = d;			
 		}
@@ -495,32 +562,34 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			((Graphics2D) g).fillRect(0, 0, getWidth(), getHeight());
 		}
 
-		if (trackMouse && mouseInside && mouseLocation != null) {
-			((Graphics2D) g).setColor(Color.red);
-			((Graphics2D) g).drawLine(0, (int) mouseLocation.getY(), getWidth(), (int) mouseLocation.getY());
-			((Graphics2D) g).drawLine((int) mouseLocation.getX(), 0, (int) mouseLocation.getX(), getHeight());
-			if (realLocations != null) {
-				double bx = realLocations[0].getX();
-				double ax = realLocations[1].getX() - bx;
-				double by = realLocations[0].getY();
-				double ay = realLocations[1].getY() - by;
-
-				((Graphics2D) g).setColor(Color.black);
-				((Graphics2D) g).drawString("" + (ax * mouseLocation.getX() + bx), (int) mouseLocation.getX() + 16,
-						(int) mouseLocation.getY() - 6);
-				((Graphics2D) g).drawString("" + (ay * mouseLocation.getY() + by), (int) mouseLocation.getX() + 16,
-						(int) mouseLocation.getY() + ((Graphics2D) g).getFontMetrics().getHeight() + 2);
+		if (mouseInside && mouseLocation != null) {
+			if (_interactor==INTERACTOR_TRACKER ) {
+				((Graphics2D) g).setColor(Color.red);
+				((Graphics2D) g).drawLine(0, (int) mouseLocation.getY(), getWidth(), (int) mouseLocation.getY());
+				((Graphics2D) g).drawLine((int) mouseLocation.getX(), 0, (int) mouseLocation.getX(), getHeight());
+				if (realLocations != null) {
+					double bx = realLocations[0].getX();
+					double ax = realLocations[1].getX() - bx;
+					double by = realLocations[0].getY();
+					double ay = realLocations[1].getY() - by;
+	
+					((Graphics2D) g).setColor(Color.black);
+					((Graphics2D) g).drawString("" + (ax * (mouseLocation.getX()-w/2+x0) + bx), (int) mouseLocation.getX() + 16,
+							(int) mouseLocation.getY() - 6);
+					((Graphics2D) g).drawString("" + (ay * (mouseLocation.getY()-h/2+y0) + by), (int) mouseLocation.getX() + 16,
+							(int) mouseLocation.getY() + ((Graphics2D) g).getFontMetrics().getHeight() + 2);
+				}
+			} else if (_mouseStartPosition!=null) {
+				if (_interactor==INTERACTOR_ZOOM_IN_SELECT) {
+					((Graphics2D) g).setColor(Color.black);					
+					int x1=(int)Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
+					int y1=(int)Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
+					int w1=(int)Math.abs(_mouseStartPosition.getX()-mouseLocation.getX());
+					int h1=(int)Math.abs(_mouseStartPosition.getY()-mouseLocation.getY());					
+					((Graphics2D) g).drawRect(x1,y1,w1,h1);
+				}
 			}
 		}
-	}
-
-	public boolean isTrackMouse() {
-		return trackMouse;
-	}
-
-	public void setTrackMouse(boolean tm) {
-		trackMouse = tm;
-		repaint();
 	}
 
 	public GDDevice getGdDevice() {
@@ -545,12 +614,14 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			e.printStackTrace();
 		}
 	}
-
-	public boolean isLocatorActive() {
-		return _locatorActive;
+	
+	public int getInteractor() {
+		return _interactor;
+	}
+	public void setInteractor(int interactor) {
+		_interactor=interactor;
+		_mouseStartPosition=null;
+		repaint();
 	}
 
-	public void setLocatorActive(boolean active) {
-		_locatorActive = active;
-	}
 }
