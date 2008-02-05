@@ -18,6 +18,8 @@ package graphics.rmi;
 import graphics.pop.GDActionMarker;
 import graphics.pop.GDDevice;
 import graphics.pop.GDReset;
+
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -25,6 +27,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -55,53 +58,45 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private Long _lastResizeTime = null;
 	private GDDevice _gdDevice = null;
 	private boolean _autoPop;
-	private boolean _autoResize;
-	
+	private boolean _autoResize;	
 	private AbstractAction[] _actions;
 	private boolean mouseInside;
 	private Point2D mouseLocation = null;
 	private Point2D[] realLocations = null;
 	private ReentrantLock _protectR = null;
-	private ConsoleLogger _consoleLogger = null;
-	
+	private ConsoleLogger _consoleLogger = null;	
 	private boolean _stopPopThread = false;	
 	private boolean _stopResizeThread = false;
 	private Thread _popThread = null;
 	private Thread _resizeThread = null;
-	
+	final private static double fx_MAX=10;
+	final private static double fy_MAX=10;	
 	private double w=Double.NaN;
 	private double h=Double.NaN;	
 	private double x0=Double.NaN;
 	private double y0=Double.NaN;
 	private double fx=Double.NaN;
-	private double fy=Double.NaN;
+	private double fy=Double.NaN;	
+	private double zoomPower=2;
 	
-	private double z=2;
+	public static final int INTERACTOR_NULL=0;	
+	public static final int INTERACTOR_ZOOM_IN_OUT=1;	
+	public static final int INTERACTOR_ZOOM_IN_OUT_X=2;	
+	public static final int INTERACTOR_ZOOM_IN_OUT_Y=3;	
+	public static final int INTERACTOR_ZOOM_IN_OUT_SELECT=4;
+	public static final int INTERACTOR_ZOOM_IN_OUT_X_SELECT=5;	
+	public static final int INTERACTOR_ZOOM_IN_OUT_Y_SELECT=6;	
+	public static final int INTERACTOR_SCROLL_LEFT_RIGHT=7;
+	public static final int INTERACTOR_SCROLL_UP_DOWN=8;
+	public static final int INTERACTOR_SCROLL=9;
+	public static final int INTERACTOR_TRACKER=10;
 	
-	public static final int INTERACTOR_NULL=0;
-	
-	public static final int INTERACTOR_ZOOM_IN=1;
-	public static final int INTERACTOR_ZOOM_OUT=2;
-	
-	public static final int INTERACTOR_ZOOM_IN_X=3;
-	public static final int INTERACTOR_ZOOM_OUT_X=4;
-	
-	public static final int INTERACTOR_ZOOM_IN_Y=5;
-	public static final int INTERACTOR_ZOOM_OUT_Y=6;
-	
-	public static final int INTERACTOR_ZOOM_IN_SELECT=7;	
-	public static final int INTERACTOR_ZOOM_OUT_SELECT=8;
-	
-	public static final int INTERACTOR_ZOOM_IN_X_SELECT=9;
-	public static final int INTERACTOR_ZOOM_OUT_X__SELECT=10;
-	
-	public static final int INTERACTOR_ZOOM_IN_Y_SELECT=11;
-	public static final int INTERACTOR_ZOOM_OUT_Y__SELECT=12;
-
-	public static final int INTERACTOR_TRACKER=13;
-	
-	private int _interactor=INTERACTOR_ZOOM_IN_SELECT;
+	private int _interactor=INTERACTOR_NULL;
 	private Point _mouseStartPosition=null;
+	private double _x0Start;
+	private double _y0Start;
+	
+	
 	
 	
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions)
@@ -111,6 +106,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions, ReentrantLock protectR, ConsoleLogger consoleLogger)
 			throws RemoteException {
+
 		_gdDevice = gdDevice;
 		_protectR = protectR;
 		_consoleLogger = consoleLogger;
@@ -158,19 +154,28 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				if (_interactor==INTERACTOR_TRACKER && _autoResize) {
 					realLocations = null;
 					repaint();
-				} if (_interactor==INTERACTOR_ZOOM_IN_SELECT) {
+				} if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT ) {
 					repaint();
 				}
 				
 			}
 
 			public void mousePressed(MouseEvent e) {
-				System.out.println("mouse pressed");
 				
 				if (_interactor==INTERACTOR_NULL) {checkPopup(e);}
-				else if (e.getButton()==MouseEvent.BUTTON1) 
-					if (_interactor==INTERACTOR_ZOOM_IN_SELECT) {
-					_mouseStartPosition=e.getPoint();
+				
+				else if (e.getButton()==MouseEvent.BUTTON1) { 
+					if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT ) {
+						_mouseStartPosition=e.getPoint();
+					} else if (_interactor==INTERACTOR_SCROLL) {
+						_mouseStartPosition=e.getPoint();
+						_x0Start=x0;
+						_y0Start=y0;
+					}
+				} else if (e.getButton()==MouseEvent.BUTTON3) { 
+					if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+						_mouseStartPosition=e.getPoint();
+					}
 				}
 				
 				
@@ -188,32 +193,166 @@ public class JGDPanelPop extends JBufferedImagePanel {
 								}						
 						}
 					}).start();
+				} else if (_interactor==INTERACTOR_ZOOM_IN_OUT) {
+					if (e.getButton()==MouseEvent.BUTTON1) {
+						zoom();
+					} else if (e.getButton()==MouseEvent.BUTTON3) {
+						unzoom();
+					}					
+				} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X) {
+					if (e.getButton()==MouseEvent.BUTTON1) {
+						zoomX();
+					} else if (e.getButton()==MouseEvent.BUTTON3) {
+						unzoomX();
+					}					
+				}else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y) {
+					if (e.getButton()==MouseEvent.BUTTON1) {
+						zoomY();
+					} else if (e.getButton()==MouseEvent.BUTTON3) {
+						unzoomY();
+					}					
+				} else if (_interactor==INTERACTOR_SCROLL_LEFT_RIGHT) {
+					if (e.getButton()==MouseEvent.BUTTON1) {
+						scrollXLeft();
+					} else if (e.getButton()==MouseEvent.BUTTON3) {
+						scrollXRight();
+					}					
+				} else if (_interactor==INTERACTOR_SCROLL_UP_DOWN) {
+					if (e.getButton()==MouseEvent.BUTTON1) {
+						scrollYUp();
+					} else if (e.getButton()==MouseEvent.BUTTON3) {
+						scrollYDown();
+					}					
 				}
 			}
 
 			public void mouseReleased(MouseEvent e) {
-				System.out.println("mouse released");
 				if (_interactor==INTERACTOR_NULL) checkPopup(e); 
-				else if (e.getButton()==MouseEvent.BUTTON1)  {
-					if (_interactor==INTERACTOR_ZOOM_IN_SELECT && _mouseStartPosition!=null) {
-				
-					double x1=	(_mouseStartPosition.getX()+e.getPoint().getX())/2;
-					double y1=	(_mouseStartPosition.getY()+e.getPoint().getY())/2;
-						
-					x0=x0-(w/2-x1);
-					y0=y0-(h/2-y1);
+				else if (e.getButton()==MouseEvent.BUTTON1 && _mouseStartPosition!=null)  {
 					
-					double zx=w/Math.abs(_mouseStartPosition.getX()-e.getPoint().getX());
-					double zy=h/Math.abs(_mouseStartPosition.getY()-e.getPoint().getY());					
-					fx=fx*zx;		
-					x0=x0*zx;
-					fy=fy*zy;
-					y0=y0*zy;					
-					_mouseStartPosition=null;
-					resizeNow();
-					repaint();
 					
+					
+					if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT ) {
+
+						Point startPosition=_mouseStartPosition;
+						_mouseStartPosition=null;
+						repaint();
+
+						if (fx==fx_MAX && fy==fy_MAX) {
+							Toolkit.getDefaultToolkit().beep();
+						} else {
+							selectZoomX(startPosition.getX(), e.getX());
+							selectZoomY(startPosition.getY(), e.getY());
+							new Thread(new Runnable() {
+								@Override
+								public void run() {								
+									resizeNow();
+									repaint();
+								}
+							}).start();
+								
+								
+							
+						}
+					
+					} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT ) {
+
+						Point startPosition=_mouseStartPosition;
+						_mouseStartPosition=null;
+						repaint();
+
+						if (fx==fx_MAX) {
+							Toolkit.getDefaultToolkit().beep();
+						} else {
+							selectZoomX(startPosition.getX(), e.getX());
+							new Thread(new Runnable() {
+								@Override
+								public void run() {								
+									resizeNow();
+									repaint();
+								}
+							}).start();
+						}					
+					} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+						Point startPosition=_mouseStartPosition;
+						_mouseStartPosition=null;
+						repaint();
+						if (fy==fy_MAX) {
+							Toolkit.getDefaultToolkit().beep();
+						} else {
+							selectZoomY(startPosition.getY(), e.getY());
+							new Thread(new Runnable() {
+								@Override
+								public void run() {								
+									resizeNow();
+									repaint();
+								}
+							}).start();
+						}					
 					}
+					
+					
+				} else if (e.getButton()==MouseEvent.BUTTON3 && _mouseStartPosition!=null)  {
+					if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT ) {
+						
+						Point startPosition=_mouseStartPosition;
+						_mouseStartPosition=null;
+						repaint();
+
+						if (fx==1 && fy==1) {
+							Toolkit.getDefaultToolkit().beep();
+						} else {
+							selectUnzoomX(startPosition.getX(), e.getX());
+							selectUnzoomY(startPosition.getY(), e.getY());								
+							new Thread(new Runnable() {
+								@Override
+								public void run() {								
+									resizeNow();
+									repaint();
+								}
+							}).start();
+						}
+
+					} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT ) {
+						
+						Point startPosition=_mouseStartPosition;
+						_mouseStartPosition=null;
+						repaint();
+
+						if (fx==1) {
+							Toolkit.getDefaultToolkit().beep();
+						} else {
+							selectUnzoomX(startPosition.getX(), e.getX());								
+							new Thread(new Runnable() {
+								@Override
+								public void run() {								
+									resizeNow();
+									repaint();
+								}
+							}).start();
+						}
+
+					} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT ) {
+						
+						Point startPosition=_mouseStartPosition;
+						_mouseStartPosition=null;
+						repaint();
+
+						if (fy==1) {
+							Toolkit.getDefaultToolkit().beep();
+						} else {
+							selectUnzoomY(startPosition.getY(), e.getY());								
+							new Thread(new Runnable() {
+								@Override
+								public void run() {								
+									resizeNow();
+									repaint();
+								}
+							}).start();
+						}
+
+					}
+					
 				}
 			}
 
@@ -221,113 +360,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				if (e.isPopupTrigger() ) {
 					JPopupMenu popupMenu = new JPopupMenu();
 					
-					popupMenu.add(new AbstractAction("Zoom X"){
-						@Override
-						public void actionPerformed(ActionEvent e) {														
-							fx=fx*z;		
-							x0=x0*z;
-							resizeNow();
-							repaint();
-						}
-					});
-					popupMenu.add(new AbstractAction("Unzoom X"){
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							fx=fx/z;							
-							x0=x0/z;
-							
-							if (fx<1) {
-								fx=1;
-								x0=w/2;
-							}
-							resizeNow();
-							repaint();
-						}
-					});
-					popupMenu.add(new AbstractAction("Zoom Y"){
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							fy=fy*z;
-							y0=y0*z;
-							resizeNow();
-							repaint();
-						}
-					});
-					popupMenu.add(new AbstractAction("Unzoom Y"){
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							fy=fy/z;
-							y0=y0/z;
-							
-							if (fy<1) {
-								fy=1;
-								y0=h/2;
-							}
-							
-							resizeNow();
-							repaint();
-						}
-					});
-					
-					popupMenu.add(new AbstractAction("Standard Size"){
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							x0=getWidth()/2;
-							y0=getHeight()/2;
-							fx=1;
-							fy=1;
-							resizeNow();
-							repaint();
-						}
-					});
-					
-					popupMenu.add(new AbstractAction("Scroll X Left"){
-						@Override
-						public void actionPerformed(ActionEvent e) {														
-							double deltax=w*(fx-1)/10;	
-							x0=x0-deltax;
-							if (x0 < w/2) {
-								x0=w/2;
-							}
-							repaint();
-						}
-					});
-					
-					popupMenu.add(new AbstractAction("Scroll X Right"){
-						@Override
-						public void actionPerformed(ActionEvent e) {		
-							double deltax=w*(fx-1)/10;	
-							x0=x0+deltax;
-							if (x0 > (w*fx)-w/2) {
-								x0=(w*fx)-w/2;
-							}
-							repaint();
-						}
-					});
-					
-					popupMenu.add(new AbstractAction("Scroll Y Up"){
-						@Override
-						public void actionPerformed(ActionEvent e) {														
-							double deltay=h*(fy-1)/10;	
-							y0=y0-deltay;
-							if (y0 < h/2) {
-								y0=h/2;
-							}
-							repaint();
-						}
-					});
-					
-					popupMenu.add(new AbstractAction("Scroll Y Down"){
-						@Override
-						public void actionPerformed(ActionEvent e) {		
-							double deltay=h*(fy-1)/10;	
-							y0=y0+deltay;
-							if (y0 > (h*fy)-h/2) {
-								y0=(h*fy)-h/2;
-							}
-							repaint();
-						}
-					});
 
 					
 					if (_actions!=null) {
@@ -345,8 +377,18 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		this.addMouseMotionListener(new MouseMotionListener() {
 			public void mouseDragged(MouseEvent e) {
 				mouseLocation = e.getPoint();
-				System.out.println(_mouseStartPosition);
-				if ((_interactor==INTERACTOR_ZOOM_IN_SELECT && _mouseStartPosition!=null) ) {
+				if (((_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) && _mouseStartPosition!=null) ) {
+					repaint();
+				}
+				if (_interactor==INTERACTOR_SCROLL && _mouseStartPosition!=null) {
+					x0=_x0Start+(_mouseStartPosition.getX()-e.getX());
+					if (x0<w/2) x0=w/2;
+					if (x0>((w*fx)-w/2)) x0=((w*fx)-w/2);
+					
+					y0=_y0Start+(_mouseStartPosition.getY()-e.getY());
+					if (y0<h/2) y0=h/2;
+					if (y0>((h*fy)-h/2)) y0=((h*fy)-h/2);
+					
 					repaint();
 				}
 			}
@@ -356,7 +398,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				mouseLocation = e.getPoint();
 				if (_interactor==INTERACTOR_TRACKER ) {
 					repaint();
-				}
+				} 
 			}
 		});
 
@@ -421,6 +463,69 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		this(gdDevice, true, true, null,null,null);
 	}
 	
+	private void selectZoomX(double startX,double endX) {
+		double zx=w/Math.abs(startX-endX);
+		double x1=(startX+endX)/2;
+		if (fx*zx>fx_MAX) {
+			zx=fx_MAX/fx;
+			fx=fx_MAX;
+		} else {
+			fx=fx*zx;
+		}
+		
+		x0=x0-(w/2-x1);
+		x0=x0*zx;
+		if (x0<w/2) x0=w/2;
+		if (x0>((w*fx)-w/2)) x0=((w*fx)-w/2);
+	}
+	
+	private void selectZoomY(double startY,double endY) {
+		double zy=h/Math.abs(startY-endY);
+		double y1=	(startY+endY)/2;
+		if (fy*zy>fy_MAX) {
+			zy=fy_MAX/fy;
+			fy=fy_MAX;
+		} else {
+			fy=fy*zy;	
+		}							
+		y0=y0-(h/2-y1);
+		y0=y0*zy;
+		if (y0<h/2) y0=h/2;
+		if (y0>((h*fy)-h/2)) y0=((h*fy)-h/2);
+	}
+	
+	private void selectUnzoomX(double startX,double endX) {
+		double zx=w/Math.abs(startX-endX);
+		double x1=(startX+endX)/2;
+		if (fx/zx<1) {
+			fx=1;
+			x0=w/2;
+		} else {
+			//x0=x0-(w/2-x1);
+			fx=fx/zx;
+			x0=x0/zx;
+		}
+		if (x0<w/2) x0=w/2;
+		if (x0>((w*fx)-w/2)) x0=((w*fx)-w/2);							
+	}
+	
+	
+	private void selectUnzoomY(double startY,double endY) {
+		double zy=h/Math.abs(startY-endY);
+		double y1=	(startY+endY)/2;
+		if (fy/zy<1) {
+			fy=1;
+			y0=h/2;
+		} else {
+			//y0=y0-(h/2-y1);							
+			fy=fy/zy;
+			y0=y0/zy;
+		}
+		
+		if (y0<h/2) y0=h/2;
+		if (y0>((h*fy)-h/2)) y0=((h*fy)-h/2);
+	}
+
 	private void updateRatios() {
 		try {
 			if (_protectR!=null) _protectR.lock();
@@ -517,6 +622,136 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		}
 	}
 
+	
+	public void zoom(){
+		if (fx*zoomPower<=fx_MAX) { 
+			fx=fx*zoomPower;									
+			x0=x0*zoomPower;
+		}
+		
+		if (fy*zoomPower<=fy_MAX) {
+			fy=fy*zoomPower;
+			y0=y0*zoomPower;
+		}
+		
+		resizeNow();
+		repaint();		
+		
+	}	
+	public void unzoom(){
+
+		fx=fx/zoomPower;							
+		x0=x0/zoomPower;
+		
+		if (fx<1) {
+			fx=1;
+			x0=w/2;
+		}
+		
+		fy=fy/zoomPower;
+		y0=y0/zoomPower;
+		
+		if (fy<1) {
+			fy=1;
+			y0=h/2;
+		}
+		
+		resizeNow();
+		repaint();
+	}
+
+	public void zoomX(){
+			if (fx*zoomPower<=fx_MAX) { 
+				fx=fx*zoomPower;									
+				x0=x0*zoomPower;
+				resizeNow();
+				repaint();
+			}
+	}	
+	public void unzoomX(){
+			fx=fx/zoomPower;							
+			x0=x0/zoomPower;
+			
+			if (fx<1) {
+				fx=1;
+				x0=w/2;
+			}
+			resizeNow();
+			repaint();
+	}
+	
+	public void zoomY(){
+		
+			if (fy*zoomPower<=fy_MAX) {
+				fy=fy*zoomPower;
+				y0=y0*zoomPower;
+				resizeNow();
+				repaint();
+			}
+		}
+	
+	public void unzoomY (){
+
+			fy=fy/zoomPower;
+			y0=y0/zoomPower;
+			
+			if (fy<1) {
+				fy=1;
+				y0=h/2;
+			}
+			
+			resizeNow();
+			repaint();
+		}
+	
+	public void standardSize() {		
+			x0=getWidth()/2;
+			y0=getHeight()/2;
+			fx=1;
+			fy=1;
+			resizeNow();
+			repaint();
+		}
+	
+	public void scrollXLeft(){
+																
+			double deltax=w*(fx-1)/10;	
+			x0=x0-deltax;
+			if (x0 < w/2) {
+				x0=w/2;
+			}
+			repaint();
+		}
+	
+	public void scrollXRight(){
+			double deltax=w*(fx-1)/10;	
+			x0=x0+deltax;
+			if (x0 > (w*fx)-w/2) {
+				x0=(w*fx)-w/2;
+			}
+			repaint();
+		}
+	
+	public void scrollYUp(){
+																
+			double deltay=h*(fy-1)/10;	
+			y0=y0-deltay;
+			if (y0 < h/2) {
+				y0=h/2;
+			}
+			repaint();
+		}
+	
+	public void scrollYDown(){
+			double deltay=h*(fy-1)/10;	
+			y0=y0+deltay;
+			if (y0 > (h*fy)-h/2) {
+				y0=(h*fy)-h/2;
+			}
+			repaint();
+		}
+	
+	
 	public synchronized Vector<GDObject> getGDOList() {
 		return _l;
 	}
@@ -549,12 +784,16 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		Dimension d = getSize();
 
 		if (!d.equals(_lastSize)) {
-			_interactor=INTERACTOR_NULL;			
+			if (_interactor==INTERACTOR_TRACKER) _interactor=INTERACTOR_NULL;			
 			_lastResizeTime = System.currentTimeMillis();
 			_lastSize = d;			
 		}
 
-		if (bufferedImage != null) {	
+		if (bufferedImage != null) {
+			((Graphics2D) g).setColor(Color.white);
+			((Graphics2D) g).setBackground(Color.white);
+			((Graphics2D) g).fillRect(0, 0, getWidth(), getHeight());
+
 			((Graphics2D) g).drawRenderedImage(bufferedImage, new AffineTransform(1,0,0,1,-(x0-getWidth()/2),-(y0-getHeight()/2)));
 		} else {
 			((Graphics2D) g).setColor(Color.white);
@@ -580,14 +819,32 @@ public class JGDPanelPop extends JBufferedImagePanel {
 							(int) mouseLocation.getY() + ((Graphics2D) g).getFontMetrics().getHeight() + 2);
 				}
 			} else if (_mouseStartPosition!=null) {
-				if (_interactor==INTERACTOR_ZOOM_IN_SELECT) {
-					((Graphics2D) g).setColor(Color.black);					
+				if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT) {
 					int x1=(int)Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
 					int y1=(int)Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
 					int w1=(int)Math.abs(_mouseStartPosition.getX()-mouseLocation.getX());
-					int h1=(int)Math.abs(_mouseStartPosition.getY()-mouseLocation.getY());					
+					int h1=(int)Math.abs(_mouseStartPosition.getY()-mouseLocation.getY());
+					((Graphics2D) g).setColor(Color.black);
+					((Graphics2D) g).setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,0,new float[]{4,4}, 20));
 					((Graphics2D) g).drawRect(x1,y1,w1,h1);
-				}
+				} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+					int x1=(int)Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
+					int y1=-1;
+					int w1=(int)Math.abs(_mouseStartPosition.getX()-mouseLocation.getX());
+					int h1=(int)h+1;
+					((Graphics2D) g).setColor(Color.black);
+					((Graphics2D) g).setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,0,new float[]{4,4}, 20));
+					((Graphics2D) g).drawRect(x1,y1,w1,h1);
+					
+				} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+					int x1=-1;
+					int y1=(int)Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
+					int w1=(int)w+1;
+					int h1=(int)Math.abs(_mouseStartPosition.getY()-mouseLocation.getY());
+					((Graphics2D) g).setColor(Color.black);
+					((Graphics2D) g).setStroke(new BasicStroke(1,BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,0,new float[]{4,4}, 20));
+					((Graphics2D) g).drawRect(x1,y1,w1,h1);
+				} 
 			}
 		}
 	}
@@ -601,9 +858,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_stopResizeThread=true;
 		try {
 			_popThread.join();
-			System.out.println("pop thread ended");
 			_resizeThread.join();
-			System.out.println("resize thread ended");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -623,5 +878,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_mouseStartPosition=null;
 		repaint();
 	}
+		
 
 }
