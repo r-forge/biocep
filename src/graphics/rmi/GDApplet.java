@@ -138,6 +138,7 @@ import uk.ac.ebi.microarray.pools.db.monitor.SymbolPopDialog;
 import uk.ac.ebi.microarray.pools.db.monitor.SymbolPushDialog;
 import util.PropertiesGenerator;
 import util.Utils;
+import static graphics.rmi.JGDPanelPop.*;
 
 /**
  * @author Karim Chine kchine@ebi.ac.uk
@@ -679,17 +680,43 @@ public class GDApplet extends GDAppletBase implements RGui {
 			graphicsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
 					graphicsMenu.removeAll();
-					graphicsMenu.add(_actions.get("createdevice"));	
+					graphicsMenu.add(_actions.get("createdevice"));
+					
+					
 					JRadioButtonMenuItem mouseTracker = new JRadioButtonMenuItem("Mouse Tracker", _sessionId != null
-							&& getCurrentJGPanelPop().isTrackMouse());
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_TRACKER);
 					mouseTracker.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							if (_sessionId != null) {
-								getCurrentJGPanelPop().setTrackMouse(!getCurrentJGPanelPop().isTrackMouse());
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_TRACKER) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_TRACKER);
+								}
+								
 							}
 						}
 					});
 					graphicsMenu.add(mouseTracker);
+					
+					JRadioButtonMenuItem zoomInSelect = new JRadioButtonMenuItem("Zoom In on Region", _sessionId != null
+							&& getCurrentJGPanelPop().getInteractor()==INTERACTOR_ZOOM_IN_SELECT);
+					zoomInSelect.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (_sessionId != null) {
+								JGDPanelPop p=getCurrentJGPanelPop();
+								if (p.getInteractor()==INTERACTOR_ZOOM_IN_SELECT) {
+									p.setInteractor(INTERACTOR_NULL);
+								} else {
+									p.setInteractor(INTERACTOR_ZOOM_IN_SELECT);
+								}
+								
+							}
+						}
+					});
+					graphicsMenu.add(zoomInSelect);
+					
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -2552,9 +2579,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public void setCurrentDevice(GDDevice device) {
 		
 		JGDPanelPop lastCurrentPanel=getCurrentJGPanelPop();
-		boolean trackMouse=lastCurrentPanel.isTrackMouse();
-		lastCurrentPanel.setTrackMouse(false);
-		lastCurrentPanel.setLocatorActive(false);
+		int interactor=lastCurrentPanel.getInteractor();
+		lastCurrentPanel.setInteractor(INTERACTOR_NULL);
 		
 		try {
 			if (_currentDevice.hasLocations()) safeConsoleSubmit("locator()");
@@ -2570,15 +2596,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 		
 		if (_currentDevice==((JGDPanelPop)_graphicPanel).getGdDevice()) {
 			views[1].getViewProperties().setIcon(_currentDeviceIcon);
-			((JGDPanelPop)_graphicPanel).setTrackMouse(trackMouse);
-			((JGDPanelPop)_graphicPanel).setLocatorActive(true);
+			((JGDPanelPop)_graphicPanel).setInteractor(interactor);
 		} else {
 			for (int i=0; i<deviceViews.size(); ++i) {
 				DeviceView dv=deviceViews.elementAt(i);
 				if (dv.getPanel().getGdDevice()==_currentDevice) {
 					dv.getViewProperties().setIcon(_currentDeviceIcon);
-					dv.getPanel().setTrackMouse(trackMouse);
-					dv.getPanel().setLocatorActive(true);
+					dv.getPanel().setInteractor(interactor);
 					break;
 				}
 			}
