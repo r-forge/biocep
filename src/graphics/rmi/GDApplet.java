@@ -239,6 +239,23 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public void init() {
 		super.init();
 		System.out.println("INIT starts");
+		System.out.println("java.home = " + System.getProperty("java.home"));
+		System.out.println("java.class.path = " + System.getProperty("java.class.path"));
+		System.out.println("Resource URL :"+GDApplet.class.getResource("/graphics/rmi/icons/zoom.png"));
+
+		System.out.println("-----------------<BR>");
+		System.out.println("<strong>System Properties:</strong><BR>");
+		System.out.println("-----------------<BR>");
+		for (Object key : PoolUtils.orderO(System.getProperties().keySet())) {
+			System.out.println("<strong>" + key + "</strong> = " + System.getProperty((String) key) + "<BR>");
+		}
+		System.out.println("-----------------<BR>");
+		System.out.println("<strong>Environment Variables:</strong><BR>");
+		System.out.println("-----------------<BR>");
+		for (String key : PoolUtils.orderS(System.getenv().keySet())) {
+			System.out.println("<strong>" + key + "</strong> = " + System.getenv(key) + "<BR>");
+		}
+		System.out.println("<body>\n");
 		
 		
 
@@ -2818,7 +2835,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 	
-	public View createView(final JPanel panel, final String title) {
+	public View createView(final Component panel, final String title) {
 		final View[] result = new View[1];
 		Runnable createRunnable = new Runnable() {
 			public void run() {
