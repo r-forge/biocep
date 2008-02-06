@@ -145,6 +145,7 @@ import static graphics.rmi.JGDPanelPop.*;
  */
 public class GDApplet extends GDAppletBase implements RGui {
 
+	
 	public static final int LOCAL_MODE = 0;
 	public static final int RMI_MODE = 1;
 	public static final int HTTP_MODE = 2;
@@ -176,6 +177,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private int _lf;
 	private boolean _isBiocLiteSourced = false;
 	private GDDevice _currentDevice;
+	
+	
 	private final ReentrantLock _protectR = new ReentrantLock() {
 		@Override
 		public void lock() {
@@ -215,6 +218,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	};
 
 	private Icon _currentDeviceIcon=null;
+
+	
 	
 	public GDApplet() throws HeadlessException {
 		super();
@@ -267,10 +272,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		}
 
+		
+		
 		try {
 
 			
-			_currentDeviceIcon=new ImageIcon(ImageIO.read(FindDialog.class.getResource("/graphics/rmi/icons/" + "active_device.png")));
+			_currentDeviceIcon=new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "active_device.png")));
+
 			
 			initActions();
 
@@ -697,7 +705,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						public void actionPerformed(ActionEvent e) {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
-								p.setInteractor(INTERACTOR_NULL);
+								setInteractor(INTERACTOR_NULL);
 								
 							}
 						}
@@ -728,9 +736,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_SELECT) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_SELECT);
+									setInteractor(INTERACTOR_ZOOM_IN_OUT_SELECT);
 								}
 								
 							}
@@ -746,9 +754,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_X_SELECT);
+									setInteractor(INTERACTOR_ZOOM_IN_OUT_X_SELECT);
 								}
 								
 							}
@@ -765,9 +773,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_Y_SELECT);
+									setInteractor(INTERACTOR_ZOOM_IN_OUT_Y_SELECT);
 								}
 								
 							}
@@ -783,9 +791,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_ZOOM_IN_OUT);
+									setInteractor(INTERACTOR_ZOOM_IN_OUT);
 								}
 								
 							}
@@ -800,9 +808,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_X) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_X);
+									setInteractor(INTERACTOR_ZOOM_IN_OUT_X);
 								}
 								
 							}
@@ -817,9 +825,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_ZOOM_IN_OUT_Y) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_ZOOM_IN_OUT_Y);
+									setInteractor(INTERACTOR_ZOOM_IN_OUT_Y);
 								}
 								
 							}
@@ -834,9 +842,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_SCROLL_LEFT_RIGHT) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_SCROLL_LEFT_RIGHT);
+									setInteractor(INTERACTOR_SCROLL_LEFT_RIGHT);
 								}
 								
 							}
@@ -852,9 +860,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_SCROLL_UP_DOWN) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_SCROLL_UP_DOWN);
+									setInteractor(INTERACTOR_SCROLL_UP_DOWN);
 								}
 								
 							}
@@ -869,9 +877,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_sessionId != null) {
 								JGDPanelPop p=getCurrentJGPanelPop();
 								if (p.getInteractor()==INTERACTOR_SCROLL) {
-									p.setInteractor(INTERACTOR_NULL);
+									setInteractor(INTERACTOR_NULL);
 								} else {
-									p.setInteractor(INTERACTOR_SCROLL);
+									setInteractor(INTERACTOR_SCROLL);
 								}
 								
 							}
@@ -2471,6 +2479,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 		((JGDPanelPop) _graphicPanel).dispose();
 		Vector<DeviceView> deviceViews=getDeviceViews();
 		for (int i=0; i<deviceViews.size(); ++i) deviceViews.elementAt(i).getPanel().dispose();		
+	}
+
+	private void setInteractor(int interactor) {
+		((JGDPanelPop) _graphicPanel).setInteractor(interactor);
+		Vector<DeviceView> deviceViews=getDeviceViews();
+		for (int i=0; i<deviceViews.size(); ++i) deviceViews.elementAt(i).getPanel().setInteractor(interactor);	
 	}
 	
 	private JGDPanelPop getCurrentJGPanelPop() {
