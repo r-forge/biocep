@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 public class SnapshotDeviceAction extends AbstractAction {
@@ -63,7 +64,7 @@ public class SnapshotDeviceAction extends AbstractAction {
 									}
 								});
 
-								NewWindow.create(panelclone, "Snapshot");
+								NewWindow.create(new JScrollPane(panelclone), "Snapshot");
 
 							} catch (Exception e) {
 								e.printStackTrace();

@@ -107,40 +107,33 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		f.getContentPane().add(new SpreadsheetPanel(300, 40, new RGui() {
 			@Override
 			public ConsoleLogger getConsoleLogger() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
-			public View createView(JPanel panel, String title) {
-				// TODO Auto-generated method stub
+			public View createView(Component panel, String title) {
 				return null;
 			}
 			@Override
 			public RServices getR() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			@Override
 			public ReentrantLock getRLock() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			
 			@Override
 			public void setCurrentDevice(GDDevice device) {
-				// TODO Auto-generated method stub
 				
 			}
 			
 			@Override
 			public GDDevice getCurrentDevice() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			
 			@Override
 			public Component getRootComponent() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			

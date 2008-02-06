@@ -30,30 +30,28 @@ import javax.swing.JPanel;
  */
 public class JBufferedImagePanel extends JPanel {
 	protected BufferedImage bufferedImage = null;
+	private boolean isSnapshot=false;
 
 	public JBufferedImagePanel() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public JBufferedImagePanel(boolean isDoubleBuffered) {
 		super(isDoubleBuffered);
-		// TODO Auto-generated constructor stub
 	}
 
 	public JBufferedImagePanel(LayoutManager layout, boolean isDoubleBuffered) {
 		super(layout, isDoubleBuffered);
-		// TODO Auto-generated constructor stub
 	}
 
 	public JBufferedImagePanel(LayoutManager layout) {
 		super(layout);
-		// TODO Auto-generated constructor stub
 	}
 
 	public JBufferedImagePanel(BufferedImage image) {
 		super();
 		bufferedImage = image;
+		isSnapshot=true;
 	}
 
 	public BufferedImage getImage() {
@@ -67,4 +65,19 @@ public class JBufferedImagePanel extends JPanel {
 		}
 
 	}
+	
+	@Override
+	public int getWidth() {
+		if (isSnapshot) {return bufferedImage.getWidth();} else return super.getWidth();
+	}
+	
+	@Override
+	public int getHeight() {
+		if (isSnapshot) {return bufferedImage.getHeight();} else return super.getHeight();
+	}
+	
+	@Override
+	public Dimension getPreferredSize() {
+		if (isSnapshot) {return new Dimension(bufferedImage.getWidth(),bufferedImage.getHeight());} else return super.getPreferredSize();	}
+	
 }

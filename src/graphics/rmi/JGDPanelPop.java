@@ -134,12 +134,12 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_actions = actions;
 
 		
-		x0=getWidth()/2;
-		y0=getHeight()/2;
+		x0=sz.getWidth()/2;
+		y0=sz.getHeight()/2;
 		fx=1;
 		fy=1;
-		w=getWidth();
-		h=getHeight();
+		w=sz.getWidth();
+		h=sz.getHeight();
 				
 		try {
 			_zoomCursor=Toolkit.getDefaultToolkit().createCustomCursor(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "zoom.png")),
@@ -174,24 +174,24 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				
 				if (_interactor==INTERACTOR_NULL) {checkPopup(e);}
 				
-				else if (e.getButton()==MouseEvent.BUTTON1) { 
-					if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT ) {
-						_mouseStartPosition=e.getPoint();
-					} else if (_interactor==INTERACTOR_SCROLL) {
-						_mouseStartPosition=e.getPoint();
-						_x0Start=x0;
-						_y0Start=y0;
+				else if (e.getButton()==MouseEvent.BUTTON1) {
+					if (e.getModifiersEx()==0) {
+						if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT ) {
+							_mouseStartPosition=e.getPoint();
+						} else if (_interactor==INTERACTOR_SCROLL) {
+							_mouseStartPosition=e.getPoint();
+							_x0Start=x0;
+							_y0Start=y0;
+						}
+					} else {
+						if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+							_mouseStartPosition=e.getPoint();
+						}						
 					}
-				} else if (e.getButton()==MouseEvent.BUTTON3) { 
-					if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-						_mouseStartPosition=e.getPoint();
-					}
-				}
-				
-				
+				} 
 			}
 
-			public void mouseClicked(final MouseEvent e) {
+			public void mouseClicked(final MouseEvent e) {		
 				if (_interactor==INTERACTOR_TRACKER) {
 					new Thread(new Runnable() {
 						public void run() {						
@@ -205,186 +205,197 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					}).start();
 				} else if (_interactor==INTERACTOR_ZOOM_IN_OUT) {
 					if (e.getButton()==MouseEvent.BUTTON1) {
-						
-						if (fx==fx_MAX && fy==fy_MAX) {
-							Toolkit.getDefaultToolkit().beep();
+						if (e.getModifiersEx()==0) {
+							if (fx==fx_MAX && fy==fy_MAX) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								double w1=w/zoomPower;
+								double h1=h/zoomPower;
+								selectZoomX(e.getX()-w1/2,e.getX()+w1/2);							
+								selectZoomY(e.getY()-h1/2,e.getY()+h1/2);							
+								resizeNow();							
+							}
 						} else {
-							double w1=w/zoomPower;
-							double h1=h/zoomPower;
-							selectZoomX(e.getX()-w1/2,e.getX()+w1/2);							
-							selectZoomY(e.getY()-h1/2,e.getY()+h1/2);							
-							resizeNow();							
+							if (fx==1 && fy==1) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								double w1=w/zoomPower;
+								double h1=h/zoomPower;
+								selectUnzoomX(e.getX()-w1/2,e.getX()+w1/2);							
+								selectUnzoomY(e.getY()-h1/2,e.getY()+h1/2);							
+								resizeNow();
+							}
 						}
 						
-					} else if (e.getButton()==MouseEvent.BUTTON3) {
-						if (fx==1 && fy==1) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							double w1=w/zoomPower;
-							double h1=h/zoomPower;
-							selectUnzoomX(e.getX()-w1/2,e.getX()+w1/2);							
-							selectUnzoomY(e.getY()-h1/2,e.getY()+h1/2);							
-							resizeNow();
-						}
-					}					
+					} 				
 				} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X) {
 					
-					if (e.getButton()==MouseEvent.BUTTON1) {
-						if (fx==fx_MAX) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							double w1=w/zoomPower;
-							selectZoomX(e.getX()-w1/2,e.getX()+w1/2);
-							resizeNow();
+					if (e.getButton()==MouseEvent.BUTTON1 ) {
+						if (e.getModifiersEx()==0) {
+							if (fx==fx_MAX) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								double w1=w/zoomPower;
+								selectZoomX(e.getX()-w1/2,e.getX()+w1/2);
+								resizeNow();
+							}
+						} 
+						else {
+							if (fx==1) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								double w1=w/zoomPower;
+								selectUnzoomX(e.getX()-w1/2,e.getX()+w1/2);
+								resizeNow();
+							}
 						}
-					} else if (e.getButton()==MouseEvent.BUTTON3) {
-						if (fx==1) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							double w1=w/zoomPower;
-							selectUnzoomX(e.getX()-w1/2,e.getX()+w1/2);
-							resizeNow();
-						}
-					}		
+					} 	
 					
 				}else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y) {
 					if (e.getButton()==MouseEvent.BUTTON1) {
-						if (fy==fy_MAX) {
-							Toolkit.getDefaultToolkit().beep();
+							if (e.getModifiersEx()==0) {
+							if (fy==fy_MAX) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								double h1=h/zoomPower;
+								selectZoomY(e.getY()-h1/2,e.getY()+h1/2);
+								resizeNow();
+							}
 						} else {
-							double h1=h/zoomPower;
-							selectZoomY(e.getY()-h1/2,e.getY()+h1/2);
-							resizeNow();
+							if (fy==1) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								double h1=h/zoomPower;
+								selectUnzoomY(e.getY()-h1/2,e.getY()+h1/2);
+								resizeNow();
+							}							
 						}
-					} else if (e.getButton()==MouseEvent.BUTTON3) {
-						if (fy==1) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							double h1=h/zoomPower;
-							selectUnzoomY(e.getY()-h1/2,e.getY()+h1/2);
-							resizeNow();
-						}
-					}					
+					} 					
 				} else if (_interactor==INTERACTOR_SCROLL_LEFT_RIGHT) {
 					if (e.getButton()==MouseEvent.BUTTON1) {
-						if (x0==w/2) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							scrollXLeft();	
-						}						
-					} else if (e.getButton()==MouseEvent.BUTTON3) {
-						if (x0==((w*fx)-w/2)) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							scrollXRight();
+						if (e.getModifiersEx()==0) {						
+							if (x0==w/2) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								scrollXLeft();	
+							}
+						} 
+						else {
+							if (x0==((w*fx)-w/2)) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								scrollXRight();
+							}							
 						}
-					}					
+						
+					} 					
 				} else if (_interactor==INTERACTOR_SCROLL_UP_DOWN) {
 					if (e.getButton()==MouseEvent.BUTTON1) {
-						if (y0==h/2) {
-							Toolkit.getDefaultToolkit().beep();
+						if (e.getModifiersEx()==0) {	
+							if (y0==h/2) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								scrollYUp();
+							}
 						} else {
-							scrollYUp();
-						}
-					} else if (e.getButton()==MouseEvent.BUTTON3) {
-						if ( y0==((h*fy)-h/2)) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							scrollYDown();
+							if ( y0==((h*fy)-h/2)) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								scrollYDown();
+							}
 						}
 					}					
 				}
 			}
 
 			public void mouseReleased(MouseEvent e) {
-				if (_interactor==INTERACTOR_NULL) checkPopup(e); 
-				else if (e.getButton()==MouseEvent.BUTTON1 && _mouseStartPosition!=null)  {
+				checkPopup(e); 
+				if (e.getButton()==MouseEvent.BUTTON1 &&  _mouseStartPosition!=null)  {
 					
-					
-					
-					if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT ) {
-
-						Point startPosition=_mouseStartPosition;
-						_mouseStartPosition=null;
-						repaint();
-
-						if (fx==fx_MAX && fy==fy_MAX) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							selectZoomX(startPosition.getX(), e.getX());
-							selectZoomY(startPosition.getY(), e.getY());						
-							resizeNow();							
-						}
-					
-					} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT ) {
-
-						Point startPosition=_mouseStartPosition;
-						_mouseStartPosition=null;
-						repaint();
-
-						if (fx==fx_MAX) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							selectZoomX(startPosition.getX(), e.getX());
-							resizeNow();
-						}					
-					} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-						Point startPosition=_mouseStartPosition;
-						_mouseStartPosition=null;
-						repaint();
-						if (fy==fy_MAX) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							selectZoomY(startPosition.getY(), e.getY());
-							resizeNow();
-						}					
-					}
-					
-					
-				} else if (e.getButton()==MouseEvent.BUTTON3 && _mouseStartPosition!=null)  {
-					if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT ) {
+					if (e.getModifiersEx()==0) {
 						
-						Point startPosition=_mouseStartPosition;
-						_mouseStartPosition=null;
-						repaint();
-
-						if (fx==1 && fy==1) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							selectUnzoomX(startPosition.getX(), e.getX());
-							selectUnzoomY(startPosition.getY(), e.getY());																
-							resizeNow();
-						}
-
-					} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT ) {
+						if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT ) {
+	
+							Point startPosition=_mouseStartPosition;
+							_mouseStartPosition=null;
+							repaint();
+	
+							if (fx==fx_MAX && fy==fy_MAX) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								selectZoomX(startPosition.getX(), e.getX());
+								selectZoomY(startPosition.getY(), e.getY());						
+								resizeNow();							
+							}
 						
-						Point startPosition=_mouseStartPosition;
-						_mouseStartPosition=null;
-						repaint();
-
-						if (fx==1) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							selectUnzoomX(startPosition.getX(), e.getX());								
-							resizeNow();
+						} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT ) {
+	
+							Point startPosition=_mouseStartPosition;
+							_mouseStartPosition=null;
+							repaint();
+	
+							if (fx==fx_MAX) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								selectZoomX(startPosition.getX(), e.getX());
+								resizeNow();
+							}					
+						} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+							Point startPosition=_mouseStartPosition;
+							_mouseStartPosition=null;
+							repaint();
+							if (fy==fy_MAX) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								selectZoomY(startPosition.getY(), e.getY());
+								resizeNow();
+							}					
 						}
-
-					} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT ) {
-						
-						Point startPosition=_mouseStartPosition;
-						_mouseStartPosition=null;
-						repaint();
-
-						if (fy==1) {
-							Toolkit.getDefaultToolkit().beep();
-						} else {
-							selectUnzoomY(startPosition.getY(), e.getY());								
-							resizeNow();
-						}
-
-					}
 					
-				}
+					} else {
+						
+						if (_interactor==INTERACTOR_ZOOM_IN_OUT_SELECT ) {
+							
+							Point startPosition=_mouseStartPosition;
+							_mouseStartPosition=null;
+							repaint();
+
+							if (fx==1 && fy==1) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								selectUnzoomX(startPosition.getX(), e.getX());
+								selectUnzoomY(startPosition.getY(), e.getY());																
+								resizeNow();
+							}
+
+						} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_X_SELECT ) {
+							
+							Point startPosition=_mouseStartPosition;
+							_mouseStartPosition=null;
+							repaint();
+
+							if (fx==1) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								selectUnzoomX(startPosition.getX(), e.getX());								
+								resizeNow();
+							}
+
+						} else if (_interactor==INTERACTOR_ZOOM_IN_OUT_Y_SELECT ) {
+							
+							Point startPosition=_mouseStartPosition;
+							_mouseStartPosition=null;
+							repaint();
+
+							if (fy==1) {
+								Toolkit.getDefaultToolkit().beep();
+							} else {
+								selectUnzoomY(startPosition.getY(), e.getY());								
+								resizeNow();
+							}
+						}
+					}					
+				} 
 			}
 
 			private void checkPopup(MouseEvent e) {

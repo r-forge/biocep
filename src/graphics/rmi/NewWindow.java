@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package graphics.rmi;
+import java.awt.Component;
+
 import javax.swing.JPanel;
 import net.infonode.docking.View;
 /**
@@ -21,7 +23,7 @@ import net.infonode.docking.View;
  */
 public class NewWindow {
 	public static GDApplet _applet;
-	public static View create(final JPanel panel, final String title) {
+	public static View create(final Component panel, final String title) {
 		return _applet.createView(panel, title);
 	}
 }
