@@ -37,9 +37,7 @@ import java.awt.image.BufferedImage;
 import java.rmi.RemoteException;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.rosuda.javaGD.GDObject;
@@ -96,9 +94,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private double _x0Start;
 	private double _y0Start;
 
-	private Cursor _scrollCursor = null;
-	private Cursor _zoomInOutCursor = null;
-
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions) throws RemoteException {
 		this(gdDevice, autoPop, autoResize, actions, null, null);
 	}
@@ -136,17 +131,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_w = sz.getWidth();
 		_h = sz.getHeight();
 
-		try {
-			_scrollCursor = Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon(GDApplet.class.getResource("/graphics/rmi/icons/" + "zoom.png")).getImage(),
-					new Point(10, 10), "zoom");
-			_zoomInOutCursor = Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon(GDApplet.class.getResource("/graphics/rmi/icons/" + "cursor_win_hand.png")).getImage(),
-					new Point(0, 0), "zoomInOut");			
-			
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 		this.addMouseListener(new MouseListener() {
 			public void mouseEntered(MouseEvent e) {
 				setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -168,6 +152,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					repaint();
 				} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
 						|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+					repaint();
+				} else if (_interactor!=INTERACTOR_NULL){
 					repaint();
 				}
 			}
@@ -442,15 +428,17 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					if (_y0 > ((_h * _fy) - _h / 2))
 						_y0 = ((_h * _fy) - _h / 2);
 
-					repaint();
+					//repaint();
 				}
+				if (_interactor!=INTERACTOR_NULL) repaint();
 			}
 
 			public void mouseMoved(MouseEvent e) {
 				mouseLocation = e.getPoint();
 				if (_interactor == INTERACTOR_TRACKER) {
-					repaint();
+					//repaint();
 				}
+				if (_interactor!=INTERACTOR_NULL) repaint();
 			}
 		});
 
@@ -842,6 +830,44 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					((Graphics2D) g).drawRect(x1, y1, w1, h1);
 				}
 			}
+			
+			if (_interactor!=INTERACTOR_NULL) {
+				String mouseDecorator="";
+				switch (_interactor) {
+				case INTERACTOR_ZOOM_IN_OUT:
+					mouseDecorator="+ / -";
+					break;
+				case INTERACTOR_ZOOM_IN_OUT_X:
+					mouseDecorator="+ / - X";
+					break;
+				case INTERACTOR_ZOOM_IN_OUT_Y:
+					mouseDecorator="+ / - Y";
+					break;					
+				case INTERACTOR_ZOOM_IN_OUT_SELECT:
+					mouseDecorator="+ / - selection";
+					break;
+				case INTERACTOR_ZOOM_IN_OUT_X_SELECT:
+					mouseDecorator="+ / - X selection";
+					break;
+				case INTERACTOR_ZOOM_IN_OUT_Y_SELECT:
+					mouseDecorator="+ / - Y selection";
+					break;					
+				case INTERACTOR_SCROLL_LEFT_RIGHT:
+					mouseDecorator="«« X »»";
+					break;
+				case INTERACTOR_SCROLL_UP_DOWN:
+					mouseDecorator="«« Y »»";
+					break;
+				default:
+					break;
+				}
+				
+				
+				
+				((Graphics2D) g).setColor(Color.black);
+				((Graphics2D) g).drawString(mouseDecorator,(int)mouseLocation.getX(), (int)mouseLocation.getY());
+			}
+			
 		}
 
 		/*
