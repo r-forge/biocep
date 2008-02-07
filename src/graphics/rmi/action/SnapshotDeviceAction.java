@@ -15,10 +15,19 @@ import javax.swing.SwingUtilities;
 
 public class SnapshotDeviceAction extends AbstractAction {
 	RGui _rgui;
+	JBufferedImagePanel _panel;
 	public SnapshotDeviceAction(RGui rgui) {
 		super("Create Snapshot");
 		_rgui=rgui;
+		_panel=null;
 	}
+	
+	public SnapshotDeviceAction(RGui rgui, JBufferedImagePanel panel) {
+		super("Create Snapshot");
+		_rgui=rgui;
+		_panel=panel;
+	}
+	
 	@Override
 	public void actionPerformed(final ActionEvent e) {
 		new Thread(new Runnable() {
@@ -28,10 +37,15 @@ public class SnapshotDeviceAction extends AbstractAction {
 						public void run() {
 							try {
 
-								JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GUtils
+								JBufferedImagePanel bufferedImagePanel = null;
+								if (_panel==null) {
+									bufferedImagePanel = (JBufferedImagePanel) GUtils
 										.getComponentParent((Component) e.getSource(),
 												JBufferedImagePanel.class);
-							
+								} else {
+									bufferedImagePanel=_panel;
+								}
+								
 								final JBufferedImagePanel panelclone = new JBufferedImagePanel(bufferedImagePanel.getImage());
 								
 								
