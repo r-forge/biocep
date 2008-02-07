@@ -184,6 +184,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				} else if (_interactor == INTERACTOR_ZOOM_IN_OUT) {
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						if (e.getModifiersEx() == 0) {
+							
 							if (_fx == fx_MAX && _fy == fy_MAX) {
 								Toolkit.getDefaultToolkit().beep();
 							} else {
@@ -294,7 +295,10 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				if (e.getButton() == MouseEvent.BUTTON1) {
 
 					if (startPosition.getX() == e.getPoint().getX() && startPosition.getY() == e.getY()) {
-						Toolkit.getDefaultToolkit().beep();
+						if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT ||_interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT)
+						{
+							Toolkit.getDefaultToolkit().beep();
+						}
 						return;
 					}
 

@@ -2125,7 +2125,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					try {
 						if (_mode == HTTP_MODE) {
-							newDevice = RHttpProxy.newDevice(_commandServletUrl, _sessionId, graphicPanel.getWidth(), graphicPanel.getHeight());
+							newDevice = RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
 						} else {
 							newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 						}
@@ -2147,6 +2147,22 @@ public class GDApplet extends GDAppletBase implements RGui {
 					deviceView.setPanel((JGDPanelPop) graphicPanel);
 
 					setCurrentDevice(newDevice);
+					
+					final JGDPanelPop gp=(JGDPanelPop)graphicPanel;
+					new Thread(new Runnable(){
+						@Override
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									gp.fit();									
+								}
+							});
+							
+						}
+					}).start();
+					
+					
 
 				} catch (TunnelingException te) {
 					te.printStackTrace();
