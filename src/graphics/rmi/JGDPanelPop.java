@@ -160,23 +160,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			public void mousePressed(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON1) {
+					_mouseStartPosition = e.getPoint();			
 					if (_interactor == INTERACTOR_SCROLL) {
-						_mouseStartPosition = e.getPoint();
 						_x0Start = _x0;
 						_y0Start = _y0;
-					} else {
-						if (e.getModifiersEx() == 0) {
-							if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
-									|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-								_mouseStartPosition = e.getPoint();
-							}
-						} else {
-							if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
-									|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-								_mouseStartPosition = e.getPoint();
-							}
-						}
-					}
+					} 
 				}
 			}
 
@@ -298,9 +286,14 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			public void mouseReleased(MouseEvent e) {
 				checkPopup(e);
-				if (e.getButton() == MouseEvent.BUTTON1 && _mouseStartPosition != null) {
+				if (_mouseStartPosition==null) return ;
+				Point startPosition = _mouseStartPosition;				
+				_mouseStartPosition = null;
+				repaint();
+				
+				if (e.getButton() == MouseEvent.BUTTON1) {
 
-					if (_mouseStartPosition.getX() == e.getPoint().getX() && _mouseStartPosition.getY() == e.getY()) {
+					if (startPosition.getX() == e.getPoint().getX() && startPosition.getY() == e.getY()) {
 						Toolkit.getDefaultToolkit().beep();
 						return;
 					}
@@ -309,9 +302,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 						if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT) {
 
-							Point startPosition = _mouseStartPosition;
-							_mouseStartPosition = null;
-							repaint();
 
 							if (_fx == fx_MAX && _fy == fy_MAX) {
 								Toolkit.getDefaultToolkit().beep();
@@ -323,10 +313,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 						} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
 
-							Point startPosition = _mouseStartPosition;
-							_mouseStartPosition = null;
-							repaint();
-
 							if (_fx == fx_MAX) {
 								Toolkit.getDefaultToolkit().beep();
 							} else {
@@ -334,9 +320,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 								resizeNow();
 							}
 						} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-							Point startPosition = _mouseStartPosition;
-							_mouseStartPosition = null;
-							repaint();
+
 							if (_fy == fy_MAX) {
 								Toolkit.getDefaultToolkit().beep();
 							} else {
@@ -349,9 +333,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 						if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT) {
 
-							Point startPosition = _mouseStartPosition;
-							_mouseStartPosition = null;
-							repaint();
 
 							if (_fx == 1 && _fy == 1) {
 								Toolkit.getDefaultToolkit().beep();
@@ -363,9 +344,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 						} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
 
-							Point startPosition = _mouseStartPosition;
-							_mouseStartPosition = null;
-							repaint();
 
 							if (_fx == 1) {
 								Toolkit.getDefaultToolkit().beep();
@@ -376,9 +354,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 						} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
 
-							Point startPosition = _mouseStartPosition;
-							_mouseStartPosition = null;
-							repaint();
 
 							if (_fy == 1) {
 								Toolkit.getDefaultToolkit().beep();
