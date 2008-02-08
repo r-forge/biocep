@@ -67,8 +67,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private boolean _stopResizeThread = false;
 	private Thread _popThread = null;
 	private Thread _resizeThread = null;
-	final private static double fx_MAX =5;
-	final private static double fy_MAX =5;
+	final private static double fx_MAX = 5;
+	final private static double fy_MAX = 5;
 	private double _w = Double.NaN;
 	private double _h = Double.NaN;
 	private double _x0 = Double.NaN;
@@ -87,9 +87,10 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	public static final int INTERACTOR_SCROLL_LEFT_RIGHT = 7;
 	public static final int INTERACTOR_SCROLL_UP_DOWN = 8;
 	public static final int INTERACTOR_SCROLL = 9;
-	public static final int INTERACTOR_TRACKER = 10;
+	//public static final int INTERACTOR_TRACKER = 10;
 
 	private int _interactor = INTERACTOR_NULL;
+	private boolean _showCoordinates = false;
 	private Point _mouseStartPosition = null;
 	private double _x0Start;
 	private double _y0Start;
@@ -123,7 +124,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		setBackground(Color.white);
 		setOpaque(true);
 		_actions = actions;
-
 		_x0 = sz.getWidth() / 2;
 		_y0 = sz.getHeight() / 2;
 		_fx = 1;
@@ -132,7 +132,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_h = sz.getHeight();
 
 		this.addMouseListener(new MouseListener() {
-			public void mouseEntered(MouseEvent e) {				
+			public void mouseEntered(MouseEvent e) {
 				mouseInside = true;
 				if (_interactor == INTERACTOR_SCROLL) {
 					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -143,10 +143,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			public void mouseExited(MouseEvent e) {
 				mouseInside = false;
-				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
-						|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-					repaint();
-				} else if (_interactor != INTERACTOR_NULL) {
+
+				if (_interactor != INTERACTOR_NULL || _showCoordinates) {
 					repaint();
 				}
 			}
@@ -162,7 +160,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			}
 
 			public void mouseClicked(final MouseEvent e) {
-				if (_interactor == INTERACTOR_TRACKER) {
+
+				if (_interactor == INTERACTOR_NULL && _showCoordinates) {
 					new Thread(new Runnable() {
 						public void run() {
 							try {
@@ -300,9 +299,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						}
 					}
 				}
+
 			}
 
 			public void mouseReleased(final MouseEvent e) {
+
 				checkPopup(e);
 				if (_mouseStartPosition == null)
 					return;
@@ -411,6 +412,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						}
 					}
 				}
+
 			}
 
 			private void checkPopup(MouseEvent e) {
@@ -449,8 +451,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						_y0 = _h / 2;
 					if (_y0 > ((_h * _fy) - _h / 2))
 						_y0 = ((_h * _fy) - _h / 2);
-
-					//repaint();
 				}
 				if (_interactor != INTERACTOR_NULL)
 					repaint();
@@ -458,13 +458,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			public void mouseMoved(MouseEvent e) {
 				mouseLocation = e.getPoint();
-				if (_interactor == INTERACTOR_TRACKER) {
-					repaint();
-				} else if (_interactor != INTERACTOR_NULL) {
+				if (_showCoordinates || _interactor != INTERACTOR_NULL) {
 					repaint();
 				}
-
 			}
+
 		});
 
 		_autoPop = autoPop;
@@ -596,11 +594,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	}
 
 	private void updateRatios() {
-		new Thread(new Runnable(){
+		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				realLocations=null;
-				
+				realLocations = null;
+
 				try {
 					if (_protectR != null)
 						_protectR.lock();
@@ -611,17 +609,17 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					if (_protectR != null)
 						_protectR.unlock();
 				}
-				
-				SwingUtilities.invokeLater(new Runnable(){
+
+				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						repaint();						
+						repaint();
 					}
 				});
-				
+
 			}
 		}).start();
-		
+
 	}
 
 	public void setAutoModes(boolean autoPop, boolean autoResize) {
@@ -684,9 +682,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				
+
 				int savedInteractor = _interactor;
+				boolean savedShowCoordinates = _showCoordinates;
 				_interactor = INTERACTOR_NULL;
+				_showCoordinates = false;
 
 				try {
 					SwingUtilities.invokeAndWait(new Runnable() {
@@ -700,9 +700,15 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 				synchronized (JGDPanelPop.this) {
 					preResizeAction.run();
-					resize();					
+					resize();
+					
 				}
 				_interactor = savedInteractor;
+				_showCoordinates = savedShowCoordinates;
+
+				if (_showCoordinates) {
+					updateRatios();
+				}
 				
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
@@ -756,8 +762,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 		if (!_autoPop)
 			popNow();
-		
-		if (_interactor == INTERACTOR_TRACKER) {
+
+		if (_showCoordinates) {
 			updateRatios();
 		}
 	}
@@ -843,6 +849,14 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	Color _transparentBlack = new Color(Color.black.getColorSpace(), new float[] { Color.black.getRed(), Color.black.getGreen(), Color.black.getBlue() },
 			(float) 0.2);
 
+	public String getRealX(double mX) {
+		return new Double((realLocations[1].getX() - realLocations[0].getX()) * (mX - _w / 2 + _x0) + realLocations[0].getX()).toString();
+	}
+
+	public String getRealY(double mY) {
+		return new Double((realLocations[1].getY() - realLocations[0].getY()) * (mY - _h / 2 + _y0) + realLocations[0].getY()).toString();
+	}
+
 	public synchronized void paintComponent(Graphics g) {
 
 		Dimension d = getSize();
@@ -855,7 +869,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		if (bufferedImage != null) {
 			((Graphics2D) g).setColor(Color.white);
 			((Graphics2D) g).setBackground(Color.white);
-			((Graphics2D) g).fillRect(0, 0, getWidth(), getHeight());			
+			((Graphics2D) g).fillRect(0, 0, getWidth(), getHeight());
 			((Graphics2D) g).drawRenderedImage(bufferedImage, new AffineTransform(1, 0, 0, 1, -(_x0 - getWidth() / 2), -(_y0 - getHeight() / 2)));
 		} else {
 			((Graphics2D) g).setColor(Color.white);
@@ -864,72 +878,104 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		}
 
 		if (mouseInside && mouseLocation != null) {
-			if (_interactor == INTERACTOR_TRACKER) {
-				((Graphics2D) g).setColor(Color.red);
+
+			if (_showCoordinates && (_interactor == INTERACTOR_NULL || _interactor == INTERACTOR_ZOOM_IN_OUT || _interactor == INTERACTOR_ZOOM_IN_OUT_X || _interactor == INTERACTOR_ZOOM_IN_OUT_Y)) {
+				((Graphics2D) g).setColor(_interactor == INTERACTOR_NULL ? Color.red : Color.black);
 				((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
 				((Graphics2D) g).drawLine(0, (int) mouseLocation.getY(), getWidth(), (int) mouseLocation.getY());
 				((Graphics2D) g).drawLine((int) mouseLocation.getX(), 0, (int) mouseLocation.getX(), getHeight());
 				if (realLocations != null) {
-					double bx = realLocations[0].getX();
-					double ax = realLocations[1].getX() - bx;
-					double by = realLocations[0].getY();
-					double ay = realLocations[1].getY() - by;
-
 					((Graphics2D) g).setColor(Color.black);
-					((Graphics2D) g).drawString("X : " + (ax * (mouseLocation.getX() - _w / 2 + _x0) + bx), (int) mouseLocation.getX() + 16, (int) mouseLocation
-							.getY() - 6);
-					((Graphics2D) g).drawString("Y : " + (ay * (mouseLocation.getY() - _h / 2 + _y0) + by), (int) mouseLocation.getX() + 16, (int) mouseLocation
-							.getY()
+					((Graphics2D) g).drawString("X : " + getRealX(mouseLocation.getX()), (int) mouseLocation.getX() + 16, (int) mouseLocation.getY() - 6);
+					((Graphics2D) g).drawString("Y : " + getRealY(mouseLocation.getY()), (int) mouseLocation.getX() + 16, (int) mouseLocation.getY()
 							+ ((Graphics2D) g).getFontMetrics().getHeight() + 2);
 				}
 			} else if (_mouseStartPosition != null) {
+
+				int x1 = 0;
+				int y1 = 0;
+				int w1 = 0;
+				int h1 = 0;
+
 				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT) {
-					int x1 = (int) Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
-					int y1 = (int) Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
-					int w1 = (int) Math.abs(_mouseStartPosition.getX() - mouseLocation.getX());
-					int h1 = (int) Math.abs(_mouseStartPosition.getY() - mouseLocation.getY());
+					x1 = (int) Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
+					y1 = (int) Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
+					w1 = (int) Math.abs(_mouseStartPosition.getX() - mouseLocation.getX());
+					h1 = (int) Math.abs(_mouseStartPosition.getY() - mouseLocation.getY());
 
 					((Graphics2D) g).setColor(_transparentBlack);
 					((Graphics2D) g).fillRect(x1, y1, w1, h1);
 
-					
-					((Graphics2D) g).setColor(Color.black);
-					((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
-					((Graphics2D) g).drawLine(0, (int) y1, getWidth(), (int) y1);
-					((Graphics2D) g).drawLine((int) x1, 0, (int) x1, getHeight());					
-					((Graphics2D) g).drawLine(0, (int) y1+h1, getWidth(), (int) y1+h1);
-					((Graphics2D) g).drawLine((int) x1+w1, 0, (int) x1+w1, getHeight());
-					
-
-					
 				} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
-					int x1 = (int) Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
-					int y1 = -1;
-					int w1 = (int) Math.abs(_mouseStartPosition.getX() - mouseLocation.getX());
-					int h1 = (int) _h + 1;
-					((Graphics2D) g).setColor(_transparentBlack);					
+					x1 = (int) Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
+					y1 = 0;
+					w1 = (int) Math.abs(_mouseStartPosition.getX() - mouseLocation.getX());
+					h1 = (int) _h;
+					((Graphics2D) g).setColor(_transparentBlack);
 					((Graphics2D) g).fillRect(x1, y1, w1, h1);
-					
-					((Graphics2D) g).setColor(Color.black);
-					((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
-					((Graphics2D) g).drawRect(x1, y1, w1, h1);
-					
-					((Graphics2D) g).drawRect(x1, y1, w1, h1);
-
 				} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-					int x1 = -1;
-					int y1 = (int) Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
-					int w1 = (int) _w + 1;
-					int h1 = (int) Math.abs(_mouseStartPosition.getY() - mouseLocation.getY());
-					((Graphics2D) g).setColor(_transparentBlack);					
+					x1 = 0;
+					y1 = (int) Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
+					w1 = (int) _w;
+					h1 = (int) Math.abs(_mouseStartPosition.getY() - mouseLocation.getY());
+					((Graphics2D) g).setColor(_transparentBlack);
 					((Graphics2D) g).fillRect(x1, y1, w1, h1);
-					
-					((Graphics2D) g).setColor(Color.black);
-					((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
-					((Graphics2D) g).drawRect(x1, y1, w1, h1);
-					
-					((Graphics2D) g).drawRect(x1, y1, w1, h1);
 				}
+
+				((Graphics2D) g).setColor(Color.black);
+				((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
+
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+					((Graphics2D) g).drawLine((int) x1, 0, (int) x1, getHeight());
+					((Graphics2D) g).drawLine((int) x1 + w1, 0, (int) x1 + w1, getHeight());
+				}
+
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+					((Graphics2D) g).drawLine(0, (int) y1, getWidth(), (int) y1);
+					((Graphics2D) g).drawLine(0, (int) y1 + h1, getWidth(), (int) y1 + h1);
+				}
+
+				if (_showCoordinates && realLocations != null) {
+					
+					x1 = (int) Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
+					y1 = (int) Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
+					w1 = (int) Math.abs(_mouseStartPosition.getX() - mouseLocation.getX());
+					h1 = (int) Math.abs(_mouseStartPosition.getY() - mouseLocation.getY());
+					
+					if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+						((Graphics2D) g).drawString("X : " + getRealX(x1), (int) x1 + 8,   (int)(_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT ? 0+((Graphics2D) g).getFontMetrics().getHeight() + 2 : y1 - 6)  );						
+						((Graphics2D) g).drawString("X : " + getRealX(x1 + w1), (int) x1 + w1 + 8,   y1 + h1 - 6   );
+					}
+
+					
+					if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+						((Graphics2D) g).drawString("Y : " + getRealY(y1), _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT ? 0 :((int) x1 + 8), (int) y1 + ((Graphics2D) g).getFontMetrics().getHeight() + 2);						
+						((Graphics2D) g).drawString("Y : " + getRealY(y1 + h1), ((int) x1 + w1 + 8), (int) y1 + h1
+							+ ((Graphics2D) g).getFontMetrics().getHeight() + 2);
+					}
+					
+
+				}
+
+			} else if (_showCoordinates) {
+				((Graphics2D) g).setColor(Color.black);
+				((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
+
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+					((Graphics2D) g).drawLine((int) mouseLocation.getX(), 0, (int) mouseLocation.getX(), getHeight());
+					if (realLocations != null) {
+						((Graphics2D) g).drawString("X : " + getRealX(mouseLocation.getX()), (int) mouseLocation.getX() + 10, (int) mouseLocation.getY() - 4);
+					}
+				}
+
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+					((Graphics2D) g).drawLine(0, (int) mouseLocation.getY(), getWidth(), (int) mouseLocation.getY());
+					if (realLocations != null) {
+						((Graphics2D) g).drawString("Y : " + getRealY(mouseLocation.getY()), (int) mouseLocation.getX() + 10, (int) mouseLocation.getY()
+								+ ((Graphics2D) g).getFontMetrics().getHeight() + 2);
+					}
+				}
+
 			}
 
 			if (_interactor != INTERACTOR_NULL) {
@@ -963,9 +1009,13 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					break;
 				}
 
-
 				((Graphics2D) g).setColor(Color.black);
-				((Graphics2D) g).drawString(mouseDecorator, (int) mouseLocation.getX(), (int) mouseLocation.getY());
+				if (!_showCoordinates) {
+					((Graphics2D) g).drawString(mouseDecorator, (int) mouseLocation.getX() + 2, (int) mouseLocation.getY() - 2);
+				} else {
+					((Graphics2D) g).drawString(mouseDecorator, (int) mouseLocation.getX()
+							- SwingUtilities.computeStringWidth(((Graphics2D) g).getFontMetrics(), mouseDecorator) - 4, (int) mouseLocation.getY() - 4);
+				}
 			}
 
 		}
@@ -1000,8 +1050,18 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	public void setInteractor(int interactor) {
 		_interactor = interactor;
 		_mouseStartPosition = null;
-		if (interactor==INTERACTOR_TRACKER) updateRatios();
 		repaint();
+	}
+
+	public boolean isShowCoordinates() {
+		return _showCoordinates;
+	}
+
+	public void setShowCoordinates(boolean showCoordinates) {
+		_showCoordinates = showCoordinates;
+		if (showCoordinates) {
+			updateRatios();
+		}
 	}
 
 }

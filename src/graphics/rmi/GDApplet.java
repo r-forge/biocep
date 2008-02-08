@@ -845,17 +845,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 					graphicsMenu.addSeparator();
 
 					JRadioButtonMenuItem mouseTracker = new JRadioButtonMenuItem("Mouse Tracker   [mouse move]", _sessionId != null
-							&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_TRACKER);
+							&& getCurrentJGPanelPop().isShowCoordinates());
 					mouseTracker.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							if (_sessionId != null) {
 								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_TRACKER) {
-									p.setInteractor(INTERACTOR_NULL);
-								} else {
-									p.setInteractor(INTERACTOR_TRACKER);
-								}
-
+								p.setShowCoordinates(!p.isShowCoordinates());
 							}
 						}
 					});
