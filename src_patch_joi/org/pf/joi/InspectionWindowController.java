@@ -16,6 +16,7 @@ package org.pf.joi;
 // IMPORTS
 // ===========================================================================
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -349,7 +350,7 @@ public class InspectionWindowController implements ActionListener, WindowListene
 		try {
 			if (newWindowMethod == null)
 				newWindowMethod = InspectionWindowController.class.getClassLoader().loadClass(
-						System.getProperty("joi.newwindow.class")).getMethod("create", JPanel.class, String.class);
+						System.getProperty("joi.newwindow.class")).getMethod("create", Component.class, String.class);
 			newWindowMethod.invoke(null, this.getMainFrame().getContentPane(), "Inspect View");
 		} catch (Exception e) {
 			e.printStackTrace();

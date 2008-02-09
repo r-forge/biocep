@@ -1990,7 +1990,7 @@ public class jEdit {
 		try {
 			if (newWindowMethod == null)
 				newWindowMethod = jEdit.class.getClassLoader().loadClass(System.getProperty("jedit.newwindow.class"))
-						.getMethod("create", JPanel.class, String.class);
+						.getMethod("create", Component.class, String.class);
 			newWindowMethod.invoke(null, f, "Edit View");
 		} catch (Exception e) {
 			e.printStackTrace();
