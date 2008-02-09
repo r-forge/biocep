@@ -22,10 +22,8 @@ import graphics.rmi.action.FitDeviceAction;
 import graphics.rmi.action.SaveDeviceAsJpgAction;
 import graphics.rmi.action.SaveDeviceAsPngAction;
 import graphics.rmi.action.SetCurrentDeviceAction;
-import graphics.rmi.action.ShowDeviceInfoAction;
 import graphics.rmi.action.SnapshotDeviceAction;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
-import graphics.rmi.spreadsheet.SpreadsheetPanel.FindDialog;
 import http.FileLoad;
 import http.NoNodeManagerFound;
 import http.NoRegistryAvailableException;
@@ -123,9 +121,6 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
-
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
-
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
@@ -2802,5 +2797,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return result[0];
 
 	}
+	
 
 }

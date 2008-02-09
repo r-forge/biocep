@@ -1028,10 +1028,10 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					mouseDecorator = "+ / - Y selection";
 					break;
 				case INTERACTOR_SCROLL_LEFT_RIGHT:
-					mouseDecorator = "«« X »»";
+					mouseDecorator = "<< X >>";
 					break;
 				case INTERACTOR_SCROLL_UP_DOWN:
-					mouseDecorator = "«« Y »»";
+					mouseDecorator = "<< Y >>";
 					break;
 				default:
 					break;
