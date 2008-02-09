@@ -2709,7 +2709,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		JGDPanelPop lastCurrentPanel = getCurrentJGPanelPop();
 		int interactor = lastCurrentPanel.getInteractor();
+		boolean showCoordinates = lastCurrentPanel.isShowCoordinates();
 		lastCurrentPanel.setInteractor(INTERACTOR_NULL);
+		lastCurrentPanel.setShowCoordinates(false);
 
 		try {
 			if (_currentDevice.hasLocations())
@@ -2727,12 +2729,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 		if (_currentDevice == ((JGDPanelPop) _graphicPanel).getGdDevice()) {
 			views[1].getViewProperties().setIcon(_currentDeviceIcon);
 			((JGDPanelPop) _graphicPanel).setInteractor(interactor);
+			((JGDPanelPop) _graphicPanel).setShowCoordinates(showCoordinates);
 		} else {
 			for (int i = 0; i < deviceViews.size(); ++i) {
 				DeviceView dv = deviceViews.elementAt(i);
 				if (dv.getPanel().getGdDevice() == _currentDevice) {
 					dv.getViewProperties().setIcon(_currentDeviceIcon);
 					dv.getPanel().setInteractor(interactor);
+					dv.getPanel().setShowCoordinates(showCoordinates);
 					break;
 				}
 			}

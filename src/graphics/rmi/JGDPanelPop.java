@@ -87,7 +87,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	public static final int INTERACTOR_SCROLL_LEFT_RIGHT = 7;
 	public static final int INTERACTOR_SCROLL_UP_DOWN = 8;
 	public static final int INTERACTOR_SCROLL = 9;
-	//public static final int INTERACTOR_TRACKER = 10;
+	// public static final int INTERACTOR_TRACKER = 10;
 
 	private int _interactor = INTERACTOR_NULL;
 	private boolean _showCoordinates = false;
@@ -310,104 +310,108 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				final Point startPosition = _mouseStartPosition;
 				_mouseStartPosition = null;
 
-				if (e.getButton() == MouseEvent.BUTTON1) {
+				if (_interactor == INTERACTOR_NULL && _showCoordinates) {
+					repaint();
+				} else {
+					if (e.getButton() == MouseEvent.BUTTON1) {
 
-					if (startPosition.getX() == e.getPoint().getX() && startPosition.getY() == e.getY()) {
-						if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
-								|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-							Toolkit.getDefaultToolkit().beep();
-						}
-						return;
-					}
-
-					if (e.getModifiersEx() == 0) {
-
-						if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT) {
-
-							if (_fx == fx_MAX && _fy == fy_MAX) {
+						if (startPosition.getX() == e.getPoint().getX() && startPosition.getY() == e.getY()) {
+							if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
+									|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
 								Toolkit.getDefaultToolkit().beep();
-								repaint();
-							} else {
-								Runnable action = new Runnable() {
-									public void run() {
-										selectZoomX(startPosition.getX(), e.getX());
-										selectZoomY(startPosition.getY(), e.getY());
-									}
-								};
-								resizeLater(action);
 							}
-
-						} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
-
-							if (_fx == fx_MAX) {
-								Toolkit.getDefaultToolkit().beep();
-								repaint();
-							} else {
-								Runnable action = new Runnable() {
-									public void run() {
-										selectZoomX(startPosition.getX(), e.getX());
-									}
-								};
-								resizeLater(action);
-							}
-						} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-
-							if (_fy == fy_MAX) {
-								Toolkit.getDefaultToolkit().beep();
-								repaint();
-							} else {
-								Runnable action = new Runnable() {
-									public void run() {
-										selectZoomY(startPosition.getY(), e.getY());
-									}
-								};
-								resizeLater(action);
-							}
+							return;
 						}
 
-					} else {
+						if (e.getModifiersEx() == 0) {
 
-						if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT) {
+							if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT) {
 
-							if (_fx == 1 && _fy == 1) {
-								Toolkit.getDefaultToolkit().beep();
-								repaint();
-							} else {
-								Runnable action = new Runnable() {
-									public void run() {
-										selectUnzoomX(startPosition.getX(), e.getX());
-										selectUnzoomY(startPosition.getY(), e.getY());
-									}
-								};
-								resizeLater(action);
+								if (_fx == fx_MAX && _fy == fy_MAX) {
+									Toolkit.getDefaultToolkit().beep();
+									repaint();
+								} else {
+									Runnable action = new Runnable() {
+										public void run() {
+											selectZoomX(startPosition.getX(), e.getX());
+											selectZoomY(startPosition.getY(), e.getY());
+										}
+									};
+									resizeLater(action);
+								}
+
+							} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+
+								if (_fx == fx_MAX) {
+									Toolkit.getDefaultToolkit().beep();
+									repaint();
+								} else {
+									Runnable action = new Runnable() {
+										public void run() {
+											selectZoomX(startPosition.getX(), e.getX());
+										}
+									};
+									resizeLater(action);
+								}
+							} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+
+								if (_fy == fy_MAX) {
+									Toolkit.getDefaultToolkit().beep();
+									repaint();
+								} else {
+									Runnable action = new Runnable() {
+										public void run() {
+											selectZoomY(startPosition.getY(), e.getY());
+										}
+									};
+									resizeLater(action);
+								}
 							}
 
-						} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+						} else {
 
-							if (_fx == 1) {
-								Toolkit.getDefaultToolkit().beep();
-								repaint();
-							} else {
-								Runnable action = new Runnable() {
-									public void run() {
-										selectUnzoomX(startPosition.getX(), e.getX());
-									}
-								};
-								resizeLater(action);
-							}
+							if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT) {
 
-						} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+								if (_fx == 1 && _fy == 1) {
+									Toolkit.getDefaultToolkit().beep();
+									repaint();
+								} else {
+									Runnable action = new Runnable() {
+										public void run() {
+											selectUnzoomX(startPosition.getX(), e.getX());
+											selectUnzoomY(startPosition.getY(), e.getY());
+										}
+									};
+									resizeLater(action);
+								}
 
-							if (_fy == 1) {
-								Toolkit.getDefaultToolkit().beep();
-								repaint();
-							} else {
-								Runnable action = new Runnable() {
-									public void run() {
-										selectUnzoomY(startPosition.getY(), e.getY());
-									}
-								};
-								resizeLater(action);
+							} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+
+								if (_fx == 1) {
+									Toolkit.getDefaultToolkit().beep();
+									repaint();
+								} else {
+									Runnable action = new Runnable() {
+										public void run() {
+											selectUnzoomX(startPosition.getX(), e.getX());
+										}
+									};
+									resizeLater(action);
+								}
+
+							} else if (_interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+
+								if (_fy == 1) {
+									Toolkit.getDefaultToolkit().beep();
+									repaint();
+								} else {
+									Runnable action = new Runnable() {
+										public void run() {
+											selectUnzoomY(startPosition.getY(), e.getY());
+										}
+									};
+									resizeLater(action);
+								}
 							}
 						}
 					}
@@ -436,9 +440,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		this.addMouseMotionListener(new MouseMotionListener() {
 			public void mouseDragged(MouseEvent e) {
 				mouseLocation = e.getPoint();
-				if (((_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) && _mouseStartPosition != null)) {
-					repaint();
-				}
+				
 				if (_interactor == INTERACTOR_SCROLL && _mouseStartPosition != null && mouseInside) {
 					_x0 = _x0Start + (_mouseStartPosition.getX() - e.getX());
 					if (_x0 < _w / 2)
@@ -451,9 +453,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						_y0 = _h / 2;
 					if (_y0 > ((_h * _fy) - _h / 2))
 						_y0 = ((_h * _fy) - _h / 2);
-				}
-				if (_interactor != INTERACTOR_NULL)
 					repaint();
+				} else if (((_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
+						|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT || (_interactor == INTERACTOR_NULL && _showCoordinates)) && _mouseStartPosition != null)) {
+					repaint();
+				}
 			}
 
 			public void mouseMoved(MouseEvent e) {
@@ -701,7 +705,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				synchronized (JGDPanelPop.this) {
 					preResizeAction.run();
 					resize();
-					
+
 				}
 				_interactor = savedInteractor;
 				_showCoordinates = savedShowCoordinates;
@@ -709,7 +713,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				if (_showCoordinates) {
 					updateRatios();
 				}
-				
+
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
 						repaint();
@@ -879,25 +883,35 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 		if (mouseInside && mouseLocation != null) {
 
-			if (_showCoordinates && (_interactor == INTERACTOR_NULL || _interactor == INTERACTOR_ZOOM_IN_OUT || _interactor == INTERACTOR_ZOOM_IN_OUT_X || _interactor == INTERACTOR_ZOOM_IN_OUT_Y)) {
-				((Graphics2D) g).setColor(_interactor == INTERACTOR_NULL ? Color.red : Color.black);
-				((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
-				((Graphics2D) g).drawLine(0, (int) mouseLocation.getY(), getWidth(), (int) mouseLocation.getY());
-				((Graphics2D) g).drawLine((int) mouseLocation.getX(), 0, (int) mouseLocation.getX(), getHeight());
-				if (realLocations != null) {
-					((Graphics2D) g).setColor(Color.black);
-					((Graphics2D) g).drawString("X : " + getRealX(mouseLocation.getX()), (int) mouseLocation.getX() + 16, (int) mouseLocation.getY() - 6);
-					((Graphics2D) g).drawString("Y : " + getRealY(mouseLocation.getY()), (int) mouseLocation.getX() + 16, (int) mouseLocation.getY()
-							+ ((Graphics2D) g).getFontMetrics().getHeight() + 2);
-				}
-			} else if (_mouseStartPosition != null) {
+			/*
+			 * if (_showCoordinates && (_interactor == INTERACTOR_NULL ||
+			 * _interactor == INTERACTOR_ZOOM_IN_OUT || _interactor ==
+			 * INTERACTOR_ZOOM_IN_OUT_X || _interactor ==
+			 * INTERACTOR_ZOOM_IN_OUT_Y)) { ((Graphics2D)
+			 * g).setColor(_interactor == INTERACTOR_NULL ? Color.red :
+			 * Color.black); ((Graphics2D) g).setStroke(new BasicStroke(1,
+			 * BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4,
+			 * 4 }, 20)); ((Graphics2D) g).drawLine(0, (int)
+			 * mouseLocation.getY(), getWidth(), (int) mouseLocation.getY());
+			 * ((Graphics2D) g).drawLine((int) mouseLocation.getX(), 0, (int)
+			 * mouseLocation.getX(), getHeight()); if (realLocations != null) {
+			 * ((Graphics2D) g).setColor(Color.black); ((Graphics2D)
+			 * g).drawString("X : " + getRealX(mouseLocation.getX()), (int)
+			 * mouseLocation.getX() + 16, (int) mouseLocation.getY() - 6);
+			 * ((Graphics2D) g).drawString("Y : " +
+			 * getRealY(mouseLocation.getY()), (int) mouseLocation.getX() + 16,
+			 * (int) mouseLocation.getY() + ((Graphics2D)
+			 * g).getFontMetrics().getHeight() + 2); } }
+			 */
+
+			if (_mouseStartPosition != null) {
 
 				int x1 = 0;
 				int y1 = 0;
 				int w1 = 0;
 				int h1 = 0;
 
-				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT) {
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || (_interactor == INTERACTOR_NULL && _showCoordinates)) {
 					x1 = (int) Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
 					y1 = (int) Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
 					w1 = (int) Math.abs(_mouseStartPosition.getX() - mouseLocation.getX());
@@ -925,52 +939,66 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				((Graphics2D) g).setColor(Color.black);
 				((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
 
-				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
+						|| (_interactor == INTERACTOR_NULL && _showCoordinates)) {
+					((Graphics2D) g).setColor(_interactor == INTERACTOR_NULL ? Color.red : Color.black);
 					((Graphics2D) g).drawLine((int) x1, 0, (int) x1, getHeight());
 					((Graphics2D) g).drawLine((int) x1 + w1, 0, (int) x1 + w1, getHeight());
 				}
 
-				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT
+						|| (_interactor == INTERACTOR_NULL && _showCoordinates)) {
+					((Graphics2D) g).setColor(_interactor == INTERACTOR_NULL ? Color.red : Color.black);
 					((Graphics2D) g).drawLine(0, (int) y1, getWidth(), (int) y1);
 					((Graphics2D) g).drawLine(0, (int) y1 + h1, getWidth(), (int) y1 + h1);
 				}
 
 				if (_showCoordinates && realLocations != null) {
-					
+
 					x1 = (int) Math.min(_mouseStartPosition.getX(), mouseLocation.getX());
 					y1 = (int) Math.min(_mouseStartPosition.getY(), mouseLocation.getY());
 					w1 = (int) Math.abs(_mouseStartPosition.getX() - mouseLocation.getX());
 					h1 = (int) Math.abs(_mouseStartPosition.getY() - mouseLocation.getY());
-					
-					if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
-						((Graphics2D) g).drawString("X : " + getRealX(x1), (int) x1 + 8,   (int)(_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT ? 0+((Graphics2D) g).getFontMetrics().getHeight() + 2 : y1 - 6)  );						
-						((Graphics2D) g).drawString("X : " + getRealX(x1 + w1), (int) x1 + w1 + 8,   y1 + h1 - 6   );
+
+					if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
+							|| (_interactor == INTERACTOR_NULL && _showCoordinates)) {
+						((Graphics2D) g).setColor(Color.black);
+						((Graphics2D) g).drawString("X : " + getRealX(x1), (int) x1 + 8,
+								(int) (_interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT ? 0 + ((Graphics2D) g).getFontMetrics().getHeight() + 2 : y1 - 6));
+						((Graphics2D) g).drawString("X : " + getRealX(x1 + w1), (int) x1 + w1 + 8, y1 + h1 - 6);
 					}
 
-					
-					if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-						((Graphics2D) g).drawString("Y : " + getRealY(y1), _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT ? 0 :((int) x1 + 8), (int) y1 + ((Graphics2D) g).getFontMetrics().getHeight() + 2);						
+					if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT
+							|| (_interactor == INTERACTOR_NULL && _showCoordinates)) {
+						((Graphics2D) g).setColor(Color.black);
+						((Graphics2D) g).drawString("Y : " + getRealY(y1), _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT ? 0 : ((int) x1 + 8), (int) y1
+								+ ((Graphics2D) g).getFontMetrics().getHeight() + 2);
 						((Graphics2D) g).drawString("Y : " + getRealY(y1 + h1), ((int) x1 + w1 + 8), (int) y1 + h1
-							+ ((Graphics2D) g).getFontMetrics().getHeight() + 2);
+								+ ((Graphics2D) g).getFontMetrics().getHeight() + 2);
 					}
-					
 
 				}
 
 			} else if (_showCoordinates) {
-				((Graphics2D) g).setColor(Color.black);
+
 				((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4, 4 }, 20));
 
-				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
+						|| (_interactor == INTERACTOR_NULL && _showCoordinates)) {
+					((Graphics2D) g).setColor(_interactor == INTERACTOR_NULL ? Color.red : Color.black);
 					((Graphics2D) g).drawLine((int) mouseLocation.getX(), 0, (int) mouseLocation.getX(), getHeight());
 					if (realLocations != null) {
+						((Graphics2D) g).setColor(Color.black);
 						((Graphics2D) g).drawString("X : " + getRealX(mouseLocation.getX()), (int) mouseLocation.getX() + 10, (int) mouseLocation.getY() - 4);
 					}
 				}
 
-				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+				if (_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT
+						|| (_interactor == INTERACTOR_NULL && _showCoordinates)) {
+					((Graphics2D) g).setColor(_interactor == INTERACTOR_NULL ? Color.red : Color.black);
 					((Graphics2D) g).drawLine(0, (int) mouseLocation.getY(), getWidth(), (int) mouseLocation.getY());
 					if (realLocations != null) {
+						((Graphics2D) g).setColor(Color.black);
 						((Graphics2D) g).drawString("Y : " + getRealY(mouseLocation.getY()), (int) mouseLocation.getX() + 10, (int) mouseLocation.getY()
 								+ ((Graphics2D) g).getFontMetrics().getHeight() + 2);
 					}
