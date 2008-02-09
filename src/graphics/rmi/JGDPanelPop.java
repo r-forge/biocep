@@ -161,7 +161,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			public void mouseClicked(final MouseEvent e) {
 				
-				checkPopup(e);
+				if (e.isPopupTrigger()) {showPopup(e);};
+				if (e.getButton() == MouseEvent.BUTTON3) {showPopup(e);};
 				
 				if (e.getButton() == MouseEvent.BUTTON1 && (_interactor == INTERACTOR_NULL && _showCoordinates)) {
 					new Thread(new Runnable() {
@@ -306,7 +307,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			public void mouseReleased(final MouseEvent e) {
 
-				checkPopup(e);
+				if (e.isPopupTrigger()) {showPopup(e);}
 				if (_mouseStartPosition == null)
 					return;
 				final Point startPosition = _mouseStartPosition;
@@ -421,8 +422,9 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 			}
 
-			private void checkPopup(MouseEvent e) {
-				if (e.isPopupTrigger()) {
+			private void showPopup(MouseEvent e) {
+				
+					System.out.println("showPopup : "+e);
 					JPopupMenu popupMenu = new JPopupMenu();
 
 					if (_actions != null) {
@@ -435,7 +437,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					}
 
 					popupMenu.show(JGDPanelPop.this, e.getX(), e.getY());
-				}
+				
 			}
 		});
 
