@@ -160,8 +160,10 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			}
 
 			public void mouseClicked(final MouseEvent e) {
-
-				if (_interactor == INTERACTOR_NULL && _showCoordinates) {
+				
+				checkPopup(e);
+				
+				if (e.getButton() == MouseEvent.BUTTON1 && (_interactor == INTERACTOR_NULL && _showCoordinates)) {
 					new Thread(new Runnable() {
 						public void run() {
 							try {
