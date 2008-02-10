@@ -84,16 +84,21 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public void init() throws RemoteException {
 		try {
 			System.setProperty("wks.persitent", "false");
-
+			
 			DirectJNI.init(getServantName());
+			
+		
 			_assignInterface = new AssignInterfaceImpl();
 			DirectJNI.getInstance().setAssignInterface(
 					(AssignInterface) java.rmi.server.RemoteObject.toStub(_assignInterface));
 
+			
 			_remoteRni = new RNIImpl();
 
+			
 			_graphicNotifier = new GraphicNotifierImpl();
-
+			
+			
 			_rim = new HashMap<String, RPackage>();
 
 			for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
@@ -103,6 +108,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 						.newInstance());
 			}
 
+			/*
+			
 			if (System.getProperty("preprocess.help") != null
 					&& System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
 				new Thread(new Runnable() {
@@ -111,11 +118,15 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 					}
 				}).start();
 			}
+			*/
 
+		
 			if (System.getProperty("apply.sandbox") != null
 					&& System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {
 				DirectJNI.getInstance().applySandbox();
 			}
+			
+			
 			_isReady = true;
 
 		} catch (Exception ex) {

@@ -362,7 +362,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 								RServices r = null;
 
 								if (getMode() == GDApplet.LOCAL_MODE) {
-									r = DirectJNI.getInstance().getRServices();
+									
+									
+									//r = DirectJNI.getInstance().getRServices();
+									try {
+									r=ServerLauncher.createR();
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+									
+									
 								} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
 									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
 								} else {
