@@ -170,7 +170,7 @@ public class SupervisorUtils {
 
 	public static void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
 
-		DBLayer dbLayer = (DBLayer) PoolUtils.getRmiRegistry();
+		DBLayer dbLayer = (DBLayer) DBLayer.getRmiRegistry();
 		HashMap<String, Object> servantInfo = dbLayer.getTableData("SERVANTS", "NAME='" + servantName + "'").elementAt(
 				0);
 
@@ -357,8 +357,8 @@ public class SupervisorUtils {
 			public void run() {
 				try {
 
-					((DBLayer) PoolUtils.getRmiRegistry()).incrementNodeProcessCounter(nodeName);
-					final NodeDataDB info = ((DBLayer) PoolUtils.getRmiRegistry()).getNodeData(
+					((DBLayer) DBLayer.getRmiRegistry()).incrementNodeProcessCounter(nodeName);
+					final NodeDataDB info = ((DBLayer) DBLayer.getRmiRegistry()).getNodeData(
 							"NODE_NAME='" + nodeName + "'").elementAt(0);
 					String command = info.getCreateServantCommand();
 

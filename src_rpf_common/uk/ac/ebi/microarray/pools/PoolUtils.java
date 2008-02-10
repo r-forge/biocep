@@ -15,8 +15,6 @@
  */
 package uk.ac.ebi.microarray.pools;
 
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -51,12 +49,9 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.UnmarshalException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -74,8 +69,6 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.neilja.net.interruptiblermi.InterruptibleRMISocketFactory;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
-import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
-import uk.ac.ebi.microarray.pools.db.DBLayer;
 
 /**
  * @author Karim Chine   kchine@ebi.ac.uk
@@ -667,34 +660,7 @@ public class PoolUtils {
 		}
 	}
 
-	private static Registry _registry = null;
-	private static Integer _lock = new Integer(0);
 
-	public static Registry getRmiRegistry() throws Exception {
-
-		if (_registry != null)
-			return _registry;
-		synchronized (_lock) {
-			if (_registry == null) {
-				final String dburl = System.getProperty("db.url");
-				if (dburl != null && !dburl.equals("")) {
-					final String user = System.getProperty("db.user");
-					final String password = System.getProperty("db.password");
-					Class.forName(System.getProperty("db.driver"));
-					_registry = DBLayer.getLayer(getDBType(dburl), new ConnectionProvider() {
-						public Connection newConnection() throws java.sql.SQLException {
-							return DriverManager.getConnection(dburl, user, password);
-						};
-
-					});
-				} else {
-					_registry = LocateRegistry.getRegistry(_registryHost, _registryPort);
-				}
-			}
-			return _registry;
-		}
-
-	}
 
 	public static String replaceAll(String input, String replaceWhat, String replaceWith) throws Exception {
 		int p;

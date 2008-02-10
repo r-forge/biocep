@@ -61,7 +61,7 @@ public class MainServer {
 			if (System.getProperty("node") != null && !System.getProperty("node").equalsIgnoreCase("")) {
 				NodeDataDB nodeData = null;
 				try {
-					rmiRegistry = PoolUtils.getRmiRegistry();
+					rmiRegistry = DBLayer.getRmiRegistry();
 					nodeData = ((DBLayer) rmiRegistry).getNodeData("NODE_NAME='" + System.getProperty("node") + "'")
 							.elementAt(0);
 				} catch (Exception e) {
@@ -88,8 +88,10 @@ public class MainServer {
 			}
 
 			if (rmiRegistry == null)
-				rmiRegistry = PoolUtils.getRmiRegistry();
+				rmiRegistry = DBLayer.getRmiRegistry();
 
+			
+			System.out.println("### code base:"+System.getProperty("java.rmi.server.codebase"));
 			ClassLoader cl = new URLClassLoader(PoolUtils.getURLS(System.getProperty("java.rmi.server.codebase")),
 					MainServer.class.getClassLoader());
 			Thread.currentThread().setContextClassLoader(cl);
