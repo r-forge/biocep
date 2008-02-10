@@ -15,8 +15,6 @@
  */
 package uk.ac.ebi.microarray.pools;
 
-import uk.ac.ebi.microarray.pools.reg.ServantProviderFactoryReg;
-
 /**
  * @author Karim Chine kchine@ebi.ac.uk
  */
@@ -39,7 +37,12 @@ public abstract class ServantProviderFactory {
 			}
 
 		} else {
-			_defaultFacory = new ServantProviderFactoryReg();
+			try {
+			_defaultFacory = (ServantProviderFactory) Class.forName("uk.ac.ebi.microarray.pools.reg.ServantProviderFactoryReg")
+				.newInstance();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

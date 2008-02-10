@@ -42,7 +42,7 @@ public class MainNodeManager {
 
 			//for (Object key:PoolUtils.orderO(System.getProperties().keySet())) {System.out.println(key+" = "+System.getProperty((String)key));}
 
-			_registry = (DBLayer) PoolUtils.getRmiRegistry();
+			_registry = (DBLayer) DBLayer.getRmiRegistry();
 			_nodeManagerName = System.getProperty("node.manager.name");
 			if (System.getProperty("node.name") != null && !System.getProperty("node.name").equals("")) {
 				_nodeManagerName += '_' + System.getProperty("node.name");

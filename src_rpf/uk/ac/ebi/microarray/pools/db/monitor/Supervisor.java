@@ -507,7 +507,7 @@ public class Supervisor {
 
 		try {
 
-			_registry = (DBLayer) PoolUtils.getRmiRegistry();
+			_registry = (DBLayer) DBLayer.getRmiRegistry();
 
 			_frame = new JFrame("Supervisor");
 			_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
