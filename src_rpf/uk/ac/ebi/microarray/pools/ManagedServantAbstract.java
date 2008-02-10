@@ -245,7 +245,10 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		throw new RemoteException("graphic mode not supported");
 
 	}
-
+	@Override
+	public String getProcessId() throws RemoteException {
+		return PoolUtils.getProcessId();
+	}
 	public String toString() {
 		return super.toString() + " " + _servantName;
 	}

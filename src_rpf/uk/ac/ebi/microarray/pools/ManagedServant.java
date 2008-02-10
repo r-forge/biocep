@@ -65,5 +65,7 @@ public interface ManagedServant extends java.rmi.Remote {
 	public boolean hasGraphicMode() throws java.rmi.RemoteException;
 
 	public RemotePanel getPanel(int w, int h) throws java.rmi.RemoteException;
+	
+	public String getProcessId() throws java.rmi.RemoteException;
 
 }
