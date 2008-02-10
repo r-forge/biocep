@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
@@ -79,95 +78,6 @@ public class SupervisorUtils {
 
 	private static HashMap<String, Identification> identificationsCache = new HashMap<String, Identification>();
 
-	public static void killLocalWinProcess(String hostIp, String processId, boolean isKILLSIG) throws Exception {
-		String[] command = isKILLSIG ? new String[] { "taskkill", "/F", "/PID", processId } : new String[] {
-				"taskkill", "/PID", processId };
-		Runtime rt = Runtime.getRuntime();
-		final Process proc = rt.exec(command);
-		final Vector<String> killPrint = new Vector<String>();
-		final Vector<String> errorPrint = new Vector<String>();
-
-		System.out.println("Kill command : " + Arrays.toString(command));
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						System.out.println(line);
-						errorPrint.add(line);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						System.out.println(line);
-						killPrint.add(line);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		int exitVal = proc.waitFor();
-		if (exitVal != 0)
-			throw new Exception("kill exit code : " + exitVal + "\n" + errorPrint);
-	}
-
-	public static void killLocalUnixProcess(String hostIp, String processId, boolean isKILLSIG) throws Exception {
-		String[] command = isKILLSIG ? new String[] { "kill", "-9", processId } : new String[] { "kill", processId };
-		Runtime rt = Runtime.getRuntime();
-		final Process proc = rt.exec(command);
-		final Vector<String> killPrint = new Vector<String>();
-		final Vector<String> errorPrint = new Vector<String>();
-
-		System.out.println("Kill command : " + Arrays.toString(command));
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						System.out.println(line);
-						errorPrint.add(line);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						System.out.println(line);
-						killPrint.add(line);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		int exitVal = proc.waitFor();
-		if (exitVal != 0)
-			throw new Exception("kill exit code : " + exitVal + "\n" + errorPrint);
-	}
-
 	public static void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
 
 		DBLayer dbLayer = (DBLayer) DBLayer.getRmiRegistry();
@@ -191,9 +101,9 @@ public class SupervisorUtils {
 
 			System.out.println("####>> Local Killl");
 			if (PoolUtils.isWindowsOs()) {
-				killLocalWinProcess(hostIp, processId, useKillCommand);
+				PoolUtils.killLocalWinProcess(processId, useKillCommand);
 			} else {
-				killLocalUnixProcess(hostIp, processId, useKillCommand);
+				PoolUtils.killLocalUnixProcess(processId, useKillCommand);
 			}
 			return;
 		}

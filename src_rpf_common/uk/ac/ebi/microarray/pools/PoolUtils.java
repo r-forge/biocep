@@ -49,7 +49,6 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.UnmarshalException;
-import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
@@ -69,6 +68,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.neilja.net.interruptiblermi.InterruptibleRMISocketFactory;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
+
 
 /**
  * @author Karim Chine   kchine@ebi.ac.uk
@@ -980,5 +980,105 @@ public class PoolUtils {
 			keys[i++] = k;
 		return orderP(keys);
 	}
+	
+	 public static void main(String[] args)  throws Exception{
+		
+	}
+
+	public static void killLocalUnixProcess(String processId, boolean isKILLSIG) throws Exception {
+		String[] command = isKILLSIG ? new String[] { "kill", "-9", processId } : new String[] { "kill", processId };
+		Runtime rt = Runtime.getRuntime();
+		final Process proc = rt.exec(command);
+		final Vector<String> killPrint = new Vector<String>();
+		final Vector<String> errorPrint = new Vector<String>();
+	
+		System.out.println("Kill command : " + Arrays.toString(command));
+	
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						System.out.println(line);
+						errorPrint.add(line);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						System.out.println(line);
+						killPrint.add(line);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	
+		int exitVal = proc.waitFor();
+		if (exitVal != 0)
+			throw new Exception("kill exit code : " + exitVal + "\n" + errorPrint);
+	}
+
+	public static void killLocalWinProcess(String processId, boolean isKILLSIG) throws Exception {
+		//String[] command = isKILLSIG ? new String[] { "taskkill", "/F", "/PID", processId } : new String[] {"taskkill", "/PID", processId };
+		
+		String[] command = new String[] { System.getProperty("pstools.home") + "/pskill.exe" , processId};
+		
+		Runtime rt = Runtime.getRuntime();
+		final Process proc = rt.exec(command);
+		final Vector<String> killPrint = new Vector<String>();
+		final Vector<String> errorPrint = new Vector<String>();
+	
+		System.out.println("Kill command : " + Arrays.toString(command));
+	
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						System.out.println(line);
+						errorPrint.add(line);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						System.out.println(line);
+						killPrint.add(line);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	
+		int exitVal = proc.waitFor();
+		if (exitVal != 0)
+			throw new Exception("kill exit code : " + exitVal + "\n" + errorPrint);
+	}
+	
+	
+		
+	
+
 
 }

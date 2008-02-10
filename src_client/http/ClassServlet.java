@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 public class ClassServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
-		// TODO Auto-generated method stub
 		super.init();
 	}
 
@@ -21,12 +20,12 @@ public class ClassServlet extends HttpServlet {
 		String resource = url.substring(url.indexOf("/classes") + "/classes".length());
 
 		InputStream is = ClassServlet.class.getResourceAsStream(resource);
-		System.out.println("url : " + url);
-		System.out.println("requested resource : " + resource);
-		System.out.println("is : " + is);
+		//System.out.println("url : " + url);
+		//System.out.println("requested resource : " + resource);
+		//System.out.println("is : " + is);
 
 		if (is == null || resource.equals("")) {
-			System.out.println("Going to send error");
+			//System.out.println("Going to send error");
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 
 		} else {
@@ -43,7 +42,7 @@ public class ClassServlet extends HttpServlet {
 				e.printStackTrace();
 				
 			}
-			System.out.println("buffer length : " + buffer.length);
+			//System.out.println("buffer length : " + buffer.length);
 			if (url.endsWith(".class")) resp.setContentType("application/java");
 			else resp.setContentType("text/plain");
 			resp.getOutputStream().write(buffer);

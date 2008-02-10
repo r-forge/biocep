@@ -16,6 +16,8 @@
 	<% String demo=request.getParameter("demo")==null ? "false" : request.getParameter("demo");  %>
 	<% String lf=request.getParameter("lf")==null ? "0" : request.getParameter("lf");  %>
 	<% String login=request.getParameter("login")==null ? "guest" : request.getParameter("login");  %>
+	<% String mode=request.getParameter("mode")==null ? "http" : request.getParameter("mode");  %>
+	<% String debug=request.getParameter("debug")==null ? "false" : request.getParameter("debug");  %>
 	
 	<body>
 		
@@ -34,6 +36,8 @@
 			<param name = "wait" value = "<%=wait%>">
 			<param name = "demo" value = "<%=demo%>">
 			<param name = "lf" value = "<%=lf%>">
+			<param name = "mode" value = "<%=mode%>">
+			<param name = "debug" value = "<%=debug%>">
 			<param name = "login" value = "<%=login%>">
 		
 			<comment>
@@ -51,6 +55,8 @@
 					wait = "<%=wait%>"
 					demo = "<%=demo%>"
 					lf = "<%=lf%>"
+					mode = "<%=mode%>"
+					debug = "<%=debug%>"
 					login = "<%=login%>"									
 					>
 					

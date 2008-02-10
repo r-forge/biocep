@@ -32,9 +32,14 @@ public class MainPsToolsDownload {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String location = System.getProperty("location");
-		if (!location.endsWith("/") && !location.endsWith("\\"))
-			location += "/";
+		String location=null;
+		if (System.getProperty("location")!=null && !System.getProperty("location").equals("")) {
+			location = System.getProperty("location");
+		} else {
+			location=args[0];
+		}
+		if (!location.endsWith("/") && !location.endsWith("\\")) location += "/";
+
 		try {
 			if (isWindowsOs()
 					&& (!new File(location + "pskill.exe").exists() || !new File(location + "pslist.exe").exists())) {
@@ -45,7 +50,7 @@ public class MainPsToolsDownload {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.exit(0);
+
 	}
 
 }

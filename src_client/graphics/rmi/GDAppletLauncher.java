@@ -15,6 +15,8 @@
  */
 package graphics.rmi;
 
+import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -35,13 +37,14 @@ import splash.SplashWindow;
 public class GDAppletLauncher {
 
 	static public void createDesktopApplication() {
-
+		
 		try {
 
 			final HashMap<String, String> params = new HashMap<String, String>();
 			params.put("command_servlet_url", System.getProperty("url"));
 			params.put("autologon", System.getProperty("autologon"));
 			params.put("demo", System.getProperty("demo"));
+			params.put("debug", System.getProperty("debug"));
 
 			if (System.getProperty("login") != null && !System.getProperty("login").equals("")) {
 				params.put("login", System.getProperty("login"));

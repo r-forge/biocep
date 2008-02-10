@@ -14,17 +14,26 @@
   </security>
 <resources>
   <j2se version="1.5+"/>
-  <property name="debug" value="<%=request.getParameter("debug")%>"/>  
-  <jar href="appletlibs/RJB.jar"/>
-  <jar href="appletlibs/commons-httpclient-3.1-rc1.jar"/>
-  <jar href="appletlibs/commons-codec-1.3.jar"/>
-  <jar href="appletlibs/commons-logging-1.1.jar"/>
-  <jar href="appletlibs/mapping.jar"/>
-  <jar href="appletlibs/idw-gpl.jar"/>
-  <jar href="appletlibs/jeditmodes.jar"/>
-  <jar href="appletlibs/jedit.jar"/>
-  <jar href="appletlibs/pf-joi-full.jar"/>
-  <jar href="appletlibs/OpenXLS.jar"/>
+  
+   <property name="debug" value="<%=request.getParameter("debug")%>"/>
+   <property name="mode" value="local"/>
+   <property name="autologon" value="true"/>
+     
+   <jar href="appletlibs/RJB.jar"/>
+   <jar href="appletlibs/commons-httpclient-3.1-rc1.jar"/>
+   <jar href="appletlibs/commons-codec-1.3.jar"/>
+   <jar href="appletlibs/commons-logging-1.1.jar"/>
+   <jar href="appletlibs/mapping.jar"/>
+   <jar href="appletlibs/idw-gpl.jar"/>
+   <jar href="appletlibs/jeditmodes.jar"/>
+   <jar href="appletlibs/jedit.jar"/>
+   <jar href="appletlibs/pf-joi-full.jar"/>
+   <jar href="appletlibs/OpenXLS.jar"/>
+   <jar href="appletlibs/JRI.jar"/>
+   <jar href="appletlibs/htmlparser.jar"/>
+   <jar href="appletlibs/webserver.jar"/>
+   <jar href="appletlibs/servlet-api.jar"/>
+  
 </resources>
-<application-desc main-class="graphics.rmi.GDDesktopLauncher"/>
+<application-desc main-class="graphics.rmi.GDAppletLauncher"/>
 </jnlp>

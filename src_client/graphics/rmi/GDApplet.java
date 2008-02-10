@@ -61,6 +61,7 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.security.AccessControlException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -121,12 +122,9 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
-
-import Acme.Serve.Serve.PathTreeDictionary;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
-import server.DirectJNI;
 import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -138,6 +136,7 @@ import uk.ac.ebi.microarray.pools.db.monitor.SymbolPushDialog;
 import util.PropertiesGenerator;
 import util.Utils;
 import static graphics.rmi.JGDPanelPop.*;
+import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
 
 /**
  * @author Karim Chine kchine@ebi.ac.uk
@@ -175,6 +174,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private int _lf;
 	private boolean _isBiocLiteSourced = false;
 	private GDDevice _currentDevice;
+	private String _localRProcessId=null;
 
 	private final ReentrantLock _protectR = new ReentrantLock() {
 		@Override
@@ -235,10 +235,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	public void init() {
 		super.init();
+		
+		if (getParameter("debug") != null && getParameter("debug").equalsIgnoreCase("true")) {
+			redirectIO();
+		}
+		
 		System.out.println("INIT starts");
 
 		if (getParameter("mode") == null) {
-			_mode = LOCAL_MODE;
+			_mode = HTTP_MODE;
 		} else {
 			if (getParameter("mode").equalsIgnoreCase("local")) {
 				_mode = LOCAL_MODE;
@@ -249,7 +254,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 
-		
 		if (_mode == GDApplet.LOCAL_MODE || _mode == GDApplet.RMI_MODE) {
 
 			new Thread(new Runnable() {
@@ -266,6 +270,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					System.out.println("properties:" + properties + "  server: " + srv);
 					srv.addServlet("/classes/", new http.ClassServlet());
+					srv.addServlet("/graphics/", new http.LocalGraphicsServlet(GDApplet.this));
 					/*
 					RServices r = null;
 					if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
@@ -280,8 +285,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						}
 					}						
 					srv.addServlet("/helpme/", new LocalHelpServlet(r));
-					*/
-					
+					 */
 
 					Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 						public void run() {
@@ -296,9 +300,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 					srv.serve();
 				}
 			}).start();
+
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						LocateRegistry.createRegistry(GUtils.getLocalRmiRegistryPort());
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+
 		}
-		
-		
+
 		if (_mode == HTTP_MODE) {
 
 			if (getParameter("command_servlet_url") == null) {
@@ -415,16 +429,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 								RServices r = null;
 
 								if (getMode() == GDApplet.LOCAL_MODE) {
-									
-									
+
 									//r = DirectJNI.getInstance().getRServices();
 									try {
-									r=ServerLauncher.createR();
+										r = ServerLauncher.createR();
+										_localRProcessId = r.getProcessId();
+										System.out.println("R Process Id :"+_localRProcessId);
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
-									
-									
+
 								} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
 									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
 								} else {
@@ -1638,14 +1652,26 @@ public class GDApplet extends GDAppletBase implements RGui {
 		System.out.println("destroy called on " + new Date());
 		if (_sessionId != null) {
 			try {
-				if (_mode == HTTP_MODE) {
-					disposeDevices();
+				if (_mode == HTTP_MODE) {					
+					disposeDevices();					
 					RHttpProxy.logOff(_commandServletUrl, _sessionId);
 				} else {
 					persistState();
 				}
 			} catch (TunnelingException e) {
 				// e.printStackTrace();
+			}
+			
+			if (_localRProcessId!=null) {
+				try {
+				if (PoolUtils.isWindowsOs()) { 
+					PoolUtils.killLocalWinProcess(_localRProcessId, true);
+				} else {
+					PoolUtils.killLocalUnixProcess(_localRProcessId, true);
+				}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 
 			noSession();
@@ -2146,7 +2172,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		});
 
 		_actions.put("spreadsheet", new AbstractAction("Spreadsheet Editor") {
-			public void actionPerformed(final ActionEvent e) {
+			public void actionPerformed(final ActionEvent ae) {
 
 				NewWindow.create(new SpreadsheetPanel(300, 40, GDApplet.this), "Spreadsheet View");
 
@@ -2199,22 +2225,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 					deviceView.setPanel((JGDPanelPop) graphicPanel);
 
 					setCurrentDevice(newDevice);
-					
-					final JGDPanelPop gp=(JGDPanelPop)graphicPanel;
-					new Thread(new Runnable(){
+
+					final JGDPanelPop gp = (JGDPanelPop) graphicPanel;
+					new Thread(new Runnable() {
 						@Override
 						public void run() {
 							SwingUtilities.invokeLater(new Runnable() {
 								@Override
 								public void run() {
-									gp.fit();									
+									gp.fit();
 								}
 							});
-							
+
 						}
 					}).start();
-					
-					
 
 				} catch (TunnelingException te) {
 					te.printStackTrace();
@@ -2509,7 +2533,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		_rForConsole = null;
 		_rForPopCmd = null;
 		_rForFiles = null;
-		_isBiocLiteSourced = false;
+		_isBiocLiteSourced = false;		
+		_localRProcessId=null;
 	}
 
 	class GetExprDialog extends JDialog {
@@ -2859,6 +2884,5 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return result[0];
 
 	}
-	
 
 }

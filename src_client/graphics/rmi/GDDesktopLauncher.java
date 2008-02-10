@@ -81,7 +81,7 @@ public class GDDesktopLauncher {
 		String root = GUtils.INSTALL_DIR;
 		new File(root).mkdir();
 
-		String[] rinfo = getRInfo(null);
+		String[] rinfo = GUtils.getRInfo(null);
 		if (rinfo == null && System.getenv("R_HOME") != null) {
 			String home = System.getenv("R_HOME");
 			if (isWindowsOs() && !home.endsWith("\\")) {
@@ -90,7 +90,7 @@ public class GDDesktopLauncher {
 			if (!isWindowsOs() && !home.endsWith("/")) {
 				home = home + "/";
 			}
-			rinfo = getRInfo(home);
+			rinfo = GUtils.getRInfo(home);
 		}
 
 		String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : (System
@@ -393,184 +393,5 @@ public class GDDesktopLauncher {
 		}
 	}
 
-	private static final String RLIBSTART = "R$LIB$START";
-	private static final String RLIBEND = "R$LIB$END";
 
-	private static final String RVERSTART = "R$VER$START";
-	private static final String RVEREND = "R$VER$END";
-
-	public static String[] getRInfo(String rhome) {
-
-		File getInfoFile = new File(GUtils.INSTALL_DIR + "getInfo.R");
-
-		File getInfoOutputFile = new File(GUtils.INSTALL_DIR + "getInfo.Rout");
-
-		String rversion = null;
-
-		String rlibraypath = null;
-
-		try {
-
-			FileWriter fw = new FileWriter(getInfoFile);
-
-			PrintWriter pw = new PrintWriter(fw);
-
-			pw.println("paste('" + RLIBSTART + "',.Library, '" + RLIBEND + "',sep='%')");
-
-			pw.println("paste('" + RVERSTART + "', R.version.string , '" + RVEREND + "', sep='%')");
-
-			fw.close();
-
-			Vector<String> getInfoCommand = new Vector<String>();
-
-			if (rhome != null) {
-				getInfoCommand.add(rhome + "bin/R");
-				getInfoCommand.add("CMD");
-				getInfoCommand.add("BATCH");
-				getInfoCommand.add("--no-save");
-				getInfoCommand.add(getInfoFile.getAbsolutePath());
-				getInfoCommand.add(getInfoOutputFile.getAbsolutePath());
-
-			} else {
-
-				if (isWindowsOs()) {
-
-					getInfoCommand.add(System.getenv().get("ComSpec"));
-					getInfoCommand.add("/C");
-					getInfoCommand.add("R");
-					getInfoCommand.add("CMD");
-					getInfoCommand.add("BATCH");
-					getInfoCommand.add("--no-save");
-					getInfoCommand.add(getInfoFile.getAbsolutePath());
-					getInfoCommand.add(getInfoOutputFile.getAbsolutePath());
-
-				} else {
-					getInfoCommand.add(/* System.getenv().get("SHELL") */"/bin/sh");
-					getInfoCommand.add("-c");
-					getInfoCommand.add("R CMD BATCH --no-save " + getInfoFile.getAbsolutePath() + " "
-							+ getInfoOutputFile.getAbsolutePath());
-				}
-			}
-
-			Vector<String> systemEnvVector = new Vector<String>();
-
-			{
-
-				Map<String, String> osenv = System.getenv();
-
-				Map<String, String> env = new HashMap<String, String>(osenv);
-
-				for (String k : env.keySet()) {
-
-					systemEnvVector.add(k + "=" + env.get(k));
-
-				}
-
-			}
-
-			System.out.println("exec->" + getInfoCommand);
-
-			final Process getInfoProc = Runtime.getRuntime().exec(getInfoCommand.toArray(new String[0]),
-
-			systemEnvVector.toArray(new String[0]));
-
-			new Thread(new Runnable() {
-
-				public void run() {
-
-					try {
-
-						BufferedReader br = new BufferedReader(new InputStreamReader(getInfoProc.getErrorStream()));
-
-						String line = null;
-
-						while ((line = br.readLine()) != null) {
-
-							System.out.println(line);
-
-						}
-
-					} catch (Exception e) {
-
-						e.printStackTrace();
-
-					}
-
-				}
-
-			}).start();
-
-			new Thread(new Runnable() {
-
-				public void run() {
-
-					try {
-
-						BufferedReader br = new BufferedReader(new InputStreamReader(getInfoProc.getInputStream()));
-
-						String line = null;
-
-						while ((line = br.readLine()) != null) {
-
-							System.out.println(line);
-
-						}
-
-					} catch (Exception e) {
-
-						e.printStackTrace();
-
-					}
-
-				}
-
-			}).start();
-
-			getInfoProc.waitFor();
-
-			if (getInfoOutputFile.exists() && getInfoOutputFile.lastModified() > getInfoFile.lastModified()) {
-
-				BufferedReader br = new BufferedReader(new FileReader(getInfoOutputFile));
-
-				String line = null;
-
-				while ((line = br.readLine()) != null) {
-
-					System.out.println(line);
-
-					if (line.contains(RLIBSTART + "%")) {
-
-						rlibraypath = line.substring(line.indexOf(RLIBSTART + "%") + (RLIBSTART + "%").length(), (line
-								.indexOf("%" + RLIBEND) > 0 ? line.indexOf("%" + RLIBEND) : line.length()));
-
-					}
-
-					if (line.contains(RVERSTART + "%")) {
-
-						rversion = line.substring(line.indexOf(RVERSTART + "%") + (RVERSTART + "%").length(), line
-								.indexOf("%" + RVEREND));
-
-					}
-
-				}
-
-			}
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-		}
-
-		if (rversion != null && rlibraypath != null) {
-
-			return new String[] { rlibraypath, rversion };
-
-		} else {
-
-			return null;
-
-		}
-
-	}
 }
