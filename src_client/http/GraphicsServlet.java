@@ -16,17 +16,8 @@
 package http;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.GUtils;
-import graphics.rmi.JBufferedImagePanel;
 import graphics.rmi.JGDPanelPop;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -49,21 +40,21 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 		doAny(request, response);
 	}
 
-	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		Object result = null;
 		do {
 
-			long t1=System.currentTimeMillis();
+			long t1 = System.currentTimeMillis();
 			ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
 			if (spFactory == null) {
 				result = new NoRegistryAvailableException();
 				break;
 			}
 
-			long t2=System.currentTimeMillis();
+			long t2 = System.currentTimeMillis();
 			RServices r = null;
+			GDDevice device = null;
 			try {
 
 				boolean wait = true;
@@ -76,36 +67,51 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					result = new NoServantAvailableException();
 					break;
 				}
-				long t3=System.currentTimeMillis();
-				GDDevice device = r.newDevice(Integer.decode(request.getParameter("width")), Integer.decode(request.getParameter("height")));
-				long t4=System.currentTimeMillis();
+				long t3 = System.currentTimeMillis();
 				
+				Integer width=null;
+				try {width=Integer.decode(request.getParameter("width"));} catch (Exception e) {}
+				if (width==null) width=600;
+				
+				Integer height=null;
+				try {height=Integer.decode(request.getParameter("height"));} catch (Exception e) {}
+				if (height==null) height=400;
+				
+
 				String command = request.getParameter("expression");
-				if (command==null) {command="hist(rnorm(100))";}				
-				r.sourceFromBuffer(new StringBuffer(command));				
-				long t5=System.currentTimeMillis();
-				JGDPanelPop panel = new JGDPanelPop(device, false, false, null,null,null);
+				if (command == null) {
+					command = "hist(rnorm(100))";
+				}
+
+				device = r.newDevice(width,height);
+				long t4 = System.currentTimeMillis();
+				r.sourceFromBuffer(new StringBuffer(command));
+				long t5 = System.currentTimeMillis();
+				JGDPanelPop panel = new JGDPanelPop(device, false, false, null, null, null);
 				panel.popNow();
-				long t6=System.currentTimeMillis();
-				response.setContentType("image/jpg");
-	            ImageIO.write(panel.getImage(), "jpg", response.getOutputStream());
-	            long t7=System.currentTimeMillis();
-	            
-	            System.out.println("delta1:"+(t2-t1));
-	            System.out.println("delta2:"+(t3-t2));
-	            System.out.println("delta3:"+(t4-t3));
-	            System.out.println("delta4:"+(t5-t4));
-	            System.out.println("delta5:"+(t6-t5));
-	            System.out.println("delta6:"+(t7-t6));
-	            
-	            
-	            
-	            return ;
+				long t6 = System.currentTimeMillis();
+				response.setContentType("image/jpeg");
+				ImageIO.write(panel.getImage(), "jpg", response.getOutputStream());
+				long t7 = System.currentTimeMillis();
+
+				System.out.println("delta1:" + (t2 - t1));
+				System.out.println("delta2:" + (t3 - t2));
+				System.out.println("delta3:" + (t4 - t3));
+				System.out.println("delta4:" + (t5 - t4));
+				System.out.println("delta5:" + (t6 - t5));
+				System.out.println("delta6:" + (t7 - t6));
+
+				return;
 
 			} catch (Exception e) {
 				result = e;
 				break;
 			} finally {
+				try {
+					device.dispose();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 				spFactory.getServantProvider().returnServantProxy(r);
 			}
 
@@ -128,8 +134,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
 

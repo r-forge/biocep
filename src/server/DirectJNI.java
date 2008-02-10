@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.locks.Condition;
@@ -2483,8 +2484,19 @@ public class DirectJNI {
 
 		public String[] listDemos() throws RemoteException {
 			if (demosList == null) {
-
 				demosList = new Vector<String>();
+				try {
+					Properties props = new Properties();
+					props.loadFromXML(DirectJNI.class.getResourceAsStream("/rdemos/list.properties"));
+					for (Object key : PoolUtils.orderO(props.keySet())) {
+						demosList.add(props.getProperty((String) key));
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				/*
+				
 				URL jarURL = null;
 				StringTokenizer st = new StringTokenizer(System.getProperty("java.class.path"), System
 						.getProperty("path.separator"));
@@ -2519,6 +2531,7 @@ public class DirectJNI {
 						e.printStackTrace();
 					}
 				}
+				*/
 
 			}
 
