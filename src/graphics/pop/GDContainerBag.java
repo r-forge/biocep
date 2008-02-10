@@ -15,8 +15,6 @@
  */
 package graphics.pop;
 
-import graphics.rmi.JGDPanelPop;
-
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -39,7 +37,7 @@ public class GDContainerBag implements GDContainer {
 	private GDState _gs;
 	private int _devNr=-1;
 
-	private static final Log log = org.apache.commons.logging.LogFactory.getLog(JGDPanelPop.class);
+	private static final Log log = org.apache.commons.logging.LogFactory.getLog(GDContainerBag.class);
 
 	public GDContainerBag(int w, int h) {
 		// System.out.println("GDContainerBag");

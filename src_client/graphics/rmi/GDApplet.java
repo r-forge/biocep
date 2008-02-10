@@ -121,6 +121,8 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
+
+import Acme.Serve.Serve.PathTreeDictionary;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
@@ -128,6 +130,7 @@ import server.DirectJNI;
 import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsolePanel;
 import uk.ac.ebi.microarray.pools.db.monitor.SubmitInterface;
 import uk.ac.ebi.microarray.pools.db.monitor.SymbolPopDialog;
@@ -235,7 +238,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		System.out.println("INIT starts");
 
 		if (getParameter("mode") == null) {
-			_mode = HTTP_MODE;
+			_mode = LOCAL_MODE;
 		} else {
 			if (getParameter("mode").equalsIgnoreCase("local")) {
 				_mode = LOCAL_MODE;
@@ -246,6 +249,56 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 
+		
+		if (_mode == GDApplet.LOCAL_MODE || _mode == GDApplet.RMI_MODE) {
+
+			new Thread(new Runnable() {
+				public void run() {
+					final Acme.Serve.Serve srv = new Acme.Serve.Serve() {
+						public void setMappingTable(PathTreeDictionary mappingtable) {
+							super.setMappingTable(mappingtable);
+						}
+					};
+					java.util.Properties properties = new java.util.Properties();
+					properties.put("port", GUtils.getLocalTomcatPort());
+					properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
+					srv.arguments = properties;
+
+					System.out.println("properties:" + properties + "  server: " + srv);
+					srv.addServlet("/classes/", new http.ClassServlet());
+					/*
+					RServices r = null;
+					if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
+						r = DirectJNI.getInstance().getRServices();
+					} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
+						r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
+					} else {
+						try {
+							r = (RServices) PoolUtils.getRmiRegistry().lookup(System.getProperty("name"));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}						
+					srv.addServlet("/helpme/", new LocalHelpServlet(r));
+					*/
+					
+
+					Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+						public void run() {
+							try {
+								srv.notifyStop();
+							} catch (java.io.IOException ioe) {
+								ioe.printStackTrace();
+							}
+							srv.destroyAllServlets();
+						}
+					}));
+					srv.serve();
+				}
+			}).start();
+		}
+		
+		
 		if (_mode == HTTP_MODE) {
 
 			if (getParameter("command_servlet_url") == null) {
@@ -259,7 +312,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		} else {
 
-			_helpServletUrl = "http://127.0.0.1:" + System.getProperty("localtomcat.port") + "/" + "helpme";
+			_helpServletUrl = "http://127.0.0.1:" + GUtils.getLocalTomcatPort() + "/" + "helpme";
 			_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
 
 		}
@@ -376,7 +429,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
 								} else {
 									try {
-										r = (RServices) PoolUtils.getRmiRegistry().lookup(System.getProperty("name"));
+										r = (RServices) DBLayer.getRmiRegistry().lookup(System.getProperty("name"));
 									} catch (Exception e) {
 										e.printStackTrace();
 									}

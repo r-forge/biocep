@@ -15,25 +15,18 @@
  */
 package graphics.rmi;
 
-import http.ClassServlet;
-import http.LocalHelpServlet;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-
 import java.util.HashMap;
-
-
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-
 //import splash.SplashWindow;
 import splash.SplashWindow;
-import uk.ac.ebi.microarray.pools.PoolUtils;
 
 
 /**
@@ -63,7 +56,6 @@ public class GDAppletLauncher {
 
 			final GDApplet gDApplet = new GDApplet(params);
 			gDApplet.init();
-
 			
 			/*
 			if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
@@ -82,62 +74,6 @@ public class GDAppletLauncher {
 
 			}
 			*/
-
-			
-			
-			
-			if (gDApplet.getMode() == GDApplet.LOCAL_MODE || gDApplet.getMode() == GDApplet.RMI_MODE) {
-
-				new Thread(new Runnable() {
-					public void run() {
-						final Acme.Serve.Serve srv = new Acme.Serve.Serve() {
-							public void setMappingTable(PathTreeDictionary mappingtable) {
-								super.setMappingTable(mappingtable);
-							}
-						};
-						java.util.Properties properties = new java.util.Properties();
-						properties.put("port", Integer.decode(System.getProperty("localtomcat.port")));
-						properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
-						srv.arguments = properties;
-
-						System.out.println("properties:" + properties + "  server: " + srv);
-
-						
-						srv.addServlet("/classes/", new http.ClassServlet());
-						
-						
-						/*
-						RServices r = null;
-						if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
-							r = DirectJNI.getInstance().getRServices();
-						} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
-							r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
-						} else {
-							try {
-								r = (RServices) PoolUtils.getRmiRegistry().lookup(System.getProperty("name"));
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}						
-						srv.addServlet("/helpme/", new LocalHelpServlet(r));
-						*/
-						
-
-						Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-							public void run() {
-								try {
-									srv.notifyStop();
-								} catch (java.io.IOException ioe) {
-									ioe.printStackTrace();
-								}
-								srv.destroyAllServlets();
-							}
-						}));
-						srv.serve();
-					}
-				}).start();
-			}
-			
 
 			try {
 				UIManager.setLookAndFeel(gDApplet.getLookAndFeelClassName());

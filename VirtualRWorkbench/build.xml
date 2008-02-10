@@ -322,15 +322,12 @@
 				  		<fileset dir="lib/desktop" includes="jedit.jar"/>				  		
 				  		<fileset dir="lib/desktop" includes="jeditmodes.jar"/>
 				  		<fileset dir="lib/desktop" includes="pf-joi-full.jar"/>
-						<fileset dir="lib/desktop" includes="OpenXLS.jar"/>
+						<fileset dir="lib/desktop" includes="OpenXLS.jar"/>						
+						<fileset dir="lib/desktop" includes="webserver.jar"/>									
+						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>			
+						<fileset dir="lib/j2ee" includes="servlet-api.jar"/>						
+						<fileset dir="lib/desktop" includes="JRI.jar"/>								
 						<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
-				  </copy>
-				
-				<copy todir="VirtualRWorkbench/frontendapp/jawslibs">	
-						<fileset dir="lib/desktop" includes="webserver.jar"/>									  
-						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>					  
-						<fileset dir="lib/j2ee" includes="servlet-api.jar"/>
-						<fileset dir="lib/desktop" includes="JRI.jar"/>									  
 				  </copy>
 				
 				
