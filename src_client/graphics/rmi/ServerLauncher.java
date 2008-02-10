@@ -2,20 +2,19 @@ package graphics.rmi;
 
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import http.ClassServlet;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.URL;
+import java.io.RandomAccessFile;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
 import uk.ac.ebi.microarray.pools.ManagedServant;
@@ -38,7 +37,7 @@ public class ServerLauncher {
 				};
 			
 				java.util.Properties properties = new java.util.Properties();
-				properties.put("port", Integer.decode(System.getProperty("localtomcat.port")));
+				properties.put("port", GUtils.getLocalTomcatPort());
 				properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
 				srv.arguments = properties;
 				System.out.println("properties:" + properties + "  server: " + srv);
@@ -99,6 +98,7 @@ public class ServerLauncher {
 		new File(rlibs).mkdir();
 
 
+		
 		Vector<String> envVector = new Vector<String>();
 		{
 			Map<String, String> osenv = System.getenv();
@@ -111,6 +111,8 @@ public class ServerLauncher {
 				envVector.add(k + "=" + env.get(k));
 			}
 		}	
+		
+		
 		
 		String[] requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo", "gplots" };
 		Vector<String> installLibBatch = new Vector<String>();
@@ -203,12 +205,33 @@ public class ServerLauncher {
 			}
 
 		}
+		
+		
+		String bootstrap = (root + "classes/bootstrap").replace('\\', '/');
+		System.out.println(bootstrap);
+		if (!new File(bootstrap).exists()) new File(bootstrap).mkdirs();
+		InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/Boot.class");
+		byte[] buffer = new byte[is.available()];
+		try {
+			for (int i = 0; i < buffer.length; ++i) {
+				int b = is.read();
+				buffer[i] = (byte) b;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		RandomAccessFile raf=new RandomAccessFile(bootstrap+"/Boot.class","rw");
+		raf.write(buffer);
+		raf.close();
+		
+		
+		
 		// ---------------------------------------
 		String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";
 		System.out.println("jripath:" + jripath + "\n");
 			
-		String cp = "J:/workspace/client/bin"+ System.getProperty("path.separator")+"J:/Program Files/R/R-2.6.1/library/rJava/jri/JRI.jar"
-					+System.getProperty("path.separator")+"J:/hop";
+		String cp = root + "classes";
+		//+ System.getProperty("path.separator")+root+"classes";
 		
 		ManagedServant[] servantHolder = new ManagedServant[1];
 		RemoteException[] exceptionHolder = new RemoteException[1];
@@ -224,14 +247,14 @@ public class ServerLauncher {
 		command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
 		
 		
-		command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://127.0.0.1:2566/classes/" + (isWindowsOs() ? "\"" : ""));
+		command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://127.0.0.1:"+GUtils.getLocalTomcatPort()+"/classes/" + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
 		
 		command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub="+listenerStub+ (isWindowsOs() ? "\"" : ""));
 		
 		command.add((isWindowsOs() ? "\"" : "") + "-Dpreprocess.help=true" + (isWindowsOs() ? "\"" : ""));		
-		command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=false" + (isWindowsOs() ? "\"" : ""));
+		command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=true" + (isWindowsOs() ? "\"" : ""));
 		
 		
 		command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + root + "wdir" + (isWindowsOs() ? "\"" : ""));				
@@ -250,14 +273,11 @@ public class ServerLauncher {
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
 		*/
 		
-		
-		
-		command.add("vv.Main");
-		command.add(System.getProperty("localtomcat.port"));
+		command.add("bootstrap.Boot");
+		command.add(""+GUtils.getLocalTomcatPort());
 
 
-		final Process proc = Runtime.getRuntime()
-				.exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
+		final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
 		final Vector<String> killPrint = new Vector<String>();
 		final Vector<String> errorPrint = new Vector<String>();
 

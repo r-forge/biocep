@@ -122,5 +122,14 @@ public class GUtils {
 
 		return new CellPoint(rowcount, colcount);
 	}
+	
+	public static int getLocalTomcatPort() {
+		if (System.getProperty("localtomcat.port")==null || System.getProperty("localtomcat.port").equals("")) {
+			return 2599;
+		} else {
+			return Integer.decode(System.getProperty("localtomcat.port"));
+		}
+	}
+	
 
 }

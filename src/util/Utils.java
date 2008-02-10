@@ -15,8 +15,6 @@
  */
 package util;
 
-import graphics.rmi.GDDesktopLauncher;
-
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -325,7 +323,7 @@ public class Utils {
 			return false;
 		Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null,
 				"javax.jnlp.BasicService");
-		Class<?> BasicServiceClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.BasicService");
+		Class<?> BasicServiceClass = Utils.class.getClassLoader().loadClass("javax.jnlp.BasicService");
 		return (Boolean) BasicServiceClass.getMethod("isWebBrowserSupported").invoke(basicServiceInstance);
 	}
 
@@ -340,7 +338,7 @@ public class Utils {
 			return;
 		Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null,
 				"javax.jnlp.BasicService");
-		Class<?> BasicServiceClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.BasicService");
+		Class<?> BasicServiceClass = Utils.class.getClassLoader().loadClass("javax.jnlp.BasicService");
 		BasicServiceClass.getMethod("showDocument", URL.class).invoke(basicServiceInstance, url);
 	}
 

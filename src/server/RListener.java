@@ -15,8 +15,6 @@
  */
 package server;
 
-import http.NoNodeManagerFound;
-import http.NoRegistryAvailableException;
 
 import java.io.File;
 import java.net.JarURLConnection;

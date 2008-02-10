@@ -25,7 +25,7 @@
 			WIDTH = "<%=width%>" 
 			HEIGHT = "<%=height%>" >
 			<PARAM NAME = CODE VALUE = "graphics.rmi.GDApplet.class" >
-			<PARAM NAME = ARCHIVE VALUE = "appletlibs/RJB.jar,appletlibs/commons-httpclient-3.1-rc1.jar,appletlibs/commons-codec-1.3.jar,appletlibs/commons-logging-1.1.jar,appletlibs/mapping.jar,appletlibs/idw-gpl.jar,appletlibs/jeditmodes.jar,appletlibs/jedit.jar,appletlibs/pf-joi-full.jar,appletlibs/OpenXLS.jar" >
+			<PARAM NAME = ARCHIVE VALUE = "appletlibs/RJB.jar,appletlibs/commons-httpclient-3.1-rc1.jar,appletlibs/commons-codec-1.3.jar,appletlibs/commons-logging-1.1.jar,appletlibs/mapping.jar,appletlibs/idw-gpl.jar,appletlibs/jeditmodes.jar,appletlibs/jedit.jar,appletlibs/pf-joi-full.jar,appletlibs/OpenXLS.jar,appletlibs/webserver.jar,appletlibs/htmlparser.jar,appletlibs/servlet-api.jar,appletlibs/JRI.jar" >
 			<param name = "type" value = "application/x-java-applet;version=1.5">
 			<param name = "scriptable" value = "false">
 			<param name = "autologon" value = "<%=autologon%>">
@@ -40,7 +40,7 @@
 				<embed type = "application/x-java-applet;version=1.5" 
 					
 					CODE = "graphics.rmi.GDApplet.class" 
-					ARCHIVE = "appletlibs/RJB.jar,appletlibs/commons-httpclient-3.1-rc1.jar,appletlibs/commons-codec-1.3.jar,appletlibs/commons-logging-1.1.jar,appletlibs/mapping.jar,appletlibs/idw-gpl.jar,appletlibs/jeditmodes.jar,appletlibs/jedit.jar,appletlibs/pf-joi-full.jar,appletlibs/OpenXLS.jar" 					
+					ARCHIVE = "appletlibs/RJB.jar,appletlibs/commons-httpclient-3.1-rc1.jar,appletlibs/commons-codec-1.3.jar,appletlibs/commons-logging-1.1.jar,appletlibs/mapping.jar,appletlibs/idw-gpl.jar,appletlibs/jeditmodes.jar,appletlibs/jedit.jar,appletlibs/pf-joi-full.jar,appletlibs/OpenXLS.jar,appletlibs/webserver.jar,appletlibs/htmlparser.jar,appletlibs/servlet-api.jar,appletlibs/JRI.jar" 					
 					WIDTH = "<%=width%>" 
 					HEIGHT = "<%=height%>" 
 					scriptable = false 
