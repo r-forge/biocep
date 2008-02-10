@@ -118,51 +118,7 @@ public class MainServer {
 			}
 
 			if (servantCreationListener != null) {
-
-				try {
-
-					final Object[] resultHolder = new Object[1];
-					Runnable setServantStubRunnable = new Runnable() {
-						public void run() {
-							try {
-								servantCreationListener.setServantStub(mservant);
-								resultHolder[0] = SET_SERVANT_STUB_DONE;
-							} catch (Exception e) {
-								final boolean wasInterrupted = Thread.interrupted();
-								if (wasInterrupted) {
-									resultHolder[0] = new RmiCallInterrupted();
-								} else {
-									resultHolder[0] = e;
-								}
-							}
-						}
-					};
-
-					Thread setServantStubThread = InterruptibleRMIThreadFactory.getInstance().newThread(
-							setServantStubRunnable);
-					setServantStubThread.start();
-
-					long t1 = System.currentTimeMillis();
-					while (resultHolder[0] == null) {
-						if ((System.currentTimeMillis() - t1) > SET_SERVANT_STUB_TIMEOUT_MILLISEC) {
-							setServantStubThread.interrupt();
-							resultHolder[0] = new RmiCallTimeout();
-							break;
-						}
-						try {
-							Thread.sleep(10);
-						} catch (Exception e) {
-						}
-					}
-
-					if (resultHolder[0] instanceof Throwable) {
-						throw (RemoteException) resultHolder[0];
-					}
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
+				callBack(mservant, null);
 			}
 
 			String sname = mservant.getServantName();
@@ -197,13 +153,75 @@ public class MainServer {
 			log.info("Servant " + sname + " instantiated successfully.");
 
 		} catch (InvocationTargetException ite) {
+			if (servantCreationListener != null) {
+				callBack(null, new RemoteException("",ite.getTargetException()));
+			}
 			throw new Exception(PoolUtils.getStackTraceAsString(ite.getTargetException()));
+
 		} catch (Exception e) {
+			
 			log.info("----------------------");
 			log.info(PoolUtils.getStackTraceAsString(e));
 			e.printStackTrace();
 			log.error(e);
+			
+			if (servantCreationListener != null) {
+				callBack(null, new RemoteException("",e));
+			}
+
 			System.exit(1);
 		}
+	}
+	
+	
+	public static void callBack(final ManagedServant servant,final  RemoteException exception) {
+		try {
+
+			final Object[] resultHolder = new Object[1];
+			Runnable setServantStubRunnable = new Runnable() {
+				public void run() {
+					try {
+						if (servant!=null) {
+							servantCreationListener.setServantStub(servant);
+						} else {
+							servantCreationListener.setRemoteException(exception);
+						}
+						resultHolder[0] = SET_SERVANT_STUB_DONE;
+					} catch (Exception e) {
+						final boolean wasInterrupted = Thread.interrupted();
+						if (wasInterrupted) {
+							resultHolder[0] = new RmiCallInterrupted();
+						} else {
+							resultHolder[0] = e;
+						}
+					}
+				}
+			};
+
+			Thread setServantStubThread = InterruptibleRMIThreadFactory.getInstance().newThread(
+					setServantStubRunnable);
+			setServantStubThread.start();
+
+			long t1 = System.currentTimeMillis();
+			while (resultHolder[0] == null) {
+				if ((System.currentTimeMillis() - t1) > SET_SERVANT_STUB_TIMEOUT_MILLISEC) {
+					setServantStubThread.interrupt();
+					resultHolder[0] = new RmiCallTimeout();
+					break;
+				}
+				try {
+					Thread.sleep(10);
+				} catch (Exception e) {
+				}
+			}
+
+			if (resultHolder[0] instanceof Throwable) {
+				throw (RemoteException) resultHolder[0];
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 }

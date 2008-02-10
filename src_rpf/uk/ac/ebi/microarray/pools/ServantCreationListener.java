@@ -23,4 +23,5 @@ import java.rmi.RemoteException;
  */
 public interface ServantCreationListener extends Remote {
 	void setServantStub(ManagedServant servant) throws RemoteException;
+	void setRemoteException(RemoteException remoteException) throws RemoteException;
 }

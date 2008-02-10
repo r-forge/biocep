@@ -20,6 +20,8 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Vector;
+
+import uk.ac.ebi.microarray.pools.CreationCallBack;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -48,13 +50,15 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	public static ManagedServant create(DBLayer dbLayer, String nodeName, boolean isPrivate) throws RemoteException {
 
 		ManagedServant[] servantHolder = new ManagedServant[1];
-		CreationCallBack callBack = new CreationCallBack(servantHolder);
+		RemoteException[] exceptionHolder = new RemoteException[1];
+		
+		CreationCallBack callBack = new CreationCallBack(servantHolder, exceptionHolder);
 		try {
 			String listenerStub = PoolUtils.stubToHex(callBack);
 			SupervisorUtils.launch(nodeName, "-Dprivate=" + new Boolean(isPrivate).toString() + " -Dlistener.stub="
 					+ listenerStub, false, PoolUtils.getHostIp());
 			long t1 = System.currentTimeMillis();
-			while (servantHolder[0] == null) {
+			while (servantHolder[0] == null && exceptionHolder[0] == null) {
 				if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
 					throw new ServantCreationTimeout();
 				try {
@@ -62,6 +66,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 				} catch (Exception e) {
 				}
 			}
+			
 
 		} catch (Exception e) {
 			throw new RemoteException("", e);
@@ -70,6 +75,8 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 				UnicastRemoteObject.unexportObject(callBack, true);
 			}
 		}
+
+		if (exceptionHolder[0]!=null) throw exceptionHolder[0];
 
 		return servantHolder[0];
 	}
@@ -145,19 +152,6 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		return result;
 	}
 
-	static private class CreationCallBack extends UnicastRemoteObject implements ServantCreationListener {
-		ManagedServant[] _managedServantHolder;
-
-		public CreationCallBack(ManagedServant[] managedServantHolder) throws RemoteException {
-			super();
-			_managedServantHolder = managedServantHolder;
-		}
-
-		public void setServantStub(ManagedServant servant) throws RemoteException {
-			System.out.println("received:" + PoolUtils.stubToHex(servant));
-			_managedServantHolder[0] = servant;
-		}
-	}
 
 	public void addErrListener(RemoteLogListener listener) throws RemoteException {
 	}
@@ -235,5 +229,9 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	}
 
 	public void setResetEnabled(boolean enable) throws RemoteException {
+	}
+	@Override
+	public String getProcessId() throws RemoteException {	
+		return PoolUtils.getProcessId();
 	}
 }
