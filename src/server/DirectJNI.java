@@ -2561,6 +2561,11 @@ public class DirectJNI {
 				_rActions.remove(0);
 			return result;
 		}
+		
+		@Override
+		public String getProcessId() throws RemoteException {
+			return PoolUtils.getProcessId();
+		}
 
 	};
 
@@ -2817,7 +2822,7 @@ public class DirectJNI {
 
 	synchronized public static void init(String instanceName) {
 		setInstanceName(instanceName);
-		scanMapping();
+		//scanMapping();
 	}
 
 	public static void init() {

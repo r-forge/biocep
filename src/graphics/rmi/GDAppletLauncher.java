@@ -15,20 +15,26 @@
  */
 package graphics.rmi;
 
+import http.ClassServlet;
 import http.LocalHelpServlet;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+
 import java.util.HashMap;
+
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import remoting.RServices;
-import server.DirectJNI;
+
+
+//import splash.SplashWindow;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+
 
 /**
  * @author Karim Chine kchine@ebi.ac.uk
@@ -58,10 +64,11 @@ public class GDAppletLauncher {
 			final GDApplet gDApplet = new GDApplet(params);
 			gDApplet.init();
 
+			
+			/*
 			if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
 				DirectJNI.getInstance();
-				if (System.getProperty("preprocess.help") != null
-						&& System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
+				if (System.getProperty("preprocess.help") != null && System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
 					new Thread(new Runnable() {
 						public void run() {
 							DirectJNI.getInstance().preprocessHelp();
@@ -69,13 +76,16 @@ public class GDAppletLauncher {
 					}).start();
 				}
 
-				if (System.getProperty("apply.sandbox") != null
-						&& System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {
+				if (System.getProperty("apply.sandbox") != null && System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {
 					DirectJNI.getInstance().applySandbox();
 				}
 
 			}
+			*/
 
+			
+			
+			
 			if (gDApplet.getMode() == GDApplet.LOCAL_MODE || gDApplet.getMode() == GDApplet.RMI_MODE) {
 
 				new Thread(new Runnable() {
@@ -92,20 +102,26 @@ public class GDAppletLauncher {
 
 						System.out.println("properties:" + properties + "  server: " + srv);
 
+						
+						srv.addServlet("/classes/", new http.ClassServlet());
+						
+						
+						/*
 						RServices r = null;
 						if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
 							r = DirectJNI.getInstance().getRServices();
 						} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
-							r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class
-									.getClassLoader());
+							r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
 						} else {
 							try {
 								r = (RServices) PoolUtils.getRmiRegistry().lookup(System.getProperty("name"));
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-						}
+						}						
 						srv.addServlet("/helpme/", new LocalHelpServlet(r));
+						*/
+						
 
 						Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 							public void run() {
@@ -121,6 +137,7 @@ public class GDAppletLauncher {
 					}
 				}).start();
 			}
+			
 
 			try {
 				UIManager.setLookAndFeel(gDApplet.getLookAndFeelClassName());
@@ -177,6 +194,7 @@ public class GDAppletLauncher {
 
 	public static void main(String[] args) throws Exception {
 
+		
 		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(
 				GDAppletLauncher.class.getResource("/splash/splashscreen.png")));
 
@@ -185,6 +203,7 @@ public class GDAppletLauncher {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		 
 
 		SwingUtilities.invokeAndWait(new Runnable() {
 			public void run() {
@@ -196,7 +215,10 @@ public class GDAppletLauncher {
 			}
 		});
 
+		
 		SplashWindow.disposeSplash();
-
+		 
 	}
+
+
 }
