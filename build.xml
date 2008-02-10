@@ -648,6 +648,10 @@
 		<delete dir="binrpf" failonerror="true"/>
 		<mkdir dir="binrpf"/>
 		
+		<delete dir="binsrv" failonerror="true"/>
+		<mkdir dir="binsrv"/>
+
+
 		<delete>
 			<fileset dir="demos">
 				<include name="**/*.class"/>
@@ -661,13 +665,29 @@
 			</fileset>
 		</delete>
 	</target>
-	
+
+	<target name="srv">
+		<echo message="${basedir}"/>
+		
+		<javac
+			srcdir="src_rpf:src:rwebservices:src_masq:src_jgd"
+			destdir="bin" debug="true" source="1.5" target="1.5">
+			<classpath>
+				<pathelement path="${JRI_JAR}"/>
+				<fileset dir="lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+		
+	</target>
+
 	<target name="compile" depends="compile.rpf">
 		<echo message="${basedir}"/>
 		
 		<javac
-			srcdir="src_rpf:src:rwebservices:src_masq:src_jgd:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"
-			destdir="bin" debug="true" source="1.5" target="1.5">
+			srcdir="src_rpf:src:src_client:rwebservices:src_masq:src_jgd:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"
+			destdir="binsrv" debug="true" source="1.5" target="1.5">
 			<classpath>
 				<pathelement path="${JRI_JAR}"/>
 				<fileset dir="lib">
@@ -685,6 +705,15 @@
 				<include name="**/*.png"/>
 				<include name="**/*.gif"/>
 			</fileset>
+			
+			<fileset dir="src_client">
+				<include name="**/*.xml"/>
+				<include name="**/*.R"/>
+				<include name="**/*.r"/>
+				<include name="**/*.png"/>
+				<include name="**/*.gif"/>
+			</fileset>
+			
 			
 			<fileset dir="src_rpf">
 				<include name="**/*.*"/>
