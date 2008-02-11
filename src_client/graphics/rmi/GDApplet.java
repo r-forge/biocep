@@ -269,8 +269,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					srv.arguments = properties;
 
 					System.out.println("properties:" + properties + "  server: " + srv);
-					srv.addServlet("/classes/", new http.ClassServlet());
-					srv.addServlet("/graphics/", new http.LocalGraphicsServlet(GDApplet.this));
+					srv.addServlet("/classes/", new http.local.LocalClassServlet());
+					srv.addServlet("/graphics/", new http.local.LocalGraphicsServlet(GDApplet.this));
 					/*
 					RServices r = null;
 					if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {

@@ -1,19 +1,6 @@
-/*
- * Copyright (C) 2007 EMBL-EBI
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package uk.ac.ebi.microarray.pools;
+package server;
+
+import static uk.ac.ebi.microarray.pools.ServerDefaults._servantPoolPrefix;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
@@ -25,15 +12,17 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
+
+import uk.ac.ebi.microarray.pools.MainServer;
+import uk.ac.ebi.microarray.pools.ManagedServant;
+import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.ServantCreationListener;
+import uk.ac.ebi.microarray.pools.YesSecurityManager;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
-import static uk.ac.ebi.microarray.pools.ServerDefaults.*;
 
-/**
- * @author Karim Chine   kchine@ebi.ac.uk
- */
-public class MainServer {
-
+public class MainRServer {
+	
 	private static String _mainServantClassName = System.getProperty("servantclass");
 
 	private static Class<?> mainServantClass = null;
@@ -45,30 +34,13 @@ public class MainServer {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(MainServer.class);
 
 	private static ManagedServant mservant = null;
-	public static ServantCreationListener servantCreationListener = null;
+	private static ServantCreationListener servantCreationListener = null;
 	public static void main(String[] args) throws Exception {
 
 		try {
 
 			if (System.getSecurityManager() == null) {
 				System.setSecurityManager(new YesSecurityManager());
-			}
-
-			if (System.getProperty("node") != null && !System.getProperty("node").equalsIgnoreCase("")) {
-				NodeDataDB nodeData = null;
-				try {
-					rmiRegistry = DBLayer.getRmiRegistry();
-					nodeData = ((DBLayer) rmiRegistry).getNodeData("NODE_NAME='" + System.getProperty("node") + "'")
-							.elementAt(0);
-				} catch (Exception e) {
-					log.info("Couldn't retrieve Node Info for node <" + System.getProperty("node") + ">");
-					e.printStackTrace();
-					return;
-				}
-				System.setProperty("autoname", "true");
-				_servantPoolPrefix = nodeData.getPoolPrefix();
-
-				System.out.println("nodedata:" + nodeData);
 			}
 
 			if (System.getProperty("autoname") != null && System.getProperty("autoname").equalsIgnoreCase("true")) {
@@ -83,18 +55,11 @@ public class MainServer {
 						+ _servantPoolPrefix);
 			}
 
-			if (rmiRegistry == null)
-				rmiRegistry = DBLayer.getRmiRegistry();
-
-			
+			if (rmiRegistry == null) rmiRegistry = DBLayer.getRmiRegistry();
 			System.out.println("### code base:"+System.getProperty("java.rmi.server.codebase"));
 			
-			ClassLoader cl = new URLClassLoader(PoolUtils.getURLS(System.getProperty("java.rmi.server.codebase")),
-					MainServer.class.getClassLoader());
-			Thread.currentThread().setContextClassLoader(cl);
-			System.out.println(Arrays.toString(PoolUtils.getURLS(System.getProperty("java.rmi.server.codebase"))));
 			
-			mainServantClass = cl.loadClass(_mainServantClassName);
+			mainServantClass = RServantImpl.class;
 
 			boolean isPrivateServant = (System.getProperty("private") != null && System.getProperty("private")
 					.equalsIgnoreCase("true"));
@@ -118,7 +83,7 @@ public class MainServer {
 			}
 
 			if (servantCreationListener != null) {
-				PoolUtils.callBack(servantCreationListener,mservant, null);
+				PoolUtils.callBack(servantCreationListener, mservant, null);
 			}
 
 			String sname = mservant.getServantName();
@@ -154,7 +119,7 @@ public class MainServer {
 
 		} catch (InvocationTargetException ite) {
 			if (servantCreationListener != null) {
-				PoolUtils.callBack(servantCreationListener,null, new RemoteException("",ite.getTargetException()));
+				PoolUtils.callBack(servantCreationListener, null, new RemoteException("",ite.getTargetException()));
 			}
 			throw new Exception(PoolUtils.getStackTraceAsString(ite.getTargetException()));
 
@@ -166,10 +131,11 @@ public class MainServer {
 			log.error(e);
 			
 			if (servantCreationListener != null) {
-				PoolUtils.callBack(servantCreationListener,null, new RemoteException("",e));
+				PoolUtils.callBack(servantCreationListener, null, new RemoteException("",e));
 			}
 
 			System.exit(1);
 		}
 	}
+
 }

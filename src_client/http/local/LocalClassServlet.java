@@ -1,4 +1,4 @@
-package http;
+package http.local;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class ClassServlet extends HttpServlet {
+public class LocalClassServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		super.init();
@@ -19,9 +19,10 @@ public class ClassServlet extends HttpServlet {
 		String url = req.getRequestURL().toString();
 		String resource = url.substring(url.indexOf("/classes") + "/classes".length());
 
-		InputStream is = ClassServlet.class.getResourceAsStream(resource);
+		InputStream is = LocalClassServlet.class.getResourceAsStream(resource);
 		//System.out.println("url : " + url);
-		//System.out.println("requested resource : " + resource);
+		//System.out.println("requested resource stream: " + resource);
+		//System.out.println("requested resource url: " + LocalClassServlet.class.getResource(resource));
 		//System.out.println("is : " + is);
 
 		if (is == null || resource.equals("")) {
