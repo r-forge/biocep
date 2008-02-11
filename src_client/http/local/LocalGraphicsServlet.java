@@ -1,8 +1,9 @@
-package http;
+package http.local;
 
 import graphics.pop.GDDevice;
 import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
+import http.TunnelingException;
 
 import java.io.IOException;
 

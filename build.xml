@@ -725,6 +725,13 @@
 			</classpath>
 		</javac>
 		
+		<rmic classpath="bin" base="bin" classname="server.RServantImpl"/>
+		<rmic classpath="bin" base="bin" classname="server.AssignInterfaceImpl"/>
+		<rmic classpath="bin" base="bin" classname="server.RNIImpl"/>
+		<rmic classpath="bin" base="bin" classname="server.GraphicNotifierImpl"/>
+		<rmic classpath="bin" base="bin" classname="server.GDDeviceImpl"/>
+	
+		
 		<copy todir="bin">
 			
 			<fileset dir="src">

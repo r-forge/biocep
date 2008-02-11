@@ -1075,6 +1075,60 @@ public class PoolUtils {
 		if (exitVal != 0)
 			throw new Exception("kill exit code : " + exitVal + "\n" + errorPrint);
 	}
+
+	public static void callBack(final ServantCreationListener servantCreationListener, final ManagedServant servant,final  RemoteException exception) {
+		try {
+	
+			final Object[] resultHolder = new Object[1];
+			Runnable setServantStubRunnable = new Runnable() {
+				public void run() {
+					try {
+						if (servant!=null) {
+							servantCreationListener.setServantStub(servant);
+						} else {
+							servantCreationListener.setRemoteException(exception);
+						}
+						resultHolder[0] = PoolUtils.SET_SERVANT_STUB_DONE;
+					} catch (Exception e) {
+						final boolean wasInterrupted = Thread.interrupted();
+						if (wasInterrupted) {
+							resultHolder[0] = new RmiCallInterrupted();
+						} else {
+							resultHolder[0] = e;
+						}
+					}
+				}
+			};
+	
+			Thread setServantStubThread = InterruptibleRMIThreadFactory.getInstance().newThread(
+					setServantStubRunnable);
+			setServantStubThread.start();
+	
+			long t1 = System.currentTimeMillis();
+			while (resultHolder[0] == null) {
+				if ((System.currentTimeMillis() - t1) > PoolUtils.SET_SERVANT_STUB_TIMEOUT_MILLISEC) {
+					setServantStubThread.interrupt();
+					resultHolder[0] = new RmiCallTimeout();
+					break;
+				}
+				try {
+					Thread.sleep(10);
+				} catch (Exception e) {
+				}
+			}
+	
+			if (resultHolder[0] instanceof Throwable) {
+				throw (RemoteException) resultHolder[0];
+			}
+	
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	
+	}
+
+	public static final Integer SET_SERVANT_STUB_DONE = new Integer(0);
+	public static final int SET_SERVANT_STUB_TIMEOUT_MILLISEC = 2000;
 	
 	
 		

@@ -3,7 +3,8 @@ package graphics.rmi;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isMacOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
-import http.ClassServlet;
+import http.local.LocalClassServlet;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -48,7 +49,7 @@ public class ServerLauncher {
 				properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
 				srv.arguments = properties;
 				System.out.println("properties:" + properties + "  server: " + srv);
-				srv.addServlet("/classes/", new ClassServlet());
+				srv.addServlet("/classes/", new LocalClassServlet());
 
 				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 					public void run() {
