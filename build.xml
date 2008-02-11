@@ -729,6 +729,7 @@
 			
 			<fileset dir="src">
 				<include name="**/*.xml"/>
+				<include name="**/*.properties"/>
 				<include name="**/*.R"/>
 				<include name="**/*.r"/>
 				<include name="**/*.png"/>
@@ -737,6 +738,7 @@
 			
 			<fileset dir="src_client">
 				<include name="**/*.xml"/>
+				<include name="**/*.properties"/>
 				<include name="**/*.R"/>
 				<include name="**/*.r"/>
 				<include name="**/*.png"/>
