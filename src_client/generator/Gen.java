@@ -32,8 +32,8 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.PropertyConfigurator;
+//import org.apache.commons.logging.impl.Log4JLogger;
+//import org.apache.log4j.PropertyConfigurator;
 import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Copy;
@@ -109,7 +109,7 @@ public class Gen {
 			protected void printMessage(String arg0, PrintStream arg1, int arg2) {
 			}
 		});
-
+/*
 		if (log instanceof Log4JLogger) {
 			Properties log4jProperties = new Properties();
 			for (Object sprop : System.getProperties().keySet()) {
@@ -119,6 +119,7 @@ public class Gen {
 			}
 			PropertyConfigurator.configure(log4jProperties);
 		}
+*/		
 
 	}
 

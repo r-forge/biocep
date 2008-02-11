@@ -15,7 +15,7 @@ public class ShowDeviceInfoAction extends AbstractAction {
 		_rgui=rgui;
 	}
 	
-	@Override
+
 	public void actionPerformed(ActionEvent e) {
 		try  {
 		System.out.println("device number :"+_device.getDeviceNumber());

@@ -39,7 +39,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
@@ -2575,7 +2574,7 @@ public class DirectJNI {
 			return result;
 		}
 		
-		@Override
+	
 		public String getProcessId() throws RemoteException {
 			return PoolUtils.getProcessId();
 		}
@@ -2621,7 +2620,7 @@ public class DirectJNI {
 			return gdBag.popAllGraphicObjects();
 		};
 		
-		@Override
+		
 		public boolean hasGraphicObjects() throws RemoteException {
 			return gdBag.hasGraphicObjects();
 		}
@@ -2646,13 +2645,13 @@ public class DirectJNI {
 			return gdBag.getDeviceNumber();
 		}
 		
-		@Override
+		
 		public boolean isCurrentDevice() throws RemoteException {
 			int d=((RInteger)DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
 			return d==gdBag.getDeviceNumber();
 		}
 		
-		@Override
+		
 		public void setAsCurrentDevice() throws RemoteException {
 			DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ")");			
 		}

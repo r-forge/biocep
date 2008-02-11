@@ -19,7 +19,6 @@ public class FitDeviceAction extends AbstractAction {
 		_rgui=rgui;
 	}
 	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		try  {						
 			

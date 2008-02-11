@@ -20,7 +20,7 @@ public class SaveDeviceAsJpgAction extends AbstractAction{
 		_rgui=rgui;
 	}
 	
-	@Override
+
 	public void actionPerformed(final ActionEvent e) {
 		new Thread(new Runnable() {
 			public void run() {

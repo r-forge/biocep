@@ -28,7 +28,7 @@ public class SnapshotDeviceAction extends AbstractAction {
 		_panel=panel;
 	}
 	
-	@Override
+	
 	public void actionPerformed(final ActionEvent e) {
 		new Thread(new Runnable() {
 			public void run() {

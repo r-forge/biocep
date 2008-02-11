@@ -132,7 +132,7 @@ public class JGDPanel extends RemotePanel implements GDContainer {
 
 	}
 
-	@Override
+	
 	public void dispose() throws RemoteException {
 		_graphicNotifier.executeDevOff(_devNr);
 		if (_gdcServer != null) {

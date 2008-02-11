@@ -31,8 +31,6 @@ import java.util.Vector;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.PropertyConfigurator;
 import org.bioconductor.packages.rservices.RList;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
@@ -467,7 +465,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			return _localGdDevice.popAllGraphicObjects();
 		};
 
-		@Override
+		
 		public boolean hasGraphicObjects() throws RemoteException {
 			return _localGdDevice.hasGraphicObjects();
 		}
@@ -480,7 +478,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			final int deviceNbr=_localGdDevice.getDeviceNumber();
 			_localGdDevice.dispose();
 			new Thread(new Runnable() {
-				@Override
+				
 				public void run() {
 					boolean shutdownSucceeded=false;
 					while (true) {
@@ -503,17 +501,17 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			
 		};
 		
-		@Override
+		
 		public int getDeviceNumber() throws RemoteException {
 			return _localGdDevice.getDeviceNumber();
 		}
 		
-		@Override
+		
 		public boolean isCurrentDevice() throws RemoteException {
 			return _localGdDevice.isCurrentDevice();
 		}
 		
-		@Override
+		
 		public void setAsCurrentDevice() throws RemoteException {
 			_localGdDevice.setAsCurrentDevice();
 		}
@@ -526,7 +524,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			_localGdDevice.putLocation(p);
 		}
 		
-		@Override
+		
 		public boolean hasLocations() throws RemoteException {
 			return _localGdDevice.hasLocations();
 		}
@@ -921,6 +919,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		}
 	}
 
+	/*
 	static {
 		if (log instanceof Log4JLogger) {
 			Properties log4jProperties = new Properties();
@@ -932,4 +931,5 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			PropertyConfigurator.configure(log4jProperties);
 		}
 	}
+	*/
 }
