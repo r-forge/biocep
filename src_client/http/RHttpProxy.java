@@ -34,7 +34,9 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
  * @author Karim Chine kchine@ebi.ac.uk
  */
 public class RHttpProxy {
-
+	
+	public static final String FAKE_SESSION = "11111111111111111111111111111111";
+	
 	static HttpClient mainHttpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
 
 	public static String logOn(String url, String sessionId, String login, String pwd, HashMap<String, Object> options)
@@ -45,7 +47,7 @@ public class RHttpProxy {
 			Object result = null;
 			try {
 				getSession = new GetMethod(url
-						+ (sessionId == null || sessionId.equals("") ? "" : ";jsessionid=" + sessionId)
+						+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION) ? "" : ";jsessionid=" + sessionId)
 						+ "?method=logon&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd)
 						+ "&options=" + PoolUtils.objectToHex(options));
 				mainHttpClient = new HttpClient();
@@ -74,7 +76,7 @@ public class RHttpProxy {
 			Object result = null;
 			mainHttpClient = new HttpClient();
 			getLogOut = new GetMethod(url
-					+ (sessionId == null || sessionId.equals("") ? "" : ";jsessionid=" + sessionId) + "?method=logoff");
+					+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION) ? "" : ";jsessionid=" + sessionId) + "?method=logoff");
 			try {
 				mainHttpClient.executeMethod(getLogOut);
 				result = new ObjectInputStream(getLogOut.getResponseBodyAsStream()).readObject();
@@ -102,7 +104,7 @@ public class RHttpProxy {
 			Object result = null;
 			try {
 				postPush = new PostMethod(url
-						+ (sessionId == null || sessionId.equals("") ? "" : ";jsessionid=" + sessionId)
+						+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION) ? "" : ";jsessionid=" + sessionId)
 						+ "?method=invoke");
 				NameValuePair[] data = { new NameValuePair("servantname", PoolUtils.objectToHex(servantName)),
 						new NameValuePair("methodname", PoolUtils.objectToHex(methodName)),
@@ -149,7 +151,7 @@ public class RHttpProxy {
 			Object result = null;
 			mainHttpClient = new HttpClient();
 			getInterrupt = new GetMethod(url
-					+ (sessionId == null || sessionId.equals("") ? "" : ";jsessionid=" + sessionId)
+					+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION)? "" : ";jsessionid=" + sessionId)
 					+ "?method=interrupt");
 			try {
 				mainHttpClient.executeMethod(getInterrupt);
@@ -176,7 +178,7 @@ public class RHttpProxy {
 			Object result = null;
 			mainHttpClient = new HttpClient();
 			getNewDevice = new GetMethod(url
-					+ (sessionId == null || sessionId.equals("") ? "" : ";jsessionid=" + sessionId)
+					+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION)? "" : ";jsessionid=" + sessionId)
 					+ "?method=newdevice" +
 					"&width="+width+"&height="+height);
 			try {
@@ -201,6 +203,8 @@ public class RHttpProxy {
 			}
 		}
 	}
+
+	
 	
 	
 

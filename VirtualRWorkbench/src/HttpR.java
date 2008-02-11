@@ -31,15 +31,26 @@ import http.RHttpProxy;
 public class HttpR {
 
 	public static void main(String[] args) throws Throwable {
-		final String cmdUrl = System.getProperty("url");
+		//final String cmdUrl = System.getProperty("url");
+		final String cmdUrl = "http://127.0.0.1:9999/cmd";
 		HashMap<String, Object> options = new HashMap<String, Object>();
-		options.put("panel.width", new Integer(400));
-		options.put("panel.height", new Integer(400));
 		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
+		System.out.println(sessionId);
+		RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", RServices.class,
+				new HttpClient(new MultiThreadedHttpConnectionManager()));
+		
+		r.consoleSubmit("a<-16");
+		
+		System.out.println(r.consoleSubmit("a"));
+		
+		System.exit(0);
+		
+		
+		
 		try {
 
-			RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", RServices.class,
-					new HttpClient(new MultiThreadedHttpConnectionManager()));
+			
+			
 			GDDevice d = (GDDevice) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "device", GDDevice.class,
 					new HttpClient(new MultiThreadedHttpConnectionManager()));
 

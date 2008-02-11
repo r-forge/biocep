@@ -169,7 +169,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private SubmitInterface _submitInterface = null;
 	private ConsolePanel _consolePanel = null;
 	private int _mode = HTTP_MODE;
-	private static final String NON_HTTP_SESSION = "11111111111111111111111111111111";
 	private LookAndFeelInfo[] installedLFs = UIManager.getInstalledLookAndFeels();
 	private int _lf;
 	private boolean _isBiocLiteSourced = false;
@@ -271,6 +270,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					System.out.println("properties:" + properties + "  server: " + srv);
 					srv.addServlet("/classes/", new http.local.LocalClassServlet());
 					srv.addServlet("/graphics/", new http.local.LocalGraphicsServlet(GDApplet.this));
+					srv.addServlet("/cmd/", new http.local.LocalCommandServlet(GDApplet.this));
+					
 					/*
 					RServices r = null;
 					if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
@@ -455,7 +456,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								d = r.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 
-								_sessionId = NON_HTTP_SESSION;
+								_sessionId = RHttpProxy.FAKE_SESSION;
 
 								restoreState();
 
