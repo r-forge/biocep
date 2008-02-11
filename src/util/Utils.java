@@ -36,8 +36,8 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.PropertyConfigurator;
+//import org.apache.commons.logging.impl.Log4JLogger;
+//import org.apache.log4j.PropertyConfigurator;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
 
@@ -301,6 +301,7 @@ public class Utils {
 	}
 
 	public static void initLog() {
+		/*
 		if (log instanceof Log4JLogger) {
 			Properties log4jProperties = new Properties();
 			for (Object sprop : System.getProperties().keySet()) {
@@ -310,6 +311,7 @@ public class Utils {
 			}
 			PropertyConfigurator.configure(log4jProperties);
 		}
+		*/
 	}
 
 	public static boolean isWebBrowserSupported() throws Exception {

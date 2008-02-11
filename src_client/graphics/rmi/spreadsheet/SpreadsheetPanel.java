@@ -105,34 +105,34 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
 		f.getContentPane().add(new SpreadsheetPanel(300, 40, new RGui() {
-			@Override
+			
 			public ConsoleLogger getConsoleLogger() {
 				return null;
 			}
-			@Override
+			
 			public View createView(Component panel, String title) {
 				return null;
 			}
-			@Override
+			
 			public RServices getR() {
 				return null;
 			}
-			@Override
+			
 			public ReentrantLock getRLock() {
 				return null;
 			}
 			
-			@Override
+			
 			public void setCurrentDevice(GDDevice device) {
 				
 			}
 			
-			@Override
+			
 			public GDDevice getCurrentDevice() {
 				return null;
 			}
 			
-			@Override
+			
 			public Component getRootComponent() {
 				return null;
 			}

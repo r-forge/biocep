@@ -603,7 +603,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 	private void updateRatios() {
 		new Thread(new Runnable() {
-			@Override
+			
 			public void run() {
 				realLocations = null;
 
@@ -619,7 +619,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				}
 
 				SwingUtilities.invokeLater(new Runnable() {
-					@Override
+					
 					public void run() {
 						repaint();
 					}
@@ -688,7 +688,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 	public void resizeLater(final Runnable preResizeAction) {
 		new Thread(new Runnable() {
-			@Override
+			
 			public void run() {
 
 				int savedInteractor = _interactor;

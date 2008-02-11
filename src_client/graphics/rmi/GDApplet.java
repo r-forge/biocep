@@ -749,7 +749,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					graphicsMenu.addSeparator();
 
 					graphicsMenu.add(new AbstractAction("Fit Device to Panel") {
-						@Override
+
 						public void actionPerformed(ActionEvent e) {
 							getCurrentJGPanelPop().fit();
 						}
@@ -2228,10 +2228,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					final JGDPanelPop gp = (JGDPanelPop) graphicPanel;
 					new Thread(new Runnable() {
-						@Override
+						
 						public void run() {
 							SwingUtilities.invokeLater(new Runnable() {
-								@Override
+								
 								public void run() {
 									gp.fit();
 								}
@@ -2758,17 +2758,17 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return _defaultHelpUrl;
 	}
 
-	@Override
+	
 	public RServices getR() {
 		return _rForConsole;
 	}
 
-	@Override
+	
 	public ReentrantLock getRLock() {
 		return _protectR;
 	}
 
-	@Override
+	
 	public ConsoleLogger getConsoleLogger() {
 		return _consoleLogger;
 	}
@@ -2781,12 +2781,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return _mode == HTTP_MODE && _login.indexOf("@@") != -1;
 	}
 
-	@Override
+	
 	public GDDevice getCurrentDevice() {
 		return _currentDevice;
 	}
 
-	@Override
+	
 	public void setCurrentDevice(GDDevice device) {
 
 		JGDPanelPop lastCurrentPanel = getCurrentJGPanelPop();
@@ -2826,7 +2826,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 
-	@Override
+
 	public Component getRootComponent() {
 		return getContentPane();
 	}

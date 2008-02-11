@@ -16,7 +16,6 @@ public class CopyFromCurrentDeviceAction extends AbstractAction {
 		_rgui=rgui;
 	}
 	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		try  {						
 			
@@ -34,8 +33,6 @@ public class CopyFromCurrentDeviceAction extends AbstractAction {
 		
 	}
 	
-
-	@Override
 	public boolean isEnabled() {
 		return _rgui.getR()!=null && _rgui.getCurrentDevice()!=_device; 
 	}

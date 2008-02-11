@@ -16,7 +16,6 @@ public class CopyToCurrentDeviceAction extends AbstractAction {
 		_rgui=rgui;
 	}
 	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		try  {						
 			
