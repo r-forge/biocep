@@ -16,6 +16,7 @@
 package http;
 
 import graphics.pop.GDDevice;
+import graphics.rmi.RGui;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -50,6 +51,13 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 	private static final int RMICALL_TIMEOUT_MILLISEC = 60 * 1000 * 10;
 	private static final Integer RMICALL_DONE = new Integer(0);
 
+	RGui _rgui = null;
+
+	public CommandServlet(RGui rgui) {
+		super();
+		_rgui = rgui;
+	}
+
 	public CommandServlet() {
 		super();
 	}
@@ -66,8 +74,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 		}
 	}
 
-	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		HttpSession session = null;
 		Object result = null;
@@ -86,8 +93,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 					String login = (String) PoolUtils.hexToObject(request.getParameter("login"));
 					String pwd = (String) PoolUtils.hexToObject(request.getParameter("pwd"));
-					HashMap<String, Object> options = (HashMap<String, Object>) PoolUtils.hexToObject(request
-							.getParameter("options"));
+					HashMap<String, Object> options = (HashMap<String, Object>) PoolUtils.hexToObject(request.getParameter("options"));
 					if (options == null)
 						options = new HashMap<String, Object>();
 					System.out.println("options:" + options);
@@ -96,58 +102,58 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					RPFSessionInfo.get().put("REMOTE_ADDR", request.getRemoteAddr());
 					RPFSessionInfo.get().put("REMOTE_HOST", request.getRemoteHost());
 
-					RServices r = null;
-
-					boolean nopool = options.keySet().contains("nopool")
-							&& ((String) options.get("nopool")).equalsIgnoreCase("true");
-					boolean save = options.keySet().contains("save")
-							&& ((String) options.get("save")).equalsIgnoreCase("true");
-
-					ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
-
-					if (spFactory == null) {
-						result = new NoRegistryAvailableException();
-						break;
-					}
-
+					boolean nopool = options.keySet().contains("nopool") && ((String) options.get("nopool")).equalsIgnoreCase("true");
+					boolean save = options.keySet().contains("save") && ((String) options.get("save")).equalsIgnoreCase("true");
 					boolean namedAccessMode = login.contains("@@");
 
-					if (!namedAccessMode) {
-						if (nopool) {
+					RServices r = null;
 
-							String nodeName = options.keySet().contains("node") ? (String) options.get("node") : System
-									.getProperty("private.servant.node.name");
-							Registry registry = spFactory.getServantProvider().getRegistry();
-							NodeManager nm = null;
-							try {
-								nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name") + "_"
-										+ nodeName);
-							} catch (NotBoundException nbe) {
-								nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name"));
-							} catch (Exception e) {
-								result = new NoNodeManagerFound();
-								break;
-							}
-							r = (RServices) nm.createPrivateServant(nodeName);
-						} else {
-							boolean wait = options.keySet().contains("wait")
-									&& ((String) options.get("wait")).equalsIgnoreCase("true");
-							if (wait) {
-								r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+					if (_rgui == null) {
+
+						ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+
+						if (spFactory == null) {
+							result = new NoRegistryAvailableException();
+							break;
+						}
+
+						if (!namedAccessMode) {
+							if (nopool) {
+
+								String nodeName = options.keySet().contains("node") ? (String) options.get("node") : System
+										.getProperty("private.servant.node.name");
+								Registry registry = spFactory.getServantProvider().getRegistry();
+								NodeManager nm = null;
+								try {
+									nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name") + "_" + nodeName);
+								} catch (NotBoundException nbe) {
+									nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name"));
+								} catch (Exception e) {
+									result = new NoNodeManagerFound();
+									break;
+								}
+								r = (RServices) nm.createPrivateServant(nodeName);
 							} else {
-								r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
+								boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");
+								if (wait) {
+									r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+								} else {
+									r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
+								}
+							}
+						} else {
+
+							Registry registry = spFactory.getServantProvider().getRegistry();
+							String sname = login.substring(login.indexOf("@@") + "@@".length());
+							login = login.substring(0, login.indexOf("@@"));
+							try {
+								r = (RServices) registry.lookup(sname);
+							} catch (Exception e) {
+								e.printStackTrace();
 							}
 						}
 					} else {
-
-						Registry registry = spFactory.getServantProvider().getRegistry();
-						String sname = login.substring(login.indexOf("@@") + "@@".length());
-						login = login.substring(0, login.indexOf("@@"));
-						try {
-							r = (RServices) registry.lookup(sname);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						r = _rgui.getR();
 					}
 
 					if (r == null) {
@@ -160,16 +166,15 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("NOPOOL", nopool);
 					session.setAttribute("SAVE", save);
 					session.setAttribute("LOGIN", login);
-					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);					
-					
+					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
+
 					session.setAttribute("threads", new ThreadsHolder());
 
-					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session
-							.getId(), session);
-					((HashMap<String, HashMap<String, Object>>) getServletContext().getAttribute(
-							"SESSIONS_ATTRIBUTES_MAP")).put(session.getId(), cloneAttributes(session));
+					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session.getId(), session);
+					((HashMap<String, HashMap<String, Object>>) getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP")).put(session.getId(),
+							cloneAttributes(session));
 
-					if (save) {
+					if (_rgui==null && save) {
 						UserUtils.loadWorkspace((String) session.getAttribute("LOGIN"), r);
 					}
 
@@ -185,6 +190,24 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 				}
 
 				if (command.equals("logoff")) {
+					
+					if (_rgui!=null) { 
+						Enumeration<String> attributeNames=session.getAttributeNames();
+						while (attributeNames.hasMoreElements()) {
+							String aname=attributeNames.nextElement();
+							if (session.getAttribute(aname) instanceof GDDevice) {
+								try {
+									_rgui.getRLock().lock();
+									((GDDevice) session.getAttribute(aname)).dispose();
+								} catch (Exception e) {
+									e.printStackTrace();
+								} finally {
+									_rgui.getRLock().unlock();
+								}
+							}
+						}
+					}
+
 					try {
 						session.invalidate();
 					} catch (Exception ex) {
@@ -206,20 +229,19 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					}
 
 					String methodName = (String) PoolUtils.hexToObject(request.getParameter("methodname"));
-					Class<?>[] methodSignature = (Class[]) PoolUtils.hexToObject(request
-							.getParameter("methodsignature"));
+					Class<?>[] methodSignature = (Class[]) PoolUtils.hexToObject(request.getParameter("methodsignature"));
 					final Method m = servant.getClass().getMethod(methodName, methodSignature);
 					if (m == null) {
 						throw new Exception("Bad Method Name :" + methodName);
 					}
 
-					final Object[] methodParams = (Object[]) PoolUtils.hexToObject(request
-							.getParameter("methodparameters"));
+					final Object[] methodParams = (Object[]) PoolUtils.hexToObject(request.getParameter("methodparameters"));
 
 					final Object[] resultHolder = new Object[1];
 					Runnable rmiRunnable = new Runnable() {
 						public void run() {
 							try {
+								if (_rgui!=null) _rgui.getRLock().lock();
 								resultHolder[0] = m.invoke(servant, methodParams);
 								if (resultHolder[0] == null)
 									resultHolder[0] = RMICALL_DONE;
@@ -237,6 +259,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								} else {
 									resultHolder[0] = e;
 								}
+							} finally {
+								if (_rgui!=null) _rgui.getRLock().unlock();
 							}
 						}
 					};
@@ -280,8 +304,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 				}
 
 				if (command.equals("interrupt")) {
-					final Vector<Thread> tvec = (Vector<Thread>) ((ThreadsHolder) session.getAttribute("threads"))
-							.getThreads().clone();
+					final Vector<Thread> tvec = (Vector<Thread>) ((ThreadsHolder) session.getAttribute("threads")).getThreads().clone();
 					for (int i = 0; i < tvec.size(); ++i) {
 						try {
 							tvec.elementAt(i).interrupt();
@@ -290,29 +313,30 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						}
 					}
 					stop[0] = true;
-					((Vector<Thread>) ((ThreadsHolder) session.getAttribute("threads")).getThreads())
-							.removeAllElements();
+					((Vector<Thread>) ((ThreadsHolder) session.getAttribute("threads")).getThreads()).removeAllElements();
 					result = null;
 					break;
 				} else if (command.equals("saveimage")) {
-					UserUtils.saveWorkspace((String) session.getAttribute("LOGIN"), (RServices) session
-							.getAttribute("R"));
+					UserUtils.saveWorkspace((String) session.getAttribute("LOGIN"), (RServices) session.getAttribute("R"));
 					result = null;
 					break;
 				} else if (command.equals("loadimage")) {
-					UserUtils.loadWorkspace((String) session.getAttribute("LOGIN"), (RServices) session
-							.getAttribute("R"));
+					UserUtils.loadWorkspace((String) session.getAttribute("LOGIN"), (RServices) session.getAttribute("R"));
 					result = null;
 					break;
 				} else if (command.equals("newdevice")) {
-					GDDevice deviceProxy=((RServices) session	.getAttribute("R")).newDevice(Integer.decode(request.getParameter("width")), Integer.decode(request.getParameter("height")));
-					String deviceName="device"+"_"+deviceProxy.getDeviceNumber();
-					System.out.println("deviceName="+deviceName);
-					session.setAttribute(deviceName, deviceProxy);
-					result = deviceName;
-					break;
+					try {
+						if (_rgui!=null) _rgui.getRLock().lock();
+						GDDevice deviceProxy=((RServices) session	.getAttribute("R")).newDevice(Integer.decode(request.getParameter("width")), Integer.decode(request.getParameter("height")));
+						String deviceName = "device" + "_" + deviceProxy.getDeviceNumber();
+						System.out.println("deviceName=" + deviceName);
+						session.setAttribute(deviceName, deviceProxy);
+						result = deviceName;
+						break;
+					} finally {
+						if (_rgui!=null) _rgui.getRLock().unlock();
+					}
 				}
-				
 
 			} while (true);
 
@@ -329,8 +353,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
 

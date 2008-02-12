@@ -16,7 +16,6 @@
 package http;
 
 import graphics.pop.GDDevice;
-
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -25,9 +24,9 @@ import java.util.HashMap;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
@@ -47,10 +46,12 @@ public class RHttpProxy {
 			Object result = null;
 			try {
 				getSession = new GetMethod(url
-						+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION) ? "" : ";jsessionid=" + sessionId)
 						+ "?method=logon&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd)
-						+ "&options=" + PoolUtils.objectToHex(options));
-				mainHttpClient = new HttpClient();
+						+ "&options=" + PoolUtils.objectToHex(options));	
+				if (sessionId != null && !sessionId.equals("")) {
+					getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					getSession.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+				}
 				mainHttpClient.executeMethod(getSession);
 				result = new ObjectInputStream(getSession.getResponseBodyAsStream()).readObject();
 			} catch (Exception e) {
@@ -74,9 +75,12 @@ public class RHttpProxy {
 		GetMethod getLogOut = null;
 		try {
 			Object result = null;
-			mainHttpClient = new HttpClient();
 			getLogOut = new GetMethod(url
-					+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION) ? "" : ";jsessionid=" + sessionId) + "?method=logoff");
+					+ "?method=logoff");
+			if (sessionId != null && !sessionId.equals("")) {
+				getLogOut.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+				getLogOut.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+			}
 			try {
 				mainHttpClient.executeMethod(getLogOut);
 				result = new ObjectInputStream(getLogOut.getResponseBodyAsStream()).readObject();
@@ -103,8 +107,7 @@ public class RHttpProxy {
 		try {
 			Object result = null;
 			try {
-				postPush = new PostMethod(url
-						+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION) ? "" : ";jsessionid=" + sessionId)
+				postPush = new PostMethod(url						
 						+ "?method=invoke");
 				NameValuePair[] data = { new NameValuePair("servantname", PoolUtils.objectToHex(servantName)),
 						new NameValuePair("methodname", PoolUtils.objectToHex(methodName)),
@@ -112,6 +115,10 @@ public class RHttpProxy {
 						new NameValuePair("methodparameters", PoolUtils.objectToHex(methodParameters)) };
 				postPush.setRequestBody(data);
 
+				if (sessionId != null && !sessionId.equals("")) {
+					postPush.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					postPush.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+				}
 				httpClient.executeMethod(postPush);
 				result = new ObjectInputStream(postPush.getResponseBodyAsStream()).readObject();
 			} catch (Exception e) {
@@ -151,9 +158,12 @@ public class RHttpProxy {
 			Object result = null;
 			mainHttpClient = new HttpClient();
 			getInterrupt = new GetMethod(url
-					+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION)? "" : ";jsessionid=" + sessionId)
 					+ "?method=interrupt");
 			try {
+				if (sessionId != null && !sessionId.equals("")) {
+					getInterrupt.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					getInterrupt.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+				}
 				mainHttpClient.executeMethod(getInterrupt);
 				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
 			} catch (Exception e) {
@@ -178,10 +188,13 @@ public class RHttpProxy {
 			Object result = null;
 			mainHttpClient = new HttpClient();
 			getNewDevice = new GetMethod(url
-					+ (sessionId == null || sessionId.equals("") || sessionId.equals(FAKE_SESSION)? "" : ";jsessionid=" + sessionId)
 					+ "?method=newdevice" +
 					"&width="+width+"&height="+height);
 			try {
+				if (sessionId != null && !sessionId.equals("")) {
+					getNewDevice.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					getNewDevice.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+				}
 				mainHttpClient.executeMethod(getNewDevice);
 				result = new ObjectInputStream(getNewDevice.getResponseBodyAsStream()).readObject();
 			} catch (Exception e) {
