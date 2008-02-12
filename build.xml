@@ -741,6 +741,7 @@
 				<include name="**/*.r"/>
 				<include name="**/*.png"/>
 				<include name="**/*.gif"/>
+				<include name="**/*.html"/>
 			</fileset>
 			
 			<fileset dir="src_client">
@@ -750,6 +751,7 @@
 				<include name="**/*.r"/>
 				<include name="**/*.png"/>
 				<include name="**/*.gif"/>
+				<include name="**/*.html"/>
 			</fileset>
 			
 			

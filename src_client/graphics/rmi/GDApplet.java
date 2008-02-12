@@ -179,7 +179,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		@Override
 		public void lock() {
 			super.lock();
-			if (isCollaborativeMode()) {
+			if (_mode==HTTP_MODE) {
 				try {
 					_currentDevice.setAsCurrentDevice();
 				} catch (Exception e) {
@@ -270,7 +270,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					System.out.println("properties:" + properties + "  server: " + srv);
 					srv.addServlet("/classes/", new http.local.LocalClassServlet());
 					srv.addServlet("/graphics/", new http.local.LocalGraphicsServlet(GDApplet.this));
-					srv.addServlet("/cmd/", new http.local.LocalCommandServlet(GDApplet.this));
+					srv.addServlet("/cmd/", new http.CommandServlet(GDApplet.this));
 					
 					/*
 					RServices r = null;

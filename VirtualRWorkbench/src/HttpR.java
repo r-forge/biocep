@@ -31,6 +31,22 @@ import http.RHttpProxy;
 public class HttpR {
 
 	public static void main(String[] args) throws Throwable {
+		{
+			final String cmdUrl = "http://127.0.0.1:9999/cmd";
+			HashMap<String, Object> options = new HashMap<String, Object>();
+			options.put("ooo", "iiii");
+			final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
+			
+			System.out.println("session id : "+sessionId);
+			
+			RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", RServices.class,
+					new HttpClient(new MultiThreadedHttpConnectionManager()));
+			
+		r.consoleSubmit("a<-100");			
+			RHttpProxy.logOff(cmdUrl, sessionId);
+			System.exit(0);
+		}
+		
 		final String cmdUrl = System.getProperty("url");
 		HashMap<String, Object> options = new HashMap<String, Object>();
 		options.put("panel.width", new Integer(400));
