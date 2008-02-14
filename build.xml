@@ -671,7 +671,7 @@
 		<echo message="${basedir}"/>
 		
 		<javac
-			srcdir="src_rpf_common:src:rwebservices:src_masq:src_jgd"
+			srcdir="src_rpf_common:src:src_patch_RWebSerivces:src_masq:src_patch_rJava:src_patch_JavaGD"
 			destdir="binsrv" debug="true" source="1.5" target="1.5">
 			<classpath>
 				<pathelement path="${JRI_JAR}"/>
@@ -715,7 +715,7 @@
 		<echo message="${basedir}"/>
 		
 		<javac
-			srcdir="src_rpf_common:src_rpf:src:src_client:rwebservices:src_masq:src_jgd:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"
+			srcdir="src_rpf_common:src_rpf:src:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"
 			destdir="bin" debug="true" source="1.5" target="1.5">
 			<classpath>
 				<pathelement path="${JRI_JAR}"/>
