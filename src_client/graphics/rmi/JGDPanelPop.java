@@ -67,8 +67,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private boolean _stopResizeThread = false;
 	private Thread _popThread = null;
 	private Thread _resizeThread = null;
-	final private static double fx_MAX = 5;
-	final private static double fy_MAX = 5;
+	final private static double fx_MAX = 1000000;
+	final private static double fy_MAX = 1000000;
 	private double _w = Double.NaN;
 	private double _h = Double.NaN;
 	private double _x0 = Double.NaN;
@@ -87,7 +87,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	public static final int INTERACTOR_SCROLL_LEFT_RIGHT = 7;
 	public static final int INTERACTOR_SCROLL_UP_DOWN = 8;
 	public static final int INTERACTOR_SCROLL = 9;
-	// public static final int INTERACTOR_TRACKER = 10;
 
 	private int _interactor = INTERACTOR_NULL;
 	private boolean _showCoordinates = false;
@@ -457,6 +456,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						_y0 = _h / 2;
 					if (_y0 > ((_h * _fy) - _h / 2))
 						_y0 = ((_h * _fy) - _h / 2);
+					recreateBufferedImage();
 					repaint();
 				} else if (((_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
 						|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT || (_interactor == INTERACTOR_NULL && _showCoordinates)) && _mouseStartPosition != null)) {
@@ -662,19 +662,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						_l = accurateEvents;
 					}
 				}
-
-				if (getWidth() > 0 && getHeight() > 0) {
-
-					bufferedImage = null;
-					Runtime.getRuntime().gc();
-					bufferedImage = new BufferedImage((int) (getWidth() * _fx), (int) (getHeight() * _fy), BufferedImage.TYPE_INT_RGB);
-					Graphics2D g2d = bufferedImage.createGraphics();
-					p(g2d);
-					g2d.dispose();
-
-				} else {
-					bufferedImage = null;
-				}
+				recreateBufferedImage();
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
 						repaint();
@@ -686,6 +674,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		}
 	}
 
+	
 	public void resizeLater(final Runnable preResizeAction) {
 		new Thread(new Runnable() {
 			
@@ -718,6 +707,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					updateRatios();
 				}
 
+				recreateBufferedImage();
+				
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
 						repaint();
@@ -794,6 +785,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		if (_x0 < _w / 2) {
 			_x0 = _w / 2;
 		}
+		recreateBufferedImage();
 		repaint();
 	}
 
@@ -803,6 +795,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		if (_x0 > (_w * _fx) - _w / 2) {
 			_x0 = (_w * _fx) - _w / 2;
 		}
+		recreateBufferedImage();
 		repaint();
 	}
 
@@ -813,6 +806,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		if (_y0 < _h / 2) {
 			_y0 = _h / 2;
 		}
+		recreateBufferedImage();
 		repaint();
 	}
 
@@ -822,6 +816,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		if (_y0 > (_h * _fy) - _h / 2) {
 			_y0 = (_h * _fy) - _h / 2;
 		}
+		recreateBufferedImage();
 		repaint();
 	}
 
@@ -833,17 +828,35 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		return new Dimension(_prefSize);
 	}
 
+	synchronized public void recreateBufferedImage() {
+		if (getWidth() > 0 && getHeight() > 0) {
+			bufferedImage = null;
+			Runtime.getRuntime().gc();
+			//bufferedImage = new BufferedImage((int) (getWidth() * _fx), (int) (getHeight() * _fy), BufferedImage.TYPE_INT_RGB);
+			bufferedImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);					
+			Graphics2D g2d = bufferedImage.createGraphics();
+			p(g2d);
+			g2d.dispose();
+	
+		} else {
+			bufferedImage = null;
+		}
+	}
+	
 	private void p(Graphics2D g) {
 		if (_forceAntiAliasing) {
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		}
 		int i = 0, j = _l.size();
 		g.setFont(_gs.f);
-		g.setClip(0, 0, (int) (getWidth() * _fx), (int) (getHeight() * _fy)); // reset
+		//g.setClip(0, 0, (int) (getWidth() * _fx), (int) (getHeight() * _fy)); // reset
+		g.setClip(0, 0, getWidth(), getHeight()); // reset
 		// clipping
 		// rect
 		g.setColor(Color.white);
-		g.fillRect(0, 0, (int) (getWidth() * _fx), (int) (getHeight() * _fy));
+		g.fillRect(0, 0, getWidth(), getHeight());
+		
+		g.translate(-(_x0 - getWidth() / 2), -(_y0 - getHeight() / 2));
 		while (i < j) {
 			GDObject o = (GDObject) _l.elementAt(i++);
 			if (o instanceof GDActionMarker) {
@@ -873,40 +886,22 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			_lastResizeTime = System.currentTimeMillis();
 			_lastSize = d;
 		}
-
+		Graphics2D g2=(Graphics2D) g;
+		
 		if (bufferedImage != null) {
-			((Graphics2D) g).setColor(Color.white);
-			((Graphics2D) g).setBackground(Color.white);
-			((Graphics2D) g).fillRect(0, 0, getWidth(), getHeight());
-			((Graphics2D) g).drawRenderedImage(bufferedImage, new AffineTransform(1, 0, 0, 1, -(_x0 - getWidth() / 2), -(_y0 - getHeight() / 2)));
+			g2.setColor(Color.white);
+			g2.setBackground(Color.white);
+			g2.fillRect(0, 0, getWidth(), getHeight());			
+			//((Graphics2D) g).drawRenderedImage(bufferedImage, new AffineTransform(1, 0, 0, 1, -(_x0 - getWidth() / 2), -(_y0 - getHeight() / 2)));
+			g2.drawRenderedImage(bufferedImage, null);
+			
 		} else {
-			((Graphics2D) g).setColor(Color.white);
-			((Graphics2D) g).setBackground(Color.white);
-			((Graphics2D) g).fillRect(0, 0, getWidth(), getHeight());
+			g2.setColor(Color.white);
+			g2.setBackground(Color.white);
+			g2.fillRect(0, 0, getWidth(), getHeight());
 		}
 
 		if (mouseInside && mouseLocation != null) {
-
-			/*
-			 * if (_showCoordinates && (_interactor == INTERACTOR_NULL ||
-			 * _interactor == INTERACTOR_ZOOM_IN_OUT || _interactor ==
-			 * INTERACTOR_ZOOM_IN_OUT_X || _interactor ==
-			 * INTERACTOR_ZOOM_IN_OUT_Y)) { ((Graphics2D)
-			 * g).setColor(_interactor == INTERACTOR_NULL ? Color.red :
-			 * Color.black); ((Graphics2D) g).setStroke(new BasicStroke(1,
-			 * BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4,
-			 * 4 }, 20)); ((Graphics2D) g).drawLine(0, (int)
-			 * mouseLocation.getY(), getWidth(), (int) mouseLocation.getY());
-			 * ((Graphics2D) g).drawLine((int) mouseLocation.getX(), 0, (int)
-			 * mouseLocation.getX(), getHeight()); if (realLocations != null) {
-			 * ((Graphics2D) g).setColor(Color.black); ((Graphics2D)
-			 * g).drawString("X : " + getRealX(mouseLocation.getX()), (int)
-			 * mouseLocation.getX() + 16, (int) mouseLocation.getY() - 6);
-			 * ((Graphics2D) g).drawString("Y : " +
-			 * getRealY(mouseLocation.getY()), (int) mouseLocation.getX() + 16,
-			 * (int) mouseLocation.getY() + ((Graphics2D)
-			 * g).getFontMetrics().getHeight() + 2); } }
-			 */
 
 			if (_mouseStartPosition != null) {
 
