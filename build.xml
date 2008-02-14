@@ -672,8 +672,12 @@
 	<target name="srv">
 		<echo message="${basedir}"/>
 		
+		<property 
+			name="src_srv_target" 
+			value="src_rpf_common:src_client:src_server_common:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>
+		
 		<javac
-			srcdir="src_rpf_common:src_server_common:src_server:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD"
+			srcdir="${src_srv_target}"
 			destdir="binsrv" debug="true" source="1.5" target="1.5">
 			<classpath>
 				<pathelement path="${JRI_JAR}"/>
@@ -683,26 +687,23 @@
 			</classpath>
 		</javac>
 		
-		<copy todir="binsrv">
-			
-			<fileset dir="src">
-				<include name="**/*.xml"/>
-				<include name="**/*.R"/>
-				<include name="**/*.r"/>
-				<include name="**/*.png"/>
-				<include name="**/*.gif"/>
-			</fileset>
-			
-			<fileset dir="src_rpf">
-				<include name="**/*.*"/>
-				<exclude name="**/*.java"/>
-			</fileset>
-			
-			<fileset dir="src_patch_RWebServices">
-				<include name="**/*.R"/>
-			</fileset>
-			
-		</copy>
+		<for list="${src_srv_target}" param="source" delimiter=":">
+		  <sequential>
+			<copy todir="binsrv">				
+				<fileset dir="@{source}">
+					<include name="**/*.xml"/>
+					<include name="**/*.props"/>
+					<include name="**/*.properties"/>
+					<include name="**/*.R"/>
+					<include name="**/*.r"/>
+					<include name="**/*.png"/>
+					<include name="**/*.gif"/>
+					<include name="**/*.html"/>
+				</fileset>				
+			</copy>
+		  </sequential>
+		</for>
+				
 		
 		<jar destfile="${SRV_JAR}">
 			<fileset dir="binsrv"/>
@@ -714,10 +715,12 @@
 	</target>
 
 	<target name="compile" depends="compile.rpf">
+		
 		<echo message="${basedir}"/>
+		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>
 		
 		<javac
-			srcdir="src_rpf_common:src_rpf:src_server_common:src_server:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"
+			srcdir="${src_compile_target}"
 			destdir="bin" debug="true" source="1.5" target="1.5">
 			<classpath>
 				<pathelement path="${JRI_JAR}"/>
@@ -733,7 +736,7 @@
 		<rmic classpath="bin" base="bin" classname="server.GraphicNotifierImpl"/>
 		<rmic classpath="bin" base="bin" classname="server.GDDeviceImpl"/>
 		
-		<for list="src_rpf_common,src_rpf,src_server_common,src_server,src_client,src_patch_rJava,src_patch_JavaGD,src_patch_RWebServices,src_patch_jedit,src_patch_jspreadsheet,src_patch_joi" param="source">
+		<for list="${src_compile_target}" param="source" delimiter=":">
 		  <sequential>
 			<copy todir="bin">				
 				<fileset dir="@{source}">
