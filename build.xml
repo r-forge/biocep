@@ -696,7 +696,7 @@
 				<exclude name="**/*.java"/>
 			</fileset>
 			
-			<fileset dir="rwebservices">
+			<fileset dir="src_patch_RWebServices">
 				<include name="**/*.R"/>
 			</fileset>
 			
@@ -760,7 +760,7 @@
 				<exclude name="**/*.java"/>
 			</fileset>
 			
-			<fileset dir="rwebservices">
+			<fileset dir="src_patch_RWebServices">
 				<include name="**/*.R"/>
 			</fileset>
 			
