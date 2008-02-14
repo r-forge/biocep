@@ -126,6 +126,7 @@ import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
 import server.NoMappingAvailable;
+import server.DirectJNI;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
@@ -431,7 +432,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								if (getMode() == GDApplet.LOCAL_MODE) {
 
-									//r = DirectJNI.getInstance().getRServices();
+									r = DirectJNI.getInstance().getRServices();
+									/*
 									try {
 										r = ServerLauncher.createR();
 										_localRProcessId = r.getProcessId();
@@ -439,6 +441,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
+									*/
 
 								} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
 									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());

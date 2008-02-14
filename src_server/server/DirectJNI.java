@@ -46,7 +46,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
