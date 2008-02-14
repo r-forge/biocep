@@ -18,7 +18,7 @@
  * author Karim Chine   kchine@ebi.ac.uk
 -->
 
-<project name="MyProject" default="compile" basedir=".">
+<project name="BIOCEP" default="compile" basedir=".">
 	
 	<property environment="env"/>
 	
@@ -45,6 +45,8 @@
 	
 	<taskdef name="if" classpath="lib/beangenlibs/ant-contrib-1.0b3.jar"
 		classname="net.sf.antcontrib.logic.IfTask"/>
+	<taskdef name="for" classpath="lib/beangenlibs/ant-contrib-1.0b3.jar"
+			classname="net.sf.antcontrib.logic.ForTask"/>
 	
 	<target name="setWinAwareProps">
 		<if>
@@ -671,7 +673,7 @@
 		<echo message="${basedir}"/>
 		
 		<javac
-			srcdir="src_rpf_common:src:src_patch_RWebSerivces:src_masq:src_patch_rJava:src_patch_JavaGD"
+			srcdir="src_rpf_common:src_server_common:src_server:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD"
 			destdir="binsrv" debug="true" source="1.5" target="1.5">
 			<classpath>
 				<pathelement path="${JRI_JAR}"/>
@@ -715,7 +717,7 @@
 		<echo message="${basedir}"/>
 		
 		<javac
-			srcdir="src_rpf_common:src_rpf:src:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"
+			srcdir="src_rpf_common:src_rpf:src_server_common:src_server:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"
 			destdir="bin" debug="true" source="1.5" target="1.5">
 			<classpath>
 				<pathelement path="${JRI_JAR}"/>
@@ -730,48 +732,24 @@
 		<rmic classpath="bin" base="bin" classname="server.RNIImpl"/>
 		<rmic classpath="bin" base="bin" classname="server.GraphicNotifierImpl"/>
 		<rmic classpath="bin" base="bin" classname="server.GDDeviceImpl"/>
-	
 		
-		<copy todir="bin">
-			
-			<fileset dir="src">
-				<include name="**/*.xml"/>
-				<include name="**/*.properties"/>
-				<include name="**/*.R"/>
-				<include name="**/*.r"/>
-				<include name="**/*.png"/>
-				<include name="**/*.gif"/>
-				<include name="**/*.html"/>
-			</fileset>
-			
-			<fileset dir="src_client">
-				<include name="**/*.xml"/>
-				<include name="**/*.properties"/>
-				<include name="**/*.R"/>
-				<include name="**/*.r"/>
-				<include name="**/*.png"/>
-				<include name="**/*.gif"/>
-				<include name="**/*.html"/>
-			</fileset>
-			
-			
-			<fileset dir="src_rpf">
-				<include name="**/*.*"/>
-				<exclude name="**/*.java"/>
-			</fileset>
-			
-			<fileset dir="src_patch_RWebServices">
-				<include name="**/*.R"/>
-			</fileset>
-			
-			<fileset dir="src_patch_jedit">
-				<include name="**/*.xml"/>
-				<include name="**/*.props"/>
-				<include name="**/*.png"/>
-			</fileset>
-			
-		</copy>
-		
+		<for list="src_rpf_common,src_rpf,src_server_common,src_server,src_client,src_patch_rJava,src_patch_JavaGD,src_patch_RWebServices,src_patch_jedit,src_patch_jspreadsheet,src_patch_joi" param="source">
+		  <sequential>
+			<copy todir="bin">				
+				<fileset dir="@{source}">
+					<include name="**/*.xml"/>
+					<include name="**/*.props"/>
+					<include name="**/*.properties"/>
+					<include name="**/*.R"/>
+					<include name="**/*.r"/>
+					<include name="**/*.png"/>
+					<include name="**/*.gif"/>
+					<include name="**/*.html"/>
+				</fileset>				
+			</copy>
+		  </sequential>
+		</for>
+				
 		<jar destfile="${CORE_JAR}">
 			<fileset dir="bin"/>
 		</jar>
