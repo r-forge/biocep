@@ -1,25 +1,16 @@
 package server;
 
+import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
+import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 import static uk.ac.ebi.microarray.pools.ServerDefaults._servantPoolPrefix;
-
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLClassLoader;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Vector;
-
 import org.apache.commons.logging.Log;
-
-import uk.ac.ebi.microarray.pools.MainServer;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationListener;
-import uk.ac.ebi.microarray.pools.YesSecurityManager;
-import uk.ac.ebi.microarray.pools.db.DBLayer;
-import uk.ac.ebi.microarray.pools.db.NodeDataDB;
 
 public class MainRServer {
 	
@@ -31,17 +22,13 @@ public class MainRServer {
 
 	private static String servantName = null;
 
-	private static final Log log = org.apache.commons.logging.LogFactory.getLog(MainServer.class);
+	private static final Log log = org.apache.commons.logging.LogFactory.getLog(MainRServer.class);
 
 	private static ManagedServant mservant = null;
 	private static ServantCreationListener servantCreationListener = null;
 	public static void main(String[] args) throws Exception {
 
 		try {
-
-			if (System.getSecurityManager() == null) {
-				System.setSecurityManager(new YesSecurityManager());
-			}
 
 			if (System.getProperty("autoname") != null && System.getProperty("autoname").equalsIgnoreCase("true")) {
 				log.info("Instantiating " + _mainServantClassName + " with autonaming, prefix " + _servantPoolPrefix);
@@ -55,7 +42,7 @@ public class MainRServer {
 						+ _servantPoolPrefix);
 			}
 
-			if (rmiRegistry == null) rmiRegistry = DBLayer.getRmiRegistry();
+			if (rmiRegistry == null) rmiRegistry = LocateRegistry.getRegistry(_registryHost, _registryPort);
 			System.out.println("### code base:"+System.getProperty("java.rmi.server.codebase"));
 			
 			
@@ -88,33 +75,6 @@ public class MainRServer {
 
 			String sname = mservant.getServantName();
 			log.info("sname :::" + sname);
-			if (rmiRegistry instanceof DBLayer) {
-				if (System.getProperty("node") != null && !System.getProperty("node").equalsIgnoreCase("")) {
-					((DBLayer) rmiRegistry).updateServantNodeName(sname, System.getProperty("node"));
-				} else {
-					Vector<NodeDataDB> nodes = ((DBLayer) rmiRegistry).getNodeData("");
-					for (int i = 0; i < nodes.size(); ++i) {
-						String nodeName = nodes.elementAt(i).getNodeName();
-						String nodeIp = nodes.elementAt(i).getHostIp();
-						String nodePrefix = nodes.elementAt(i).getPoolPrefix();
-						if (sname.startsWith(nodePrefix) && nodeIp.equals(PoolUtils.getHostIp())) {
-							((DBLayer) rmiRegistry).updateServantNodeName(sname, nodeName);
-							break;
-						}
-					}
-				}
-
-				HashMap<String, Object> attributes = new HashMap<String, Object>();
-				Enumeration<Object> sysPropKeys = (Enumeration<Object>) System.getProperties().keys();
-				while (sysPropKeys.hasMoreElements()) {
-					String key = (String) sysPropKeys.nextElement();
-					if (key.startsWith("attr.")) {
-						attributes.put(key, System.getProperty(key));
-					}
-				}
-
-				((DBLayer) rmiRegistry).updateServantAttributes(sname, attributes);
-			}
 			log.info("Servant " + sname + " instantiated successfully.");
 
 		} catch (InvocationTargetException ite) {
