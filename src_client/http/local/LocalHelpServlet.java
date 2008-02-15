@@ -15,6 +15,8 @@
  */
 package http.local;
 
+import graphics.rmi.RGui;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
@@ -29,13 +31,14 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
  * @author Karim Chine   kchine@ebi.ac.uk
  */
 public class LocalHelpServlet extends javax.servlet.http.HttpServlet {
-	private RServices _r;
+	
+	private RGui _rgui;
 
-	public LocalHelpServlet(RServices r) {
+	public LocalHelpServlet(RGui rgui) {
 		super();
-		_r = r;
+		_rgui=rgui;
 	}
-
+	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
@@ -66,7 +69,7 @@ public class LocalHelpServlet extends javax.servlet.http.HttpServlet {
 				}
 
 				//System.out.println("uri="+uri);
-				result = _r.getRHelpFile(helpuri);
+				result = _rgui.getR().getRHelpFile(helpuri);
 
 				break;
 

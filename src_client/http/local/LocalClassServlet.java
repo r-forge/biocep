@@ -2,6 +2,8 @@ package http.local;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -46,10 +48,16 @@ public class LocalClassServlet extends HttpServlet {
 			//System.out.println("buffer length : " + buffer.length);
 			if (url.endsWith(".class")) resp.setContentType("application/java");
 			else resp.setContentType("text/plain");
+			//resp.setContentLength(buffer.length);
+			//resp.getOutputStream().flush();
 			resp.getOutputStream().write(buffer);
 			resp.getOutputStream().flush();
 			resp.getOutputStream().close();
 		}
 	}
 
+	public static void main(String[] args) throws Exception {
+		URLClassLoader cl=new URLClassLoader(new URL[]{new URL("http://127.0.0.1:9999/classes/")},null);
+		System.out.println(cl.getResource("rjbmaps.properties"));		
+	}
 }

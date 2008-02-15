@@ -17,6 +17,7 @@ package generator;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.InputStream;
@@ -52,6 +53,7 @@ import org.rosuda.JRI.Rengine;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import uk.ac.ebi.microarray.pools.PoolUtils;
 import de.hunsicker.jalopy.plugin.ant.AntPlugin;
 import server.DirectJNI;
 import server.ExecutionUnit;
@@ -418,6 +420,20 @@ public class Gen {
 
 		HashMap<String, String> marker = new HashMap<String, String>();
 		marker.put("RJBMAPPINGJAR", "TRUE");
+				
+		
+		Properties props=new Properties();		
+		props.put("PACKAGE_NAMES", PoolUtils.objectToHex(DirectJNI._packageNames) );
+		props.put("S4BEANS_MAP", PoolUtils.objectToHex(DirectJNI._s4BeansMapping) );
+		props.put("S4BEANS_REVERT_MAP", PoolUtils.objectToHex(DirectJNI._s4BeansMappingRevert) );
+		props.put("FACTORIES_MAPPING", PoolUtils.objectToHex(DirectJNI._factoriesMapping) );		
+		props.put("S4BEANS_HASH", PoolUtils.objectToHex(DirectJNI._s4BeansHash) );
+		props.put("R_PACKAGE_INTERFACES_HASH", PoolUtils.objectToHex(DirectJNI._rPackageInterfacesHash) );
+		props.put("ABSTRACT_FACTORIES", PoolUtils.objectToHex(DirectJNI._abstractFactories) );		
+		FileOutputStream fos=new FileOutputStream(GEN_ROOT_SRC+"/"+"rjbmaps.properties");
+		props.storeToXML(fos, null);
+		fos.close();
+		
 		jar(GEN_ROOT_SRC, GEN_ROOT_LIB + FILE_SEPARATOR + MAPPING_JAR_NAME, marker);
 
 		if (_webPublishingEnabled)
@@ -568,7 +584,7 @@ public class Gen {
 			}
 		}
 
-		jarTask.setIncludes("**/*.java,**/*.class, **/*.R, **/*.xml, **/*.wsdl");
+		jarTask.setIncludes("**/*.java,**/*.class, **/*.R, **/*.xml, **/*.properties, **/*.wsdl");
 		jarTask.setExcludes("org/bioconductor/rserviceJms/**/*");
 
 		jarTask.init();

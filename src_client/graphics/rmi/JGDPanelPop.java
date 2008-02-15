@@ -31,7 +31,6 @@ import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.rmi.RemoteException;
@@ -458,10 +457,9 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						_y0 = ((_h * _fy) - _h / 2);
 					recreateBufferedImage();
 					repaint();
-				} else if (((_interactor == INTERACTOR_ZOOM_IN_OUT_SELECT || _interactor == INTERACTOR_ZOOM_IN_OUT_X_SELECT
-						|| _interactor == INTERACTOR_ZOOM_IN_OUT_Y_SELECT || (_interactor == INTERACTOR_NULL && _showCoordinates)) && _mouseStartPosition != null)) {
+				} else if ((_interactor == INTERACTOR_NULL && _showCoordinates) || _interactor != INTERACTOR_NULL ) {					
 					repaint();
-				}
+				} 
 			}
 
 			public void mouseMoved(MouseEvent e) {

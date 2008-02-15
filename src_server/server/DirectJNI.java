@@ -24,7 +24,9 @@ import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -97,6 +99,7 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.RemotePanel;
 import util.Utils;
+import static server.Globals.GEN_ROOT_SRC;
 import static server.RConst.*;
 
 /**
@@ -106,13 +109,15 @@ public class DirectJNI {
 
 	public static ClassLoader _mappingClassLoader = DirectJNI.class.getClassLoader();
 	public static ClassLoader _resourcesClassLoader = DirectJNI.class.getClassLoader();
+	
 	public static Vector<String> _abstractFactories = new Vector<String>();
 	public static HashMap<String, String> _factoriesMapping = new HashMap<String, String>();
 	public static HashMap<String, String> _s4BeansMappingRevert = new HashMap<String, String>();
 	public static HashMap<String, String> _s4BeansMapping = new HashMap<String, String>();
-	public static HashMap<String, Class<?>> _s4BeansHash = new HashMap<String, Class<?>>();
+	public static Vector<String> _packageNames = new Vector<String>();	
+	public static HashMap<String, Class<?>> _s4BeansHash = new HashMap<String, Class<?>>();	
 	public static HashMap<String, Vector<Class<?>>> _rPackageInterfacesHash = new HashMap<String, Vector<Class<?>>>();
-	public static Vector<String> _packageNames = new Vector<String>();
+	
 	private static final String V_NAME_PREFIXE = "V__";
 	private static final String V_TEMP_PREFIXE = V_NAME_PREFIXE + "TEMP__";
 	private static final String PENV = ".PrivateEnv";
@@ -2719,6 +2724,36 @@ public class DirectJNI {
 		DirectJNI.getInstance().upgdateBootstrapObjects();
 
 	}
+	
+	private static void init(ClassLoader cl) throws Exception {
+
+		Properties props=new Properties();
+		InputStream is=cl.getResourceAsStream("rjbmaps.properties");
+		//System.out.println("url:"+cl.getResource("/rjbmaps.properties"));
+		System.out.println("####### is:"+is);
+		
+		
+		props.loadFromXML(is);		
+		DirectJNI._packageNames=(Vector<String>)PoolUtils.hexToObject((String)props.get("PACKAGE_NAMES"));		
+		DirectJNI._s4BeansMapping= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("S4BEANS_MAP"));
+		DirectJNI._s4BeansMappingRevert= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("S4BEANS_REVERT_MAP"));
+		DirectJNI._factoriesMapping= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("FACTORIES_MAPPING"));		
+		DirectJNI._s4BeansHash = (HashMap<String, Class<?>>)PoolUtils.hexToObject((String)props.get("S4BEANS_HASH"));	
+		DirectJNI._rPackageInterfacesHash = (HashMap<String, Vector<Class<?>>>)PoolUtils.hexToObject((String)props.get("R_PACKAGE_INTERFACES_HASH"));
+		DirectJNI._abstractFactories= (Vector<String>)PoolUtils.hexToObject((String)props.get("ABSTRACT_FACTORIES"));
+		
+		log.info("<> rPackageInterfaces:" + DirectJNI._packageNames);
+		log.info("<> s4Beans MAP :" + DirectJNI._s4BeansMapping);
+		log.info("<> s4Beans Revert MAP :" + DirectJNI._s4BeansMappingRevert);
+		log.info("<> factories :" + DirectJNI._factoriesMapping);
+		
+		Thread.currentThread().setContextClassLoader(_resourcesClassLoader);
+		DirectJNI.getInstance().getRServices().sourceFromResource("/bootstrap.R");
+		DirectJNI.getInstance().initPackages();
+		DirectJNI.getInstance().upgdateBootstrapObjects();
+
+	}
+
 
 	private void upgdateBootstrapObjects() throws Exception {
 		RChar objs = (RChar) getRServices().evalAndGetObject(".PrivateEnv$ls(all.names=TRUE)");
@@ -2728,8 +2763,26 @@ public class DirectJNI {
 	}
 
 	static private void scanMapping() {
+		
 		if (!_initHasBeenCalled) {
 			_initHasBeenCalled = true;
+			
+			if (DirectJNI.class.getResource("rjbmaps.properties")!=null) {
+				System.out.println("<1> "+DirectJNI.class.getResource("rjbmaps.properties"));
+				_resourcesClassLoader = DirectJNI.class.getClassLoader();
+				try {init(DirectJNI.class.getClassLoader());} catch (Exception e) {e.printStackTrace();}
+				return;
+				
+			}  else if (System.getProperty("java.rmi.server.codebase") != null) {				
+				ClassLoader codebaseClassLoader=new URLClassLoader(PoolUtils.getURLS(System.getProperty("java.rmi.server.codebase")),DirectJNI.class.getClassLoader());
+				if (codebaseClassLoader.getResource("rjbmaps.properties")!=null) {
+					System.out.println("<2> "+codebaseClassLoader.getResource("/rjbmaps.properties"));
+					_resourcesClassLoader = codebaseClassLoader;
+					try {init(codebaseClassLoader);} catch (Exception e) {e.printStackTrace();}
+					return;
+				}
+			}
+			
 			boolean mappingJarFound = false;
 			try {
 
@@ -2781,13 +2834,19 @@ public class DirectJNI {
 
 				if (!mappingJarFound) {
 					URL bootstrap_url = DirectJNI.class.getResource("/bootstrap.R");
+					System.out.println("bootstrap_url: "+bootstrap_url);
 					if (bootstrap_url != null) {
 						String jarpath = bootstrap_url.toString();
-						jarpath = jarpath.substring(0, jarpath.indexOf('!')) + "!/";
-						_resourcesClassLoader = DirectJNI.class.getClassLoader();
-
-						log.info("Mapping Jar Found via class.getResource :" + jarpath);
-						init(new URL(jarpath));
+						if (jarpath.endsWith(".jar")) {
+							jarpath = jarpath.substring(0, jarpath.indexOf('!')) + "!/";
+							_resourcesClassLoader = DirectJNI.class.getClassLoader();	
+							log.info("Mapping Jar Found via class.getResource (in jar) :" + jarpath);
+							init(new URL(jarpath));
+						} else {
+							_resourcesClassLoader = DirectJNI.class.getClassLoader();	
+							log.info("Mapping Found via class.getResource (default class loader) :" + jarpath);
+							init(new URL(jarpath));
+						}
 					} else {
 						log.info("No Mapping Jar Found In Class Path");
 						_resourcesClassLoader = DirectJNI.class.getClassLoader();
@@ -2833,7 +2892,7 @@ public class DirectJNI {
 
 	synchronized public static void init(String instanceName) {
 		setInstanceName(instanceName);
-		//scanMapping();
+		scanMapping();
 	}
 
 	public static void init() {

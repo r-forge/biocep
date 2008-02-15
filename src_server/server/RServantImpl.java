@@ -98,8 +98,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 						.newInstance());
 			}
 
-			/*
-			
+		
 			if (System.getProperty("preprocess.help") != null
 					&& System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
 				new Thread(new Runnable() {
@@ -108,7 +107,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 					}
 				}).start();
 			}
-			*/
+		
 
 		
 			if (System.getProperty("apply.sandbox") != null
@@ -290,7 +289,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			Vector<Integer> devices=new Vector<Integer>();
 			for (Integer d:_deviceHashMap.keySet()) devices.add(d);
 			
-			System.out.println("ddddddd:"+devices);			
+			System.out.println("devices before reset:"+devices);			
 			
 			for (Integer d:devices) {
 				try {_deviceHashMap.get(d).dispose();} catch (Exception ex) {ex.printStackTrace();}
