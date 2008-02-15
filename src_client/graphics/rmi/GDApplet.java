@@ -125,8 +125,8 @@ import org.bioconductor.packages.rservices.RObject;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
-import server.NoMappingAvailable;
 import server.DirectJNI;
+import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
@@ -253,8 +253,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 				_mode = HTTP_MODE;
 			}
 		}
-
-		if (_mode == GDApplet.LOCAL_MODE || _mode == GDApplet.RMI_MODE) {
+	
+		if (_mode == LOCAL_MODE || _mode == RMI_MODE) {
 
 			new Thread(new Runnable() {
 				public void run() {
@@ -272,6 +272,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					srv.addServlet("/classes/", new http.local.LocalClassServlet());
 					srv.addServlet("/graphics/", new http.local.LocalGraphicsServlet(GDApplet.this));
 					srv.addServlet("/cmd/", new http.CommandServlet(GDApplet.this));
+					if (_mode==LOCAL_MODE) srv.addServlet("/helpme/", new http.local.LocalHelpServlet(GDApplet.this));
 					
 					/*
 					RServices r = null;
@@ -431,8 +432,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								RServices r = null;
 
 								if (getMode() == GDApplet.LOCAL_MODE) {
-
+									DirectJNI.init();	
 									r = DirectJNI.getInstance().getRServices();
+									
 									/*
 									try {
 										r = ServerLauncher.createR();
@@ -442,6 +444,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 										e.printStackTrace();
 									}
 									*/
+									
 
 								} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
 									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
