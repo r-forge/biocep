@@ -174,13 +174,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private int _lf;
 	private boolean _isBiocLiteSourced = false;
 	private GDDevice _currentDevice;
-	private String _localRProcessId=null;
+	private String _localRProcessId = null;
+	Acme.Serve.Serve _virtualizationLocalHttpServer = null;
+	Acme.Serve.Serve _codeLocalHttpServer = null;
 
 	private final ReentrantLock _protectR = new ReentrantLock() {
 		@Override
 		public void lock() {
 			super.lock();
-			if (_mode==HTTP_MODE) {
+			if (_mode == HTTP_MODE) {
 				try {
 					_currentDevice.setAsCurrentDevice();
 				} catch (Exception e) {
@@ -205,6 +207,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	};
 	private String[] _packageNameSave = new String[] { "" };
 	private String[] _expressionSave = new String[] { "" };
+	private String[] _httpPortSave = new String[] { "80" };
 	private ConsoleLogger _consoleLogger = new ConsoleLogger() {
 		public void printAsInput(String message) {
 			_consolePanel.print(message, null);
@@ -235,11 +238,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	public void init() {
 		super.init();
-		
+
 		if (getParameter("debug") != null && getParameter("debug").equalsIgnoreCase("true")) {
 			redirectIO();
 		}
-		
+
 		System.out.println("INIT starts");
 
 		if (getParameter("mode") == null) {
@@ -253,11 +256,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 				_mode = HTTP_MODE;
 			}
 		}
-	
+
 		if (_mode == LOCAL_MODE || _mode == RMI_MODE) {
 
 			new Thread(new Runnable() {
 				public void run() {
+					System.out.println("local Http port : " + GUtils.getLocalTomcatPort());
 					final Acme.Serve.Serve srv = new Acme.Serve.Serve() {
 						public void setMappingTable(PathTreeDictionary mappingtable) {
 							super.setMappingTable(mappingtable);
@@ -267,29 +271,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 					properties.put("port", GUtils.getLocalTomcatPort());
 					properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
 					srv.arguments = properties;
-
 					System.out.println("properties:" + properties + "  server: " + srv);
-					srv.addServlet("/classes/", new http.local.LocalClassServlet());
-					srv.addServlet("/graphics/", new http.local.LocalGraphicsServlet(GDApplet.this));
-					srv.addServlet("/cmd/", new http.CommandServlet(GDApplet.this));
-					if (_mode==LOCAL_MODE) srv.addServlet("/helpme/", new http.local.LocalHelpServlet(GDApplet.this));
+					srv.addServlet("/classes/", new http.local.LocalClassServlet());					
+					srv.addServlet("/helpme/", new http.local.LocalHelpServlet(GDApplet.this));
 					
-					/*
-					RServices r = null;
-					if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
-						r = DirectJNI.getInstance().getRServices();
-					} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
-						r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
-					} else {
-						try {
-							r = (RServices) PoolUtils.getRmiRegistry().lookup(System.getProperty("name"));
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}						
-					srv.addServlet("/helpme/", new LocalHelpServlet(r));
-					 */
-
 					Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 						public void run() {
 							try {
@@ -306,9 +291,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			new Thread(new Runnable() {
 				public void run() {
+					System.out.println("local rmiregistry port : " + GUtils.getLocalTomcatPort());
 					try {
 						LocateRegistry.createRegistry(GUtils.getLocalRmiRegistryPort());
-					}catch (Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -432,21 +418,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 								RServices r = null;
 
 								if (getMode() == GDApplet.LOCAL_MODE) {
-									/*
+									
 									DirectJNI.init();							
 									r = DirectJNI.getInstance().getRServices();
-									*/
 									
-									
+
+									/*
 									try {
 										r = ServerLauncher.createR();
 										_localRProcessId = r.getProcessId();
-										System.out.println("R Process Id :"+_localRProcessId);
+										System.out.println("R Process Id :" + _localRProcessId);
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
-									
-									
+									*/
 
 								} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
 									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
@@ -697,6 +682,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("playdemo"));
+					sessionMenu.addSeparator();
+					sessionMenu.add(_actions.get("runhttpserver"));
+					
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1103,6 +1091,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(helpMenu);
 
+			
+			
 			JScrollPane filesScrollPane = new JScrollPane(_filesTable);
 			filesScrollPane.addMouseListener(ml);
 			workingDirPanel.add(filesScrollPane, BorderLayout.CENTER);
@@ -1661,26 +1651,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 		System.out.println("destroy called on " + new Date());
 		if (_sessionId != null) {
 			try {
-				if (_mode == HTTP_MODE) {					
-					disposeDevices();					
+				if (_mode == HTTP_MODE) {
+					disposeDevices();
 					RHttpProxy.logOff(_commandServletUrl, _sessionId);
 				} else {
 					persistState();
 				}
 			} catch (TunnelingException e) {
 				// e.printStackTrace();
-			}
-			
-			if (_localRProcessId!=null) {
-				try {
-				if (PoolUtils.isWindowsOs()) { 
-					PoolUtils.killLocalWinProcess(_localRProcessId, true);
-				} else {
-					PoolUtils.killLocalUnixProcess(_localRProcessId, true);
-				}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 			}
 
 			noSession();
@@ -2237,10 +2215,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					final JGDPanelPop gp = (JGDPanelPop) graphicPanel;
 					new Thread(new Runnable() {
-						
+
 						public void run() {
 							SwingUtilities.invokeLater(new Runnable() {
-								
+
 								public void run() {
 									gp.fit();
 								}
@@ -2455,6 +2433,65 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+		_actions.put("runhttpserver", new AbstractAction("Run Http Server") {
+			public void actionPerformed(final ActionEvent e) {
+				new Thread(new Runnable() {
+					public void run() {
+
+						try {
+
+							while (true) {
+								GetExprDialog dialog = new GetExprDialog(" Run Http Server On Port : ", _httpPortSave);
+								dialog.setVisible(true);
+								if (dialog.getExpr() != null) {
+									try {
+										final int port = Integer.decode(dialog.getExpr());
+										if (PoolUtils.isPortInUse(port)) {
+											JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
+										} else {
+
+											new Thread(new Runnable() {
+												public void run() {
+													_virtualizationLocalHttpServer = new Acme.Serve.Serve() {
+														public void setMappingTable(PathTreeDictionary mappingtable) {
+															super.setMappingTable(mappingtable);
+														}
+													};
+													java.util.Properties properties = new java.util.Properties();
+													properties.put("port", port);
+													properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
+													_virtualizationLocalHttpServer.arguments = properties;
+													_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(GDApplet.this));
+													_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(GDApplet.this));
+													_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(GDApplet.this));
+													_virtualizationLocalHttpServer.serve();
+												}
+											}).start();
+											break;
+
+										}
+									} catch (Exception e) {
+										JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Bad Port", "", JOptionPane.ERROR_MESSAGE);
+										continue;
+									}
+
+								} else {
+									break;
+								}
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return _sessionId != null && _virtualizationLocalHttpServer == null;
+			}
+		});
 	}
 
 	public void saveimage() throws TunnelingException {
@@ -2538,12 +2575,40 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void noSession() {
+
+		if (_localRProcessId != null) {
+			try {
+				if (PoolUtils.isWindowsOs()) {
+					PoolUtils.killLocalWinProcess(_localRProcessId, true);
+				} else {
+					PoolUtils.killLocalUnixProcess(_localRProcessId, true);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (_virtualizationLocalHttpServer!=null) {
+			
+			try {
+				_virtualizationLocalHttpServer.notifyStop();
+			} catch (java.io.IOException ioe) {
+				ioe.printStackTrace();
+			}
+			
+			try {
+				_virtualizationLocalHttpServer.destroyAllServlets();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		_sessionId = null;
 		_rForConsole = null;
 		_rForPopCmd = null;
 		_rForFiles = null;
-		_isBiocLiteSourced = false;		
-		_localRProcessId=null;
+		_isBiocLiteSourced = false;
+		_localRProcessId = null;
+		_virtualizationLocalHttpServer=null;
 	}
 
 	class GetExprDialog extends JDialog {
@@ -2767,17 +2832,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return _defaultHelpUrl;
 	}
 
-	
 	public RServices getR() {
 		return _rForConsole;
 	}
 
-	
 	public ReentrantLock getRLock() {
 		return _protectR;
 	}
 
-	
 	public ConsoleLogger getConsoleLogger() {
 		return _consoleLogger;
 	}
@@ -2790,12 +2852,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return _mode == HTTP_MODE && _login.indexOf("@@") != -1;
 	}
 
-	
 	public GDDevice getCurrentDevice() {
 		return _currentDevice;
 	}
 
-	
 	public void setCurrentDevice(GDDevice device) {
 
 		JGDPanelPop lastCurrentPanel = getCurrentJGPanelPop();
@@ -2832,9 +2892,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}
 		}
-
 	}
-
 
 	public Component getRootComponent() {
 		return getContentPane();

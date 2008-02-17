@@ -93,6 +93,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 					String login = (String) PoolUtils.hexToObject(request.getParameter("login"));
 					String pwd = (String) PoolUtils.hexToObject(request.getParameter("pwd"));
+					System.out.println("login :"+login);
+					System.out.println("pwd :"+pwd);
 					HashMap<String, Object> options = (HashMap<String, Object>) PoolUtils.hexToObject(request.getParameter("options"));
 					if (options == null)
 						options = new HashMap<String, Object>();

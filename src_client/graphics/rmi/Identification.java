@@ -26,6 +26,7 @@ class Identification {
 	private boolean _nopool;
 	private boolean _waitForResource;
 	private boolean _playDemo;
+	
 
 	public Identification(String user, String pwd, boolean persistentWorkspace, boolean nopool,
 			boolean waitForResource, boolean playDemo) {

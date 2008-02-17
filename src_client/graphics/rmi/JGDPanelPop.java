@@ -181,6 +181,14 @@ public class JGDPanelPop extends JBufferedImagePanel {
 							if (_fx == fx_MAX && _fy == fy_MAX) {
 								Toolkit.getDefaultToolkit().beep();
 							} else {
+								
+								/*
+								if (e.getX()>_w/2) scrollXRight((e.getX()-_w/2));
+								if (e.getX()<_w/2) scrollXRight((_w/2-e.getX()));										
+								if (e.getY()>_h/2) scrollYDown((e.getY()-_h/2));
+								if (e.getY()<_h/2) scrollYUp((_h/2-e.getY()));
+								*/										
+
 								Runnable action = new Runnable() {
 									public void run() {
 										double w1 = _w / _zoomPower;
@@ -272,13 +280,13 @@ public class JGDPanelPop extends JBufferedImagePanel {
 							if (_x0 == _w / 2) {
 								Toolkit.getDefaultToolkit().beep();
 							} else {
-								scrollXLeft();
+								scrollXLeft(0.8*_w);
 							}
 						} else {
 							if (_x0 == ((_w * _fx) - _w / 2)) {
 								Toolkit.getDefaultToolkit().beep();
 							} else {
-								scrollXRight();
+								scrollXRight(0.8*_w);
 							}
 						}
 
@@ -289,13 +297,13 @@ public class JGDPanelPop extends JBufferedImagePanel {
 							if (_y0 == _h / 2) {
 								Toolkit.getDefaultToolkit().beep();
 							} else {
-								scrollYUp();
+								scrollYUp(0.8*_h);
 							}
 						} else {
 							if (_y0 == ((_h * _fy) - _h / 2)) {
 								Toolkit.getDefaultToolkit().beep();
 							} else {
-								scrollYDown();
+								scrollYDown(0.8*_h);
 							}
 						}
 					}
@@ -776,9 +784,9 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		repaint();
 	}
 
-	public void scrollXLeft() {
+	public void scrollXLeft(double deltax) {
 
-		double deltax = _w * (_fx - 1) / 10;
+		//double deltax = _w * (_fx - 1) / 10;
 		_x0 = _x0 - deltax;
 		if (_x0 < _w / 2) {
 			_x0 = _w / 2;
@@ -787,8 +795,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		repaint();
 	}
 
-	public void scrollXRight() {
-		double deltax = _w * (_fx - 1) / 10;
+	public void scrollXRight(double deltax) {
+		//double deltax = _w * (_fx - 1) / 10;
 		_x0 = _x0 + deltax;
 		if (_x0 > (_w * _fx) - _w / 2) {
 			_x0 = (_w * _fx) - _w / 2;
@@ -797,9 +805,9 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		repaint();
 	}
 
-	public void scrollYUp() {
+	public void scrollYUp(double deltay) {
 
-		double deltay = _h * (_fy - 1) / 10;
+		//double deltay = _h * (_fy - 1) / 10;
 		_y0 = _y0 - deltay;
 		if (_y0 < _h / 2) {
 			_y0 = _h / 2;
@@ -808,8 +816,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		repaint();
 	}
 
-	public void scrollYDown() {
-		double deltay = _h * (_fy - 1) / 10;
+	public void scrollYDown(double deltay) {
+		//double deltay = _h * (_fy - 1) / 10;
 		_y0 = _y0 + deltay;
 		if (_y0 > (_h * _fy) - _h / 2) {
 			_y0 = (_h * _fy) - _h / 2;
