@@ -533,8 +533,7 @@
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
 				
 				<!--optional-->
-				<pathelement
-					path="VirtualRWorkbench/frontendapp/WEB-INF/lib/mapping.jar"/>
+				<pathelement path="VirtualRWorkbench/distrib/mapping.jar"/>
 				
 			</classpath>
 			
@@ -562,6 +561,7 @@
 			<jvmarg value="-Ddb.url=${db.url}"/>
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
+			
 			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>

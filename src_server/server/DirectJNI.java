@@ -370,7 +370,8 @@ public class DirectJNI {
 		}
 
 		try {
-			getRServices().sourceFromResource("/rscripts/init.R");
+			String initRSourcingLog=getRServices().sourceFromResource("/rscripts/init.R");
+			System.out.println("init.R sourcing log : "+initRSourcingLog);
 			initPrivateEnv();
 			_continueStr = ((RChar) ((RList) getRServices().evalAndGetObject("options('continue')")).getValue()[0])
 					.getValue()[0];
@@ -2497,44 +2498,6 @@ public class DirectJNI {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
-				/*
-				
-				URL jarURL = null;
-				StringTokenizer st = new StringTokenizer(System.getProperty("java.class.path"), System
-						.getProperty("path.separator"));
-				while (st.hasMoreTokens()) {
-					String pathElement = st.nextToken();
-					if (pathElement.endsWith("RJB.jar")) {
-						try {
-
-							jarURL = new URL("jar:file:" + pathElement.replace('\\', '/') + "!/");
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						break;
-					}
-				}
-
-				if (jarURL == null) {
-					jarURL = DirectJNI.class.getResource("/server/DirectJNI.class");
-				}
-
-				if (jarURL != null) {
-					try {
-						JarURLConnection jarConnection = (JarURLConnection) jarURL.openConnection();
-						JarFile jarfile = jarConnection.getJarFile();
-						Enumeration<JarEntry> enu = jarfile.entries();
-						while (enu.hasMoreElements()) {
-							String entry = enu.nextElement().toString();
-							if (entry.startsWith("rdemos") && entry.endsWith(".r"))
-								demosList.add(entry.substring("rdemos".length() + 1, entry.length() - 2));
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-				*/
 
 			}
 
@@ -2714,46 +2677,30 @@ public class DirectJNI {
 			}
 		});
 	}
-
-	private static void init(URL mappingjarUrl) throws Exception {
-		log.info("mapping jar : " + mappingjarUrl);
-		DirectJNI.generateMaps(mappingjarUrl);
-		Thread.currentThread().setContextClassLoader(_resourcesClassLoader);
-		DirectJNI.getInstance().getRServices().sourceFromResource("/bootstrap.R");
-		DirectJNI.getInstance().initPackages();
-		DirectJNI.getInstance().upgdateBootstrapObjects();
-
-	}
 	
-	private static void init(ClassLoader cl) throws Exception {
-
+	private static void init(ClassLoader cl) throws Exception {		
 		Properties props=new Properties();
-		InputStream is=cl.getResourceAsStream("rjbmaps.properties");
-		//System.out.println("url:"+cl.getResource("/rjbmaps.properties"));
-		System.out.println("####### is:"+is);
-		
-		
+		InputStream is=cl.getResourceAsStream("maps/rjbmaps.xml");
+		System.out.println("####### is:"+is);				
 		props.loadFromXML(is);		
-		DirectJNI._packageNames=(Vector<String>)PoolUtils.hexToObject((String)props.get("PACKAGE_NAMES"));		
-		DirectJNI._s4BeansMapping= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("S4BEANS_MAP"));
-		DirectJNI._s4BeansMappingRevert= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("S4BEANS_REVERT_MAP"));
-		DirectJNI._factoriesMapping= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("FACTORIES_MAPPING"));		
-		DirectJNI._s4BeansHash = (HashMap<String, Class<?>>)PoolUtils.hexToObject((String)props.get("S4BEANS_HASH"));	
-		DirectJNI._rPackageInterfacesHash = (HashMap<String, Vector<Class<?>>>)PoolUtils.hexToObject((String)props.get("R_PACKAGE_INTERFACES_HASH"));
-		DirectJNI._abstractFactories= (Vector<String>)PoolUtils.hexToObject((String)props.get("ABSTRACT_FACTORIES"));
-		
+		DirectJNI._packageNames=(Vector<String>)PoolUtils.hexToObject((String)props.get("PACKAGE_NAMES"),cl);		
+		DirectJNI._s4BeansMapping= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("S4BEANS_MAP"),cl);
+		DirectJNI._s4BeansMappingRevert= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("S4BEANS_REVERT_MAP"),cl);
+		DirectJNI._factoriesMapping= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("FACTORIES_MAPPING"),cl);		
+		DirectJNI._s4BeansHash = (HashMap<String, Class<?>>)PoolUtils.hexToObject((String)props.get("S4BEANS_HASH"),cl);	
+		DirectJNI._rPackageInterfacesHash = (HashMap<String, Vector<Class<?>>>)PoolUtils.hexToObject((String)props.get("R_PACKAGE_INTERFACES_HASH"),cl);
+		DirectJNI._abstractFactories= (Vector<String>)PoolUtils.hexToObject((String)props.get("ABSTRACT_FACTORIES"),cl);				
 		log.info("<> rPackageInterfaces:" + DirectJNI._packageNames);
 		log.info("<> s4Beans MAP :" + DirectJNI._s4BeansMapping);
 		log.info("<> s4Beans Revert MAP :" + DirectJNI._s4BeansMappingRevert);
-		log.info("<> factories :" + DirectJNI._factoriesMapping);
-		
+		log.info("<> factories :" + DirectJNI._factoriesMapping);		
+		_mappingClassLoader = cl;
+		_resourcesClassLoader = cl;
 		Thread.currentThread().setContextClassLoader(_resourcesClassLoader);
 		DirectJNI.getInstance().getRServices().sourceFromResource("/bootstrap.R");
 		DirectJNI.getInstance().initPackages();
 		DirectJNI.getInstance().upgdateBootstrapObjects();
-
 	}
-
 
 	private void upgdateBootstrapObjects() throws Exception {
 		RChar objs = (RChar) getRServices().evalAndGetObject(".PrivateEnv$ls(all.names=TRUE)");
@@ -2762,101 +2709,25 @@ public class DirectJNI {
 				_bootstrapRObjects.add(objs.getValue()[i]);
 	}
 
-	static private void scanMapping() {
-		
+	static private void scanMapping() {		
 		if (!_initHasBeenCalled) {
 			_initHasBeenCalled = true;
 			
-			if (DirectJNI.class.getResource("rjbmaps.properties")!=null) {
-				System.out.println("<1> "+DirectJNI.class.getResource("rjbmaps.properties"));
-				_resourcesClassLoader = DirectJNI.class.getClassLoader();
+			if (DirectJNI.class.getClassLoader().getResource("maps/rjbmaps.xml")!=null) {
+				System.out.println("<1> "+DirectJNI.class.getClassLoader().getResource("maps/rjbmaps.xml"));
 				try {init(DirectJNI.class.getClassLoader());} catch (Exception e) {e.printStackTrace();}
 				return;
 				
 			}  else if (System.getProperty("java.rmi.server.codebase") != null) {				
 				ClassLoader codebaseClassLoader=new URLClassLoader(PoolUtils.getURLS(System.getProperty("java.rmi.server.codebase")),DirectJNI.class.getClassLoader());
-				if (codebaseClassLoader.getResource("rjbmaps.properties")!=null) {
-					System.out.println("<2> "+codebaseClassLoader.getResource("/rjbmaps.properties"));
-					_resourcesClassLoader = codebaseClassLoader;
+				if (codebaseClassLoader.getResource("maps/rjbmaps.xml")!=null) {
+					System.out.println("<2> "+codebaseClassLoader.getResource("maps/rjbmaps.xml"));
 					try {init(codebaseClassLoader);} catch (Exception e) {e.printStackTrace();}
 					return;
 				}
-			}
-			
-			boolean mappingJarFound = false;
-			try {
-
-				StringTokenizer st = new StringTokenizer(System.getProperty("java.class.path"), System
-						.getProperty("path.separator"));
-				while (st.hasMoreTokens()) {
-					String pathElement = st.nextToken();
-
-					if (pathElement.endsWith(".jar")) {
-						JarFile jarfile = new JarFile(pathElement);
-						if (jarfile.getManifest() != null
-								&& "TRUE".equalsIgnoreCase(jarfile.getManifest().getMainAttributes().getValue(
-										"RJBMAPPINGJAR"))) {
-							log.info("Mapping Jar Found In java.class.path :" + pathElement);
-							_resourcesClassLoader = DirectJNI.class.getClassLoader();
-							init(new URL("jar:file:" + pathElement.replace('\\', '/') + "!/"));
-							mappingJarFound = true;
-							break;
-						}
-					}
-				}
-
-				if (!mappingJarFound && System.getProperty("java.rmi.server.codebase") != null) {
-
-					URL[] urls = PoolUtils.getURLS(System.getProperty("java.rmi.server.codebase"));
-					for (int i = 0; i < urls.length; ++i) {
-						if (urls[i].toString().endsWith(".jar")) {
-
-							URL url = new URL("jar:" + urls[i].toString() + "!/");
-
-							JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
-							JarFile jarfile = jarConnection.getJarFile();
-							if ("TRUE".equalsIgnoreCase(jarfile.getManifest().getMainAttributes().getValue(
-									"RJBMAPPINGJAR"))) {
-								log.info("Mapping Jar Found In java.rmi.server.codebase :" + urls[i]);
-								URL[] resourcesUrls = new URL[urls.length];
-								for (int j = 0; j < resourcesUrls.length; ++j) {
-									resourcesUrls[j] = new URL("jar:" + urls[j].toString() + "!/");
-								}
-								_resourcesClassLoader = new URLClassLoader(resourcesUrls, DirectJNI.class
-										.getClassLoader());
-								init(url);
-								mappingJarFound = true;
-								break;
-							}
-						}
-					}
-				}
-
-				if (!mappingJarFound) {
-					URL bootstrap_url = DirectJNI.class.getResource("/bootstrap.R");
-					System.out.println("bootstrap_url: "+bootstrap_url);
-					if (bootstrap_url != null) {
-						String jarpath = bootstrap_url.toString();
-						if (jarpath.endsWith(".jar")) {
-							jarpath = jarpath.substring(0, jarpath.indexOf('!')) + "!/";
-							_resourcesClassLoader = DirectJNI.class.getClassLoader();	
-							log.info("Mapping Jar Found via class.getResource (in jar) :" + jarpath);
-							init(new URL(jarpath));
-						} else {
-							_resourcesClassLoader = DirectJNI.class.getClassLoader();	
-							log.info("Mapping Found via class.getResource (default class loader) :" + jarpath);
-							init(new URL(jarpath));
-						}
-					} else {
-						log.info("No Mapping Jar Found In Class Path");
-						_resourcesClassLoader = DirectJNI.class.getClassLoader();
-						Thread.currentThread().setContextClassLoader(_resourcesClassLoader);
-					}
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			} else {
+				System.out.println("!! No mapping found");
+			}			
 		}
 	}
 
