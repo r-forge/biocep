@@ -429,8 +429,9 @@ public class Gen {
 		props.put("FACTORIES_MAPPING", PoolUtils.objectToHex(DirectJNI._factoriesMapping) );		
 		props.put("S4BEANS_HASH", PoolUtils.objectToHex(DirectJNI._s4BeansHash) );
 		props.put("R_PACKAGE_INTERFACES_HASH", PoolUtils.objectToHex(DirectJNI._rPackageInterfacesHash) );
-		props.put("ABSTRACT_FACTORIES", PoolUtils.objectToHex(DirectJNI._abstractFactories) );		
-		FileOutputStream fos=new FileOutputStream(GEN_ROOT_SRC+"/"+"rjbmaps.properties");
+		props.put("ABSTRACT_FACTORIES", PoolUtils.objectToHex(DirectJNI._abstractFactories) );
+		new File(GEN_ROOT_SRC+"/"+"maps").mkdirs();
+		FileOutputStream fos=new FileOutputStream(GEN_ROOT_SRC+"/"+"maps/rjbmaps.xml");
 		props.storeToXML(fos, null);
 		fos.close();
 		
