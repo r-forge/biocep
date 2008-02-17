@@ -34,8 +34,9 @@ import java.util.Vector;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import net.java.dev.jspreadsheet.CellPoint;
-
 import org.gjt.sp.jedit.gui.FloatingWindowContainer;
+
+import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
  * @author Karim Chine kchine@ebi.ac.uk
@@ -133,20 +134,47 @@ public class GUtils {
 		return new CellPoint(rowcount, colcount);
 	}
 	
-	public static int getLocalTomcatPort() {
-		if (System.getProperty("localtomcat.port")==null || System.getProperty("localtomcat.port").equals("")) {
-			return 2599;
-		} else {
-			return Integer.decode(System.getProperty("localtomcat.port"));
-		}
-	}
 
-	public static int getLocalRmiRegistryPort() {
-		if (System.getProperty("localrmiregistry.port")==null || System.getProperty("localrmiregistry.port").equals("")) {
-			return 2560;
-		} else {
-			return Integer.decode(System.getProperty("localrmiregistry.port"));
+
+	
+	private static Integer _localTomcatPort=null;
+	public static synchronized Integer getLocalTomcatPort() {
+		if (_localTomcatPort==null){			
+			
+			if (System.getProperty("localtomcat.port")==null || System.getProperty("localtomcat.port").equals("")) {
+				_localTomcatPort=3001;
+			} else {
+				_localTomcatPort=Integer.decode(System.getProperty("localtomcat.port"));
+			}	
+			
+			for (int i=0;i<1000;++i) {				
+				if (!PoolUtils.isPortInUse(_localTomcatPort+i)) {
+					_localTomcatPort=_localTomcatPort+i;
+					break;
+				}
+			}
+		} 
+		
+		return _localTomcatPort;		
+	}
+	private static Integer _localRmiregistryPort=null;
+	public static synchronized Integer getLocalRmiRegistryPort() {
+		if (_localRmiregistryPort==null){			
+			
+			if (System.getProperty("localrmiregistry.port")==null || System.getProperty("localrmiregistry.port").equals("")) {
+				_localRmiregistryPort= 2560;
+			} else {
+				_localRmiregistryPort= Integer.decode(System.getProperty("localrmiregistry.port"));
+			}
+			for (int i=0;i<1000;++i) {				
+				if (!PoolUtils.isPortInUse(_localRmiregistryPort+i)) {
+					_localRmiregistryPort=_localRmiregistryPort+i;
+					break;
+				}
+			}
 		}
+		return _localRmiregistryPort;
+
 	}
 
 	

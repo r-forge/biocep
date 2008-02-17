@@ -15,8 +15,6 @@
  */
 package graphics.rmi;
 
-import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -30,14 +28,13 @@ import javax.swing.UIManager;
 //import splash.SplashWindow;
 import splash.SplashWindow;
 
-
 /**
  * @author Karim Chine kchine@ebi.ac.uk
  */
 public class GDAppletLauncher {
 
 	static public void createDesktopApplication() {
-		
+
 		try {
 
 			final HashMap<String, String> params = new HashMap<String, String>();
@@ -45,64 +42,41 @@ public class GDAppletLauncher {
 			params.put("autologon", System.getProperty("autologon"));
 			params.put("demo", System.getProperty("demo"));
 			params.put("debug", System.getProperty("debug"));
-
 			if (System.getProperty("login") != null && !System.getProperty("login").equals("")) {
 				params.put("login", System.getProperty("login"));
 			} else {
 				params.put("login", System.getProperty("user.name"));
 			}
-
 			params.put("save", System.getProperty("save"));
 			params.put("mode", System.getProperty("mode"));
 			params.put("lf", System.getProperty("lf"));
 			System.out.println("params=" + params);
-
 			final GDApplet gDApplet = new GDApplet(params);
 			gDApplet.init();
 			
-			/*
-			if (gDApplet.getMode() == GDApplet.LOCAL_MODE) {
-				DirectJNI.getInstance();
-				if (System.getProperty("preprocess.help") != null && System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
-					new Thread(new Runnable() {
-						public void run() {
-							DirectJNI.getInstance().preprocessHelp();
-						}
-					}).start();
+			Runtime.getRuntime().addShutdownHook(new Thread( new Runnable() {
+				public void run() {
+					gDApplet.destroy();
 				}
-
-				if (System.getProperty("apply.sandbox") != null && System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {
-					DirectJNI.getInstance().applySandbox();
-				}
-
-			}
-			*/
-
+			}));
+			gDApplet.destroy();
+			
 			try {
 				UIManager.setLookAndFeel(gDApplet.getLookAndFeelClassName());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
 			JFrame fconsole = new JFrame();
-
 			fconsole.getContentPane().setLayout(new BorderLayout());
 			fconsole.getContentPane().add(gDApplet.getContentPane(), BorderLayout.CENTER);
-
 			fconsole.setPreferredSize(new Dimension(840, 720));
-
 			fconsole.addWindowListener(new WindowListener() {
 
 				public void windowActivated(WindowEvent e) {
 				}
 
 				public void windowClosed(WindowEvent e) {
-					try {
-						gDApplet.destroy();
-						System.exit(0);
-					} catch (Exception re) {
-						re.printStackTrace();
-					}
+					System.exit(0);
 				}
 
 				public void windowClosing(WindowEvent e) {
@@ -132,18 +106,12 @@ public class GDAppletLauncher {
 	}
 
 	public static void main(String[] args) throws Exception {
-
-		
-		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(
-				GDAppletLauncher.class.getResource("/splash/splashscreen.png")));
-
+		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(GDAppletLauncher.class.getResource("/splash/splashscreen.png")));
 		try {
 			Thread.sleep(500);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		 
-
 		SwingUtilities.invokeAndWait(new Runnable() {
 			public void run() {
 				try {
@@ -153,11 +121,6 @@ public class GDAppletLauncher {
 				}
 			}
 		});
-
-		
 		SplashWindow.disposeSplash();
-		 
 	}
-
-
 }

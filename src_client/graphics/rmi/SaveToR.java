@@ -42,7 +42,7 @@ public class SaveToR {
 	}
 
 	public static void main(String[] args) {
-		String root = System.getProperty("user.home") + "/RWorkbench/";
-		System.out.println("root:" + root);
+		
+
 	}
 }

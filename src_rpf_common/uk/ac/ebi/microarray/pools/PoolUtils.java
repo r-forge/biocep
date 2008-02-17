@@ -43,6 +43,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.rmi.NoSuchObjectException;
@@ -1131,8 +1132,33 @@ public class PoolUtils {
 	public static final int SET_SERVANT_STUB_TIMEOUT_MILLISEC = 2000;
 	
 	
-		
+	public static boolean isPortInUse(int port) {
+		Socket s=null;
+		try {
+			s = new Socket("127.0.0.1",port);
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (s!=null) try {s.close();} catch (Exception ex) {}
+		}
+		return true;
+	}
 	
+	public static void startPortInUseDogwatcher(final int port, final int periodicitySec,final int maxFailure) {
+		new Thread(new Runnable(){
+			int failureCounter=maxFailure;
+			public void run() {
+				while(true) {
+					if (!PoolUtils.isPortInUse(port)) --failureCounter;
+					if (failureCounter==0) {
+						System.out.println("The Creator Process doesn't respond, going to die");
+						System.exit(0);
+					}					
+					try {Thread.sleep(1000*periodicitySec);} catch (Exception e) {}
+				}				
+			}
+		}).start();
+	}
 
 
 }
