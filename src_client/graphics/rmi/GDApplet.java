@@ -419,11 +419,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								if (getMode() == GDApplet.LOCAL_MODE) {
 									
+									/*
 									DirectJNI.init();							
 									r = DirectJNI.getInstance().getRServices();
-									
+									*/
 
-									/*
+									
 									try {
 										r = ServerLauncher.createR();
 										_localRProcessId = r.getProcessId();
@@ -431,7 +432,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
-									*/
+									
 
 								} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
 									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());

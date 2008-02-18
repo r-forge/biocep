@@ -169,6 +169,7 @@ public class Globals {
 			log.info("s4Beans MAP :" + DirectJNI._s4BeansMapping);
 			log.info("s4Beans Revert MAP :" + DirectJNI._s4BeansMappingRevert);
 			log.info("factories :" + DirectJNI._factoriesMapping);
+			log.info("r package interface hash :" + DirectJNI._rPackageInterfacesHash);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

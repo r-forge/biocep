@@ -91,13 +91,19 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			
 			_rim = new HashMap<String, RPackage>();
 
+			
+			
 			for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
 				String shortClassName = className.substring(className.lastIndexOf('.') + 1);
 				log.info(shortClassName);
-				_rim.put(shortClassName, (RPackage) DirectJNI._mappingClassLoader.loadClass(className + "ImplRemote")
+				System.out.println("Going to load : "+className + "ImplRemote");
+				_rim.put(shortClassName, (RPackage) DirectJNI.class.getClassLoader().loadClass(className + "ImplRemote")
 						.newInstance());
 			}
+			
+			
 
+	
 		
 			if (System.getProperty("preprocess.help") != null
 					&& System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
@@ -114,6 +120,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 					&& System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {
 				DirectJNI.getInstance().applySandbox();
 			}
+			
 			
 			
 			_isReady = true;
