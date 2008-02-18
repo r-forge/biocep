@@ -44,6 +44,7 @@ import org.apache.tools.ant.taskdefs.Jar;
 import org.apache.tools.ant.taskdefs.Javac;
 import org.apache.tools.ant.taskdefs.Manifest;
 import org.apache.tools.ant.taskdefs.Mkdir;
+import org.apache.tools.ant.taskdefs.Rmic;
 import org.apache.tools.ant.taskdefs.War;
 import org.apache.tools.ant.taskdefs.Manifest.Attribute;
 import org.apache.tools.ant.types.DirSet;
@@ -396,6 +397,17 @@ public class Gen {
 			applyJalopy(GEN_ROOT_SRC);
 
 		compile(GEN_ROOT_SRC);
+		
+		for (String k:DirectJNI._rPackageInterfacesHash.keySet()) {
+			Rmic rmicTask = new Rmic();
+			rmicTask.setProject(_project);			
+			rmicTask.setTaskName("rmic_packages");
+			rmicTask.setClasspath(new Path(_project,GEN_ROOT_SRC));
+			rmicTask.setBase(new File(GEN_ROOT_SRC));
+			rmicTask.setClassname(k+"ImplRemote");
+			rmicTask.init();
+			rmicTask.execute();	
+		}
 
 		if (_webPublishingEnabled) {
 
