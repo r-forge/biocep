@@ -207,7 +207,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	};
 	private String[] _packageNameSave = new String[] { "" };
 	private String[] _expressionSave = new String[] { "" };
-	private String[] _httpPortSave = new String[] { "80" };
+	private String[] _httpPortSave = new String[] { "8080" };
 	private ConsoleLogger _consoleLogger = new ConsoleLogger() {
 		public void printAsInput(String message) {
 			_consolePanel.print(message, null);
@@ -232,8 +232,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public String getWebAppUrl() {
 		String url = GDApplet.class.getResource("/graphics/rmi/GDApplet.class").toString();
 		System.out.println("url=" + url);
-		url = url.substring(4, url.indexOf("appletlibs"));
-		return url;
+		if (url.contains("http:")) {
+			url = url.substring(4, url.indexOf("appletlibs"));
+			return url;
+		} else {
+			return null;
+		}
 	}
 
 	public void init() {
@@ -256,8 +260,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 				_mode = HTTP_MODE;
 			}
 		}
-
-		if (_mode == LOCAL_MODE || _mode == RMI_MODE) {
+		
+		
+		if (true) {
 
 			new Thread(new Runnable() {
 				public void run() {
@@ -302,23 +307,24 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		}
 
-		if (_mode == HTTP_MODE) {
-
-			if (getParameter("command_servlet_url") == null) {
+		if (getParameter("command_servlet_url") == null || getParameter("command_servlet_url").equals("")) {
+			if (getWebAppUrl()!=null) {
 				_commandServletUrl = getWebAppUrl() + "cmd";
 			} else {
-				_commandServletUrl = getParameter("command_servlet_url");
+				_commandServletUrl = "http://127.0.0.1:8080/cmd";
 			}
-
-			_helpServletUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
-			_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
-
 		} else {
-
-			_helpServletUrl = "http://127.0.0.1:" + GUtils.getLocalTomcatPort() + "/" + "helpme";
-			_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
-
+			_commandServletUrl = getParameter("command_servlet_url");
 		}
+		
+		
+		LoginDialog.mode_int=_mode;
+		LoginDialog.url_str=_commandServletUrl;
+		if (getParameter("stub") != null && !getParameter("stub").equals("")) LoginDialog.stub_str=getParameter("stub");
+		if (getParameter("name") != null && !getParameter("name").equals("")) LoginDialog.servantName_str=getParameter("name");
+		if (getParameter("registryhost") != null && !getParameter("registryhost").equals("")) LoginDialog.servantName_str=getParameter("registryhost");
+		if (getParameter("registryport") != null && !getParameter("registryport").equals("")) LoginDialog.servantName_str=getParameter("registryport");
+		
 
 		try {
 
@@ -359,21 +365,32 @@ public class GDApplet extends GDAppletBase implements RGui {
 						try {
 
 							GDDevice d = null;
+							
+							LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane(), _mode);
+							loginDialog.setVisible(true);
+
+							Identification ident = loginDialog.getIndentification();
+							if (ident == null)
+								return "Logon cancelled\n";							
+
+							_mode=ident.getMode();
+
+							
 							if (getMode() == HTTP_MODE) {
 
-								LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane(), _mode);
-								loginDialog.setVisible(true);
+								_commandServletUrl=ident.getUrl();								
+								_helpServletUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
+								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
 
-								Identification ident = loginDialog.getIndentification();
-								if (ident == null)
-									return "Logon cancelled\n";
-
-								_nopool = ident.isNopool();
-								_save = ident.isPersistentWorkspace();
+								
+								_login = ident.getUser();							
+								_nopool = ident.isNopool();							
 								_wait = ident.isWaitForResource();
+								_save = ident.isPersistentWorkspace();
 								_demo = ident.isPlayDemo();
-								_login = ident.getUser();
 								String pwd = ident.getPwd();
+
+
 
 								String oldSessionId = _sessionId;
 								HashMap<String, Object> options = new HashMap<String, Object>();
@@ -400,20 +417,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 								d = RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
 								System.out.println("device id:" + d.getDeviceNumber());
 							} else {
-
-								LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane(), _mode);
-								loginDialog.setVisible(true);
-
-								Identification ident = loginDialog.getIndentification();
-								if (ident == null)
-									return "Logon cancelled\n";
-
-								_nopool = ident.isNopool();
+								
+								_helpServletUrl = "http://127.0.0.1:" + GUtils.getLocalTomcatPort() + "/" + "helpme";
+								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
+								
 								_save = ident.isPersistentWorkspace();
-								_wait = ident.isWaitForResource();
 								_demo = ident.isPlayDemo();
-								_login = ident.getUser();
-								String pwd = ident.getPwd();
 
 								RServices r = null;
 
@@ -423,7 +432,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									DirectJNI.init();							
 									r = DirectJNI.getInstance().getRServices();
 									*/
-
+									
 									
 									try {
 										r = ServerLauncher.createR();
@@ -432,9 +441,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
-									
+																		
 
-								} else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
+								} else {
+									
+								}
+								
+								
+								/*
+								else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
 									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
 								} else {
 									try {
@@ -442,7 +457,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
-								}
+								}*/
 
 								_rForConsole = r;
 								_rForPopCmd = r;
@@ -685,7 +700,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					sessionMenu.add(_actions.get("playdemo"));
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("runhttpserver"));
-					
+					sessionMenu.add(_actions.get("stophttpserver"));					
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -2434,7 +2449,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("runhttpserver", new AbstractAction("Run Http Server") {
+		_actions.put("runhttpserver", new AbstractAction("Run Http Virtualization Engine") {
 			public void actionPerformed(final ActionEvent e) {
 				new Thread(new Runnable() {
 					public void run() {
@@ -2442,7 +2457,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						try {
 
 							while (true) {
-								GetExprDialog dialog = new GetExprDialog(" Run Http Server On Port : ", _httpPortSave);
+								GetExprDialog dialog = new GetExprDialog(" Run Http Virtualization Engine On Port : ", _httpPortSave);
 								dialog.setVisible(true);
 								if (dialog.getExpr() != null) {
 									try {
@@ -2465,10 +2480,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 													_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(GDApplet.this));
 													_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(GDApplet.this));
 													_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(GDApplet.this));
-													_virtualizationLocalHttpServer.serve();
+													_virtualizationLocalHttpServer.serve();													
 												}
 											}).start();
+											
+											JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "A Virtualization HTTP Engine is now running on port "+port+"\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"+PoolUtils.getHostIp()+":"+port+"/cmd", "", JOptionPane.INFORMATION_MESSAGE);
 											break;
+											
 
 										}
 									} catch (Exception e) {
@@ -2493,6 +2511,36 @@ public class GDApplet extends GDAppletBase implements RGui {
 				return _sessionId != null && _virtualizationLocalHttpServer == null;
 			}
 		});
+		
+		_actions.put("stophttpserver", new AbstractAction("Stop Http Server") {
+			public void actionPerformed(final ActionEvent e) {
+				new Thread(new Runnable() {
+					public void run() {
+						if (_virtualizationLocalHttpServer!=null) {							
+							try {
+								_virtualizationLocalHttpServer.notifyStop();
+							} catch (java.io.IOException ioe) {
+								ioe.printStackTrace();
+							}							
+							try {
+								_virtualizationLocalHttpServer.destroyAllServlets();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							_virtualizationLocalHttpServer=null;
+							JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "The Virtualization HTTP Engine was stopped successfully", "", JOptionPane.INFORMATION_MESSAGE);
+						}						
+					}
+				}).start();
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return _sessionId != null && _virtualizationLocalHttpServer != null;
+			}
+		});
+
+		
 	}
 
 	public void saveimage() throws TunnelingException {

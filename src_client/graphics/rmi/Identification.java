@@ -20,22 +20,50 @@ package graphics.rmi;
  */
 class Identification {
 
-	private String _user;
-	private String _pwd;
-	private boolean _persistentWorkspace;
-	private boolean _nopool;
-	private boolean _waitForResource;
-	private boolean _playDemo;
+	private int _mode;
 	
+	private String _url;
+	private String _user;
+	private String _pwd;	
+	private boolean _nopool;
+	private boolean _waitForResource;	
+	
+	private String _rmiregistryIp;
+	private Integer _rmiregistryPort;
+	private String _servantName;
+	private String _stub;
+	
+	private String _memoryMax;
 
-	public Identification(String user, String pwd, boolean persistentWorkspace, boolean nopool,
-			boolean waitForResource, boolean playDemo) {
+	private boolean _persistentWorkspace;	
+	private boolean _playDemo;
+
+	public Identification(int mode, 
+			String url, String user, String pwd,  boolean nopool, boolean waitForResource,  
+			String rmiregistryIp, Integer rmiregistryPort, String servantName, String stub, 
+			String memoryMax,
+			boolean persistentWorkspace, boolean playDemo) {		
+		this._mode=mode;	
+		this._url=url;
 		this._user = user;
 		this._pwd = pwd;
-		this._persistentWorkspace = persistentWorkspace;
-		this._nopool = nopool;
+		this._nopool = nopool;		
 		this._waitForResource = waitForResource;
+		this._rmiregistryIp=rmiregistryIp;
+		this._rmiregistryPort=rmiregistryPort;
+		this._servantName=servantName;		
+		this._stub=stub;		
+		this._memoryMax=memoryMax;	
+		this._persistentWorkspace = persistentWorkspace;
 		this._playDemo = playDemo;
+	}
+
+	public int getMode() {
+		return _mode;
+	}
+
+	public String getUrl() {
+		return _url;
 	}
 
 	public String getUser() {
@@ -46,10 +74,6 @@ class Identification {
 		return _pwd;
 	}
 
-	public boolean isPersistentWorkspace() {
-		return _persistentWorkspace;
-	}
-
 	public boolean isNopool() {
 		return _nopool;
 	}
@@ -58,7 +82,31 @@ class Identification {
 		return _waitForResource;
 	}
 
+	public String getRmiregistryIp() {
+		return _rmiregistryIp;
+	}
+
+	public Integer getRmiregistryPort() {
+		return _rmiregistryPort;
+	}
+
+	public String getServantName() {
+		return _servantName;
+	}
+
+	public String getStub() {
+		return _stub;
+	}
+
+	public String getMemoryMax() {
+		return _memoryMax;
+	}
+
+	public boolean isPersistentWorkspace() {
+		return _persistentWorkspace;
+	}
+
 	public boolean isPlayDemo() {
 		return _playDemo;
-	}
+	}	
 }
