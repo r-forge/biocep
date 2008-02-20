@@ -32,4 +32,5 @@ public interface RGui {
 	public void setCurrentDevice(GDDevice device);
 	public Component getRootComponent();
 	public GDDevice getCurrentDevice();	
+	public JGDPanelPop getCurrentJGPanelPop();
 }

@@ -25,6 +25,7 @@ public class FitDeviceAction extends AbstractAction {
 			JGDPanelPop panel = (JGDPanelPop) GUtils
 			.getComponentParent((Component) e.getSource(),
 					JGDPanelPop.class);
+			
 			panel.fit();
 		} catch (Exception ex) {
 			ex.printStackTrace();	
