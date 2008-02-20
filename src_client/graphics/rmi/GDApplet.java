@@ -18,6 +18,7 @@ package graphics.rmi;
 import graphics.pop.GDDevice;
 import graphics.rmi.action.CopyFromCurrentDeviceAction;
 import graphics.rmi.action.CopyToCurrentDeviceAction;
+import graphics.rmi.action.CoupleToCurrentDeviceAction;
 import graphics.rmi.action.FitDeviceAction;
 import graphics.rmi.action.SaveDeviceAsJpgAction;
 import graphics.rmi.action.SaveDeviceAsPngAction;
@@ -129,7 +130,6 @@ import server.DirectJNI;
 import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsolePanel;
 import uk.ac.ebi.microarray.pools.db.monitor.SubmitInterface;
 import uk.ac.ebi.microarray.pools.db.monitor.SymbolPopDialog;
@@ -428,11 +428,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								if (getMode() == GDApplet.LOCAL_MODE) {
 									
-									/*
+								
 									DirectJNI.init();							
 									r = DirectJNI.getInstance().getRServices();
-									*/
 									
+									
+									/*
 									
 									try {
 										r = ServerLauncher.createR();
@@ -441,6 +442,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
+									
+									*/
 																		
 
 								} else {
@@ -475,8 +478,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							new SetCurrentDeviceAction(GDApplet.this, d), null, new FitDeviceAction(GDApplet.this, d), null,
 									new SnapshotDeviceAction(GDApplet.this), new SaveDeviceAsPngAction(GDApplet.this),
-									new SaveDeviceAsJpgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this, d),
-									new CopyToCurrentDeviceAction(GDApplet.this, d)
+									new SaveDeviceAsJpgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+									new CopyToCurrentDeviceAction(GDApplet.this, d), null,new CoupleToCurrentDeviceAction(GDApplet.this)
 
 							}, getRLock(), getConsoleLogger());
 							_rootGraphicPanel.removeAll();
@@ -502,8 +505,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 										new SetCurrentDeviceAction(GDApplet.this, newDevice), null, new FitDeviceAction(GDApplet.this, newDevice), null,
 										new SnapshotDeviceAction(GDApplet.this), new SaveDeviceAsPngAction(GDApplet.this),
-										new SaveDeviceAsJpgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this, newDevice),
-										new CopyToCurrentDeviceAction(GDApplet.this, newDevice) }, getRLock(), getConsoleLogger());
+										new SaveDeviceAsJpgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+										new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this)}, getRLock(), getConsoleLogger());
 
 								rootComponent.removeAll();
 								rootComponent.setLayout(new BorderLayout());
@@ -1163,6 +1166,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (_currentDevice == d) {
 								setCurrentDevice(((JGDPanelPop) _graphicPanel).getGdDevice());
 								_currentDevice.setAsCurrentDevice();
+							} else {
+								getCurrentJGPanelPop().removeCoupledTo(((DeviceView) window).getPanel());
 							}
 							((DeviceView) window).getPanel().dispose();
 
@@ -2218,7 +2223,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
 							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), null,
-							new CopyFromCurrentDeviceAction(GDApplet.this, newDevice), new CopyToCurrentDeviceAction(GDApplet.this, newDevice) }, getRLock(),
+							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(),
 							getConsoleLogger());
 
 					rootGraphicPanel.removeAll();
@@ -2611,7 +2616,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			deviceViews.elementAt(i).getPanel().setInteractor(interactor);
 	}
 
-	private JGDPanelPop getCurrentJGPanelPop() {
+	public JGDPanelPop getCurrentJGPanelPop() {
 		if (_currentDevice == ((JGDPanelPop) _graphicPanel).getGdDevice())
 			return (JGDPanelPop) _graphicPanel;
 		Vector<DeviceView> deviceViews = getDeviceViews();
@@ -2912,6 +2917,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		boolean showCoordinates = lastCurrentPanel.isShowCoordinates();
 		lastCurrentPanel.setInteractor(INTERACTOR_NULL);
 		lastCurrentPanel.setShowCoordinates(false);
+		lastCurrentPanel.removeAllCoupledTo();
 
 		try {
 			if (_currentDevice.hasLocations())

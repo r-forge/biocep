@@ -1,26 +1,26 @@
 package graphics.rmi.action;
 
-import graphics.pop.GDDevice;
+import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
 
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-public class CopyFromCurrentDeviceAction extends AbstractAction {
-	private GDDevice _device;
+public class CopyFromCurrentDeviceAction extends AbstractAction implements LinkedToPanel{
 	private RGui _rgui;
-	public CopyFromCurrentDeviceAction(RGui rgui , GDDevice device) {
+	private JGDPanelPop _panel;
+	
+	public CopyFromCurrentDeviceAction(RGui rgui) {
 		super("Copy From Current Device");
-		_device=device;
 		_rgui=rgui;
 	}
 	
 	public void actionPerformed(ActionEvent e) {
 		try  {						
-			
+			_rgui.getCurrentJGPanelPop().removeCoupledTo(_panel);			
 			_rgui.getRLock().lock();
-			int desinationDeviceNumber=_device.getDeviceNumber();
+			int desinationDeviceNumber=_panel.getGdDevice().getDeviceNumber();
 			int sourceDeviceNumber=_rgui.getCurrentDevice().getDeviceNumber();
 			
 			System.out.println(_rgui.getR().consoleSubmit(".PrivateEnv$dev.copy(which="+desinationDeviceNumber+");" +".PrivateEnv$dev.set("+sourceDeviceNumber+");"));
@@ -34,7 +34,11 @@ public class CopyFromCurrentDeviceAction extends AbstractAction {
 	}
 	
 	public boolean isEnabled() {
-		return _rgui.getR()!=null && _rgui.getCurrentDevice()!=_device; 
+		return _rgui.getR()!=null && _rgui.getCurrentDevice()!=_panel.getGdDevice(); 
 	}
-
+	
+	public void setPanel(JGDPanelPop panel) {
+		_panel=panel;
+		
+	}
 }

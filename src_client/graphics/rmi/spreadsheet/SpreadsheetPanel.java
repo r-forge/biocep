@@ -28,6 +28,7 @@ import net.java.dev.jspreadsheet.SpreadsheetTableModel;
 import graphics.pop.GDDevice;
 import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GUtils;
+import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -121,19 +122,20 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public ReentrantLock getRLock() {
 				return null;
 			}
-			
-			
+						
 			public void setCurrentDevice(GDDevice device) {
 				
 			}
-			
-			
+						
 			public GDDevice getCurrentDevice() {
 				return null;
 			}
-			
-			
+						
 			public Component getRootComponent() {
+				return null;
+			}
+			
+			public JGDPanelPop getCurrentJGPanelPop() {
 				return null;
 			}
 			
