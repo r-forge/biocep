@@ -214,7 +214,9 @@ public abstract class DBLayer implements Registry {
 				final String codeBaseStr = rset.getString(2);
 				final ClassLoader cl = (codeBaseStr != null ? new URLClassLoader(PoolUtils.getURLS(codeBaseStr),
 						DBLayer.class.getClassLoader()) : DBLayer.class.getClassLoader());
-
+				System.out.println("codeBaseStr ::"+ codeBaseStr);
+				
+				
 				final Object[] resultHolder = new Object[1];
 				Runnable lookupRunnable = new Runnable() {
 					public void run() {

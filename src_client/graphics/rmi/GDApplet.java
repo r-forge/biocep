@@ -63,7 +63,10 @@ import java.io.Serializable;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.security.AccessControlException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -130,6 +133,7 @@ import server.DirectJNI;
 import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsolePanel;
 import uk.ac.ebi.microarray.pools.db.monitor.SubmitInterface;
@@ -376,7 +380,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane(), _mode);
 							loginDialog.setVisible(true);
 
-							Identification ident = loginDialog.getIndentification();
+							final Identification ident = loginDialog.getIndentification();
 							if (ident == null)
 								return "Logon cancelled\n";							
 
@@ -450,10 +454,51 @@ public class GDApplet extends GDAppletBase implements RGui {
 									
 								} else {
 									if (ident.getRmiMode()==RMI_MODE_STUB_MODE) {
+										
 										r = (RServices) PoolUtils.hexToStub(ident.getStub(), GDApplet.class.getClassLoader());
+										
+										
 									} else if (ident.getRmiMode()==RMI_MODE_REGISTRY_MODE){
-										r = (RServices)LocateRegistry.getRegistry(ident.getRmiregistryIp(), ident.getRmiregistryPort()).lookup(ident.getServantName());
-									}									
+										Registry registry=null;
+										try {
+											registry=LocateRegistry.getRegistry(ident.getRmiregistryIp(), ident.getRmiregistryPort());
+											registry.list();
+										} catch (Exception e) {
+											e.printStackTrace();
+											throw new NoRmiRegistryAvailable();
+										}
+										
+										try {
+											r = (RServices)registry.lookup(ident.getServantName());
+										}  catch (Exception e) {
+											e.printStackTrace();
+											throw new BadServantName();
+										}
+										
+									} else if (ident.getRmiMode()==RMI_MODE_DB_MODE) {
+										Registry registry=null;
+										try {
+											final String[] dbDriverClass_dbUrl=LoginDialog.getDriverClassAndUrl(ident.getDbDriver(), ident.getDbHostIp(), ident.getDbHostPort(), ident.getDbName());									
+											Class.forName(dbDriverClass_dbUrl[0]);
+											registry = DBLayer.getLayer(PoolUtils.getDBType(dbDriverClass_dbUrl[1]), new ConnectionProvider() {
+												public Connection newConnection() throws java.sql.SQLException {
+												return DriverManager.getConnection(dbDriverClass_dbUrl[1], ident.getDbUser(), ident.getDbPwd());
+												};
+											});
+											registry.list();
+										} catch (Exception e) {
+											e.printStackTrace();
+											throw new NoDbRegistryAvailable();
+										}	
+										
+										try {
+											r = (RServices)registry.lookup(ident.getDbServantName());
+										} catch (Exception e) {
+											e.printStackTrace();
+											throw new BadServantName();
+										}
+										
+									}
 								}
 
 								_rForConsole = r;
@@ -541,7 +586,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 							return "No Node Manager Found, can not log on in <no pool> mode \n";
 						} catch (TunnelingException te) {
 							return PoolUtils.getStackTraceAsString(te.getCause());
-						} catch (RemoteException re) {
+						} catch (NoRmiRegistryAvailable normie) {
+							return "No RMI Registry Available, can not log on\n";
+						} catch (NoDbRegistryAvailable nodbe) {
+							return "No DB Registry Available, can not log on\n";
+						} catch (BadServantName bsne) {
+							return "Bad RMI Servant Name, can not log on\n";
+						}catch (RemoteException re) {
 							return PoolUtils.getStackTraceAsString(re.getCause());
 						} catch (Exception unknow) {
 							return "Unknown Error, can not log on -->"+ PoolUtils.getStackTraceAsString(unknow)+"\n";

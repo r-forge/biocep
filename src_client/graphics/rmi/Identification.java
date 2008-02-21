@@ -36,10 +36,11 @@ class Identification {
 
 	private String _dbDriver;	
 	private String _dbHostIp;
-	private String _dbHostPort;
+	private Integer _dbHostPort;
 	private String _dbName;
 	private String _dbUser;
 	private String _dbPwd;
+	private String _dbServantName;
 	
 	private String _stub;
 	
@@ -54,8 +55,9 @@ class Identification {
 			int rmiMode,
 			String rmiregistryIp, Integer rmiregistryPort, String servantName,
 			String dbDriver, 
-			String dbHostIp, String dbHostPort, String dbName,
-			String dbUser, String dbPwd,			
+			String dbHostIp, Integer dbHostPort, String dbName,
+			String dbUser, String dbPwd,
+			String dbServantName,
 			String stub,
 			int memoryMin,
 			int memoryMax,
@@ -79,6 +81,8 @@ class Identification {
 
 		this._dbUser=dbUser;
 		this._dbPwd=dbPwd;		
+		this._dbServantName=dbServantName;
+		
 		this._stub=stub;
 		this._memoryMin=memoryMin;
 		this._memoryMax=memoryMax;	
@@ -151,6 +155,10 @@ class Identification {
 	}
 
 
+	public String getDbServantName() {
+		return _dbServantName;
+	}
+	
 	public String getDbPwd() {
 		return _dbPwd;
 	}
@@ -160,7 +168,7 @@ class Identification {
 		return _dbHostIp;
 	}
 
-	public String getDbHostPort() {
+	public Integer getDbHostPort() {
 		return _dbHostPort;
 	}
 

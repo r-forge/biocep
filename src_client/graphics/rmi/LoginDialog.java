@@ -26,6 +26,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -46,6 +48,8 @@ import javax.swing.border.BevelBorder;
 import remoting.RServices;
 
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
+import uk.ac.ebi.microarray.pools.db.DBLayer;
 
 /**
  * @author Karim Chine   kchine@ebi.ac.uk
@@ -62,21 +66,23 @@ public class LoginDialog extends JDialog {
 	public static int rmiMode_int = GDApplet.RMI_MODE_REGISTRY_MODE;
 	
 	public static String rmiregistryIp_str = "127.0.0.1";
-	public static int rmiregistryPort_int = 1099;
+	public static Integer rmiregistryPort_int = 1099;
 	public static String servantName_str = "";
 	
 	public static String dbDriver_str = "DERBY";	
 	public static String dbHostIp_str = "127.0.0.1";
-	public static String dbHostPort_str = "1527";
+	public static Integer dbHostPort_int = 1527;
 	public static String dbName_str = "DWEP";
 	
 	public static String dbUser_str = "DWEP";
 	public static String dbPwd_str = "DWEP";
+	public static String dbServantName_str = "";
+	
 		
 	public static String stub_str = "";
 	
-	public static int memoryMin_int = 256;
-	public static int memoryMax_int = 256;
+	public static Integer memoryMin_int = 256;
+	public static Integer memoryMax_int = 256;
 
 	public static boolean persistentWorkspace_bool = false;
 	public static boolean playDemo_bool = false;
@@ -97,7 +103,7 @@ public class LoginDialog extends JDialog {
 	
 	private JTextField _rmiregistryIp;
 	private JTextField _rmiregistryPort;
-	private JComboBox _servantName;
+	private static JComboBox _servantName=null;
 	private JButton _refresh;
 
 	private JComboBox _dbDriver;
@@ -107,6 +113,7 @@ public class LoginDialog extends JDialog {
 	
 	private JTextField _dbUser;
 	private JTextField _dbPwd;
+	private static JComboBox _dbServantName;
 	
 	private JTextField _stub;
 
@@ -129,7 +136,7 @@ public class LoginDialog extends JDialog {
 			return new Identification(mode_int, url_str, login_str, pwd_str, nopool_bool, waitForResource_bool,
 			rmiMode_int,			
 			rmiregistryIp_str, rmiregistryPort_int, servantName_str,			
-			dbDriver_str, dbHostIp_str, dbHostPort_str, dbName_str, dbUser_str, dbPwd_str,
+			dbDriver_str, dbHostIp_str, dbHostPort_int, dbName_str, dbUser_str, dbPwd_str, dbServantName_str,
 			stub_str, 			
 			memoryMin_int,memoryMax_int,
 			persistentWorkspace_bool, playDemo_bool);
@@ -243,7 +250,7 @@ public class LoginDialog extends JDialog {
 			p1.add(new JLabel("  DB User"));p2.add(_dbUser);			
 			p1.add(new JLabel("  DB Pwd"));p2.add(_dbPwd);			
 			JPanel namePanel=new JPanel(new BorderLayout());
-			namePanel.add(_servantName, BorderLayout.CENTER); namePanel.add(_refresh, BorderLayout.EAST);
+			namePanel.add(_dbServantName, BorderLayout.CENTER); namePanel.add(_refresh, BorderLayout.EAST);
 			p1.add(new JLabel("  R Servant Name"));p2.add(namePanel);			
 			p1.add(_persistentWorkspaceCheckBox); p2.add(new JLabel(""));
 			p1.add(_playDemoBox); p2.add(new JLabel(""));
@@ -365,7 +372,7 @@ public class LoginDialog extends JDialog {
 		_rmiregistryIp=new JTextField(rmiregistryIp_str);
 		_rmiregistryPort=new JTextField(new Integer(rmiregistryPort_int).toString());
 		
-		_servantName=new JComboBox(new Object[]{servantName_str});
+		if (_servantName==null) _servantName=new JComboBox(new Object[]{servantName_str});
 		_servantName.setSelectedItem(servantName_str);
 		_servantName.setEditable(true);
 		
@@ -383,10 +390,14 @@ public class LoginDialog extends JDialog {
 		_dbDriver=new JComboBox(new Object[]{"DERBY", "ORACLE", "MySQL"});
 		_dbDriver.setSelectedItem(dbDriver_str);				
 		_dbHostIp=new JTextField(dbHostIp_str);
-		_dbHostPort=new JTextField(dbHostPort_str);
+		_dbHostPort=new JTextField(new Integer(dbHostPort_int).toString());
 		_dbName=new JTextField(dbName_str);		
 		_dbUser=new JTextField(dbUser_str);
 		_dbPwd=new JTextField(dbPwd_str);
+		
+		if (_dbServantName==null) _dbServantName=new JComboBox(new Object[]{dbServantName_str});
+		_dbServantName.setSelectedItem(dbServantName_str);
+		_dbServantName.setEditable(true);
 				
 		_stub=new JTextField(stub_str);
 		
@@ -500,22 +511,23 @@ public class LoginDialog extends JDialog {
 			rmiMode_int = GDApplet.RMI_MODE_STUB_MODE;
 		
 		rmiregistryIp_str = _rmiregistryIp.getText();
-		rmiregistryPort_int = Integer.decode(_rmiregistryPort.getText());
+		try {rmiregistryPort_int = Integer.decode(_rmiregistryPort.getText());} catch (Exception e) {rmiregistryPort_int=null;}
 		servantName_str = (String)_servantName.getSelectedItem();
 		
 		dbDriver_str = (String)_dbDriver.getSelectedItem();
 		
 		dbHostIp_str = _dbHostIp.getText();
-		dbHostIp_str = _dbHostPort.getText();
+		try {dbHostPort_int = Integer.decode(_dbHostPort.getText());} catch (Exception e) {dbHostPort_int=null;}
 		dbName_str = _dbName.getText();
 		
 		dbUser_str = _dbUser.getText();
-		dbPwd_str = _dbPwd.getText();	
+		dbPwd_str = _dbPwd.getText();
+		dbServantName_str = (String) _dbServantName.getSelectedItem();
 		
 		stub_str = _stub.getText();
 
-		memoryMin_int = Integer.decode(_memoryMin.getText());
-		memoryMax_int = Integer.decode(_memoryMax.getText());
+		try {memoryMin_int = Integer.decode(_memoryMin.getText());} catch (Exception e) {memoryMin_int=null;}
+		try {memoryMax_int = Integer.decode(_memoryMax.getText());} catch (Exception e) {memoryMax_int=null;}
 
 		playDemo_bool = _playDemoBox.isSelected();
 		persistentWorkspace_bool = _persistentWorkspaceCheckBox.isSelected();
@@ -530,41 +542,91 @@ public class LoginDialog extends JDialog {
 	}
 	
 	private void refreshNamesRmiModeRegistryMode() {
-		try {
-			Registry registry=LocateRegistry.getRegistry(_rmiregistryIp.getText(), Integer.decode(_rmiregistryPort.getText()));
-			String[] list=registry.list();
-			Vector<String> rnames=new Vector<String>();
-			for (int i=0; i<list.length; ++i) {
-				if (registry.lookup(list[i]) instanceof RServices) rnames.add(list[i]);
+		new Thread(new Runnable(){
+			public void run() {
+				try {
+					Registry registry=LocateRegistry.getRegistry(_rmiregistryIp.getText(), Integer.decode(_rmiregistryPort.getText()));
+					String[] list=registry.list();
+					final Vector<String> rnames=new Vector<String>();
+					for (int i=0; i<list.length; ++i) {
+						if (registry.lookup(list[i]) instanceof RServices) rnames.add(list[i]);
+					}
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_servantName=new JComboBox((Object[])rnames.toArray(new Object[0]));
+							_servantName.setEditable(true);
+							recreateRmiDynamicPanel();
+						}
+					});
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							JOptionPane.showMessageDialog(LoginDialog.this, "Coulnd't connect to rmiregistry");
+						}
+					});
+				}
+				
 			}
-			_servantName=new JComboBox((Object[])rnames.toArray(new Object[0]));
-			_servantName.setEditable(true);
-			recreateRmiDynamicPanel();
-			
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showConfirmDialog(this, "Coulnd't connect to rmiregistry");
-		}
+		}).start();
 	}
 
+	public static String[] getDriverClassAndUrl(String driver, String hostIp, int hostPort, String dbName) {
+		String[] result=new String[2];
+		if (driver.equalsIgnoreCase("DERBY")) {
+			result[0]="org.apache.derby.jdbc.ClientDriver";
+			result[1]="jdbc:derby://"+hostIp+":"+hostPort+"/"+dbName+";create=true";
+		} else if (driver.equalsIgnoreCase("ORACLE")) {
+			result[0]="oracle.jdbc.OracleDriver";
+			result[1]="jdbc:oracle:thin:@"+hostIp+":"+hostPort+":"+dbName;
+		} else if (driver.equalsIgnoreCase("MySQL")) {
+			result[0]="com.mysql.jdbc.Driver";
+			result[1]="jdbc:mysql://"+hostIp+":"+hostPort+"/"+dbName;
+		}		
+		return result;
+	}
 	private void refreshNamesRmiModeDbMode() {
-		try {
-			Registry registry=LocateRegistry.getRegistry(_rmiregistryIp.getText(), Integer.decode(_rmiregistryPort.getText()));
-			String[] list=registry.list();
-			Vector<String> rnames=new Vector<String>();
-			for (int i=0; i<list.length; ++i) {
-				if (registry.lookup(list[i]) instanceof RServices) rnames.add(list[i]);
-			}
-			_servantName=new JComboBox((Object[])rnames.toArray(new Object[0]));
-			_servantName.setEditable(true);
-			recreateRmiDynamicPanel();
 			
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showConfirmDialog(this, "Coulnd't connect to rmiregistry");
-		}
+		new Thread(new Runnable(){
+			public void run() {
+				try {					
+					final String[] dbDriverClass_dbUrl=getDriverClassAndUrl((String)_dbDriver.getSelectedItem(), _dbHostIp.getText(), Integer.decode(_dbHostPort.getText()), _dbName.getText());
+					final String user = _dbUser.getText();
+					final String password = _dbPwd.getText();
+					Class.forName(dbDriverClass_dbUrl[0]);
+					Registry registry = DBLayer.getLayer(PoolUtils.getDBType(dbDriverClass_dbUrl[1]), new ConnectionProvider() {
+						public Connection newConnection() throws java.sql.SQLException {
+							return DriverManager.getConnection(dbDriverClass_dbUrl[1], user, password);
+						};
+
+					});
+					
+					String[] list=registry.list();
+					final Vector<String> rnames=new Vector<String>();
+					for (int i=0; i<list.length; ++i) {
+						if (registry.lookup(list[i]) instanceof RServices) rnames.add(list[i]);
+					}
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_dbServantName=new JComboBox((Object[])rnames.toArray(new Object[0]));
+							_dbServantName.setEditable(true);
+							recreateRmiDynamicPanel();							
+						}
+					});
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							JOptionPane.showMessageDialog(LoginDialog.this, "Coulnd't connect to db registry");			
+						}
+					});
+				
+				}
+			}
+		}).start();
 	}
 
 }
