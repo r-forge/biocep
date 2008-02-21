@@ -29,7 +29,8 @@
   <jar href="appletlibs/JRI.jar"/>     
   <jar href="appletlibs/htmlparser.jar"/>     
   <jar href="appletlibs/webserver.jar"/>     
-  <jar href="appletlibs/servlet-api.jar"/>   
+  <jar href="appletlibs/servlet-api.jar"/> 
+  <jar href="appletlibs/derbyclient.jar"/>  
 </resources>
 
 <application-desc main-class="graphics.rmi.GDAppletLauncher"/>

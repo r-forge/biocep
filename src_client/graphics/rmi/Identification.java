@@ -28,20 +28,37 @@ class Identification {
 	private boolean _nopool;
 	private boolean _waitForResource;	
 	
+	private int _rmiMode;
+	
 	private String _rmiregistryIp;
 	private Integer _rmiregistryPort;
 	private String _servantName;
+
+	private String _dbDriver;	
+	private String _dbHostIp;
+	private String _dbHostPort;
+	private String _dbName;
+	private String _dbUser;
+	private String _dbPwd;
+	
 	private String _stub;
 	
-	private String _memoryMax;
+	private int _memoryMin;
+	private int _memoryMax;
 
 	private boolean _persistentWorkspace;	
 	private boolean _playDemo;
 
 	public Identification(int mode, 
 			String url, String user, String pwd,  boolean nopool, boolean waitForResource,  
-			String rmiregistryIp, Integer rmiregistryPort, String servantName, String stub, 
-			String memoryMax,
+			int rmiMode,
+			String rmiregistryIp, Integer rmiregistryPort, String servantName,
+			String dbDriver, 
+			String dbHostIp, String dbHostPort, String dbName,
+			String dbUser, String dbPwd,			
+			String stub,
+			int memoryMin,
+			int memoryMax,
 			boolean persistentWorkspace, boolean playDemo) {		
 		this._mode=mode;	
 		this._url=url;
@@ -49,10 +66,21 @@ class Identification {
 		this._pwd = pwd;
 		this._nopool = nopool;		
 		this._waitForResource = waitForResource;
+		this._rmiMode = rmiMode;
 		this._rmiregistryIp=rmiregistryIp;
 		this._rmiregistryPort=rmiregistryPort;
-		this._servantName=servantName;		
-		this._stub=stub;		
+		this._servantName=servantName;
+		
+		this._dbDriver=dbDriver;
+		
+		this._dbHostIp=dbHostIp;
+		this._dbHostPort=dbHostPort;
+		this._dbName=dbName;
+
+		this._dbUser=dbUser;
+		this._dbPwd=dbPwd;		
+		this._stub=stub;
+		this._memoryMin=memoryMin;
 		this._memoryMax=memoryMax;	
 		this._persistentWorkspace = persistentWorkspace;
 		this._playDemo = playDemo;
@@ -98,7 +126,7 @@ class Identification {
 		return _stub;
 	}
 
-	public String getMemoryMax() {
+	public int getMemoryMax() {
 		return _memoryMax;
 	}
 
@@ -108,5 +136,39 @@ class Identification {
 
 	public boolean isPlayDemo() {
 		return _playDemo;
+	}
+
+	public int getRmiMode() {
+		return _rmiMode;
+	}
+
+	public String getDbDriver() {
+		return _dbDriver;
+	}
+
+	public String getDbUser() {
+		return _dbUser;
+	}
+
+
+	public String getDbPwd() {
+		return _dbPwd;
+	}
+
+
+	public String getDbHostIp() {
+		return _dbHostIp;
+	}
+
+	public String getDbHostPort() {
+		return _dbHostPort;
+	}
+
+	public String getDbName() {
+		return _dbName;
+	}
+
+	public int getMemoryMin() {
+		return _memoryMin;
 	}	
 }

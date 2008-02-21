@@ -67,14 +67,14 @@ public class ServerLauncher {
 		}).start();
 
 		try {
-			System.out.println("R:" + createR());
+			System.out.println("R:" + createR(256,256));
 		} catch (Exception e) {
 			System.out.println("Things went wrong");
 			e.printStackTrace();
 		}
 	}
 
-	public static RServices createR() throws Exception {
+	public static RServices createR(int memoryMinMegabytes, int memoryMaxMegabytes) throws Exception {
 
 		String urlprefix = null;
 		try {
@@ -321,8 +321,13 @@ public class ServerLauncher {
 
 			Vector<String> command = new Vector<String>();
 			command.add(System.getProperty("java.home") + "/bin/java");
+			
+			command.add((isWindowsOs() ? "\"" : "") + "-DXms"+ memoryMinMegabytes +"m" + (isWindowsOs() ? "\"" : ""));
+			command.add((isWindowsOs() ? "\"" : "") + "-DXmx"+ memoryMaxMegabytes +"m" + (isWindowsOs() ? "\"" : ""));
+			
 			command.add("-classpath");
 			command.add((isWindowsOs() ? "\"" : "") + cp + (isWindowsOs() ? "\"" : ""));
+			
 			command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
 
 			command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://127.0.0.1:" + GUtils.getLocalTomcatPort() + "/classes/"

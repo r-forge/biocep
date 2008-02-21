@@ -130,8 +130,10 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		setBackground(Color.white);
 		setOpaque(true);
 		_actions = actions;
-		for (int i=0; i<_actions.length; ++i) {
-			if (_actions[i] instanceof LinkedToPanel) ((LinkedToPanel)_actions[i]).setPanel(this);
+		if (_actions!=null) {
+			for (int i=0; i<_actions.length; ++i) {
+				if (_actions[i] instanceof LinkedToPanel) ((LinkedToPanel)_actions[i]).setPanel(this);
+			}
 		}
 		
 		_x0 = sz.getWidth() / 2;

@@ -97,7 +97,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				String shortClassName = className.substring(className.lastIndexOf('.') + 1);
 				log.info(shortClassName);
 				System.out.println("Going to load : "+className + "ImplRemote");
-				_rim.put(shortClassName, (RPackage) DirectJNI.class.getClassLoader().loadClass(className + "ImplRemote")
+				_rim.put(shortClassName, (RPackage) DirectJNI._mappingClassLoader.loadClass(className + "ImplRemote")
 						.newInstance());
 			}
 			

@@ -327,7 +327,8 @@
 						<fileset dir="lib/desktop" includes="webserver.jar"/>									
 						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>			
 						<fileset dir="lib/j2ee" includes="servlet-api.jar"/>						
-						<fileset dir="lib/desktop" includes="JRI.jar"/>								
+						<fileset dir="lib/desktop" includes="JRI.jar"/>
+				  		<fileset dir="lib/jdbc" includes="derbyclient.jar"/>		
 						<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
 				  </copy>
 				
@@ -391,11 +392,6 @@
 				  </path>
 				</signjar>
 				
-				<signjar destDir="VirtualRWorkbench/frontendapp/jawslibs" alias="appletsigningkey" keystore="VirtualRWorkbench/appletKeyStore.ks"  storepass="emblebi" >
-				  <path>					  
-					<fileset dir="VirtualRWorkbench/frontendapp/jawslibs" includes="**/*.jar" />					
-				  </path>
-				</signjar>
 								
 				<jar basedir="VirtualRWorkbench/frontendapp" destfile="VirtualRWorkbench/${demo.frontend.war.name}.war" />
 
