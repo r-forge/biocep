@@ -130,6 +130,7 @@ import server.DirectJNI;
 import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsolePanel;
 import uk.ac.ebi.microarray.pools.db.monitor.SubmitInterface;
 import uk.ac.ebi.microarray.pools.db.monitor.SymbolPopDialog;
@@ -138,6 +139,8 @@ import util.PropertiesGenerator;
 import util.Utils;
 import static graphics.rmi.JGDPanelPop.*;
 import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
+import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
+import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 
 /**
  * @author Karim Chine kchine@ebi.ac.uk
@@ -147,6 +150,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public static final int LOCAL_MODE = 0;
 	public static final int RMI_MODE = 1;
 	public static final int HTTP_MODE = 2;
+	
+	public static final int RMI_MODE_REGISTRY_MODE = 0;
+	public static final int RMI_MODE_DB_MODE = 1;
+	public static final int RMI_MODE_STUB_MODE = 2;
 
 	private String _commandServletUrl = null;
 	private String _defaultHelpUrl = null;
@@ -428,39 +435,26 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								if (getMode() == GDApplet.LOCAL_MODE) {
 									
-								
+									/*
 									DirectJNI.init();							
 									r = DirectJNI.getInstance().getRServices();
-									
-									
-									/*
+									*/
 									
 									try {
-										r = ServerLauncher.createR();
+										r = ServerLauncher.createR(ident.getMemoryMin(), ident.getMemoryMax());
 										_localRProcessId = r.getProcessId();
 										System.out.println("R Process Id :" + _localRProcessId);
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
 									
-									*/
-																		
-
 								} else {
-									
+									if (ident.getRmiMode()==RMI_MODE_STUB_MODE) {
+										r = (RServices) PoolUtils.hexToStub(ident.getStub(), GDApplet.class.getClassLoader());
+									} else if (ident.getRmiMode()==RMI_MODE_REGISTRY_MODE){
+										r = (RServices)LocateRegistry.getRegistry(ident.getRmiregistryIp(), ident.getRmiregistryPort()).lookup(ident.getServantName());
+									}									
 								}
-								
-								
-								/*
-								else if (System.getProperty("stub") != null && !System.getProperty("stub").equals("")) {
-									r = (RServices) PoolUtils.hexToStub(System.getProperty("stub"), GDApplet.class.getClassLoader());
-								} else {
-									try {
-										r = (RServices) DBLayer.getRmiRegistry().lookup(System.getProperty("name"));
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}*/
 
 								_rForConsole = r;
 								_rForPopCmd = r;
@@ -540,16 +534,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 
 						} catch (NoServantAvailableException e) {
-							return "No R servant available, cannot log on\n";
+							return "No R servant available, can not log on\n";
 						} catch (NoRegistryAvailableException nrae) {
-							return "No Registry available, cannot log on\n";
+							return "No Registry available, can not log on\n";
 						} catch (NoNodeManagerFound nne) {
-							return "No Node Manager Found, cannot log on in <no pool> mode \n";
+							return "No Node Manager Found, can not log on in <no pool> mode \n";
 						} catch (TunnelingException te) {
 							return PoolUtils.getStackTraceAsString(te.getCause());
 						} catch (RemoteException re) {
 							return PoolUtils.getStackTraceAsString(re.getCause());
+						} catch (Exception unknow) {
+							return "Unknown Error, can not log on -->"+ PoolUtils.getStackTraceAsString(unknow)+"\n";
 						}
+
 					}
 
 					if (_sessionId == null)

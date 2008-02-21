@@ -7,6 +7,7 @@ import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.zip.*;
 
+
 public class RJavaClassLoader extends URLClassLoader {
     String rJavaPath, rJavaLibPath;
     HashMap libMap;
@@ -193,14 +194,28 @@ public class RJavaClassLoader extends URLClassLoader {
 	// System.out.println("=== giving up");
 	if (cl == null) {
 		cl= RJavaClassLoader.class.getClassLoader().loadClass(name);
+	}	
+	if (cl == null && System.getProperty("java.rmi.server.codebase") != null) {
+		Vector<URL> urlsVector = new Vector<URL>();
+		StringTokenizer st = new StringTokenizer(System.getProperty("java.rmi.server.codebase"), " ");		
+		while (st.hasMoreElements()) {
+			try {
+				urlsVector.add(new URL((String) st.nextElement()));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}		
+		ClassLoader codebaseClassLoader=new URLClassLoader( (URL[])urlsVector.toArray(new URL[0]),RJavaClassLoader.class.getClassLoader());
+		cl= codebaseClassLoader.loadClass(name);
 	}
+	
 	if (cl == null) {
 	    throw (new ClassNotFoundException());
 	}
 
 	return cl;
     }
-
+    
     public URL findResource(String name) {
 	if (verbose) System.out.println("RJavaClassLoader: findResource('"+name+"')");
 	if (useSystem) {
