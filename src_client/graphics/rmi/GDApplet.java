@@ -443,7 +443,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 									*/
 									
 									try {
-										r = ServerLauncher.createR("127.0.0.1",GUtils.getLocalTomcatPort(),ident.getMemoryMin(), ident.getMemoryMax());
+										
+										
+										r = ServerLauncher.createR(false,"127.0.0.1",GUtils.getLocalTomcatPort(), "127.0.0.1", GUtils.getLocalRmiRegistryPort(),ident.getMemoryMin(), ident.getMemoryMax());
+										
+										
 										_localRProcessId = r.getProcessId();
 										System.out.println("R Process Id :" + _localRProcessId);
 									} catch (Exception e) {
