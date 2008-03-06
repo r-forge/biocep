@@ -9,38 +9,48 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import javax.swing.JOptionPane;
+
+import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
 import uk.ac.ebi.microarray.pools.MainPsToolsDownload;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
+import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.SCPClient;
+import ch.ethz.ssh2.Session;
+import ch.ethz.ssh2.StreamGobbler;
 
 public class ServerLauncher {
-	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 3;
+	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
 	public static int BUFFER_SIZE = 8192 * 5;
 
 	/**
 	 * @param args
 	 */
-	
+	public static Acme.Serve.Serve srv;
 	public static void main(String[] args) throws Exception {
+		
+		
 		new Thread(new Runnable() {
 			public void run() {
 
-				final Acme.Serve.Serve srv = new Acme.Serve.Serve() {
+				srv = new Acme.Serve.Serve() {
 					public void setMappingTable(PathTreeDictionary mappingtable) {
 						super.setMappingTable(mappingtable);
 					}
@@ -52,31 +62,185 @@ public class ServerLauncher {
 				srv.arguments = properties;
 				System.out.println("properties:" + properties + "  server: " + srv);
 				srv.addServlet("/classes/", new LocalClassServlet());
-
-				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-					public void run() {
-						try {
-							srv.notifyStop();
-						} catch (java.io.IOException ioe) {
-							ioe.printStackTrace();
-						}
-						srv.destroyAllServlets();
-					}
-				}));
-
 				srv.serve();
 			}
 		}).start();
+		
+		
+		new Thread(new Runnable() {
+			public void run() {
+				System.out.println("local rmiregistry port : " + GUtils.getLocalTomcatPort());
+				try {
+					LocateRegistry.createRegistry(GUtils.getLocalRmiRegistryPort());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 
+		RServices r = createRSsh(true, 
+				PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(),
+				PoolUtils.getHostIp(), GUtils.getLocalRmiRegistryPort(), 256, 256, 
+				"192.168.189.128", "ebi", "ebibiocep");
+		System.out.println("rr:"+r);
+		
+		//BootSsh.main(new String[]{"false","127.0.0.1",""+GUtils.getLocalTomcatPort(),"127.0.0.1",""+GUtils.getLocalRmiRegistryPort(),"256","256"});
+		/*
 		try {
-			System.out.println("R:" + createR("127.0.0.1",GUtils.getLocalTomcatPort(),256,256));
+			RServices r=createR(true, "127.0.0.1",GUtils.getLocalTomcatPort(), "127.0.0.1", GUtils.getLocalRmiRegistryPort(),256,256);
+			String processId=r.getProcessId();
+			System.out.println("R:" + r);
+			try {
+				if (PoolUtils.isWindowsOs()) {
+					PoolUtils.killLocalWinProcess(processId, true);
+				} else {
+					PoolUtils.killLocalUnixProcess(processId, true);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
 		} catch (Exception e) {
 			System.out.println("Things went wrong");
 			e.printStackTrace();
 		}
+		*/
+
+		if (srv!=null) {
+			
+			try {
+				srv.notifyStop();
+			} catch (java.io.IOException ioe) {
+				ioe.printStackTrace();
+			}
+			
+			try {
+				srv.destroyAllServlets();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	
+		
 	}
 
-	public static RServices createR(String codeServerHostIp, int codeServerPort , int memoryMinMegabytes, int memoryMaxMegabytes) throws Exception {
+	
+	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, 
+            String rmiRegistryHostIp, int rmiRegistryPort , 
+            int memoryMinMegabytes, int memoryMaxMegabytes,
+            String sshHostIp, String login, String pwd) throws Exception {
+
+		Connection conn = null;
+		try {
+			conn=new Connection(sshHostIp);
+			conn.connect();
+			boolean isAuthenticated = conn.authenticateWithPassword(login, pwd);
+			if (isAuthenticated == false)
+				throw new IOException("Authentication failed.");
+			
+			InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/BootSsh.class");
+			byte[] buffer = new byte[is.available()];
+			try {
+				for (int i = 0; i < buffer.length; ++i) {
+					int b = is.read();
+					buffer[i] = (byte) b;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			String bootstrapDir = System.getProperty("user.home") + "/RWorkbench/" + "classes/bootstrap";
+			new File(bootstrapDir).mkdirs();
+			RandomAccessFile raf = new RandomAccessFile(bootstrapDir + "/BootSsh.class", "rw");
+			raf.setLength(0);
+			raf.write(buffer);
+			raf.close();	
+				
+			Session sess = null;
+			try {
+				sess=conn.openSession();
+				sess.execCommand("mkdir -p RWorkbench/classes/bootstrap");
+				sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);				
+			} finally {
+				try {sess.close();} catch (Exception e) {e.printStackTrace();}
+			}
+						
+			
+			new SCPClient(conn).put(bootstrapDir + "/BootSsh.class", "RWorkbench/classes/bootstrap");
+			
+			sess = conn.openSession();
+			sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh"+" "+new Boolean(keepAlive)+" "
+					+codeServerHostIp+" "+codeServerPort+" "
+					+rmiRegistryHostIp+" "+rmiRegistryPort+" "
+					+memoryMinMegabytes+" "+memoryMaxMegabytes);
+			
+			InputStream stdout = new StreamGobbler(sess.getStdout());
+			final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
+			
+			InputStream stderr = new StreamGobbler(sess.getStderr());
+			final BufferedReader brErr = new BufferedReader(new InputStreamReader(stderr));
+			
+			final StringBuffer sshOutput=new StringBuffer();
+			final RServices[] rHolder=new RServices[1];
+			new Thread(new Runnable(){
+				public void run() {
+					try {
+						while (true) {
+							String line = brOut.readLine();
+							if (line == null) break;
+							sshOutput.append(line+"\n");
+							System.out.println(line);
+							
+							int eIndex=sshOutput.indexOf(BootSsh.STUB_END_MARKER);
+							if (eIndex!=-1) {
+								int bIndex=sshOutput.indexOf(BootSsh.STUB_BEGIN_MARKER);
+								String stub=sshOutput.substring(bIndex+BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
+								rHolder[0]=(RServices)PoolUtils.hexToStub(stub,ServerLauncher.class.getClassLoader());								
+								break;
+							}
+							
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}					
+				}
+			}).start();
+			
+			new Thread(new Runnable(){
+				public void run() {
+					try {
+						while (true) {
+							String line = brErr.readLine();
+							if (line == null) break;
+							System.out.println(line);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}					
+				}
+			}).start();
+			
+			
+			long t1 = System.currentTimeMillis();
+			while (rHolder[0] == null) {
+				if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
+					throw new ServantCreationTimeout();
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+				}
+			}
+
+			return rHolder[0];
+			
+		} finally {
+			conn.close();
+		}
+		
+	}
+	
+	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, 
+			                        String rmiRegistryHostIp, int rmiRegistryPort , 
+			                        int memoryMinMegabytes, int memoryMaxMegabytes) throws Exception {
 
 		String urlprefix = null;
 		try {
@@ -86,7 +250,7 @@ public class ServerLauncher {
 			urlprefix = BasicServiceClass.getMethod("getCodeBase").invoke(basicServiceInstance).toString();
 		} catch (Exception e) {
 
-		}
+		}		
 		System.out.println("url prefix:" + urlprefix);
 		URL rjbURL = null;
 		System.out.println(ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class"));
@@ -99,6 +263,12 @@ public class ServerLauncher {
 				rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
 			}
 		}
+		
+		if (urlprefix == null) {
+			urlprefix="http://biocep.r-forge.r-project.org/appletlibs/";
+		}
+		
+		
 
 		String root = GUtils.INSTALL_DIR;
 		new File(root).mkdir();
@@ -332,8 +502,20 @@ public class ServerLauncher {
 			
 			command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
 
-			command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://"+codeServerHostIp+":" + codeServerPort + "/classes/"
-					+ (isWindowsOs() ? "\"" : ""));
+			if (keepAlive) {
+				command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase="+
+						"http://"+codeServerHostIp+":" + codeServerPort + "/classes/"+ " "+
+						urlprefix+"JRI.jar"+" "+
+						urlprefix+"commons-logging-1.1.jar"+" "+
+						urlprefix+"log4j-1.2.14.jar"+" "+
+						urlprefix+"htmlparser.jar"+" "+
+						urlprefix+"derbyclient.jar"+" "+
+						urlprefix+"RJB.jar"+" "+
+						urlprefix+"mapping.jar"+ (isWindowsOs() ? "\"" : ""));
+			} else {				
+				command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://"+codeServerHostIp+":" + codeServerPort + "/classes/" + (isWindowsOs() ? "\"" : ""));
+			}
+			
 			command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
 
 			command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
@@ -345,15 +527,19 @@ public class ServerLauncher {
 			command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + root + "wdir" + (isWindowsOs() ? "\"" : ""));
 			command.add((isWindowsOs() ? "\"" : "") + "-Dpstools.home=" + root + "PsTools/" + (isWindowsOs() ? "\"" : ""));
 
-			command.add((isWindowsOs() ? "\"" : "") + "-Dregistryhost=127.0.0.1" + (isWindowsOs() ? "\"" : ""));
-			command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + GUtils.getLocalRmiRegistryPort() + (isWindowsOs() ? "\"" : ""));
+			command.add((isWindowsOs() ? "\"" : "") + "-Dregistryhost="+ rmiRegistryHostIp + (isWindowsOs() ? "\"" : ""));
+			command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
 
 			command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog"
 					+ (isWindowsOs() ? "\"" : ""));
 
 			command.add("bootstrap.Boot");
+			command.add(new Boolean(keepAlive).toString());
 			command.add(codeServerHostIp );
 			command.add(""+codeServerPort );
+			if (keepAlive) {				
+				command.add(urlprefix);
+			}
 
 			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
 			final Vector<String> killPrint = new Vector<String>();
@@ -405,6 +591,7 @@ public class ServerLauncher {
 			if (exceptionHolder[0] != null) {
 				throw exceptionHolder[0];
 			}
+			
 			return (RServices) servantHolder[0];
 		} finally {
 			if (callBack != null) {
