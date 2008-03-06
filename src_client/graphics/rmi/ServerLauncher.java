@@ -26,6 +26,7 @@ import uk.ac.ebi.microarray.pools.MainPsToolsDownload;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
+import ch.ethz.ssh2.Connection;
 
 public class ServerLauncher {
 	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 3;
@@ -34,6 +35,7 @@ public class ServerLauncher {
 	/**
 	 * @param args
 	 */
+	
 	public static void main(String[] args) throws Exception {
 		new Thread(new Runnable() {
 			public void run() {
@@ -67,14 +69,14 @@ public class ServerLauncher {
 		}).start();
 
 		try {
-			System.out.println("R:" + createR(256,256));
+			System.out.println("R:" + createR("127.0.0.1",GUtils.getLocalTomcatPort(),256,256));
 		} catch (Exception e) {
 			System.out.println("Things went wrong");
 			e.printStackTrace();
 		}
 	}
 
-	public static RServices createR(int memoryMinMegabytes, int memoryMaxMegabytes) throws Exception {
+	public static RServices createR(String codeServerHostIp, int codeServerPort , int memoryMinMegabytes, int memoryMaxMegabytes) throws Exception {
 
 		String urlprefix = null;
 		try {
@@ -192,7 +194,7 @@ public class ServerLauncher {
 			}
 		}
 
-		String[] requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo", "gplots" };
+		String[] requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo" };
 		Vector<String> installLibBatch = new Vector<String>();
 		installLibBatch.add("source('http://bioconductor.org/biocLite.R')");
 
@@ -330,7 +332,7 @@ public class ServerLauncher {
 			
 			command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
 
-			command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://127.0.0.1:" + GUtils.getLocalTomcatPort() + "/classes/"
+			command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://"+codeServerHostIp+":" + codeServerPort + "/classes/"
 					+ (isWindowsOs() ? "\"" : ""));
 			command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
 
@@ -350,7 +352,8 @@ public class ServerLauncher {
 					+ (isWindowsOs() ? "\"" : ""));
 
 			command.add("bootstrap.Boot");
-			command.add("" + GUtils.getLocalTomcatPort());
+			command.add(codeServerHostIp );
+			command.add(""+codeServerPort );
 
 			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
 			final Vector<String> killPrint = new Vector<String>();

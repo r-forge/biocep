@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.microarray.pools;
 
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -1033,7 +1034,15 @@ public class PoolUtils {
 	public static void killLocalWinProcess(String processId, boolean isKILLSIG) throws Exception {
 		//String[] command = isKILLSIG ? new String[] { "taskkill", "/F", "/PID", processId } : new String[] {"taskkill", "/PID", processId };
 		
-		String[] command = new String[] { System.getProperty("pstools.home") + "/pskill.exe" , processId};
+		String pskillCommand=System.getProperty("pstools.home") + "/pskill.exe" ;
+		if (!new File(pskillCommand).exists()) {
+			String psToolsHome=System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
+			new File(psToolsHome).mkdirs();
+			MainPsToolsDownload.main(new String[] { psToolsHome });
+			pskillCommand=psToolsHome + "/pskill.exe" ;
+		}
+		
+		String[] command = new String[] { pskillCommand , processId};
 		
 		Runtime rt = Runtime.getRuntime();
 		final Process proc = rt.exec(command);
@@ -1132,10 +1141,10 @@ public class PoolUtils {
 	public static final int SET_SERVANT_STUB_TIMEOUT_MILLISEC = 2000;
 	
 	
-	public static boolean isPortInUse(int port) {
+	public static boolean isPortInUse(String hostIp,int port) {
 		Socket s=null;
 		try {
-			s = new Socket("127.0.0.1",port);
+			s = new Socket(hostIp,port);
 		} catch (Exception e) {
 			return false;
 		} finally {
@@ -1144,12 +1153,12 @@ public class PoolUtils {
 		return true;
 	}
 	
-	public static void startPortInUseDogwatcher(final int port, final int periodicitySec,final int maxFailure) {
+	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec,final int maxFailure) {
 		new Thread(new Runnable(){
 			int failureCounter=maxFailure;
 			public void run() {
 				while(true) {
-					if (!PoolUtils.isPortInUse(port)) --failureCounter;
+					if (!PoolUtils.isPortInUse(hostIp,port)) --failureCounter;
 					if (failureCounter==0) {
 						System.out.println("The Creator Process doesn't respond, going to die");
 						System.exit(0);

@@ -148,7 +148,7 @@ public class GUtils {
 			}	
 			
 			for (int i=0;i<1000;++i) {				
-				if (!PoolUtils.isPortInUse(_localTomcatPort+i)) {
+				if (!PoolUtils.isPortInUse("127.0.0.1",_localTomcatPort+i)) {
 					_localTomcatPort=_localTomcatPort+i;
 					break;
 				}
@@ -167,7 +167,7 @@ public class GUtils {
 				_localRmiregistryPort= Integer.decode(System.getProperty("localrmiregistry.port"));
 			}
 			for (int i=0;i<1000;++i) {				
-				if (!PoolUtils.isPortInUse(_localRmiregistryPort+i)) {
+				if (!PoolUtils.isPortInUse("127.0.0.1",_localRmiregistryPort+i)) {
 					_localRmiregistryPort=_localRmiregistryPort+i;
 					break;
 				}
