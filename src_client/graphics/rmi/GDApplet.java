@@ -143,8 +143,6 @@ import util.PropertiesGenerator;
 import util.Utils;
 import static graphics.rmi.JGDPanelPop.*;
 import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 
 /**
  * @author Karim Chine kchine@ebi.ac.uk
@@ -445,7 +443,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									*/
 									
 									try {
-										r = ServerLauncher.createR(ident.getMemoryMin(), ident.getMemoryMax());
+										r = ServerLauncher.createR("127.0.0.1",GUtils.getLocalTomcatPort(),ident.getMemoryMin(), ident.getMemoryMax());
 										_localRProcessId = r.getProcessId();
 										System.out.println("R Process Id :" + _localRProcessId);
 									} catch (Exception e) {
@@ -2137,7 +2135,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						try {
 
 							if (getMode() == HTTP_MODE) {
-								saveimage();
+								RHttpProxy.saveimage(_commandServletUrl,_sessionId);
 							} else {
 								_consolePanel.play("save.image('.RData')", false);
 							}
@@ -2162,7 +2160,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					public void run() {
 						try {
 							if (getMode() == HTTP_MODE) {
-								loadimage();
+								RHttpProxy.loadimage(_commandServletUrl,_sessionId);
 							} else {
 								_consolePanel.play("load('.RData')", false);
 							}
@@ -2515,7 +2513,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (dialog.getExpr() != null) {
 									try {
 										final int port = Integer.decode(dialog.getExpr());
-										if (PoolUtils.isPortInUse(port)) {
+										if (PoolUtils.isPortInUse("127.0.0.1",port)) {
 											JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
 										} else {
 
@@ -2594,60 +2592,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 		});
 
 		
-	}
-
-	public void saveimage() throws TunnelingException {
-		HttpClient mainHttpClient = null;
-		GetMethod getInterrupt = null;
-		try {
-			Object result = null;
-			mainHttpClient = new HttpClient();
-			getInterrupt = new GetMethod(_commandServletUrl + (_sessionId == null || _sessionId.equals("") ? "" : ";jsessionid=" + _sessionId)
-					+ "?method=saveimage");
-			try {
-				mainHttpClient.executeMethod(getInterrupt);
-				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
-			} catch (Exception e) {
-				throw new TunnelingException("", e);
-			}
-			if (result != null && result instanceof TunnelingException) {
-				throw (TunnelingException) result;
-			}
-
-		} finally {
-			if (getInterrupt != null) {
-				getInterrupt.releaseConnection();
-			}
-			if (mainHttpClient != null) {
-			}
-		}
-	}
-
-	public void loadimage() throws TunnelingException {
-		HttpClient mainHttpClient = null;
-		GetMethod getInterrupt = null;
-		try {
-			Object result = null;
-			mainHttpClient = new HttpClient();
-			getInterrupt = new GetMethod(_commandServletUrl + (_sessionId == null || _sessionId.equals("") ? "" : ";jsessionid=" + _sessionId)
-					+ "?method=loadimage");
-			try {
-				mainHttpClient.executeMethod(getInterrupt);
-				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
-			} catch (Exception e) {
-				throw new TunnelingException("", e);
-			}
-			if (result != null && result instanceof TunnelingException) {
-				throw (TunnelingException) result;
-			}
-
-		} finally {
-			if (getInterrupt != null) {
-				getInterrupt.releaseConnection();
-			}
-			if (mainHttpClient != null) {
-			}
-		}
 	}
 
 	private void disposeDevices() {

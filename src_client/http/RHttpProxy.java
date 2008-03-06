@@ -217,6 +217,65 @@ public class RHttpProxy {
 		}
 	}
 
+	public static void saveimage(String url, String sessionId) throws TunnelingException {
+		GetMethod getInterrupt = null;
+		try {
+			Object result = null;
+			mainHttpClient = new HttpClient();
+			getInterrupt = new GetMethod(url
+					+ "?method=saveimage");
+			try {
+				if (sessionId != null && !sessionId.equals("")) {
+					getInterrupt.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					getInterrupt.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+				}
+				mainHttpClient.executeMethod(getInterrupt);
+				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
+			} catch (Exception e) {
+				throw new TunnelingException("", e);
+			}
+			if (result != null && result instanceof TunnelingException) {
+				throw (TunnelingException) result;
+			}
+
+		} finally {
+			if (getInterrupt != null) {
+				getInterrupt.releaseConnection();
+			}
+			if (mainHttpClient != null) {
+			}
+		}
+	}
+
+	public static void loadimage(String url,String sessionId) throws TunnelingException {
+		GetMethod getInterrupt = null;
+		try {
+			Object result = null;
+			mainHttpClient = new HttpClient();
+			getInterrupt = new GetMethod(url
+					+ "?method=loadimage");
+			try {
+				if (sessionId != null && !sessionId.equals("")) {
+					getInterrupt.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					getInterrupt.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+				}
+				mainHttpClient.executeMethod(getInterrupt);
+				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
+			} catch (Exception e) {
+				throw new TunnelingException("", e);
+			}
+			if (result != null && result instanceof TunnelingException) {
+				throw (TunnelingException) result;
+			}
+
+		} finally {
+			if (getInterrupt != null) {
+				getInterrupt.releaseConnection();
+			}
+			if (mainHttpClient != null) {
+			}
+		}
+	}
 	
 	
 	

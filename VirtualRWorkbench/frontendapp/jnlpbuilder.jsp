@@ -30,7 +30,13 @@
   <jar href="appletlibs/jeditmodes.jar"/>
   <jar href="appletlibs/jedit.jar"/>
   <jar href="appletlibs/pf-joi-full.jar"/>
-  <jar href="appletlibs/OpenXLS.jar"/>     
+  <jar href="appletlibs/OpenXLS.jar"/> 
+  <jar href="appletlibs/JRI.jar"/>     
+  <jar href="appletlibs/htmlparser.jar"/>     
+  <jar href="appletlibs/webserver.jar"/>     
+  <jar href="appletlibs/servlet-api.jar"/> 
+  <jar href="appletlibs/derbyclient.jar"/>  
+  <jar href="appletlibs/ganymed-ssh2.jar"/>    
 </resources>
 
 <application-desc main-class="graphics.rmi.GDAppletLauncher"/>
