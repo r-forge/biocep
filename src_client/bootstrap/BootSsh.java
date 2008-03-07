@@ -18,14 +18,15 @@ public class BootSsh {
 					new Class<?>[] { String.class, int.class, int.class, int.class }).invoke(null, args[1], Integer.decode(args[2]), 3, 3);
 			Class<?> ServerLauncherClass = cl.loadClass("graphics.rmi.ServerLauncher");
 			Remote r = (Remote) ServerLauncherClass.getMethod("createR",
-					new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class }).invoke(
+					new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class, boolean.class }).invoke(
 					null,
 					new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), args[3],
-							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue() });
-			System.out.println(STUB_BEGIN_MARKER+ stubToHex(r)+ STUB_END_MARKER);
+							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), false });
+			System.out.println(STUB_BEGIN_MARKER+ stubToHex(r)+ STUB_END_MARKER);			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.exit(0);
 	}
 	
 	public static String stubToHex(Remote obj) throws NoSuchObjectException {
