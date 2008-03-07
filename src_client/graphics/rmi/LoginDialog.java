@@ -56,7 +56,7 @@ import uk.ac.ebi.microarray.pools.db.DBLayer;
  */
 public class LoginDialog extends JDialog {
 
-	public static int mode_int = GDApplet.LOCAL_MODE;
+	public static int mode_int = GDApplet.NEW_R_MODE;
 	public static String url_str = "http://127.0.0.1:8080/cmd";
 	public static String login_str = "guest";
 	public static String pwd_str = "guest";
@@ -128,7 +128,10 @@ public class LoginDialog extends JDialog {
 	private JTextField _memoryMax;
 	
 	private JCheckBox _keepAlive;
-	private JCheckBox _useSsh;
+	
+	private JRadioButton _useSsh;
+	private JRadioButton _useLocalHost; 
+	
 	private JTextField _sshHostIp;
 	private JTextField _sshLogin;
 	private JPasswordField _sshPwd;
@@ -169,8 +172,7 @@ public class LoginDialog extends JDialog {
 			dynamicPanel.add(p1);		
 			dynamicPanel.add(p2);
 
-			p1.add(new JLabel("")); p2.add(new JLabel(""));
-			
+			p1.add(_useLocalHost); p2.add(new JLabel(""));			
 			p1.add(_useSsh); p2.add(new JLabel(""));
 			if (_useSsh.isSelected()) {
 				p1.add(new JLabel("  SSH Host")); p2.add(_sshHostIp);
@@ -178,16 +180,15 @@ public class LoginDialog extends JDialog {
 				p1.add(new JLabel("  SSH Pwd")); p2.add(_sshPwd);				
 			} 
 			p1.add(new JLabel("")); p2.add(new JLabel(""));
-			p1.add(new JLabel("  Memory Min (megabytes)")); p2.add(_memoryMin);
-			p1.add(new JLabel("  Memory Max (megabytes)")); p2.add(_memoryMax);			
-			
-			
+						
 			if (!_useSsh.isSelected()) {
 				p1.add(new JLabel("")); p2.add(new JLabel(""));
 				p1.add(new JLabel("")); p2.add(new JLabel(""));
 				p1.add(new JLabel("")); p2.add(new JLabel(""));
 			}
-			
+
+			p1.add(new JLabel("  Memory Min (megabytes)")); p2.add(_memoryMin);
+			p1.add(new JLabel("  Memory Max (megabytes)")); p2.add(_memoryMax);			
 			p1.add(_keepAlive); p2.add(new JLabel(""));
 			p1.add(_persistentWorkspaceCheckBox); p2.add(new JLabel(""));
 			p1.add(_playDemoBox); p2.add(new JLabel(""));
@@ -324,7 +325,7 @@ public class LoginDialog extends JDialog {
 		((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		localModeButton = new JRadioButton("New R");
-		localModeButton.setSelected(mode == GDApplet.LOCAL_MODE);
+		localModeButton.setSelected(mode == GDApplet.NEW_R_MODE);
 		localModeButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();				
@@ -429,12 +430,24 @@ public class LoginDialog extends JDialog {
 		_memoryMax=new JTextField(new Integer(memoryMax_int).toString());
 		
 		_keepAlive=new JCheckBox("Keep Alive");_keepAlive.setSelected(keepAlive_bool);
-		_useSsh=new JCheckBox("Create on Remote Host via SSH");_useSsh.setSelected(useSsh_bool);
+		
+		_useSsh=new JRadioButton("Remote Host via SSH");_useSsh.setSelected(useSsh_bool);
 		_useSsh.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();				
 			}
 		});
+		_useLocalHost=new JRadioButton("Local Host");_useLocalHost.setSelected(!useSsh_bool);
+		_useLocalHost.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				recreateDynamicPanel();				
+			}
+		});
+		
+		ButtonGroup useSshButtonGroup = new ButtonGroup();
+		useSshButtonGroup.add(_useSsh);
+		useSshButtonGroup.add(_useLocalHost);
+		
 		_sshHostIp=new JTextField(sshHost_str);
 		_sshLogin=new JTextField(sshLogin_str);
 		_sshPwd=new JPasswordField(sshPwd_str);
@@ -529,7 +542,7 @@ public class LoginDialog extends JDialog {
 	private void okMethod() {
 
 		if (localModeButton.isSelected())
-			mode_int = GDApplet.LOCAL_MODE;
+			mode_int = GDApplet.NEW_R_MODE;
 		else if (httpModeButton.isSelected())
 			mode_int = GDApplet.HTTP_MODE;
 		else

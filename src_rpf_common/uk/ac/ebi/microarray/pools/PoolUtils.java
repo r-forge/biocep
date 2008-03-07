@@ -688,9 +688,7 @@ public class PoolUtils {
 		final JTextArea area = new JTextArea();
 		final JProgressBar jpb = new JProgressBar(0, 100);
 		final JFrame f = new JFrame(taskName);
-
 		if (showProgress) {
-
 			Runnable runnable = new Runnable() {
 				public void run() {
 					area.setFocusable(false);

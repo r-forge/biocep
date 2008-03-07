@@ -5,11 +5,11 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 import http.local.LocalClassServlet;
 
+import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -21,7 +21,14 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import bootstrap.BootSsh;
 import remoting.RServices;
@@ -44,9 +51,9 @@ public class ServerLauncher {
 	 * @param args
 	 */
 	public static Acme.Serve.Serve srv;
+
 	public static void main(String[] args) throws Exception {
-		
-		
+
 		new Thread(new Runnable() {
 			public void run() {
 
@@ -65,8 +72,7 @@ public class ServerLauncher {
 				srv.serve();
 			}
 		}).start();
-		
-		
+
 		new Thread(new Runnable() {
 			public void run() {
 				System.out.println("local rmiregistry port : " + GUtils.getLocalTomcatPort());
@@ -78,65 +84,89 @@ public class ServerLauncher {
 			}
 		}).start();
 
-		RServices r = createRSsh(true, 
-				PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(),
-				PoolUtils.getHostIp(), GUtils.getLocalRmiRegistryPort(), 256, 256, 
-				"192.168.189.128", "ebi", "ebibiocep");
-		System.out.println("rr:"+r);
-		
-		//BootSsh.main(new String[]{"false","127.0.0.1",""+GUtils.getLocalTomcatPort(),"127.0.0.1",""+GUtils.getLocalRmiRegistryPort(),"256","256"});
-		/*
-		try {
-			RServices r=createR(true, "127.0.0.1",GUtils.getLocalTomcatPort(), "127.0.0.1", GUtils.getLocalRmiRegistryPort(),256,256);
-			String processId=r.getProcessId();
-			System.out.println("R:" + r);
-			try {
-				if (PoolUtils.isWindowsOs()) {
-					PoolUtils.killLocalWinProcess(processId, true);
-				} else {
-					PoolUtils.killLocalUnixProcess(processId, true);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}			
-		} catch (Exception e) {
-			System.out.println("Things went wrong");
-			e.printStackTrace();
-		}
-		*/
+		RServices r = createRSsh(true, PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), GUtils.getLocalRmiRegistryPort(), 256, 256,
+				"192.168.189.128", "ebi", "ebibiocep", true);
+		String processId = r.getProcessId();
+		System.out.println("rr:" + r);
+		PoolUtils.killSshProcess(processId, "192.168.189.128", "ebi", "ebibiocep", true);
 
-		if (srv!=null) {
-			
+		// BootSsh.main(new
+		// String[]{"false","127.0.0.1",""+GUtils.getLocalTomcatPort(),"127.0.0.1",""+GUtils.getLocalRmiRegistryPort(),"256","256"});
+		/*
+		 * try { RServices r=createR(true,
+		 * "127.0.0.1",GUtils.getLocalTomcatPort(), "127.0.0.1",
+		 * GUtils.getLocalRmiRegistryPort(),256,256); String
+		 * processId=r.getProcessId(); System.out.println("R:" + r); try { if
+		 * (PoolUtils.isWindowsOs()) { PoolUtils.killLocalWinProcess(processId,
+		 * true); } else { PoolUtils.killLocalUnixProcess(processId, true); } }
+		 * catch (Exception e) { e.printStackTrace(); } } catch (Exception e) {
+		 * System.out.println("Things went wrong"); e.printStackTrace(); }
+		 */
+
+		if (srv != null) {
+
 			try {
 				srv.notifyStop();
 			} catch (java.io.IOException ioe) {
 				ioe.printStackTrace();
 			}
-			
+
 			try {
 				srv.destroyAllServlets();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-	
-		
+
 	}
 
+	static JTextArea createRSshProgressArea;
+	static JProgressBar createRSshProgressBar;
+	static JFrame createRSshProgressFrame;
 	
-	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, 
-            String rmiRegistryHostIp, int rmiRegistryPort , 
-            int memoryMinMegabytes, int memoryMaxMegabytes,
-            String sshHostIp, String sshLogin, String sshPwd) throws Exception {
+	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
+			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress) throws BadSshHostException,
+			BadSshLoginPwdException, Exception {
+
+		if (showProgress) {
+			createRSshProgressArea = new JTextArea();
+			createRSshProgressBar = new JProgressBar(0, 100);
+			createRSshProgressFrame = new JFrame("Create R Server via SSH");
+			
+			Runnable runnable = new Runnable() {
+				public void run() {
+					createRSshProgressArea.setFocusable(false);
+					createRSshProgressBar.setIndeterminate(true);
+					JPanel p = new JPanel(new BorderLayout());
+					p.add(createRSshProgressBar, BorderLayout.SOUTH);
+					p.add(new JScrollPane(createRSshProgressArea), BorderLayout.CENTER);
+					createRSshProgressFrame.add(p);
+					createRSshProgressFrame.pack();
+					createRSshProgressFrame.setSize(300, 90);
+					createRSshProgressFrame.setVisible(true);
+					PoolUtils.locateInScreenCenter(createRSshProgressFrame);
+				}
+			};
+
+			if (SwingUtilities.isEventDispatchThread())
+				runnable.run();
+			else {
+				SwingUtilities.invokeLater(runnable);
+			}
+		}
 
 		Connection conn = null;
 		try {
-			conn=new Connection(sshHostIp);
-			conn.connect();
+			conn = new Connection(sshHostIp);
+			try {
+				conn.connect();
+			} catch (Exception e) {
+				throw new BadSshHostException();
+			}
 			boolean isAuthenticated = conn.authenticateWithPassword(sshLogin, sshPwd);
 			if (isAuthenticated == false)
-				throw new IOException("Authentication failed.");
-			
+				throw new BadSshLoginPwdException();
+
 			InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/BootSsh.class");
 			byte[] buffer = new byte[is.available()];
 			try {
@@ -147,458 +177,486 @@ public class ServerLauncher {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 			String bootstrapDir = System.getProperty("user.home") + "/RWorkbench/" + "classes/bootstrap";
 			new File(bootstrapDir).mkdirs();
 			RandomAccessFile raf = new RandomAccessFile(bootstrapDir + "/BootSsh.class", "rw");
 			raf.setLength(0);
 			raf.write(buffer);
-			raf.close();	
-				
+			raf.close();
+
 			Session sess = null;
 			try {
-				sess=conn.openSession();
+				sess = conn.openSession();
 				sess.execCommand("mkdir -p RWorkbench/classes/bootstrap");
-				sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);				
+				sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
 			} finally {
-				try {sess.close();} catch (Exception e) {e.printStackTrace();}
+				try {
+					sess.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
-						
-			
+
 			new SCPClient(conn).put(bootstrapDir + "/BootSsh.class", "RWorkbench/classes/bootstrap");
-			
+
 			sess = conn.openSession();
-			sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh"+" "+new Boolean(keepAlive)+" "
-					+codeServerHostIp+" "+codeServerPort+" "
-					+rmiRegistryHostIp+" "+rmiRegistryPort+" "
-					+memoryMinMegabytes+" "+memoryMaxMegabytes);
-			
+			sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
+					+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes);
+
 			InputStream stdout = new StreamGobbler(sess.getStdout());
 			final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
-			
+
 			InputStream stderr = new StreamGobbler(sess.getStderr());
 			final BufferedReader brErr = new BufferedReader(new InputStreamReader(stderr));
-			
-			final StringBuffer sshOutput=new StringBuffer();
-			final RServices[] rHolder=new RServices[1];
-			new Thread(new Runnable(){
+			final StringBuffer sshOutput = new StringBuffer();
+			new Thread(new Runnable() {
 				public void run() {
 					try {
 						while (true) {
 							String line = brOut.readLine();
-							if (line == null) break;
-							sshOutput.append(line+"\n");
-							System.out.println(line);
-							
-							int eIndex=sshOutput.indexOf(BootSsh.STUB_END_MARKER);
-							if (eIndex!=-1) {
-								int bIndex=sshOutput.indexOf(BootSsh.STUB_BEGIN_MARKER);
-								String stub=sshOutput.substring(bIndex+BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
-								rHolder[0]=(RServices)PoolUtils.hexToStub(stub,ServerLauncher.class.getClassLoader());								
+							if (line == null)
 								break;
-							}
-							
+							sshOutput.append(line + "\n");
+							System.out.println(line);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-					}					
+					}
+					System.out.println("Out Log Thread Died");
 				}
 			}).start();
-			
-			new Thread(new Runnable(){
+
+			new Thread(new Runnable() {
 				public void run() {
 					try {
 						while (true) {
 							String line = brErr.readLine();
-							if (line == null) break;
+							if (line == null)
+								break;
 							System.out.println(line);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-					}					
+					}
+					System.out.println("Err Log Thread Died");
 				}
 			}).start();
-			
-			
-			long t1 = System.currentTimeMillis();
-			while (rHolder[0] == null) {
-				if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
-					throw new ServantCreationTimeout();
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
+
+			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
+
+			int eIndex = sshOutput.indexOf(BootSsh.STUB_END_MARKER);
+			if (eIndex != -1) {
+				int bIndex = sshOutput.indexOf(BootSsh.STUB_BEGIN_MARKER);
+				String stub = sshOutput.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
+				return (RServices) PoolUtils.hexToStub(stub, ServerLauncher.class.getClassLoader());
+			} else {
+				return null;
+			}
+
+		} finally {
+			try {
+				if (conn != null)
+					conn.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if (showProgress) {
+				createRSshProgressFrame.setVisible(false);
+			}
+		}
+
+	}
+
+	static JTextArea createRProgressArea;
+	static JProgressBar createRProgressBar;
+	static JFrame createRProgressFrame;
+	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
+			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws Exception {
+
+		if (showProgress) {
+			createRProgressArea = new JTextArea();
+			createRProgressBar = new JProgressBar(0, 100);
+			createRProgressFrame = new JFrame("Create R Server on Local Host");
+
+			Runnable runnable = new Runnable() {
+				public void run() {
+					createRProgressArea.setFocusable(false);
+					createRProgressBar.setIndeterminate(true);
+					JPanel p = new JPanel(new BorderLayout());
+					p.add(createRProgressBar, BorderLayout.SOUTH);
+					p.add(new JScrollPane(createRProgressArea), BorderLayout.CENTER);
+					createRProgressFrame.add(p);
+					createRProgressFrame.pack();
+					createRProgressFrame.setSize(300, 90);
+					createRProgressFrame.setVisible(true);
+					PoolUtils.locateInScreenCenter(createRProgressFrame);
+				}
+			};
+			if (SwingUtilities.isEventDispatchThread())
+				runnable.run();
+			else {
+				SwingUtilities.invokeLater(runnable);
+			}
+		}
+
+		try {
+			String urlprefix = null;
+			try {
+				Class<?> ServiceManagerClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.ServiceManager");
+				Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null, "javax.jnlp.BasicService");
+				Class<?> BasicServiceClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.BasicService");
+				urlprefix = BasicServiceClass.getMethod("getCodeBase").invoke(basicServiceInstance).toString();
+			} catch (Exception e) {
+
+			}
+			System.out.println("url prefix:" + urlprefix);
+			URL rjbURL = null;
+			System.out.println(ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class"));
+
+			if (urlprefix != null) {
+				rjbURL = new URL(urlprefix + "appletlibs/RJB.jar");
+			} else {
+				String thisUrl = ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class").toString();
+				if (thisUrl.indexOf("http:") != -1) {
+					rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
 				}
 			}
 
-			return rHolder[0];
-			
-		} finally {
-			try {conn.close();} catch (Exception e) {e.printStackTrace();}
-		}
-		
-	}
-	
-	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, 
-			                        String rmiRegistryHostIp, int rmiRegistryPort , 
-			                        int memoryMinMegabytes, int memoryMaxMegabytes) throws Exception {
-
-		String urlprefix = null;
-		try {
-			Class<?> ServiceManagerClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.ServiceManager");
-			Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null, "javax.jnlp.BasicService");
-			Class<?> BasicServiceClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.BasicService");
-			urlprefix = BasicServiceClass.getMethod("getCodeBase").invoke(basicServiceInstance).toString();
-		} catch (Exception e) {
-
-		}		
-		System.out.println("url prefix:" + urlprefix);
-		URL rjbURL = null;
-		System.out.println(ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class"));
-
-		if (urlprefix != null) {
-			rjbURL = new URL(urlprefix + "appletlibs/RJB.jar");
-		} else {
-			String thisUrl = ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class").toString();
-			if (thisUrl.indexOf("http:") != -1) {
-				rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
+			if (urlprefix == null) {
+				urlprefix = "http://biocep.r-forge.r-project.org/appletlibs/";
 			}
-		}
-		
-		if (urlprefix == null) {
-			urlprefix="http://biocep.r-forge.r-project.org/appletlibs/";
-		}
-		
-		
 
-		String root = GUtils.INSTALL_DIR;
-		new File(root).mkdir();
+			String root = GUtils.INSTALL_DIR;
+			new File(root).mkdir();
 
-		String[] rinfo = GUtils.getRInfo(null);
-		if (rinfo == null && System.getenv("R_HOME") != null) {
-			String home = System.getenv("R_HOME");
-			if (isWindowsOs() && !home.endsWith("\\")) {
-				home = home + "\\";
+			String[] rinfo = GUtils.getRInfo(null);
+			if (rinfo == null && System.getenv("R_HOME") != null) {
+				String home = System.getenv("R_HOME");
+				if (isWindowsOs() && !home.endsWith("\\")) {
+					home = home + "\\";
+				}
+				if (!isWindowsOs() && !home.endsWith("/")) {
+					home = home + "/";
+				}
+				rinfo = GUtils.getRInfo(home);
 			}
-			if (!isWindowsOs() && !home.endsWith("/")) {
-				home = home + "/";
-			}
-			rinfo = GUtils.getRInfo(home);
-		}
 
-		String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : (System.getenv("R_HOME") != null ? System
-				.getenv("R_HOME") : null);
-		System.out.println("rpath=" + rpath);
-		System.out.println("rversion=" + (rinfo != null ? rinfo[1] : ""));
+			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : (System.getenv("R_HOME") != null ? System
+					.getenv("R_HOME") : null);
+			System.out.println("rpath=" + rpath);
+			System.out.println("rversion=" + (rinfo != null ? rinfo[1] : ""));
 
-		if (rpath == null) {
+			if (rpath == null) {
 
-			if (isWindowsOs()) {
+				if (isWindowsOs()) {
 
-				int n = JOptionPane.showConfirmDialog(null, "R is not accessible from the command line\nWould you like to use the Embedded R?", "",
-						JOptionPane.YES_NO_OPTION);
-				if (n == JOptionPane.OK_OPTION) {
-					String rZipFileName = null;
-					if (isWindowsOs()) {
-						if (!new File(root + "R/R-2.6.0/bin/R.dll").exists()) {
-							rZipFileName = "R-2.6.0Win.zip";
-						} else {
-							rZipFileName = null;
+					int n = JOptionPane.showConfirmDialog(null, "R is not accessible from the command line\nWould you like to use the Embedded R?", "",
+							JOptionPane.YES_NO_OPTION);
+					if (n == JOptionPane.OK_OPTION) {
+						String rZipFileName = null;
+						if (isWindowsOs()) {
+							if (!new File(root + "R/R-2.6.0/bin/R.dll").exists()) {
+								rZipFileName = "R-2.6.0Win.zip";
+							} else {
+								rZipFileName = null;
+							}
+						} else if (isMacOs()) {
+							if (!new File(root + "R/R-2.6.0/lib/libR.dylib").exists()) {
+								rZipFileName = "R-2.6.0MacOSX.zip";
+							} else {
+								rZipFileName = null;
+							}
 						}
-					} else if (isMacOs()) {
-						if (!new File(root + "R/R-2.6.0/lib/libR.dylib").exists()) {
-							rZipFileName = "R-2.6.0MacOSX.zip";
-						} else {
-							rZipFileName = null;
+
+						if (rZipFileName != null) {
+							URL rUrl = new URL(rjbURL.toString().substring(0, rjbURL.toString().indexOf("/appletlibs")) + "/jawslibs/" + rZipFileName);
+
+							InputStream is = null;
+							try {
+								is = rUrl.openConnection().getInputStream();
+							} catch (Exception e) {
+								rUrl = new URL("http://www.ebi.ac.uk/microarray-srv/frontendapp/" + "jawslibs/" + rZipFileName);
+								is = rUrl.openConnection().getInputStream();
+							}
+
+							unzip(is, root + "R/", null, BUFFER_SIZE, true, "Unzipping R..", 3816);
+
 						}
+
+						rpath = root + "R/R-2.6.0/";
+
+					} else {
+						JOptionPane.showMessageDialog(null,
+								"please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
+						System.exit(0);
 					}
-
-					if (rZipFileName != null) {
-						URL rUrl = new URL(rjbURL.toString().substring(0, rjbURL.toString().indexOf("/appletlibs")) + "/jawslibs/" + rZipFileName);
-
-						InputStream is = null;
-						try {
-							is = rUrl.openConnection().getInputStream();
-						} catch (Exception e) {
-							rUrl = new URL("http://www.ebi.ac.uk/microarray-srv/frontendapp/" + "jawslibs/" + rZipFileName);
-							is = rUrl.openConnection().getInputStream();
-						}
-
-						unzip(is, root + "R/", null, BUFFER_SIZE, true, "Unzipping R..", 3816);
-
-					}
-
-					rpath = root + "R/R-2.6.0/";
 
 				} else {
-					JOptionPane.showMessageDialog(null, "please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
+					JOptionPane
+							.showMessageDialog(null,
+									"R is not accessible from the command line\n please add R to your System path \nor set R_HOME to the root Directory of your local R installation\n");
 					System.exit(0);
 				}
 
-			} else {
-				JOptionPane
-						.showMessageDialog(null,
-								"R is not accessible from the command line\n please add R to your System path \nor set R_HOME to the root Directory of your local R installation\n");
-				System.exit(0);
 			}
 
-		}
+			if (!rpath.endsWith("/") && !rpath.endsWith("\\"))
+				rpath += "/";
+			// String rlibs = System.getenv("R_LIBS") != null ?
+			// System.getenv("R_LIBS") : (rinfo != null ? rinfo[0] : rpath+
+			// "library");
+			String rlibs = (root + "library").replace('\\', '/');
+			new File(rlibs).mkdir();
 
-		if (!rpath.endsWith("/") && !rpath.endsWith("\\"))
-			rpath += "/";
-		// String rlibs = System.getenv("R_LIBS") != null ?
-		// System.getenv("R_LIBS") : (rinfo != null ? rinfo[0] : rpath+
-		// "library");
-		String rlibs = (root + "library").replace('\\', '/');
-		new File(rlibs).mkdir();
-
-		Vector<String> envVector = new Vector<String>();
-		{
-			Map<String, String> osenv = System.getenv();
-			Map<String, String> env = new HashMap<String, String>(osenv);
-			env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
-			env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
-			env.put("R_HOME", rpath);
-			env.put("R_LIBS", rlibs + (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : ""));
-			for (String k : env.keySet()) {
-				envVector.add(k + "=" + env.get(k));
-			}
-		}
-
-		String[] requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo" };
-		Vector<String> installLibBatch = new Vector<String>();
-		installLibBatch.add("source('http://bioconductor.org/biocLite.R')");
-
-		for (int i = 0; i < requiredPackages.length; ++i) {
-			if (getLibraryPath(requiredPackages[i], rpath, rlibs) == null) {
-				installLibBatch.add("biocLite('" + requiredPackages[i] + "',lib='" + rlibs + "')");
-			}
-		}
-
-		if (installLibBatch.size() > 1) {
-
-			File installPackagesFile = new File(root + "installRequiredPackages.R");
-			File installPackagesOutputFile = new File(root + "installRequiredPackages.Rout");
-
-			FileWriter fw = new FileWriter(installPackagesFile);
-			PrintWriter pw = new PrintWriter(fw);
-			for (int i = 0; i < installLibBatch.size(); ++i) {
-				pw.println(installLibBatch.elementAt(i));
-			}
-			fw.close();
-
-			Vector<String> installCommand = new Vector<String>();
-			installCommand.add(rpath + "bin/R");
-			installCommand.add("CMD");
-			installCommand.add("BATCH");
-			installCommand.add("--no-save");
-			installCommand.add(installPackagesFile.getAbsolutePath());
-			installCommand.add(installPackagesOutputFile.getAbsolutePath());
-
-			System.out.println(installCommand);
-
-			final Process installProc = Runtime.getRuntime().exec(installCommand.toArray(new String[0]), envVector.toArray(new String[0]));
-			final Vector<String> installPrint = new Vector<String>();
-			final Vector<String> installErrorPrint = new Vector<String>();
-
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(installProc.getErrorStream()));
-						String line = null;
-						while ((line = br.readLine()) != null) {
-							System.out.println(line);
-							installErrorPrint.add(line);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(installProc.getInputStream()));
-						String line = null;
-						while ((line = br.readLine()) != null) {
-							System.out.println(line);
-							installPrint.add(line);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-			installProc.waitFor();
-
-			if (installPackagesOutputFile.exists() && installPackagesOutputFile.lastModified() > installPackagesFile.lastModified()) {
-				BufferedReader br = new BufferedReader(new FileReader(installPackagesOutputFile));
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					System.out.println(line);
+			Vector<String> envVector = new Vector<String>();
+			{
+				Map<String, String> osenv = System.getenv();
+				Map<String, String> env = new HashMap<String, String>(osenv);
+				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
+				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
+				env.put("R_HOME", rpath);
+				env.put("R_LIBS", rlibs + (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : ""));
+				for (String k : env.keySet()) {
+					envVector.add(k + "=" + env.get(k));
 				}
 			}
 
-			Vector<String> missingLibs = new Vector<String>();
+			String[] requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo" };
+			Vector<String> installLibBatch = new Vector<String>();
+			installLibBatch.add("source('http://bioconductor.org/biocLite.R')");
 
 			for (int i = 0; i < requiredPackages.length; ++i) {
 				if (getLibraryPath(requiredPackages[i], rpath, rlibs) == null) {
-					missingLibs.add(requiredPackages[i]);
+					installLibBatch.add("biocLite('" + requiredPackages[i] + "',lib='" + rlibs + "')");
 				}
 			}
 
-			if (missingLibs.size() > 0) {
-				System.out.println("The following packages probably couldn't be automatically installed\n" + missingLibs);
-			}
+			if (installLibBatch.size() > 1) {
 
-		}
+				File installPackagesFile = new File(root + "installRequiredPackages.R");
+				File installPackagesOutputFile = new File(root + "installRequiredPackages.Rout");
 
-		String bootstrap = (root + "classes/bootstrap").replace('\\', '/');
-		System.out.println(bootstrap);
-		if (!new File(bootstrap).exists())
-			new File(bootstrap).mkdirs();
-		InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/Boot.class");
-		byte[] buffer = new byte[is.available()];
-		try {
-			for (int i = 0; i < buffer.length; ++i) {
-				int b = is.read();
-				buffer[i] = (byte) b;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		RandomAccessFile raf = new RandomAccessFile(bootstrap + "/Boot.class", "rw");
-		raf.setLength(0);
-		raf.write(buffer);
-		raf.close();
+				FileWriter fw = new FileWriter(installPackagesFile);
+				PrintWriter pw = new PrintWriter(fw);
+				for (int i = 0; i < installLibBatch.size(); ++i) {
+					pw.println(installLibBatch.elementAt(i));
+				}
+				fw.close();
 
-		new File(root + "PsTools").mkdirs();
-		MainPsToolsDownload.main(new String[] { root + "PsTools" });
+				Vector<String> installCommand = new Vector<String>();
+				installCommand.add(rpath + "bin/R");
+				installCommand.add("CMD");
+				installCommand.add("BATCH");
+				installCommand.add("--no-save");
+				installCommand.add(installPackagesFile.getAbsolutePath());
+				installCommand.add(installPackagesOutputFile.getAbsolutePath());
 
-		// ---------------------------------------
-		
-		String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";
-		System.out.println("jripath:" + jripath + "\n");
+				System.out.println(installCommand);
 
-		String cp = root + "classes";
+				final Process installProc = Runtime.getRuntime().exec(installCommand.toArray(new String[0]), envVector.toArray(new String[0]));
+				final Vector<String> installPrint = new Vector<String>();
+				final Vector<String> installErrorPrint = new Vector<String>();
 
-		ManagedServant[] servantHolder = new ManagedServant[1];
-		RemoteException[] exceptionHolder = new RemoteException[1];
-
-		CreationCallBack callBack = null;
-
-		try {
-			callBack = new CreationCallBack(servantHolder, exceptionHolder);
-			String listenerStub = PoolUtils.stubToHex(callBack);
-
-			Vector<String> command = new Vector<String>();
-			command.add(System.getProperty("java.home") + "/bin/java");
-			
-			command.add((isWindowsOs() ? "\"" : "") + "-DXms"+ memoryMinMegabytes +"m" + (isWindowsOs() ? "\"" : ""));
-			command.add((isWindowsOs() ? "\"" : "") + "-DXmx"+ memoryMaxMegabytes +"m" + (isWindowsOs() ? "\"" : ""));
-			
-			command.add("-classpath");
-			command.add((isWindowsOs() ? "\"" : "") + cp + (isWindowsOs() ? "\"" : ""));
-			
-			command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
-
-			if (keepAlive) {
-				command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase="+
-						"http://"+codeServerHostIp+":" + codeServerPort + "/classes/"+ " "+
-						urlprefix+"JRI.jar"+" "+
-						urlprefix+"commons-logging-1.1.jar"+" "+
-						urlprefix+"log4j-1.2.14.jar"+" "+
-						urlprefix+"htmlparser.jar"+" "+
-						urlprefix+"derbyclient.jar"+" "+
-						urlprefix+"RJB.jar"+" "+
-						urlprefix+"mapping.jar"+ (isWindowsOs() ? "\"" : ""));
-			} else {				
-				command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://"+codeServerHostIp+":" + codeServerPort + "/classes/" + (isWindowsOs() ? "\"" : ""));
-			}
-			
-			command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
-
-			command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
-			command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
-
-			command.add((isWindowsOs() ? "\"" : "") + "-Dpreprocess.help=true" + (isWindowsOs() ? "\"" : ""));
-			command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=true" + (isWindowsOs() ? "\"" : ""));
-
-			command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + root + "wdir" + (isWindowsOs() ? "\"" : ""));
-			command.add((isWindowsOs() ? "\"" : "") + "-Dpstools.home=" + root + "PsTools/" + (isWindowsOs() ? "\"" : ""));
-
-			command.add((isWindowsOs() ? "\"" : "") + "-Dregistryhost="+ rmiRegistryHostIp + (isWindowsOs() ? "\"" : ""));
-			command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
-
-			command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog"
-					+ (isWindowsOs() ? "\"" : ""));
-
-			command.add("bootstrap.Boot");
-			command.add(new Boolean(keepAlive).toString());
-			command.add(codeServerHostIp );
-			command.add(""+codeServerPort );
-			if (keepAlive) {				
-				command.add(urlprefix);
-			}
-
-			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
-			final Vector<String> killPrint = new Vector<String>();
-			final Vector<String> errorPrint = new Vector<String>();
-
-			System.out.println(" command : " + command);
-
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-						String line = null;
-						while ((line = br.readLine()) != null) {
-							System.out.println(line);
-							errorPrint.add(line);
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							BufferedReader br = new BufferedReader(new InputStreamReader(installProc.getErrorStream()));
+							String line = null;
+							while ((line = br.readLine()) != null) {
+								System.out.println(line);
+								installErrorPrint.add(line);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-					} catch (Exception e) {
-						e.printStackTrace();
+					}
+				}).start();
+
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							BufferedReader br = new BufferedReader(new InputStreamReader(installProc.getInputStream()));
+							String line = null;
+							while ((line = br.readLine()) != null) {
+								System.out.println(line);
+								installPrint.add(line);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+				installProc.waitFor();
+
+				if (installPackagesOutputFile.exists() && installPackagesOutputFile.lastModified() > installPackagesFile.lastModified()) {
+					BufferedReader br = new BufferedReader(new FileReader(installPackagesOutputFile));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						System.out.println(line);
 					}
 				}
-			}).start();
 
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-						String line = null;
-						while ((line = br.readLine()) != null) {
-							System.out.println(line);
-							killPrint.add(line);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
+				Vector<String> missingLibs = new Vector<String>();
+
+				for (int i = 0; i < requiredPackages.length; ++i) {
+					if (getLibraryPath(requiredPackages[i], rpath, rlibs) == null) {
+						missingLibs.add(requiredPackages[i]);
 					}
 				}
-			}).start();
 
-			long t1 = System.currentTimeMillis();
-			while (servantHolder[0] == null && exceptionHolder[0] == null) {
-				//System.out.println(new Date());
-				if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
-					throw new ServantCreationTimeout();
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
+				if (missingLibs.size() > 0) {
+					System.out.println("The following packages probably couldn't be automatically installed\n" + missingLibs);
+				}
+
+			}
+
+			String bootstrap = (root + "classes/bootstrap").replace('\\', '/');
+			System.out.println(bootstrap);
+			if (!new File(bootstrap).exists())
+				new File(bootstrap).mkdirs();
+			InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/Boot.class");
+			byte[] buffer = new byte[is.available()];
+			try {
+				for (int i = 0; i < buffer.length; ++i) {
+					int b = is.read();
+					buffer[i] = (byte) b;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			RandomAccessFile raf = new RandomAccessFile(bootstrap + "/Boot.class", "rw");
+			raf.setLength(0);
+			raf.write(buffer);
+			raf.close();
+
+			new File(root + "PsTools").mkdirs();
+			MainPsToolsDownload.main(new String[] { root + "PsTools" });
+
+			// ---------------------------------------
+
+			String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";
+			System.out.println("jripath:" + jripath + "\n");
+
+			String cp = root + "classes";
+
+			ManagedServant[] servantHolder = new ManagedServant[1];
+			RemoteException[] exceptionHolder = new RemoteException[1];
+
+			CreationCallBack callBack = null;
+
+			try {
+				callBack = new CreationCallBack(servantHolder, exceptionHolder);
+				String listenerStub = PoolUtils.stubToHex(callBack);
+
+				Vector<String> command = new Vector<String>();
+				command.add(System.getProperty("java.home") + "/bin/java");
+
+				command.add((isWindowsOs() ? "\"" : "") + "-DXms" + memoryMinMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-DXmx" + memoryMaxMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
+
+				command.add("-classpath");
+				command.add((isWindowsOs() ? "\"" : "") + cp + (isWindowsOs() ? "\"" : ""));
+
+				command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
+
+				if (keepAlive) {
+					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=" + "http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"
+							+ " " + urlprefix + "JRI.jar" + " " + urlprefix + "commons-logging-1.1.jar" + " " + urlprefix + "log4j-1.2.14.jar" + " "
+							+ urlprefix + "htmlparser.jar" + " " + urlprefix + "derbyclient.jar" + " " + urlprefix + "RJB.jar" + " " + urlprefix
+							+ "mapping.jar" + (isWindowsOs() ? "\"" : ""));
+				} else {
+					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"
+							+ (isWindowsOs() ? "\"" : ""));
+				}
+
+				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
+
+				command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
+
+				command.add((isWindowsOs() ? "\"" : "") + "-Dpreprocess.help=true" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=true" + (isWindowsOs() ? "\"" : ""));
+
+				command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + root + "wdir" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dpstools.home=" + root + "PsTools/" + (isWindowsOs() ? "\"" : ""));
+
+				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryhost=" + rmiRegistryHostIp + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
+
+				command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog"
+						+ (isWindowsOs() ? "\"" : ""));
+
+				command.add("bootstrap.Boot");
+				command.add(new Boolean(keepAlive).toString());
+				command.add(codeServerHostIp);
+				command.add("" + codeServerPort);
+				if (keepAlive) {
+					command.add(urlprefix);
+				}
+
+				final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
+				final Vector<String> killPrint = new Vector<String>();
+				final Vector<String> errorPrint = new Vector<String>();
+
+				System.out.println(" command : " + command);
+
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+							String line = null;
+							while ((line = br.readLine()) != null) {
+								System.out.println(line);
+								errorPrint.add(line);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+							String line = null;
+							while ((line = br.readLine()) != null) {
+								System.out.println(line);
+								killPrint.add(line);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+
+				long t1 = System.currentTimeMillis();
+				while (servantHolder[0] == null && exceptionHolder[0] == null) {
+					// System.out.println(new Date());
+					if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
+						throw new ServantCreationTimeout();
+					try {
+						Thread.sleep(100);
+					} catch (Exception e) {
+					}
+				}
+
+				if (exceptionHolder[0] != null) {
+					throw exceptionHolder[0];
+				}
+
+				return (RServices) servantHolder[0];
+			} finally {
+				if (callBack != null) {
+					UnicastRemoteObject.unexportObject(callBack, true);
 				}
 			}
-
-			if (exceptionHolder[0] != null) {
-				throw exceptionHolder[0];
-			}
-			
-			return (RServices) servantHolder[0];
 		} finally {
-			if (callBack != null) {
-				UnicastRemoteObject.unexportObject(callBack, true);
+			if (showProgress) {
+				createRProgressFrame.setVisible(false);
 			}
 		}
-
 	}
 
 	private static String getLibraryPath(String libName, String rpath, String rlibs) {

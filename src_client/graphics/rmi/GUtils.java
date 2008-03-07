@@ -46,6 +46,7 @@ public class GUtils {
 	public static String INSTALL_DIR = new File(System.getProperty("user.home") + "/RWorkbench/").getAbsolutePath()
 			+ "/";
 	public static String SETTINGS_FILE = INSTALL_DIR + "settings.xml";
+	public static String NEW_R_STUB_FILE = INSTALL_DIR + "new_R_stub.txt";	
 
 	public static class PopupListener extends MouseAdapter {
 		private JPopupMenu popup;
