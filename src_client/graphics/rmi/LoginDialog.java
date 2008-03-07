@@ -83,6 +83,13 @@ public class LoginDialog extends JDialog {
 	
 	public static Integer memoryMin_int = 256;
 	public static Integer memoryMax_int = 256;
+	
+	public static boolean keepAlive_bool = false;
+	public static boolean useSsh_bool = false;
+	public static String sshHost_str = "";
+	public static String sshLogin_str = "";
+	public static String sshPwd_str = "";
+	
 
 	public static boolean persistentWorkspace_bool = false;
 	public static boolean playDemo_bool = false;
@@ -119,7 +126,13 @@ public class LoginDialog extends JDialog {
 
 	private JTextField _memoryMin;
 	private JTextField _memoryMax;
-
+	
+	private JCheckBox _keepAlive;
+	private JCheckBox _useSsh;
+	private JTextField _sshHostIp;
+	private JTextField _sshLogin;
+	private JPasswordField _sshPwd;
+	
 	private JCheckBox _persistentWorkspaceCheckBox;
 	private JCheckBox _playDemoBox;
 
@@ -138,7 +151,7 @@ public class LoginDialog extends JDialog {
 			rmiregistryIp_str, rmiregistryPort_int, servantName_str,			
 			dbDriver_str, dbHostIp_str, dbHostPort_int, dbName_str, dbUser_str, dbPwd_str, dbServantName_str,
 			stub_str, 			
-			memoryMin_int,memoryMax_int,
+			memoryMin_int,memoryMax_int, keepAlive_bool, useSsh_bool, sshHost_str, sshLogin_str, sshPwd_str,
 			persistentWorkspace_bool, playDemo_bool);
 		else
 			return null;
@@ -157,17 +170,28 @@ public class LoginDialog extends JDialog {
 			dynamicPanel.add(p2);
 
 			p1.add(new JLabel("")); p2.add(new JLabel(""));
+			
+			p1.add(_useSsh); p2.add(new JLabel(""));
+			if (_useSsh.isSelected()) {
+				p1.add(new JLabel("  SSH Host")); p2.add(_sshHostIp);
+				p1.add(new JLabel("  SSH Login")); p2.add(_sshLogin);
+				p1.add(new JLabel("  SSH Pwd")); p2.add(_sshPwd);				
+			} 
+			p1.add(new JLabel("")); p2.add(new JLabel(""));
 			p1.add(new JLabel("  Memory Min (megabytes)")); p2.add(_memoryMin);
 			p1.add(new JLabel("  Memory Max (megabytes)")); p2.add(_memoryMax);			
-			p1.add(new JLabel("")); p2.add(new JLabel(""));
+			
+			
+			if (!_useSsh.isSelected()) {
+				p1.add(new JLabel("")); p2.add(new JLabel(""));
+				p1.add(new JLabel("")); p2.add(new JLabel(""));
+				p1.add(new JLabel("")); p2.add(new JLabel(""));
+			}
+			
+			p1.add(_keepAlive); p2.add(new JLabel(""));
 			p1.add(_persistentWorkspaceCheckBox); p2.add(new JLabel(""));
 			p1.add(_playDemoBox); p2.add(new JLabel(""));
-			p1.add(new JLabel("")); p2.add(new JLabel(""));
-			p1.add(new JLabel("")); p2.add(new JLabel(""));
-			p1.add(new JLabel("")); p2.add(new JLabel(""));
-			p1.add(new JLabel("")); p2.add(new JLabel(""));
 			
-			p1.add(new JLabel("")); p2.add(new JLabel(""));
 			
 
 		} else if (httpModeButton.isSelected()) {
@@ -299,7 +323,7 @@ public class LoginDialog extends JDialog {
 		getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
 		((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		localModeButton = new JRadioButton("Local R");
+		localModeButton = new JRadioButton("New R");
 		localModeButton.setSelected(mode == GDApplet.LOCAL_MODE);
 		localModeButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
@@ -403,6 +427,17 @@ public class LoginDialog extends JDialog {
 		
 		_memoryMin=new JTextField(new Integer(memoryMin_int).toString());
 		_memoryMax=new JTextField(new Integer(memoryMax_int).toString());
+		
+		_keepAlive=new JCheckBox("Keep Alive");_keepAlive.setSelected(keepAlive_bool);
+		_useSsh=new JCheckBox("Create on Remote Host via SSH");_useSsh.setSelected(useSsh_bool);
+		_useSsh.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				recreateDynamicPanel();				
+			}
+		});
+		_sshHostIp=new JTextField(sshHost_str);
+		_sshLogin=new JTextField(sshLogin_str);
+		_sshPwd=new JPasswordField(sshPwd_str);
 
 		_persistentWorkspaceCheckBox = new JCheckBox("Persistent Workspace", persistentWorkspace_bool);
 		_playDemoBox = new JCheckBox("Play Demo", playDemo_bool);
@@ -448,6 +483,10 @@ public class LoginDialog extends JDialog {
 
 		_memoryMin.addKeyListener(keyListener);
 		_memoryMax.addKeyListener(keyListener);
+		
+		_sshHostIp.addKeyListener(keyListener);
+		_sshLogin.addKeyListener(keyListener);
+		_sshPwd.addKeyListener(keyListener);
 
 		_ok = new JButton("Ok");
 		_ok.addActionListener(new ActionListener() {
@@ -528,6 +567,12 @@ public class LoginDialog extends JDialog {
 
 		try {memoryMin_int = Integer.decode(_memoryMin.getText());} catch (Exception e) {memoryMin_int=null;}
 		try {memoryMax_int = Integer.decode(_memoryMax.getText());} catch (Exception e) {memoryMax_int=null;}
+		
+		keepAlive_bool=_keepAlive.isSelected();
+		useSsh_bool=_useSsh.isSelected();
+		sshHost_str=_sshHostIp.getText();
+		sshLogin_str=_sshLogin.getText();
+		sshPwd_str=_sshPwd.getText();
 
 		playDemo_bool = _playDemoBox.isSelected();
 		persistentWorkspace_bool = _persistentWorkspaceCheckBox.isSelected();

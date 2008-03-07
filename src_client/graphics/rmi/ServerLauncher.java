@@ -127,13 +127,13 @@ public class ServerLauncher {
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, 
             String rmiRegistryHostIp, int rmiRegistryPort , 
             int memoryMinMegabytes, int memoryMaxMegabytes,
-            String sshHostIp, String login, String pwd) throws Exception {
+            String sshHostIp, String sshLogin, String sshPwd) throws Exception {
 
 		Connection conn = null;
 		try {
 			conn=new Connection(sshHostIp);
 			conn.connect();
-			boolean isAuthenticated = conn.authenticateWithPassword(login, pwd);
+			boolean isAuthenticated = conn.authenticateWithPassword(sshLogin, sshPwd);
 			if (isAuthenticated == false)
 				throw new IOException("Authentication failed.");
 			
@@ -233,7 +233,7 @@ public class ServerLauncher {
 			return rHolder[0];
 			
 		} finally {
-			conn.close();
+			try {conn.close();} catch (Exception e) {e.printStackTrace();}
 		}
 		
 	}
