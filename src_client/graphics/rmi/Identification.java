@@ -45,8 +45,14 @@ class Identification {
 	private String _stub;
 	
 	private int _memoryMin;
-	private int _memoryMax;
-
+	private int _memoryMax;	
+	private boolean _keepAlive;	
+	private boolean _useSsh;	
+	private String _sshHostIp;
+	private String _sshLogin;
+	private String _sshPwd;
+	
+	
 	private boolean _persistentWorkspace;	
 	private boolean _playDemo;
 
@@ -61,6 +67,13 @@ class Identification {
 			String stub,
 			int memoryMin,
 			int memoryMax,
+			
+			boolean keepAlive,
+			boolean useSsh,
+			String sshHostIp,
+			String sshLogin,
+			String sshPwd,
+			
 			boolean persistentWorkspace, boolean playDemo) {		
 		this._mode=mode;	
 		this._url=url;
@@ -86,6 +99,11 @@ class Identification {
 		this._stub=stub;
 		this._memoryMin=memoryMin;
 		this._memoryMax=memoryMax;	
+		this._keepAlive=keepAlive;
+		this._useSsh=useSsh;
+		this._sshHostIp=sshHostIp;
+		this._sshLogin=sshLogin;
+		this._sshPwd=sshPwd;		
 		this._persistentWorkspace = persistentWorkspace;
 		this._playDemo = playDemo;
 	}
@@ -178,5 +196,25 @@ class Identification {
 
 	public int getMemoryMin() {
 		return _memoryMin;
+	}
+
+	public boolean isKeepAlive() {
+		return _keepAlive;
+	}
+
+	public boolean isUseSsh() {
+		return _useSsh;
+	}
+
+	public String getSshHostIp() {
+		return _sshHostIp;
+	}
+
+	public String getSshLogin() {
+		return _sshLogin;
+	}
+
+	public String getSshPwd() {
+		return _sshPwd;
 	}	
 }

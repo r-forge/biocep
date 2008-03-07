@@ -123,7 +123,6 @@ import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
 import remoting.FileDescription;
@@ -183,7 +182,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private int _lf;
 	private boolean _isBiocLiteSourced = false;
 	private GDDevice _currentDevice;
-	private String _localRProcessId = null;
+	
+	private Boolean _keepAlive=null;
+	private String[] _sshParameters=null;
+	
+	private String _rProcessId = null;
 	Acme.Serve.Serve _virtualizationLocalHttpServer = null;
 	Acme.Serve.Serve _codeLocalHttpServer = null;
 
@@ -444,12 +447,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 									
 									try {
 										
-										
-										r = ServerLauncher.createR(false,"127.0.0.1",GUtils.getLocalTomcatPort(), "127.0.0.1", GUtils.getLocalRmiRegistryPort(),ident.getMemoryMin(), ident.getMemoryMax());
-										
-										
-										_localRProcessId = r.getProcessId();
-										System.out.println("R Process Id :" + _localRProcessId);
+										if (ident.isUseSsh()) {
+											r = ServerLauncher.createRSsh(ident.isKeepAlive(),PoolUtils.getHostIp(),GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), GUtils.getLocalRmiRegistryPort(),ident.getMemoryMin(), ident.getMemoryMax(),ident.getSshHostIp(),ident.getSshLogin(), ident.getSshPwd());									
+										} else {
+											r = ServerLauncher.createR(ident.isKeepAlive(),PoolUtils.getHostIp(),GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), GUtils.getLocalRmiRegistryPort(),ident.getMemoryMin(), ident.getMemoryMax());
+										}
+																				
+										_keepAlive=ident.isKeepAlive();
+										if (ident.isUseSsh()) {
+											_sshParameters=new String[]{ident.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd()};
+										}
+										_rProcessId = r.getProcessId();
+										System.out.println("R Process Id :" + _rProcessId);
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
@@ -2626,15 +2635,24 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	private void noSession() {
 
-		if (_localRProcessId != null) {
-			try {
-				if (PoolUtils.isWindowsOs()) {
-					PoolUtils.killLocalWinProcess(_localRProcessId, true);
-				} else {
-					PoolUtils.killLocalUnixProcess(_localRProcessId, true);
+		if (_rProcessId != null && !_keepAlive) {
+			if (_sshParameters==null) {
+				try {
+					if (PoolUtils.isWindowsOs()) {
+						PoolUtils.killLocalWinProcess(_rProcessId, true);
+					} else {
+						PoolUtils.killLocalUnixProcess(_rProcessId, true);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			} else {
+				System.out.println("---> SSH Kill process ID:"+_rProcessId);
+				try {
+					PoolUtils.killSshProcess(_rProcessId, _sshParameters[0], _sshParameters[1],_sshParameters[2], true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
@@ -2657,7 +2675,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 		_rForPopCmd = null;
 		_rForFiles = null;
 		_isBiocLiteSourced = false;
-		_localRProcessId = null;
+		_keepAlive=null;
+		_sshParameters=null;
+		_rProcessId = null;
 		_virtualizationLocalHttpServer=null;
 	}
 
