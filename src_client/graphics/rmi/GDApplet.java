@@ -25,6 +25,7 @@ import graphics.rmi.action.SaveDeviceAsPngAction;
 import graphics.rmi.action.SetCurrentDeviceAction;
 import graphics.rmi.action.SnapshotDeviceAction;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
+import http.ConnectionFailedException;
 import http.FileLoad;
 import http.NoNodeManagerFound;
 import http.NoRegistryAvailableException;
@@ -64,6 +65,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
+import java.net.ConnectException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -395,44 +397,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 										pr.close();
 
 										ident=new Identification(
-												RMI_MODE,"","","", false, false,
-												RMI_MODE_STUB_MODE, 
-												"", -1, "",
-												"",
-												"",-1,"",
-												"","",
-												"",
-												stub,
-												-1,
-												-1,
-												false,
-												false,
-												"",
-												"",
-												"",
-												false,false
-												
-												/*
-												int mode, 
-												String url, String user, String pwd,  boolean nopool, boolean waitForResource,  
-												int rmiMode,
-												String rmiregistryIp, Integer rmiregistryPort, String servantName,
-												String dbDriver, 
-												String dbHostIp, Integer dbHostPort, String dbName,
-												String dbUser, String dbPwd,
-												String dbServantName,
-												String stub,
-												int memoryMin,
-												int memoryMax,
-												
-												boolean keepAlive,
-												boolean useSsh,
-												String sshHostIp,
-												String sshLogin,
-												String sshPwd,
-												
-												boolean persistentWorkspace, boolean playDemo
-												*/
+												RMI_MODE,"","","", false, false,RMI_MODE_STUB_MODE, 
+												"", -1, "","","",-1,"","","","",stub,-1,-1,false,false,"","","",false,false
 										);
 									} 
 							} 
@@ -467,8 +433,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								HashMap<String, Object> options = new HashMap<String, Object>();
 								options.put("nopool", new Boolean(_nopool).toString());
 								options.put("save", new Boolean(_save).toString());
-								options.put("wait", new Boolean(_wait).toString());
+								options.put("wait", new Boolean(_wait).toString());								
 								_sessionId = RHttpProxy.logOn(_commandServletUrl, _sessionId, _login, pwd, options);
+								
 								if (_sessionId.equals(oldSessionId)) {
 									return "Already logged on\n";
 								}
@@ -535,7 +502,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 								} else {
 									if (ident.getRmiMode() == RMI_MODE_STUB_MODE) {
 
+										System.out.println("before hex to stub");
 										r = (RServices) PoolUtils.hexToStub(ident.getStub(), GDApplet.class.getClassLoader());
+										System.out.println("after hex to stub");
+										try {
+											r.ping();
+										} catch (Exception e) {
+											e.printStackTrace();
+											new File(GUtils.NEW_R_STUB_FILE).delete();
+											throw new PingRServerFailedException();
+										}
 
 									} else if (ident.getRmiMode() == RMI_MODE_REGISTRY_MODE) {
 										Registry registry = null;
@@ -554,7 +530,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											throw new BadServantName();
 										}
 										
-										if (new File(GUtils.NEW_R_STUB_FILE).exists()) new File(GUtils.NEW_R_STUB_FILE).delete();
+										new File(GUtils.NEW_R_STUB_FILE).delete();
 
 									} else if (ident.getRmiMode() == RMI_MODE_DB_MODE) {
 										Registry registry = null;
@@ -580,7 +556,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											throw new BadServantName();
 										}
 										
-										if (new File(GUtils.NEW_R_STUB_FILE).exists()) new File(GUtils.NEW_R_STUB_FILE).delete();
+										new File(GUtils.NEW_R_STUB_FILE).delete();
 
 									}
 								}
@@ -669,9 +645,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 							return "No Registry available, can not log on\n";
 						} catch (NoNodeManagerFound nne) {
 							return "No Node Manager Found, can not log on in <no pool> mode \n";
+						} catch (ConnectionFailedException cfe) {
+							return "Connection to HTTP Virtualization Server Failed \n";
 						} catch (TunnelingException te) {
 							return PoolUtils.getStackTraceAsString(te.getCause());
-						} catch (NoRmiRegistryAvailable normie) {
+						} 
+						
+						catch (NoRmiRegistryAvailable normie) {
 							return "No RMI Registry Available, can not log on\n";
 						} catch (NoDbRegistryAvailable nodbe) {
 							return "No DB Registry Available, can not log on\n";
@@ -681,6 +661,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 							return "Cannot connect to Remote SSH Host\n";
 						} catch (BadSshLoginPwdException blp_ssh_e) {
 							return "Bad SSH Login/Password\n";
+						} catch (PingRServerFailedException prsf_e) {
+							return "Ping R Server Failed\n";
 						} catch (RemoteException re) {
 							return PoolUtils.getStackTraceAsString(re.getCause());
 						} catch (Exception unknow) {
@@ -891,11 +873,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 			final JMenu graphicsMenu = new JMenu("Graphics");
 			graphicsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
+					
 					graphicsMenu.removeAll();
 					graphicsMenu.add(_actions.get("createdevice"));
 					graphicsMenu.addSeparator();
 
-					graphicsMenu.add(new SnapshotDeviceAction(GDApplet.this, getCurrentJGPanelPop()));
+					graphicsMenu.add(new SnapshotDeviceAction(GDApplet.this, _sessionId==null ? null : getCurrentJGPanelPop()));
 					graphicsMenu.add(new SaveDeviceAsPngAction(GDApplet.this));
 					graphicsMenu.add(new SaveDeviceAsJpgAction(GDApplet.this));
 
@@ -905,6 +888,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 						public void actionPerformed(ActionEvent e) {
 							getCurrentJGPanelPop().fit();
+						}
+						
+						public boolean isEnabled() {
+							return _sessionId!=null;
 						}
 					});
 					graphicsMenu.addSeparator();
@@ -924,6 +911,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					zoomSelect.setEnabled(_sessionId!=null);
 					graphicsMenu.add(zoomSelect);
 
 					JRadioButtonMenuItem zoom = new JRadioButtonMenuItem("Zoom In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -941,6 +929,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					zoom.setEnabled(_sessionId!=null);
 					graphicsMenu.add(zoom);
 
 					JRadioButtonMenuItem scroll = new JRadioButtonMenuItem("Scroll   [mouse drag]", _sessionId != null
@@ -958,6 +947,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					scroll.setEnabled(_sessionId!=null);
 					graphicsMenu.add(scroll);
 
 					graphicsMenu.addSeparator();
@@ -977,6 +967,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					zoomSelectX.setEnabled(_sessionId!=null);
 					graphicsMenu.add(zoomSelectX);
 
 					JRadioButtonMenuItem zoomX = new JRadioButtonMenuItem("Zoom X In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -994,6 +985,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					zoomX.setEnabled(_sessionId!=null);
 					graphicsMenu.add(zoomX);
 
 					JRadioButtonMenuItem scrollX = new JRadioButtonMenuItem("Scroll X Left / Right   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -1011,6 +1003,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					scrollX.setEnabled(_sessionId!=null);
 					graphicsMenu.add(scrollX);
 
 					graphicsMenu.addSeparator();
@@ -1030,6 +1023,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					zoomSelectY.setEnabled(_sessionId!=null);
 					graphicsMenu.add(zoomSelectY);
 
 					JRadioButtonMenuItem zoomY = new JRadioButtonMenuItem("Zoom Y In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -1047,6 +1041,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					zoomY.setEnabled(_sessionId!=null);
 					graphicsMenu.add(zoomY);
 
 					JRadioButtonMenuItem scrollY = new JRadioButtonMenuItem("Scroll Y Up / Down   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -1064,6 +1059,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					scrollY.setEnabled(_sessionId!=null);
 					graphicsMenu.add(scrollY);
 
 					graphicsMenu.addSeparator();
@@ -1078,6 +1074,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+					mouseTracker.setEnabled(_sessionId!=null);
 					graphicsMenu.add(mouseTracker);
 
 				}

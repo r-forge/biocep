@@ -53,7 +53,19 @@ public class ServerLauncher {
 	public static Acme.Serve.Serve srv;
 
 	public static void main(String[] args) throws Exception {
-
+		
+		BufferedReader pr=new BufferedReader(new FileReader(GUtils.NEW_R_STUB_FILE));
+		String stub=pr.readLine();
+		pr.close();
+		
+		System.out.println("before hex to stub");
+		RServices rrr = (RServices) PoolUtils.hexToStub(stub, GDApplet.class.getClassLoader());
+		System.out.println("after hex to stub ->"+rrr);
+		rrr.ping();
+		
+		System.exit(0);
+		
+		
 		new Thread(new Runnable() {
 			public void run() {
 
@@ -144,6 +156,7 @@ public class ServerLauncher {
 					createRSshProgressFrame.pack();
 					createRSshProgressFrame.setSize(300, 90);
 					createRSshProgressFrame.setVisible(true);
+					createRProgressFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 					PoolUtils.locateInScreenCenter(createRSshProgressFrame);
 				}
 			};
@@ -290,6 +303,7 @@ public class ServerLauncher {
 					createRProgressFrame.pack();
 					createRProgressFrame.setSize(300, 90);
 					createRProgressFrame.setVisible(true);
+					createRProgressFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 					PoolUtils.locateInScreenCenter(createRProgressFrame);
 				}
 			};

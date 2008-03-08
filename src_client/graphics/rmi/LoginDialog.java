@@ -187,11 +187,11 @@ public class LoginDialog extends JDialog {
 				p1.add(new JLabel("")); p2.add(new JLabel(""));
 			}
 
-			p1.add(new JLabel("  Memory Min (megabytes)")); p2.add(_memoryMin);
-			p1.add(new JLabel("  Memory Max (megabytes)")); p2.add(_memoryMax);			
 			p1.add(_keepAlive); p2.add(new JLabel(""));
 			p1.add(_persistentWorkspaceCheckBox); p2.add(new JLabel(""));
 			p1.add(_playDemoBox); p2.add(new JLabel(""));
+			p1.add(new JLabel("  Memory Min (megabytes)")); p2.add(_memoryMin);
+			p1.add(new JLabel("  Memory Max (megabytes)")); p2.add(_memoryMax);			
 			
 			
 
@@ -471,6 +471,17 @@ public class LoginDialog extends JDialog {
 			}
 		};
 		
+		
+		localModeButton.addKeyListener(keyListener);
+		httpModeButton.addKeyListener(keyListener);
+		rmiModeButton.addKeyListener(keyListener);
+		
+		
+		rmiModeRegistryModeButton.addKeyListener(keyListener);
+		rmiModeDbModeButton.addKeyListener(keyListener);
+		rmiModeStubModeButton.addKeyListener(keyListener);
+
+		
 		_url.addKeyListener(keyListener);
 		_login.addKeyListener(keyListener);
 		_pwd.addKeyListener(keyListener);
@@ -497,6 +508,8 @@ public class LoginDialog extends JDialog {
 		_memoryMin.addKeyListener(keyListener);
 		_memoryMax.addKeyListener(keyListener);
 		
+		_useSsh.addKeyListener(keyListener);
+		_useLocalHost.addKeyListener(keyListener);
 		_sshHostIp.addKeyListener(keyListener);
 		_sshLogin.addKeyListener(keyListener);
 		_sshPwd.addKeyListener(keyListener);

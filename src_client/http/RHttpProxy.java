@@ -20,6 +20,7 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.ConnectException;
 import java.util.HashMap;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -54,6 +55,8 @@ public class RHttpProxy {
 				}
 				mainHttpClient.executeMethod(getSession);
 				result = new ObjectInputStream(getSession.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
 			} catch (Exception e) {
 				throw new TunnelingException("Client Side", e);
 			}
@@ -84,6 +87,8 @@ public class RHttpProxy {
 			try {
 				mainHttpClient.executeMethod(getLogOut);
 				result = new ObjectInputStream(getLogOut.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
 			} catch (Exception e) {
 				throw new TunnelingException("", e);
 			}
@@ -121,6 +126,8 @@ public class RHttpProxy {
 				}
 				httpClient.executeMethod(postPush);
 				result = new ObjectInputStream(postPush.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
 			} catch (Exception e) {
 				throw new TunnelingException("Client Side", e);
 			}
@@ -166,6 +173,8 @@ public class RHttpProxy {
 				}
 				mainHttpClient.executeMethod(getInterrupt);
 				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
 			} catch (Exception e) {
 				throw new TunnelingException("", e);
 			}
@@ -197,6 +206,8 @@ public class RHttpProxy {
 				}
 				mainHttpClient.executeMethod(getNewDevice);
 				result = new ObjectInputStream(getNewDevice.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
 			} catch (Exception e) {
 				throw new TunnelingException("", e);
 			}
@@ -231,6 +242,8 @@ public class RHttpProxy {
 				}
 				mainHttpClient.executeMethod(getInterrupt);
 				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
 			} catch (Exception e) {
 				throw new TunnelingException("", e);
 			}
@@ -261,6 +274,8 @@ public class RHttpProxy {
 				}
 				mainHttpClient.executeMethod(getInterrupt);
 				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
 			} catch (Exception e) {
 				throw new TunnelingException("", e);
 			}
