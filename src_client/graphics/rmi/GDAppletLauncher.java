@@ -18,8 +18,6 @@ package graphics.rmi;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -63,46 +61,20 @@ public class GDAppletLauncher {
 					gDApplet.destroy();
 				}
 			}));
-			gDApplet.destroy();
 			
 			try {
 				UIManager.setLookAndFeel(gDApplet.getLookAndFeelClassName());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			JFrame fconsole = new JFrame();
-			fconsole.getContentPane().setLayout(new BorderLayout());
-			fconsole.getContentPane().add(gDApplet.getContentPane(), BorderLayout.CENTER);
-			fconsole.setPreferredSize(new Dimension(840, 720));
-			fconsole.addWindowListener(new WindowListener() {
+			JFrame mainframe = new JFrame();
+			mainframe.getContentPane().setLayout(new BorderLayout());
+			mainframe.getContentPane().add(gDApplet.getContentPane(), BorderLayout.CENTER);
+			mainframe.setPreferredSize(new Dimension(840, 720));
+			mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-				public void windowActivated(WindowEvent e) {
-				}
-
-				public void windowClosed(WindowEvent e) {
-					System.exit(0);
-				}
-
-				public void windowClosing(WindowEvent e) {
-				}
-
-				public void windowDeactivated(WindowEvent e) {
-				}
-
-				public void windowDeiconified(WindowEvent e) {
-				}
-
-				public void windowIconified(WindowEvent e) {
-				}
-
-				public void windowOpened(WindowEvent e) {
-				}
-
-			});
-			fconsole.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-			fconsole.pack();
-			fconsole.setVisible(true);
+			mainframe.pack();
+			mainframe.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -17,6 +17,7 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,19 +54,7 @@ public class ServerLauncher {
 	public static Acme.Serve.Serve srv;
 
 	public static void main(String[] args) throws Exception {
-		
-		BufferedReader pr=new BufferedReader(new FileReader(GUtils.NEW_R_STUB_FILE));
-		String stub=pr.readLine();
-		pr.close();
-		
-		System.out.println("before hex to stub");
-		RServices rrr = (RServices) PoolUtils.hexToStub(stub, GDApplet.class.getClassLoader());
-		System.out.println("after hex to stub ->"+rrr);
-		rrr.ping();
-		
-		System.exit(0);
-		
-		
+
 		new Thread(new Runnable() {
 			public void run() {
 
@@ -90,17 +79,28 @@ public class ServerLauncher {
 				System.out.println("local rmiregistry port : " + GUtils.getLocalTomcatPort());
 				try {
 					LocateRegistry.createRegistry(GUtils.getLocalRmiRegistryPort());
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}).start();
 
+		
+		  RServices r = createRLocal(true, PoolUtils.getHostIp(),
+		  GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(),
+		  GUtils.getLocalRmiRegistryPort(), 256, 256, true); String processId =
+		  r.getProcessId(); System.out.println("rr:" + r);
+		  PoolUtils.killLocalWinProcess(processId, true);
+		 
+
+		  /*
 		RServices r = createRSsh(true, PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), GUtils.getLocalRmiRegistryPort(), 256, 256,
-				"192.168.189.128", "ebi", "ebibiocep", true);
+				"192.168.189.131", "ebi", "ebibiocep", true);
 		String processId = r.getProcessId();
 		System.out.println("rr:" + r);
-		PoolUtils.killSshProcess(processId, "192.168.189.128", "ebi", "ebibiocep", true);
+		PoolUtils.killSshProcess(processId, "192.168.189.131", "ebi", "ebibiocep", true);
+		*/
 
 		// BootSsh.main(new
 		// String[]{"false","127.0.0.1",""+GUtils.getLocalTomcatPort(),"127.0.0.1",""+GUtils.getLocalRmiRegistryPort(),"256","256"});
@@ -130,12 +130,14 @@ public class ServerLauncher {
 			}
 		}
 
+		System.exit(0);
+
 	}
 
 	static JTextArea createRSshProgressArea;
 	static JProgressBar createRSshProgressBar;
 	static JFrame createRSshProgressFrame;
-	
+
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress) throws BadSshHostException,
 			BadSshLoginPwdException, Exception {
@@ -144,7 +146,7 @@ public class ServerLauncher {
 			createRSshProgressArea = new JTextArea();
 			createRSshProgressBar = new JProgressBar(0, 100);
 			createRSshProgressFrame = new JFrame("Create R Server via SSH");
-			
+
 			Runnable runnable = new Runnable() {
 				public void run() {
 					createRSshProgressArea.setFocusable(false);
@@ -156,7 +158,7 @@ public class ServerLauncher {
 					createRSshProgressFrame.pack();
 					createRSshProgressFrame.setSize(300, 90);
 					createRSshProgressFrame.setVisible(true);
-					createRProgressFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+					createRSshProgressFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 					PoolUtils.locateInScreenCenter(createRSshProgressFrame);
 				}
 			};
@@ -205,66 +207,76 @@ public class ServerLauncher {
 				sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
 			} finally {
 				try {
-					sess.close();
+					if (sess != null)
+						sess.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 
 			new SCPClient(conn).put(bootstrapDir + "/BootSsh.class", "RWorkbench/classes/bootstrap");
+			try {
+				sess = conn.openSession();
+				sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
+						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes);
 
-			sess = conn.openSession();
-			sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
-					+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes);
+				InputStream stdout = new StreamGobbler(sess.getStdout());
+				final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
 
-			InputStream stdout = new StreamGobbler(sess.getStdout());
-			final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
-
-			InputStream stderr = new StreamGobbler(sess.getStderr());
-			final BufferedReader brErr = new BufferedReader(new InputStreamReader(stderr));
-			final StringBuffer sshOutput = new StringBuffer();
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						while (true) {
-							String line = brOut.readLine();
-							if (line == null)
-								break;
-							sshOutput.append(line + "\n");
-							System.out.println(line);
+				InputStream stderr = new StreamGobbler(sess.getStderr());
+				final BufferedReader brErr = new BufferedReader(new InputStreamReader(stderr));
+				final StringBuffer sshOutput = new StringBuffer();
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							while (true) {
+								String line = brOut.readLine();
+								if (line == null)
+									break;
+								sshOutput.append(line + "\n");
+								System.out.println(line);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-					} catch (Exception e) {
-						e.printStackTrace();
+						System.out.println("Out Log Thread Died");
 					}
-					System.out.println("Out Log Thread Died");
-				}
-			}).start();
+				}).start();
 
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						while (true) {
-							String line = brErr.readLine();
-							if (line == null)
-								break;
-							System.out.println(line);
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							while (true) {
+								String line = brErr.readLine();
+								if (line == null)
+									break;
+								System.out.println(line);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-					} catch (Exception e) {
-						e.printStackTrace();
+						System.out.println("Err Log Thread Died");
 					}
-					System.out.println("Err Log Thread Died");
+				}).start();
+
+				sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
+
+				int eIndex = sshOutput.indexOf(BootSsh.STUB_END_MARKER);
+				if (eIndex != -1) {
+					int bIndex = sshOutput.indexOf(BootSsh.STUB_BEGIN_MARKER);
+					String stub = sshOutput.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
+					return (RServices) PoolUtils.hexToStub(stub, ServerLauncher.class.getClassLoader());
+				} else {
+					return null;
 				}
-			}).start();
 
-			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
-
-			int eIndex = sshOutput.indexOf(BootSsh.STUB_END_MARKER);
-			if (eIndex != -1) {
-				int bIndex = sshOutput.indexOf(BootSsh.STUB_BEGIN_MARKER);
-				String stub = sshOutput.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
-				return (RServices) PoolUtils.hexToStub(stub, ServerLauncher.class.getClassLoader());
-			} else {
-				return null;
+			} finally {
+				try {
+					if (sess != null)
+						sess.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 
 		} finally {
@@ -281,9 +293,204 @@ public class ServerLauncher {
 
 	}
 
+	
+	static JTextArea createRLocalProgressArea;
+	static JProgressBar createRLocalProgressBar;
+	static JFrame createRLocalProgressFrame;
+
+	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
+			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws BadSshHostException,
+			BadSshLoginPwdException, Exception {
+
+		if (showProgress) {
+			createRLocalProgressArea = new JTextArea();
+			createRLocalProgressBar = new JProgressBar(0, 100);
+			createRLocalProgressFrame = new JFrame("Create R Server on Local Host");
+
+			Runnable runnable = new Runnable() {
+				public void run() {
+					createRLocalProgressArea.setFocusable(false);
+					createRLocalProgressBar.setIndeterminate(true);
+					JPanel p = new JPanel(new BorderLayout());
+					p.add(createRLocalProgressBar, BorderLayout.SOUTH);
+					p.add(new JScrollPane(createRLocalProgressArea), BorderLayout.CENTER);
+					createRLocalProgressFrame.add(p);
+					createRLocalProgressFrame.pack();
+					createRLocalProgressFrame.setSize(300, 90);
+					createRLocalProgressFrame.setVisible(true);
+					createRLocalProgressFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+					PoolUtils.locateInScreenCenter(createRLocalProgressFrame);
+				}
+			};
+
+			if (SwingUtilities.isEventDispatchThread())
+				runnable.run();
+			else {
+				SwingUtilities.invokeLater(runnable);
+			}
+		}
+
+		
+		
+		try {	
+			InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/BootSsh.class");
+			byte[] buffer = new byte[is.available()];
+			try {
+				for (int i = 0; i < buffer.length; ++i) {
+					int b = is.read();
+					buffer[i] = (byte) b;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			String bootstrapDir = System.getProperty("user.home") + "/RWorkbench/" + "classes/bootstrap";
+			new File(bootstrapDir).mkdirs();
+			RandomAccessFile raf = new RandomAccessFile(bootstrapDir + "/BootSsh.class", "rw");
+			raf.setLength(0);
+			raf.write(buffer);
+			raf.close();
+
+			
+			
+			Vector<String> command = new Vector<String>();
+			command.add(System.getProperty("java.home") + "/bin/java");
+			command.add("-classpath");			
+			command.add((isWindowsOs() ? "\"" : "") + System.getProperty("user.home") + "/RWorkbench/" + "classes" + (isWindowsOs() ? "\"" : ""));
+			command.add("bootstrap.BootSsh");			
+			command.add(new Boolean(keepAlive).toString());
+			command.add(codeServerHostIp);
+			command.add(""+codeServerPort);
+			command.add(rmiRegistryHostIp);
+			command.add(""+rmiRegistryPort);
+			command.add(""+memoryMinMegabytes);
+			command.add(""+memoryMaxMegabytes);
+			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), null);
+
+			final StringBuffer outPrint = new StringBuffer();
+			final StringBuffer errorPrint = new StringBuffer();
+
+			System.out.println(" command : " + command);
+
+			
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+						String line = null;
+						while ((line = br.readLine()) != null) {
+							System.out.println(line);
+							errorPrint.append(line + "\n");
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					System.out.println();
+				}
+			}).start();
+
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+						String line = null;
+						while ((line = br.readLine()) != null) {
+							System.out.println(line);
+							outPrint.append(line + "\n");
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+
+			proc.waitFor();
+			proc.destroy();
+			
+			int eIndex = outPrint.indexOf(BootSsh.STUB_END_MARKER);
+			if (eIndex != -1) {
+				int bIndex = outPrint.indexOf(BootSsh.STUB_BEGIN_MARKER);
+				String stub = outPrint.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
+				return (RServices) PoolUtils.hexToStub(stub, ServerLauncher.class.getClassLoader());
+			} else {
+				return null;
+			}
+
+			
+			/*
+			try {
+				sess = conn.openSession();
+				sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
+						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes);
+
+				InputStream stdout = new StreamGobbler(sess.getStdout());
+				final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
+
+				InputStream stderr = new StreamGobbler(sess.getStderr());
+				final BufferedReader brErr = new BufferedReader(new InputStreamReader(stderr));
+				final StringBuffer sshOutput = new StringBuffer();
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							while (true) {
+								String line = brOut.readLine();
+								if (line == null)
+									break;
+								sshOutput.append(line + "\n");
+								System.out.println(line);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						System.out.println("Out Log Thread Died");
+					}
+				}).start();
+
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							while (true) {
+								String line = brErr.readLine();
+								if (line == null)
+									break;
+								System.out.println(line);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						System.out.println("Err Log Thread Died");
+					}
+				}).start();
+
+				sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
+
+				int eIndex = sshOutput.indexOf(BootSsh.STUB_END_MARKER);
+				if (eIndex != -1) {
+					int bIndex = sshOutput.indexOf(BootSsh.STUB_BEGIN_MARKER);
+					String stub = sshOutput.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
+					return (RServices) PoolUtils.hexToStub(stub, ServerLauncher.class.getClassLoader());
+				} else {
+					return null;
+				}
+
+			*/
+
+		} finally {
+			if (showProgress) {
+				createRLocalProgressFrame.setVisible(false);
+			}
+		}
+
+	}
+
+	
+	
+	
 	static JTextArea createRProgressArea;
 	static JProgressBar createRProgressBar;
 	static JFrame createRProgressFrame;
+
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
 			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws Exception {
 
@@ -610,7 +817,8 @@ public class ServerLauncher {
 				}
 
 				final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
-				final Vector<String> killPrint = new Vector<String>();
+
+				final Vector<String> outPrint = new Vector<String>();
 				final Vector<String> errorPrint = new Vector<String>();
 
 				System.out.println(" command : " + command);
@@ -627,6 +835,8 @@ public class ServerLauncher {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
+
+						System.out.println();
 					}
 				}).start();
 
@@ -637,7 +847,7 @@ public class ServerLauncher {
 							String line = null;
 							while ((line = br.readLine()) != null) {
 								System.out.println(line);
-								killPrint.add(line);
+								outPrint.add(line);
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -659,7 +869,8 @@ public class ServerLauncher {
 				if (exceptionHolder[0] != null) {
 					throw exceptionHolder[0];
 				}
-
+				
+				
 				return (RServices) servantHolder[0];
 			} finally {
 				if (callBack != null) {
