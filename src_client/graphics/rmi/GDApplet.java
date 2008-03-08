@@ -1,18 +1,4 @@
-/*
- * Copyright (C) 2007 EMBL-EBI
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
@@ -53,7 +39,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -65,7 +50,6 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
-import java.net.ConnectException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -479,8 +463,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 												.getHostIp(), GUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
 												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(),true);
 									} else {
+										
+										r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils
+												.getHostIp(), GUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
+										/*
 										r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), GUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
+												*/
 									}
 
 									_keepAlive = ident.isKeepAlive();
@@ -1813,8 +1802,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			} catch (TunnelingException e) {
 				// e.printStackTrace();
 			}
-
-			noSession();
+			noSession();			
 		}
 	}
 
@@ -2714,7 +2702,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private void noSession() {
 
 		if (_rProcessId != null && !_keepAlive) {
-			if (_sshParameters == null) {
+			
+			if (_sshParameters == null) {				
 				try {
 					if (PoolUtils.isWindowsOs()) {
 						PoolUtils.killLocalWinProcess(_rProcessId, true);
@@ -2732,6 +2721,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
+		
 		}
 
 		if (_virtualizationLocalHttpServer != null) {
