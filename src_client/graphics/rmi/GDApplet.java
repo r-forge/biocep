@@ -38,6 +38,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,6 +116,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
+import org.rosuda.javaGD.GDObject;
+
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
@@ -185,7 +188,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		@Override
 		public void lock() {
 			super.lock();
-			if (_mode == HTTP_MODE) {
+			//if (_mode == HTTP_MODE) 
+			{
 				try {
 					_currentDevice.setAsCurrentDevice();
 				} catch (Exception e) {
@@ -206,6 +210,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}
 			super.unlock();
+		}
+		
+		public boolean isLocked() {
+			try {
+				if (_rForConsole.isBusy()) {
+					return true;
+				} 
+			} catch (Exception e) {
+			}
+			return super.isLocked();
 		}
 	};
 	private String[] _packageNameSave = new String[] { "" };
@@ -456,8 +470,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 									/*
 									DirectJNI.init();							
 									r = DirectJNI.getInstance().getRServices();
-									 */
+									*/
+									 
 
+								
 									if (ident.isUseSsh()) {
 										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), GUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
@@ -466,10 +482,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 										
 										r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), GUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
-										/*
-										r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils
-												.getHostIp(), GUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
-												*/
 									}
 
 									_keepAlive = ident.isKeepAlive();
@@ -486,14 +498,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 										pw.println(PoolUtils.stubToHex(r));
 										pw.close();
 									}
+
 									
 
 								} else {
 									if (ident.getRmiMode() == RMI_MODE_STUB_MODE) {
-
-										System.out.println("before hex to stub");
-										r = (RServices) PoolUtils.hexToStub(ident.getStub(), GDApplet.class.getClassLoader());
-										System.out.println("after hex to stub");
+										r = (RServices) PoolUtils.hexToStub(ident.getStub(), GDApplet.class.getClassLoader());										
 										try {
 											r.ping();
 										} catch (Exception e) {
@@ -509,14 +519,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 											registry.list();
 										} catch (Exception e) {
 											e.printStackTrace();
-											throw new NoRmiRegistryAvailable();
+											throw new NoRmiRegistryAvailableException();
 										}
 
 										try {
 											r = (RServices) registry.lookup(ident.getServantName());
 										} catch (Exception e) {
 											e.printStackTrace();
-											throw new BadServantName();
+											throw new BadServantNameException();
 										}
 										
 										new File(GUtils.NEW_R_STUB_FILE).delete();
@@ -535,26 +545,37 @@ public class GDApplet extends GDAppletBase implements RGui {
 											registry.list();
 										} catch (Exception e) {
 											e.printStackTrace();
-											throw new NoDbRegistryAvailable();
+											throw new NoDbRegistryAvailableException();
 										}
 
 										try {
 											r = (RServices) registry.lookup(ident.getDbServantName());
 										} catch (Exception e) {
 											e.printStackTrace();
-											throw new BadServantName();
+											throw new BadServantNameException();
 										}
 										
 										new File(GUtils.NEW_R_STUB_FILE).delete();
 
 									}
 								}
-
+								
+								if (r.isBusy()) {
+									
+									int n=JOptionPane.showConfirmDialog(GDApplet.this, "R is busy, can't login, would you like to stop it?","", JOptionPane.OK_CANCEL_OPTION);
+									if (n==JOptionPane.OK_OPTION) {
+										r.stop();
+									} else {
+										throw new RBusyException();
+									}
+								}
+																
+								d = r.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
+																
 								_rForConsole = r;
 								_rForPopCmd = r;
-								_rForFiles = r;
-
-								d = r.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
+								_rForFiles = r;								
+								
 
 								_sessionId = RHttpProxy.FAKE_SESSION;
 
@@ -640,11 +661,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 							return PoolUtils.getStackTraceAsString(te.getCause());
 						} 
 						
-						catch (NoRmiRegistryAvailable normie) {
+						catch (NoRmiRegistryAvailableException normie) {
 							return "No RMI Registry Available, can not log on\n";
-						} catch (NoDbRegistryAvailable nodbe) {
+						} catch (NoDbRegistryAvailableException nodbe) {
 							return "No DB Registry Available, can not log on\n";
-						} catch (BadServantName bsne) {
+						} catch (BadServantNameException bsne) {
 							return "Bad RMI Servant Name, can not log on\n";
 						} catch (BadSshHostException bh_ssh_e) {
 							return "Cannot connect to Remote SSH Host\n";
@@ -652,6 +673,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 							return "Bad SSH Login/Password\n";
 						} catch (PingRServerFailedException prsf_e) {
 							return "Ping R Server Failed\n";
+						} catch (RBusyException rb_e) {
+							return "Connection Failed, R is Busy\n";
 						} catch (RemoteException re) {
 							return PoolUtils.getStackTraceAsString(re.getCause());
 						} catch (Exception unknow) {
@@ -681,10 +704,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 						}
 					}
 
+					try {
+						System.out.println("R is busy:"+_rForConsole.isBusy());
+					} catch (Exception e) {e.printStackTrace();}
 					Object result = null;
 					if (getRLock().isLocked()) {
 						result = "R is busy, please retry\n";
 					} else {
+						
 						try {
 							getRLock().lock();
 							result = _rForConsole.consoleSubmit(expression);
@@ -708,7 +735,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 			};
 			_consolePanel = new ConsolePanel(_submitInterface, new AbstractAction[] { _actions.get("logon"), _actions.get("logoff"), null,
 					_actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"), _actions.get("interrupteval"), null,
-					_actions.get("playdemo") });
+					_actions.get("playdemo"), null, new AbstractAction("Show R Info"){
+
+						public void actionPerformed(ActionEvent e) {
+							try {
+								System.out.println("R is busy :"+_rForConsole.isBusy());
+							} catch (Exception ex) {
+								
+							}
+							
+						}
+				
+			} });
 
 			JPanel workingDirPanel = new JPanel();
 			workingDirPanel.setLayout(new BorderLayout());

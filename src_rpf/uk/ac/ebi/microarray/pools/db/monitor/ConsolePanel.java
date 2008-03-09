@@ -170,8 +170,10 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 					if (_textField.getText().trim().equals(""))
 						return;
-
+					
+					System.out.println("before play");
 					play(_textField.getText(), false);
+					System.out.println("after play");
 
 				} else {
 

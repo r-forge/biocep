@@ -104,15 +104,15 @@ public class DirectJNI {
 
 	public static ClassLoader _mappingClassLoader = DirectJNI.class.getClassLoader();
 	public static ClassLoader _resourcesClassLoader = DirectJNI.class.getClassLoader();
-	
+
 	public static Vector<String> _abstractFactories = new Vector<String>();
 	public static HashMap<String, String> _factoriesMapping = new HashMap<String, String>();
 	public static HashMap<String, String> _s4BeansMappingRevert = new HashMap<String, String>();
 	public static HashMap<String, String> _s4BeansMapping = new HashMap<String, String>();
-	public static Vector<String> _packageNames = new Vector<String>();	
-	public static HashMap<String, Class<?>> _s4BeansHash = new HashMap<String, Class<?>>();	
+	public static Vector<String> _packageNames = new Vector<String>();
+	public static HashMap<String, Class<?>> _s4BeansHash = new HashMap<String, Class<?>>();
 	public static HashMap<String, Vector<Class<?>>> _rPackageInterfacesHash = new HashMap<String, Vector<Class<?>>>();
-	
+
 	private static final String V_NAME_PREFIXE = "V__";
 	private static final String V_TEMP_PREFIXE = V_NAME_PREFIXE + "TEMP__";
 	private static final String PENV = ".PrivateEnv";
@@ -131,6 +131,7 @@ public class DirectJNI {
 	private int _markerA = -1;
 	private ExecutionUnit _sharedExecutionUnit = null;
 	private final ReentrantLock _runRlock = new ReentrantLock();
+	private final ReentrantLock _mainLock = new ReentrantLock();
 	private final Condition _availableCondition = _runRlock.newCondition();
 	private long _varCounter = 0;
 	private long _tempCounter = 0;
@@ -160,51 +161,24 @@ public class DirectJNI {
 	public String runR(ExecutionUnit eu) {
 		if (Thread.currentThread() == _rEngine) {
 			throw new RuntimeException("runR called from within the R MainLoop Thread");
-
 		} else {
-			boolean hasConsoleInput = (eu.getConsoleInput() != null && !eu.getConsoleInput().equals(""));
-			PrintStream _o = System.out;
-			Boolean[] scanResultHolder = null;
-
-			if (hasConsoleInput) {
-				scanResultHolder = new Boolean[1];
-				scanResultHolder[0] = false;
-				System.setOut(new PrintStream(new ScanStream(_o, _continueStr.getBytes(), _promptStr.getBytes(),
-						scanResultHolder)));
-			}
-
+			_mainLock.lock();
 			try {
-
-				_runRlock.lock();
-				try {
-					_sharedExecutionUnit = eu;
-
-					try {
-						_availableCondition.await();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-
-				} finally {
-					_runRlock.unlock();
-				}
+				boolean hasConsoleInput = (eu.getConsoleInput() != null && !eu.getConsoleInput().equals(""));
+				PrintStream _o = System.out;
+				Boolean[] scanResultHolder = null;
 
 				if (hasConsoleInput) {
+					scanResultHolder = new Boolean[1];
+					scanResultHolder[0] = false;
+					System.setOut(new PrintStream(new ScanStream(_o, _continueStr.getBytes(), _promptStr.getBytes(), scanResultHolder)));
+				}
+
+				try {
 
 					_runRlock.lock();
 					try {
-						_sharedExecutionUnit = new ExecutionUnit() {
-							public void run(Rengine e) {
-							}
-
-							public boolean emptyConsoleBufferBefore() {
-								return false;
-							}
-
-							public String getConsoleInput() {
-								return "print('" + TAIL_PATTERN + "')";
-							}
-						};
+						_sharedExecutionUnit = eu;
 
 						try {
 							_availableCondition.await();
@@ -216,13 +190,12 @@ public class DirectJNI {
 						_runRlock.unlock();
 					}
 
-					if (scanResultHolder[0] == true) {
+					if (hasConsoleInput) {
 
 						_runRlock.lock();
 						try {
 							_sharedExecutionUnit = new ExecutionUnit() {
 								public void run(Rengine e) {
-									_rEngine.rniStop(1);
 								}
 
 								public boolean emptyConsoleBufferBefore() {
@@ -230,7 +203,7 @@ public class DirectJNI {
 								}
 
 								public String getConsoleInput() {
-									return null;
+									return "print('" + TAIL_PATTERN + "')";
 								}
 							};
 
@@ -244,32 +217,63 @@ public class DirectJNI {
 							_runRlock.unlock();
 						}
 
-						return "incomplete function call\n";
-					}
+						if (scanResultHolder[0] == true) {
 
-					int p;
-					while ((p = _sharedBuffer.indexOf(TAIL_PATTERN)) == -1) {
+							_runRlock.lock();
+							try {
+								_sharedExecutionUnit = new ExecutionUnit() {
+									public void run(Rengine e) {
+										_rEngine.rniStop(1);
+									}
 
-						try {
-							Thread.sleep(10);
-						} catch (Exception e) {
-							e.printStackTrace();
+									public boolean emptyConsoleBufferBefore() {
+										return false;
+									}
+
+									public String getConsoleInput() {
+										return null;
+									}
+								};
+
+								try {
+									_availableCondition.await();
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+
+							} finally {
+								_runRlock.unlock();
+							}
+
+							return "incomplete function call\n";
 						}
-					}
-					return _sharedBuffer.substring(0, p - 5);
 
-				} else {
-					return _sharedBuffer.toString();
+						int p;
+						while ((p = _sharedBuffer.indexOf(TAIL_PATTERN)) == -1) {
+
+							try {
+								Thread.sleep(10);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+						return _sharedBuffer.substring(0, p - 5);
+
+					} else {
+						return _sharedBuffer.toString();
+					}
+				} finally {
+					if (hasConsoleInput)
+						System.setOut(_o);
 				}
 			} finally {
-				if (hasConsoleInput)
-					System.setOut(_o);
+				_mainLock.unlock();
 			}
 
 		}
 	}
 
-	boolean runRInProgress() {
+	public boolean runRInProgress() {
 		return _runRlock.isLocked();
 	}
 
@@ -304,8 +308,7 @@ public class DirectJNI {
 						_markerA = -1;
 						_sharedExecutionUnit.run(re);
 
-						if (_sharedExecutionUnit.getConsoleInput() != null
-								&& !_sharedExecutionUnit.getConsoleInput().equals("")) {
+						if (_sharedExecutionUnit.getConsoleInput() != null && !_sharedExecutionUnit.getConsoleInput().equals("")) {
 							System.out.print(prompt);
 							consoleInput = _sharedExecutionUnit.getConsoleInput() + "\n";
 						}
@@ -365,13 +368,11 @@ public class DirectJNI {
 		}
 
 		try {
-			String initRSourcingLog=getRServices().sourceFromResource("/rscripts/init.R");
-			System.out.println("init.R sourcing log : "+initRSourcingLog);
+			String initRSourcingLog = getRServices().sourceFromResource("/rscripts/init.R");
+			System.out.println("init.R sourcing log : " + initRSourcingLog);
 			initPrivateEnv();
-			_continueStr = ((RChar) ((RList) getRServices().evalAndGetObject("options('continue')")).getValue()[0])
-					.getValue()[0];
-			_promptStr = ((RChar) ((RList) getRServices().evalAndGetObject("options('prompt')")).getValue()[0])
-					.getValue()[0];
+			_continueStr = ((RChar) ((RList) getRServices().evalAndGetObject("options('continue')")).getValue()[0]).getValue()[0];
+			_promptStr = ((RChar) ((RList) getRServices().evalAndGetObject("options('prompt')")).getValue()[0]).getValue()[0];
 
 			getRServices().consoleSubmit("1");
 			_packNames = ((RChar) getRServices().evalAndGetObject(".packages(all=T)")).getValue();
@@ -380,8 +381,7 @@ public class DirectJNI {
 
 			WDIR = System.getProperty("working.dir.root") != null && !System.getProperty("working.dir.root").equals("") ? System
 					.getProperty("working.dir.root")
-					+ "/" + INSTANCE_NAME
-					: DEFAULT_WDIR_ROOT;
+					+ "/" + INSTANCE_NAME : DEFAULT_WDIR_ROOT;
 			try {
 				WDIR = new File(WDIR).getCanonicalPath().replace('\\', '/');
 				regenerateWorkingDirectory(true);
@@ -434,8 +434,7 @@ public class DirectJNI {
 					continue;
 
 				Parser p = new Parser(indexFile);
-				processNode(_packNames[i], uriPrefix, p.extractAllNodesThatMatch(new TagNameFilter("BODY"))
-						.elementAt(0));
+				processNode(_packNames[i], uriPrefix, p.extractAllNodesThatMatch(new TagNameFilter("BODY")).elementAt(0));
 
 			} catch (Exception e) {
 				//e.printStackTrace();
@@ -446,11 +445,9 @@ public class DirectJNI {
 	public static void processNode(String packageName, String uriPrefix, Node n) {
 		if (n instanceof LinkTag) {
 			LinkTag lt = (LinkTag) n;
-			if (lt.getLinkText() != null && !lt.getLinkText().equals("")
-					&& !lt.getLinkText().equalsIgnoreCase("overview")
+			if (lt.getLinkText() != null && !lt.getLinkText().equals("") && !lt.getLinkText().equalsIgnoreCase("overview")
 					&& !lt.getLinkText().equalsIgnoreCase("directory") && lt.extractLink().endsWith(".html")) {
-				_symbolUriMap.put(packageName + "~" + lt.getLinkText(), uriPrefix
-						+ lt.extractLink().substring(lt.extractLink().lastIndexOf('/') + 1));
+				_symbolUriMap.put(packageName + "~" + lt.getLinkText(), uriPrefix + lt.extractLink().substring(lt.extractLink().lastIndexOf('/') + 1));
 			}
 		}
 		NodeList children = n.getChildren();
@@ -592,8 +589,7 @@ public class DirectJNI {
 
 			RComplex vec = (RComplex) obj;
 
-			if (vec.getReal() != null && vec.getReal().length == 0 && vec.getImaginary() != null
-					&& vec.getImaginary().length == 0) {
+			if (vec.getReal() != null && vec.getReal().length == 0 && vec.getImaginary() != null && vec.getImaginary().length == 0) {
 				resultId = e.rniEval(e.rniParse("new('complex')", 1), 0);
 			} else {
 				String v_temp_1 = newTemporaryVariableName();
@@ -761,14 +757,11 @@ public class DirectJNI {
 				String constructorArgs = "";
 				for (int i = 0; i < fields.length; ++i) {
 
-					String getterName = fields[i].getClass().equals(Boolean.class) ? "is"
-							+ Utils.captalizeFirstChar(fields[i].getName()) : "get"
+					String getterName = fields[i].getClass().equals(Boolean.class) ? "is" + Utils.captalizeFirstChar(fields[i].getName()) : "get"
 							+ Utils.captalizeFirstChar(fields[i].getName());
-					Object fieldValue = obj.getClass().getMethod(getterName, (Class[]) null).invoke(obj,
-							(Object[]) null);
+					Object fieldValue = obj.getClass().getMethod(getterName, (Class[]) null).invoke(obj, (Object[]) null);
 
-					if (fieldValue instanceof RList
-							&& (((RList) fieldValue).getValue() == null || ((RList) fieldValue).getValue().length == 0)
+					if (fieldValue instanceof RList && (((RList) fieldValue).getValue() == null || ((RList) fieldValue).getValue().length == 0)
 							&& (((RList) fieldValue).getNames() == null || ((RList) fieldValue).getNames().length == 0)) {
 						fieldValue = null;
 					}
@@ -833,8 +826,7 @@ public class DirectJNI {
 	}
 
 	private boolean isNull(String expression) {
-		boolean isNull = _rEngine.rniGetBoolArrayI(_rEngine.rniEval(
-				_rEngine.rniParse("is.null(" + expression + ")", 1), 0))[0] == 1;
+		boolean isNull = _rEngine.rniGetBoolArrayI(_rEngine.rniEval(_rEngine.rniParse("is.null(" + expression + ")", 1), 0))[0] == 1;
 		return isNull;
 	}
 
@@ -871,14 +863,13 @@ public class DirectJNI {
 			if (e.rniExpType(expressionId) != S4SXP) {
 				if (DirectJNI._s4BeansMapping.get(unionrclass) != null) {
 
-					o = (RObject) DirectJNI._mappingClassLoader.loadClass(DirectJNI._s4BeansMapping.get(unionrclass))
-							.getConstructor(new Class[] { o.getClass() }).newInstance(new Object[] { o });
+					o = (RObject) DirectJNI._mappingClassLoader.loadClass(DirectJNI._s4BeansMapping.get(unionrclass)).getConstructor(
+							new Class[] { o.getClass() }).newInstance(new Object[] { o });
 				} else {
 				}
 			}
 
-			String factoryJavaClassName = DirectJNI._factoriesMapping.get(Utils.captalizeFirstChar(rclass)
-					+ "FactoryForR" + unionrclass);
+			String factoryJavaClassName = DirectJNI._factoriesMapping.get(Utils.captalizeFirstChar(rclass) + "FactoryForR" + unionrclass);
 			result = (RObject) DirectJNI._mappingClassLoader.loadClass(factoryJavaClassName).newInstance();
 			Method setDataM = result.getClass().getMethod("setData", new Class[] { RObject.class });
 			setDataM.invoke(result, o);
@@ -957,8 +948,7 @@ public class DirectJNI {
 					names = e.rniGetStringArray(namesId);
 				}
 
-				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na("
-						+ expression + ")]", 1), 0));
+				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na(" + expression + ")]", 1), 0));
 				vector = new RLogical(b, isNaIdx.length == 0 ? null : isNaIdx, names);
 				if (rclass.equals("logical") || rclass.equals("vector")) {
 					result = vector;
@@ -992,8 +982,7 @@ public class DirectJNI {
 					names = e.rniGetStringArray(namesId);
 				}
 
-				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na("
-						+ expression + ")]", 1), 0));
+				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na(" + expression + ")]", 1), 0));
 				vector = new RInteger(e.rniGetIntArray(expressionId), isNaIdx.length == 0 ? null : isNaIdx, names);
 				if (rclass.equals("integer") || rclass.equals("vector")) {
 					result = vector;
@@ -1026,8 +1015,7 @@ public class DirectJNI {
 				if (namesId != 0 && e.rniExpType(namesId) == STRSXP) {
 					names = e.rniGetStringArray(namesId);
 				}
-				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na("
-						+ expression + ")]", 1), 0));
+				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na(" + expression + ")]", 1), 0));
 				vector = new RNumeric(e.rniGetDoubleArray(expressionId), isNaIdx.length == 0 ? null : isNaIdx, names);
 
 				if (rclass.equals("numeric") || rclass.equals("double") || rclass.equals("vector")) {
@@ -1060,8 +1048,7 @@ public class DirectJNI {
 					names = e.rniGetStringArray(namesId);
 				}
 
-				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na("
-						+ expression + ")]", 1), 0));
+				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na(" + expression + ")]", 1), 0));
 				vector = new RComplex(c_real, c_imaginary, isNaIdx.length == 0 ? null : isNaIdx, names);
 
 				if (rclass.equals("complex") || rclass.equals("vector")) {
@@ -1092,8 +1079,7 @@ public class DirectJNI {
 					names = e.rniGetStringArray(namesId);
 				}
 
-				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na("
-						+ expression + ")]", 1), 0));
+				int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + expression + ")-1))[is.na(" + expression + ")]", 1), 0));
 				vector = new RChar(e.rniGetStringArray(expressionId), isNaIdx.length == 0 ? null : isNaIdx, names);
 				if (rclass.equals("character") || rclass.equals("vector")) {
 					result = vector;
@@ -1159,8 +1145,7 @@ public class DirectJNI {
 					// String[] rowNames =
 					// e.rniGetStringArray(e.rniGetAttr(expressionId,
 					// "row.names"));
-					String[] rowNames = e.rniGetStringArray(e
-							.rniEval(e.rniParse("row.names(" + expression + ")", 1), 0));
+					String[] rowNames = e.rniGetStringArray(e.rniEval(e.rniParse("row.names(" + expression + ")", 1), 0));
 
 					result = new RDataFrame(rlist, rowNames);
 				}
@@ -1233,9 +1218,7 @@ public class DirectJNI {
 		}
 
 		if (false)
-			log
-					.info("TYPE STR FOR<" + expression + ">:" + typeStr + " result:" + result + " type hint was : "
-							+ rclass);
+			log.info("TYPE STR FOR<" + expression + ">:" + typeStr + " result:" + result + " type hint was : " + rclass);
 
 		return result;
 	}
@@ -1249,8 +1232,7 @@ public class DirectJNI {
 					ReferenceInterface fobj = (ReferenceInterface) f.get(arg);
 					if (fobj == null)
 						continue;
-					if (fobj.getRObjectId() != arg.getRObjectId()
-							|| !fobj.getAssignInterface().equals(arg.getAssignInterface())) {
+					if (fobj.getRObjectId() != arg.getRObjectId() || !fobj.getAssignInterface().equals(arg.getAssignInterface())) {
 						return true;
 					}
 					if (hasDistributedReferences(fobj))
@@ -1266,8 +1248,7 @@ public class DirectJNI {
 		}
 	}
 
-	private RObject call(boolean resultAsReference, String varName, String methodName, RObject... args)
-			throws Exception {
+	private RObject call(boolean resultAsReference, String varName, String methodName, RObject... args) throws Exception {
 
 		Rengine e = _rEngine;
 
@@ -1414,8 +1395,8 @@ public class DirectJNI {
 		long resultId = putObject(obj);
 		protectSafe(resultId);
 		Class<?> javaClass = DirectJNI._mappingClassLoader.loadClass(obj.getClass().getName() + "Ref");
-		ReferenceInterface result = (ReferenceInterface) javaClass.getConstructor(
-				new Class[] { long.class, String.class }).newInstance(new Object[] { resultId, "" });
+		ReferenceInterface result = (ReferenceInterface) javaClass.getConstructor(new Class[] { long.class, String.class }).newInstance(
+				new Object[] { resultId, "" });
 		result.setAssignInterface(_ai);
 		return result;
 	}
@@ -1540,8 +1521,7 @@ public class DirectJNI {
 				String javaClassName = guessJavaClassRef(rclass, resultType);
 				Class<?> javaClass = DirectJNI._mappingClassLoader.loadClass(javaClassName);
 				protectSafe(resultId);
-				result = (RObject) javaClass.getConstructor(new Class[] { long.class, String.class }).newInstance(
-						new Object[] { resultId, "" });
+				result = (RObject) javaClass.getConstructor(new Class[] { long.class, String.class }).newInstance(new Object[] { resultId, "" });
 				((ReferenceInterface) result).setAssignInterface(_ai);
 			}
 			e.rniEval(e.rniParse("rm(" + resultvar + ")", 1), 0);
@@ -1599,13 +1579,11 @@ public class DirectJNI {
 			resource = resource.substring(1);
 
 		try {
-			final File tempFile = new File(TEMP_DIR + "/" + resource.substring(resource.lastIndexOf('/') + 1))
-					.getCanonicalFile();
+			final File tempFile = new File(TEMP_DIR + "/" + resource.substring(resource.lastIndexOf('/') + 1)).getCanonicalFile();
 			if (tempFile.exists())
 				tempFile.delete();
 
-			BufferedReader breader = new BufferedReader(new InputStreamReader(refClassLoader
-					.getResourceAsStream(resource)));
+			BufferedReader breader = new BufferedReader(new InputStreamReader(refClassLoader.getResourceAsStream(resource)));
 			PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
 			String line;
 			do {
@@ -1617,8 +1595,7 @@ public class DirectJNI {
 			pwriter.close();
 
 			toggleMarker();
-			_rEngine.rniEval(_rEngine.rniParse("source(\"" + tempFile.getAbsolutePath().replace('\\', '/') + "\")", 1),
-					0);
+			_rEngine.rniEval(_rEngine.rniParse("source(\"" + tempFile.getAbsolutePath().replace('\\', '/') + "\")", 1), 0);
 			String lastStatus = cutStatusSinceMarker();
 			log.info(resource + " loading status : " + lastStatus);
 			tempFile.delete();
@@ -1647,8 +1624,7 @@ public class DirectJNI {
 			pwriter.close();
 
 			toggleMarker();
-			_rEngine.rniEval(_rEngine.rniParse("source(\"" + tempFile.getAbsolutePath().replace('\\', '/') + "\")", 1),
-					0);
+			_rEngine.rniEval(_rEngine.rniParse("source(\"" + tempFile.getAbsolutePath().replace('\\', '/') + "\")", 1), 0);
 
 			String lastStatus = cutStatusSinceMarker();
 
@@ -1797,11 +1773,8 @@ public class DirectJNI {
 								asString[i] = expressions[i].substring(1, expressions[i].length() - 1);
 							} else {
 
-								if (e
-										.rniGetBoolArrayI(e.rniEval(e.rniParse("is.atomic(" + expressions[i] + ")", 1),
-												0))[0] == 1) {
-									asString[i] = e.rniGetString(e.rniEval(e.rniParse("toString(" + expressions[i]
-											+ ")", 1), 0));
+								if (e.rniGetBoolArrayI(e.rniEval(e.rniParse("is.atomic(" + expressions[i] + ")", 1), 0))[0] == 1) {
+									asString[i] = e.rniGetString(e.rniEval(e.rniParse("toString(" + expressions[i] + ")", 1), 0));
 								} else {
 									toggleMarker();
 									e.rniEval(e.rniParse("print(" + expressions[i] + ")", 1), 0);
@@ -1863,8 +1836,7 @@ public class DirectJNI {
 			return objHolder[0];
 		}
 
-		public void callAndAssignName(final String varName, final String methodName, final RObject... args)
-				throws RemoteException {
+		public void callAndAssignName(final String varName, final String methodName, final RObject... args) throws RemoteException {
 			final Exception[] exceptionHolder = new Exception[1];
 
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -2086,8 +2058,7 @@ public class DirectJNI {
 					try {
 						String rootvar = newTemporaryVariableName();
 						e.rniAssign(rootvar, ((ReferenceInterface) refObj).getRObjectId(), 0);
-						e.rniEval(e.rniParse(name + "<-" + rootvar + ((ReferenceInterface) refObj).getSlotsPath(), 1),
-								0);
+						e.rniEval(e.rniParse(name + "<-" + rootvar + ((ReferenceInterface) refObj).getSlotsPath(), 1), 0);
 						e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 
 					} catch (Exception ex) {
@@ -2123,9 +2094,8 @@ public class DirectJNI {
 					for (Iterator<?> iter = DirectJNI._rPackageInterfacesHash.keySet().iterator(); iter.hasNext();) {
 						String className = (String) iter.next();
 						if (className.substring(className.lastIndexOf('.') + 1).equals(packageName)) {
-							_packs.put(packageName, (RPackage) DirectJNI._mappingClassLoader.loadClass(
-									className + "Impl").getMethod("getInstance", (Class[]) null).invoke((Object) null,
-									(Object[]) null));
+							_packs.put(packageName, (RPackage) DirectJNI._mappingClassLoader.loadClass(className + "Impl").getMethod("getInstance",
+									(Class[]) null).invoke((Object) null, (Object[]) null));
 							break;
 						}
 					}
@@ -2228,6 +2198,10 @@ public class DirectJNI {
 
 		}
 
+		public boolean isBusy() throws RemoteException {
+			return _mainLock.isLocked();
+		}
+
 		public boolean isResetEnabled() throws RemoteException {
 			return false;
 		}
@@ -2294,27 +2268,25 @@ public class DirectJNI {
 				if (files[i].isDirectory()) {
 					getWorkingDirectoryFileNames(files[i], result);
 				} else {
-					String name = path.getAbsolutePath().substring(WDIR.length(), path.getAbsolutePath().length())
-							+ System.getProperty("file.separator") + files[i].getName();
+					String name = path.getAbsolutePath().substring(WDIR.length(), path.getAbsolutePath().length()) + System.getProperty("file.separator")
+							+ files[i].getName();
 					name = (name.substring(1, name.length())).replace('\\', '/');
 				}
 			}
 		}
 
-		private void getWorkingDirectoryFileDescriptions(File path, Vector<FileDescription> result)
-				throws java.rmi.RemoteException {
+		private void getWorkingDirectoryFileDescriptions(File path, Vector<FileDescription> result) throws java.rmi.RemoteException {
 			File[] files = path.listFiles();
 			if (files == null)
 				return;
 			for (int i = 0; i < files.length; i++) {
 				if (files[i].isDirectory()) {
-					String name = (files[i].getAbsolutePath().substring(WDIR.length() + 1, files[i].getAbsolutePath()
-							.length())).replace('\\', '/');
+					String name = (files[i].getAbsolutePath().substring(WDIR.length() + 1, files[i].getAbsolutePath().length())).replace('\\', '/');
 					result.add(new FileDescription(name, 0, true, new Date(files[i].lastModified())));
 					getWorkingDirectoryFileDescriptions(files[i], result);
 				} else {
-					String name = path.getAbsolutePath().substring(WDIR.length(), path.getAbsolutePath().length())
-							+ System.getProperty("file.separator") + files[i].getName();
+					String name = path.getAbsolutePath().substring(WDIR.length(), path.getAbsolutePath().length()) + System.getProperty("file.separator")
+							+ files[i].getName();
 					name = name.substring(1, name.length()).replace('\\', '/');
 					result.add(new FileDescription(name, files[i].length(), false, new Date(files[i].lastModified())));
 				}
@@ -2366,8 +2338,7 @@ public class DirectJNI {
 			}
 		}
 
-		public byte[] readWorkingDirectoryFileBlock(String fileName, long offset, int blocksize)
-				throws java.rmi.RemoteException {
+		public byte[] readWorkingDirectoryFileBlock(String fileName, long offset, int blocksize) throws java.rmi.RemoteException {
 			try {
 				RandomAccessFile raf = new RandomAccessFile(new File(WDIR + '/' + fileName), "r");
 				raf.seek(offset);
@@ -2404,8 +2375,7 @@ public class DirectJNI {
 				}
 
 				String filePath = null;
-				if (System.getenv().get("R_LIBS") != null && !System.getenv().get("R_LIBS").equals("")
-						&& uri.startsWith("/library/")) {
+				if (System.getenv().get("R_LIBS") != null && !System.getenv().get("R_LIBS").equals("") && uri.startsWith("/library/")) {
 					filePath = System.getenv().get("R_LIBS") + uri.substring(8);
 					if (!new File(filePath).exists())
 						filePath = null;
@@ -2436,8 +2406,7 @@ public class DirectJNI {
 				}
 			} else {
 
-				String[] nameSpaces = ((RChar) DirectJNI.getInstance().getRServices().evalAndGetObject(
-						"loadedNamespaces()")).getValue();
+				String[] nameSpaces = ((RChar) DirectJNI.getInstance().getRServices().evalAndGetObject("loadedNamespaces()")).getValue();
 				for (int i = 0; i < nameSpaces.length; ++i) {
 					if (_nameSpacesHash.get(nameSpaces[i]) == null) {
 						String[] exportedSymbols = ((RChar) DirectJNI.getInstance().getRServices().evalAndGetObject(
@@ -2506,8 +2475,7 @@ public class DirectJNI {
 			} else {
 				try {
 					StringBuffer result = new StringBuffer();
-					BufferedReader br = new BufferedReader(new InputStreamReader(RListener.class
-							.getResourceAsStream("/rdemos/" + demoName + ".r")));
+					BufferedReader br = new BufferedReader(new InputStreamReader(RListener.class.getResourceAsStream("/rdemos/" + demoName + ".r")));
 					String line = null;
 					while ((line = br.readLine()) != null) {
 						result.append(line + "\n");
@@ -2535,8 +2503,7 @@ public class DirectJNI {
 				_rActions.remove(0);
 			return result;
 		}
-		
-	
+
 		public String getProcessId() throws RemoteException {
 			return PoolUtils.getProcessId();
 		}
@@ -2552,28 +2519,26 @@ public class DirectJNI {
 			gdBag = new GDContainerBag(w, h);
 			JavaGD.setGDContainer(gdBag);
 			Dimension dim = gdBag.getSize();
-			
-			
-			RInteger devicesBefore=(RInteger)DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
-			Vector<Integer> devicesVector=new Vector<Integer>();
-			if (devicesBefore!=null) { 
-				for (int i=0; i<devicesBefore.getValue().length; ++i) devicesVector.add(devicesBefore.getValue()[i]);
+
+			RInteger devicesBefore = (RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+			Vector<Integer> devicesVector = new Vector<Integer>();
+			if (devicesBefore != null) {
+				for (int i = 0; i < devicesBefore.getValue().length; ++i)
+					devicesVector.add(devicesBefore.getValue()[i]);
 			}
-			System.out.println("devices before :"+devicesBefore);
-			
-			
+			System.out.println("devices before :" + devicesBefore);
+
 			System.out.println(DirectJNI.getInstance().getRServices().evaluate(
 					"JavaGD(name='JavaGD', width=" + dim.getWidth() + ", height=" + dim.getHeight() + ", ps=12)"));
-			
-			
-			RInteger devicesAfter=(RInteger)DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
-			for (int i=0; i<devicesAfter.getValue().length; ++i) if (!devicesVector.contains(devicesAfter.getValue()[i])) {
-				System.out.println("caught:"+	devicesAfter.getValue()[i] );
-				gdBag.setDeviceNumber(devicesAfter.getValue()[i]);
-				break;
-			}
-			
-			
+
+			RInteger devicesAfter = (RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+			for (int i = 0; i < devicesAfter.getValue().length; ++i)
+				if (!devicesVector.contains(devicesAfter.getValue()[i])) {
+					System.out.println("caught:" + devicesAfter.getValue()[i]);
+					gdBag.setDeviceNumber(devicesAfter.getValue()[i]);
+					break;
+				}
+
 			System.out.println(DirectJNI.getInstance().getRServices().consoleSubmit(".PrivateEnv$dev.list()"));
 
 		}
@@ -2581,16 +2546,14 @@ public class DirectJNI {
 		public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects() throws RemoteException {
 			return gdBag.popAllGraphicObjects();
 		};
-		
-		
+
 		public boolean hasGraphicObjects() throws RemoteException {
 			return gdBag.hasGraphicObjects();
 		}
 
 		public void fireSizeChangedEvent(int w, int h) throws RemoteException {
 			gdBag.setSize(w, h);
-			DirectJNI.getInstance().getRServices().evaluate(
-					"try( {.C(\"javaGDresize\",as.integer(" + gdBag.getDeviceNumber() + "))}, silent=TRUE)");
+			DirectJNI.getInstance().getRServices().evaluate("try( {.C(\"javaGDresize\",as.integer(" + gdBag.getDeviceNumber() + "))}, silent=TRUE)");
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				System.out.println(DirectJNI.getInstance().getRServices().getStatus());
 			}
@@ -2598,26 +2561,22 @@ public class DirectJNI {
 		};
 
 		public void dispose() throws RemoteException {
-			DirectJNI.getInstance().getRServices().evaluate(
-					"try({ .PrivateEnv$dev.off(which="+gdBag.getDeviceNumber()+")},silent=TRUE)");
+			DirectJNI.getInstance().getRServices().evaluate("try({ .PrivateEnv$dev.off(which=" + gdBag.getDeviceNumber() + ")},silent=TRUE)");
 		};
-		
-		
+
 		public int getDeviceNumber() throws RemoteException {
 			return gdBag.getDeviceNumber();
 		}
-		
-		
+
 		public boolean isCurrentDevice() throws RemoteException {
-			int d=((RInteger)DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
-			return d==gdBag.getDeviceNumber();
+			int d = ((RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+			return d == gdBag.getDeviceNumber();
 		}
-		
-		
+
 		public void setAsCurrentDevice() throws RemoteException {
-			DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ")");			
+			DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ")");
 		}
-		
+
 		public Dimension getSize() throws RemoteException {
 			return gdBag.getSize();
 		}
@@ -2625,7 +2584,7 @@ public class DirectJNI {
 		public void putLocation(Point2D p) throws RemoteException {
 			GDInterface.putLocatorLocation(p);
 		}
-		
+
 		public boolean hasLocations() throws RemoteException {
 			return GDInterface.hasLocations();
 		}
@@ -2636,13 +2595,12 @@ public class DirectJNI {
 				for (int i = 0; i < points.length; ++i) {
 					GDInterface.putLocatorLocation(points[i]);
 				}
-				
-				RList l = (RList) DirectJNI.getInstance().getRServices().evalAndGetObject("locator()");				
-				
+
+				RList l = (RList) DirectJNI.getInstance().getRServices().evalAndGetObject("locator()");
+
 				Point2D[] result = new Point2D[points.length];
 				for (int i = 0; i < points.length; ++i) {
-					result[i] = new DoublePoint(((RNumeric) l.getValue()[0]).getValue()[i],
-							((RNumeric) l.getValue()[1]).getValue()[i]);
+					result[i] = new DoublePoint(((RNumeric) l.getValue()[0]).getValue()[i], ((RNumeric) l.getValue()[1]).getValue()[i]);
 				}
 				return result;
 			} finally {
@@ -2672,23 +2630,23 @@ public class DirectJNI {
 			}
 		});
 	}
-	
-	private static void init(ClassLoader cl) throws Exception {		
-		Properties props=new Properties();
-		InputStream is=cl.getResourceAsStream("maps/rjbmaps.xml");
-		System.out.println("####### is:"+is);				
-		props.loadFromXML(is);		
-		DirectJNI._packageNames=(Vector<String>)PoolUtils.hexToObject((String)props.get("PACKAGE_NAMES"),cl);		
-		DirectJNI._s4BeansMapping= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("S4BEANS_MAP"),cl);
-		DirectJNI._s4BeansMappingRevert= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("S4BEANS_REVERT_MAP"),cl);
-		DirectJNI._factoriesMapping= (HashMap<String, String>)PoolUtils.hexToObject((String)props.get("FACTORIES_MAPPING"),cl);		
-		DirectJNI._s4BeansHash = (HashMap<String, Class<?>>)PoolUtils.hexToObject((String)props.get("S4BEANS_HASH"),cl);	
-		DirectJNI._rPackageInterfacesHash = (HashMap<String, Vector<Class<?>>>)PoolUtils.hexToObject((String)props.get("R_PACKAGE_INTERFACES_HASH"),cl);
-		DirectJNI._abstractFactories= (Vector<String>)PoolUtils.hexToObject((String)props.get("ABSTRACT_FACTORIES"),cl);				
+
+	private static void init(ClassLoader cl) throws Exception {
+		Properties props = new Properties();
+		InputStream is = cl.getResourceAsStream("maps/rjbmaps.xml");
+		System.out.println("####### is:" + is);
+		props.loadFromXML(is);
+		DirectJNI._packageNames = (Vector<String>) PoolUtils.hexToObject((String) props.get("PACKAGE_NAMES"), cl);
+		DirectJNI._s4BeansMapping = (HashMap<String, String>) PoolUtils.hexToObject((String) props.get("S4BEANS_MAP"), cl);
+		DirectJNI._s4BeansMappingRevert = (HashMap<String, String>) PoolUtils.hexToObject((String) props.get("S4BEANS_REVERT_MAP"), cl);
+		DirectJNI._factoriesMapping = (HashMap<String, String>) PoolUtils.hexToObject((String) props.get("FACTORIES_MAPPING"), cl);
+		DirectJNI._s4BeansHash = (HashMap<String, Class<?>>) PoolUtils.hexToObject((String) props.get("S4BEANS_HASH"), cl);
+		DirectJNI._rPackageInterfacesHash = (HashMap<String, Vector<Class<?>>>) PoolUtils.hexToObject((String) props.get("R_PACKAGE_INTERFACES_HASH"), cl);
+		DirectJNI._abstractFactories = (Vector<String>) PoolUtils.hexToObject((String) props.get("ABSTRACT_FACTORIES"), cl);
 		log.info("<> rPackageInterfaces:" + DirectJNI._packageNames);
 		log.info("<> s4Beans MAP :" + DirectJNI._s4BeansMapping);
 		log.info("<> s4Beans Revert MAP :" + DirectJNI._s4BeansMappingRevert);
-		log.info("<> factories :" + DirectJNI._factoriesMapping);		
+		log.info("<> factories :" + DirectJNI._factoriesMapping);
 		_mappingClassLoader = cl;
 		_resourcesClassLoader = cl;
 		Thread.currentThread().setContextClassLoader(_resourcesClassLoader);
@@ -2704,32 +2662,40 @@ public class DirectJNI {
 				_bootstrapRObjects.add(objs.getValue()[i]);
 	}
 
-	static private void scanMapping() {		
+	static private void scanMapping() {
 		if (!_initHasBeenCalled) {
 			_initHasBeenCalled = true;
-			
-			if (DirectJNI.class.getClassLoader().getResource("maps/rjbmaps.xml")!=null) {
-				System.out.println("<1> "+DirectJNI.class.getClassLoader().getResource("maps/rjbmaps.xml"));
-				try {init(DirectJNI.class.getClassLoader());} catch (Exception e) {e.printStackTrace();}
+
+			if (DirectJNI.class.getClassLoader().getResource("maps/rjbmaps.xml") != null) {
+				System.out.println("<1> " + DirectJNI.class.getClassLoader().getResource("maps/rjbmaps.xml"));
+				try {
+					init(DirectJNI.class.getClassLoader());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				return;
-				
-			}  else if (System.getProperty("java.rmi.server.codebase") != null) {				
-				ClassLoader codebaseClassLoader=new URLClassLoader(PoolUtils.getURLS(System.getProperty("java.rmi.server.codebase")),DirectJNI.class.getClassLoader());
-				if (codebaseClassLoader.getResource("maps/rjbmaps.xml")!=null) {
-					System.out.println("<2> "+codebaseClassLoader.getResource("maps/rjbmaps.xml"));
-					try {init(codebaseClassLoader);} catch (Exception e) {e.printStackTrace();}
+
+			} else if (System.getProperty("java.rmi.server.codebase") != null) {
+				ClassLoader codebaseClassLoader = new URLClassLoader(PoolUtils.getURLS(System.getProperty("java.rmi.server.codebase")), DirectJNI.class
+						.getClassLoader());
+				if (codebaseClassLoader.getResource("maps/rjbmaps.xml") != null) {
+					System.out.println("<2> " + codebaseClassLoader.getResource("maps/rjbmaps.xml"));
+					try {
+						init(codebaseClassLoader);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					return;
 				}
 			} else {
 				System.out.println("!! No mapping found");
-			}			
+			}
 		}
 	}
 
 	public void regenerateWorkingDirectory(boolean callR) throws Exception {
 		File wdirFile = new File(WDIR);
-		if (wdirFile.exists() && System.getProperty("wks.persitent") != null
-				&& System.getProperty("wks.persitent").equals("false")) {
+		if (wdirFile.exists() && System.getProperty("wks.persitent") != null && System.getProperty("wks.persitent").equals("false")) {
 			File[] list = wdirFile.listFiles();
 			for (int i = 0; i < list.length; ++i) {
 				if (list[i].isDirectory()) {
