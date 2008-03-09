@@ -20,13 +20,12 @@ import java.awt.Component;
 import java.util.concurrent.locks.ReentrantLock;
 import net.infonode.docking.View;
 
+import remoting.RKit;
 import remoting.RServices;
 /**
  * @author Karim Chine   kchine@ebi.ac.uk
  */
-public interface RGui {	
-	public RServices getR();
-	public ReentrantLock getRLock();	
+public interface RGui extends RKit {	
 	public ConsoleLogger getConsoleLogger();
 	public View createView(Component panel,String title);
 	public void setCurrentDevice(GDDevice device);

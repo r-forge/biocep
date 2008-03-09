@@ -16,6 +16,7 @@
 package server;
 
 import graphics.pop.GDDevice;
+import graphics.rmi.GDApplet;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
 import java.io.Serializable;
@@ -23,15 +24,22 @@ import java.rmi.*;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.swing.JOptionPane;
+
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RObject;
 import org.rosuda.JRI.Rengine;
+
+import Acme.Serve.Serve.PathTreeDictionary;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RCallback;
+import remoting.RKit;
 import remoting.RNI;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.InitializingException;
@@ -431,7 +439,77 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public boolean isBusy() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().isBusy();
 	}
+	
+	public String getHostIp() throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getHostIp();
+	}
+	
+	public boolean isPortInUse(int port) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().isPortInUse(port);
+	}
+	
+	Acme.Serve.Serve _virtualizationLocalHttpServer = null;
+	public void startHttpServer(final int port) throws RemoteException {
+		if (PoolUtils.isPortInUse("127.0.0.1", port)) {
+			throw new RemoteException("Port already in use");
+		} else {
+			new Thread(new Runnable() {
+				public void run() {
+					
+					RKit rkit=new RKit() {						
+						ReentrantLock _lock=new ReentrantLock(){
+							public void lock() {
+							}
+							public void unlock() {
+								super.unlock();
+							}
+							public boolean isLocked() {
+								return false;
+							}							
+						};
+						public RServices getR() {
+							return DirectJNI.getInstance().getRServices();
+						}
+						public ReentrantLock getRLock() {
+							return _lock;
+						}
+					};
+				
+					_virtualizationLocalHttpServer = new Acme.Serve.Serve() {
+						public void setMappingTable(PathTreeDictionary mappingtable) {
+							super.setMappingTable(mappingtable);
+						}
+					};
+					java.util.Properties properties = new java.util.Properties();
+					properties.put("port", port);
+					properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");					
+					_virtualizationLocalHttpServer.arguments = properties;
+					_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(rkit));
+					_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(rkit));
+					_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(rkit));
+					_virtualizationLocalHttpServer.serve();
+				}
+			}).start();
+		}
+	
+	}
+	
+	public void stopHttpServer() throws RemoteException {
+		if (_virtualizationLocalHttpServer != null) {
+			try {
+				_virtualizationLocalHttpServer.notifyStop();
+			} catch (java.io.IOException ioe) {
+				ioe.printStackTrace();
+			}
+			try {
+				_virtualizationLocalHttpServer.destroyAllServlets();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			_virtualizationLocalHttpServer = null;
+		}
 
+	}
 	// --------------
 
 

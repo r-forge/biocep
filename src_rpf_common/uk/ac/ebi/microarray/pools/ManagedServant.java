@@ -67,5 +67,7 @@ public interface ManagedServant extends java.rmi.Remote {
 	public RemotePanel getPanel(int w, int h) throws java.rmi.RemoteException;
 	
 	public String getProcessId() throws java.rmi.RemoteException;
+	
+	public String getHostIp() throws java.rmi.RemoteException;
 
 }

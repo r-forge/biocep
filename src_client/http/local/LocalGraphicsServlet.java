@@ -2,21 +2,19 @@ package http.local;
 
 import graphics.pop.GDDevice;
 import graphics.rmi.JGDPanelPop;
-import graphics.rmi.RGui;
 import http.TunnelingException;
-
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import remoting.RKit;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 public class LocalGraphicsServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
-	private RGui _rgui;
-	public LocalGraphicsServlet(RGui rgui) {
+	private RKit _rgui;
+	public LocalGraphicsServlet(RKit rgui) {
 		super();
 		_rgui=rgui;
 	}

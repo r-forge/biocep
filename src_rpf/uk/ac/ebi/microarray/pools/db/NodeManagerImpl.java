@@ -234,4 +234,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	public String getProcessId() throws RemoteException {	
 		return PoolUtils.getProcessId();
 	}
+	public String getHostIp() throws RemoteException {	
+		return PoolUtils.getHostIp();
+	}
 }

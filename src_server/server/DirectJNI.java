@@ -2508,6 +2508,18 @@ public class DirectJNI {
 			return PoolUtils.getProcessId();
 		}
 
+		public String getHostIp() throws RemoteException {
+			return PoolUtils.getHostIp();
+		}
+		
+		public boolean isPortInUse(int port) throws RemoteException {
+			return PoolUtils.isPortInUse("127.0.0.1", port);
+		}
+		
+		public void startHttpServer(int port) throws RemoteException {
+		}
+		public void stopHttpServer() throws RemoteException {
+		}
 	};
 
 	public static Vector<RAction> _rActions = new Vector<RAction>();

@@ -1,4 +1,3 @@
-
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
@@ -211,12 +210,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 			super.unlock();
 		}
-		
+
 		public boolean isLocked() {
 			try {
 				if (_rForConsole.isBusy()) {
 					return true;
-				} 
+				}
 			} catch (Exception e) {
 			}
 			return super.isLocked();
@@ -384,31 +383,28 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							GDDevice d = null;
 
-							boolean showLoginDialog=true;
+							boolean showLoginDialog = true;
 							if (new File(GUtils.NEW_R_STUB_FILE).exists()) {
-									int n=JOptionPane.showConfirmDialog(GDApplet.this, "Would you like to connect to the last created and kept alive R Server ?", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null);
-									if (n==JOptionPane.OK_OPTION) {										
-										showLoginDialog=false;
-							
-										BufferedReader pr=new BufferedReader(new FileReader(GUtils.NEW_R_STUB_FILE));
-										String stub=pr.readLine();
-										pr.close();
+								int n = JOptionPane.showConfirmDialog(GDApplet.this, "Would you like to connect to the last created and kept alive R Server ?",
+										"", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null);
+								if (n == JOptionPane.OK_OPTION) {
+									showLoginDialog = false;
 
-										ident=new Identification(
-												RMI_MODE,"","","", false, false,RMI_MODE_STUB_MODE, 
-												"", -1, "","","",-1,"","","","",stub,-1,-1,false,false,"","","",false,false
-										);
-									} 
-							} 
-							
+									BufferedReader pr = new BufferedReader(new FileReader(GUtils.NEW_R_STUB_FILE));
+									String stub = pr.readLine();
+									pr.close();
+
+									ident = new Identification(RMI_MODE, "", "", "", false, false, RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "", "",
+											stub, -1, -1, false, false, "", "", "", false, false);
+								}
+							}
+
 							if (showLoginDialog) {
 								LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane(), _mode);
 								loginDialog.setVisible(true);
 								ident = loginDialog.getIndentification();
 							}
-							
-							
-							
+
 							if (ident == null)
 								return "Logon cancelled\n";
 
@@ -431,9 +427,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								HashMap<String, Object> options = new HashMap<String, Object>();
 								options.put("nopool", new Boolean(_nopool).toString());
 								options.put("save", new Boolean(_save).toString());
-								options.put("wait", new Boolean(_wait).toString());								
+								options.put("wait", new Boolean(_wait).toString());
 								_sessionId = RHttpProxy.logOn(_commandServletUrl, _sessionId, _login, pwd, options);
-								
+
 								if (_sessionId.equals(oldSessionId)) {
 									return "Already logged on\n";
 								}
@@ -452,8 +448,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								d = RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
 								System.out.println("device id:" + d.getDeviceNumber());
-								
-								if (new File(GUtils.NEW_R_STUB_FILE).exists()) new File(GUtils.NEW_R_STUB_FILE).delete();
+
+								if (new File(GUtils.NEW_R_STUB_FILE).exists())
+									new File(GUtils.NEW_R_STUB_FILE).delete();
 
 							} else {
 
@@ -470,16 +467,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 									/*
 									DirectJNI.init();							
 									r = DirectJNI.getInstance().getRServices();
-									*/
-									 
+									 */
 
-								
 									if (ident.isUseSsh()) {
 										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), GUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
-												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(),true);
+												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), true);
 									} else {
-										
+
 										r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), GUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
 									}
@@ -491,19 +486,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 									_rProcessId = r.getProcessId();
 									System.out.println("R Process Id :" + _rProcessId);
 
-									
-									new File(GUtils.NEW_R_STUB_FILE).delete();									
+									new File(GUtils.NEW_R_STUB_FILE).delete();
 									if (_keepAlive) {
-										PrintWriter pw=new PrintWriter(new FileWriter(GUtils.NEW_R_STUB_FILE));
+										PrintWriter pw = new PrintWriter(new FileWriter(GUtils.NEW_R_STUB_FILE));
 										pw.println(PoolUtils.stubToHex(r));
 										pw.close();
 									}
 
-									
-
 								} else {
 									if (ident.getRmiMode() == RMI_MODE_STUB_MODE) {
-										r = (RServices) PoolUtils.hexToStub(ident.getStub(), GDApplet.class.getClassLoader());										
+										r = (RServices) PoolUtils.hexToStub(ident.getStub(), GDApplet.class.getClassLoader());
 										try {
 											r.ping();
 										} catch (Exception e) {
@@ -528,7 +520,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											e.printStackTrace();
 											throw new BadServantNameException();
 										}
-										
+
 										new File(GUtils.NEW_R_STUB_FILE).delete();
 
 									} else if (ident.getRmiMode() == RMI_MODE_DB_MODE) {
@@ -554,28 +546,28 @@ public class GDApplet extends GDAppletBase implements RGui {
 											e.printStackTrace();
 											throw new BadServantNameException();
 										}
-										
+
 										new File(GUtils.NEW_R_STUB_FILE).delete();
 
 									}
 								}
-								
+
 								if (r.isBusy()) {
-									
-									int n=JOptionPane.showConfirmDialog(GDApplet.this, "R is busy, can't login, would you like to stop it?","", JOptionPane.OK_CANCEL_OPTION);
-									if (n==JOptionPane.OK_OPTION) {
+
+									int n = JOptionPane.showConfirmDialog(GDApplet.this, "R is busy, can't login, would you like to stop it?", "",
+											JOptionPane.OK_CANCEL_OPTION);
+									if (n == JOptionPane.OK_OPTION) {
 										r.stop();
 									} else {
 										throw new RBusyException();
 									}
 								}
-																
+
 								d = r.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
-																
+
 								_rForConsole = r;
 								_rForPopCmd = r;
-								_rForFiles = r;								
-								
+								_rForFiles = r;
 
 								_sessionId = RHttpProxy.FAKE_SESSION;
 
@@ -659,8 +651,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 							return "Connection to HTTP Virtualization Server Failed \n";
 						} catch (TunnelingException te) {
 							return PoolUtils.getStackTraceAsString(te.getCause());
-						} 
-						
+						}
+
 						catch (NoRmiRegistryAvailableException normie) {
 							return "No RMI Registry Available, can not log on\n";
 						} catch (NoDbRegistryAvailableException nodbe) {
@@ -708,7 +700,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					if (getRLock().isLocked()) {
 						result = "R is busy, please retry\n";
 					} else {
-						
+
 						try {
 							getRLock().lock();
 							result = _rForConsole.consoleSubmit(expression);
@@ -732,18 +724,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 			};
 			_consolePanel = new ConsolePanel(_submitInterface, new AbstractAction[] { _actions.get("logon"), _actions.get("logoff"), null,
 					_actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"), _actions.get("interrupteval"), null,
-					_actions.get("playdemo"), null, new AbstractAction("Show R Info"){
+					_actions.get("playdemo"), null, new AbstractAction("Show R Info") {
 
 						public void actionPerformed(ActionEvent e) {
 							try {
-								System.out.println("R is busy :"+_rForConsole.isBusy());
+								System.out.println("R is busy :" + _rForConsole.isBusy());
 							} catch (Exception ex) {
-								
+
 							}
-							
+
 						}
-				
-			} });
+
+					} });
 
 			JPanel workingDirPanel = new JPanel();
 			workingDirPanel.setLayout(new BorderLayout());
@@ -847,6 +839,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("runhttpserver"));
 					sessionMenu.add(_actions.get("stophttpserver"));
+					sessionMenu.addSeparator();
+					sessionMenu.add(_actions.get("runhttpserverlocalhost"));
+					sessionMenu.add(_actions.get("stophttpserverlocalhost"));
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -897,12 +892,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 			final JMenu graphicsMenu = new JMenu("Graphics");
 			graphicsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
-					
+
 					graphicsMenu.removeAll();
 					graphicsMenu.add(_actions.get("createdevice"));
 					graphicsMenu.addSeparator();
 
-					graphicsMenu.add(new SnapshotDeviceAction(GDApplet.this, _sessionId==null ? null : getCurrentJGPanelPop()));
+					graphicsMenu.add(new SnapshotDeviceAction(GDApplet.this, _sessionId == null ? null : getCurrentJGPanelPop()));
 					graphicsMenu.add(new SaveDeviceAsPngAction(GDApplet.this));
 					graphicsMenu.add(new SaveDeviceAsJpgAction(GDApplet.this));
 
@@ -913,9 +908,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 						public void actionPerformed(ActionEvent e) {
 							getCurrentJGPanelPop().fit();
 						}
-						
+
 						public boolean isEnabled() {
-							return _sessionId!=null;
+							return _sessionId != null;
 						}
 					});
 					graphicsMenu.addSeparator();
@@ -935,7 +930,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					zoomSelect.setEnabled(_sessionId!=null);
+					zoomSelect.setEnabled(_sessionId != null);
 					graphicsMenu.add(zoomSelect);
 
 					JRadioButtonMenuItem zoom = new JRadioButtonMenuItem("Zoom In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -953,7 +948,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					zoom.setEnabled(_sessionId!=null);
+					zoom.setEnabled(_sessionId != null);
 					graphicsMenu.add(zoom);
 
 					JRadioButtonMenuItem scroll = new JRadioButtonMenuItem("Scroll   [mouse drag]", _sessionId != null
@@ -971,7 +966,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					scroll.setEnabled(_sessionId!=null);
+					scroll.setEnabled(_sessionId != null);
 					graphicsMenu.add(scroll);
 
 					graphicsMenu.addSeparator();
@@ -991,7 +986,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					zoomSelectX.setEnabled(_sessionId!=null);
+					zoomSelectX.setEnabled(_sessionId != null);
 					graphicsMenu.add(zoomSelectX);
 
 					JRadioButtonMenuItem zoomX = new JRadioButtonMenuItem("Zoom X In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -1009,7 +1004,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					zoomX.setEnabled(_sessionId!=null);
+					zoomX.setEnabled(_sessionId != null);
 					graphicsMenu.add(zoomX);
 
 					JRadioButtonMenuItem scrollX = new JRadioButtonMenuItem("Scroll X Left / Right   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -1027,7 +1022,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					scrollX.setEnabled(_sessionId!=null);
+					scrollX.setEnabled(_sessionId != null);
 					graphicsMenu.add(scrollX);
 
 					graphicsMenu.addSeparator();
@@ -1047,7 +1042,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					zoomSelectY.setEnabled(_sessionId!=null);
+					zoomSelectY.setEnabled(_sessionId != null);
 					graphicsMenu.add(zoomSelectY);
 
 					JRadioButtonMenuItem zoomY = new JRadioButtonMenuItem("Zoom Y In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -1065,7 +1060,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					zoomY.setEnabled(_sessionId!=null);
+					zoomY.setEnabled(_sessionId != null);
 					graphicsMenu.add(zoomY);
 
 					JRadioButtonMenuItem scrollY = new JRadioButtonMenuItem("Scroll Y Up / Down   [mouse click / ctrl-mouse click]", _sessionId != null
@@ -1083,7 +1078,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					scrollY.setEnabled(_sessionId!=null);
+					scrollY.setEnabled(_sessionId != null);
 					graphicsMenu.add(scrollY);
 
 					graphicsMenu.addSeparator();
@@ -1098,7 +1093,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					mouseTracker.setEnabled(_sessionId!=null);
+					mouseTracker.setEnabled(_sessionId != null);
 					graphicsMenu.add(mouseTracker);
 
 				}
@@ -1837,7 +1832,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			} catch (TunnelingException e) {
 				// e.printStackTrace();
 			}
-			noSession();			
+			noSession();
 		}
 	}
 
@@ -2609,7 +2604,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("runhttpserver", new AbstractAction("Run Http Virtualization Engine") {
+		_actions.put("runhttpserverlocalhost", new AbstractAction("Run Http Virtualization Engine On Local Host") {
 			public void actionPerformed(final ActionEvent e) {
 				new Thread(new Runnable() {
 					public void run() {
@@ -2671,13 +2666,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}).start();
 			}
 
-			@Override
 			public boolean isEnabled() {
 				return _sessionId != null && _virtualizationLocalHttpServer == null;
 			}
 		});
 
-		_actions.put("stophttpserver", new AbstractAction("Stop Http Server") {
+		_actions.put("stophttpserverlocalhost", new AbstractAction("Stop Http Server On Local Host") {
 			public void actionPerformed(final ActionEvent e) {
 				new Thread(new Runnable() {
 					public void run() {
@@ -2700,9 +2694,68 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}).start();
 			}
 
-			@Override
 			public boolean isEnabled() {
 				return _sessionId != null && _virtualizationLocalHttpServer != null;
+			}
+		});
+
+		_actions.put("runhttpserver", new AbstractAction("Run Http Virtualization Engine") {
+			public void actionPerformed(final ActionEvent ae) {
+				new Thread(new Runnable() {
+					public void run() {
+
+				while (true) {
+					GetExprDialog dialog = new GetExprDialog(" Run Http Virtualization Engine On Port : ", _httpPortSave);
+					dialog.setVisible(true);
+					if (dialog.getExpr() != null) {
+						try {
+							final int port = Integer.decode(dialog.getExpr());
+							if (_rForConsole.isPortInUse(port)) {
+								JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
+							} else {
+
+								_rForConsole.startHttpServer(port);
+								JOptionPane
+										.showMessageDialog(
+												GDApplet.this.getContentPane(),
+												"A Virtualization HTTP Engine is now running on port "
+														+ port
+														+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
+														+ _rForConsole.getHostIp() + ":" + port + "/cmd", "", JOptionPane.INFORMATION_MESSAGE);
+
+								break;
+							}
+						} catch (Exception e) {
+							JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Bad Port", "", JOptionPane.ERROR_MESSAGE);
+							continue;
+						}
+
+					} else {
+						break;
+					}
+				}
+					}
+				}).start();
+			}
+
+			public boolean isEnabled() {
+				return _sessionId != null;
+			}
+		});
+
+		_actions.put("stophttpserver", new AbstractAction("Stop Http Server") {
+			public void actionPerformed(final ActionEvent e) {
+				try {
+					_rForConsole.stopHttpServer();
+					JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "The Virtualization HTTP Engine was stopped successfully", "",
+							JOptionPane.INFORMATION_MESSAGE);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+
+			public boolean isEnabled() {
+				return _sessionId != null;
 			}
 		});
 
@@ -2737,8 +2790,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private void noSession() {
 
 		if (_rProcessId != null && !_keepAlive) {
-			
-			if (_sshParameters == null) {				
+
+			if (_sshParameters == null) {
 				try {
 					if (PoolUtils.isWindowsOs()) {
 						PoolUtils.killLocalWinProcess(_rProcessId, true);
@@ -2756,7 +2809,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
-		
+
 		}
 
 		if (_virtualizationLocalHttpServer != null) {

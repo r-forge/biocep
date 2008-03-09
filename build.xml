@@ -37,6 +37,9 @@
 	<property name="LOGGING_JAR" value="${basedir}/lib/log/commons-logging-1.1.jar"/>
 	<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.14.jar"/>	
 	<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>
+	<property name="HTTPSERVER_JAR" value="${basedir}/lib/desktop/webserver.jar"/>
+	<property name="SSH_JAR" value="${basedir}/lib/pool/ganymed-ssh2.jar"/>
+	
 	
 	<property name="ORACLE_JAR" value="${basedir}/lib/jdbc/ojdbc-14.jar"/>
 	<property name="MYSQL_JAR" value="${basedir}/lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>
@@ -86,6 +89,7 @@
 				<pathelement path="${LOGGING_JAR}"/>
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
 				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
 			</classpath>
@@ -164,6 +168,8 @@
 				<pathelement path="${LOGGING_JAR}"/>
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="${HTTPSERVER_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
@@ -339,6 +345,7 @@
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>
 			</classpath>
 			
 			<jvmarg value="-Ddb.driver=${db.driver}"/>
@@ -374,6 +381,7 @@
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
@@ -417,6 +425,7 @@
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
@@ -463,6 +472,7 @@
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
 				<path refid="${client.path.id}"/>
@@ -512,17 +522,14 @@
 			<classpath>
 				
 				<pathelement path="${CORE_JAR}"/>
-				<pathelement path="${JRI_JAR}"/>
-				
+				<pathelement path="${JRI_JAR}"/>				
 				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="${HTTPSERVER_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>				
 				<pathelement path="lib/j2ee/servlet-api.jar"/>
-				<pathelement path="lib/desktop/webserver.jar"/>
 				<pathelement path="lib/desktop/jeditmodes.jar"/>
 				<pathelement path="lib/desktop/jedit.jar"/>
 				<pathelement path="lib/desktop/OpenXLS.jar"/>
-				
-				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
-					
 				<pathelement path="lib/desktop/pf-joi-full.jar"/>
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
 				
