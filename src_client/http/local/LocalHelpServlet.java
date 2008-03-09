@@ -15,16 +15,12 @@
  */
 package http.local;
 
-import graphics.rmi.RGui;
-
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import remoting.RServices;
+import remoting.RKit;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
@@ -32,9 +28,9 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
  */
 public class LocalHelpServlet extends javax.servlet.http.HttpServlet {
 	
-	private RGui _rgui;
+	private RKit _rgui;
 
-	public LocalHelpServlet(RGui rgui) {
+	public LocalHelpServlet(RKit rgui) {
 		super();
 		_rgui=rgui;
 	}

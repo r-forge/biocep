@@ -243,15 +243,15 @@
 							<pathelement path="${CORE_JAR}"/>
 											
 							<pathelement path="${HTMLPARSER_JAR}"/>
+							<pathelement path="${HTTPSERVER_JAR}"/>
+							<pathelement path="${SSH_JAR}"/>
+							
 							<pathelement path="lib/j2ee/servlet-api.jar"/>							
 							<pathelement path="lib/desktop/idw-gpl.jar"/>
 							<pathelement path="lib/desktop/pf-joi-full.jar"/>
-							<pathelement path="lib/desktop/webserver.jar"/>
 							<pathelement path="lib/desktop/jeditmodes.jar"/>
 							<pathelement path="lib/desktop/jedit.jar"/>
 							<pathelement path="lib/desktop/OpenXLS.jar"/>
-							
-							<pathelement path="lib/pool/ganymed-ssh2.jar"/>			
 							
 							<pathelement path="${demo.mappingjar}"/>
 							<pathelement path="${LOGGING_JAR}"/>

@@ -16,8 +16,6 @@
 package http;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.RGui;
-
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
+import remoting.RKit;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -51,9 +50,9 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 	private static final int RMICALL_TIMEOUT_MILLISEC = 60 * 1000 * 10;
 	private static final Integer RMICALL_DONE = new Integer(0);
 
-	RGui _rgui = null;
+	RKit _rgui = null;
 
-	public CommandServlet(RGui rgui) {
+	public CommandServlet(RKit rgui) {
 		super();
 		_rgui = rgui;
 	}
