@@ -704,9 +704,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 						}
 					}
 
-					try {
-						System.out.println("R is busy:"+_rForConsole.isBusy());
-					} catch (Exception e) {e.printStackTrace();}
 					Object result = null;
 					if (getRLock().isLocked()) {
 						result = "R is busy, please retry\n";
