@@ -428,6 +428,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().popRActions();
 	}
 
+	public boolean isBusy() throws RemoteException {
+		return DirectJNI.getInstance().getRServices().isBusy();
+	}
 
 	// --------------
 

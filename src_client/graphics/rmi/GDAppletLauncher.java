@@ -22,8 +22,6 @@ import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
-//import splash.SplashWindow;
 import splash.SplashWindow;
 
 /**
@@ -58,7 +56,7 @@ public class GDAppletLauncher {
 			
 			Runtime.getRuntime().addShutdownHook(new Thread( new Runnable() {
 				public void run() {
-					gDApplet.destroy();
+					gDApplet.destroy();					
 				}
 			}));
 			
@@ -84,7 +82,7 @@ public class GDAppletLauncher {
 	public static void main(String[] args) throws Exception {
 		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(GDAppletLauncher.class.getResource("/splash/splashscreen.png")));
 		try {
-			Thread.sleep(500);
+			Thread.sleep(200);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

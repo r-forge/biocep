@@ -55,6 +55,57 @@ public class ServerLauncher {
 
 	public static void main(String[] args) throws Exception {
 
+		
+		Vector<String> command = new Vector<String>();
+		command.add("cmd");
+		command.add("/C");
+		command.add("start");
+		command.add("dir");
+		//command.add(System.getProperty("java.home") + "/bin/java");
+
+
+		final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]));
+
+		final Vector<String> outPrint = new Vector<String>();
+		final Vector<String> errorPrint = new Vector<String>();
+
+		System.out.println(" command : " + command);
+
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						System.out.println(line);
+						errorPrint.add(line);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				System.out.println();
+			}
+		}).start();
+
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						System.out.println(line);
+						outPrint.add(line);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+		proc.waitFor();
+		System.exit(0);
+		
 		new Thread(new Runnable() {
 			public void run() {
 
