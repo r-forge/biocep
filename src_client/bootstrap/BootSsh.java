@@ -2,6 +2,7 @@ package bootstrap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.NoSuchObjectException;
@@ -10,7 +11,14 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class BootSsh {
 	public static final String STUB_BEGIN_MARKER="#STUBBEGIN#";
-	public static final String STUB_END_MARKER="#STUBEND#";	
+	public static final String STUB_END_MARKER="#STUBEND#";
+	
+	public static final String PROCESS_ID_BEGIN_MARKER="#PROCESSIDBEGIN#";
+	public static final String PROCESS_ID_END_MARKER="#PROCESSIDEND#";	
+
+	public static final String R_PROCESS_ID_BEGIN_MARKER="#RPROCESSIDBEGIN#";
+	public static final String R_PROCESS_ID_END_MARKER="#RPROCESSIDEND#";	
+
 	public static void main(String[] args) {
 		try {
 			URLClassLoader cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/") }, BootSsh.class.getClassLoader());
@@ -22,7 +30,17 @@ public class BootSsh {
 					null,
 					new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), args[3],
 							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), false });
-			System.out.println(STUB_BEGIN_MARKER+ stubToHex(r)+ STUB_END_MARKER);			
+			
+			System.out.println(STUB_BEGIN_MARKER+ stubToHex(r)+ STUB_END_MARKER);	
+			
+			Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");			
+			String processId=(String)poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);
+			System.out.println(PROCESS_ID_BEGIN_MARKER+processId+ PROCESS_ID_END_MARKER);
+			
+			System.out.println(R_PROCESS_ID_BEGIN_MARKER+(String)r.getClass().getMethod("getProcessId", new Class<?>[0]).invoke(r, new Object[0])+ R_PROCESS_ID_END_MARKER);
+			
+			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

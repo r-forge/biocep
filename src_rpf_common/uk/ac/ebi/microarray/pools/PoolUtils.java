@@ -305,7 +305,17 @@ public class PoolUtils {
 	}
 
 	public static String currentWinProcessID() throws Exception {
+		
 		String pslistpath = System.getProperty("pstools.home") + "/pslist.exe";
+		if (!new File(pslistpath).exists()) {
+			String psToolsHome=System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
+			pslistpath=psToolsHome + "/pslist.exe" ;
+			if (!new File(pslistpath).exists()) {
+				new File(psToolsHome).mkdirs();
+				MainPsToolsDownload.main(new String[] { psToolsHome });
+			}			
+		}	
+		
 		String[] command = new String[] { pslistpath, "-t" };
 		Runtime rt = Runtime.getRuntime();
 		final Process proc = rt.exec(command);
@@ -331,8 +341,9 @@ public class PoolUtils {
 				try {
 					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 					String line = null;
-					while ((line = br.readLine()) != null)
+					while ((line = br.readLine()) != null) {
 						pslistPrint.add(line);
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -340,16 +351,20 @@ public class PoolUtils {
 		}).start();
 
 		int exitVal = proc.waitFor();
+		/*
+		System.out.println(">"+exitVal+"<");
+		for (int i=0; i<pslistPrint.size(); ++i)
+			System.out.println(">>"+pslistPrint.elementAt(i)+"<<");
+			*/
+		
 		if (exitVal != 0)
 			throw new Exception("pslist exit code : " + exitVal);
 		int i = 0;
-		while (!pslistPrint.elementAt(i).trim().startsWith("pslist "))
-			++i;
+		while (!pslistPrint.elementAt(i).trim().startsWith("pslist ")) ++i;		
+		//System.out.println(">>>>>>>>>>>"+pslistPrint.elementAt(i - 1)+"<<<<<<<<<<<<<");		
 		StringTokenizer st = new StringTokenizer(pslistPrint.elementAt(i - 1), " ");
-
 		st.nextElement();
 		return (String) st.nextElement();
-
 	}
 
 	public static String currentProcessID() throws Exception {
@@ -1040,11 +1055,12 @@ public class PoolUtils {
 		String pskillCommand=System.getProperty("pstools.home") + "/pskill.exe" ;
 		if (!new File(pskillCommand).exists()) {
 			String psToolsHome=System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
-			new File(psToolsHome).mkdirs();
-			MainPsToolsDownload.main(new String[] { psToolsHome });
 			pskillCommand=psToolsHome + "/pskill.exe" ;
-		}
-		
+			if (!new File(pskillCommand).exists()) {
+				new File(psToolsHome).mkdirs();
+				MainPsToolsDownload.main(new String[] { psToolsHome });
+			}			
+		}		
 		String[] command = new String[] { pskillCommand , processId};
 		
 		Runtime rt = Runtime.getRuntime();

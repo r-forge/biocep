@@ -87,10 +87,15 @@ public class ServerLauncher {
 		}).start();
 
 		
+		  	
 		  RServices r = createRLocal(true, PoolUtils.getHostIp(),
 		  GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(),
-		  GUtils.getLocalRmiRegistryPort(), 256, 256, true); String processId =
-		  r.getProcessId(); System.out.println("rr:" + r);
+		  GUtils.getLocalRmiRegistryPort(), 256, 256, true);
+		  
+		  String processId = r.getProcessId();
+		  System.out.println("Local process ID:"+PoolUtils.getProcessId());
+		  System.out.println("R process ID:"+processId);
+			  
 		  PoolUtils.killLocalWinProcess(processId, true);
 		 
 
@@ -406,7 +411,14 @@ public class ServerLauncher {
 			}).start();
 
 			proc.waitFor();
-			proc.destroy();
+			
+			
+			String processId=outPrint.substring(outPrint.indexOf(BootSsh.PROCESS_ID_BEGIN_MARKER)+BootSsh.PROCESS_ID_BEGIN_MARKER.length(), outPrint.indexOf(BootSsh.PROCESS_ID_END_MARKER));
+			String rprocessId=outPrint.substring(outPrint.indexOf(BootSsh.R_PROCESS_ID_BEGIN_MARKER)+BootSsh.R_PROCESS_ID_BEGIN_MARKER.length(), outPrint.indexOf(BootSsh.R_PROCESS_ID_END_MARKER));
+			
+			System.out.println("(1) intermediate process id:"+processId);
+			System.out.println("(2) r process id:"+rprocessId);
+			//PoolUtils.killLocalWinProcess(processId, true);
 			
 			int eIndex = outPrint.indexOf(BootSsh.STUB_END_MARKER);
 			if (eIndex != -1) {
@@ -416,65 +428,6 @@ public class ServerLauncher {
 			} else {
 				return null;
 			}
-
-			
-			/*
-			try {
-				sess = conn.openSession();
-				sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
-						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes);
-
-				InputStream stdout = new StreamGobbler(sess.getStdout());
-				final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
-
-				InputStream stderr = new StreamGobbler(sess.getStderr());
-				final BufferedReader brErr = new BufferedReader(new InputStreamReader(stderr));
-				final StringBuffer sshOutput = new StringBuffer();
-				new Thread(new Runnable() {
-					public void run() {
-						try {
-							while (true) {
-								String line = brOut.readLine();
-								if (line == null)
-									break;
-								sshOutput.append(line + "\n");
-								System.out.println(line);
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						System.out.println("Out Log Thread Died");
-					}
-				}).start();
-
-				new Thread(new Runnable() {
-					public void run() {
-						try {
-							while (true) {
-								String line = brErr.readLine();
-								if (line == null)
-									break;
-								System.out.println(line);
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						System.out.println("Err Log Thread Died");
-					}
-				}).start();
-
-				sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
-
-				int eIndex = sshOutput.indexOf(BootSsh.STUB_END_MARKER);
-				if (eIndex != -1) {
-					int bIndex = sshOutput.indexOf(BootSsh.STUB_BEGIN_MARKER);
-					String stub = sshOutput.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
-					return (RServices) PoolUtils.hexToStub(stub, ServerLauncher.class.getClassLoader());
-				} else {
-					return null;
-				}
-
-			*/
 
 		} finally {
 			if (showProgress) {
