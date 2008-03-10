@@ -37,7 +37,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,8 +114,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
-import org.rosuda.javaGD.GDObject;
-
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
@@ -124,6 +121,7 @@ import server.DirectJNI;
 import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsolePanel;
@@ -376,7 +374,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			_submitInterface = new SubmitInterface() {
 
 				public String submit(String expression) {
-
+					
 					if (expression.equals("logon") || expression.startsWith("logon ")) {
 
 						try {
@@ -679,13 +677,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 						return "Not Logged on, type 'logon' to connect\n";
 
 					if (expression.equals("logoff") || expression.startsWith("logoff ")) {
+
 						try {
 							if (_mode == HTTP_MODE) {
 								disposeDevices();
 								RHttpProxy.logOff(_commandServletUrl, _sessionId);
 							} else {
-								persistState();
+								if (!getRLock().isLocked()) {
+									disposeDevices();
+									persistState();
+								}
 							}
+							
 							noSession();
 							return "Logged Off\n";
 						} catch (NotLoggedInException nlie) {
@@ -2206,7 +2209,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return !getRLock().isLocked();
+				return _sessionId==null;
 			}
 		});
 
@@ -2217,7 +2220,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !getRLock().isLocked();
+				return _sessionId != null ;
 			}
 		});
 
@@ -2726,6 +2729,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								break;
 							}
 						} catch (Exception e) {
+							e.printStackTrace();
 							JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Bad Port", "", JOptionPane.ERROR_MESSAGE);
 							continue;
 						}
@@ -2788,7 +2792,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void noSession() {
-
+		
 		if (_rProcessId != null && !_keepAlive) {
 
 			if (_sshParameters == null) {
@@ -2804,7 +2808,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			} else {
 				System.out.println("---> SSH Kill process ID:" + _rProcessId);
 				try {
-					PoolUtils.killSshProcess(_rProcessId, _sshParameters[0], _sshParameters[1], _sshParameters[2], true);
+					SSHUtils.killSshProcess(_rProcessId, _sshParameters[0], _sshParameters[1], _sshParameters[2], true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -2835,6 +2839,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		_sshParameters = null;
 		_rProcessId = null;
 		_virtualizationLocalHttpServer = null;
+		
 	}
 
 	class GetExprDialog extends JDialog {

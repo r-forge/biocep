@@ -38,6 +38,8 @@
 	<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.14.jar"/>	
 	<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>
 	<property name="HTTPSERVER_JAR" value="${basedir}/lib/desktop/webserver.jar"/>
+	<property name="SERVLETAPI_JAR" value="lib/j2ee/servlet-api.jar"/>
+	
 	<property name="SSH_JAR" value="${basedir}/lib/pool/ganymed-ssh2.jar"/>
 	
 	
@@ -169,6 +171,7 @@
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				<pathelement path="${HTTPSERVER_JAR}"/>
+				<pathelement path="${SERVLETAPI_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
@@ -527,6 +530,7 @@
 				<pathelement path="${HTTPSERVER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>				
 				<pathelement path="lib/j2ee/servlet-api.jar"/>
+	
 				<pathelement path="lib/desktop/jeditmodes.jar"/>
 				<pathelement path="lib/desktop/jedit.jar"/>
 				<pathelement path="lib/desktop/OpenXLS.jar"/>
@@ -758,6 +762,7 @@
 					<include name="**/*.png"/>
 					<include name="**/*.gif"/>
 					<include name="**/*.html"/>
+					<include name="**/*.sql"/>
 				</fileset>				
 			</copy>
 		  </sequential>
