@@ -16,25 +16,20 @@
 package server;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.GDApplet;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
 import java.io.Serializable;
 import java.rmi.*;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.swing.JOptionPane;
-
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RObject;
 import org.rosuda.JRI.Rengine;
-
-import Acme.Serve.Serve.PathTreeDictionary;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -62,10 +57,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	private AssignInterface _assignInterface = null;
 
 	private GraphicNotifier _graphicNotifier = null;
-	
-	private  HashMap<Integer,GDDeviceImpl> _deviceHashMap=new HashMap<Integer, GDDeviceImpl>();
+
+	private HashMap<Integer, GDDeviceImpl> _deviceHashMap = new HashMap<Integer, GDDeviceImpl>();
 
 	private boolean _isReady = false;
+	
+	private Acme.Serve.Serve _virtualizationLocalHttpServer = null;
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RServantImpl.class);
 
@@ -82,55 +79,37 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public void init() throws RemoteException {
 		try {
 			System.setProperty("wks.persitent", "false");
-			
-			DirectJNI.init(getServantName());
-			
-		
-			_assignInterface = new AssignInterfaceImpl(this);
-			DirectJNI.getInstance().setAssignInterface(
-					(AssignInterface) java.rmi.server.RemoteObject.toStub(_assignInterface));
 
-			
+			DirectJNI.init(getServantName());
+
+			_assignInterface = new AssignInterfaceImpl(this);
+			DirectJNI.getInstance().setAssignInterface((AssignInterface) java.rmi.server.RemoteObject.toStub(_assignInterface));
+
 			_remoteRni = new RNIImpl(_log);
 
-			
 			_graphicNotifier = new GraphicNotifierImpl();
-			
-			
+
 			_rim = new HashMap<String, RPackage>();
 
-			
-			
 			for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
 				String shortClassName = className.substring(className.lastIndexOf('.') + 1);
 				log.info(shortClassName);
-				System.out.println("Going to load : "+className + "ImplRemote");
-				_rim.put(shortClassName, (RPackage) DirectJNI._mappingClassLoader.loadClass(className + "ImplRemote")
-						.newInstance());
+				System.out.println("Going to load : " + className + "ImplRemote");
+				_rim.put(shortClassName, (RPackage) DirectJNI._mappingClassLoader.loadClass(className + "ImplRemote").newInstance());
 			}
-			
-			
 
-	
-		
-			if (System.getProperty("preprocess.help") != null
-					&& System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
+			if (System.getProperty("preprocess.help") != null && System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
 				new Thread(new Runnable() {
 					public void run() {
 						DirectJNI.getInstance().preprocessHelp();
 					}
 				}).start();
 			}
-		
 
-		
-			if (System.getProperty("apply.sandbox") != null
-					&& System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {
+			if (System.getProperty("apply.sandbox") != null && System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {
 				DirectJNI.getInstance().applySandbox();
 			}
-			
-			
-			
+
 			_isReady = true;
 
 		} catch (Exception ex) {
@@ -138,7 +117,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			throw new RemoteException("<" + Utils.getStackTraceAsString(ex) + ">");
 		}
 	}
-
 
 	@Override
 	public void logInfo(String message) throws RemoteException {
@@ -285,8 +263,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			runR(new ExecutionUnit() {
 				public void run(Rengine e) {
 
-					String[] allobj = e
-							.rniGetStringArray(e.rniEval(e.rniParse(".PrivateEnv$ls(all.names=TRUE)", 1), 0));
+					String[] allobj = e.rniGetStringArray(e.rniEval(e.rniParse(".PrivateEnv$ls(all.names=TRUE)", 1), 0));
 					if (allobj != null) {
 						for (int i = 0; i < allobj.length; ++i)
 							if (DirectJNI.getInstance().getBootStrapRObjects().contains(allobj[i])) {
@@ -294,20 +271,24 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 								e.rniEval(e.rniParse("rm(" + allobj[i] + ")", 1), 0);
 					}
 
-					
 					DirectJNI.getInstance().unprotectAll();
 					_log.setLength(0);
 
 				}
 			});
 
-			Vector<Integer> devices=new Vector<Integer>();
-			for (Integer d:_deviceHashMap.keySet()) devices.add(d);
-			
-			System.out.println("devices before reset:"+devices);			
-			
-			for (Integer d:devices) {
-				try {_deviceHashMap.get(d).dispose();} catch (Exception ex) {ex.printStackTrace();}
+			Vector<Integer> devices = new Vector<Integer>();
+			for (Integer d : _deviceHashMap.keySet())
+				devices.add(d);
+
+			System.out.println("devices before reset:" + devices);
+
+			for (Integer d : devices) {
+				try {
+					_deviceHashMap.get(d).dispose();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 
 			RListener.stopAllClusters();
@@ -398,8 +379,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		DirectJNI.getInstance().getRServices().removeWorkingDirectoryFile(fileName);
 	}
 
-	public byte[] readWorkingDirectoryFileBlock(String fileName, long offset, int blocksize)
-			throws java.rmi.RemoteException {
+	public byte[] readWorkingDirectoryFileBlock(String fileName, long offset, int blocksize) throws java.rmi.RemoteException {
 		return DirectJNI.getInstance().getRServices().readWorkingDirectoryFileBlock(fileName, offset, blocksize);
 	}
 
@@ -439,61 +419,57 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public boolean isBusy() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().isBusy();
 	}
-	
+
 	public String getHostIp() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getHostIp();
 	}
-	
+
 	public boolean isPortInUse(int port) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().isPortInUse(port);
 	}
-	
-	Acme.Serve.Serve _virtualizationLocalHttpServer = null;
+
 	public void startHttpServer(final int port) throws RemoteException {
 		if (PoolUtils.isPortInUse("127.0.0.1", port)) {
 			throw new RemoteException("Port already in use");
 		} else {
 			new Thread(new Runnable() {
 				public void run() {
-					
-					RKit rkit=new RKit() {						
-						ReentrantLock _lock=new ReentrantLock(){
-							public void lock() {
+					try {
+						 
+						RKit rkit = new RKit() {							
+							RServices _r=(RServices)UnicastRemoteObject.toStub(RServantImpl.this);
+							ReentrantLock _lock = new ReentrantLock();
+							public RServices getR() {
+								return _r;
 							}
-							public void unlock() {
-								super.unlock();
+							public ReentrantLock getRLock() {
+								return _lock;
 							}
-							public boolean isLocked() {
-								return false;
-							}							
 						};
-						public RServices getR() {
-							return DirectJNI.getInstance().getRServices();
-						}
-						public ReentrantLock getRLock() {
-							return _lock;
-						}
-					};
-				
-					_virtualizationLocalHttpServer = new Acme.Serve.Serve() {
-						public void setMappingTable(PathTreeDictionary mappingtable) {
-							super.setMappingTable(mappingtable);
-						}
-					};
-					java.util.Properties properties = new java.util.Properties();
-					properties.put("port", port);
-					properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");					
-					_virtualizationLocalHttpServer.arguments = properties;
-					_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(rkit));
-					_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(rkit));
-					_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(rkit));
-					_virtualizationLocalHttpServer.serve();
+
+						_virtualizationLocalHttpServer = new Acme.Serve.Serve() {
+							public void setMappingTable(PathTreeDictionary mappingtable) {
+								super.setMappingTable(mappingtable);
+							}
+						};
+						java.util.Properties properties = new java.util.Properties();
+						properties.put("port", port);
+						properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
+						_virtualizationLocalHttpServer.arguments = properties;
+						_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(rkit));
+						_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(rkit));
+						_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(rkit));
+					
+						_virtualizationLocalHttpServer.serve();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}).start();
 		}
-	
+
 	}
-	
+
 	public void stopHttpServer() throws RemoteException {
 		if (_virtualizationLocalHttpServer != null) {
 			try {
@@ -512,7 +488,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 	// --------------
 
-
 	/*
 	static {
 		if (log instanceof Log4JLogger) {
@@ -525,5 +500,5 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			PropertyConfigurator.configure(log4jProperties);
 		}
 	}
-	*/
+	 */
 }

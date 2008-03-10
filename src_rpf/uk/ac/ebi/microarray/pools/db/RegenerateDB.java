@@ -40,6 +40,7 @@ public class RegenerateDB {
 			}
 		});
 
+		
 		dbLayer.applyDBScript(RegenerateDB.class.getResourceAsStream("/dbscript.sql"));
 		String fillDbScriptName = System.getProperty("db.initscript");
 		if (fillDbScriptName != null && !fillDbScriptName.equals("")) {
