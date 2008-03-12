@@ -170,7 +170,6 @@
 				<pathelement path="${LOGGING_JAR}"/>
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
-				<pathelement path="${HTTPSERVER_JAR}"/>
 				<pathelement path="${SERVLETAPI_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${ORACLE_JAR}"/>
@@ -527,7 +526,6 @@
 				<pathelement path="${CORE_JAR}"/>
 				<pathelement path="${JRI_JAR}"/>				
 				<pathelement path="${HTMLPARSER_JAR}"/>
-				<pathelement path="${HTTPSERVER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>				
 				<pathelement path="lib/j2ee/servlet-api.jar"/>
 	
@@ -585,6 +583,93 @@
 			
 		</java>
 	</target>
+
+	
+	<target name="s" depends="compile,setWinAwareProps">
+		
+			
+		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
+		<if><not><isset property="lf"/></not><then><property name="lf" value="0"/></then></if>
+		<if><not><isset property="mode"/></not><then><property name="mode" value="local"/></then></if>
+		<if><not><isset property="stub"/></not><then><property name="stub" value=""/></then></if>				
+		<if><not><isset property="localtomcat.port"/></not><then><property name="localtomcat.port" value="9999"/></then></if>
+		<if><not><isset property="url"/></not><then><property name="url" value=""/></then></if>
+		<if><not><isset property="name"/></not><then><property name="name" value=""/></then></if>
+		<if><not><isset property="save"/></not><then><property name="save" value="true"/></then></if>
+
+		<if><not><isset property="registryhost"/></not><then><property name="registryhost" value=""/></then></if>
+		<if><not><isset property="registryport"/></not><then><property name="registryport" value=""/></then></if>		
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
+							
+
+		<java maxmemory="1024m" classname="graphics.rmi.ServerLauncher"
+			fork="true" spawn="${spawn}">
+			<classpath>
+				
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${JRI_JAR}"/>				
+				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>				
+				<pathelement path="lib/j2ee/servlet-api.jar"/>
+	
+				<pathelement path="lib/desktop/jeditmodes.jar"/>
+				<pathelement path="lib/desktop/jedit.jar"/>
+				<pathelement path="lib/desktop/OpenXLS.jar"/>
+				<pathelement path="lib/desktop/pf-joi-full.jar"/>
+				<pathelement path="lib/desktop/idw-gpl.jar"/>
+				
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+				
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
+				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
+				
+				<!--optional-->
+				<pathelement path="VirtualRWorkbench/distrib/mapping.jar"/>
+				
+			</classpath>
+			
+			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
+			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
+			<jvmarg value="-Dpreprocess.help=true"/>
+			<jvmarg value="-Dapply.sandbox=false"/>
+			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
+			
+			<jvmarg value="-Dmode=${mode}"/>
+			<jvmarg value="-Dautologon=true"/>
+			<jvmarg value="-Durl=${url}"/>
+			<jvmarg value="-Dlf=${lf}"/>
+			<jvmarg value="-Dstub=${stub}"/>
+			<jvmarg value="-Dname=${name}"/>
+			<jvmarg value="-Dsave=${save}" />
+			<jvmarg value="-Dlocaltomcat.port=${localtomcat.port}"/>
+			
+			<jvmarg value="-Dregistryhost=${registryhost}"/>
+			<jvmarg value="-Dregistryport=${registryport}"/>
+			
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.password}"/>
+			
+			
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+	</target>
+	
 	
 	<target name="killdb">
 		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
@@ -731,7 +816,7 @@
 	<target name="compile" depends="compile.rpf">
 		
 		<echo message="${basedir}"/>
-		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>
+		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_tjws"/>
 		
 		<javac
 			srcdir="${src_compile_target}"

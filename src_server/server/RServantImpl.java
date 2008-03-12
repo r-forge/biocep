@@ -440,10 +440,25 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						System.out.println("!! Request to run virtualization server on port "+port);
+						log.info("!! Request to run virtualization server on port "+port);
 						RKit rkit = new RKit() {							
 							RServices _r=(RServices)UnicastRemoteObject.toStub(RServantImpl.this);
 							ReentrantLock _lock = new ReentrantLock();
+							/*
+							ReentrantLock _lock = new ReentrantLock(){
+								
+								public void lock() {
+								}
+								
+								public void unlock() {
+								}
+								
+								public boolean isLocked() {
+									return false;
+								}
+							};
+							*/
+							
 							public RServices getR() {
 								return _r;
 							}
@@ -457,6 +472,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 								super.setMappingTable(mappingtable);
 							}
 						};
+						
+						log.info(this.getClass().getResource("/Acme/Serve/Serve.class"));
+						log.info(this.getClass().getResource("/Acme/Serve/Serve$ServeConfig.class"));
 						java.util.Properties properties = new java.util.Properties();
 						properties.put("port", port);
 						properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
@@ -464,7 +482,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 						_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(rkit));
 						_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(rkit));
 						_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(rkit));
-						System.out.println("Going to run virtualization server on port "+port);
+						log.info("Going to run virtualization server on port "+port);
 						_virtualizationLocalHttpServer.serve();
 					} catch (Exception e) {
 						log.info(PoolUtils.getStackTraceAsString(e));
@@ -506,5 +524,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			PropertyConfigurator.configure(log4jProperties);
 		}
 	}
-	 
+
+	
 }

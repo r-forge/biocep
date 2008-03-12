@@ -19,7 +19,8 @@ public class LocalClassServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String url = req.getRequestURL().toString();
-		String resource = url.substring(url.indexOf("/classes") + "/classes".length());
+		String resource = url.substring(url.indexOf("/classes") + "/classes".length())
+		;
 
 		InputStream is = LocalClassServlet.class.getResourceAsStream(resource);
 		//System.out.println("url : " + url);

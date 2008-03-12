@@ -42,9 +42,9 @@ public class MainPsToolsDownload {
 
 		try {
 			if (isWindowsOs()
-					&& (!new File(location + "pskill.exe").exists() || !new File(location + "pslist.exe").exists())) {
+					&& (!new File(location + "pskill.exe").exists() || !new File(location + "pslist.exe").exists() || !new File(location + "psexec.exe").exists())) {
 				unzip(new URL("http://download.sysinternals.com/Files/PsTools.zip").openConnection().getInputStream(),
-						location, new EqualNameFilter("pslist.exe", "pskill.exe"), 1024 * 16, true,
+						location, new EqualNameFilter("pslist.exe", "pskill.exe", "psexec.exe"), 1024 * 16, true,
 						"Unzipping psTools..", 2);
 			}
 		} catch (Exception e) {
