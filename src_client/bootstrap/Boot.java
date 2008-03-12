@@ -9,7 +9,7 @@ public class Boot {
 		URLClassLoader cl=null;
 		if (keepAlive) {
 			String jarsUrlPrefix=args[3];
-			cl=new URLClassLoader(new URL[]{										
+			cl=new URLClassLoader(new URL[]{			
 					new URL("http://"+args[1]+":"+args[2]+"/classes/"),
 					new URL(jarsUrlPrefix+"JRI.jar"),			
 					new URL(jarsUrlPrefix+"commons-logging-1.1.jar"),
@@ -22,7 +22,8 @@ public class Boot {
 			
 			, Boot.class.getClassLoader());	
 		} else {
-			cl=new URLClassLoader(new URL[]{ new URL("http://"+args[1]+":"+args[2]+"/classes/")}, Boot.class.getClassLoader());
+			cl=new URLClassLoader(new URL[]{
+					new URL("http://"+args[1]+":"+args[2]+"/classes/")}, Boot.class.getClassLoader());
 			cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils").getMethod("startPortInUseDogwatcher", new Class<?>[]{String.class,int.class,int.class,int.class}).invoke(null, args[1],Integer.decode(args[2]), 3, 3);
 		}
 		Class<?> mainClass=cl.loadClass("server.MainRServer");		

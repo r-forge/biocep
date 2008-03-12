@@ -17,7 +17,6 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +36,7 @@ import uk.ac.ebi.microarray.pools.CreationCallBack;
 import uk.ac.ebi.microarray.pools.MainPsToolsDownload;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
@@ -54,57 +54,7 @@ public class ServerLauncher {
 	public static Acme.Serve.Serve srv;
 
 	public static void main(String[] args) throws Exception {
-
 		
-		Vector<String> command = new Vector<String>();
-		command.add("cmd");
-		command.add("/C");
-		command.add("start");
-		command.add("dir");
-		//command.add(System.getProperty("java.home") + "/bin/java");
-
-
-		final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]));
-
-		final Vector<String> outPrint = new Vector<String>();
-		final Vector<String> errorPrint = new Vector<String>();
-
-		System.out.println(" command : " + command);
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						System.out.println(line);
-						errorPrint.add(line);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				System.out.println();
-			}
-		}).start();
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						System.out.println(line);
-						outPrint.add(line);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		proc.waitFor();
-		System.exit(0);
 		
 		new Thread(new Runnable() {
 			public void run() {
@@ -136,58 +86,18 @@ public class ServerLauncher {
 				}
 			}
 		}).start();
-
 		
 		  	
-		  RServices r = createRLocal(true, PoolUtils.getHostIp(),
+		  RServices r = createRLocal(false, PoolUtils.getHostIp(),
 		  GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(),
 		  GUtils.getLocalRmiRegistryPort(), 256, 256, true);
 		  
 		  String processId = r.getProcessId();
 		  System.out.println("Local process ID:"+PoolUtils.getProcessId());
 		  System.out.println("R process ID:"+processId);
-			  
-		  PoolUtils.killLocalWinProcess(processId, true);
-		 
-
-		  /*
-		RServices r = createRSsh(true, PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), GUtils.getLocalRmiRegistryPort(), 256, 256,
-				"192.168.189.131", "ebi", "ebibiocep", true);
-		String processId = r.getProcessId();
-		System.out.println("rr:" + r);
-		PoolUtils.killSshProcess(processId, "192.168.189.131", "ebi", "ebibiocep", true);
-		*/
-
-		// BootSsh.main(new
-		// String[]{"false","127.0.0.1",""+GUtils.getLocalTomcatPort(),"127.0.0.1",""+GUtils.getLocalRmiRegistryPort(),"256","256"});
-		/*
-		 * try { RServices r=createR(true,
-		 * "127.0.0.1",GUtils.getLocalTomcatPort(), "127.0.0.1",
-		 * GUtils.getLocalRmiRegistryPort(),256,256); String
-		 * processId=r.getProcessId(); System.out.println("R:" + r); try { if
-		 * (PoolUtils.isWindowsOs()) { PoolUtils.killLocalWinProcess(processId,
-		 * true); } else { PoolUtils.killLocalUnixProcess(processId, true); } }
-		 * catch (Exception e) { e.printStackTrace(); } } catch (Exception e) {
-		 * System.out.println("Things went wrong"); e.printStackTrace(); }
-		 */
-
-		if (srv != null) {
-
-			try {
-				srv.notifyStop();
-			} catch (java.io.IOException ioe) {
-				ioe.printStackTrace();
-			}
-
-			try {
-				srv.destroyAllServlets();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		System.exit(0);
-
+			  		  
+		  System.exit(0);
+	
 	}
 
 	static JTextArea createRSshProgressArea;
@@ -408,9 +318,27 @@ public class ServerLauncher {
 			raf.close();
 
 			
+			String logFileDir=System.getProperty("user.home") + "/RWorkbench/" +"log/";
+			new File(logFileDir).mkdirs();
+			String logFile=logFileDir+"log"+System.currentTimeMillis()+".txt";
+			new File(logFile).delete();
 			
 			Vector<String> command = new Vector<String>();
-			command.add(System.getProperty("java.home") + "/bin/java");
+			if (isWindowsOs()) {
+				String psexecCommand=System.getProperty("pstools.home") + "/psexec.exe" ;
+				if (!new File(psexecCommand).exists()) {
+					String psToolsHome=System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
+					psexecCommand=psToolsHome + "/psexec.exe" ;
+					if (!new File(psexecCommand).exists()) {
+						new File(psToolsHome).mkdirs();
+						MainPsToolsDownload.main(new String[] { psToolsHome });
+					}			
+				}	
+				command.add(psexecCommand);
+				command.add("-d");
+			}
+			
+			command.add((isWindowsOs() ? "\"" : "")+System.getProperty("java.home") + "/bin/java"+ (isWindowsOs() ? "\"" : ""));
 			command.add("-classpath");			
 			command.add((isWindowsOs() ? "\"" : "") + System.getProperty("user.home") + "/RWorkbench/" + "classes" + (isWindowsOs() ? "\"" : ""));
 			command.add("bootstrap.BootSsh");			
@@ -421,47 +349,25 @@ public class ServerLauncher {
 			command.add(""+rmiRegistryPort);
 			command.add(""+memoryMinMegabytes);
 			command.add(""+memoryMaxMegabytes);
+			command.add(logFile);
 			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), null);
 
-			final StringBuffer outPrint = new StringBuffer();
-			final StringBuffer errorPrint = new StringBuffer();
-
-			System.out.println(" command : " + command);
-
+			while (!new File(logFile).exists()) {
+				try {Thread.sleep(100);} catch (Exception e) {}
+			}
+			StringBuffer outPrint=new StringBuffer();
+			while (outPrint.indexOf(BootSsh.STUB_END_MARKER)==-1) {
+				try {Thread.sleep(100);} catch (Exception e) {}
+				outPrint=new StringBuffer();
+				BufferedReader br=new BufferedReader(new FileReader(logFile));
+				while (true) {
+					String line=br.readLine(); if (line==null) break;
+					outPrint.append(line+"\n");
+				}
+				br.close();
+			}
 			
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-						String line = null;
-						while ((line = br.readLine()) != null) {
-							System.out.println(line);
-							errorPrint.append(line + "\n");
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					System.out.println();
-				}
-			}).start();
-
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-						String line = null;
-						while ((line = br.readLine()) != null) {
-							System.out.println(line);
-							outPrint.append(line + "\n");
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-
-			proc.waitFor();
+			new File(logFile).delete();
 			
 			
 			String processId=outPrint.substring(outPrint.indexOf(BootSsh.PROCESS_ID_BEGIN_MARKER)+BootSsh.PROCESS_ID_BEGIN_MARKER.length(), outPrint.indexOf(BootSsh.PROCESS_ID_END_MARKER));
@@ -775,6 +681,7 @@ public class ServerLauncher {
 				String listenerStub = PoolUtils.stubToHex(callBack);
 
 				Vector<String> command = new Vector<String>();
+				
 				command.add(System.getProperty("java.home") + "/bin/java");
 
 				command.add((isWindowsOs() ? "\"" : "") + "-DXms" + memoryMinMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
@@ -869,7 +776,6 @@ public class ServerLauncher {
 
 				long t1 = System.currentTimeMillis();
 				while (servantHolder[0] == null && exceptionHolder[0] == null) {
-					// System.out.println(new Date());
 					if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
 						throw new ServantCreationTimeout();
 					try {
@@ -911,4 +817,29 @@ public class ServerLauncher {
 			return null;
 		}
 	}
+	
+	
+	public static class RemoteLogListenerImpl extends UnicastRemoteObject implements RemoteLogListener {
+
+		public RemoteLogListenerImpl() throws RemoteException {
+			super();
+		}
+
+		public void flush() throws RemoteException {
+		}
+
+		public void write(final byte[] b) throws RemoteException {
+			System.out.print(new String(b));
+		}
+
+		public void write(final byte[] b, final int off, final int len) throws RemoteException {
+			System.out.print(new String(b, off, len));
+		}
+
+		public void write(final int b) throws RemoteException {
+			System.out.print(new String(new byte[] { (byte) b, (byte) (b >> 8) }));
+		}
+
+	}
+
 }

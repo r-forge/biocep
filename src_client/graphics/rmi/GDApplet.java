@@ -188,7 +188,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		@Override
 		public void lock() {
 			super.lock();
-			//if (_mode == HTTP_MODE) 
+			if (_mode == HTTP_MODE) 
 			{
 				try {
 					_currentDevice.setAsCurrentDevice();

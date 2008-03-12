@@ -1,13 +1,18 @@
 package bootstrap;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Date;
 
 public class BootSsh {
 	public static final String STUB_BEGIN_MARKER="#STUBBEGIN#";
@@ -20,8 +25,13 @@ public class BootSsh {
 	public static final String R_PROCESS_ID_END_MARKER="#RPROCESSIDEND#";	
 
 	public static void main(String[] args) {
+		String logFileName=args[7];
+		PrintWriter bw=null;
 		try {
-			URLClassLoader cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/") }, BootSsh.class.getClassLoader());
+			bw=new PrintWriter(new FileWriter(args[7]));
+			URL classServerUrl=new URL("http://" + args[1] + ":" + args[2] + "/classes/");			
+			bw.println(classServerUrl);
+			URLClassLoader cl = new URLClassLoader(new URL[] { classServerUrl }, BootSsh.class.getClassLoader());
 			cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils").getMethod("startPortInUseDogwatcher",
 					new Class<?>[] { String.class, int.class, int.class, int.class }).invoke(null, args[1], Integer.decode(args[2]), 3, 3);
 			Class<?> ServerLauncherClass = cl.loadClass("graphics.rmi.ServerLauncher");
@@ -31,19 +41,19 @@ public class BootSsh {
 					new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), args[3],
 							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), false });
 			
-			System.out.println(STUB_BEGIN_MARKER+ stubToHex(r)+ STUB_END_MARKER);	
+			
 			
 			Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");			
 			String processId=(String)poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);
-			System.out.println(PROCESS_ID_BEGIN_MARKER+processId+ PROCESS_ID_END_MARKER);
-			
-			System.out.println(R_PROCESS_ID_BEGIN_MARKER+(String)r.getClass().getMethod("getProcessId", new Class<?>[0]).invoke(r, new Object[0])+ R_PROCESS_ID_END_MARKER);
-			
-			
-
+			bw.println(PROCESS_ID_BEGIN_MARKER+processId+ PROCESS_ID_END_MARKER);			
+			bw.println(R_PROCESS_ID_BEGIN_MARKER+(String)r.getClass().getMethod("getProcessId", new Class<?>[0]).invoke(r, new Object[0])+ R_PROCESS_ID_END_MARKER);
+			bw.println(STUB_BEGIN_MARKER+ stubToHex(r)+ STUB_END_MARKER);	
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			if (bw!=null) {try {bw.close();} catch (Exception e) {e.printStackTrace();}}
 		}
+		
 		System.exit(0);
 	}
 	
