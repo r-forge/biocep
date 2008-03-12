@@ -56,8 +56,10 @@ public class RHttpProxy {
 				mainHttpClient.executeMethod(getSession);
 				result = new ObjectInputStream(getSession.getResponseBodyAsStream()).readObject();
 			} catch (ConnectException e) {
+				e.printStackTrace();
 				throw new ConnectionFailedException();
 			} catch (Exception e) {
+				e.printStackTrace();
 				throw new TunnelingException("Client Side", e);
 			}
 

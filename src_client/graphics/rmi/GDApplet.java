@@ -53,6 +53,7 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.security.AccessControlException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -118,9 +119,11 @@ import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
 import server.DirectJNI;
+import server.GDDeviceImpl;
 import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
@@ -374,7 +377,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			_submitInterface = new SubmitInterface() {
 
 				public String submit(String expression) {
-					
+
 					if (expression.equals("logon") || expression.startsWith("logon ")) {
 
 						try {
@@ -592,6 +595,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 							});
 
+							if (getOpenedServerLogView()!=null) {
+								getOpenedServerLogView().recreateRemoteLogListenerImpl();
+								_rForConsole.addErrListener(getOpenedServerLogView().getRemoteLogListenerImpl());
+								_rForConsole.addOutListener(getOpenedServerLogView().getRemoteLogListenerImpl());
+
+							}
+							
+							
 							Vector<DeviceView> deviceViews = getDeviceViews();
 							for (int i = 0; i < deviceViews.size(); ++i) {
 								final JPanel rootComponent = (JPanel) deviceViews.elementAt(i).getComponent();
@@ -677,8 +688,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 						return "Not Logged on, type 'logon' to connect\n";
 
 					if (expression.equals("logoff") || expression.startsWith("logoff ")) {
-
 						try {
+					
+							ServerLogView serverLogView=getOpenedServerLogView();
+							if (getOpenedServerLogView()!=null) {
+								try {
+									_rForConsole.removeErrListener(getOpenedServerLogView().getRemoteLogListenerImpl());
+									_rForConsole.removeOutListener(getOpenedServerLogView().getRemoteLogListenerImpl());
+									UnicastRemoteObject.unexportObject(getOpenedServerLogView().getRemoteLogListenerImpl(), false);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}										
+							}
+
 							if (_mode == HTTP_MODE) {
 								disposeDevices();
 								RHttpProxy.logOff(_commandServletUrl, _sessionId);
@@ -688,7 +710,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									persistState();
 								}
 							}
-							
+
 							noSession();
 							return "Logged Off\n";
 						} catch (NotLoggedInException nlie) {
@@ -845,6 +867,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("runhttpserverlocalhost"));
 					sessionMenu.add(_actions.get("stophttpserverlocalhost"));
+					sessionMenu.addSeparator();
+					sessionMenu.add(_actions.get("serverlogview"));
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1580,19 +1604,30 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private JTextArea getOpenedLogViewerArea() {
-		LogView lv = getOpenedLogViewer();
+		LogView lv = getOpenedLogView();
 		if (lv != null)
 			return lv.getArea();
 		else
 			return null;
 	}
 
-	private LogView getOpenedLogViewer() {
+	private LogView getOpenedLogView() {
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
 		while (iter.hasNext()) {
 			DynamicView dv = iter.next();
 			if (dv instanceof LogView) {
 				return (LogView) dv;
+			}
+		}
+		return null;
+	}
+
+	private ServerLogView getOpenedServerLogView() {
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof ServerLogView) {
+				return (ServerLogView) dv;
 			}
 		}
 		return null;
@@ -2209,7 +2244,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId==null;
+				return _sessionId == null;
 			}
 		});
 
@@ -2220,7 +2255,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null ;
+				return _sessionId != null;
 			}
 		});
 
@@ -2417,7 +2452,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		_actions.put("logview", new AbstractAction("Console Log Viewer") {
 			public void actionPerformed(final ActionEvent e) {
-				if (getOpenedLogViewer() == null) {
+				if (getOpenedLogView() == null) {
 
 					try {
 						_rForConsole.setProgressiveConsoleLogEnabled(true);
@@ -2426,7 +2461,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					}
 
 					int id = getDynamicViewId();
-					DockingWindow lv = new graphics.rmi.GDApplet.LogView("Console Log Viewer", null, new JTextArea(), id);
+					DockingWindow lv = new graphics.rmi.GDApplet.LogView("Console Log Viewer", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new DockingWindowListener() {
 						public void viewFocusChanged(View arg0, View arg1) {
@@ -2485,7 +2520,126 @@ public class GDApplet extends GDAppletBase implements RGui {
 						}
 					});
 				} else {
-					getOpenedLogViewer().restoreFocus();
+					getOpenedLogView().restoreFocus();
+				}
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
+		_actions.put("serverlogview", new AbstractAction("R Server Log Viewer") {
+			public void actionPerformed(final ActionEvent e) {
+				if (getOpenedServerLogView() == null) {
+					int id = getDynamicViewId();
+					final ServerLogView lv = new ServerLogView("R Server Log Viewer", null, id);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+					lv.addListener(new DockingWindowListener() {
+						public void viewFocusChanged(View arg0, View arg1) {
+						}
+
+						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowClosed(DockingWindow arg0) {
+						}
+
+						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+							try {
+								_rForConsole.removeErrListener(((ServerLogView)arg0).getRemoteLogListenerImpl());
+								_rForConsole.removeOutListener(((ServerLogView)arg0).getRemoteLogListenerImpl());
+								UnicastRemoteObject.unexportObject(((ServerLogView)arg0).getRemoteLogListenerImpl(), false);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+
+						public void windowDocked(DockingWindow arg0) {
+						}
+
+						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowHidden(DockingWindow arg0) {
+						}
+
+						public void windowMaximized(DockingWindow arg0) {
+						}
+
+						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowMinimized(DockingWindow arg0) {
+						}
+
+						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowRestored(DockingWindow arg0) {
+						}
+
+						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowShown(DockingWindow arg0) {
+						}
+
+						public void windowUndocked(DockingWindow arg0) {
+						}
+
+						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+					});
+
+					lv.setLayout(new BorderLayout());
+					JScrollPane _scrollPane = new JScrollPane(lv.getArea());
+
+					lv.add(_scrollPane);
+
+					lv.getArea().setEditable(false);
+					lv.getArea().addMouseListener(new MouseAdapter() {
+						public void mousePressed(MouseEvent e) {
+							checkPopup(e);
+						}
+
+						public void mouseClicked(MouseEvent e) {
+							checkPopup(e);
+						}
+
+						public void mouseReleased(MouseEvent e) {
+							checkPopup(e);
+						}
+
+						private void checkPopup(MouseEvent e) {
+							if (e.isPopupTrigger()) {
+								JPopupMenu popupMenu = new JPopupMenu();
+								popupMenu.add(new AbstractAction("Clean") {
+									public void actionPerformed(ActionEvent e) {
+										lv.getArea().setText("");
+									}
+
+									public boolean isEnabled() {
+										return !lv.getArea().getText().equals("");
+									}
+								});
+
+								popupMenu.show(lv.getArea(), e.getX(), e.getY());
+							}
+						}
+					});
+
+					try {
+						
+						_rForConsole.addOutListener(lv.getRemoteLogListenerImpl());
+						_rForConsole.addErrListener(lv.getRemoteLogListenerImpl());
+					} catch (RemoteException re) {
+						re.printStackTrace();
+					}
 				}
 			}
 
@@ -2707,37 +2861,37 @@ public class GDApplet extends GDAppletBase implements RGui {
 				new Thread(new Runnable() {
 					public void run() {
 
-				while (true) {
-					GetExprDialog dialog = new GetExprDialog(" Run Http Virtualization Engine On Port : ", _httpPortSave);
-					dialog.setVisible(true);
-					if (dialog.getExpr() != null) {
-						try {
-							final int port = Integer.decode(dialog.getExpr());
-							if (_rForConsole.isPortInUse(port)) {
-								JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
+						while (true) {
+							GetExprDialog dialog = new GetExprDialog(" Run Http Virtualization Engine On Port : ", _httpPortSave);
+							dialog.setVisible(true);
+							if (dialog.getExpr() != null) {
+								try {
+									final int port = Integer.decode(dialog.getExpr());
+									if (_rForConsole.isPortInUse(port)) {
+										JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
+									} else {
+
+										_rForConsole.startHttpServer(port);
+										JOptionPane
+												.showMessageDialog(
+														GDApplet.this.getContentPane(),
+														"A Virtualization HTTP Engine is now running on port "
+																+ port
+																+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
+																+ _rForConsole.getHostIp() + ":" + port + "/cmd", "", JOptionPane.INFORMATION_MESSAGE);
+
+										break;
+									}
+								} catch (Exception e) {
+									e.printStackTrace();
+									JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Bad Port", "", JOptionPane.ERROR_MESSAGE);
+									continue;
+								}
+
 							} else {
-
-								_rForConsole.startHttpServer(port);
-								JOptionPane
-										.showMessageDialog(
-												GDApplet.this.getContentPane(),
-												"A Virtualization HTTP Engine is now running on port "
-														+ port
-														+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
-														+ _rForConsole.getHostIp() + ":" + port + "/cmd", "", JOptionPane.INFORMATION_MESSAGE);
-
 								break;
 							}
-						} catch (Exception e) {
-							e.printStackTrace();
-							JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Bad Port", "", JOptionPane.ERROR_MESSAGE);
-							continue;
 						}
-
-					} else {
-						break;
-					}
-				}
 					}
 				}).start();
 			}
@@ -2765,6 +2919,54 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 
+	public static class RemoteLogListenerImpl extends UnicastRemoteObject implements RemoteLogListener {
+		private ServerLogView _serverLogView;
+
+		public RemoteLogListenerImpl(ServerLogView serverLogView) throws RemoteException {
+			super();
+			_serverLogView = serverLogView;
+		}
+
+		public void scrollToEnd() {
+			_serverLogView.getScrollPane().getVerticalScrollBar().setValue(_serverLogView.getScrollPane().getVerticalScrollBar().getMaximum());
+		}
+
+		public void flush() throws RemoteException {
+		}
+
+		public void write(final byte[] b) throws RemoteException {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					_serverLogView.getArea().append(new String(b));
+					scrollToEnd();
+					_serverLogView.getArea().repaint();
+				}
+			});
+		}
+
+		public void write(final byte[] b, final int off, final int len) throws RemoteException {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					_serverLogView.getArea().append(new String(b, off, len));
+					scrollToEnd();
+					_serverLogView.getArea().repaint();
+				}
+			});
+		}
+
+		public void write(final int b) throws RemoteException {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					_serverLogView.getArea().append(new String(new byte[] { (byte) b, (byte) (b >> 8) }));
+					scrollToEnd();
+					_serverLogView.getArea().repaint();
+				}
+			});
+		}
+
+	}
+
+	
 	private void disposeDevices() {
 		((JGDPanelPop) _graphicPanel).dispose();
 		Vector<DeviceView> deviceViews = getDeviceViews();
@@ -2792,7 +2994,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void noSession() {
-		
+
 		if (_rProcessId != null && !_keepAlive) {
 
 			if (_sshParameters == null) {
@@ -2839,7 +3041,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		_sshParameters = null;
 		_rProcessId = null;
 		_virtualizationLocalHttpServer = null;
-		
+
 	}
 
 	class GetExprDialog extends JDialog {
@@ -2987,14 +3189,57 @@ public class GDApplet extends GDAppletBase implements RGui {
 	static class LogView extends DynamicView {
 		JTextArea _area;
 
-		LogView(String title, Icon icon, JTextArea area, int id) {
-			super(title, icon, newPanel(area), id);
-			_area = area;
+		LogView(String title, Icon icon, int id) {
+			super(title, icon, new JPanel(), id);
+			((JPanel) getComponent()).setLayout(new BorderLayout());
+			_area = new JTextArea();
+			((JPanel) getComponent()).add(_area);
 		}
 
 		public JTextArea getArea() {
 			return _area;
 		}
+	}
+
+	public static class ServerLogView extends DynamicView {
+		JTextArea _area;
+		JScrollPane _scrollPane;
+		RemoteLogListenerImpl _rll;
+
+		ServerLogView(String title, Icon icon, int id) {
+			super(title, icon, new JPanel(), id);
+			_area = new JTextArea();
+			_scrollPane = new JScrollPane(_area);
+			
+			((JPanel) getComponent()).setLayout(new BorderLayout());
+			((JPanel) getComponent()).add(_scrollPane);
+			try {
+				_rll = new RemoteLogListenerImpl(this);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		public JTextArea getArea() {
+			return _area;
+		}
+
+		public JScrollPane getScrollPane() {
+			return _scrollPane;
+		}
+		
+		public RemoteLogListenerImpl getRemoteLogListenerImpl() {
+			return _rll;
+		}
+		
+		public void recreateRemoteLogListenerImpl() {
+			try {
+				_rll = new RemoteLogListenerImpl(this);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 
 	HashMap<Integer, DynamicView> dynamicViews = new HashMap<Integer, DynamicView>();

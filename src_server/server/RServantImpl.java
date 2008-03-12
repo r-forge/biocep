@@ -23,11 +23,14 @@ import java.rmi.*;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.Log4JLogger;
+import org.apache.log4j.PropertyConfigurator;
 import org.bioconductor.packages.rservices.RObject;
 import org.rosuda.JRI.Rengine;
 import remoting.AssignInterface;
@@ -429,13 +432,15 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 
 	public void startHttpServer(final int port) throws RemoteException {
+		log.info(" 1 startHttpServer called");
+		System.out.println(" 2 startHttpServer called");
 		if (PoolUtils.isPortInUse("127.0.0.1", port)) {
 			throw new RemoteException("Port already in use");
 		} else {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						 
+						System.out.println("!! Request to run virtualization server on port "+port);
 						RKit rkit = new RKit() {							
 							RServices _r=(RServices)UnicastRemoteObject.toStub(RServantImpl.this);
 							ReentrantLock _lock = new ReentrantLock();
@@ -459,9 +464,10 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 						_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(rkit));
 						_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(rkit));
 						_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(rkit));
-					
+						System.out.println("Going to run virtualization server on port "+port);
 						_virtualizationLocalHttpServer.serve();
 					} catch (Exception e) {
+						log.info(PoolUtils.getStackTraceAsString(e));
 						e.printStackTrace();
 					}
 				}
@@ -488,7 +494,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 	// --------------
 
-	/*
+	
 	static {
 		if (log instanceof Log4JLogger) {
 			Properties log4jProperties = new Properties();
@@ -500,5 +506,5 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			PropertyConfigurator.configure(log4jProperties);
 		}
 	}
-	 */
+	 
 }

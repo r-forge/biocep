@@ -17,7 +17,10 @@ public class Boot {
 					new URL(jarsUrlPrefix+"htmlparser.jar"),
 					new URL(jarsUrlPrefix+"derbyclient.jar"),					
 					new URL(jarsUrlPrefix+"RJB.jar"),
-					new URL(jarsUrlPrefix+"mapping.jar")}, Boot.class.getClassLoader());	
+					new URL(jarsUrlPrefix+"mapping.jar")}
+			
+			
+			, Boot.class.getClassLoader());	
 		} else {
 			cl=new URLClassLoader(new URL[]{ new URL("http://"+args[1]+":"+args[2]+"/classes/")}, Boot.class.getClassLoader());
 			cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils").getMethod("startPortInUseDogwatcher", new Class<?>[]{String.class,int.class,int.class,int.class}).invoke(null, args[1],Integer.decode(args[2]), 3, 3);
