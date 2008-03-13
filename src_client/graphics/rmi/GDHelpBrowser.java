@@ -174,7 +174,7 @@ public class GDHelpBrowser extends JPanel implements HyperlinkListener, ActionLi
 				}
 			});
 
-			_htmlPane.addMouseListener(new GUtils.PopupListener(menu));
+			_htmlPane.addMouseListener(new GDApplet.PopupListener(menu));
 
 			_htmlPane.addKeyListener(new KeyListener() {
 				public void keyPressed(KeyEvent e) {

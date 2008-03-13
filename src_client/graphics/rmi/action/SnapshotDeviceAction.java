@@ -1,6 +1,6 @@
 package graphics.rmi.action;
 
-import graphics.rmi.GUtils;
+import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
 import graphics.rmi.NewWindow;
 import graphics.rmi.RGui;
@@ -39,7 +39,7 @@ public class SnapshotDeviceAction extends AbstractAction {
 
 								JBufferedImagePanel bufferedImagePanel = null;
 								if (_panel==null) {
-									bufferedImagePanel = (JBufferedImagePanel) GUtils
+									bufferedImagePanel = (JBufferedImagePanel) GDApplet
 										.getComponentParent((Component) e.getSource(),
 												JBufferedImagePanel.class);
 								} else {

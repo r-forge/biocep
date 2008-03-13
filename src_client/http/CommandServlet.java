@@ -36,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 import remoting.RKit;
 import remoting.RServices;
-import server.RServantImpl;
 import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RmiCallInterrupted;

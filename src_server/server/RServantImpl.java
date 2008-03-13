@@ -16,10 +16,16 @@
 package server;
 
 import graphics.pop.GDDevice;
+import graphics.rmi.GUtils;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
+import graphics.rmi.RClustserInterface;
+import graphics.rmi.ServerLauncher;
+import http.local.LocalClassServlet;
+
 import java.io.Serializable;
 import java.rmi.*;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -33,6 +39,8 @@ import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.PropertyConfigurator;
 import org.bioconductor.packages.rservices.RObject;
 import org.rosuda.JRI.Rengine;
+
+import Acme.Serve.Serve.PathTreeDictionary;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -64,7 +72,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	private HashMap<Integer, GDDeviceImpl> _deviceHashMap = new HashMap<Integer, GDDeviceImpl>();
 
 	private boolean _isReady = false;
-	
+
 	private Acme.Serve.Serve _virtualizationLocalHttpServer = null;
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RServantImpl.class);
@@ -112,6 +120,20 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			if (System.getProperty("apply.sandbox") != null && System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {
 				DirectJNI.getInstance().applySandbox();
 			}
+
+			RListener.setRClusterInterface(new RClustserInterface() {
+				public Vector<RServices> createRs(int n, String nodeName) throws Exception {
+					Vector<RServices> workers = new Vector<RServices>();
+					for (int i = 0; i < n; ++i) {
+						workers.add(cloneServer());
+					}
+					return workers;
+				}
+
+				public void releaseRs(Vector<RServices> rs, int n, String nodeName) throws Exception {
+					// TODO Auto-generated method stub					
+				}
+			});
 
 			_isReady = true;
 
@@ -434,16 +456,19 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public void startHttpServer(final int port) throws RemoteException {
 		log.info(" 1 startHttpServer called");
 		System.out.println(" 2 startHttpServer called");
-		if (PoolUtils.isPortInUse("127.0.0.1", port)) {
+		if (_virtualizationLocalHttpServer != null) {
+			throw new RemoteException("Server Already Running");
+		} else if (PoolUtils.isPortInUse("127.0.0.1", port)) {
 			throw new RemoteException("Port already in use");
 		} else {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						log.info("!! Request to run virtualization server on port "+port);
-						RKit rkit = new RKit() {							
-							RServices _r=(RServices)UnicastRemoteObject.toStub(RServantImpl.this);
+						log.info("!! Request to run virtualization server on port " + port);
+						RKit rkit = new RKit() {
+							RServices _r = (RServices) UnicastRemoteObject.toStub(RServantImpl.this);
 							ReentrantLock _lock = new ReentrantLock();
+
 							/*
 							ReentrantLock _lock = new ReentrantLock(){
 								
@@ -457,11 +482,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 									return false;
 								}
 							};
-							*/
-							
+							 */
+
 							public RServices getR() {
 								return _r;
 							}
+
 							public ReentrantLock getRLock() {
 								return _lock;
 							}
@@ -472,7 +498,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 								super.setMappingTable(mappingtable);
 							}
 						};
-						
+
 						log.info(this.getClass().getResource("/Acme/Serve/Serve.class"));
 						log.info(this.getClass().getResource("/Acme/Serve/Serve$ServeConfig.class"));
 						java.util.Properties properties = new java.util.Properties();
@@ -482,7 +508,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 						_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(rkit));
 						_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(rkit));
 						_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(rkit));
-						log.info("Going to run virtualization server on port "+port);
+						log.info("Going to run virtualization server on port " + port);
 						_virtualizationLocalHttpServer.serve();
 					} catch (Exception e) {
 						log.info(PoolUtils.getStackTraceAsString(e));
@@ -510,9 +536,56 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		}
 
 	}
+
+	public boolean isHttpServerRunning(int port) throws RemoteException {
+		return _virtualizationLocalHttpServer != null;
+	}
+
+	private Acme.Serve.Serve srv = null;
+
+	public RServices cloneServer() throws RemoteException {
+		if (srv == null) {
+			synchronized (this) {
+				if (srv == null) {
+					new Thread(new Runnable() {
+						public void run() {
+							Acme.Serve.Serve srv = new Acme.Serve.Serve();
+							java.util.Properties properties = new java.util.Properties();
+							properties.put("port", GUtils.getLocalTomcatPort());
+							properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
+							srv.arguments = properties;
+							System.out.println("properties:" + properties + "  server: " + srv);
+							srv.addServlet("/classes/", new LocalClassServlet());
+							srv.serve();
+						}
+					}).start();
+
+					new Thread(new Runnable() {
+						public void run() {
+							System.out.println("local rmiregistry port : " + GUtils.getLocalTomcatPort());
+							try {
+								LocateRegistry.createRegistry(GUtils.getLocalRmiRegistryPort());
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
+
+				}
+			}
+		}
+		try {
+			RServices w = ServerLauncher.createRLocal(true, PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), GUtils
+					.getLocalRmiRegistryPort(), 256, 256, true);
+			return w;
+		} catch (Exception e) {
+			throw new RemoteException("", e);
+		}
+
+	}
+
 	// --------------
 
-	
 	static {
 		if (log instanceof Log4JLogger) {
 			Properties log4jProperties = new Properties();
@@ -525,5 +598,4 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		}
 	}
 
-	
 }

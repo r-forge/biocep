@@ -237,4 +237,8 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	public String getHostIp() throws RemoteException {	
 		return PoolUtils.getHostIp();
 	}
+	
+	public ManagedServant cloneServer() throws RemoteException {
+		return null;
+	}
 }

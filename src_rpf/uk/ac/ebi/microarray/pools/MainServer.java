@@ -117,6 +117,7 @@ public class MainServer {
 
 			}
 
+			//System.out.println("clone:"+mservant.cloneServer());
 			if (servantCreationListener != null) {
 				PoolUtils.callBack(servantCreationListener,mservant, null);
 			}

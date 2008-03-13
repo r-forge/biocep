@@ -49,6 +49,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -71,6 +72,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -111,16 +113,21 @@ import net.infonode.docking.util.DockingUtil;
 import net.infonode.docking.util.MixedViewHandler;
 import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
+import net.java.dev.jspreadsheet.CellPoint;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
+import org.gjt.sp.jedit.gui.FloatingWindowContainer;
+
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
 import server.DirectJNI;
 import server.GDDeviceImpl;
 import server.NoMappingAvailable;
+import server.RListener;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
@@ -385,13 +392,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 							GDDevice d = null;
 
 							boolean showLoginDialog = true;
-							if (new File(GUtils.NEW_R_STUB_FILE).exists()) {
+							if (new File(GDApplet.NEW_R_STUB_FILE).exists()) {
 								int n = JOptionPane.showConfirmDialog(GDApplet.this, "Would you like to connect to the last created and kept alive R Server ?",
 										"", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null);
 								if (n == JOptionPane.OK_OPTION) {
 									showLoginDialog = false;
 
-									BufferedReader pr = new BufferedReader(new FileReader(GUtils.NEW_R_STUB_FILE));
+									BufferedReader pr = new BufferedReader(new FileReader(GDApplet.NEW_R_STUB_FILE));
 									String stub = pr.readLine();
 									pr.close();
 
@@ -450,8 +457,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 								d = RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
 								System.out.println("device id:" + d.getDeviceNumber());
 
-								if (new File(GUtils.NEW_R_STUB_FILE).exists())
-									new File(GUtils.NEW_R_STUB_FILE).delete();
+								if (new File(GDApplet.NEW_R_STUB_FILE).exists())
+									new File(GDApplet.NEW_R_STUB_FILE).delete();
 
 							} else {
 
@@ -487,12 +494,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 									_rProcessId = r.getProcessId();
 									System.out.println("R Process Id :" + _rProcessId);
 
-									new File(GUtils.NEW_R_STUB_FILE).delete();
+									new File(GDApplet.NEW_R_STUB_FILE).delete();
 									if (_keepAlive) {
-										PrintWriter pw = new PrintWriter(new FileWriter(GUtils.NEW_R_STUB_FILE));
+										PrintWriter pw = new PrintWriter(new FileWriter(GDApplet.NEW_R_STUB_FILE));
 										pw.println(PoolUtils.stubToHex(r));
 										pw.close();
 									}
+									
+									
+									
 
 								} else {
 									if (ident.getRmiMode() == RMI_MODE_STUB_MODE) {
@@ -501,7 +511,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											r.ping();
 										} catch (Exception e) {
 											e.printStackTrace();
-											new File(GUtils.NEW_R_STUB_FILE).delete();
+											new File(GDApplet.NEW_R_STUB_FILE).delete();
 											throw new PingRServerFailedException();
 										}
 
@@ -522,7 +532,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											throw new BadServantNameException();
 										}
 
-										new File(GUtils.NEW_R_STUB_FILE).delete();
+										new File(GDApplet.NEW_R_STUB_FILE).delete();
 
 									} else if (ident.getRmiMode() == RMI_MODE_DB_MODE) {
 										Registry registry = null;
@@ -548,7 +558,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											throw new BadServantNameException();
 										}
 
-										new File(GUtils.NEW_R_STUB_FILE).delete();
+										new File(GDApplet.NEW_R_STUB_FILE).delete();
 
 									}
 								}
@@ -564,6 +574,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									}
 								}
 
+								
 								d = r.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 
 								_rForConsole = r;
@@ -601,8 +612,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 								_rForConsole.addOutListener(getOpenedServerLogView().getRemoteLogListenerImpl());
 
 							}
-							
-							
+
+
 							Vector<DeviceView> deviceViews = getDeviceViews();
 							for (int i = 0; i < deviceViews.size(); ++i) {
 								final JPanel rootComponent = (JPanel) deviceViews.elementAt(i).getComponent();
@@ -1812,7 +1823,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void restoreState() {
-		File settings = new File(GUtils.SETTINGS_FILE);
+		File settings = new File(GDApplet.SETTINGS_FILE);
 		if (settings.exists()) {
 			try {
 				Properties props = new Properties();
@@ -1841,7 +1852,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	private void persistState() {
 		try {
-			PropertiesGenerator.main(new String[] { GUtils.SETTINGS_FILE,
+			PropertiesGenerator.main(new String[] { GDApplet.SETTINGS_FILE,
 					"working.dir.root=" + ((RChar) _rForConsole.evalAndGetObject("getwd()")).getValue()[0],
 					"command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()) });
 		} catch (Exception e) {
@@ -3242,8 +3253,32 @@ public class GDApplet extends GDAppletBase implements RGui {
 		
 	}
 
+	public static class PopupListener extends MouseAdapter {
+		private JPopupMenu popup;
+	
+		public PopupListener(JPopupMenu popup) {
+			this.popup = popup;
+		}
+	
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+	
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+	
+		protected void maybeShowPopup(MouseEvent e) {
+			if (popup.isPopupTrigger(e)) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		}
+	}
+
 	HashMap<Integer, DynamicView> dynamicViews = new HashMap<Integer, DynamicView>();
 	View[] views = new View[3];
+	public static String NEW_R_STUB_FILE = GUtils.INSTALL_DIR + "new_R_stub.txt";
+	public static String SETTINGS_FILE = GUtils.INSTALL_DIR + "settings.xml";
 
 	int getDynamicViewId() {
 		int id = 0;
@@ -3427,6 +3462,71 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 		return result[0];
 
+	}
+
+	static public CellPoint getSize(String input, char delim) {
+		BufferedReader in = new BufferedReader(new StringReader(input));
+		String line;
+		int rowcount = 0;
+		int colcount = 0;
+	
+		try {
+			while ((line = in.readLine()) != null) {
+				rowcount++;
+	
+				// initialize new tokenizer on line with tab delimiter.
+				// tokenizer = new StringTokenizer(line, "\t");
+				int index;
+				int prev = 0;
+	
+				// set col to 1 before each loop
+				int col = 0;
+	
+				while (true) {
+					index = line.indexOf(delim, prev);
+					prev = index + 1;
+	
+					// increment column number
+					col++;
+	
+					if (index == -1) {
+						break;
+					}
+				}
+	
+				if (colcount < col) {
+					colcount = col;
+				}
+			}
+		} catch (Exception e) {
+			return null;
+		}
+	
+		return new CellPoint(rowcount, colcount);
+	}
+
+	public static Component getComponentParent(Component comp, Class<?> clazz) {
+		for (;;) {
+			if (comp == null)
+				break;
+	
+			if (comp instanceof JComponent) {
+				Component real = (Component) ((JComponent) comp).getClientProperty("KORTE_REAL_FRAME");
+				if (real != null)
+					comp = real;
+			}
+	
+			if (clazz.isAssignableFrom(comp.getClass()))
+				return comp;
+			else if (comp instanceof JPopupMenu)
+				comp = ((JPopupMenu) comp).getInvoker();
+			else if (comp instanceof FloatingWindowContainer) {
+				comp = ((FloatingWindowContainer) comp).getDockableWindowManager();
+			} else
+				comp = comp.getParent();
+		}
+		return null;
+	
 	}
 
 }
