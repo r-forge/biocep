@@ -54,7 +54,8 @@ public class BootSsh {
 			if (bw!=null) {try {bw.close();} catch (Exception e) {e.printStackTrace();}}
 		}
 		
-		System.exit(0);
+		//while (true) {	try {Thread.sleep(1000);} catch (Exception e) {e.printStackTrace();}	}
+		//System.exit(0);
 	}
 	
 	public static String stubToHex(Remote obj) throws NoSuchObjectException {

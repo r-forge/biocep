@@ -1,7 +1,7 @@
 package graphics.rmi.action;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.GUtils;
+import graphics.rmi.GDApplet;
 import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
 
@@ -22,7 +22,7 @@ public class FitDeviceAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		try  {						
 			
-			JGDPanelPop panel = (JGDPanelPop) GUtils
+			JGDPanelPop panel = (JGDPanelPop) GDApplet
 			.getComponentParent((Component) e.getSource(),
 					JGDPanelPop.class);
 			

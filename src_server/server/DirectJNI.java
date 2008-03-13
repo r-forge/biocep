@@ -2520,6 +2520,12 @@ public class DirectJNI {
 		}
 		public void stopHttpServer() throws RemoteException {
 		}
+		public boolean isHttpServerRunning(int port) throws RemoteException {
+			return false;
+		}
+		public RServices cloneServer() throws RemoteException {
+			return null;
+		}
 	};
 
 	public static Vector<RAction> _rActions = new Vector<RAction>();

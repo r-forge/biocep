@@ -15,6 +15,7 @@
  */
 package server;
 
+import graphics.rmi.RClustserInterface;
 
 import java.io.File;
 import java.net.JarURLConnection;
@@ -55,11 +56,104 @@ import uk.ac.ebi.microarray.pools.ServantProviderFactory;
  */
 public abstract class RListener {
 
-	private static RCallback _callbackInterface = null;
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RListener.class);
+
+	private static RCallback _callbackInterface = null;
 
 	public static void setCallbackInterface(RCallback callbackInterface) {
 		_callbackInterface = callbackInterface;
+	}
+
+	private static RClustserInterface _rClusterInterface = new RClustserInterface() {
+		public Vector<RServices> createRs(int n, String nodeName) throws Exception {
+			Vector<RServices> workers = null;
+
+			try {
+				ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+
+				if (spFactory == null) {
+					throw new Exception("no registry");
+				}
+
+				Registry registry = spFactory.getServantProvider().getRegistry();
+				NodeManager nm = null;
+				try {
+					nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name") + "_" + nodeName);
+				} catch (NotBoundException nbe) {
+					nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name"));
+				} catch (Exception e) {
+					throw new Exception("no node manager");
+				}
+
+				for (int i = 0; i < n; ++i) {
+					RServices r = null;
+
+					r = (RServices) nm.createPrivateServant(nodeName);
+
+					if (r == null) {
+						throw new Exception("not enough number of servants available");
+					}
+
+					workers.add(r);
+				}
+
+				for (int i = 0; i < n; ++i) {
+					RServices r = null;
+
+					r = (RServices) nm.createPrivateServant(nodeName);
+
+					if (r == null) {
+						throw new Exception("not enough number of servants available");
+					}
+
+					workers.add(r);
+				}
+				return workers;
+			} catch (Exception e) {
+				if (workers.size() > 0) {
+					for (int i = 0; i < workers.size(); ++i) {
+						try {
+							ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(workers.elementAt(i));
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+				}
+				throw e;
+
+			}
+		}
+
+		public void releaseRs(Vector<RServices> rs, int n, String nodeName) throws Exception {
+			try {
+				Registry registry = ServantProviderFactory.getFactory().getServantProvider().getRegistry();
+				NodeManager nm = null;
+				try {
+					nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name") + "_" + nodeName);
+				} catch (NotBoundException nbe) {
+					nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name"));
+				} catch (Exception e) {
+					throw new Exception("no node manager");
+				}
+
+				for (int i = 0; i < n; ++i) {
+					try {
+						nm.kill(rs.elementAt(i));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+
+	};
+
+	public static void setRClusterInterface(RClustserInterface rClusterInterface) {
+		_rClusterInterface = rClusterInterface;
 	}
 
 	public static void progress(float percentageDone, String phaseDescription, float phasePercentageDone) {
@@ -137,8 +231,7 @@ public abstract class RListener {
 
 			list = new Vector<String>();
 			URL jarURL = null;
-			StringTokenizer st = new StringTokenizer(System.getProperty("java.class.path"), System
-					.getProperty("path.separator"));
+			StringTokenizer st = new StringTokenizer(System.getProperty("java.class.path"), System.getProperty("path.separator"));
 			while (st.hasMoreTokens()) {
 				String pathElement = st.nextToken();
 				if (pathElement.endsWith("RJB.jar")) {
@@ -186,57 +279,16 @@ public abstract class RListener {
 	}
 
 	public static String[] makeCluster(long n, String nodeName) {
-		Vector<RServices> workers = new Vector<RServices>();
-
+		Vector<RServices> workers = null;
 		try {
-			
-			ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
-
-			if (spFactory == null) {
-				throw new Exception("no registry");
-			}
-							
-			Registry registry = spFactory.getServantProvider().getRegistry();
-			NodeManager nm = null;
-			try {
-				nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name") + "_"
-						+ nodeName);
-			} catch (NotBoundException nbe) {
-				nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name"));
-			} catch (Exception e) {
-				throw new Exception("no node manager");
-			}
-
-			for (int i = 0; i < n; ++i) {
-				RServices r = null;
-					
-				r = (RServices) nm.createPrivateServant(nodeName);
-				
-				if (r == null) {
-					throw new Exception("not enough number of servants available");
-				}
-				
-				workers.add(r);
-			}
-
+			workers = _rClusterInterface.createRs((int) n, nodeName);
 			String clusterName = "CL_" + (CLUSTER_COUNTER++);
 			_clustersHash.put(clusterName, new Cluster(clusterName, workers, nodeName));
-
 			return new String[] { "OK", clusterName };
 
 		} catch (Exception e) {
 
 			e.printStackTrace();
-			if (workers.size() > 0) {
-				for (int i = 0; i < workers.size(); ++i) {
-					try {
-						ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(
-								workers.elementAt(i));
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-				}
-			}
 			return new String[] { "NOK", convertToPrintCommand("couldn't create cluster") };
 		}
 
@@ -253,44 +305,24 @@ public abstract class RListener {
 	public static RInteger nullObject = new RInteger(-11);
 
 	public static void stopAllClusters() {
-				
+
 		System.out.println("Stop All Clusters");
-		Vector<String> v=new Vector<String>(_clustersHash.keySet());
+		Vector<String> v = new Vector<String>(_clustersHash.keySet());
 		for (String cl : v) {
 			Cluster cluster = _clustersHash.get(cl);
-			stopCluster(cluster.getName());			
-		}	
+			stopCluster(cluster.getName());
+		}
 	}
 
 	public static String[] stopCluster(String cl) {
 		Cluster cluster = _clustersHash.get(cl);
 		if (cluster == null)
 			return new String[] { "NOK", "Invalid cluster" };
-		
-		try {			
-			Registry registry = ServantProviderFactory.getFactory().getServantProvider().getRegistry();
-			NodeManager nm = null;
-			try {
-				nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name") + "_"
-						+ cluster.getNodeName());
-			} catch (NotBoundException nbe) {
-				nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name"));
-			} catch (Exception e) {
-				throw new Exception("no node manager");
-			}
-			
-			for (int i = 0; i < cluster.getWorkers().size(); ++i) {			
-				try {
-					nm.kill(cluster.getWorkers().elementAt(i));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
-			}
+		try {
+			_rClusterInterface.releaseRs(cluster.getWorkers(), cluster.getWorkers().size(), cluster.getNodeName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 		_clustersHash.remove(cl);
 		return new String[] { "OK" };
 	}
@@ -341,11 +373,9 @@ public abstract class RListener {
 					} else if (var.getClass() == RLogical.class) {
 						return new RLogical(((RLogical) var).getValue()[i]);
 					} else if (var.getClass() == RComplex.class) {
-						return new RComplex(new double[] { ((RComplex) var).getReal()[i] },
-								new double[] { ((RComplex) var).getImaginary()[i] },
-								((RComplex) var).getIndexNA() != null ? new int[] { ((RComplex) var).getIndexNA()[i] }
-										: null, ((RComplex) var).getNames() != null ? new String[] { ((RComplex) var)
-										.getNames()[i] } : null);
+						return new RComplex(new double[] { ((RComplex) var).getReal()[i] }, new double[] { ((RComplex) var).getImaginary()[i] },
+								((RComplex) var).getIndexNA() != null ? new int[] { ((RComplex) var).getIndexNA()[i] } : null,
+								((RComplex) var).getNames() != null ? new String[] { ((RComplex) var).getNames()[i] } : null);
 					}
 
 					else if (var.getClass() == RList.class) {
@@ -524,7 +554,7 @@ public abstract class RListener {
 		public Vector<RServices> getWorkers() {
 			return _workers;
 		}
-		
+
 		public String getNodeName() {
 			return _nodeName;
 		}

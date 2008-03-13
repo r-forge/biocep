@@ -27,7 +27,7 @@ import net.java.dev.jspreadsheet.SpreadsheetSelectionListener;
 import net.java.dev.jspreadsheet.SpreadsheetTableModel;
 import graphics.pop.GDDevice;
 import graphics.rmi.ConsoleLogger;
-import graphics.rmi.GUtils;
+import graphics.rmi.GDApplet;
 import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
 import java.awt.BorderLayout;
@@ -228,7 +228,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		ss.addUndoableEditListener(um);
 		ss.addSelectionListener(sl);
 
-		ss.getTable().addMouseListener(new GUtils.PopupListener(new PopupMenu()));
+		ss.getTable().addMouseListener(new GDApplet.PopupListener(new PopupMenu()));
 		ss.getTable().addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 			}
@@ -1839,7 +1839,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		public FromRDialog() {
 			super((Frame) null, true);
-			setLocationRelativeTo(GUtils.getComponentParent(ss, JInternalFrame.class));
+			setLocationRelativeTo(GDApplet.getComponentParent(ss, JInternalFrame.class));
 			getContentPane().setLayout(new GridLayout(1, 2));
 			((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -2274,7 +2274,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		public EvalDialog() {
 			super((Frame) null, true);
-			setLocationRelativeTo(GUtils.getComponentParent(ss, JInternalFrame.class));
+			setLocationRelativeTo(GDApplet.getComponentParent(ss, JInternalFrame.class));
 			getContentPane().setLayout(new GridLayout(1, 2));
 			((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 

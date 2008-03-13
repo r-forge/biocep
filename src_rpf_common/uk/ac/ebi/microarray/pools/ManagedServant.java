@@ -69,5 +69,7 @@ public interface ManagedServant extends java.rmi.Remote {
 	public String getProcessId() throws java.rmi.RemoteException;
 	
 	public String getHostIp() throws java.rmi.RemoteException;
+	
+	public ManagedServant cloneServer() throws java.rmi.RemoteException;
 
 }

@@ -19,10 +19,25 @@ public class LocalClassServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String url = req.getRequestURL().toString();
-		String resource = url.substring(url.indexOf("/classes") + "/classes".length())
-		;
+		String resource = url.substring(url.indexOf("/classes") + "/classes".length());
+		if (resource.equals("")) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 
+		}
+		
 		InputStream is = LocalClassServlet.class.getResourceAsStream(resource);
+		if (is==null && resource.endsWith(".class")) {
+			System.out.println("--> trying to load missing class :"+resource);
+			String className=resource.substring(1, resource.indexOf(".class")).replace('/', '.');
+			System.out.println("--> class name:"+className);
+			try {
+				LocalClassServlet.class.getClassLoader().loadClass(className);
+				is = LocalClassServlet.class.getResourceAsStream(resource);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		//System.out.println("url : " + url);
 		//System.out.println("requested resource stream: " + resource);
 		//System.out.println("requested resource url: " + LocalClassServlet.class.getResource(resource));

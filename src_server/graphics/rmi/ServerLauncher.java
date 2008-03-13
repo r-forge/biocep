@@ -92,6 +92,8 @@ public class ServerLauncher {
 		  GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(),
 		  GUtils.getLocalRmiRegistryPort(), 256, 256, true);
 		  
+		  System.out.println("make cluster result : "+r.consoleSubmit("makeCluster(1)"));
+		  
 		  String processId = r.getProcessId();
 		  System.out.println("Local process ID:"+PoolUtils.getProcessId());
 		  System.out.println("R process ID:"+processId);
@@ -265,8 +267,7 @@ public class ServerLauncher {
 	static JFrame createRLocalProgressFrame;
 
 	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws BadSshHostException,
-			BadSshLoginPwdException, Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws Exception {
 
 		if (showProgress) {
 			createRLocalProgressArea = new JTextArea();

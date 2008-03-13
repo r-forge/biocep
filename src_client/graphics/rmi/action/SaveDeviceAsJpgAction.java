@@ -1,6 +1,6 @@
 package graphics.rmi.action;
 
-import graphics.rmi.GUtils;
+import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
 import graphics.rmi.RGui;
 
@@ -29,7 +29,7 @@ public class SaveDeviceAsJpgAction extends AbstractAction{
 					final JFileChooser chooser = new JFileChooser();
 					int returnVal = chooser.showOpenDialog(_rgui.getRootComponent());
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GUtils
+						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GDApplet
 								.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);												
 						ImageIO.write(bufferedImagePanel.getImage(), "jpg", chooser.getSelectedFile());
 					}

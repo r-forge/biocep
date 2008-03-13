@@ -106,8 +106,11 @@ public interface RServices extends ManagedServant {
 	public boolean isBusy() throws java.rmi.RemoteException;
 	
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
-		
+			
 	public void startHttpServer(int port) throws java.rmi.RemoteException;
 	
+	public boolean isHttpServerRunning(int port) throws java.rmi.RemoteException;
+	
 	public void stopHttpServer() throws java.rmi.RemoteException;
+
 }
