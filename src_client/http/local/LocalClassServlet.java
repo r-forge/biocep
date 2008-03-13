@@ -34,7 +34,7 @@ public class LocalClassServlet extends HttpServlet {
 				LocalClassServlet.class.getClassLoader().loadClass(className);
 				is = LocalClassServlet.class.getResourceAsStream(resource);
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 		
