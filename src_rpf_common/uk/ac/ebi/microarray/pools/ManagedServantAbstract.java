@@ -249,6 +249,14 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	public String getProcessId() throws RemoteException {
 		return PoolUtils.getProcessId();
 	}
+
+	public String getHostIp() throws RemoteException {
+		return PoolUtils.getHostIp();
+	}
+	
+	public boolean isPortInUse(int port) throws RemoteException {
+		return PoolUtils.isPortInUse("127.0.0.1", port);
+	}
 	
 	public String toString() {
 		return super.toString() + " " + _servantName;
