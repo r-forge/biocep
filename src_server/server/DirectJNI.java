@@ -2520,7 +2520,7 @@ public class DirectJNI {
 		}
 		public void stopHttpServer() throws RemoteException {
 		}
-		public boolean isHttpServerRunning(int port) throws RemoteException {
+		public boolean isHttpServerStarted(int port) throws RemoteException {
 			return false;
 		}
 		public RServices cloneServer() throws RemoteException {

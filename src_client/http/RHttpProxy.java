@@ -71,8 +71,6 @@ public class RHttpProxy {
 			if (getSession != null) {
 				getSession.releaseConnection();
 			}
-			if (mainHttpClient != null) {
-			}
 		}
 	}
 
@@ -102,8 +100,6 @@ public class RHttpProxy {
 		} finally {
 			if (getLogOut != null) {
 				getLogOut.releaseConnection();
-			}
-			if (mainHttpClient != null) {
 			}
 		}
 	}

@@ -18,7 +18,7 @@
  * author Karim Chine   kchine@ebi.ac.uk
 -->
 
-<project name="BIOCEP" default="compile" basedir=".">
+<project name="BioCep" default="compile" basedir=".">
 	
 	<property environment="env"/>
 	
@@ -37,8 +37,6 @@
 	<property name="LOGGING_JAR" value="${basedir}/lib/log/commons-logging-1.1.jar"/>
 	<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.14.jar"/>	
 	<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>
-	<property name="HTTPSERVER_JAR" value="${basedir}/lib/desktop/webserver.jar"/>
-	<property name="SERVLETAPI_JAR" value="lib/j2ee/servlet-api.jar"/>
 	
 	<property name="SSH_JAR" value="${basedir}/lib/pool/ganymed-ssh2.jar"/>
 	
@@ -170,11 +168,15 @@
 				<pathelement path="${LOGGING_JAR}"/>
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
-				<pathelement path="${SERVLETAPI_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
+				
+				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+				
 				<pathelement path="${servant.classpath}"/>
 				
 			</classpath>
@@ -383,7 +385,8 @@
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
-				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>				
+				
 				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
@@ -428,6 +431,9 @@
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				
+				
+				
 				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
@@ -527,7 +533,10 @@
 				<pathelement path="${JRI_JAR}"/>				
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>				
-				<pathelement path="lib/j2ee/servlet-api.jar"/>
+				
+				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 	
 				<pathelement path="lib/desktop/jeditmodes.jar"/>
 				<pathelement path="lib/desktop/jedit.jar"/>
@@ -613,13 +622,16 @@
 				<pathelement path="${JRI_JAR}"/>				
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>				
-				<pathelement path="lib/j2ee/servlet-api.jar"/>
 	
 				<pathelement path="lib/desktop/jeditmodes.jar"/>
 				<pathelement path="lib/desktop/jedit.jar"/>
 				<pathelement path="lib/desktop/OpenXLS.jar"/>
 				<pathelement path="lib/desktop/pf-joi-full.jar"/>
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
+				
+				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
@@ -816,7 +828,7 @@
 	<target name="compile" depends="compile.rpf">
 		
 		<echo message="${basedir}"/>
-		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_tjws"/>
+		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>
 		
 		<javac
 			srcdir="${src_compile_target}"

@@ -242,11 +242,13 @@
 							<pathelement path="${JRI_JAR}"/>
 							<pathelement path="${CORE_JAR}"/>
 											
-							<pathelement path="${HTMLPARSER_JAR}"/>
-							<pathelement path="${HTTPSERVER_JAR}"/>
+							<pathelement path="${HTMLPARSER_JAR}"/>							
 							<pathelement path="${SSH_JAR}"/>
 							
-							<pathelement path="lib/j2ee/servlet-api.jar"/>							
+							<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+							<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
+							<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+														
 							<pathelement path="lib/desktop/idw-gpl.jar"/>
 							<pathelement path="lib/desktop/pf-joi-full.jar"/>
 							<pathelement path="lib/desktop/jeditmodes.jar"/>
@@ -323,10 +325,13 @@
 				  		<fileset dir="lib/desktop" includes="jedit.jar"/>				  		
 				  		<fileset dir="lib/desktop" includes="jeditmodes.jar"/>
 				  		<fileset dir="lib/desktop" includes="pf-joi-full.jar"/>
-						<fileset dir="lib/desktop" includes="OpenXLS.jar"/>						
-						<fileset dir="lib/desktop" includes="webserver.jar"/>									
-						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>			
-						<fileset dir="lib/j2ee" includes="servlet-api.jar"/>						
+						<fileset dir="lib/desktop" includes="OpenXLS.jar"/>
+				  	
+						<fileset dir="lib/desktop" includes="servlet-api-2.5-6.1.8.jar"/>
+				  		<fileset dir="lib/desktop" includes="jetty-util-6.1.8.jar"/>
+						<fileset dir="lib/desktop" includes="jetty-6.1.8.jar"/>
+				  	
+						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>									
 						<fileset dir="lib/desktop" includes="JRI.jar"/>
 				  		<fileset dir="lib/jdbc" includes="derbyclient.jar"/>
 				  		<fileset dir="lib/pool" includes="ganymed-ssh2.jar"/>

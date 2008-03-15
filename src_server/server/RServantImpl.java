@@ -16,31 +16,26 @@
 package server;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.GUtils;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
 import graphics.rmi.RClustserInterface;
 import graphics.rmi.ServerLauncher;
-import http.local.LocalClassServlet;
 
 import java.io.Serializable;
 import java.rmi.*;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.PropertyConfigurator;
 import org.bioconductor.packages.rservices.RObject;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.rosuda.JRI.Rengine;
-
-import Acme.Serve.Serve.PathTreeDictionary;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -72,8 +67,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	private HashMap<Integer, GDDeviceImpl> _deviceHashMap = new HashMap<Integer, GDDeviceImpl>();
 
 	private boolean _isReady = false;
-
-	private Acme.Serve.Serve _virtualizationLocalHttpServer = null;
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RServantImpl.class);
 
@@ -123,9 +116,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 			RListener.setRClusterInterface(new RClustserInterface() {
 				public Vector<RServices> createRs(int n, String nodeName) throws Exception {
+					System.out.println(" create Rs");
 					Vector<RServices> workers = new Vector<RServices>();
 					for (int i = 0; i < n; ++i) {
-						workers.add(cloneServer());
+						RServices w = ServerLauncher.createRLocal(false, PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), PoolUtils
+								.getLocalRmiRegistryPort(), 256, 256, false);
+						workers.add(w);
 					}
 					return workers;
 				}
@@ -453,16 +449,17 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().isPortInUse(port);
 	}
 
+	Server _virtualizationServer=null;
 	public void startHttpServer(final int port) throws RemoteException {
 		log.info(" 1 startHttpServer called");
 		System.out.println(" 2 startHttpServer called");
-		if (_virtualizationLocalHttpServer != null) {
+		if (_virtualizationServer != null) {
 			throw new RemoteException("Server Already Running");
 		} else if (PoolUtils.isPortInUse("127.0.0.1", port)) {
 			throw new RemoteException("Port already in use");
 		} else {
-			new Thread(new Runnable() {
-				public void run() {
+			
+			
 					try {
 						log.info("!! Request to run virtualization server on port " + port);
 						RKit rkit = new RKit() {
@@ -493,90 +490,44 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 							}
 						};
 
-						_virtualizationLocalHttpServer = new Acme.Serve.Serve() {
-							public void setMappingTable(PathTreeDictionary mappingtable) {
-								super.setMappingTable(mappingtable);
-							}
-						};
+						
+						_virtualizationServer = new Server(port);
+						Context root = new Context(_virtualizationServer,"/",Context.SESSIONS);
+						root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(rkit)), "/graphics/*");
+						root.addServlet(new ServletHolder(new http.CommandServlet(rkit)), "/cmd/*");
+						root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(rkit)), "/helpme/*");
+						System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
+						_virtualizationServer.start();
 
-						log.info(this.getClass().getResource("/Acme/Serve/Serve.class"));
-						log.info(this.getClass().getResource("/Acme/Serve/Serve$ServeConfig.class"));
-						java.util.Properties properties = new java.util.Properties();
-						properties.put("port", port);
-						properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
-						_virtualizationLocalHttpServer.arguments = properties;
-						_virtualizationLocalHttpServer.addServlet("/graphics/", new http.local.LocalGraphicsServlet(rkit));
-						_virtualizationLocalHttpServer.addServlet("/cmd/", new http.CommandServlet(rkit));
-						_virtualizationLocalHttpServer.addServlet("/helpme/", new http.local.LocalHelpServlet(rkit));
-						log.info("Going to run virtualization server on port " + port);
-						_virtualizationLocalHttpServer.serve();
 					} catch (Exception e) {
 						log.info(PoolUtils.getStackTraceAsString(e));
 						e.printStackTrace();
 					}
-				}
-			}).start();
 		}
 
 	}
 
 	public void stopHttpServer() throws RemoteException {
-		if (_virtualizationLocalHttpServer != null) {
+		if (_virtualizationServer!=null) {
 			try {
-				_virtualizationLocalHttpServer.notifyStop();
-			} catch (java.io.IOException ioe) {
-				ioe.printStackTrace();
-			}
-			try {
-				_virtualizationLocalHttpServer.destroyAllServlets();
+			_virtualizationServer.stop();
 			} catch (Exception e) {
-				e.printStackTrace();
+				_virtualizationServer=null;
+				throw new RemoteException("",e);
 			}
-			_virtualizationLocalHttpServer = null;
+			_virtualizationServer=null;
 		}
-
 	}
 
-	public boolean isHttpServerRunning(int port) throws RemoteException {
-		return _virtualizationLocalHttpServer != null;
+	public boolean isHttpServerStarted(int port) throws RemoteException {
+		return _virtualizationServer != null;
 	}
-
-	private Acme.Serve.Serve srv = null;
 
 	public RServices cloneServer() throws RemoteException {
-		if (srv == null) {
-			synchronized (this) {
-				if (srv == null) {
-					new Thread(new Runnable() {
-						public void run() {
-							Acme.Serve.Serve srv = new Acme.Serve.Serve();
-							java.util.Properties properties = new java.util.Properties();
-							properties.put("port", GUtils.getLocalTomcatPort());
-							properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
-							srv.arguments = properties;
-							System.out.println("properties:" + properties + "  server: " + srv);
-							srv.addServlet("/classes/", new LocalClassServlet());
-							srv.serve();
-						}
-					}).start();
-
-					new Thread(new Runnable() {
-						public void run() {
-							System.out.println("local rmiregistry port : " + GUtils.getLocalTomcatPort());
-							try {
-								LocateRegistry.createRegistry(GUtils.getLocalRmiRegistryPort());
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}).start();
-
-				}
-			}
-		}
+		System.out.println("cloneServer");
 		try {
-			RServices w = ServerLauncher.createRLocal(true, PoolUtils.getHostIp(), GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), GUtils
-					.getLocalRmiRegistryPort(), 256, 256, true);
+			RServices w = ServerLauncher.createRLocal(false, PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), PoolUtils
+					.getLocalRmiRegistryPort(), 256, 256, false);
 			return w;
 		} catch (Exception e) {
 			throw new RemoteException("", e);
@@ -586,6 +537,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	// --------------
 
+	/*
 	static {
 		if (log instanceof Log4JLogger) {
 			Properties log4jProperties = new Properties();
@@ -597,5 +549,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			PropertyConfigurator.configure(log4jProperties);
 		}
 	}
+	*/
 
 }

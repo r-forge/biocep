@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Vector;
 
 
-import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
  * @author Karim Chine kchine@ebi.ac.uk
@@ -37,47 +36,6 @@ public class GUtils {
 
 	public static String INSTALL_DIR = new File(System.getProperty("user.home") + "/RWorkbench/").getAbsolutePath()
 			+ "/";
-	private static Integer _localTomcatPort=null;
-	public static synchronized Integer getLocalTomcatPort() {
-		if (_localTomcatPort==null){			
-			
-			if (System.getProperty("localtomcat.port")==null || System.getProperty("localtomcat.port").equals("")) {
-				_localTomcatPort=3001;
-			} else {
-				_localTomcatPort=Integer.decode(System.getProperty("localtomcat.port"));
-			}	
-			
-			for (int i=0;i<1000;++i) {				
-				if (!PoolUtils.isPortInUse("127.0.0.1",_localTomcatPort+i)) {
-					_localTomcatPort=_localTomcatPort+i;
-					break;
-				}
-			}
-		} 
-		
-		return _localTomcatPort;		
-	}
-	private static Integer _localRmiregistryPort=null;
-	public static synchronized Integer getLocalRmiRegistryPort() {
-		if (_localRmiregistryPort==null){			
-			
-			if (System.getProperty("localrmiregistry.port")==null || System.getProperty("localrmiregistry.port").equals("")) {
-				_localRmiregistryPort= 2560;
-			} else {
-				_localRmiregistryPort= Integer.decode(System.getProperty("localrmiregistry.port"));
-			}
-			for (int i=0;i<1000;++i) {				
-				if (!PoolUtils.isPortInUse("127.0.0.1",_localRmiregistryPort+i)) {
-					_localRmiregistryPort=_localRmiregistryPort+i;
-					break;
-				}
-			}
-		}
-		return _localRmiregistryPort;
-
-	}
-
-	
 	static final String RLIBSTART = "R$LIB$START";
 	static final String RLIBEND = "R$LIB$END";
 	static final String RVERSTART = "R$VER$START";

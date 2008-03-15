@@ -1,18 +1,14 @@
 package bootstrap;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Date;
 
 public class BootSsh {
 	public static final String STUB_BEGIN_MARKER="#STUBBEGIN#";
@@ -28,7 +24,7 @@ public class BootSsh {
 		String logFileName=args[7];
 		PrintWriter bw=null;
 		try {
-			bw=new PrintWriter(new FileWriter(args[7]));
+			bw=new PrintWriter(new FileWriter(logFileName));
 			URL classServerUrl=new URL("http://" + args[1] + ":" + args[2] + "/classes/");			
 			bw.println(classServerUrl);
 			URLClassLoader cl = new URLClassLoader(new URL[] { classServerUrl }, BootSsh.class.getClassLoader());
@@ -53,9 +49,7 @@ public class BootSsh {
 		} finally {
 			if (bw!=null) {try {bw.close();} catch (Exception e) {e.printStackTrace();}}
 		}
-		
-		//while (true) {	try {Thread.sleep(1000);} catch (Exception e) {e.printStackTrace();}	}
-		//System.exit(0);
+
 	}
 	
 	public static String stubToHex(Remote obj) throws NoSuchObjectException {

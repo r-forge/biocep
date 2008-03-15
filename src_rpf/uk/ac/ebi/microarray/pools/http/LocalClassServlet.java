@@ -1,35 +1,48 @@
-package http.local;
+package uk.ac.ebi.microarray.pools.http;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.methods.GetMethod;
+
 public class LocalClassServlet extends HttpServlet {
-	@Override
+
 	public void init() throws ServletException {
 		super.init();
 	}
 
-	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		doAny(req, resp);
+	}
+	
+
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		doAny(req, resp);
+	}
+	
+	protected void doAny(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String url = req.getRequestURL().toString();
 		String resource = url.substring(url.indexOf("/classes") + "/classes".length());
 		if (resource.equals("")) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 
-		}
-		
-		InputStream is = LocalClassServlet.class.getResourceAsStream(resource);
+		}		
+		InputStream is=null;
+		is = LocalClassServlet.class.getResourceAsStream(resource);
 		if (is==null && resource.endsWith(".class")) {
-			System.out.println("--> trying to load missing class :"+resource);
+			//System.out.println("--> trying to load missing class :"+resource);
 			String className=resource.substring(1, resource.indexOf(".class")).replace('/', '.');
-			System.out.println("--> class name:"+className);
+			//System.out.println("--> class name:"+className);
 			try {
 				LocalClassServlet.class.getClassLoader().loadClass(className);
 				is = LocalClassServlet.class.getResourceAsStream(resource);
@@ -48,25 +61,10 @@ public class LocalClassServlet extends HttpServlet {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 
 		} else {
-			byte[] buffer = new byte[is.available()];
-			try {
-				
-				for (int i = 0; i < buffer.length; ++i) {
-					int b = is.read();
-					buffer[i] = (byte) b;
-				}
-				
-			} catch (Exception e) {
-				
-				e.printStackTrace();
-				
-			}
-			//System.out.println("buffer length : " + buffer.length);
 			if (url.endsWith(".class")) resp.setContentType("application/java");
 			else resp.setContentType("text/plain");
-			//resp.setContentLength(buffer.length);
-			//resp.getOutputStream().flush();
-			resp.getOutputStream().write(buffer);
+			int b;
+			while ((b=is.read())!=-1) { resp.getOutputStream().write(b);}			
 			resp.getOutputStream().flush();
 			resp.getOutputStream().close();
 		}
