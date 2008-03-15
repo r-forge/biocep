@@ -15,9 +15,11 @@
  */
 package uk.ac.ebi.microarray.pools;
 
+
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -25,8 +27,13 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
+
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
+import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 import static uk.ac.ebi.microarray.pools.ServerDefaults.*;
 
 /**
@@ -48,6 +55,57 @@ public class MainServer {
 	public static ServantCreationListener servantCreationListener = null;
 	public static void main(String[] args) throws Exception {
 
+		System.out.println("*************************$$$$$$$$$$$$");
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					
+					Server server = new Server(PoolUtils.getLocalTomcatPort());
+					Context root = new Context(server,"/",Context.SESSIONS);
+					root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
+					System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
+					server.start();
+					
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+		/*
+		System.out.println("*************************$$$$$$$$$$$$");
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					System.out.println("++++++++++++++++oops");
+				Acme.Serve.Serve srv = new Acme.Serve.Serve();
+				java.util.Properties properties = new java.util.Properties();
+				properties.put("port", PoolUtils.getLocalTomcatPort());
+				properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
+				srv.arguments = properties;
+				System.out.println("++++++++++++++++properties:" + properties + "  server: " + srv);
+				srv.addServlet("/classes/", new LocalClassServlet());
+				System.out.println("++++++++++++++++ going to start code server on port :"+PoolUtils.getLocalTomcatPort());
+				srv.serve();
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		*/
+
+		new Thread(new Runnable() {
+			public void run() {
+				System.out.println("+++++++++++++++++++ going to start local rmiregistry port : " + PoolUtils.getLocalRmiRegistryPort());
+				try {
+					LocateRegistry.createRegistry(PoolUtils.getLocalRmiRegistryPort());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+		
 		try {
 
 			if (System.getSecurityManager() == null) {
@@ -151,6 +209,7 @@ public class MainServer {
 
 				((DBLayer) rmiRegistry).updateServantAttributes(sname, attributes);
 			}
+			log.info("*************************$$$$$$$$$$$$");
 			log.info("Servant " + sname + " instantiated successfully.");
 
 		} catch (InvocationTargetException ite) {

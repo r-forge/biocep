@@ -20,14 +20,15 @@
 	<% String debug=request.getParameter("debug")==null ? "false" : request.getParameter("debug");  %>
 	
 	<body>
-		
+
+						
 		<object
 			classid = "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
 			codebase = "http://java.sun.com/update/1.5.0/jinstall-1_5-windows-i586.cab#Version=5,0,0,3"
 			WIDTH = "<%=width%>" 
 			HEIGHT = "<%=height%>" >
 			<PARAM NAME = CODE VALUE = "graphics.rmi.GDApplet.class" >
-			<PARAM NAME = ARCHIVE VALUE = "appletlibs/RJB.jar,appletlibs/commons-httpclient-3.1-rc1.jar,appletlibs/commons-codec-1.3.jar,appletlibs/commons-logging-1.1.jar,appletlibs/log4j-1.2.14.jar,appletlibs/mapping.jar,appletlibs/idw-gpl.jar,appletlibs/jeditmodes.jar,appletlibs/jedit.jar,appletlibs/pf-joi-full.jar,appletlibs/OpenXLS.jar,appletlibs/webserver.jar,appletlibs/htmlparser.jar,appletlibs/servlet-api.jar,appletlibs/JRI.jar,appletlibs/derbyclient.jar,appletlibs/ganymed-ssh2.jar" >
+			<PARAM NAME = ARCHIVE VALUE = "appletlibs/RJB.jar,appletlibs/commons-httpclient-3.1-rc1.jar,appletlibs/commons-codec-1.3.jar,appletlibs/commons-logging-1.1.jar,appletlibs/log4j-1.2.14.jar,appletlibs/mapping.jar,appletlibs/idw-gpl.jar,appletlibs/jeditmodes.jar,appletlibs/jedit.jar,appletlibs/pf-joi-full.jar,appletlibs/OpenXLS.jar,appletlibs/servlet-api-2.5-6.1.8.jar,appletlibs/jetty-6.1.8.jar,appletlibs/jetty-util-6.1.8.jar,appletlibs/htmlparser.jar,appletlibs/JRI.jar,appletlibs/derbyclient.jar,appletlibs/ganymed-ssh2.jar" >
 			<param name = "type" value = "application/x-java-applet;version=1.5">
 			<param name = "scriptable" value = "false">
 			<param name = "autologon" value = "<%=autologon%>">
@@ -44,7 +45,7 @@
 				<embed type = "application/x-java-applet;version=1.5" 
 					
 					CODE = "graphics.rmi.GDApplet.class" 
-					ARCHIVE = "appletlibs/RJB.jar,appletlibs/commons-httpclient-3.1-rc1.jar,appletlibs/commons-codec-1.3.jar,appletlibs/commons-logging-1.1.jar,appletlibs/log4j-1.2.14.jar,appletlibs/mapping.jar,appletlibs/idw-gpl.jar,appletlibs/jeditmodes.jar,appletlibs/jedit.jar,appletlibs/pf-joi-full.jar,appletlibs/OpenXLS.jar,appletlibs/webserver.jar,appletlibs/htmlparser.jar,appletlibs/servlet-api.jar,appletlibs/JRI.jar,appletlibs/derbyclient.jar,appletlibs/ganymed-ssh2.jar" 					
+					ARCHIVE = "appletlibs/RJB.jar,appletlibs/commons-httpclient-3.1-rc1.jar,appletlibs/commons-codec-1.3.jar,appletlibs/commons-logging-1.1.jar,appletlibs/log4j-1.2.14.jar,appletlibs/mapping.jar,appletlibs/idw-gpl.jar,appletlibs/jeditmodes.jar,appletlibs/jedit.jar,appletlibs/pf-joi-full.jar,appletlibs/OpenXLS.jar,appletlibs/servlet-api-2.5-6.1.8.jar,appletlibs/jetty-6.1.8.jar,appletlibs/jetty-util-6.1.8.jar,appletlibs/htmlparser.jar,appletlibs/JRI.jar,appletlibs/derbyclient.jar,appletlibs/ganymed-ssh2.jar" 					
 					WIDTH = "<%=width%>" 
 					HEIGHT = "<%=height%>" 
 					scriptable = false 

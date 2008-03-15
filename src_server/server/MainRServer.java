@@ -8,9 +8,15 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import org.apache.commons.logging.Log;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
+
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationListener;
+import uk.ac.ebi.microarray.pools.YesSecurityManager;
+import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 
 public class MainRServer {
 	
@@ -27,9 +33,42 @@ public class MainRServer {
 	private static ManagedServant mservant = null;
 	private static ServantCreationListener servantCreationListener = null;
 	public static void main(String[] args) throws Exception {
+		
+		System.out.println("*************************$$$$$$$$$$$$");
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					
+					Server server = new Server(PoolUtils.getLocalTomcatPort());
+					Context root = new Context(server,"/",Context.SESSIONS);
+					root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
+					System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
+					server.start();
+					
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 
+		new Thread(new Runnable() {
+			public void run() {
+				System.out.println("+++++++++++++++++++ going to start local rmiregistry port : " + PoolUtils.getLocalRmiRegistryPort());
+				try {
+					LocateRegistry.createRegistry(PoolUtils.getLocalRmiRegistryPort());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		
 		try {
 
+			if (System.getSecurityManager() == null) {
+				System.setSecurityManager(new YesSecurityManager());
+			}
+
+			
 			if (System.getProperty("autoname") != null && System.getProperty("autoname").equalsIgnoreCase("true")) {
 				log.info("Instantiating " + _mainServantClassName + " with autonaming, prefix " + _servantPoolPrefix);
 				servantName = null;

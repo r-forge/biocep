@@ -3,8 +3,6 @@ package graphics.rmi;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isMacOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
-import http.local.LocalClassServlet;
-
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,7 +19,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -29,7 +26,9 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
 import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
@@ -38,6 +37,7 @@ import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
+import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
@@ -51,35 +51,27 @@ public class ServerLauncher {
 	/**
 	 * @param args
 	 */
-	public static Acme.Serve.Serve srv;
 
+	static Server server ;
 	public static void main(String[] args) throws Exception {
-		
-		
-		new Thread(new Runnable() {
-			public void run() {
 
-				srv = new Acme.Serve.Serve() {
-					public void setMappingTable(PathTreeDictionary mappingtable) {
-						super.setMappingTable(mappingtable);
-					}
-				};
-
-				java.util.Properties properties = new java.util.Properties();
-				properties.put("port", GUtils.getLocalTomcatPort());
-				properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
-				srv.arguments = properties;
-				System.out.println("properties:" + properties + "  server: " + srv);
-				srv.addServlet("/classes/", new LocalClassServlet());
-				srv.serve();
+		server = new Server(PoolUtils.getLocalTomcatPort());
+		Context root = new Context(server,"/",Context.SESSIONS);
+		root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
+		server.start();
+				
+		if (true) {
+			while (true){
+				System.out.println("starting:"+server.isStarting()+"started"+server.isStarted()+""+"");
+				try {Thread.sleep(1000);} catch (Exception e) {}
 			}
-		}).start();
+		}
 
 		new Thread(new Runnable() {
 			public void run() {
-				System.out.println("local rmiregistry port : " + GUtils.getLocalTomcatPort());
+				System.out.println("local rmiregistry port : " + PoolUtils.getLocalRmiRegistryPort());
 				try {
-					LocateRegistry.createRegistry(GUtils.getLocalRmiRegistryPort());
+					LocateRegistry.createRegistry(PoolUtils.getLocalRmiRegistryPort());
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -89,16 +81,16 @@ public class ServerLauncher {
 		
 		  	
 		  RServices r = createRLocal(false, PoolUtils.getHostIp(),
-		  GUtils.getLocalTomcatPort(), PoolUtils.getHostIp(),
-		  GUtils.getLocalRmiRegistryPort(), 256, 256, true);
+		  PoolUtils.getLocalTomcatPort(), PoolUtils.getHostIp(),
+		  PoolUtils.getLocalRmiRegistryPort(), 256, 256, false);
 		  
-		  System.out.println("make cluster result : "+r.consoleSubmit("makeCluster(1)"));
+		  System.out.println("make cluster result : "+r.cloneServer());
 		  
 		  String processId = r.getProcessId();
 		  System.out.println("Local process ID:"+PoolUtils.getProcessId());
 		  System.out.println("R process ID:"+processId);
 			  		  
-		  System.exit(0);
+		  //System.exit(0);
 	
 	}
 
@@ -699,8 +691,7 @@ public class ServerLauncher {
 							+ urlprefix + "htmlparser.jar" + " " + urlprefix + "derbyclient.jar" + " " + urlprefix + "RJB.jar" + " " + urlprefix
 							+ "mapping.jar" + (isWindowsOs() ? "\"" : ""));
 				} else {
-					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"
-							+ (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"+ (isWindowsOs() ? "\"" : ""));
 				}
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
@@ -718,6 +709,7 @@ public class ServerLauncher {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
 
 				
+				/*
 				command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=INFO,A1,A2"+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"+ (isWindowsOs() ? "\"" : ""));
@@ -725,7 +717,8 @@ public class ServerLauncher {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));				
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
+				*/				
 				
 				
 				command.add("bootstrap.Boot");
