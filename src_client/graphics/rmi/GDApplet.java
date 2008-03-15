@@ -509,9 +509,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
 												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), true);
 									} else {
-
-										r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
+					
+										if (PoolUtils.isWindowsOs()) {
+											r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
+										} else {
+											r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
+												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
+										}
 									}
 
 									_keepAlive = ident.isKeepAlive();
@@ -3008,6 +3013,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			if (_sshParameters == null) {
 				try {
+					_rForConsole.reset();
 					if (PoolUtils.isWindowsOs()) {
 						PoolUtils.killLocalWinProcess(_rProcessId, true);
 					} else {

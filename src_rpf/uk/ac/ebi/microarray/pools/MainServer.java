@@ -54,57 +54,6 @@ public class MainServer {
 	private static ManagedServant mservant = null;
 	public static ServantCreationListener servantCreationListener = null;
 	public static void main(String[] args) throws Exception {
-
-		System.out.println("*************************$$$$$$$$$$$$");
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					
-					Server server = new Server(PoolUtils.getLocalTomcatPort());
-					Context root = new Context(server,"/",Context.SESSIONS);
-					root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
-					System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
-					server.start();
-					
-				} catch (Throwable e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		/*
-		System.out.println("*************************$$$$$$$$$$$$");
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					System.out.println("++++++++++++++++oops");
-				Acme.Serve.Serve srv = new Acme.Serve.Serve();
-				java.util.Properties properties = new java.util.Properties();
-				properties.put("port", PoolUtils.getLocalTomcatPort());
-				properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
-				srv.arguments = properties;
-				System.out.println("++++++++++++++++properties:" + properties + "  server: " + srv);
-				srv.addServlet("/classes/", new LocalClassServlet());
-				System.out.println("++++++++++++++++ going to start code server on port :"+PoolUtils.getLocalTomcatPort());
-				srv.serve();
-				} catch (Throwable e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-		*/
-
-		new Thread(new Runnable() {
-			public void run() {
-				System.out.println("+++++++++++++++++++ going to start local rmiregistry port : " + PoolUtils.getLocalRmiRegistryPort());
-				try {
-					LocateRegistry.createRegistry(PoolUtils.getLocalRmiRegistryPort());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
 		
 		try {
 

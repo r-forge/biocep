@@ -33,35 +33,7 @@ public class MainRServer {
 	private static ManagedServant mservant = null;
 	private static ServantCreationListener servantCreationListener = null;
 	public static void main(String[] args) throws Exception {
-		
-		System.out.println("*************************$$$$$$$$$$$$");
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					
-					Server server = new Server(PoolUtils.getLocalTomcatPort());
-					Context root = new Context(server,"/",Context.SESSIONS);
-					root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
-					System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
-					server.start();
-					
-				} catch (Throwable e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		new Thread(new Runnable() {
-			public void run() {
-				System.out.println("+++++++++++++++++++ going to start local rmiregistry port : " + PoolUtils.getLocalRmiRegistryPort());
-				try {
-					LocateRegistry.createRegistry(PoolUtils.getLocalRmiRegistryPort());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-		
+				
 		try {
 
 			if (System.getSecurityManager() == null) {

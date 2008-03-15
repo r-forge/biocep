@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.5+" codebase="http://192.168.1.5:8080/frontendapp/" >
+<jnlp spec="1.5+" codebase="http://127.0.0.1:8080/frontendapp/" >
 
 <information>
   <title>Virtual R Workbench</title>

@@ -172,7 +172,7 @@ makeCluster <- function( n=3, nodeName='N1' )  {
 
 clusterEvalQ <- function( cl, exp )  {  
 	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"clusterEvalQ", cl, exp );
-	if (result[1]=='OK') {
+	if (result[1]=='OK') {		
 		eval(parse("", text=result[2]))
 	} else {
 		eval(parse("", text=result[2]))
