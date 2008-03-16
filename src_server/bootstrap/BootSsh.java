@@ -1,9 +1,12 @@
 package bootstrap;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.NoSuchObjectException;
@@ -20,11 +23,19 @@ public class BootSsh {
 	public static final String R_PROCESS_ID_BEGIN_MARKER="#RPROCESSIDBEGIN#";
 	public static final String R_PROCESS_ID_END_MARKER="#RPROCESSIDEND#";	
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 		String logFileName=args[7];
-		PrintWriter bw=null;
+		PrintStream bw=null;
+		if (logFileName.equals("System.out")) {
+			bw=System.out;
+		} else {
+			bw=new PrintStream(new File(logFileName));
+		}
+		
+		System.out.println("+*+*+*+*+*+*+*");
+		bw.println("/*/**/**/**/*/*///*/");
 		try {
-			bw=new PrintWriter(new FileWriter(logFileName));
+			
 			URL classServerUrl=new URL("http://" + args[1] + ":" + args[2] + "/classes/");			
 			bw.println(classServerUrl);
 			URLClassLoader cl = new URLClassLoader(new URL[] { classServerUrl }, BootSsh.class.getClassLoader());
@@ -47,9 +58,11 @@ public class BootSsh {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (bw!=null) {try {bw.close();} catch (Exception e) {e.printStackTrace();}}
+			if (bw!=null){
+				try {bw.close();} catch (Exception e) {e.printStackTrace();}
+			}
 		}
-
+		System.exit(0);
 	}
 	
 	public static String stubToHex(Remote obj) throws NoSuchObjectException {

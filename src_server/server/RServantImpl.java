@@ -20,7 +20,6 @@ import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
 import graphics.rmi.RClustserInterface;
 import graphics.rmi.ServerLauncher;
-
 import java.io.Serializable;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
@@ -49,10 +48,8 @@ import remoting.RKit;
 import remoting.RNI;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.InitializingException;
-import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.ManagedServantAbstract;
 import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.RemotePanel;
 import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 import util.Utils;
@@ -395,44 +392,71 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		System.exit(0);
 	}
 
-	@Override
 	public boolean hasConsoleMode() throws RemoteException {
 		return true;
 	}
 
-	@Override
 	public String consoleSubmit(String cmd) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().consoleSubmit(cmd);
 	}
+	
+	private boolean submitted;
+	public void asynchronousConsoleSubmit(final String cmd) throws RemoteException {
+		
+		submitted=false;
+		
+		new Thread(new Runnable() {
+			public void run() {
+				String result="";
+				
+				try {
+					result=DirectJNI.getInstance().getRServices().consoleSubmit(cmd);
+				} catch (Exception e) {
+					result=PoolUtils.getStackTraceAsString(e);
+				}
+				
+				submitted=true;
+				
+				RAction consoleLogAppend = new RAction("ASYNCHRONOUS_SUBMIT_LOG");
+				HashMap<String, Object> attrs = new HashMap<String, Object>();
+				attrs.put("command", cmd);
+				attrs.put("result", result);
+				consoleLogAppend.setAttributes(attrs);
+				DirectJNI.getInstance().addAction(consoleLogAppend);
+			}
+		}).start();
+		
+		if (!submitted && !isBusy()) {
+			while (!isBusy()) {
+				if (submitted) break;
+				try {Thread.sleep(20);} catch (Exception e) {}				
+			}			
+		}
+		
+	}
 
-	@Override
 	public boolean hasPushPopMode() throws RemoteException {
 		return true;
 	}
 
-	@Override
 	public Serializable pop(String symbol) throws RemoteException {
 		Serializable result = DirectJNI.getInstance().getRServices().evalAndGetObject(symbol);
 		System.out.println("result for " + symbol + " : " + result);
 		return result;
 	}
 
-	@Override
 	public void push(String symbol, Serializable object) throws RemoteException {
 		DirectJNI.getInstance().getRServices().putObjectAndAssignName((RObject) object, symbol);
 	}
 
-	@Override
 	public String[] listSymbols() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().listSymbols();
 	}
 
-	@Override
 	public boolean hasGraphicMode() throws RemoteException {
 		return true;
 	}
 
-	@Override
 	public RemotePanel getPanel(int w, int h) throws RemoteException {
 		return new JGDPanel(w, h, _graphicNotifier);
 	}

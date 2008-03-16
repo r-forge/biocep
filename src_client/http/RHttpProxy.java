@@ -84,7 +84,7 @@ public class RHttpProxy {
 				getLogOut.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
 				getLogOut.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
 			}
-			try {
+			try {				
 				mainHttpClient.executeMethod(getLogOut);
 				result = new ObjectInputStream(getLogOut.getResponseBodyAsStream()).readObject();
 			} catch (ConnectException e) {
@@ -146,8 +146,8 @@ public class RHttpProxy {
 	}
 
 	public static Object getDynamicProxy(final String url, final String sessionId, final String servantName,
-			Class<?> c, final HttpClient httpClient) {
-		Object proxy = Proxy.newProxyInstance(RHttpProxy.class.getClassLoader(), new Class[] { c },
+			Class<?>[] c, final HttpClient httpClient) {
+		Object proxy = Proxy.newProxyInstance(RHttpProxy.class.getClassLoader(), c ,
 				new InvocationHandler() {
 					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 						return RHttpProxy.invoke(url, sessionId, servantName, method.getName(), method
@@ -215,7 +215,7 @@ public class RHttpProxy {
 			
 			String deviceName=(String)result;
 			return (GDDevice) RHttpProxy.getDynamicProxy(url, sessionId, deviceName,
-					GDDevice.class, new HttpClient(new MultiThreadedHttpConnectionManager()));
+					new Class[]{GDDevice.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));
 
 		} finally {
 			if (getNewDevice != null) {

@@ -12,6 +12,7 @@ import graphics.rmi.action.SnapshotDeviceAction;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
 import http.ConnectionFailedException;
 import http.FileLoad;
+import http.HttpMarker;
 import http.NoNodeManagerFound;
 import http.NoRegistryAvailableException;
 import http.NoServantAvailableException;
@@ -288,22 +289,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-
+						
 						final Server server = new Server(PoolUtils.getLocalTomcatPort());
+						server.setStopAtShutdown(true);
 						Context root = new Context(server, "/", Context.SESSIONS);
 						root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 						System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
-						Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-							public void run() {
-								try {
-									server.stop();
-								} catch (Exception ioe) {
-									ioe.printStackTrace();
-								}
-
-							}
-						}));
-
 						server.start();
 
 					} catch (Throwable e) {
@@ -312,37 +303,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}).start();
 
-			/*
-			new Thread(new Runnable() {
-				public void run() {
-					System.out.println("local Http port : " + PoolUtils.getLocalTomcatPort());
-					final Acme.Serve.Serve srv = new Acme.Serve.Serve() {
-						public void setMappingTable(PathTreeDictionary mappingtable) {
-							super.setMappingTable(mappingtable);
-						}
-					};
-					java.util.Properties properties = new java.util.Properties();
-					properties.put("port", PoolUtils.getLocalTomcatPort());
-					properties.setProperty(Acme.Serve.Serve.ARG_NOHUP, "nohup");
-					srv.arguments = properties;
-					System.out.println("properties:" + properties + "  server: " + srv);
-					srv.addServlet("/classes/", new uk.ac.ebi.microarray.pools.http.LocalClassServlet());
-					srv.addServlet("/helpme/", new http.local.LocalHelpServlet(GDApplet.this));
-
-					Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-						public void run() {
-							try {
-								srv.notifyStop();
-							} catch (java.io.IOException ioe) {
-								ioe.printStackTrace();
-							}
-							srv.destroyAllServlets();
-						}
-					}));
-					srv.serve();
-				}
-			}).start();
-			 */
 
 			new Thread(new Runnable() {
 				public void run() {
@@ -473,12 +433,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 									JOptionPane.showMessageDialog(GDApplet.this, "The login <guest> is not allowed to have workspace persistency");
 								}
 
-								_rForConsole = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", RServices.class, new HttpClient(
+								_rForConsole = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[]{RServices.class, HttpMarker.class}, new HttpClient(
 										new MultiThreadedHttpConnectionManager()));
-								_rForPopCmd = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", RServices.class, new HttpClient(
+								_rForPopCmd = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[]{RServices.class, HttpMarker.class}, new HttpClient(
 										new MultiThreadedHttpConnectionManager()));
-
-								_rForFiles = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", RServices.class, new HttpClient(
+								_rForFiles = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[]{RServices.class, HttpMarker.class}, new HttpClient(
 										new MultiThreadedHttpConnectionManager()));
 
 								d = RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
@@ -512,10 +471,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 					
 										if (PoolUtils.isWindowsOs()) {
 											r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
-												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
+												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
 										} else {
 											r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
-												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), true);
+												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
 										}
 									}
 
@@ -728,6 +687,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					if (expression.equals("logoff") || expression.startsWith("logoff ")) {
 						try {
 
+							System.out.println("p1");
 							ServerLogView serverLogView = getOpenedServerLogView();
 							if (getOpenedServerLogView() != null) {
 								try {
@@ -738,10 +698,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 									e.printStackTrace();
 								}
 							}
+							System.out.println("p2");
 
 							if (_mode == HTTP_MODE) {
-								disposeDevices();
+								System.out.println("p3");
+								if (!getRLock().isLocked()) {
+									disposeDevices();
+								}
+								System.out.println("p4");
 								RHttpProxy.logOff(_commandServletUrl, _sessionId);
+								System.out.println("p5");
 							} else {
 								if (!getRLock().isLocked()) {
 									disposeDevices();
@@ -766,7 +732,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 						try {
 							getRLock().lock();
-							result = _rForConsole.consoleSubmit(expression);
+							
+							if (_rForConsole instanceof HttpMarker) {								
+								_rForConsole.asynchronousConsoleSubmit(expression);								
+								System.out.println(_rForConsole.isBusy());
+								while(_rForConsole.isBusy()) {
+									try {Thread.sleep(20);} catch (Exception e) {}
+								}							
+								result="";
+								
+							} else {
+								result=_rForConsole.consoleSubmit(expression);
+							}
+							
+							
 						} catch (NotLoggedInException nle) {
 							noSession();
 							result = "Not Logged on, type 'logon' to connect\n";
@@ -781,6 +760,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							getRLock().unlock();
 						}
 					}
+					
 					return (String) result;
 
 				}
@@ -1593,7 +1573,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 											});
 
 										}
+									} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
+										SwingUtilities.invokeLater(new Runnable() {
+											public void run() {
+												_consolePanel.print(null, (String)action.getAttributes().get("result"));
+											}
+										});										
 									}
+									
 								}
 
 							}

@@ -241,4 +241,13 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	public ManagedServant cloneServer() throws RemoteException {
 		return null;
 	}
+	
+	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
+	}
+	
+	public boolean isBusy() throws RemoteException {
+		return false;
+	}
+	
+	
 }
