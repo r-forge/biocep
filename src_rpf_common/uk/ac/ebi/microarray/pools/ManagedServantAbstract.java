@@ -258,6 +258,16 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		return PoolUtils.isPortInUse("127.0.0.1", port);
 	}
 	
+	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
+	}
+	public ManagedServant cloneServer() throws RemoteException {
+		return null;
+	}
+	
+	public boolean isBusy() throws RemoteException {
+		return false;
+	}
+	
 	public String toString() {
 		return super.toString() + " " + _servantName;
 	}

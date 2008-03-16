@@ -60,12 +60,11 @@ public class ServerLauncher {
 		root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 		server.start();
 				
-		if (true) {
-			while (true){
-				System.out.println("starting:"+server.isStarting()+"started"+server.isStarted()+""+"");
-				try {Thread.sleep(1000);} catch (Exception e) {}
-			}
+		
+		while (!server.isStarted()){	
+			try {Thread.sleep(20);} catch (Exception e) {}
 		}
+
 
 		new Thread(new Runnable() {
 			public void run() {
@@ -80,11 +79,11 @@ public class ServerLauncher {
 		}).start();
 		
 		  	
-		  RServices r = createRLocal(false, PoolUtils.getHostIp(),
+		  RServices r = createRSsh(false, PoolUtils.getHostIp(),
 		  PoolUtils.getLocalTomcatPort(), PoolUtils.getHostIp(),
-		  PoolUtils.getLocalRmiRegistryPort(), 256, 256, false);
+		  PoolUtils.getLocalRmiRegistryPort(), 256, 256, "192.168.189.131", "ebi", "ebibiocep", false);
 		  
-		  System.out.println("make cluster result : "+r.cloneServer());
+		  //System.out.println("make cluster result : "+r.cloneServer());
 		  
 		  String processId = r.getProcessId();
 		  System.out.println("Local process ID:"+PoolUtils.getProcessId());
@@ -178,7 +177,7 @@ public class ServerLauncher {
 			try {
 				sess = conn.openSession();
 				sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
-						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes);
+						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes+" "+"System.out");
 
 				InputStream stdout = new StreamGobbler(sess.getStdout());
 				final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));

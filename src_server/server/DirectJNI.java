@@ -395,6 +395,10 @@ public class DirectJNI {
 
 	}
 
+	public void addAction(RAction action) {
+		_rActions.add(action);
+	}
+	
 	public Vector<String> getBootStrapRObjects() {
 		return _bootstrapRObjects;
 	}
@@ -2518,14 +2522,21 @@ public class DirectJNI {
 		
 		public void startHttpServer(int port) throws RemoteException {
 		}
+		
 		public void stopHttpServer() throws RemoteException {
 		}
+		
 		public boolean isHttpServerStarted(int port) throws RemoteException {
 			return false;
 		}
+		
 		public RServices cloneServer() throws RemoteException {
 			return null;
 		}
+		
+		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
+		}
+
 	};
 
 	public static Vector<RAction> _rActions = new Vector<RAction>();

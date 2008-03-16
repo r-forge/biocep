@@ -102,9 +102,7 @@ public interface RServices extends ManagedServant {
 	public String getRHelpFileUri(String topic, String pack) throws java.rmi.RemoteException;
 
 	public Vector<RAction> popRActions() throws java.rmi.RemoteException;
-	
-	public boolean isBusy() throws java.rmi.RemoteException;
-	
+		
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
 			
 	public void startHttpServer(int port) throws java.rmi.RemoteException;
