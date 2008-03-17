@@ -367,7 +367,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 		log.info("command servlet init");
 		if (_rkit==null) {
 			PoolUtils.injectSystemProperties(true);
-			Utils.initLog();
+			//Utils.initLog();
 		}
 		PoolUtils.initRmiSocketFactory();
 		getServletContext().setAttribute("SESSIONS_MAP", new HashMap<String, HttpSession>());

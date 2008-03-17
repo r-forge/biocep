@@ -18,9 +18,13 @@ package uk.ac.ebi.microarray.pools;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.rmi.RemoteException;
+import java.util.Properties;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.Layout;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.WriterAppender;
 import org.apache.log4j.helpers.LogLog;
 
@@ -28,6 +32,8 @@ import org.apache.log4j.helpers.LogLog;
  * @author Karim Chine   kchine@ebi.ac.uk
  */
 public class RemoteAppender extends WriterAppender {
+	
+	public static final Log log = org.apache.commons.logging.LogFactory.getLog(RemoteAppender.class);
 
 	private static Vector<RemoteLogListener> _outLogListeners = new Vector<RemoteLogListener>();
 	private static Vector<RemoteLogListener> _errLogListeners = new Vector<RemoteLogListener>();
@@ -110,6 +116,20 @@ public class RemoteAppender extends WriterAppender {
 
 	protected final void closeWriter() {
 		super.closeWriter();
+	}
+
+	public static void initLog() {
+		
+		if (log instanceof Log4JLogger) {
+			Properties log4jProperties = new Properties();
+			for (Object sprop : System.getProperties().keySet()) {
+				if (((String) sprop).startsWith("log4j.")) {
+					log4jProperties.put(sprop, System.getProperties().get(sprop));
+				}
+			}
+			PropertyConfigurator.configure(log4jProperties);
+		}
+	
 	}
 
 	private static class RemoteErrStream extends OutputStream {
