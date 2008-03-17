@@ -31,15 +31,9 @@ import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.PropertyConfigurator;
-//import org.apache.commons.logging.impl.Log4JLogger;
-//import org.apache.log4j.PropertyConfigurator;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
 
@@ -47,7 +41,7 @@ import org.w3c.dom.Node;
  * @author Karim Chine kchine@ebi.ac.uk
  */
 public class Utils {
-	private static final Log log = org.apache.commons.logging.LogFactory.getLog(Utils.class);
+	
 
 	public static String flatArray(Object[] array) {
 		String result = "{";
@@ -300,20 +294,6 @@ public class Utils {
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
-	}
-
-	public static void initLog() {
-		
-		if (log instanceof Log4JLogger) {
-			Properties log4jProperties = new Properties();
-			for (Object sprop : System.getProperties().keySet()) {
-				if (((String) sprop).startsWith("log4j.")) {
-					log4jProperties.put(sprop, System.getProperties().get(sprop));
-				}
-			}
-			PropertyConfigurator.configure(log4jProperties);
-		}
-	
 	}
 
 	public static boolean isWebBrowserSupported() throws Exception {

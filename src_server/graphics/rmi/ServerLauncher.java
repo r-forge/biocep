@@ -707,6 +707,7 @@ public class ServerLauncher {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryhost=" + rmiRegistryHostIp + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
 
+				/*
 				command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=INFO,A1,A2"+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"+ (isWindowsOs() ? "\"" : ""));
@@ -714,7 +715,8 @@ public class ServerLauncher {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));				
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
+				*/				
 								
 				command.add("bootstrap.Boot");
 				command.add(new Boolean(keepAlive).toString());

@@ -2,11 +2,8 @@ package bootstrap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.NoSuchObjectException;

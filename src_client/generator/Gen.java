@@ -33,8 +33,6 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.impl.Log4JLogger;
-//import org.apache.log4j.PropertyConfigurator;
 import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Copy;
