@@ -176,6 +176,9 @@
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+				<pathelement path="lib/desktop/activation.jar"/>
+				<pathelement path="lib/desktop/mail.jar"/>
+
 				
 				<pathelement path="${servant.classpath}"/>
 				
@@ -537,6 +540,9 @@
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+				<pathelement path="lib/desktop/activation.jar"/>
+				<pathelement path="lib/desktop/mail.jar"/>
+
 	
 				<pathelement path="lib/desktop/jeditmodes.jar"/>
 				<pathelement path="lib/desktop/jedit.jar"/>
@@ -632,6 +638,9 @@
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+				<pathelement path="lib/desktop/activation.jar"/>
+				<pathelement path="lib/desktop/mail.jar"/>
+
 				
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>

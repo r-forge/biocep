@@ -248,6 +248,8 @@
 							<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 							<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 							<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+							<pathelement path="lib/desktop/activation.jar"/>
+							<pathelement path="lib/desktop/mail.jar"/>
 														
 							<pathelement path="lib/desktop/idw-gpl.jar"/>
 							<pathelement path="lib/desktop/pf-joi-full.jar"/>
@@ -330,7 +332,9 @@
 						<fileset dir="lib/desktop" includes="servlet-api-2.5-6.1.8.jar"/>
 				  		<fileset dir="lib/desktop" includes="jetty-util-6.1.8.jar"/>
 						<fileset dir="lib/desktop" includes="jetty-6.1.8.jar"/>
-				  	
+				  		<fileset dir="lib/desktop" includes="activation.jar"/>
+				  		<fileset dir="lib/desktop" includes="mail.jar"/>
+				  					  	
 						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>									
 						<fileset dir="lib/desktop" includes="JRI.jar"/>
 				  		<fileset dir="lib/jdbc" includes="derbyclient.jar"/>
