@@ -31,8 +31,13 @@
    <jar href="appletlibs/OpenXLS.jar"/>
    <jar href="appletlibs/JRI.jar"/>
    <jar href="appletlibs/htmlparser.jar"/>
-   <jar href="appletlibs/webserver.jar"/>
-   <jar href="appletlibs/servlet-api.jar"/>
+   
+  <jar href="appletlibs/servlet-api-2.5-6.1.8.jar"/>  
+  <jar href="appletlibs/jetty-6.1.8.jar"/>  
+  <jar href="appletlibs/jetty-util-6.1.8.jar"/>   
+  <jar href="appletlibs/activation.jar"/>
+  <jar href="appletlibs/mail.jar"/>
+   
   
 </resources>
 <application-desc main-class="graphics.rmi.GDAppletLauncher"/>

@@ -294,6 +294,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						server.setStopAtShutdown(true);
 						Context root = new Context(server, "/", Context.SESSIONS);
 						root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
+						root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/helpme/*");
 						System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
 						server.start();
 
@@ -466,7 +467,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									if (ident.isUseSsh()) {
 										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
-												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), true);
+												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), false);
 									} else {
 					
 										if (PoolUtils.isWindowsOs()) {
@@ -687,7 +688,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 					if (expression.equals("logoff") || expression.startsWith("logoff ")) {
 						try {
 
-							System.out.println("p1");
 							ServerLogView serverLogView = getOpenedServerLogView();
 							if (getOpenedServerLogView() != null) {
 								try {
@@ -698,16 +698,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 									e.printStackTrace();
 								}
 							}
-							System.out.println("p2");
 
 							if (_mode == HTTP_MODE) {
-								System.out.println("p3");
 								if (!getRLock().isLocked()) {
 									disposeDevices();
 								}
-								System.out.println("p4");
 								RHttpProxy.logOff(_commandServletUrl, _sessionId);
-								System.out.println("p5");
 							} else {
 								if (!getRLock().isLocked()) {
 									disposeDevices();
