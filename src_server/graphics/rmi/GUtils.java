@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -95,7 +96,6 @@ public class GUtils {
 			}
 	
 			Vector<String> systemEnvVector = new Vector<String>();
-	
 			{
 	
 				Map<String, String> osenv = System.getenv();
@@ -112,6 +112,7 @@ public class GUtils {
 	
 			System.out.println("exec->" + getInfoCommand);
 	
+			System.out.println(systemEnvVector);
 			final Process getInfoProc = Runtime.getRuntime().exec(getInfoCommand.toArray(new String[0]),
 	
 			systemEnvVector.toArray(new String[0]));
@@ -128,7 +129,7 @@ public class GUtils {
 	
 						while ((line = br.readLine()) != null) {
 	
-							//System.out.println(line);
+							System.out.println(line);
 	
 						}
 	
@@ -154,7 +155,7 @@ public class GUtils {
 	
 						while ((line = br.readLine()) != null) {
 	
-							//System.out.println(line);
+							System.out.println(line);
 	
 						}
 	

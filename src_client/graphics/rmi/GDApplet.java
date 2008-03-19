@@ -291,7 +291,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					try {
 						
 						final Server server = new Server(PoolUtils.getLocalTomcatPort());
-						server.setStopAtShutdown(true);
+						//server.setStopAtShutdown(true);
 						Context root = new Context(server, "/", Context.SESSIONS);
 						root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 						root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/helpme/*");
@@ -2994,9 +2994,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		if (_rProcessId != null && !_keepAlive) {
 
+			try {
+				_rForConsole.reset();
+			} catch (Exception e) {
+				System.out.println("333333333333333333333333333");
+				e.printStackTrace();
+			}
 			if (_sshParameters == null) {
 				try {
-					_rForConsole.reset();
 					if (PoolUtils.isWindowsOs()) {
 						PoolUtils.killLocalWinProcess(_rProcessId, true);
 					} else {

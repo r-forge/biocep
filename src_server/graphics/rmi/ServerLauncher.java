@@ -16,6 +16,7 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -54,7 +55,10 @@ public class ServerLauncher {
 
 	static Server server ;
 	public static void main(String[] args) throws Exception {
-
+		String[] rinfo = GUtils.getRInfo(null);
+		System.out.println("R Info::"+Arrays.toString(rinfo));
+		
+		System.exit(0);
 		server = new Server(PoolUtils.getLocalTomcatPort());
 		Context root = new Context(server,"/",Context.SESSIONS);
 		root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
@@ -479,35 +483,26 @@ public class ServerLauncher {
 					if (n == JOptionPane.OK_OPTION) {
 						String rZipFileName = null;
 						if (isWindowsOs()) {
-							if (!new File(root + "R/R-2.6.0/bin/R.dll").exists()) {
-								rZipFileName = "R-2.6.0Win.zip";
+							if (!new File(root + "R/R-2.6.2/bin/R.dll").exists()) {
+								rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/R-2.6.2-Win.zip";								
 							} else {
 								rZipFileName = null;
 							}
 						} else if (isMacOs()) {
-							if (!new File(root + "R/R-2.6.0/lib/libR.dylib").exists()) {
-								rZipFileName = "R-2.6.0MacOSX.zip";
+							if (!new File(root + "R/R-2.6.2/lib/libR.dylib").exists()) {
+								rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/R-2.6.2-Mac.zip";
 							} else {
 								rZipFileName = null;
 							}
 						}
 
 						if (rZipFileName != null) {
-							URL rUrl = new URL(rjbURL.toString().substring(0, rjbURL.toString().indexOf("/appletlibs")) + "/jawslibs/" + rZipFileName);
-
-							InputStream is = null;
-							try {
-								is = rUrl.openConnection().getInputStream();
-							} catch (Exception e) {
-								rUrl = new URL("http://www.ebi.ac.uk/microarray-srv/frontendapp/" + "jawslibs/" + rZipFileName);
-								is = rUrl.openConnection().getInputStream();
-							}
-
-							unzip(is, root + "R/", null, BUFFER_SIZE, true, "Unzipping R..", 3816);
-
+							URL rUrl = new URL(rZipFileName);
+							InputStream is = rUrl.openConnection().getInputStream();
+							unzip(is, root + "R/", null, BUFFER_SIZE, true, "Unzipping R..", 3606);
 						}
 
-						rpath = root + "R/R-2.6.0/";
+						rpath = root + "R/R-2.6.2/";
 
 					} else {
 						JOptionPane.showMessageDialog(null,
