@@ -37,7 +37,27 @@
 				<pathelement path="${CORE_JAR}"/>
 				<pathelement path="${LOGGING_JAR}"/>
 				<pathelement path="${LOG4J_JAR}"/>					
-				<pathelement path="demos/demo1/distrib/mapping.jar"/>				
+				<pathelement path="demos/demo1/distrib/mapping.jar"/>	
+				
+				<pathelement path="lib/svg/batik-anim.jar"/>
+				<pathelement path="lib/svg/batik-awt-util.jar"/>
+				<pathelement path="lib/svg/batik-bridge.jar"/>
+				<pathelement path="lib/svg/batik-css.jar"/>
+				<pathelement path="lib/svg/batik-dom.jar"/>
+				<pathelement path="lib/svg/batik-ext.jar"/>
+				<pathelement path="lib/svg/batik-extension.jar"/>
+				<pathelement path="lib/svg/batik-gui-util.jar"/>
+				<pathelement path="lib/svg/batik-gvt.jar"/>
+				<pathelement path="lib/svg/batik-parser.jar"/>
+				<pathelement path="lib/svg/batik-script.jar"/>
+				<pathelement path="lib/svg/batik-svg-dom.jar"/>
+				<pathelement path="lib/svg/batik-swing.jar"/>
+				<pathelement path="lib/svg/batik-util.jar"/>
+				<pathelement path="lib/svg/batik-xml.jar"/>
+				<pathelement path="lib/svg/js.jar"/>
+				<pathelement path="lib/svg/xml-apis.jar"/>
+				<pathelement path="lib/svg/xml-apis-ext.jar"/>	
+							
 			</classpath>
 		</javac>
 		
@@ -50,6 +70,29 @@
 				<pathelement path="${HTMLPARSER_JAR}"/>				
 				<pathelement path="demos/demo1/distrib/mapping.jar"/>				
 				<pathelement location="demos/demo1/src"/>
+				
+				
+				<pathelement path="lib/svg/batik-anim.jar"/>
+				<pathelement path="lib/svg/batik-awt-util.jar"/>
+				<pathelement path="lib/svg/batik-bridge.jar"/>
+				<pathelement path="lib/svg/batik-css.jar"/>
+				<pathelement path="lib/svg/batik-dom.jar"/>
+				<pathelement path="lib/svg/batik-ext.jar"/>
+				<pathelement path="lib/svg/batik-extension.jar"/>
+				<pathelement path="lib/svg/batik-gui-util.jar"/>
+				<pathelement path="lib/svg/batik-gvt.jar"/>
+				<pathelement path="lib/svg/batik-parser.jar"/>
+				<pathelement path="lib/svg/batik-script.jar"/>
+				<pathelement path="lib/svg/batik-svg-dom.jar"/>
+				<pathelement path="lib/svg/batik-swing.jar"/>
+				<pathelement path="lib/svg/batik-util.jar"/>
+				<pathelement path="lib/svg/batik-xml.jar"/>
+				<pathelement path="lib/svg/js.jar"/>
+				<pathelement path="lib/svg/xml-apis.jar"/>
+				<pathelement path="lib/svg/xml-apis-ext.jar"/>	
+				
+				
+				
 			</classpath>
 			<env key="Path" path="${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>

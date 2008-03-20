@@ -637,6 +637,10 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
+	
+	public Vector<String> evalAndGetSvg(String expression) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().evalAndGetSvg(expression);
+	}
 	// --------------
 
 	/*
