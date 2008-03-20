@@ -13,10 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+
+import org.apache.batik.swing.JSVGCanvas;
 import org.bioconductor.packages.biobase.ExpressionSet;
 import org.bioconductor.packages.rGlobalEnv.Point;
 import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
+import org.bioconductor.packages.rservices.RInteger;
 import org.bioconductor.packages.rservices.RNamedArgument;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.vsn.Vsn;
@@ -32,10 +44,41 @@ public class DirectPackUsage {
 
 	public static void main(String args[]) throws Exception {
 
+		
 		System.setErr(new PrintStream(System.out));
 		DirectJNI.init();
 		RServices r = DirectJNI.getInstance().getRServices();
 
+		
+	
+		Vector<String> result=r.evalAndGetSvg("plot(rnorm(100))");
+		System.out.println(result);
+		String tempFile=System.getProperty("java.io.tmpdir")+"/svgview"+System.currentTimeMillis()+".svg";
+		PrintWriter pw=new PrintWriter(new FileWriter(tempFile));
+		for (int i=0; i<result.size(); ++i) pw.println(result.elementAt(i));
+		pw.close();
+		
+				
+		
+        JFrame f = new JFrame("Batik");
+        JSVGCanvas svgCanvas = new JSVGCanvas();
+        f.getContentPane().add(svgCanvas);
+
+        f.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+        
+        f.setSize(400, 400);
+        f.setVisible(true);
+
+        svgCanvas.setURI(new File(tempFile).toURL().toString());
+        
+        if (true) return;
+		System.exit(0);
+		
+		
 		System.out.println("Available Packages : " + Utils.flatArray(r.getAllPackageNames()));
 		rGlobalEnvFunction globalPack = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"));
 		vsnFunction vsnPack = (vsnFunction) r.getPackage("vsnFunction");
@@ -61,8 +104,10 @@ public class DirectPackUsage {
 		System.exit(0);
 	}
 
+	/*
 	static {
 		Utils.initLog();
 	}
+	*/
 
 }

@@ -1,15 +1,11 @@
 package server;
 
 import graphics.pop.GDDevice;
-
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.Vector;
-
 import mapping.RPackage;
-
 import org.bioconductor.packages.rservices.RObject;
-
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RCallback;
@@ -271,5 +267,9 @@ public class RServicesObject implements RServices {
 	}
 	
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
+	}
+	
+	public Vector<String> evalAndGetSvg(String expression) throws RemoteException {
+		return null;
 	}
 }

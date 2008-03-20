@@ -200,6 +200,26 @@
 				</antcall>
 			</target>
 			
+			<target name="local" depends="democompile">
+				
+				<path id="demoVsnPoolpath">
+					<pathelement location="${demo.client.bin}"/>			
+					<pathelement path="${demo.mappingjar}"/>
+										
+				</path>
+				
+				<antcall target="client">						
+					<param name="client.db.driver" value="${demo.db.driver}"/>
+					<param name="client.db.url" value="${demo.db.url}" />
+					<param name="client.db.user" value="${demo.db.user}" />
+					<param name="client.db.password" value="${demo.db.password}" />
+					<param name="client.defaultpoolname" value="${demo.client.defaultpoolname}" />
+					<param name="client.path.id" value="demoVsnPoolpath" />			
+					<param name="client.mainclass" value="LocalR" />
+					
+				</antcall>
+			</target>
+
 			<target name="demorun2" depends="democompile">
 				
 				<if><not><isset property="url"/></not><then><property name="url" value="http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/cmd"/></then></if>

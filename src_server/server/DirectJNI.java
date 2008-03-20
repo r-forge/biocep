@@ -24,6 +24,7 @@ import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -2535,6 +2536,64 @@ public class DirectJNI {
 		}
 		
 		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
+		}
+						
+		public Vector<String> evalAndGetSvg(String expression) throws RemoteException {
+			
+			System.out.println("ooooo");
+			File tempFile = null;
+			try {
+				tempFile=new File(TEMP_DIR + "/" + "temp.svg").getCanonicalFile();
+				if (tempFile.exists())
+					tempFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("",e);
+			}
+			
+			final String command="devSVG(file = \""+tempFile.getAbsolutePath().replace('\\', '/')
+			+"\", width = 10, height = 8, bg = 'white', fg = 'black', onefile=TRUE, xmlHeader=TRUE);"+expression;
+			System.out.println("command : "+command);
+			
+			_lastStatus = runR(new server.ExecutionUnit() {
+				public void run(Rengine e) {
+				}
+				public String getConsoleInput() {					
+					return command;
+				}
+			});
+			
+			if (!_lastStatus.equals("")) {				
+				log.info(_lastStatus);
+				return null;				
+			} else {
+				Vector<String> result=null;
+				try {
+
+					RInteger devices = (RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+					for (int i=0; i<devices.getValue().length;++i) {
+						if (devices.getNames()[i].equals("devSVG")) {
+							DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.off("+devices.getValue()[i]+")");
+						}
+					}		
+					
+					result = new Vector<String>();
+					BufferedReader br = new BufferedReader(new FileReader(tempFile));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						result.add(line);
+					}
+					br.close();
+					tempFile.delete();
+					
+					
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					throw new RemoteException("",e);
+				}
+				return result;
+			}			
 		}
 
 	};

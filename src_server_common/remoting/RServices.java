@@ -110,5 +110,7 @@ public interface RServices extends ManagedServant {
 	public boolean isHttpServerStarted(int port) throws java.rmi.RemoteException;
 	
 	public void stopHttpServer() throws java.rmi.RemoteException;
+	
+	public Vector<String> evalAndGetSvg(String expression) throws RemoteException;
 
 }
