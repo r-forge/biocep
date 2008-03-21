@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2007 EMBL-EBI
- * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,6 +112,7 @@ public class GUtils {
 			System.out.println("exec->" + getInfoCommand);
 	
 			System.out.println(systemEnvVector);
+			
 			final Process getInfoProc = Runtime.getRuntime().exec(getInfoCommand.toArray(new String[0]),
 	
 			systemEnvVector.toArray(new String[0]));
@@ -202,6 +202,7 @@ public class GUtils {
 		} catch (Exception e) {
 	
 			e.printStackTrace();
+			
 	
 		}
 	

@@ -568,6 +568,9 @@ public class ServerLauncher {
 			new File(root).mkdir();
 
 			String[] rinfo = GUtils.getRInfo(null);
+			System.out.println("+rinfo:"+rinfo+" "+Arrays.toString(rinfo));
+			
+			/*
 			if (rinfo == null && System.getenv("R_HOME") != null) {
 				String home = System.getenv("R_HOME");
 				if (isWindowsOs() && !home.endsWith("\\")) {
@@ -578,9 +581,14 @@ public class ServerLauncher {
 				}
 				rinfo = GUtils.getRInfo(home);
 			}
+			
 
 			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : (System.getenv("R_HOME") != null ? System
 					.getenv("R_HOME") : null);
+			*/		
+					
+			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) :  null;
+			
 			System.out.println("rpath=" + rpath);
 			System.out.println("rversion=" + (rinfo != null ? rinfo[1] : ""));
 
@@ -761,6 +769,33 @@ public class ServerLauncher {
 			new File(root + "PsTools").mkdirs();
 			MainPsToolsDownload.main(new String[] { root + "PsTools" });
 
+			// ---------------------------------------
+			
+			if (isWindowsOs() && !new File(root + "VRWorkbench.bat").exists()) {
+				try {
+					String launcherFile = root + "VRWorkbench.bat";
+					FileWriter fw = new FileWriter(launcherFile);
+					PrintWriter pw = new PrintWriter(fw);
+					pw.println("javaws http://biocep-distrib.r-forge.r-project.org/rworkbench.jnlp");
+					fw.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+			if (!isWindowsOs() && !new File(root + "VRWorkbench.sh").exists()) {
+				try {
+					String launcherFile = root + "VRWorkbench.sh";
+					FileWriter fw = new FileWriter(launcherFile);
+					PrintWriter pw = new PrintWriter(fw);
+					pw.println("javaws http://biocep-distrib.r-forge.r-project.org/rworkbench.jnlp");
+					fw.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			
 			// ---------------------------------------
 
 			String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";

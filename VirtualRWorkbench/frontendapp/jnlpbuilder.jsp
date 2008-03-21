@@ -37,10 +37,29 @@
   <jar href="appletlibs/servlet-api-2.5-6.1.8.jar"/>  
   <jar href="appletlibs/jetty-6.1.8.jar"/>  
   <jar href="appletlibs/jetty-util-6.1.8.jar"/> 
+  
   <jar href="appletlibs/activation.jar"/>
   <jar href="appletlibs/mail.jar"/>
+  
+  <jar href="appletlibs/batik-anim.jar"/>
+  <jar href="appletlibs/batik-awt-util.jar"/>
+  <jar href="appletlibs/batik-bridge.jar"/>
+  <jar href="appletlibs/batik-css.jar"/>
+  <jar href="appletlibs/batik-dom.jar"/>
+  <jar href="appletlibs/batik-ext.jar"/>
+  <jar href="appletlibs/batik-extension.jar"/>
+  <jar href="appletlibs/batik-gui-util.jar"/>
+  <jar href="appletlibs/batik-gvt.jar"/>
+  <jar href="appletlibs/batik-parser.jar"/>
+  <jar href="appletlibs/batik-script.jar"/>
+  <jar href="appletlibs/batik-svg-dom.jar"/>
+  <jar href="appletlibs/batik-swing.jar"/>
+  <jar href="appletlibs/batik-util.jar"/>
+  <jar href="appletlibs/batik-xml.jar"/>
+  <jar href="appletlibs/js.jar"/>
+  <jar href="appletlibs/xml-apis.jar"/>
+  <jar href="appletlibs/xml-apis-ext.jar"/>
    
-
   <jar href="appletlibs/derbyclient.jar"/>  
   <jar href="appletlibs/ganymed-ssh2.jar"/>    
 </resources>
