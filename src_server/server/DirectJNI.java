@@ -2540,7 +2540,6 @@ public class DirectJNI {
 						
 		public Vector<String> evalAndGetSvg(String expression) throws RemoteException {
 			
-			System.out.println("ooooo");
 			File tempFile = null;
 			try {
 				tempFile=new File(TEMP_DIR + "/" + "temp.svg").getCanonicalFile();
@@ -2551,17 +2550,9 @@ public class DirectJNI {
 				throw new RemoteException("",e);
 			}
 			
-			final String command="devSVG(file = \""+tempFile.getAbsolutePath().replace('\\', '/')
-			+"\", width = 10, height = 8, bg = 'white', fg = 'black', onefile=TRUE, xmlHeader=TRUE);"+expression;
-			System.out.println("command : "+command);
-			
-			_lastStatus = runR(new server.ExecutionUnit() {
-				public void run(Rengine e) {
-				}
-				public String getConsoleInput() {					
-					return command;
-				}
-			});
+			final StringBuffer command=new StringBuffer("devSVG(file = \""+tempFile.getAbsolutePath().replace('\\', '/')
+			+"\", width = 10, height = 8, bg = 'white', fg = 'black', onefile=TRUE, xmlHeader=TRUE);"+expression);
+			DirectJNI.getInstance().getRServices().sourceFromBuffer(command);
 			
 			if (!_lastStatus.equals("")) {				
 				log.info(_lastStatus);

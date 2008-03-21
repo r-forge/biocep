@@ -354,11 +354,34 @@
 						<fileset dir="lib/desktop" includes="jetty-6.1.8.jar"/>
 				  		<fileset dir="lib/desktop" includes="activation.jar"/>
 				  		<fileset dir="lib/desktop" includes="mail.jar"/>
-				  					  	
+				  	
+					  	<fileset dir="lib/svg" includes="batik-anim.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-awt-util.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-bridge.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-css.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-dom.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-ext.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-extension.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-gui-util.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-gvt.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-parser.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-script.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-svg-dom.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-swing.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-util.jar"/>
+					  	<fileset dir="lib/svg" includes="batik-xml.jar"/>
+					  	<fileset dir="lib/svg" includes="js.jar"/>
+					  	<fileset dir="lib/svg" includes="xml-apis.jar"/>
+					  	<fileset dir="lib/svg" includes="xml-apis-ext.jar"/>	
+				  	
 						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>									
 						<fileset dir="lib/desktop" includes="JRI.jar"/>
 				  		<fileset dir="lib/jdbc" includes="derbyclient.jar"/>
 				  		<fileset dir="lib/pool" includes="ganymed-ssh2.jar"/>
+				  	
+				  	
+				  	
+				  	
 						<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
 				  </copy>
 				
