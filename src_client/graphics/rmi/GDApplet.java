@@ -3327,6 +3327,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			_area = new JTextArea();
 			_scrollPane = new JScrollPane(_area);
 			_svgCanvas = new JSVGCanvas();
+			_svgCanvas.setEnableZoomInteractor(true);
 
 			JButton submit = new JButton("Submit");
 			submit.addActionListener(new ActionListener() {
@@ -3338,12 +3339,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} else {
 								GDApplet.this.getRLock().lock();
 								try {
+									SwingUtilities.invokeLater(new Runnable(){
+										public void run() {
+											_area.setEnabled(false);
+										}
+									});
 									Vector<String> result=GDApplet.this.getR().evalAndGetSvg(_area.getText());
-									//System.out.println(result);
+									//System.out.println("SVG RESULT:"+result);
 									final String tempFile=System.getProperty("java.io.tmpdir")+"/svgview"+System.currentTimeMillis()+".svg";
 									PrintWriter pw=new PrintWriter(new FileWriter(tempFile));
 									for (int i=0; i<result.size(); ++i) pw.println(result.elementAt(i));
 									pw.close();
+									
+									
 									SwingUtilities.invokeLater(new Runnable(){
 										public void run() {
 											try {
@@ -3358,6 +3366,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 									e.printStackTrace();
 								} finally {
 									GDApplet.this.getRLock().unlock();
+									SwingUtilities.invokeLater(new Runnable(){
+										public void run() {
+											_area.setEnabled(true);
+										}
+									});
 								}
 							}
 						}
@@ -3370,8 +3383,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 			topPanel.add(submit, BorderLayout.SOUTH);
 
 			JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, _svgCanvas);
-
+			splitPane.setDividerSize(3);
+			
 			((JPanel) getComponent()).setLayout(new BorderLayout());
+			((JPanel) getComponent()).setBorder(BorderFactory.createLineBorder(Color.blue, 2));
 			((JPanel) getComponent()).add(splitPane);
 
 		}
