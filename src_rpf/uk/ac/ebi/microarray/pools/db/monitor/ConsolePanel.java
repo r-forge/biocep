@@ -35,6 +35,7 @@ import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
@@ -201,7 +202,11 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 		setLayout(new BorderLayout());
 		add(_scrollPane, BorderLayout.CENTER);
-		add(_textField, BorderLayout.SOUTH);
+		
+		JPanel bottomPanel=new JPanel(new BorderLayout());
+		bottomPanel.add(new JLabel("Evaluate : "), BorderLayout.WEST);
+		bottomPanel.add(_textField, BorderLayout.CENTER);
+		add(bottomPanel, BorderLayout.SOUTH);
 
 		_textArea.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {

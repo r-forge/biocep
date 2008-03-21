@@ -268,6 +268,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public void init() {
 		super.init();
 
+		System.setErr(System.out);
 		if (getParameter("debug") != null && getParameter("debug").equalsIgnoreCase("true")) {
 			redirectIO();
 		}
@@ -465,6 +466,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 									 * DirectJNI.getInstance().getRServices();
 									 */
 
+									_keepAlive = ident.isKeepAlive();
+									
 									if (ident.isUseSsh()) {
 										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
@@ -472,16 +475,22 @@ public class GDApplet extends GDAppletBase implements RGui {
 									} else {
 
 										if (PoolUtils.isWindowsOs()) {
-											r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(),
+											if (_keepAlive) {
+												r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(),
 													PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
 													false);
+											} else {
+												r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(),
+														PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
+														false);												
+											}
 										} else {
 											r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
 													.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
 										}
 									}
 
-									_keepAlive = ident.isKeepAlive();
+									
 									if (ident.isUseSsh()) {
 										_sshParameters = new String[] { ident.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd() };
 									}
@@ -3345,6 +3354,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 										}
 									});
 									Vector<String> result=GDApplet.this.getR().evalAndGetSvg(_area.getText());
+									if (result==null) {
+										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
+										return ;
+									}
 									//System.out.println("SVG RESULT:"+result);
 									final String tempFile=System.getProperty("java.io.tmpdir")+"/svgview"+System.currentTimeMillis()+".svg";
 									PrintWriter pw=new PrintWriter(new FileWriter(tempFile));
@@ -3382,12 +3395,25 @@ public class GDApplet extends GDAppletBase implements RGui {
 			topPanel.add(_scrollPane, BorderLayout.CENTER);
 			topPanel.add(submit, BorderLayout.SOUTH);
 
-			JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, _svgCanvas);
+			final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, _svgCanvas);
 			splitPane.setDividerSize(3);
 			
 			((JPanel) getComponent()).setLayout(new BorderLayout());
-			((JPanel) getComponent()).setBorder(BorderFactory.createLineBorder(Color.blue, 2));
+			((JPanel) getComponent()).setBorder(BorderFactory.createLineBorder(Color.gray, 2));
 			((JPanel) getComponent()).add(splitPane);
+
+			
+			
+			new Thread(new Runnable(){
+				public void run() {
+					SwingUtilities.invokeLater(new Runnable(){
+						public void run() {
+							splitPane.setDividerLocation((int)60);
+						}
+					});
+				}
+			}).start();
+			
 
 		}
 
