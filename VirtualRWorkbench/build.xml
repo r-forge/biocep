@@ -475,6 +475,81 @@
 
 			</target>
 	
+	
+	
+	
+	
+	
+	<target name="onejar" depends="compile">
+		
+		<delete dir="VirtualRWorkbench/classes" failonerror="true"/>
+		<mkdir dir="VirtualRWorkbench/classes"/>
+		
+		<delete file="VirtualRWorkbench/biocep.jar" failonerror="true"/>
+		<delete file="VirtualRWorkbench/biocepsigned.jar" failonerror="true"/>
+		<delete file="VirtualRWorkbench/MANIFEST.MF" failonerror="true"/>
+		
+   	    <unjar src="lib/log/commons-logging-1.1.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>   	    
+   	    <unjar src="lib/log/log4j-1.2.14.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+   	    <unjar src="lib/j2ee/commons-codec-1.3.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/j2ee/commons-httpclient-3.1-rc1.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/desktop/idw-gpl.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>				
+		<unjar src="lib/desktop/jedit.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/desktop/jeditmodes.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/desktop/pf-joi-full.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/desktop/OpenXLS.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>					
+		<unjar src="lib/desktop/servlet-api-2.5-6.1.8.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/desktop/jetty-util-6.1.8.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/desktop/jetty-6.1.8.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>				
+		<unjar src="lib/desktop/activation.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/desktop/mail.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/svg/batik-anim.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-awt-util.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-bridge.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-css.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-dom.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-ext.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-extension.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-gui-util.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/svg/batik-gvt.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-parser.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-script.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-svg-dom.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-swing.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-util.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/batik-xml.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/js.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/xml-apis.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/svg/xml-apis-ext.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/j2ee/htmlparser.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/pool/ganymed-ssh2.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/jdbc/derbyclient.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/desktop/JRI.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="VirtualRWorkbench/distrib/mapping.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="RJB.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+
+
+		<manifest file="VirtualRWorkbench/MANIFEST.MF">
+			<attribute name="Built-By" value="Karim Chine"/>
+			<attribute name="Main-Class" value="graphics.rmi.GDAppletLauncher"/>
+		</manifest>		
+		
+		<jar basedir="VirtualRWorkbench/classes" destfile="VirtualRWorkbench/biocep.jar" manifest="VirtualRWorkbench/MANIFEST.MF" />
+		
+		
+		<signjar jar="VirtualRWorkbench/biocep.jar" signedjar="VirtualRWorkbench/biocepsigned.jar" alias="appletsigningkey" keystore="VirtualRWorkbench/appletKeyStore.ks"  storepass="emblebi" />
+		
+
+	</target>
+
+	
+	
+	
+	
+	
+	
+	
+	
 			<target name="democlean">
 				<delete dir="${demo.generatedir}" failonerror="true"/>
 				<mkdir dir="${demo.generatedir}"/>

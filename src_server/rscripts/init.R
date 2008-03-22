@@ -1,7 +1,7 @@
 
 library(rJava);.jinit(classpath=NULL);
 library(JavaGD)
-library(RSvgDevice)
+library(Cairo)
 
 .PrivateEnv<-new.env(parent = .GlobalEnv)
 library(TypeInfo)

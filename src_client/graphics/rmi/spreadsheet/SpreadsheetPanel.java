@@ -485,6 +485,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 					try {
 						_rgui.getRLock().lock();
 						_rgui.getR().putObjectAndAssignName(robj, tempVarName);
+						
 						if (_rgui.getR().getStatus().toUpperCase().contains("ERROR")) {
 							JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error",
 									JOptionPane.ERROR_MESSAGE);

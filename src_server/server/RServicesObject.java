@@ -269,7 +269,7 @@ public class RServicesObject implements RServices {
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 	}
 	
-	public Vector<String> evalAndGetSvg(String expression) throws RemoteException {
+	public Vector<String> evalAndGetSvg(String expression,int width, int height) throws RemoteException {
 		return null;
 	}
 }

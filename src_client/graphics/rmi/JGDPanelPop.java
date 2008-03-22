@@ -961,6 +961,33 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		}
 	}
 
+	//devSVG(file = "c:/Rplots.svg", width = 10, height = 8, bg = "white", fg = "black", onefile=TRUE, xmlHeader=TRUE)
+	public void paintAll(Graphics2D g) {
+		if (_forceAntiAliasing) {
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		}
+		int i = 0, j = _l.size();
+		g.setFont(_gs.f);
+		// g.setClip(0, 0, (int) (getWidth() * _fx), (int) (getHeight() * _fy));
+		// // reset
+		g.setClip(0, 0, getWidth(), getHeight()); // reset
+		// clipping
+		// rect
+		g.setColor(Color.white);
+		g.fillRect(0, 0, getWidth(), getHeight());
+
+		g.translate(-(_x0 - getWidth() / 2), -(_y0 - getHeight() / 2));
+		while (i < j) {
+			GDObject o = (GDObject) _l.elementAt(i++);
+			if (o instanceof GDActionMarker) {
+
+			} else {
+				o.paint(this, _gs, g);
+			}
+		}
+	}
+
+	
 	Color _transparentBlack = new Color(Color.black.getColorSpace(), new float[] { Color.black.getRed(), Color.black.getGreen(), Color.black.getBlue() },
 			(float) 0.2);
 
