@@ -111,6 +111,6 @@ public interface RServices extends ManagedServant {
 	
 	public void stopHttpServer() throws java.rmi.RemoteException;
 	
-	public Vector<String> evalAndGetSvg(String expression) throws RemoteException;
+	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException;
 
 }

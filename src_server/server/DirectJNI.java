@@ -1640,6 +1640,25 @@ public class DirectJNI {
 			return null;
 		}
 	}
+	
+	void shutdownCairoDevices() throws RemoteException{
+		RInteger devices = (RInteger)getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+		for (int i=0; i<devices.getValue().length;++i) {
+			if (devices.getNames()[i].equals("Cairo")) {
+				getRServices().evalAndGetObject(".PrivateEnv$dev.off("+devices.getValue()[i]+")");
+			}
+		}
+	}
+	
+	Integer getCairoDevice() throws RemoteException {
+		RInteger devices = (RInteger)getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+		for (int i=0; i<devices.getValue().length;++i) {
+			if (devices.getNames()[i].equals("Cairo")) {
+				return devices.getValue()[i];
+			}
+		}
+		return null;
+	}
 
 	String newTemporaryVariableName() {
 		return V_TEMP_PREFIXE + _tempCounter++;
@@ -2538,11 +2557,11 @@ public class DirectJNI {
 		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 		}
 						
-		public Vector<String> evalAndGetSvg(String expression) throws RemoteException {
+		public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
 			
 			File tempFile = null;
 			try {
-				tempFile=new File(TEMP_DIR + "/" + "temp.svg").getCanonicalFile();
+				tempFile=new File(TEMP_DIR + "/temp"+System.currentTimeMillis()+".svg").getCanonicalFile();
 				if (tempFile.exists())
 					tempFile.delete();
 			} catch (Exception e) {
@@ -2550,24 +2569,21 @@ public class DirectJNI {
 				throw new RemoteException("",e);
 			}
 			
-			final StringBuffer command=new StringBuffer("devSVG(file = \""+tempFile.getAbsolutePath().replace('\\', '/')
-			+"\", width = 10, height = 8, bg = 'white', fg = 'black', onefile=TRUE, xmlHeader=TRUE);"+expression);
+			final StringBuffer command=new StringBuffer("CairoSVG(file = \""+tempFile.getAbsolutePath().replace('\\', '/')
+			+"\", width = "+new Double(10*(width/height))+", height = "+10+" , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);"+expression);			
 			DirectJNI.getInstance().getRServices().sourceFromBuffer(command);
+		
 			
 			if (!_lastStatus.equals("")) {				
-				log.info(_lastStatus);
-				return null;				
-			} else {
+				log.info(_lastStatus);				
+			} 
+			
+			if (tempFile.exists()) {
 				Vector<String> result=null;
 				try {
 
-					RInteger devices = (RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
-					for (int i=0; i<devices.getValue().length;++i) {
-						if (devices.getNames()[i].equals("devSVG")) {
-							DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.off("+devices.getValue()[i]+")");
-						}
-					}		
-					
+					DirectJNI.getInstance().shutdownCairoDevices();
+										
 					result = new Vector<String>();
 					BufferedReader br = new BufferedReader(new FileReader(tempFile));
 					String line = null;
@@ -2577,14 +2593,15 @@ public class DirectJNI {
 					br.close();
 					tempFile.delete();
 					
-					
 				}
 				catch (Exception e) {
 					e.printStackTrace();
 					throw new RemoteException("",e);
 				}
 				return result;
-			}			
+			} else {
+				return null;
+			}
 		}
 
 	};
@@ -2687,6 +2704,59 @@ public class DirectJNI {
 			}
 
 		}
+
+		synchronized public Vector<String> getSVG() throws RemoteException {
+			
+			File tempFile = null;
+			try {
+				tempFile=new File(TEMP_DIR + "/temp"+System.currentTimeMillis()+".svg").getCanonicalFile();
+				if (tempFile.exists())
+					tempFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("",e);
+			}
+			
+			DirectJNI.getInstance().shutdownCairoDevices();
+			final String command="CairoSVG(file = \""+tempFile.getAbsolutePath().replace('\\', '/')
+			+"\", width = "+new Double(10*(getSize().width/getSize().height))+", height = "+10+" , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";			
+			DirectJNI.getInstance().getRServices().evaluate(command);
+			
+			
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {				
+				log.info(DirectJNI.getInstance().getRServices().getStatus());				
+			} 			
+			if (tempFile.exists()) {
+				
+				
+				Vector<String> result=null;
+				try {
+
+					
+					DirectJNI.getInstance().shutdownCairoDevices();
+					
+					result = new Vector<String>();
+					BufferedReader br = new BufferedReader(new FileReader(tempFile));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						result.add(line);
+					}
+					br.close();
+					tempFile.delete();
+					
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					throw new RemoteException("",e);
+				}
+				return result;
+			} else {
+				return null;
+			}
+		}
+
+			
+
 
 	}
 

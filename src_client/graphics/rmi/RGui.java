@@ -17,11 +17,9 @@ package graphics.rmi;
 
 import graphics.pop.GDDevice;
 import java.awt.Component;
-import java.util.concurrent.locks.ReentrantLock;
 import net.infonode.docking.View;
-
 import remoting.RKit;
-import remoting.RServices;
+
 /**
  * @author Karim Chine   kchine@ebi.ac.uk
  */

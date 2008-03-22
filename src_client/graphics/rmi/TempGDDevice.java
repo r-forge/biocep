@@ -53,5 +53,9 @@ public class TempGDDevice implements GDDevice {
 
 	public void setAsCurrentDevice() throws RemoteException {
 	}
+	
+	public Vector<String> getSVG() throws RemoteException {
+		return null;
+	}
 
 }

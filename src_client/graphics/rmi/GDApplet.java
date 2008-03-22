@@ -7,6 +7,7 @@ import graphics.rmi.action.CoupleToCurrentDeviceAction;
 import graphics.rmi.action.FitDeviceAction;
 import graphics.rmi.action.SaveDeviceAsJpgAction;
 import graphics.rmi.action.SaveDeviceAsPngAction;
+import graphics.rmi.action.SaveDeviceAsSvgAction;
 import graphics.rmi.action.SetCurrentDeviceAction;
 import graphics.rmi.action.SnapshotDeviceAction;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
@@ -129,6 +130,7 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
+import server.DirectJNI;
 import server.NoMappingAvailable;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -276,7 +278,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		System.out.println("INIT starts");
 
 		if (getParameter("mode") == null) {
-			_mode = HTTP_MODE;
+			_mode = NEW_R_MODE;
 		} else {
 			if (getParameter("mode").equalsIgnoreCase("local")) {
 				_mode = NEW_R_MODE;
@@ -461,13 +463,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
-									/*
-									 * DirectJNI.init(); r =
-									 * DirectJNI.getInstance().getRServices();
-									 */
-
-									_keepAlive = ident.isKeepAlive();
 									
+									/*
+									  DirectJNI.init(); r = DirectJNI.getInstance().getRServices();
+									  if (false) throw new BadSshHostException();
+									  if (false) throw new BadSshLoginPwdException();									  
+									  _keepAlive = ident.isKeepAlive();
+									*/ 									 
+									
+									 
+									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
 												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
@@ -489,11 +494,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 													.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
 										}
 									}
-
 									
 									if (ident.isUseSsh()) {
 										_sshParameters = new String[] { ident.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd() };
 									}
+									
 									_rProcessId = r.getProcessId();
 									System.out.println("R Process Id :" + _rProcessId);
 
@@ -590,7 +595,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							new SetCurrentDeviceAction(GDApplet.this, d), null, new FitDeviceAction(GDApplet.this, d), null,
 									new SnapshotDeviceAction(GDApplet.this), new SaveDeviceAsPngAction(GDApplet.this),
-									new SaveDeviceAsJpgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+									new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
 									new CopyToCurrentDeviceAction(GDApplet.this, d), null, new CoupleToCurrentDeviceAction(GDApplet.this)
 
 							}, getRLock(), getConsoleLogger());
@@ -624,7 +629,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 										new SetCurrentDeviceAction(GDApplet.this, newDevice), null, new FitDeviceAction(GDApplet.this, newDevice), null,
 										new SnapshotDeviceAction(GDApplet.this), new SaveDeviceAsPngAction(GDApplet.this),
-										new SaveDeviceAsJpgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+										new SaveDeviceAsJpgAction(GDApplet.this),new SaveDeviceAsSvgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
 										new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) },
 										getRLock(), getConsoleLogger());
 
@@ -1498,7 +1503,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		LoginDialog.playDemo_bool = _demo;
 		LoginDialog.login_str = _login;
 
-		if (getParameter("autologon") != null && getParameter("autologon").equalsIgnoreCase("true")) {
+		if (getParameter("autologon") == null || getParameter("autologon").equalsIgnoreCase("true")) {
 			new Thread(new Runnable() {
 				public void run() {
 					SwingUtilities.invokeLater(new Runnable() {
@@ -1947,7 +1952,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && (_filesTable.getSelectedRows().length > 0 && !_workDirFiles.elementAt(_filesTable.getSelectedRows()[0]).isDir());
+				return getR() != null && (_filesTable.getSelectedRows().length > 0 && !_workDirFiles.elementAt(_filesTable.getSelectedRows()[0]).isDir());
 			}
 		});
 
@@ -2003,7 +2008,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2021,7 +2026,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2039,7 +2044,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2072,7 +2077,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && _filesTable.getSelectedRows().length > 0;
+				return getR() != null && _filesTable.getSelectedRows().length > 0;
 			}
 		});
 
@@ -2119,7 +2124,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !getRLock().isLocked();
+				return getR() != null && !getRLock().isLocked();
 			}
 		});
 
@@ -2166,7 +2171,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !getRLock().isLocked();
+				return getR() != null && !getRLock().isLocked();
 			}
 		});
 
@@ -2176,7 +2181,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2277,7 +2282,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId == null;
+				return getR() == null;
 			}
 		});
 
@@ -2288,7 +2293,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2299,7 +2304,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null && !getRLock().isLocked();
+				return getR() != null && !getRLock().isLocked();
 			}
 		});
 
@@ -2325,7 +2330,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2348,7 +2353,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2443,7 +2448,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
-							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), null,
+							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), null,
 							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
 
@@ -2559,7 +2564,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return true;
+				return getR() != null;
 			}
 		});
 
@@ -2678,7 +2683,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return true;
+				return getR() != null;
 			}
 		});
 
@@ -2752,7 +2757,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return true;
+				return getR() != null;
 			}
 		});
 
@@ -2809,7 +2814,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return true;
+				return getR() != null;
 			}
 		});
 
@@ -2831,7 +2836,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2865,7 +2870,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2922,7 +2927,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 
 			public boolean isEnabled() {
-				return _sessionId != null && _virtualizationServer == null;
+				return getR() != null && _virtualizationServer == null;
 			}
 		});
 
@@ -2937,7 +2942,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 
 			public boolean isEnabled() {
-				return _sessionId != null && _virtualizationServer != null;
+				return getR() != null && _virtualizationServer != null;
 			}
 		});
 
@@ -2982,7 +2987,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -2998,7 +3003,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 
 			public boolean isEnabled() {
-				return _sessionId != null;
+				return getR() != null;
 			}
 		});
 
@@ -3330,6 +3335,35 @@ public class GDApplet extends GDAppletBase implements RGui {
 		JScrollPane _scrollPane;
 		JSVGCanvas _svgCanvas = new JSVGCanvas();
 
+		private void showPopup(MouseEvent e) {
+			JPopupMenu popupMenu = new JPopupMenu();
+
+
+			popupMenu.add(new AbstractAction("Load Svg From File") {
+				public void actionPerformed(ActionEvent e) {
+					final JFileChooser chooser = new JFileChooser();
+					int returnVal = chooser.showOpenDialog(_svgCanvas);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						SwingUtilities.invokeLater(new Runnable(){
+							public void run() {
+								try {
+								_svgCanvas.setURI(chooser.getSelectedFile().toURL().toString());
+								repaint();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						});
+					}
+				}
+				public boolean isEnabled() {
+					return true;
+				}
+			});
+
+			popupMenu.show(_svgCanvas, e.getX(), e.getY());
+
+		}
 		SvgView(String title, Icon icon, int id) {
 			super(title, icon, new JPanel(), id);
 
@@ -3338,6 +3372,31 @@ public class GDApplet extends GDAppletBase implements RGui {
 			_svgCanvas = new JSVGCanvas();
 			_svgCanvas.setEnableZoomInteractor(true);
 
+			_svgCanvas.addMouseListener(new MouseListener() {
+				public void mouseEntered(MouseEvent e) {
+					}
+				public void mouseClicked(MouseEvent e) {
+					if (e.isPopupTrigger()) {
+						showPopup(e);
+					}
+					
+					if (e.getButton() == MouseEvent.BUTTON3) {
+						showPopup(e);
+					}
+					
+				};
+				
+				public void mouseExited(MouseEvent e) {};
+				
+				public void mousePressed(MouseEvent e) {};
+				
+				public void mouseReleased(MouseEvent e) {
+					if (e.isPopupTrigger()) {
+						showPopup(e);
+					}
+				};
+			});
+			
 			JButton submit = new JButton("Submit");
 			submit.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -3353,10 +3412,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 											_area.setEnabled(false);
 										}
 									});
-									Vector<String> result=GDApplet.this.getR().evalAndGetSvg(_area.getText());
+									Vector<String> result=GDApplet.this.getR().evalAndGetSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
 									if (result==null) {
 										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
 										return ;
+									}
+									if (!"".equals(GDApplet.this.getR().getStatus())) {
+										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
 									}
 									//System.out.println("SVG RESULT:"+result);
 									final String tempFile=System.getProperty("java.io.tmpdir")+"/svgview"+System.currentTimeMillis()+".svg";

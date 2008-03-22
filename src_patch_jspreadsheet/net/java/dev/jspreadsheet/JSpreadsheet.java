@@ -32,8 +32,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
-import remoting.RServices;
-
 
 /**
  * An encapsulation of the functionality of the Sharp Tools spreadsheet

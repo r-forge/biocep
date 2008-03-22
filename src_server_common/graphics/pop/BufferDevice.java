@@ -79,5 +79,9 @@ public class BufferDevice implements GDDevice {
 	public Point2D[] getRealPoints(Point2D[] points) throws RemoteException {
 		return null;
 	}
+	
+	public Vector<String> getSVG() throws RemoteException {
+		return null;
+	}
 
 }

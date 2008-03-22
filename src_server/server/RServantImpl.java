@@ -638,8 +638,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 
 	
-	public Vector<String> evalAndGetSvg(String expression) throws RemoteException {
-		return DirectJNI.getInstance().getRServices().evalAndGetSvg(expression);
+	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().evalAndGetSvg(expression, width, height);
 	}
 	// --------------
 

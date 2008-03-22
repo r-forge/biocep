@@ -48,4 +48,6 @@ public interface GDDevice extends Remote {
 	public boolean isCurrentDevice() throws RemoteException;
 	
 	public void setAsCurrentDevice() throws RemoteException;
+	
+	public Vector<String> getSVG() throws RemoteException;
 }
