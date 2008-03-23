@@ -556,7 +556,12 @@ public class ServerLauncher {
 			} else {
 				String thisUrl = ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class").toString();
 				if (thisUrl.indexOf("http:") != -1) {
-					rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
+					
+					if (thisUrl.indexOf("RJB.jar")!=-1) {
+						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
+					} else {
+						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocepsigned.jar") + "biocepsigned.jar".length()));
+					}
 				}
 			}
 
