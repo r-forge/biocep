@@ -50,4 +50,19 @@ public interface GDDevice extends Remote {
 	public void setAsCurrentDevice() throws RemoteException;
 	
 	public Vector<String> getSVG() throws RemoteException;
+	
+	public byte[] getPostScript() throws RemoteException;
+	
+	public byte[] getPdf() throws RemoteException;
+	
+	public byte[] getPictex() throws RemoteException;
+	
+	public byte[] getPng() throws RemoteException;
+	
+	public byte[] getJpg() throws RemoteException;
+	
+	public byte[] getBmp() throws RemoteException;
+	
+	public byte[] getXfig() throws RemoteException;
+	
 }

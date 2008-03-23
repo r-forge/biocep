@@ -20,19 +20,27 @@ import graphics.pop.GDDevice;
 import graphics.rmi.DoublePoint;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
+import graphics.rmi.JGDPanelPop;
+
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -46,9 +54,21 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import mapping.StandardReference;
+
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RArrayRef;
@@ -86,6 +106,10 @@ import org.rosuda.JRI.Rengine;
 import org.rosuda.JRI.RengineWrapper;
 import org.rosuda.javaGD.GDInterface;
 import org.rosuda.javaGD.JavaGD;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -99,7 +123,7 @@ import util.Utils;
 import static server.RConst.*;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine kchine@ebi.ac.uk
  */
 public class DirectJNI {
 
@@ -399,7 +423,7 @@ public class DirectJNI {
 	public void addAction(RAction action) {
 		_rActions.add(action);
 	}
-	
+
 	public Vector<String> getBootStrapRObjects() {
 		return _bootstrapRObjects;
 	}
@@ -442,7 +466,7 @@ public class DirectJNI {
 				processNode(_packNames[i], uriPrefix, p.extractAllNodesThatMatch(new TagNameFilter("BODY")).elementAt(0));
 
 			} catch (Exception e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 			}
 		}
 	}
@@ -1640,20 +1664,20 @@ public class DirectJNI {
 			return null;
 		}
 	}
-	
-	void shutdownCairoDevices() throws RemoteException{
-		RInteger devices = (RInteger)getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
-		for (int i=0; i<devices.getValue().length;++i) {
-			if (devices.getNames()[i].equals("Cairo")) {
-				getRServices().evalAndGetObject(".PrivateEnv$dev.off("+devices.getValue()[i]+")");
+
+	void shutdownDevices(String deviceType) throws RemoteException {
+		RInteger devices = (RInteger) getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+		for (int i = 0; i < devices.getValue().length; ++i) {
+			if (devices.getNames()[i].equals(deviceType)) {
+				getRServices().evalAndGetObject(".PrivateEnv$dev.off(" + devices.getValue()[i] + ")");
 			}
 		}
 	}
-	
-	Integer getCairoDevice() throws RemoteException {
-		RInteger devices = (RInteger)getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
-		for (int i=0; i<devices.getValue().length;++i) {
-			if (devices.getNames()[i].equals("Cairo")) {
+
+	Integer getDevice(String deviceType) throws RemoteException {
+		RInteger devices = (RInteger) getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+		for (int i = 0; i < devices.getValue().length; ++i) {
+			if (devices.getNames()[i].equals(deviceType)) {
 				return devices.getValue()[i];
 			}
 		}
@@ -2535,72 +2559,131 @@ public class DirectJNI {
 		public String getHostIp() throws RemoteException {
 			return PoolUtils.getHostIp();
 		}
-		
+
 		public boolean isPortInUse(int port) throws RemoteException {
 			return PoolUtils.isPortInUse("127.0.0.1", port);
 		}
-		
+
 		public void startHttpServer(int port) throws RemoteException {
 		}
-		
+
 		public void stopHttpServer() throws RemoteException {
 		}
-		
+
 		public boolean isHttpServerStarted(int port) throws RemoteException {
 			return false;
 		}
-		
+
 		public RServices cloneServer() throws RemoteException {
 			return null;
 		}
-		
+
 		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 		}
-						
+
 		public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
-			
+
 			File tempFile = null;
 			try {
-				tempFile=new File(TEMP_DIR + "/temp"+System.currentTimeMillis()+".svg").getCanonicalFile();
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".svg").getCanonicalFile();
 				if (tempFile.exists())
 					tempFile.delete();
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new RemoteException("",e);
+				throw new RemoteException("", e);
 			}
-			
-			final StringBuffer command=new StringBuffer("CairoSVG(file = \""+tempFile.getAbsolutePath().replace('\\', '/')
-			+"\", width = "+new Double(10*(width/height))+", height = "+10+" , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);"+expression);			
-			DirectJNI.getInstance().getRServices().sourceFromBuffer(command);
-		
-			
-			if (!_lastStatus.equals("")) {				
-				log.info(_lastStatus);				
-			} 
-			
-			if (tempFile.exists()) {
-				Vector<String> result=null;
-				try {
 
-					DirectJNI.getInstance().shutdownCairoDevices();
-										
-					result = new Vector<String>();
-					BufferedReader br = new BufferedReader(new FileReader(tempFile));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						result.add(line);
+			DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");
+			String loadStatus = DirectJNI.getInstance().getRServices().getStatus();
+
+			if (!loadStatus.equals("")) {
+
+				DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+				String svgNS = "http://www.w3.org/2000/svg";
+				Document document = domImpl.createDocument(svgNS, "svg", null);
+				SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+
+				Dimension dSize = new Dimension(width, height);
+				GDDevice device = null;
+				try {
+					device = DirectJNI.getInstance().getRServices().newDevice(dSize.width, dSize.height);
+					JGDPanelPop panel = new JGDPanelPop(device, false, false, null, null, null);
+					DirectJNI.getInstance().getRServices().sourceFromBuffer(new StringBuffer(expression));
+					if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+						log.info(DirectJNI.getInstance().getRServices().getStatus());
 					}
-					br.close();
-					tempFile.delete();
-					
+					panel.popNow();
+					if (panel.getGDOList().size() == 0)
+						throw new RemoteException(DirectJNI.getInstance().getRServices().getStatus());
+					panel.paintAll(svgGenerator, new Point(0, 0), dSize);
+				} catch (Exception e) {
+					throw new RemoteException("", e);
+				} finally {
+					device.dispose();
 				}
-				catch (Exception e) {
-					e.printStackTrace();
-					throw new RemoteException("",e);
+
+				try {
+					svgGenerator.setSVGCanvasSize(dSize);
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					boolean useCSS = true;
+					Writer out = new OutputStreamWriter(baos, "UTF-8");
+					svgGenerator.stream(out, useCSS);
+					out.close();
+
+					DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+					Document doc = builder.parse(new ByteArrayInputStream(baos.toByteArray()));
+					((Element) doc.getElementsByTagName("svg").item(0)).setAttribute("viewBox", "0,0," + dSize.width + "," + dSize.height);
+
+					Writer stringW = new StringWriter();
+					DOMSource source = new DOMSource(doc);
+					TransformerFactory transFactory = TransformerFactory.newInstance();
+					Transformer transformer = transFactory.newTransformer();
+					transformer.transform(source, new StreamResult(stringW));
+
+					Vector<String> result = new Vector<String>();
+					BufferedReader br = new BufferedReader(new StringReader(stringW.toString()));
+					String line = null;
+					while ((line = br.readLine()) != null)
+						result.add(line);
+
+					return result;
+				} catch (Exception e) {
+					throw new RemoteException("", e);
 				}
-				return result;
+
 			} else {
-				return null;
+				final StringBuffer command = new StringBuffer("CairoSVG(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
+						+ new Double(10 * (width / height)) + ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);" + expression);
+				DirectJNI.getInstance().getRServices().sourceFromBuffer(command);
+
+				if (!_lastStatus.equals("")) {
+					log.info(_lastStatus);
+				}
+
+				if (tempFile.exists()) {
+					Vector<String> result = null;
+					try {
+
+						DirectJNI.getInstance().shutdownDevices("Cairo");
+
+						result = new Vector<String>();
+						BufferedReader br = new BufferedReader(new FileReader(tempFile));
+						String line = null;
+						while ((line = br.readLine()) != null) {
+							result.add(line);
+						}
+						br.close();
+						tempFile.delete();
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						throw new RemoteException("", e);
+					}
+					return result;
+				} else {
+					return null;
+				}
+
 			}
 		}
 
@@ -2706,48 +2789,180 @@ public class DirectJNI {
 		}
 
 		synchronized public Vector<String> getSVG() throws RemoteException {
-			
+
 			File tempFile = null;
 			try {
-				tempFile=new File(TEMP_DIR + "/temp"+System.currentTimeMillis()+".svg").getCanonicalFile();
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".svg").getCanonicalFile();
 				if (tempFile.exists())
 					tempFile.delete();
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new RemoteException("",e);
+				throw new RemoteException("", e);
 			}
-			
-			DirectJNI.getInstance().shutdownCairoDevices();
-			final String command="CairoSVG(file = \""+tempFile.getAbsolutePath().replace('\\', '/')
-			+"\", width = "+new Double(10*(getSize().width/getSize().height))+", height = "+10+" , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";			
-			DirectJNI.getInstance().getRServices().evaluate(command);
-			
-			
-			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {				
-				log.info(DirectJNI.getInstance().getRServices().getStatus());				
-			} 			
+
+			DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");
+			String loadStatus = DirectJNI.getInstance().getRServices().getStatus();
+
+			if (!loadStatus.equals("")) {
+
+				DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+				String svgNS = "http://www.w3.org/2000/svg";
+				Document document = domImpl.createDocument(svgNS, "svg", null);
+				SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+
+				Dimension dSize = getSize();
+
+				GDDevice device = null;
+				try {
+					int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+					device = DirectJNI.getInstance().getRServices().newDevice(dSize.width, dSize.height);
+					DirectJNI.getInstance().getRServices().evaluateExpressions(
+							".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + device.getDeviceNumber() + ");"
+									+ ".PrivateEnv$dev.set(" + currentDevice + ");", 3);
+					JGDPanelPop panel = new JGDPanelPop(device, false, false, null, null, null);
+					panel.popNow();
+					panel.paintAll(svgGenerator, new Point(0, 0), dSize);
+				} catch (Exception e) {
+					throw new RemoteException("", e);
+				} finally {
+					device.dispose();
+				}
+
+				try {
+					svgGenerator.setSVGCanvasSize(dSize);
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					boolean useCSS = true;
+					Writer out = new OutputStreamWriter(baos, "UTF-8");
+					svgGenerator.stream(out, useCSS);
+					out.close();
+
+					DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+					Document doc = builder.parse(new ByteArrayInputStream(baos.toByteArray()));
+					((Element) doc.getElementsByTagName("svg").item(0)).setAttribute("viewBox", "0,0," + dSize.width + "," + dSize.height);
+
+					Writer stringW = new StringWriter();
+					DOMSource source = new DOMSource(doc);
+					TransformerFactory transFactory = TransformerFactory.newInstance();
+					Transformer transformer = transFactory.newTransformer();
+					transformer.transform(source, new StreamResult(stringW));
+
+					Vector<String> result = new Vector<String>();
+					BufferedReader br = new BufferedReader(new StringReader(stringW.toString()));
+					String line = null;
+					while ((line = br.readLine()) != null)
+						result.add(line);
+
+					return result;
+				} catch (Exception e) {
+					throw new RemoteException("", e);
+				}
+			} else {
+
+				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+
+				DirectJNI.getInstance().shutdownDevices("Cairo");
+
+				final String createDeviceCommand = "CairoSVG(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
+						+ new Double(10 * (getSize().width / getSize().height)) + ", height = " + 10
+						+ " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
+				DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
+				if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+					log.info(DirectJNI.getInstance().getRServices().getStatus());
+				}
+
+				int cairoDevice = DirectJNI.getInstance().getDevice("Cairo");
+				DirectJNI.getInstance().getRServices().evaluateExpressions(
+						".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + cairoDevice + ");" + ".PrivateEnv$dev.set("
+								+ currentDevice + ");", 3);
+
+				if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+					log.info(DirectJNI.getInstance().getRServices().getStatus());
+				}
+
+				if (tempFile.exists()) {
+
+					Vector<String> result = null;
+					try {
+
+						DirectJNI.getInstance().shutdownDevices("Cairo");
+
+						result = new Vector<String>();
+						BufferedReader br = new BufferedReader(new FileReader(tempFile));
+						String line = null;
+						while ((line = br.readLine()) != null) {
+							result.add(line);
+						}
+						br.close();
+						tempFile.delete();
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						throw new RemoteException("", e);
+					}
+					return result;
+				} else {
+					return null;
+				}
+
+			}
+		}
+
+		public byte[] getBmp() throws RemoteException {
+			return null;
+		}
+
+		public byte[] getJpg() throws RemoteException {
+			return null;
+		}
+
+		public byte[] getPdf() throws RemoteException {
+			File tempFile = null;
+			try {
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".pdf").getCanonicalFile();
+				if (tempFile.exists())
+					tempFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+
+			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+
+			DirectJNI.getInstance().shutdownDevices("pdf");
+
+			final String createDeviceCommand = "pdf(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
+					+ new Double(6 * (getSize().width / getSize().height)) + ", height = " + 6
+					+ " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+
+			int pdfDevice = DirectJNI.getInstance().getDevice("pdf");
+			DirectJNI.getInstance().getRServices().evaluateExpressions(
+					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + pdfDevice + ");" + ".PrivateEnv$dev.set("
+							+ currentDevice + ");", 3);
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+
 			if (tempFile.exists()) {
-				
-				
-				Vector<String> result=null;
+
+				byte[] result = null;
 				try {
 
-					
-					DirectJNI.getInstance().shutdownCairoDevices();
-					
-					result = new Vector<String>();
-					BufferedReader br = new BufferedReader(new FileReader(tempFile));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						result.add(line);
-					}
-					br.close();
+					DirectJNI.getInstance().shutdownDevices("pdf");
+
+					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
+					result = new byte[(int) raf.length()];
+					raf.readFully(result);
+					raf.close();
+
 					tempFile.delete();
-					
-				}
-				catch (Exception e) {
+
+				} catch (Exception e) {
 					e.printStackTrace();
-					throw new RemoteException("",e);
+					throw new RemoteException("", e);
 				}
 				return result;
 			} else {
@@ -2755,8 +2970,21 @@ public class DirectJNI {
 			}
 		}
 
-			
+		public byte[] getPictex() throws RemoteException {
+			return null;
+		}
 
+		public byte[] getPng() throws RemoteException {
+			return null;
+		}
+
+		public byte[] getPostScript() throws RemoteException {
+			return null;
+		}
+
+		public byte[] getXfig() throws RemoteException {
+			return null;
+		}
 
 	}
 

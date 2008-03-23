@@ -2,7 +2,6 @@ package graphics.rmi.action;
 
 import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
-import graphics.rmi.NewWindow;
 import graphics.rmi.RGui;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -15,17 +14,10 @@ import javax.swing.SwingUtilities;
 
 public class SnapshotDeviceAction extends AbstractAction {
 	RGui _rgui;
-	JBufferedImagePanel _panel;
+	
 	public SnapshotDeviceAction(RGui rgui) {
 		super("Create Snapshot");
 		_rgui=rgui;
-		_panel=null;
-	}
-	
-	public SnapshotDeviceAction(RGui rgui, JBufferedImagePanel panel) {
-		super("Create Snapshot");
-		_rgui=rgui;
-		_panel=panel;
 	}
 	
 	
@@ -38,13 +30,11 @@ public class SnapshotDeviceAction extends AbstractAction {
 							try {
 
 								JBufferedImagePanel bufferedImagePanel = null;
-								if (_panel==null) {
+								
 									bufferedImagePanel = (JBufferedImagePanel) GDApplet
 										.getComponentParent((Component) e.getSource(),
 												JBufferedImagePanel.class);
-								} else {
-									bufferedImagePanel=_panel;
-								}
+								
 								
 								final JBufferedImagePanel panelclone = new JBufferedImagePanel(bufferedImagePanel.getImage());
 								
@@ -78,7 +68,8 @@ public class SnapshotDeviceAction extends AbstractAction {
 									}
 								});
 
-								NewWindow.create(new JScrollPane(panelclone), "Snapshot");
+								_rgui.createView(new JScrollPane(panelclone), "Snapshot");
+
 
 							} catch (Exception e) {
 								e.printStackTrace();

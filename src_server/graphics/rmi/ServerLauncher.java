@@ -658,7 +658,14 @@ public class ServerLauncher {
 				}
 			}
 
-			String[] requiredPackages = new String[] { "rJava", "JavaGD", "Cairo" , "TypeInfo" };
+			String[] requiredPackages = null;
+			
+			if (isWindowsOs()) {
+				requiredPackages=new String[] { "rJava", "JavaGD", "TypeInfo" , "Cairo"};
+			} else {
+				requiredPackages=new String[] { "rJava", "JavaGD", "TypeInfo" };
+			}
+			
 			Vector<String> installLibBatch = new Vector<String>();
 			installLibBatch.add("source('http://bioconductor.org/biocLite.R')");
 
