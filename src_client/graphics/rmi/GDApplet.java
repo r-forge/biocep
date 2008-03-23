@@ -465,15 +465,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
-									
+									/*
 									
 									  DirectJNI.init(); r = DirectJNI.getInstance().getRServices();
 									  if (false) throw new BadSshHostException();
 									  if (false) throw new BadSshLoginPwdException();									  
 									  _keepAlive = ident.isKeepAlive();
 									 									 
-									
-									/* 
+									*/
+									 
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
@@ -500,7 +500,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									if (ident.isUseSsh()) {
 										_sshParameters = new String[] { ident.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd() };
 									}
-									*/
+									
 									
 									_rProcessId = r.getProcessId();
 									System.out.println("R Process Id :" + _rProcessId);
