@@ -1,7 +1,6 @@
 
 library(rJava);.jinit(classpath=NULL);
 library(JavaGD)
-library(Cairo)
 
 .PrivateEnv<-new.env(parent = .GlobalEnv)
 library(TypeInfo)

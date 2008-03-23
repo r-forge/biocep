@@ -95,4 +95,32 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 	public Vector<String> getSVG() throws RemoteException {
 		return _localGdDevice.getSVG();
 	}
+	
+	public byte[] getBmp() throws RemoteException {
+		return _localGdDevice.getBmp();
+	}
+	
+	public byte[] getJpg() throws RemoteException {
+		return _localGdDevice.getJpg();
+	}
+	
+	public byte[] getPdf() throws RemoteException {
+		return _localGdDevice.getPdf();
+	}
+	
+	public byte[] getPictex() throws RemoteException {
+		return _localGdDevice.getPictex();
+	}
+	
+	public byte[] getPng() throws RemoteException {
+		return _localGdDevice.getPng();
+	}
+	
+	public byte[] getPostScript() throws RemoteException {
+		return _localGdDevice.getPostScript();
+	}
+	
+	public byte[] getXfig() throws RemoteException {
+		return _localGdDevice.getXfig();
+	}
 }

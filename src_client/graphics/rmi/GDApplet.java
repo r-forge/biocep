@@ -6,10 +6,12 @@ import graphics.rmi.action.CopyToCurrentDeviceAction;
 import graphics.rmi.action.CoupleToCurrentDeviceAction;
 import graphics.rmi.action.FitDeviceAction;
 import graphics.rmi.action.SaveDeviceAsJpgAction;
+import graphics.rmi.action.SaveDeviceAsPdfAction;
 import graphics.rmi.action.SaveDeviceAsPngAction;
 import graphics.rmi.action.SaveDeviceAsSvgAction;
 import graphics.rmi.action.SetCurrentDeviceAction;
 import graphics.rmi.action.SnapshotDeviceAction;
+import graphics.rmi.action.SnapshotDeviceSvgAction;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
 import http.ConnectionFailedException;
 import http.FileLoad;
@@ -464,14 +466,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
 									
-									/*
+									
 									  DirectJNI.init(); r = DirectJNI.getInstance().getRServices();
 									  if (false) throw new BadSshHostException();
 									  if (false) throw new BadSshLoginPwdException();									  
 									  _keepAlive = ident.isKeepAlive();
-									*/ 									 
+									 									 
 									
-									 
+									/* 
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
@@ -498,6 +500,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									if (ident.isUseSsh()) {
 										_sshParameters = new String[] { ident.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd() };
 									}
+									*/
 									
 									_rProcessId = r.getProcessId();
 									System.out.println("R Process Id :" + _rProcessId);
@@ -594,8 +597,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] {
 
 							new SetCurrentDeviceAction(GDApplet.this, d), null, new FitDeviceAction(GDApplet.this, d), null,
-									new SnapshotDeviceAction(GDApplet.this), new SaveDeviceAsPngAction(GDApplet.this),
-									new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+									new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
+									new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this) , null, new CopyFromCurrentDeviceAction(GDApplet.this),
 									new CopyToCurrentDeviceAction(GDApplet.this, d), null, new CoupleToCurrentDeviceAction(GDApplet.this)
 
 							}, getRLock(), getConsoleLogger());
@@ -628,8 +631,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 										new SetCurrentDeviceAction(GDApplet.this, newDevice), null, new FitDeviceAction(GDApplet.this, newDevice), null,
-										new SnapshotDeviceAction(GDApplet.this), new SaveDeviceAsPngAction(GDApplet.this),
-										new SaveDeviceAsJpgAction(GDApplet.this),new SaveDeviceAsSvgAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
+										new SaveDeviceAsJpgAction(GDApplet.this),new SaveDeviceAsSvgAction(GDApplet.this),new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
 										new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) },
 										getRLock(), getConsoleLogger());
 
@@ -954,14 +957,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 				public void menuSelected(MenuEvent e) {
 
 					graphicsMenu.removeAll();
-					graphicsMenu.add(_actions.get("createdevice"));
+					graphicsMenu.add(_actions.get("createdevice"));					
 					graphicsMenu.addSeparator();
-
+					
+					/*
 					graphicsMenu.add(new SnapshotDeviceAction(GDApplet.this, _sessionId == null ? null : getCurrentJGPanelPop()));
 					graphicsMenu.add(new SaveDeviceAsPngAction(GDApplet.this));
 					graphicsMenu.add(new SaveDeviceAsJpgAction(GDApplet.this));
-
 					graphicsMenu.addSeparator();
+					*/
 
 					graphicsMenu.add(new AbstractAction("Fit Device to Panel") {
 
@@ -1249,7 +1253,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 									}
 
-									@Override
 									public boolean isEnabled() {
 										return _sessionId != null && !getRLock().isLocked();
 									}
@@ -2447,8 +2450,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					}
 
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
-							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
-							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), null,
+							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this),null,
+							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),new SaveDeviceAsPdfAction(GDApplet.this), null,
 							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
 
@@ -3412,7 +3415,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 											_area.setEnabled(false);
 										}
 									});
-									Vector<String> result=GDApplet.this.getR().evalAndGetSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
+									
+									Vector<String> result=null;
+									try {
+										result=GDApplet.this.getR().evalAndGetSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
+									} catch (RemoteException e) {
+										JOptionPane.showMessageDialog(null, e.getCause().getMessage(), "R Error", JOptionPane.ERROR_MESSAGE);
+										return ;
+									}
+									
 									if (result==null) {
 										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
 										return ;
@@ -3421,7 +3432,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
 									}
 									//System.out.println("SVG RESULT:"+result);
-									final String tempFile=System.getProperty("java.io.tmpdir")+"/svgview"+System.currentTimeMillis()+".svg";
+									final String tempFile=/*System.getProperty("java.io.tmpdir")*/"c:"+"/svgview"+System.currentTimeMillis()+".svg";
 									PrintWriter pw=new PrintWriter(new FileWriter(tempFile));
 									for (int i=0; i<result.size(); ++i) pw.println(result.elementAt(i));
 									pw.close();

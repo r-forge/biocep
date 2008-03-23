@@ -58,4 +58,31 @@ public class TempGDDevice implements GDDevice {
 		return null;
 	}
 
+	public byte[] getBmp() throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getJpg() throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPdf() throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPictex() throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPng() throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPostScript() throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getXfig() throws RemoteException {
+		return null;
+	}
 }
