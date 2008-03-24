@@ -3,13 +3,10 @@ package graphics.rmi;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isMacOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
+import graphics.pop.GDDevice;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -26,9 +23,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -38,13 +34,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import org.apache.batik.swing.JSVGCanvas;
-import org.apache.batik.swing.gvt.GVTTreeRendererAdapter;
-import org.apache.batik.swing.gvt.GVTTreeRendererEvent;
-import org.apache.batik.swing.svg.GVTTreeBuilderAdapter;
-import org.apache.batik.swing.svg.GVTTreeBuilderEvent;
-import org.apache.batik.swing.svg.SVGDocumentLoaderAdapter;
-import org.apache.batik.swing.svg.SVGDocumentLoaderEvent;
+import net.infonode.docking.View;
+
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -55,6 +46,7 @@ import uk.ac.ebi.microarray.pools.MainPsToolsDownload;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
+import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
 import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 import ch.ethz.ssh2.ChannelCondition;
@@ -68,97 +60,6 @@ import ch.ethz.ssh2.StreamGobbler;
  */
 public class ServerLauncher {
 
-	public static void main(String[] args) {
-		// Create a new JFrame.
-		JFrame f = new JFrame("Batik");
-		ServerLauncher app = new ServerLauncher(f);
-
-		// Add components to the frame.
-		f.getContentPane().add(app.createComponents());
-
-		// Display the frame.
-		f.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				System.exit(0);
-			}
-		});
-		f.setSize(400, 400);
-		f.setVisible(true);
-	}
-
-	// The frame.
-	protected JFrame frame;
-
-	// The "Load" button, which displays up a file chooser upon clicking.
-	protected JButton button = new JButton("Load...");
-
-	// The status label.
-	protected JLabel label = new JLabel();
-
-	// The SVG canvas.
-	protected JSVGCanvas svgCanvas = new JSVGCanvas();
-
-	public ServerLauncher(JFrame f) {
-		frame = f;
-	}
-
-	public JComponent createComponents() {
-		// Create a panel and add the button, status label and the SVG canvas.
-		final JPanel panel = new JPanel(new BorderLayout());
-
-		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		p.add(button);
-		p.add(label);
-
-		panel.add("North", p);
-		panel.add("Center", svgCanvas);
-
-		// Set the button action.
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				try {
-					svgCanvas.setURI(new File("c:/Rplots.svg").toURL().toString());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-
-		// Set the JSVGCanvas listeners.
-		svgCanvas.addSVGDocumentLoaderListener(new SVGDocumentLoaderAdapter() {
-			public void documentLoadingStarted(SVGDocumentLoaderEvent e) {
-				label.setText("Document Loading...");
-			}
-
-			public void documentLoadingCompleted(SVGDocumentLoaderEvent e) {
-				label.setText("Document Loaded.");
-			}
-		});
-
-		svgCanvas.addGVTTreeBuilderListener(new GVTTreeBuilderAdapter() {
-			public void gvtBuildStarted(GVTTreeBuilderEvent e) {
-				label.setText("Build Started...");
-			}
-
-			public void gvtBuildCompleted(GVTTreeBuilderEvent e) {
-				label.setText("Build Done.");
-				frame.pack();
-			}
-		});
-
-		svgCanvas.addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
-			public void gvtRenderingPrepare(GVTTreeRendererEvent e) {
-				label.setText("Rendering Started...");
-			}
-
-			public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
-				label.setText("");
-			}
-		});
-
-		return panel;
-	}
-
 	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
 	public static int BUFFER_SIZE = 8192 * 5;
 
@@ -166,14 +67,82 @@ public class ServerLauncher {
 	 * @param args
 	 */
 
-	static Server server;
+	public static void main(String[] args) throws Exception {
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					createAndShowGUI();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 
-	public static void main_(String[] args) throws Exception {
-		String[] rinfo = GUtils.getRInfo(null);
-		System.out.println("R Info::" + Arrays.toString(rinfo));
+	private static void createAndShowGUI() throws Exception {
 
-		System.exit(0);
-		server = new Server(PoolUtils.getLocalTomcatPort());
+		ServerLauncher.runServers(3000, 3001);
+		final RServices r = ServerLauncher.createRLocal(false, "127.0.0.1", 3000, "127.0.0.1", 3001, 256, 256, false);
+		final ReentrantLock lock = new ReentrantLock();
+		final String processId = r.getProcessId();
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			public void run() {
+				try {
+					ServerLauncher.killLocalWinProcess(processId, true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}));		
+		RGui rgui = new RGui() {
+			public View createView(Component panel, String title) {
+				return null;
+			}
+
+			public ConsoleLogger getConsoleLogger() {
+				return null;
+			}
+
+			public GDDevice getCurrentDevice() {
+				return null;
+			}
+
+			public JGDPanelPop getCurrentJGPanelPop() {
+				return null;
+			}
+
+			public Component getRootComponent() {
+				return null;
+			}
+
+			public void setCurrentDevice(GDDevice device) {
+			}
+
+			public RServices getR() {
+				return r;
+			}
+
+			public ReentrantLock getRLock() {
+				return lock;
+			}
+		};
+
+		JFrame frame = new JFrame("R Workbench Plugins");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		JLabel label = new JLabel("Hello World");
+		frame.getContentPane().add(label);
+
+		frame.pack();
+		frame.setVisible(true);
+	}
+
+	static JTextArea createRSshProgressArea;
+	static JProgressBar createRSshProgressBar;
+	static JFrame createRSshProgressFrame;
+
+	public static void runServers(int tomcatPort, final int rmiregistryPort) throws Exception {
+		Server server = new Server(tomcatPort);
 		Context root = new Context(server, "/", Context.SESSIONS);
 		root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 		server.start();
@@ -187,9 +156,8 @@ public class ServerLauncher {
 
 		new Thread(new Runnable() {
 			public void run() {
-				System.out.println("local rmiregistry port : " + PoolUtils.getLocalRmiRegistryPort());
 				try {
-					LocateRegistry.createRegistry(PoolUtils.getLocalRmiRegistryPort());
+					LocateRegistry.createRegistry(rmiregistryPort);
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -197,22 +165,7 @@ public class ServerLauncher {
 			}
 		}).start();
 
-		RServices r = createRSsh(false, PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), 256,
-				256, "192.168.189.131", "ebi", "ebibiocep", false);
-
-		// System.out.println("make cluster result : "+r.cloneServer());
-
-		String processId = r.getProcessId();
-		System.out.println("Local process ID:" + PoolUtils.getProcessId());
-		System.out.println("R process ID:" + processId);
-
-		// System.exit(0);
-
 	}
-
-	static JTextArea createRSshProgressArea;
-	static JProgressBar createRSshProgressBar;
-	static JFrame createRSshProgressFrame;
 
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress) throws BadSshHostException,
@@ -999,4 +952,67 @@ public class ServerLauncher {
 
 	}
 
+	public static void killLocalUnixProcess(String processId, boolean isKILLSIG) throws Exception {
+		PoolUtils.killLocalUnixProcess(processId, isKILLSIG);
+	}
+
+	public static void killLocalWinProcess(String processId, boolean isKILLSIG) throws Exception {
+		PoolUtils.killLocalWinProcess(processId, isKILLSIG);
+	}
+
+	public static void killSshProcess(String processId, String sshHostIp, String sshLogin, String sshPwd, boolean forcedKill) throws Exception {
+		SSHUtils.killSshProcess(processId, sshHostIp, sshLogin, sshPwd, forcedKill);
+	}
+	/*
+	 * public static void main(String[] args) { // Create a new JFrame. JFrame f =
+	 * new JFrame("Batik"); ServerLauncher app = new ServerLauncher(f);
+	 *  // Add components to the frame.
+	 * f.getContentPane().add(app.createComponents());
+	 *  // Display the frame. f.addWindowListener(new WindowAdapter() { public
+	 * void windowClosing(WindowEvent e) { System.exit(0); } }); f.setSize(400,
+	 * 400); f.setVisible(true); }
+	 *  // The frame. protected JFrame frame;
+	 *  // The "Load" button, which displays up a file chooser upon clicking.
+	 * protected JButton button = new JButton("Load...");
+	 *  // The status label. protected JLabel label = new JLabel();
+	 *  // The SVG canvas. protected JSVGCanvas svgCanvas = new JSVGCanvas();
+	 * 
+	 * public ServerLauncher(JFrame f) { frame = f; }
+	 * 
+	 * public JComponent createComponents() { // Create a panel and add the
+	 * button, status label and the SVG canvas. final JPanel panel = new
+	 * JPanel(new BorderLayout());
+	 * 
+	 * JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT)); p.add(button);
+	 * p.add(label);
+	 * 
+	 * panel.add("North", p); panel.add("Center", svgCanvas);
+	 *  // Set the button action. button.addActionListener(new ActionListener() {
+	 * public void actionPerformed(ActionEvent ae) { try { svgCanvas.setURI(new
+	 * File("c:/Rplots.svg").toURL().toString()); } catch (Exception e) {
+	 * e.printStackTrace(); } } });
+	 *  // Set the JSVGCanvas listeners.
+	 * svgCanvas.addSVGDocumentLoaderListener(new SVGDocumentLoaderAdapter() {
+	 * public void documentLoadingStarted(SVGDocumentLoaderEvent e) {
+	 * label.setText("Document Loading..."); }
+	 * 
+	 * public void documentLoadingCompleted(SVGDocumentLoaderEvent e) {
+	 * label.setText("Document Loaded."); } });
+	 * 
+	 * svgCanvas.addGVTTreeBuilderListener(new GVTTreeBuilderAdapter() { public
+	 * void gvtBuildStarted(GVTTreeBuilderEvent e) { label.setText("Build
+	 * Started..."); }
+	 * 
+	 * public void gvtBuildCompleted(GVTTreeBuilderEvent e) {
+	 * label.setText("Build Done."); frame.pack(); } });
+	 * 
+	 * svgCanvas.addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
+	 * public void gvtRenderingPrepare(GVTTreeRendererEvent e) {
+	 * label.setText("Rendering Started..."); }
+	 * 
+	 * public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
+	 * label.setText(""); } });
+	 * 
+	 * return panel; }
+	 */
 }

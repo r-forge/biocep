@@ -205,6 +205,7 @@
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>
+				<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
 				
 				
 				<pathelement path="lib/svg/batik-anim.jar"/>
@@ -597,6 +598,7 @@
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>
+				<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
 
 	
 				<pathelement path="lib/desktop/jeditmodes.jar"/>
@@ -716,6 +718,7 @@
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>
+				<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
 
 				<pathelement path="lib/svg/batik-anim.jar"/>
 				<pathelement path="lib/svg/batik-awt-util.jar"/>
