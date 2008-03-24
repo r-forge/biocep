@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,18 +63,16 @@ import static server.Globals.*;
 import util.Utils;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine   k.chine@imperial.ac.uk
  */
 public class Gen {
 
 	private static Vector<String[]> _functionsVector = new Vector<String[]>();
 	private static Project _project = new Project();
 
-	private static String[] rwebservicesScripts = { "/R/AllMkMapClasses.R", "/R/mkJavaBean.R",
-			"/R/ArrayAndMatrix-class.R", "/R/javaReservedWord.R", "/R/unpackAntScript.R", "/R/basicConvert.R",
-			"/R/mkConverter.R", "/R/mkTest.R", "/R/zzz.R", "/R/basicConvert2.R", "/R/mkDataMap.R", "/R/sink.R",
-			"/R/cConvert.R", "/R/testUtil.R", "/R/mkMapUtil.R", "/R/mkFuncMap.R", "/R/typeInfoToJava.R",
-			"/R/createMap.R" };
+	private static String[] rwebservicesScripts = { "/R/AllMkMapClasses.R", "/R/mkJavaBean.R", "/R/ArrayAndMatrix-class.R", "/R/javaReservedWord.R",
+			"/R/unpackAntScript.R", "/R/basicConvert.R", "/R/mkConverter.R", "/R/mkTest.R", "/R/zzz.R", "/R/basicConvert2.R", "/R/mkDataMap.R", "/R/sink.R",
+			"/R/cConvert.R", "/R/testUtil.R", "/R/mkMapUtil.R", "/R/mkFuncMap.R", "/R/typeInfoToJava.R", "/R/createMap.R" };
 
 	private static StringBuffer initScriptBuffer = new StringBuffer();
 
@@ -110,17 +110,17 @@ public class Gen {
 			protected void printMessage(String arg0, PrintStream arg1, int arg2) {
 			}
 		});
-/*
-		if (log instanceof Log4JLogger) {
-			Properties log4jProperties = new Properties();
-			for (Object sprop : System.getProperties().keySet()) {
-				if (((String) sprop).startsWith("log4j.")) {
-					log4jProperties.put(sprop, System.getProperties().get(sprop));
-				}
-			}
-			PropertyConfigurator.configure(log4jProperties);
-		}
-*/		
+		/*
+		 if (log instanceof Log4JLogger) {
+		 Properties log4jProperties = new Properties();
+		 for (Object sprop : System.getProperties().keySet()) {
+		 if (((String) sprop).startsWith("log4j.")) {
+		 log4jProperties.put(sprop, System.getProperties().get(sprop));
+		 }
+		 }
+		 PropertyConfigurator.configure(log4jProperties);
+		 }
+		 */
 
 	}
 
@@ -133,8 +133,7 @@ public class Gen {
 		}
 
 		GEN_ROOT = System.getProperty("outputdir");
-		MAPPING_JAR_NAME = System.getProperty("mappingjar") != null && !System.getProperty("mappingjar").equals("") ? System
-				.getProperty("mappingjar")
+		MAPPING_JAR_NAME = System.getProperty("mappingjar") != null && !System.getProperty("mappingjar").equals("") ? System.getProperty("mappingjar")
 				: "mapping.jar";
 		if (!MAPPING_JAR_NAME.endsWith(".jar"))
 			MAPPING_JAR_NAME += ".jar";
@@ -150,8 +149,7 @@ public class Gen {
 				};
 			});
 		} else {
-			String fileName = System.getProperty("file") != null && !System.getProperty("file").equals("") ? System
-					.getProperty("file") : "rjmap.xml";
+			String fileName = System.getProperty("file") != null && !System.getProperty("file").equals("") ? System.getProperty("file") : "rjmap.xml";
 			files = new File[] { new File(fileName) };
 		}
 
@@ -175,8 +173,7 @@ public class Gen {
 			Utils.catchNodes(Utils.catchNode(document.getDocumentElement(), "scripts"), "initScript", initNodes);
 			for (int i = 0; i < initNodes.size(); ++i) {
 				NamedNodeMap attrs = initNodes.elementAt(i).getAttributes();
-				boolean embed = attrs.getNamedItem("embed") != null
-						&& attrs.getNamedItem("embed").getNodeValue().equalsIgnoreCase("true");
+				boolean embed = attrs.getNamedItem("embed") != null && attrs.getNamedItem("embed").getNodeValue().equalsIgnoreCase("true");
 				StringBuffer vbuffer = new StringBuffer();
 				if (attrs.getNamedItem("inline") != null) {
 					vbuffer.append(attrs.getNamedItem("inline").getNodeValue());
@@ -196,8 +193,7 @@ public class Gen {
 			}
 
 			Vector<Node> packageInitNodes = new Vector<Node>();
-			Utils.catchNodes(Utils.catchNode(document.getDocumentElement(), "scripts"), "packageScript",
-					packageInitNodes);
+			Utils.catchNodes(Utils.catchNode(document.getDocumentElement(), "scripts"), "packageScript", packageInitNodes);
 			for (int i = 0; i < packageInitNodes.size(); ++i) {
 				NamedNodeMap attrs = packageInitNodes.elementAt(i).getAttributes();
 				String packageName = attrs.getNamedItem("package").getNodeValue();
@@ -239,16 +235,12 @@ public class Gen {
 				NamedNodeMap attrs = functionsNodes.elementAt(i).getAttributes();
 				String functionName = attrs.getNamedItem("name").getNodeValue();
 
-				boolean forWeb = attrs.getNamedItem("forWeb") != null
-						&& attrs.getNamedItem("forWeb").getNodeValue().equalsIgnoreCase("true");
+				boolean forWeb = attrs.getNamedItem("forWeb") != null && attrs.getNamedItem("forWeb").getNodeValue().equalsIgnoreCase("true");
 				boolean singleThreadedWeb = attrs.getNamedItem("singleThreadedWeb") != null
 						&& attrs.getNamedItem("singleThreadedWeb").getNodeValue().equalsIgnoreCase("true");
 
-				String signature = (attrs.getNamedItem("signature") == null ? "" : attrs.getNamedItem("signature")
-						.getNodeValue()
-						+ ",");
-				String renameTo = (attrs.getNamedItem("renameTo") == null ? null : attrs.getNamedItem("renameTo")
-						.getNodeValue());
+				String signature = (attrs.getNamedItem("signature") == null ? "" : attrs.getNamedItem("signature").getNodeValue() + ",");
+				String renameTo = (attrs.getNamedItem("renameTo") == null ? null : attrs.getNamedItem("renameTo").getNodeValue());
 
 				HashMap<String, FAttributes> sigMap = Globals._functionsToPublish.get(functionName);
 
@@ -259,8 +251,7 @@ public class Gen {
 					if (attrs.getNamedItem("returnType") == null) {
 						_functionsVector.add(new String[] { functionName });
 					} else {
-						_functionsVector.add(new String[] { functionName,
-								attrs.getNamedItem("returnType").getNodeValue() });
+						_functionsVector.add(new String[] { functionName, attrs.getNamedItem("returnType").getNodeValue() });
 					}
 
 				}
@@ -272,11 +263,8 @@ public class Gen {
 
 			}
 
-			if (System.getProperty("targetjdk") != null && !System.getProperty("targetjdk").equals("")
-					&& System.getProperty("targetjdk").compareTo("1.6") < 0) {
-				if (_webPublishingEnabled
-						|| (System.getProperty("ws.r.api") != null && System.getProperty("ws.r.api").equalsIgnoreCase(
-								"true"))) {
+			if (System.getProperty("targetjdk") != null && !System.getProperty("targetjdk").equals("") && System.getProperty("targetjdk").compareTo("1.6") < 0) {
+				if (_webPublishingEnabled || (System.getProperty("ws.r.api") != null && System.getProperty("ws.r.api").equalsIgnoreCase("true"))) {
 					log.info("be careful, web publishing disabled beacuse target JDK<1.6");
 				}
 				_webPublishingEnabled = false;
@@ -304,9 +292,8 @@ public class Gen {
 					formalArgs += "p" + i + (i == s4Nodes.size() - 1 ? "" : ",");
 					signature += "'" + s4Name + "'" + (i == s4Nodes.size() - 1 ? "" : ",");
 				}
-				String genBeansScriptlet = "setGeneric('" + PUBLISH_S4_HEADER + "', function(" + formalArgs
-						+ ") standardGeneric('" + PUBLISH_S4_HEADER + "'));" + "setMethod('" + PUBLISH_S4_HEADER
-						+ "', signature(" + signature + ") , function(" + formalArgs + ") {   })";
+				String genBeansScriptlet = "setGeneric('" + PUBLISH_S4_HEADER + "', function(" + formalArgs + ") standardGeneric('" + PUBLISH_S4_HEADER
+						+ "'));" + "setMethod('" + PUBLISH_S4_HEADER + "', signature(" + signature + ") , function(" + formalArgs + ") {   })";
 				initScriptBuffer.append(genBeansScriptlet);
 				_functionsVector.add(new String[] { PUBLISH_S4_HEADER, "numeric" });
 			}
@@ -336,8 +323,7 @@ public class Gen {
 					regenerateDir(GEN_ROOT_SRC);
 
 					String createMapStr = "createMap(";
-					boolean isGeneric = e.rniGetBoolArrayI(e.rniEval(e.rniParse("isGeneric(\"" + functionPair[0]
-							+ "\")", 1), 0))[0] == 1;
+					boolean isGeneric = e.rniGetBoolArrayI(e.rniEval(e.rniParse("isGeneric(\"" + functionPair[0] + "\")", 1), 0))[0] == 1;
 
 					log.info("is Generic : " + isGeneric);
 					if (isGeneric) {
@@ -345,12 +331,9 @@ public class Gen {
 					} else {
 						createMapStr += "\"" + functionPair[0] + "\"";
 					}
-					createMapStr += ", outputDirectory=\""
-							+ GEN_ROOT_SRC.substring(0, GEN_ROOT_SRC.length() - "/src".length()).replace('\\', '/')
-							+ "\"";
+					createMapStr += ", outputDirectory=\"" + GEN_ROOT_SRC.substring(0, GEN_ROOT_SRC.length() - "/src".length()).replace('\\', '/') + "\"";
 					createMapStr += ", typeMode=\"robject\"";
-					createMapStr += (functionPair.length == 1 || functionPair[1] == null
-							|| functionPair[1].trim().equals("") ? ""
+					createMapStr += (functionPair.length == 1 || functionPair[1] == null || functionPair[1].trim().equals("") ? ""
 							: ", S4DefaultTypedSig=TypedSignature(returnType=\"" + functionPair[1] + "\")");
 					createMapStr += ")";
 
@@ -368,9 +351,7 @@ public class Gen {
 
 					URL url = null;
 					try {
-						url = new URL("jar:file:"
-								+ (GEN_ROOT_LIB + FILE_SEPARATOR + TEMP_JARS_PREFIX + i + ".jar").replace('\\', '/')
-								+ "!/");
+						url = new URL("jar:file:" + (GEN_ROOT_LIB + FILE_SEPARATOR + TEMP_JARS_PREFIX + i + ".jar").replace('\\', '/') + "!/");
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
@@ -395,16 +376,16 @@ public class Gen {
 			applyJalopy(GEN_ROOT_SRC);
 
 		compile(GEN_ROOT_SRC);
-		
-		for (String k:DirectJNI._rPackageInterfacesHash.keySet()) {
+
+		for (String k : DirectJNI._rPackageInterfacesHash.keySet()) {
 			Rmic rmicTask = new Rmic();
-			rmicTask.setProject(_project);			
+			rmicTask.setProject(_project);
 			rmicTask.setTaskName("rmic_packages");
-			rmicTask.setClasspath(new Path(_project,GEN_ROOT_SRC));
+			rmicTask.setClasspath(new Path(_project, GEN_ROOT_SRC));
 			rmicTask.setBase(new File(GEN_ROOT_SRC));
-			rmicTask.setClassname(k+"ImplRemote");
+			rmicTask.setClassname(k + "ImplRemote");
 			rmicTask.init();
-			rmicTask.execute();	
+			rmicTask.execute();
 		}
 
 		if (_webPublishingEnabled) {
@@ -418,8 +399,7 @@ public class Gen {
 					continue;
 				log.info("### " + className);
 				Utils.exec(new String[] { "wsgen", "-wsdl", "-d", GEN_ROOT_LIB + FILE_SEPARATOR + "src", "-cp",
-						GEN_ROOT_LIB + FILE_SEPARATOR + "src" + System.getProperty("path.separator") + "RJB.jar",
-						className + "Web" }, null, null);
+						GEN_ROOT_LIB + FILE_SEPARATOR + "src" + System.getProperty("path.separator") + "RJB.jar", className + "Web" }, null, null);
 			}
 
 			new File(GEN_ROOT_LIB + FILE_SEPARATOR + "__temp.jar").delete();
@@ -430,21 +410,20 @@ public class Gen {
 
 		HashMap<String, String> marker = new HashMap<String, String>();
 		marker.put("RJBMAPPINGJAR", "TRUE");
-				
-		
-		Properties props=new Properties();		
-		props.put("PACKAGE_NAMES", PoolUtils.objectToHex(DirectJNI._packageNames) );
-		props.put("S4BEANS_MAP", PoolUtils.objectToHex(DirectJNI._s4BeansMapping) );
-		props.put("S4BEANS_REVERT_MAP", PoolUtils.objectToHex(DirectJNI._s4BeansMappingRevert) );
-		props.put("FACTORIES_MAPPING", PoolUtils.objectToHex(DirectJNI._factoriesMapping) );		
-		props.put("S4BEANS_HASH", PoolUtils.objectToHex(DirectJNI._s4BeansHash) );
-		props.put("R_PACKAGE_INTERFACES_HASH", PoolUtils.objectToHex(DirectJNI._rPackageInterfacesHash) );
-		props.put("ABSTRACT_FACTORIES", PoolUtils.objectToHex(DirectJNI._abstractFactories) );
-		new File(GEN_ROOT_SRC+"/"+"maps").mkdirs();
-		FileOutputStream fos=new FileOutputStream(GEN_ROOT_SRC+"/"+"maps/rjbmaps.xml");
+
+		Properties props = new Properties();
+		props.put("PACKAGE_NAMES", PoolUtils.objectToHex(DirectJNI._packageNames));
+		props.put("S4BEANS_MAP", PoolUtils.objectToHex(DirectJNI._s4BeansMapping));
+		props.put("S4BEANS_REVERT_MAP", PoolUtils.objectToHex(DirectJNI._s4BeansMappingRevert));
+		props.put("FACTORIES_MAPPING", PoolUtils.objectToHex(DirectJNI._factoriesMapping));
+		props.put("S4BEANS_HASH", PoolUtils.objectToHex(DirectJNI._s4BeansHash));
+		props.put("R_PACKAGE_INTERFACES_HASH", PoolUtils.objectToHex(DirectJNI._rPackageInterfacesHash));
+		props.put("ABSTRACT_FACTORIES", PoolUtils.objectToHex(DirectJNI._abstractFactories));
+		new File(GEN_ROOT_SRC + "/" + "maps").mkdirs();
+		FileOutputStream fos = new FileOutputStream(GEN_ROOT_SRC + "/" + "maps/rjbmaps.xml");
 		props.storeToXML(fos, null);
 		fos.close();
-		
+
 		jar(GEN_ROOT_SRC, GEN_ROOT_LIB + FILE_SEPARATOR + MAPPING_JAR_NAME, marker);
 
 		if (_webPublishingEnabled)
@@ -613,11 +592,9 @@ public class Gen {
 		for (Iterator iter = DirectJNI._rPackageInterfacesHash.keySet().iterator(); iter.hasNext();) {
 			String className = (String) iter.next();
 			String packageName = className.substring(className.lastIndexOf('.') + 1);
-			File packScriptFile = new File(GEN_ROOT_SRC + FILE_SEPARATOR + className.replace('.', FILE_SEPARATOR)
-					+ ".R");
+			File packScriptFile = new File(GEN_ROOT_SRC + FILE_SEPARATOR + className.replace('.', FILE_SEPARATOR) + ".R");
 			PrintWriter pw = new PrintWriter(new FileWriter(packScriptFile));
-			pw.println(packageEmbedScriptHashMap.get(packageName) != null ? packageEmbedScriptHashMap.get(packageName)
-					: "## No Init Required");
+			pw.println(packageEmbedScriptHashMap.get(packageName) != null ? packageEmbedScriptHashMap.get(packageName) : "## No Init Required");
 			pw.close();
 		}
 	}
@@ -626,15 +603,13 @@ public class Gen {
 
 		String GEN_WEBINF = GEN_ROOT + FILE_SEPARATOR + "war" + FILE_SEPARATOR + "WEB-INF";
 
-		String WAR_NAME = System.getProperty("warname") != null && !System.getProperty("warname").equals("") ? System
-				.getProperty("warname") : MAPPING_JAR_NAME.substring(0, MAPPING_JAR_NAME.length() - "jar".length())
+		String WAR_NAME = System.getProperty("warname") != null && !System.getProperty("warname").equals("") ? System.getProperty("warname") : MAPPING_JAR_NAME
+				.substring(0, MAPPING_JAR_NAME.length() - "jar".length())
 				+ "war";
 		if (!WAR_NAME.endsWith(".war"))
 			WAR_NAME += ".war";
 
-		String PROPS_EMBED = System.getProperty("propsembed") != null && !System.getProperty("propsembed").equals("") ? System
-				.getProperty("propsembed")
-				: null;
+		String PROPS_EMBED = System.getProperty("propsembed") != null && !System.getProperty("propsembed").equals("") ? System.getProperty("propsembed") : null;
 
 		deleteDir(GEN_ROOT + FILE_SEPARATOR + "war");
 
@@ -695,8 +670,7 @@ public class Gen {
 		pw_web_xml.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		pw_web_xml
 				.println("<web-app version=\"2.4\" xmlns=\"http://java.sun.com/xml/ns/j2ee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd\">");
-		pw_web_xml
-				.println("<listener><listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class></listener>");
+		pw_web_xml.println("<listener><listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class></listener>");
 
 		for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
 			String shortClassName = className.substring(className.lastIndexOf('.') + 1);
@@ -708,8 +682,8 @@ public class Gen {
 
 		for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
 			String shortClassName = className.substring(className.lastIndexOf('.') + 1);
-			pw_web_xml.println("<servlet-mapping><servlet-name>" + shortClassName
-					+ "_servlet</servlet-name><url-pattern>/" + shortClassName + "</url-pattern></servlet-mapping>");
+			pw_web_xml.println("<servlet-mapping><servlet-name>" + shortClassName + "_servlet</servlet-name><url-pattern>/" + shortClassName
+					+ "</url-pattern></servlet-mapping>");
 		}
 		pw_web_xml.println("<session-config><session-timeout>30</session-timeout></session-config>");
 		pw_web_xml.println("<welcome-file-list><welcome-file>index.jsp</welcome-file></welcome-file-list>");
@@ -723,8 +697,8 @@ public class Gen {
 
 		for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
 			String shortClassName = className.substring(className.lastIndexOf('.') + 1);
-			pw_sun_jaxws_xml.println("   <endpoint    name='name_" + shortClassName + "'   implementation='"
-					+ className + "Web" + "' url-pattern='/" + shortClassName + "'/>");
+			pw_sun_jaxws_xml.println("   <endpoint    name='name_" + shortClassName + "'   implementation='" + className + "Web" + "' url-pattern='/"
+					+ shortClassName + "'/>");
 		}
 
 		pw_sun_jaxws_xml.println("</endpoints>");
@@ -735,8 +709,7 @@ public class Gen {
 			InputStream is = new FileInputStream(PROPS_EMBED);
 			byte[] buffer = new byte[is.available()];
 			is.read(buffer);
-			RandomAccessFile raf = new RandomAccessFile(GEN_WEBINF + FILE_SEPARATOR + "classes" + FILE_SEPARATOR
-					+ "globals.properties", "rw");
+			RandomAccessFile raf = new RandomAccessFile(GEN_WEBINF + FILE_SEPARATOR + "classes" + FILE_SEPARATOR + "globals.properties", "rw");
 			raf.setLength(0);
 			raf.write(buffer);
 			raf.close();

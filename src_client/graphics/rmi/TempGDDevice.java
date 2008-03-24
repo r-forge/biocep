@@ -9,15 +9,18 @@ import java.util.Vector;
 
 import org.rosuda.javaGD.GDObject;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class TempGDDevice implements GDDevice {
-	
-	private Dimension _dim=new Dimension(100,100);
+
+	private Dimension _dim = new Dimension(100, 100);
 
 	public void dispose() throws RemoteException {
 	}
 
 	public void fireSizeChangedEvent(int w, int h) throws RemoteException {
-		_dim=new Dimension(w,h);
+		_dim = new Dimension(w, h);
 	}
 
 	public int getDeviceNumber() throws RemoteException {
@@ -53,7 +56,7 @@ public class TempGDDevice implements GDDevice {
 
 	public void setAsCurrentDevice() throws RemoteException {
 	}
-	
+
 	public Vector<String> getSVG() throws RemoteException {
 		return null;
 	}
@@ -61,27 +64,27 @@ public class TempGDDevice implements GDDevice {
 	public byte[] getBmp() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getJpg() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getPdf() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getPictex() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getPng() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getPostScript() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getXfig() throws RemoteException {
 		return null;
 	}

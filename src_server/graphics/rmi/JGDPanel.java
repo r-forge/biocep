@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +31,7 @@ import org.rosuda.javaGD.GDObject;
 import org.rosuda.javaGD.GDState;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class JGDPanel extends RemotePanel implements GDContainer {
 	static final long serialVersionUID = 85376389L;
@@ -132,7 +134,6 @@ public class JGDPanel extends RemotePanel implements GDContainer {
 
 	}
 
-	
 	public void dispose() throws RemoteException {
 		_graphicNotifier.executeDevOff(_devNr);
 		if (_gdcServer != null) {

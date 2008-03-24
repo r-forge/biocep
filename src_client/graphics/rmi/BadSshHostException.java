@@ -1,5 +1,8 @@
 package graphics.rmi;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class BadSshHostException extends Exception {
 
 	public BadSshHostException() {

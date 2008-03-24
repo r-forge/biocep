@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +36,7 @@ import javax.swing.JTextField;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class NodeDialog extends JDialog {
 
@@ -71,9 +73,8 @@ public class NodeDialog extends JDialog {
 	public NodeDataDB getLaunchInfo() {
 
 		if (isOk)
-			return new NodeDataDB(_nodeName, _host_ip_str, _host_name_str, _login_str, _pwd_str, _homeDir_str,
-					_command_str, _kill_command_str, _os_str, Integer.decode(_servant_nbr_min), Integer
-							.decode(_servant_nbr_max), _prefix, Integer.decode(_processCounter));
+			return new NodeDataDB(_nodeName, _host_ip_str, _host_name_str, _login_str, _pwd_str, _homeDir_str, _command_str, _kill_command_str, _os_str,
+					Integer.decode(_servant_nbr_min), Integer.decode(_servant_nbr_max), _prefix, Integer.decode(_processCounter));
 		else
 			return null;
 	}
@@ -119,11 +120,11 @@ public class NodeDialog extends JDialog {
 
 		hostIp = new JTextField();
 		hostIp.setText(_host_ip_str);
-		//if (!addTeditF)	hostIp.setEditable(false);
+		// if (!addTeditF) hostIp.setEditable(false);
 
 		hostName = new JTextField();
 		hostName.setText(_host_name_str);
-		//if (!addTeditF)	hostName.setEditable(false);
+		// if (!addTeditF) hostName.setEditable(false);
 
 		login = new JTextField();
 		login.setText(_login_str);
@@ -154,7 +155,7 @@ public class NodeDialog extends JDialog {
 		processCounter = new JTextField();
 		processCounter.setText(new Integer(_processCounter).toString());
 
-		//if (!addTeditF)	prefix.setEditable(false);
+		// if (!addTeditF) prefix.setEditable(false);
 
 		p2.add(nodeName);
 		p2.add(hostIp);

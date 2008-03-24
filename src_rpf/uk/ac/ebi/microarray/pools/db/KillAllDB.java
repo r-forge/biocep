@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +28,7 @@ import javax.swing.JFrame;
 import uk.ac.ebi.microarray.pools.db.monitor.SupervisorUtils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class KillAllDB {
 	public static void main(String[] args) {
@@ -55,8 +57,7 @@ public class KillAllDB {
 				new Thread(new Runnable() {
 					public void run() {
 						try {
-							System.out.println("killing servant<" + servantName + "> host ip:" + hostIp
-									+ " process id:" + processId);
+							System.out.println("killing servant<" + servantName + "> host ip:" + hostIp + " process id:" + processId);
 							SupervisorUtils.killProcess(servantName, true, frame);
 							dbLayer.unbind(servantName);
 						} catch (Exception e) {

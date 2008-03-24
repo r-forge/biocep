@@ -1,5 +1,7 @@
 <!--
- * Copyright (C) 2007 2008 KARIM CHINE / EMBL-EBI / IMPERIAL COLLEGE LONDON 
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +17,7 @@
 -->
 
 <!--
- * author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
 -->
 
 <project name="BioCep" default="compile" basedir=".">
@@ -94,6 +96,27 @@
 				<pathelement path="${FTP_JAR}"/>
 				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
 				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
+				<pathelement path="${env.ANT_HOME}/lib/ant-launcher.jar"/>
+				
+				<pathelement path="lib/svg/batik-anim.jar"/>
+				<pathelement path="lib/svg/batik-awt-util.jar"/>
+				<pathelement path="lib/svg/batik-bridge.jar"/>
+				<pathelement path="lib/svg/batik-css.jar"/>
+				<pathelement path="lib/svg/batik-dom.jar"/>
+				<pathelement path="lib/svg/batik-ext.jar"/>
+				<pathelement path="lib/svg/batik-extension.jar"/>
+				<pathelement path="lib/svg/batik-gui-util.jar"/>
+				<pathelement path="lib/svg/batik-gvt.jar"/>
+				<pathelement path="lib/svg/batik-parser.jar"/>
+				<pathelement path="lib/svg/batik-script.jar"/>
+				<pathelement path="lib/svg/batik-svg-dom.jar"/>
+				<pathelement path="lib/svg/batik-svggen.jar"/>
+				<pathelement path="lib/svg/batik-swing.jar"/>
+				<pathelement path="lib/svg/batik-util.jar"/>
+				<pathelement path="lib/svg/batik-xml.jar"/>
+				<pathelement path="lib/svg/js.jar"/>
+				<pathelement path="lib/svg/xml-apis.jar"/>
+				<pathelement path="lib/svg/xml-apis-ext.jar"/>		
 			</classpath>
 			
 			<env key="Path" path="${R_LIB_PATH}"/>

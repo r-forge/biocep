@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +30,7 @@ import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine   k.chine@imperial.ac.uk
  */
 public class HelpServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
@@ -40,8 +42,7 @@ public class HelpServlet extends javax.servlet.http.HttpServlet implements javax
 		doAny(request, response);
 	}
 
-	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		HttpSession session = null;
 		Object result = null;
@@ -56,8 +57,7 @@ public class HelpServlet extends javax.servlet.http.HttpServlet implements javax
 				//System.out.println("<"+uri+"><"+session+"><"+(session==null? "NULL" : session.getAttribute("R"))+">");
 
 				if (session == null || session.getAttribute("R") == null) {
-					Collection<HttpSession> sessions = ((HashMap<String, HttpSession>) getServletContext()
-							.getAttribute("SESSIONS_MAP")).values();
+					Collection<HttpSession> sessions = ((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).values();
 					if (sessions.size() > 0) {
 						session = sessions.iterator().next();
 					} else {
@@ -101,8 +101,7 @@ public class HelpServlet extends javax.servlet.http.HttpServlet implements javax
 		response.flushBuffer();
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
 

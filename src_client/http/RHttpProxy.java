@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,27 +33,25 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class RHttpProxy {
-	
+
 	public static final String FAKE_SESSION = "11111111111111111111111111111111";
-	
+
 	static HttpClient mainHttpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
 
-	public static String logOn(String url, String sessionId, String login, String pwd, HashMap<String, Object> options)
-			throws TunnelingException {
+	public static String logOn(String url, String sessionId, String login, String pwd, HashMap<String, Object> options) throws TunnelingException {
 
 		GetMethod getSession = null;
 		try {
 			Object result = null;
 			try {
-				getSession = new GetMethod(url
-						+ "?method=logon&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd)
-						+ "&options=" + PoolUtils.objectToHex(options));	
+				getSession = new GetMethod(url + "?method=logon&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd) + "&options="
+						+ PoolUtils.objectToHex(options));
 				if (sessionId != null && !sessionId.equals("")) {
 					getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-					getSession.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+					getSession.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
 				}
 				mainHttpClient.executeMethod(getSession);
 				result = new ObjectInputStream(getSession.getResponseBodyAsStream()).readObject();
@@ -78,13 +78,12 @@ public class RHttpProxy {
 		GetMethod getLogOut = null;
 		try {
 			Object result = null;
-			getLogOut = new GetMethod(url
-					+ "?method=logoff");
+			getLogOut = new GetMethod(url + "?method=logoff");
 			if (sessionId != null && !sessionId.equals("")) {
 				getLogOut.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-				getLogOut.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+				getLogOut.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
 			}
-			try {				
+			try {
 				mainHttpClient.executeMethod(getLogOut);
 				result = new ObjectInputStream(getLogOut.getResponseBodyAsStream()).readObject();
 			} catch (ConnectException e) {
@@ -104,14 +103,13 @@ public class RHttpProxy {
 		}
 	}
 
-	public static Object invoke(String url, String sessionId, String servantName, String methodName,
-			Class<?>[] methodSignature, Object[] methodParameters, HttpClient httpClient) throws TunnelingException {
+	public static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters,
+			HttpClient httpClient) throws TunnelingException {
 		PostMethod postPush = null;
 		try {
 			Object result = null;
 			try {
-				postPush = new PostMethod(url						
-						+ "?method=invoke");
+				postPush = new PostMethod(url + "?method=invoke");
 				NameValuePair[] data = { new NameValuePair("servantname", PoolUtils.objectToHex(servantName)),
 						new NameValuePair("methodname", PoolUtils.objectToHex(methodName)),
 						new NameValuePair("methodsignature", PoolUtils.objectToHex(methodSignature)),
@@ -120,7 +118,7 @@ public class RHttpProxy {
 
 				if (sessionId != null && !sessionId.equals("")) {
 					postPush.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-					postPush.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+					postPush.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
 				}
 				httpClient.executeMethod(postPush);
 				result = new ObjectInputStream(postPush.getResponseBodyAsStream()).readObject();
@@ -140,20 +138,17 @@ public class RHttpProxy {
 		}
 	}
 
-	public static Object invoke(String url, String sessionId, String servantName, String methodName,
-			Class<?>[] methodSignature, Object[] methodParameters) throws TunnelingException {
+	public static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters)
+			throws TunnelingException {
 		return invoke(url, sessionId, servantName, methodName, methodSignature, methodParameters, mainHttpClient);
 	}
 
-	public static Object getDynamicProxy(final String url, final String sessionId, final String servantName,
-			Class<?>[] c, final HttpClient httpClient) {
-		Object proxy = Proxy.newProxyInstance(RHttpProxy.class.getClassLoader(), c ,
-				new InvocationHandler() {
-					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-						return RHttpProxy.invoke(url, sessionId, servantName, method.getName(), method
-								.getParameterTypes(), args, httpClient);
-					}
-				});
+	public static Object getDynamicProxy(final String url, final String sessionId, final String servantName, Class<?>[] c, final HttpClient httpClient) {
+		Object proxy = Proxy.newProxyInstance(RHttpProxy.class.getClassLoader(), c, new InvocationHandler() {
+			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				return RHttpProxy.invoke(url, sessionId, servantName, method.getName(), method.getParameterTypes(), args, httpClient);
+			}
+		});
 		return proxy;
 	}
 
@@ -162,12 +157,11 @@ public class RHttpProxy {
 		try {
 			Object result = null;
 			mainHttpClient = new HttpClient();
-			getInterrupt = new GetMethod(url
-					+ "?method=interrupt");
+			getInterrupt = new GetMethod(url + "?method=interrupt");
 			try {
 				if (sessionId != null && !sessionId.equals("")) {
 					getInterrupt.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-					getInterrupt.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+					getInterrupt.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
 				}
 				mainHttpClient.executeMethod(getInterrupt);
 				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
@@ -188,19 +182,17 @@ public class RHttpProxy {
 			}
 		}
 	}
-	
+
 	public static GDDevice newDevice(String url, String sessionId, int width, int height) throws TunnelingException {
 		GetMethod getNewDevice = null;
 		try {
 			Object result = null;
 			mainHttpClient = new HttpClient();
-			getNewDevice = new GetMethod(url
-					+ "?method=newdevice" +
-					"&width="+width+"&height="+height);
+			getNewDevice = new GetMethod(url + "?method=newdevice" + "&width=" + width + "&height=" + height);
 			try {
 				if (sessionId != null && !sessionId.equals("")) {
 					getNewDevice.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-					getNewDevice.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+					getNewDevice.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
 				}
 				mainHttpClient.executeMethod(getNewDevice);
 				result = new ObjectInputStream(getNewDevice.getResponseBodyAsStream()).readObject();
@@ -212,10 +204,10 @@ public class RHttpProxy {
 			if (result != null && result instanceof TunnelingException) {
 				throw (TunnelingException) result;
 			}
-			
-			String deviceName=(String)result;
-			return (GDDevice) RHttpProxy.getDynamicProxy(url, sessionId, deviceName,
-					new Class[]{GDDevice.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));
+
+			String deviceName = (String) result;
+			return (GDDevice) RHttpProxy.getDynamicProxy(url, sessionId, deviceName, new Class[] { GDDevice.class }, new HttpClient(
+					new MultiThreadedHttpConnectionManager()));
 
 		} finally {
 			if (getNewDevice != null) {
@@ -231,12 +223,11 @@ public class RHttpProxy {
 		try {
 			Object result = null;
 			mainHttpClient = new HttpClient();
-			getInterrupt = new GetMethod(url
-					+ "?method=saveimage");
+			getInterrupt = new GetMethod(url + "?method=saveimage");
 			try {
 				if (sessionId != null && !sessionId.equals("")) {
 					getInterrupt.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-					getInterrupt.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+					getInterrupt.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
 				}
 				mainHttpClient.executeMethod(getInterrupt);
 				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
@@ -258,17 +249,16 @@ public class RHttpProxy {
 		}
 	}
 
-	public static void loadimage(String url,String sessionId) throws TunnelingException {
+	public static void loadimage(String url, String sessionId) throws TunnelingException {
 		GetMethod getInterrupt = null;
 		try {
 			Object result = null;
 			mainHttpClient = new HttpClient();
-			getInterrupt = new GetMethod(url
-					+ "?method=loadimage");
+			getInterrupt = new GetMethod(url + "?method=loadimage");
 			try {
 				if (sessionId != null && !sessionId.equals("")) {
 					getInterrupt.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-					getInterrupt.setRequestHeader("Cookie", "JSESSIONID="+sessionId);
+					getInterrupt.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
 				}
 				mainHttpClient.executeMethod(getInterrupt);
 				result = new ObjectInputStream(getInterrupt.getResponseBodyAsStream()).readObject();
@@ -289,8 +279,5 @@ public class RHttpProxy {
 			}
 		}
 	}
-	
-	
-	
 
 }

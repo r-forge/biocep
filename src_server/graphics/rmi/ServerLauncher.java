@@ -63,99 +63,102 @@ import ch.ethz.ssh2.SCPClient;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class ServerLauncher {
-	
-	
-	
-    public static void main(String[] args) {
-        // Create a new JFrame.
-        JFrame f = new JFrame("Batik");
-        ServerLauncher app = new ServerLauncher(f);
 
-        // Add components to the frame.
-        f.getContentPane().add(app.createComponents());
+	public static void main(String[] args) {
+		// Create a new JFrame.
+		JFrame f = new JFrame("Batik");
+		ServerLauncher app = new ServerLauncher(f);
 
-        // Display the frame.
-        f.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-        f.setSize(400, 400);
-        f.setVisible(true);
-    }
-    
-    // The frame.
-    protected JFrame frame;
+		// Add components to the frame.
+		f.getContentPane().add(app.createComponents());
 
-    // The "Load" button, which displays up a file chooser upon clicking.
-    protected JButton button = new JButton("Load...");
+		// Display the frame.
+		f.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		f.setSize(400, 400);
+		f.setVisible(true);
+	}
 
-    // The status label.
-    protected JLabel label = new JLabel();
+	// The frame.
+	protected JFrame frame;
 
-    // The SVG canvas.
-    protected JSVGCanvas svgCanvas = new JSVGCanvas();
+	// The "Load" button, which displays up a file chooser upon clicking.
+	protected JButton button = new JButton("Load...");
 
-    public ServerLauncher(JFrame f) {
-        frame = f;
-    }
+	// The status label.
+	protected JLabel label = new JLabel();
 
-    public JComponent createComponents() {
-        // Create a panel and add the button, status label and the SVG canvas.
-        final JPanel panel = new JPanel(new BorderLayout());
+	// The SVG canvas.
+	protected JSVGCanvas svgCanvas = new JSVGCanvas();
 
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        p.add(button);
-        p.add(label);
+	public ServerLauncher(JFrame f) {
+		frame = f;
+	}
 
-        panel.add("North", p);
-        panel.add("Center", svgCanvas);
+	public JComponent createComponents() {
+		// Create a panel and add the button, status label and the SVG canvas.
+		final JPanel panel = new JPanel(new BorderLayout());
 
-        // Set the button action.
-        button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-            	try {
-            		svgCanvas.setURI(new File("c:/Rplots.svg").toURL().toString());
-            	} catch (Exception e) {
-            		e.printStackTrace();
+		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		p.add(button);
+		p.add(label);
+
+		panel.add("North", p);
+		panel.add("Center", svgCanvas);
+
+		// Set the button action.
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					svgCanvas.setURI(new File("c:/Rplots.svg").toURL().toString());
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-            }
-        });
+			}
+		});
 
-        // Set the JSVGCanvas listeners.
-        svgCanvas.addSVGDocumentLoaderListener(new SVGDocumentLoaderAdapter() {
-            public void documentLoadingStarted(SVGDocumentLoaderEvent e) {
-                label.setText("Document Loading...");
-            }
-            public void documentLoadingCompleted(SVGDocumentLoaderEvent e) {
-                label.setText("Document Loaded.");
-            }
-        });
+		// Set the JSVGCanvas listeners.
+		svgCanvas.addSVGDocumentLoaderListener(new SVGDocumentLoaderAdapter() {
+			public void documentLoadingStarted(SVGDocumentLoaderEvent e) {
+				label.setText("Document Loading...");
+			}
 
-        svgCanvas.addGVTTreeBuilderListener(new GVTTreeBuilderAdapter() {
-            public void gvtBuildStarted(GVTTreeBuilderEvent e) {
-                label.setText("Build Started...");
-            }
-            public void gvtBuildCompleted(GVTTreeBuilderEvent e) {
-                label.setText("Build Done.");
-                frame.pack();
-            }
-        });
+			public void documentLoadingCompleted(SVGDocumentLoaderEvent e) {
+				label.setText("Document Loaded.");
+			}
+		});
 
-        svgCanvas.addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
-            public void gvtRenderingPrepare(GVTTreeRendererEvent e) {
-                label.setText("Rendering Started...");
-            }
-            public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
-                label.setText("");
-            }
-        });
+		svgCanvas.addGVTTreeBuilderListener(new GVTTreeBuilderAdapter() {
+			public void gvtBuildStarted(GVTTreeBuilderEvent e) {
+				label.setText("Build Started...");
+			}
 
-        return panel;
-    }
-	
-	
+			public void gvtBuildCompleted(GVTTreeBuilderEvent e) {
+				label.setText("Build Done.");
+				frame.pack();
+			}
+		});
+
+		svgCanvas.addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
+			public void gvtRenderingPrepare(GVTTreeRendererEvent e) {
+				label.setText("Rendering Started...");
+			}
+
+			public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
+				label.setText("");
+			}
+		});
+
+		return panel;
+	}
+
 	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
 	public static int BUFFER_SIZE = 8192 * 5;
 
@@ -163,22 +166,24 @@ public class ServerLauncher {
 	 * @param args
 	 */
 
-	static Server server ;
+	static Server server;
+
 	public static void main_(String[] args) throws Exception {
 		String[] rinfo = GUtils.getRInfo(null);
-		System.out.println("R Info::"+Arrays.toString(rinfo));
-		
+		System.out.println("R Info::" + Arrays.toString(rinfo));
+
 		System.exit(0);
 		server = new Server(PoolUtils.getLocalTomcatPort());
-		Context root = new Context(server,"/",Context.SESSIONS);
+		Context root = new Context(server, "/", Context.SESSIONS);
 		root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 		server.start();
-				
-		
-		while (!server.isStarted()){	
-			try {Thread.sleep(20);} catch (Exception e) {}
-		}
 
+		while (!server.isStarted()) {
+			try {
+				Thread.sleep(20);
+			} catch (Exception e) {
+			}
+		}
 
 		new Thread(new Runnable() {
 			public void run() {
@@ -191,20 +196,18 @@ public class ServerLauncher {
 				}
 			}
 		}).start();
-		
-		  	
-		  RServices r = createRSsh(false, PoolUtils.getHostIp(),
-		  PoolUtils.getLocalTomcatPort(), PoolUtils.getHostIp(),
-		  PoolUtils.getLocalRmiRegistryPort(), 256, 256, "192.168.189.131", "ebi", "ebibiocep", false);
-		  
-		  //System.out.println("make cluster result : "+r.cloneServer());
-		  
-		  String processId = r.getProcessId();
-		  System.out.println("Local process ID:"+PoolUtils.getProcessId());
-		  System.out.println("R process ID:"+processId);
-			  		  
-		  //System.exit(0);
-	
+
+		RServices r = createRSsh(false, PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), 256,
+				256, "192.168.189.131", "ebi", "ebibiocep", false);
+
+		// System.out.println("make cluster result : "+r.cloneServer());
+
+		String processId = r.getProcessId();
+		System.out.println("Local process ID:" + PoolUtils.getProcessId());
+		System.out.println("R process ID:" + processId);
+
+		// System.exit(0);
+
 	}
 
 	static JTextArea createRSshProgressArea;
@@ -291,7 +294,8 @@ public class ServerLauncher {
 			try {
 				sess = conn.openSession();
 				sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
-						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes+" "+"System.out");
+						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes + " "
+						+ "System.out");
 
 				InputStream stdout = new StreamGobbler(sess.getStdout());
 				final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
@@ -366,7 +370,6 @@ public class ServerLauncher {
 
 	}
 
-	
 	static JTextArea createRLocalProgressArea;
 	static JProgressBar createRLocalProgressBar;
 	static JFrame createRLocalProgressFrame;
@@ -402,9 +405,7 @@ public class ServerLauncher {
 			}
 		}
 
-		
-		
-		try {	
+		try {
 			InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/BootSsh.class");
 			byte[] buffer = new byte[is.available()];
 			try {
@@ -423,66 +424,74 @@ public class ServerLauncher {
 			raf.write(buffer);
 			raf.close();
 
-			
-			String logFileDir=System.getProperty("user.home") + "/RWorkbench/" +"log/";
+			String logFileDir = System.getProperty("user.home") + "/RWorkbench/" + "log/";
 			new File(logFileDir).mkdirs();
-			String logFile=logFileDir+"log"+System.currentTimeMillis()+".txt";
+			String logFile = logFileDir + "log" + System.currentTimeMillis() + ".txt";
 			new File(logFile).delete();
-			
+
 			Vector<String> command = new Vector<String>();
 			if (isWindowsOs()) {
-				String psexecCommand=System.getProperty("pstools.home") + "/psexec.exe" ;
+				String psexecCommand = System.getProperty("pstools.home") + "/psexec.exe";
 				if (!new File(psexecCommand).exists()) {
-					String psToolsHome=System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
-					psexecCommand=psToolsHome + "/psexec.exe" ;
+					String psToolsHome = System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
+					psexecCommand = psToolsHome + "/psexec.exe";
 					if (!new File(psexecCommand).exists()) {
 						new File(psToolsHome).mkdirs();
 						MainPsToolsDownload.main(new String[] { psToolsHome });
-					}			
-				}	
+					}
+				}
 				command.add(psexecCommand);
 				command.add("-d");
 			}
-			
-			command.add((isWindowsOs() ? "\"" : "")+System.getProperty("java.home") + "/bin/java"+ (isWindowsOs() ? "\"" : ""));
-			command.add("-classpath");			
+
+			command.add((isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java" + (isWindowsOs() ? "\"" : ""));
+			command.add("-classpath");
 			command.add((isWindowsOs() ? "\"" : "") + System.getProperty("user.home") + "/RWorkbench/" + "classes" + (isWindowsOs() ? "\"" : ""));
-			command.add("bootstrap.BootSsh");			
+			command.add("bootstrap.BootSsh");
 			command.add(new Boolean(keepAlive).toString());
 			command.add(codeServerHostIp);
-			command.add(""+codeServerPort);
+			command.add("" + codeServerPort);
 			command.add(rmiRegistryHostIp);
-			command.add(""+rmiRegistryPort);
-			command.add(""+memoryMinMegabytes);
-			command.add(""+memoryMaxMegabytes);
+			command.add("" + rmiRegistryPort);
+			command.add("" + memoryMinMegabytes);
+			command.add("" + memoryMaxMegabytes);
 			command.add(logFile);
 			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), null);
 
 			while (!new File(logFile).exists()) {
-				try {Thread.sleep(100);} catch (Exception e) {}
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+				}
 			}
-			StringBuffer outPrint=new StringBuffer();
-			while (outPrint.indexOf(BootSsh.STUB_END_MARKER)==-1) {
-				try {Thread.sleep(100);} catch (Exception e) {}
-				outPrint=new StringBuffer();
-				BufferedReader br=new BufferedReader(new FileReader(logFile));
+			StringBuffer outPrint = new StringBuffer();
+			while (outPrint.indexOf(BootSsh.STUB_END_MARKER) == -1) {
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+				}
+				outPrint = new StringBuffer();
+				BufferedReader br = new BufferedReader(new FileReader(logFile));
 				while (true) {
-					String line=br.readLine(); if (line==null) break;
-					outPrint.append(line+"\n");
+					String line = br.readLine();
+					if (line == null)
+						break;
+					outPrint.append(line + "\n");
 				}
 				br.close();
 			}
-			
+
 			new File(logFile).delete();
-			
-			
-			String processId=outPrint.substring(outPrint.indexOf(BootSsh.PROCESS_ID_BEGIN_MARKER)+BootSsh.PROCESS_ID_BEGIN_MARKER.length(), outPrint.indexOf(BootSsh.PROCESS_ID_END_MARKER));
-			String rprocessId=outPrint.substring(outPrint.indexOf(BootSsh.R_PROCESS_ID_BEGIN_MARKER)+BootSsh.R_PROCESS_ID_BEGIN_MARKER.length(), outPrint.indexOf(BootSsh.R_PROCESS_ID_END_MARKER));
-			
-			System.out.println("(1) intermediate process id:"+processId);
-			System.out.println("(2) r process id:"+rprocessId);
-			//PoolUtils.killLocalWinProcess(processId, true);
-			
+
+			String processId = outPrint.substring(outPrint.indexOf(BootSsh.PROCESS_ID_BEGIN_MARKER) + BootSsh.PROCESS_ID_BEGIN_MARKER.length(), outPrint
+					.indexOf(BootSsh.PROCESS_ID_END_MARKER));
+			String rprocessId = outPrint.substring(outPrint.indexOf(BootSsh.R_PROCESS_ID_BEGIN_MARKER) + BootSsh.R_PROCESS_ID_BEGIN_MARKER.length(), outPrint
+					.indexOf(BootSsh.R_PROCESS_ID_END_MARKER));
+
+			System.out.println("(1) intermediate process id:" + processId);
+			System.out.println("(2) r process id:" + rprocessId);
+			// PoolUtils.killLocalWinProcess(processId, true);
+
 			int eIndex = outPrint.indexOf(BootSsh.STUB_END_MARKER);
 			if (eIndex != -1) {
 				int bIndex = outPrint.indexOf(BootSsh.STUB_BEGIN_MARKER);
@@ -500,9 +509,6 @@ public class ServerLauncher {
 
 	}
 
-	
-	
-	
 	static JTextArea createRProgressArea;
 	static JProgressBar createRProgressBar;
 	static JFrame createRProgressFrame;
@@ -556,11 +562,11 @@ public class ServerLauncher {
 			} else {
 				String thisUrl = ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class").toString();
 				if (thisUrl.indexOf("http:") != -1) {
-					
-					if (thisUrl.indexOf("RJB.jar")!=-1) {
+
+					if (thisUrl.indexOf("RJB.jar") != -1) {
 						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
 					} else {
-						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocepsigned.jar") + "biocepsigned.jar".length()));
+						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocep.jar") + "biocep.jar".length()));
 					}
 				}
 			}
@@ -573,27 +579,24 @@ public class ServerLauncher {
 			new File(root).mkdir();
 
 			String[] rinfo = GUtils.getRInfo(null);
-			System.out.println("+rinfo:"+rinfo+" "+Arrays.toString(rinfo));
-			
-			/*
-			if (rinfo == null && System.getenv("R_HOME") != null) {
-				String home = System.getenv("R_HOME");
-				if (isWindowsOs() && !home.endsWith("\\")) {
-					home = home + "\\";
-				}
-				if (!isWindowsOs() && !home.endsWith("/")) {
-					home = home + "/";
-				}
-				rinfo = GUtils.getRInfo(home);
-			}
-			
+			System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
 
-			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : (System.getenv("R_HOME") != null ? System
-					.getenv("R_HOME") : null);
-			*/		
-					
-			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) :  null;
-			
+			/*
+			 * if (rinfo == null && System.getenv("R_HOME") != null) { String
+			 * home = System.getenv("R_HOME"); if (isWindowsOs() &&
+			 * !home.endsWith("\\")) { home = home + "\\"; } if (!isWindowsOs() &&
+			 * !home.endsWith("/")) { home = home + "/"; } rinfo =
+			 * GUtils.getRInfo(home); }
+			 * 
+			 * 
+			 * String rpath = rinfo != null ? rinfo[0].substring(0,
+			 * rinfo[0].length() - "library".length()) :
+			 * (System.getenv("R_HOME") != null ? System .getenv("R_HOME") :
+			 * null);
+			 */
+
+			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : null;
+
 			System.out.println("rpath=" + rpath);
 			System.out.println("rversion=" + (rinfo != null ? rinfo[1] : ""));
 
@@ -607,7 +610,7 @@ public class ServerLauncher {
 						String rZipFileName = null;
 						if (isWindowsOs()) {
 							if (!new File(root + "R/R-2.6.2/bin/R.dll").exists()) {
-								rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/R-2.6.2-Win.zip";								
+								rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/R-2.6.2-Win.zip";
 							} else {
 								rZipFileName = null;
 							}
@@ -664,13 +667,13 @@ public class ServerLauncher {
 			}
 
 			String[] requiredPackages = null;
-			
+
 			if (isWindowsOs()) {
-				requiredPackages=new String[] { "rJava", "JavaGD", "TypeInfo" , "Cairo"};
+				requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo", "Cairo" };
 			} else {
-				requiredPackages=new String[] { "rJava", "JavaGD", "TypeInfo" };
+				requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo" };
 			}
-			
+
 			Vector<String> installLibBatch = new Vector<String>();
 			installLibBatch.add("source('http://bioconductor.org/biocLite.R')");
 
@@ -782,7 +785,7 @@ public class ServerLauncher {
 			MainPsToolsDownload.main(new String[] { root + "PsTools" });
 
 			// ---------------------------------------
-			
+
 			if (isWindowsOs() && !new File(root + "VRWorkbench.bat").exists()) {
 				try {
 					String launcherFile = root + "VRWorkbench.bat";
@@ -794,7 +797,7 @@ public class ServerLauncher {
 					e.printStackTrace();
 				}
 			}
-			
+
 			if (!isWindowsOs() && !new File(root + "VRWorkbench.sh").exists()) {
 				try {
 					String launcherFile = root + "VRWorkbench.sh";
@@ -807,7 +810,6 @@ public class ServerLauncher {
 				}
 			}
 
-			
 			// ---------------------------------------
 
 			String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";
@@ -825,7 +827,7 @@ public class ServerLauncher {
 				String listenerStub = PoolUtils.stubToHex(callBack);
 
 				Vector<String> command = new Vector<String>();
-				
+
 				command.add(System.getProperty("java.home") + "/bin/java");
 
 				command.add((isWindowsOs() ? "\"" : "") + "-DXms" + memoryMinMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
@@ -842,7 +844,8 @@ public class ServerLauncher {
 							+ urlprefix + "htmlparser.jar" + " " + urlprefix + "derbyclient.jar" + " " + urlprefix + "RJB.jar" + " " + urlprefix
 							+ "mapping.jar" + (isWindowsOs() ? "\"" : ""));
 				} else {
-					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"+ (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"
+							+ (isWindowsOs() ? "\"" : ""));
 				}
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
@@ -860,16 +863,29 @@ public class ServerLauncher {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
 
 				/*
-				command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=INFO,A1,A2"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"+ (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
-				*/				
-								
+				 * command.add((isWindowsOs() ? "\"" : "") +
+				 * "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+
+				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
+				 * "\"" : "") + "-Dlog4j.rootCategory=INFO,A1,A2"+
+				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
+				 * "\"" : "") +
+				 * "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"+
+				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
+				 * "\"" : "") +
+				 * "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"+
+				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
+				 * "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern=
+				 * [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
+				 * command.add((isWindowsOs() ? "\"" : "") +
+				 * "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"+
+				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
+				 * "\"" : "") +
+				 * "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"+
+				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
+				 * "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern=
+				 * [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
+				 */
+
 				command.add("bootstrap.Boot");
 				command.add(new Boolean(keepAlive).toString());
 				command.add(codeServerHostIp);
@@ -930,8 +946,7 @@ public class ServerLauncher {
 				if (exceptionHolder[0] != null) {
 					throw exceptionHolder[0];
 				}
-				
-				
+
 				return (RServices) servantHolder[0];
 			} finally {
 				if (callBack != null) {
@@ -960,8 +975,7 @@ public class ServerLauncher {
 			return null;
 		}
 	}
-	
-	
+
 	public static class RemoteLogListenerImpl extends UnicastRemoteObject implements RemoteLogListener {
 
 		public RemoteLogListenerImpl() throws RemoteException {

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +27,9 @@ import remoting.AssignInterface;
 import util.Utils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
-public class RIntegerRef extends RInteger implements mapping.ReferenceInterface, mapping.StandardReference,
-		Externalizable {
+public class RIntegerRef extends RInteger implements mapping.ReferenceInterface, mapping.StandardReference, Externalizable {
 
 	private long[] _rObjectIdHolder;
 
@@ -94,15 +95,14 @@ public class RIntegerRef extends RInteger implements mapping.ReferenceInterface,
 	public boolean equals(Object inputObject) {
 		if (inputObject == null || !(inputObject instanceof RIntegerRef))
 			return false;
-		return ((RIntegerRef) inputObject)._rObjectIdHolder[0] == _rObjectIdHolder[0]
-				&& ((RIntegerRef) inputObject)._slotsPath.equals(_slotsPath);
+		return ((RIntegerRef) inputObject)._rObjectIdHolder[0] == _rObjectIdHolder[0] && ((RIntegerRef) inputObject)._slotsPath.equals(_slotsPath);
 	}
 
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		try {
-			result.append("A Reference to an object of Class \"RInteger\" on the R servant <"
-					+ _assignInterface.getName() + ">  [" + _rObjectIdHolder[0] + "/" + _slotsPath + "]\n");
+			result.append("A Reference to an object of Class \"RInteger\" on the R servant <" + _assignInterface.getName() + ">  [" + _rObjectIdHolder[0] + "/"
+					+ _slotsPath + "]\n");
 		} catch (java.rmi.RemoteException e) {
 			e.printStackTrace();
 		}

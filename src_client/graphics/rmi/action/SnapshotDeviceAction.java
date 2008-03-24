@@ -12,15 +12,17 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+/**
+ * @author Karim Chine   k.chine@imperial.ac.uk
+ */
 public class SnapshotDeviceAction extends AbstractAction {
 	RGui _rgui;
-	
+
 	public SnapshotDeviceAction(RGui rgui) {
 		super("Create Snapshot");
-		_rgui=rgui;
+		_rgui = rgui;
 	}
-	
-	
+
 	public void actionPerformed(final ActionEvent e) {
 		new Thread(new Runnable() {
 			public void run() {
@@ -30,20 +32,14 @@ public class SnapshotDeviceAction extends AbstractAction {
 							try {
 
 								JBufferedImagePanel bufferedImagePanel = null;
-								
-									bufferedImagePanel = (JBufferedImagePanel) GDApplet
-										.getComponentParent((Component) e.getSource(),
-												JBufferedImagePanel.class);
-								
-								
+
+								bufferedImagePanel = (JBufferedImagePanel) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
+
 								final JBufferedImagePanel panelclone = new JBufferedImagePanel(bufferedImagePanel.getImage());
-								
-								
-								final AbstractAction[] actions = new AbstractAction[] { new SnapshotDeviceAction(_rgui) ,
-										new SaveDeviceAsPngAction(_rgui), new SaveDeviceAsJpgAction(_rgui) };
-								
-								
-								
+
+								final AbstractAction[] actions = new AbstractAction[] { new SnapshotDeviceAction(_rgui), new SaveDeviceAsPngAction(_rgui),
+										new SaveDeviceAsJpgAction(_rgui) };
+
 								panelclone.addMouseListener(new MouseAdapter() {
 									public void mousePressed(MouseEvent e) {
 										checkPopup(e);
@@ -70,7 +66,6 @@ public class SnapshotDeviceAction extends AbstractAction {
 
 								_rgui.createView(new JScrollPane(panelclone), "Snapshot");
 
-
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -82,11 +77,10 @@ public class SnapshotDeviceAction extends AbstractAction {
 			}
 		}).start();
 
-		
 	}
-	
+
 	@Override
 	public boolean isEnabled() {
-		return _rgui.getR()!=null;
+		return _rgui.getR() != null;
 	}
 }

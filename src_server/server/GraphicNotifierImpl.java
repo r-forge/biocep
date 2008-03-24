@@ -8,6 +8,9 @@ import java.rmi.server.UnicastRemoteObject;
 
 import org.rosuda.javaGD.GDContainer;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class GraphicNotifierImpl extends UnicastRemoteObject implements GraphicNotifier {
 	public GraphicNotifierImpl() throws RemoteException {
 		super();

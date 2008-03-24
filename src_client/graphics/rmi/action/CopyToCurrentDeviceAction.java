@@ -7,35 +7,39 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class CopyToCurrentDeviceAction extends AbstractAction {
 	private GDDevice _device;
 	private RGui _rgui;
-	public CopyToCurrentDeviceAction(RGui rgui , GDDevice device) {
+
+	public CopyToCurrentDeviceAction(RGui rgui, GDDevice device) {
 		super("Copy To Current Device");
-		_device=device;
-		_rgui=rgui;
+		_device = device;
+		_rgui = rgui;
 	}
-	
+
 	public void actionPerformed(ActionEvent e) {
-		try  {						
-			
+		try {
+
 			_rgui.getRLock().lock();
-			int desinationDeviceNumber=_device.getDeviceNumber();
-			int sourceDeviceNumber=_rgui.getCurrentDevice().getDeviceNumber();
-			System.out.println(_rgui.getR().consoleSubmit(".PrivateEnv$dev.set("+desinationDeviceNumber+");"+".PrivateEnv$dev.copy(which="+sourceDeviceNumber+");" ));
-			
+			int desinationDeviceNumber = _device.getDeviceNumber();
+			int sourceDeviceNumber = _rgui.getCurrentDevice().getDeviceNumber();
+			System.out.println(_rgui.getR().consoleSubmit(
+					".PrivateEnv$dev.set(" + desinationDeviceNumber + ");" + ".PrivateEnv$dev.copy(which=" + sourceDeviceNumber + ");"));
+
 		} catch (Exception ex) {
-			ex.printStackTrace();	
+			ex.printStackTrace();
 		} finally {
 			_rgui.getRLock().unlock();
 		}
-		
+
 	}
-	
 
 	@Override
 	public boolean isEnabled() {
-		return _rgui.getR()!=null && _rgui.getCurrentDevice()!=_device; 
+		return _rgui.getR() != null && _rgui.getCurrentDevice() != _device;
 	}
 
 }

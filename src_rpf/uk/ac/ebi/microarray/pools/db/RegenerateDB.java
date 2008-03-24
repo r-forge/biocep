@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +24,7 @@ import java.sql.SQLException;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class RegenerateDB {
 	public static void main(String[] args) throws Exception {
@@ -40,7 +42,6 @@ public class RegenerateDB {
 			}
 		});
 
-		
 		dbLayer.applyDBScript(RegenerateDB.class.getResourceAsStream("/dbscript.sql"));
 		String fillDbScriptName = System.getProperty("db.initscript");
 		if (fillDbScriptName != null && !fillDbScriptName.equals("")) {

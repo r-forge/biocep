@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +29,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine   k.chine@imperial.ac.uk
  */
 public class ServantProxyPoolSingletonDB {
 	static java.util.Hashtable<String, GenericObjectPool> _pool = new Hashtable<String, GenericObjectPool>();
@@ -36,8 +38,7 @@ public class ServantProxyPoolSingletonDB {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(ServantProxyPoolSingletonDB.class);
 	private static boolean _shuttingDown = false;
 
-	public static GenericObjectPool getInstance(String poolName, String driver, final String url, final String user,
-			final String password) {
+	public static GenericObjectPool getInstance(String poolName, String driver, final String url, final String user, final String password) {
 		String key = driver + "%" + poolName + "%" + url + "%" + user + "%" + password;
 		if (_pool.get(key) != null)
 			return _pool.get(key);

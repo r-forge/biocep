@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +31,10 @@ import org.apache.log4j.WriterAppender;
 import org.apache.log4j.helpers.LogLog;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class RemoteAppender extends WriterAppender {
-	
+
 	public static final Log log = org.apache.commons.logging.LogFactory.getLog(RemoteAppender.class);
 
 	private static Vector<RemoteLogListener> _outLogListeners = new Vector<RemoteLogListener>();
@@ -119,7 +121,7 @@ public class RemoteAppender extends WriterAppender {
 	}
 
 	public static void initLog() {
-		
+
 		if (log instanceof Log4JLogger) {
 			Properties log4jProperties = new Properties();
 			for (Object sprop : System.getProperties().keySet()) {
@@ -129,7 +131,7 @@ public class RemoteAppender extends WriterAppender {
 			}
 			PropertyConfigurator.configure(log4jProperties);
 		}
-	
+
 	}
 
 	private static class RemoteErrStream extends OutputStream {

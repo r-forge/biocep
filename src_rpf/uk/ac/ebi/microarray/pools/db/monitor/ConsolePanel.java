@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +51,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class ConsolePanel extends JPanel implements ClipboardOwner {
 
@@ -106,7 +108,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 			for (int i = 0; i <= command.length(); ++i) {
 				_textField.setText(command.substring(0, i));
 				_textField.setCaretPosition(_textField.getText().length());
-				//Toolkit.getDefaultToolkit().beep();  
+				// Toolkit.getDefaultToolkit().beep();
 				try {
 					Thread.sleep(30);
 				} catch (Exception e) {
@@ -171,7 +173,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 					if (_textField.getText().trim().equals(""))
 						return;
-		
+
 					play(_textField.getText(), false);
 
 				} else {
@@ -202,8 +204,8 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 		setLayout(new BorderLayout());
 		add(_scrollPane, BorderLayout.CENTER);
-		
-		JPanel bottomPanel=new JPanel(new BorderLayout());
+
+		JPanel bottomPanel = new JPanel(new BorderLayout());
 		bottomPanel.add(new JLabel("Evaluate : "), BorderLayout.WEST);
 		bottomPanel.add(_textField, BorderLayout.CENTER);
 		add(bottomPanel, BorderLayout.SOUTH);
@@ -260,9 +262,8 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 						public void actionPerformed(ActionEvent e) {
 
 							try {
-								BufferedReader in = new BufferedReader(new StringReader((String) Toolkit
-										.getDefaultToolkit().getSystemClipboard().getContents(ConsolePanel.this)
-										.getTransferData(DataFlavor.stringFlavor))
+								BufferedReader in = new BufferedReader(new StringReader((String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(
+										ConsolePanel.this).getTransferData(DataFlavor.stringFlavor))
 
 								);
 								String line;

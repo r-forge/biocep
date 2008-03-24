@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +42,7 @@ import uk.ac.ebi.microarray.pools.TimeoutException;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class ServantProviderFactoryReg extends ServantProviderFactory {
 
@@ -55,38 +57,31 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 
 	public ServantProviderFactoryReg() {
 
-		if (System.getProperty("pools.regmode.configuration.file") != null
-				&& !System.getProperty("pools.regmode.configuration.file").equals("")) {
+		if (System.getProperty("pools.regmode.configuration.file") != null && !System.getProperty("pools.regmode.configuration.file").equals("")) {
 			try {
 				initPoolsHashMap(new FileInputStream(System.getProperty("pools.regmode.configuration.file")));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else if (System.getProperty("pools.regmode.configuration.resource") != null
-				&& !System.getProperty("pools.regmode.configuration.resource").equals("")) {
+		} else if (System.getProperty("pools.regmode.configuration.resource") != null && !System.getProperty("pools.regmode.configuration.resource").equals("")) {
 			try {
-				initPoolsHashMap(this.getClass().getResourceAsStream(
-						System.getProperty("pools.regmode.configuration.resource")));
+				initPoolsHashMap(this.getClass().getResourceAsStream(System.getProperty("pools.regmode.configuration.resource")));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		} else {
 
-			String poolPrefix = System.getProperty("prefix") != null && !System.getProperty("prefix").equals("") ? System
-					.getProperty("prefix")
+			String poolPrefix = System.getProperty("prefix") != null && !System.getProperty("prefix").equals("") ? System.getProperty("prefix")
 					: DEFAULT_PREFIX;
 
-			String registryHost = System.getProperty("registryhost") != null
-					&& !System.getProperty("registryhost").equals("") ? System.getProperty("registryhost")
-					: DEFAULT_REGISTRY_HOST;
+			String registryHost = System.getProperty("registryhost") != null && !System.getProperty("registryhost").equals("") ? System
+					.getProperty("registryhost") : DEFAULT_REGISTRY_HOST;
 
-			int registryPort = System.getProperty("registryport") != null
-					&& !System.getProperty("registryport").equals("") ? Integer.decode(System
+			int registryPort = System.getProperty("registryport") != null && !System.getProperty("registryport").equals("") ? Integer.decode(System
 					.getProperty("registryport")) : DEFAULT_REGISTRY_PORT;
 
-			int timeOutMillisec = System.getProperty("timeout") != null && !System.getProperty("timeout").equals("") ? Integer
-					.decode(System.getProperty("timeout"))
-					: DEFAULT_TIMEOUT;
+			int timeOutMillisec = System.getProperty("timeout") != null && !System.getProperty("timeout").equals("") ? Integer.decode(System
+					.getProperty("timeout")) : DEFAULT_TIMEOUT;
 
 			_defaultPoolName = "DEFAULT";
 			PoolData poolData = new PoolData(_defaultPoolName, timeOutMillisec, new Vector<PoolNode>());
@@ -115,8 +110,8 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 				do {
 					try {
 						node = _poolHashMap.get(poolName).getNodes().elementAt(order.elementAt(nodeIndex));
-						proxy = (ManagedServant) ServantProxyPoolSingletonReg.getInstance(node.getRegistryHost(),
-								node.getRegistryPort(), node.getServantPoolPrefix()).borrowObject();
+						proxy = (ManagedServant) ServantProxyPoolSingletonReg.getInstance(node.getRegistryHost(), node.getRegistryPort(),
+								node.getServantPoolPrefix()).borrowObject();
 					} catch (NoSuchElementException e) {
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -124,8 +119,7 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 
 					if (proxy != null) {
 						try {
-							log.info("<" + Thread.currentThread().getName() + "> obtained resource : "
-									+ proxy.getServantName());
+							log.info("<" + Thread.currentThread().getName() + "> obtained resource : " + proxy.getServantName());
 						} catch (Exception e) {
 						}
 						break;
@@ -140,8 +134,8 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 					} catch (Exception e) {
 					}
 
-					log.info("<" + Thread.currentThread().getName() + "> thread waiting for resource for  : "
-							+ ((System.currentTimeMillis() - tstart) / 1000) + " seconds");
+					log.info("<" + Thread.currentThread().getName() + "> thread waiting for resource for  : " + ((System.currentTimeMillis() - tstart) / 1000)
+							+ " seconds");
 
 				} while (true);
 
@@ -158,8 +152,8 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 				do {
 					try {
 						node = _poolHashMap.get(poolName).getNodes().elementAt(order.elementAt(nodeIndex));
-						proxy = (ManagedServant) ServantProxyPoolSingletonReg.getInstance(node.getRegistryHost(),
-								node.getRegistryPort(), node.getServantPoolPrefix()).borrowObject();
+						proxy = (ManagedServant) ServantProxyPoolSingletonReg.getInstance(node.getRegistryHost(), node.getRegistryPort(),
+								node.getServantPoolPrefix()).borrowObject();
 					} catch (NoSuchElementException e) {
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -167,8 +161,7 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 
 					if (proxy != null) {
 						try {
-							log.info("<" + Thread.currentThread().getName() + "> obtained resource : "
-									+ proxy.getServantName());
+							log.info("<" + Thread.currentThread().getName() + "> obtained resource : " + proxy.getServantName());
 						} catch (Exception e) {
 						}
 						break;
@@ -191,8 +184,7 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 				try {
 					PoolNode node = _borrowedServants.get(proxy);
 					_borrowedServants.remove(proxy);
-					ServantProxyPoolSingletonReg.getInstance(node.getRegistryHost(), node.getRegistryPort(),
-							node.getServantPoolPrefix()).returnObject(proxy);
+					ServantProxyPoolSingletonReg.getInstance(node.getRegistryHost(), node.getRegistryPort(), node.getServantPoolPrefix()).returnObject(proxy);
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.exit(0);
@@ -236,8 +228,8 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 			Node p = pools.item(i);
 			if (p.getNodeName().equals("pool")) {
 				String name = p.getAttributes().getNamedItem("name").getNodeValue();
-				int timeout = p.getAttributes().getNamedItem("borrowTimeout") == null ? DEFAULT_TIMEOUT : Integer
-						.decode(p.getAttributes().getNamedItem("borrowTimeout").getNodeValue());
+				int timeout = p.getAttributes().getNamedItem("borrowTimeout") == null ? DEFAULT_TIMEOUT : Integer.decode(p.getAttributes().getNamedItem(
+						"borrowTimeout").getNodeValue());
 				PoolData poolData = new PoolData(name, timeout, new Vector<PoolNode>());
 				_poolHashMap.put(poolData.getPoolName(), poolData);
 
@@ -245,12 +237,12 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 				for (int j = 0; j < pnodes.getLength(); ++j) {
 					Node pn = pnodes.item(j);
 					if (pn.getNodeName().equals("node")) {
-						String prefix = pn.getAttributes().getNamedItem("prefix") == null ? DEFAULT_PREFIX : pn
-								.getAttributes().getNamedItem("prefix").getNodeValue();
-						String host = pn.getAttributes().getNamedItem("registryHost") == null ? DEFAULT_REGISTRY_HOST
-								: pn.getAttributes().getNamedItem("registryHost").getNodeValue();
-						int port = pn.getAttributes().getNamedItem("registryPort") == null ? DEFAULT_REGISTRY_PORT
-								: Integer.decode(pn.getAttributes().getNamedItem("registryPort").getNodeValue());
+						String prefix = pn.getAttributes().getNamedItem("prefix") == null ? DEFAULT_PREFIX : pn.getAttributes().getNamedItem("prefix")
+								.getNodeValue();
+						String host = pn.getAttributes().getNamedItem("registryHost") == null ? DEFAULT_REGISTRY_HOST : pn.getAttributes().getNamedItem(
+								"registryHost").getNodeValue();
+						int port = pn.getAttributes().getNamedItem("registryPort") == null ? DEFAULT_REGISTRY_PORT : Integer.decode(pn.getAttributes()
+								.getNamedItem("registryPort").getNodeValue());
 						poolData.getNodes().add(new PoolNode(prefix, host, port));
 					}
 				}

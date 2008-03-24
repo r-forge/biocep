@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,94 +18,81 @@
 package graphics.rmi;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 class Identification {
 
 	private int _mode;
-	
+
 	private String _url;
 	private String _user;
-	private String _pwd;	
+	private String _pwd;
 	private boolean _nopool;
-	private boolean _waitForResource;	
-	
+	private boolean _waitForResource;
+
 	private int _rmiMode;
-	
+
 	private String _rmiregistryIp;
 	private Integer _rmiregistryPort;
 	private String _servantName;
 
-	private String _dbDriver;	
+	private String _dbDriver;
 	private String _dbHostIp;
 	private Integer _dbHostPort;
 	private String _dbName;
 	private String _dbUser;
 	private String _dbPwd;
 	private String _dbServantName;
-	
+
 	private String _stub;
-	
+
 	private int _memoryMin;
-	private int _memoryMax;	
-	private boolean _keepAlive;	
-	private boolean _useSsh;	
+	private int _memoryMax;
+	private boolean _keepAlive;
+	private boolean _useSsh;
 	private String _sshHostIp;
 	private String _sshLogin;
 	private String _sshPwd;
-	
-	
-	private boolean _persistentWorkspace;	
+
+	private boolean _persistentWorkspace;
 	private boolean _playDemo;
 
-	public Identification(int mode, 
-			String url, String user, String pwd,  boolean nopool, boolean waitForResource,  
-			int rmiMode,
-			String rmiregistryIp, Integer rmiregistryPort, String servantName,
-			String dbDriver, 
-			String dbHostIp, Integer dbHostPort, String dbName,
-			String dbUser, String dbPwd,
-			String dbServantName,
-			String stub,
-			int memoryMin,
-			int memoryMax,
-			
-			boolean keepAlive,
-			boolean useSsh,
-			String sshHostIp,
-			String sshLogin,
-			String sshPwd,
-			
-			boolean persistentWorkspace, boolean playDemo) {		
-		this._mode=mode;	
-		this._url=url;
+	public Identification(int mode, String url, String user, String pwd, boolean nopool, boolean waitForResource, int rmiMode, String rmiregistryIp,
+			Integer rmiregistryPort, String servantName, String dbDriver, String dbHostIp, Integer dbHostPort, String dbName, String dbUser, String dbPwd,
+			String dbServantName, String stub, int memoryMin, int memoryMax,
+
+			boolean keepAlive, boolean useSsh, String sshHostIp, String sshLogin, String sshPwd,
+
+			boolean persistentWorkspace, boolean playDemo) {
+		this._mode = mode;
+		this._url = url;
 		this._user = user;
 		this._pwd = pwd;
-		this._nopool = nopool;		
+		this._nopool = nopool;
 		this._waitForResource = waitForResource;
 		this._rmiMode = rmiMode;
-		this._rmiregistryIp=rmiregistryIp;
-		this._rmiregistryPort=rmiregistryPort;
-		this._servantName=servantName;
-		
-		this._dbDriver=dbDriver;
-		
-		this._dbHostIp=dbHostIp;
-		this._dbHostPort=dbHostPort;
-		this._dbName=dbName;
+		this._rmiregistryIp = rmiregistryIp;
+		this._rmiregistryPort = rmiregistryPort;
+		this._servantName = servantName;
 
-		this._dbUser=dbUser;
-		this._dbPwd=dbPwd;		
-		this._dbServantName=dbServantName;
-		
-		this._stub=stub;
-		this._memoryMin=memoryMin;
-		this._memoryMax=memoryMax;	
-		this._keepAlive=keepAlive;
-		this._useSsh=useSsh;
-		this._sshHostIp=sshHostIp;
-		this._sshLogin=sshLogin;
-		this._sshPwd=sshPwd;		
+		this._dbDriver = dbDriver;
+
+		this._dbHostIp = dbHostIp;
+		this._dbHostPort = dbHostPort;
+		this._dbName = dbName;
+
+		this._dbUser = dbUser;
+		this._dbPwd = dbPwd;
+		this._dbServantName = dbServantName;
+
+		this._stub = stub;
+		this._memoryMin = memoryMin;
+		this._memoryMax = memoryMax;
+		this._keepAlive = keepAlive;
+		this._useSsh = useSsh;
+		this._sshHostIp = sshHostIp;
+		this._sshLogin = sshLogin;
+		this._sshPwd = sshPwd;
 		this._persistentWorkspace = persistentWorkspace;
 		this._playDemo = playDemo;
 	}
@@ -172,15 +161,13 @@ class Identification {
 		return _dbUser;
 	}
 
-
 	public String getDbServantName() {
 		return _dbServantName;
 	}
-	
+
 	public String getDbPwd() {
 		return _dbPwd;
 	}
-
 
 	public String getDbHostIp() {
 		return _dbHostIp;
@@ -216,5 +203,5 @@ class Identification {
 
 	public String getSshPwd() {
 		return _sshPwd;
-	}	
+	}
 }

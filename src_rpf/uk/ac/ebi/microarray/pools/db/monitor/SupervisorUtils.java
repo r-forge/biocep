@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +37,7 @@ import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class SupervisorUtils {
 	static class CancelException extends Exception {
@@ -81,8 +83,7 @@ public class SupervisorUtils {
 	public static void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
 
 		DBLayer dbLayer = (DBLayer) DBLayer.getRmiRegistry();
-		HashMap<String, Object> servantInfo = dbLayer.getTableData("SERVANTS", "NAME='" + servantName + "'").elementAt(
-				0);
+		HashMap<String, Object> servantInfo = dbLayer.getTableData("SERVANTS", "NAME='" + servantName + "'").elementAt(0);
 
 		NodeDataDB nd = null;
 		try {
@@ -93,8 +94,7 @@ public class SupervisorUtils {
 
 		String hostIp = (String) servantInfo.get("REGISTER_HOST_IP");
 		String processId = (String) servantInfo.get("REGISTER_PROCESS_ID");
-		HashMap<String, Object> attributes = (HashMap<String, Object>) PoolUtils.hexToObject((String) servantInfo
-				.get("ATTRIBUTES_HEX"));
+		HashMap<String, Object> attributes = (HashMap<String, Object>) PoolUtils.hexToObject((String) servantInfo.get("ATTRIBUTES_HEX"));
 		System.out.println("attributes : " + attributes);
 
 		if (PoolUtils.getHostIp().equals(hostIp)) {
@@ -109,9 +109,8 @@ public class SupervisorUtils {
 		}
 
 		System.out.println("####>> SSH Killl");
-		String killCommand = useKillCommand ? (nd != null && nd.getKillServantCommand() != null
-				&& !nd.getKillServantCommand().equals("") ? nd.getKillServantCommand() : "kill -9 ${PROCESS_ID}")
-				: "kill ${PROCESS_ID}";
+		String killCommand = useKillCommand ? (nd != null && nd.getKillServantCommand() != null && !nd.getKillServantCommand().equals("") ? nd
+				.getKillServantCommand() : "kill -9 ${PROCESS_ID}") : "kill ${PROCESS_ID}";
 		killCommand = PoolUtils.replaceAll(killCommand, "${PROCESS_ID}", processId);
 
 		if (attributes != null) {
@@ -170,8 +169,7 @@ public class SupervisorUtils {
 		conn.close();
 	}
 
-	public static void launchLocalProcess(final boolean showConsole, String homeDir, String command, String prefix,
-			boolean isForWindows) throws Exception {
+	public static void launchLocalProcess(final boolean showConsole, String homeDir, String command, String prefix, boolean isForWindows) throws Exception {
 		System.out.println("launchLocalProcess");
 
 		Vector<String> cmd = new Vector<String>();
@@ -188,11 +186,9 @@ public class SupervisorUtils {
 		System.out.println(cmd);
 
 		Runtime rt = Runtime.getRuntime();
-		final Process proc = homeDir.trim().equals("") ? rt.exec(cmd.toArray(new String[0])) : rt.exec(cmd
-				.toArray(new String[0]), null, new File(homeDir));
+		final Process proc = homeDir.trim().equals("") ? rt.exec(cmd.toArray(new String[0])) : rt.exec(cmd.toArray(new String[0]), null, new File(homeDir));
 
-		final ProcessLogDialog pdialog = (showConsole ? new ProcessLogDialog(null, "127.0.0.1", "localhost", prefix)
-				: null);
+		final ProcessLogDialog pdialog = (showConsole ? new ProcessLogDialog(null, "127.0.0.1", "localhost", prefix) : null);
 		if (pdialog != null)
 			pdialog.setVisible(true);
 
@@ -260,47 +256,39 @@ public class SupervisorUtils {
 
 	}
 
-	public static void launch(final String nodeName, final String options, final boolean showConsole,
-			final String callerHostIp) throws Exception {
+	public static void launch(final String nodeName, final String options, final boolean showConsole, final String callerHostIp) throws Exception {
 
 		new Thread(new Runnable() {
 			public void run() {
 				try {
 
 					((DBLayer) DBLayer.getRmiRegistry()).incrementNodeProcessCounter(nodeName);
-					final NodeDataDB info = ((DBLayer) DBLayer.getRmiRegistry()).getNodeData(
-							"NODE_NAME='" + nodeName + "'").elementAt(0);
+					final NodeDataDB info = ((DBLayer) DBLayer.getRmiRegistry()).getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
 					String command = info.getCreateServantCommand();
 
-					if (info.getHostName().equalsIgnoreCase("localhost")
-							|| info.getHostIp().equalsIgnoreCase("127.0.0.1") || info.getHostIp().equals(callerHostIp)) {
+					if (info.getHostName().equalsIgnoreCase("localhost") || info.getHostIp().equalsIgnoreCase("127.0.0.1")
+							|| info.getHostIp().equals(callerHostIp)) {
 
 						command = PoolUtils.replaceAll(command, "${OPTIONS}", options);
-						command = PoolUtils.replaceAll(command, "${INSTALL_DIR}", new File(info.getInstallDir())
-								.getCanonicalPath().replace('\\', '/'));
-						command = PoolUtils.replaceAll(command, "${PROCESS_COUNTER}", new Integer(info
-								.getProcessCounter()).toString());
+						command = PoolUtils.replaceAll(command, "${INSTALL_DIR}", new File(info.getInstallDir()).getCanonicalPath().replace('\\', '/'));
+						command = PoolUtils.replaceAll(command, "${PROCESS_COUNTER}", new Integer(info.getProcessCounter()).toString());
 
 						System.out.println("--> Launching local process : " + command);
 						if (PoolUtils.isWindowsOs()) {
-							launchLocalProcess(showConsole, new File(info.getInstallDir()).getCanonicalPath(), command,
-									info.getPoolPrefix(), true);
+							launchLocalProcess(showConsole, new File(info.getInstallDir()).getCanonicalPath(), command, info.getPoolPrefix(), true);
 						} else {
-							launchLocalProcess(showConsole, new File(info.getInstallDir()).getCanonicalPath(), command,
-									info.getPoolPrefix(), false);
+							launchLocalProcess(showConsole, new File(info.getInstallDir()).getCanonicalPath(), command, info.getPoolPrefix(), false);
 						}
 						return;
 					} else {
 
 						command = PoolUtils.replaceAll(command, "${OPTIONS}", options);
 						command = PoolUtils.replaceAll(command, "${INSTALL_DIR}", info.getInstallDir());
-						command = PoolUtils.replaceAll(command, "${PROCESS_COUNTER}", new Integer(info
-								.getProcessCounter()).toString());
+						command = PoolUtils.replaceAll(command, "${PROCESS_COUNTER}", new Integer(info.getProcessCounter()).toString());
 
 						System.out.println("--> Launching process via SSH : " + command);
 
-						Connection conn = new Connection(info.getHostIp().trim().equals("") ? info.getHostName() : info
-								.getHostIp());
+						Connection conn = new Connection(info.getHostIp().trim().equals("") ? info.getHostName() : info.getHostIp());
 						conn.connect();
 						boolean isAuthenticated = conn.authenticateWithPassword(info.getLogin(), info.getPwd());
 						if (isAuthenticated == false)
@@ -309,8 +297,8 @@ public class SupervisorUtils {
 						final Session session = conn.openSession();
 						session.execCommand(command);
 
-						final ProcessLogDialog pdialog = showConsole ? new ProcessLogDialog(null, info.getHostIp(),
-								info.getHostName(), info.getPoolPrefix()) : null;
+						final ProcessLogDialog pdialog = showConsole ? new ProcessLogDialog(null, info.getHostIp(), info.getHostName(), info.getPoolPrefix())
+								: null;
 						if (pdialog != null)
 							pdialog.setVisible(true);
 

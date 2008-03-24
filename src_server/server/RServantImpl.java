@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +57,7 @@ import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 import util.Utils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class RServantImpl extends ManagedServantAbstract implements RServices {
 
@@ -399,24 +401,25 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public String consoleSubmit(String cmd) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().consoleSubmit(cmd);
 	}
-	
+
 	private boolean submitted;
+
 	public void asynchronousConsoleSubmit(final String cmd) throws RemoteException {
-		
-		submitted=false;
-		
+
+		submitted = false;
+
 		new Thread(new Runnable() {
 			public void run() {
-				String result="";
-				
+				String result = "";
+
 				try {
-					result=DirectJNI.getInstance().getRServices().consoleSubmit(cmd);
+					result = DirectJNI.getInstance().getRServices().consoleSubmit(cmd);
 				} catch (Exception e) {
-					result=PoolUtils.getStackTraceAsString(e);
+					result = PoolUtils.getStackTraceAsString(e);
 				}
-				
-				submitted=true;
-				
+
+				submitted = true;
+
 				RAction consoleLogAppend = new RAction("ASYNCHRONOUS_SUBMIT_LOG");
 				HashMap<String, Object> attrs = new HashMap<String, Object>();
 				attrs.put("command", cmd);
@@ -425,14 +428,18 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				DirectJNI.getInstance().addAction(consoleLogAppend);
 			}
 		}).start();
-		
+
 		if (!submitted && !isBusy()) {
 			while (!isBusy()) {
-				if (submitted) break;
-				try {Thread.sleep(20);} catch (Exception e) {}				
-			}			
+				if (submitted)
+					break;
+				try {
+					Thread.sleep(20);
+				} catch (Exception e) {
+				}
+			}
 		}
-		
+
 	}
 
 	public boolean hasPushPopMode() throws RemoteException {
@@ -592,7 +599,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 		if (server == null) {
 			server = new Server(PoolUtils.getLocalTomcatPort());
-			server.setStopAtShutdown(true);			
+			server.setStopAtShutdown(true);
 			Context root = new Context(server, "/", Context.SESSIONS);
 			root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 			System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
@@ -601,11 +608,14 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-			while (!server.isStarted()){
-				try {Thread.sleep(20);} catch (Exception e) {}
+
+			while (!server.isStarted()) {
+				try {
+					Thread.sleep(20);
+				} catch (Exception e) {
+				}
 			}
-			
+
 			new Thread(new Runnable() {
 				public void run() {
 					System.out.println("+++++++++++++++++++ going to start local rmiregistry port : " + PoolUtils.getLocalRmiRegistryPort());
@@ -637,24 +647,17 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
-	
 	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().evalAndGetSvg(expression, width, height);
 	}
 	// --------------
 
 	/*
-	static {
-		if (log instanceof Log4JLogger) {
-			Properties log4jProperties = new Properties();
-			for (Object sprop : System.getProperties().keySet()) {
-				if (((String) sprop).startsWith("log4j.")) {
-					log4jProperties.put(sprop, System.getProperties().get(sprop));
-				}
-			}
-			PropertyConfigurator.configure(log4jProperties);
-		}
-	}
+	 * static { if (log instanceof Log4JLogger) { Properties log4jProperties =
+	 * new Properties(); for (Object sprop : System.getProperties().keySet()) {
+	 * if (((String) sprop).startsWith("log4j.")) { log4jProperties.put(sprop,
+	 * System.getProperties().get(sprop)); } }
+	 * PropertyConfigurator.configure(log4jProperties); } }
 	 */
 
 }

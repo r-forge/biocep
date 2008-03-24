@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +23,15 @@ import java.awt.Graphics2D;
 import java.awt.LayoutManager;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 
 import javax.swing.JPanel;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class JBufferedImagePanel extends JPanel {
 	protected BufferedImage bufferedImage = null;
-	private boolean isSnapshot=false;
+	private boolean isSnapshot = false;
 
 	public JBufferedImagePanel() {
 		super();
@@ -51,12 +52,11 @@ public class JBufferedImagePanel extends JPanel {
 	public JBufferedImagePanel(BufferedImage image) {
 		super();
 		bufferedImage = image;
-		isSnapshot=true;
+		isSnapshot = true;
 	}
 
 	public BufferedImage getImage() {
-		return bufferedImage == null ? new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB)
-				: bufferedImage;
+		return bufferedImage == null ? new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB) : bufferedImage;
 	}
 
 	public synchronized void paintComponent(Graphics g) {
@@ -65,19 +65,29 @@ public class JBufferedImagePanel extends JPanel {
 		}
 
 	}
-	
+
 	@Override
 	public int getWidth() {
-		if (isSnapshot) {return bufferedImage.getWidth();} else return super.getWidth();
+		if (isSnapshot) {
+			return bufferedImage.getWidth();
+		} else
+			return super.getWidth();
 	}
-	
+
 	@Override
 	public int getHeight() {
-		if (isSnapshot) {return bufferedImage.getHeight();} else return super.getHeight();
+		if (isSnapshot) {
+			return bufferedImage.getHeight();
+		} else
+			return super.getHeight();
 	}
-	
+
 	@Override
 	public Dimension getPreferredSize() {
-		if (isSnapshot) {return new Dimension(bufferedImage.getWidth(),bufferedImage.getHeight());} else return super.getPreferredSize();	}
-	
+		if (isSnapshot) {
+			return new Dimension(bufferedImage.getWidth(), bufferedImage.getHeight());
+		} else
+			return super.getPreferredSize();
+	}
+
 }

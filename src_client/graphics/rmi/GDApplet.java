@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
@@ -151,7 +168,7 @@ import static graphics.rmi.JGDPanelPop.*;
 import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class GDApplet extends GDAppletBase implements RGui {
 
@@ -466,14 +483,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
 									/*
-									
-									  DirectJNI.init(); r = DirectJNI.getInstance().getRServices();
-									  if (false) throw new BadSshHostException();
-									  if (false) throw new BadSshLoginPwdException();									  
-									  _keepAlive = ident.isKeepAlive();
-									 									 
-									*/
-									 
+									 * 
+									 * DirectJNI.init(); r =
+									 * DirectJNI.getInstance().getRServices();
+									 * if (false) throw new
+									 * BadSshHostException(); if (false) throw
+									 * new BadSshLoginPwdException(); _keepAlive =
+									 * ident.isKeepAlive();
+									 * 
+									 */
+
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
@@ -484,24 +503,23 @@ public class GDApplet extends GDAppletBase implements RGui {
 										if (PoolUtils.isWindowsOs()) {
 											if (_keepAlive) {
 												r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(),
-													PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
-													false);
+														PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
+														false);
 											} else {
 												r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(),
 														PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
-														false);												
+														false);
 											}
 										} else {
 											r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
 													.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
 										}
 									}
-									
+
 									if (ident.isUseSsh()) {
 										_sshParameters = new String[] { ident.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd() };
 									}
-									
-									
+
 									_rProcessId = r.getProcessId();
 									System.out.println("R Process Id :" + _rProcessId);
 
@@ -597,9 +615,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] {
 
 							new SetCurrentDeviceAction(GDApplet.this, d), null, new FitDeviceAction(GDApplet.this, d), null,
-									new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
-									new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this) , null, new CopyFromCurrentDeviceAction(GDApplet.this),
-									new CopyToCurrentDeviceAction(GDApplet.this, d), null, new CoupleToCurrentDeviceAction(GDApplet.this)
+									new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this), null,
+									new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this),
+									new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
+									new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, d), null,
+									new CoupleToCurrentDeviceAction(GDApplet.this)
 
 							}, getRLock(), getConsoleLogger());
 							_rootGraphicPanel.removeAll();
@@ -631,10 +651,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 										new SetCurrentDeviceAction(GDApplet.this, newDevice), null, new FitDeviceAction(GDApplet.this, newDevice), null,
-										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
-										new SaveDeviceAsJpgAction(GDApplet.this),new SaveDeviceAsSvgAction(GDApplet.this),new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
-										new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) },
-										getRLock(), getConsoleLogger());
+										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this), null,
+										new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this),
+										new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
+										new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
+										new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
 
 								rootComponent.removeAll();
 								rootComponent.setLayout(new BorderLayout());
@@ -957,15 +978,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 				public void menuSelected(MenuEvent e) {
 
 					graphicsMenu.removeAll();
-					graphicsMenu.add(_actions.get("createdevice"));					
+					graphicsMenu.add(_actions.get("createdevice"));
 					graphicsMenu.addSeparator();
-					
+
 					/*
-					graphicsMenu.add(new SnapshotDeviceAction(GDApplet.this, _sessionId == null ? null : getCurrentJGPanelPop()));
-					graphicsMenu.add(new SaveDeviceAsPngAction(GDApplet.this));
-					graphicsMenu.add(new SaveDeviceAsJpgAction(GDApplet.this));
-					graphicsMenu.addSeparator();
-					*/
+					 * graphicsMenu.add(new SnapshotDeviceAction(GDApplet.this,
+					 * _sessionId == null ? null : getCurrentJGPanelPop()));
+					 * graphicsMenu.add(new
+					 * SaveDeviceAsPngAction(GDApplet.this));
+					 * graphicsMenu.add(new
+					 * SaveDeviceAsJpgAction(GDApplet.this));
+					 * graphicsMenu.addSeparator();
+					 */
 
 					graphicsMenu.add(new AbstractAction("Fit Device to Panel") {
 
@@ -2450,8 +2474,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 					}
 
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
-							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this),null,
-							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),new SaveDeviceAsPdfAction(GDApplet.this), null,
+							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
+							new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
+							new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
 							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
 
@@ -2690,12 +2715,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-
 		_actions.put("svgview", new AbstractAction("SVG Viewer") {
 			public void actionPerformed(final ActionEvent e) {
 				if (getOpenedServerLogView() == null) {
 					int id = getDynamicViewId();
-					
+
 					final SvgView lv = new SvgView("SVG Viewer", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new DockingWindowListener() {
@@ -2764,7 +2788,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		
 		_actions.put("inspect", new AbstractAction("Inspect") {
 			public void actionPerformed(final ActionEvent e) {
 
@@ -3341,17 +3364,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 		private void showPopup(MouseEvent e) {
 			JPopupMenu popupMenu = new JPopupMenu();
 
-
 			popupMenu.add(new AbstractAction("Load Svg From File") {
 				public void actionPerformed(ActionEvent e) {
 					final JFileChooser chooser = new JFileChooser();
 					int returnVal = chooser.showOpenDialog(_svgCanvas);
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						SwingUtilities.invokeLater(new Runnable(){
+						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
 								try {
-								_svgCanvas.setURI(chooser.getSelectedFile().toURL().toString());
-								repaint();
+									_svgCanvas.setURI(chooser.getSelectedFile().toURL().toString());
+									repaint();
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
@@ -3359,6 +3381,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						});
 					}
 				}
+
 				public boolean isEnabled() {
 					return true;
 				}
@@ -3367,6 +3390,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			popupMenu.show(_svgCanvas, e.getX(), e.getY());
 
 		}
+
 		SvgView(String title, Icon icon, int id) {
 			super(title, icon, new JPanel(), id);
 
@@ -3377,29 +3401,32 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			_svgCanvas.addMouseListener(new MouseListener() {
 				public void mouseEntered(MouseEvent e) {
-					}
+				}
+
 				public void mouseClicked(MouseEvent e) {
 					if (e.isPopupTrigger()) {
 						showPopup(e);
 					}
-					
+
 					if (e.getButton() == MouseEvent.BUTTON3) {
 						showPopup(e);
 					}
-					
+
 				};
-				
-				public void mouseExited(MouseEvent e) {};
-				
-				public void mousePressed(MouseEvent e) {};
-				
+
+				public void mouseExited(MouseEvent e) {
+				};
+
+				public void mousePressed(MouseEvent e) {
+				};
+
 				public void mouseReleased(MouseEvent e) {
 					if (e.isPopupTrigger()) {
 						showPopup(e);
 					}
 				};
 			});
-			
+
 			JButton submit = new JButton("Submit");
 			submit.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -3410,39 +3437,39 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} else {
 								GDApplet.this.getRLock().lock();
 								try {
-									SwingUtilities.invokeLater(new Runnable(){
+									SwingUtilities.invokeLater(new Runnable() {
 										public void run() {
 											_area.setEnabled(false);
 										}
 									});
-									
-									Vector<String> result=null;
+
+									Vector<String> result = null;
 									try {
-										result=GDApplet.this.getR().evalAndGetSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
+										result = GDApplet.this.getR().evalAndGetSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
 									} catch (RemoteException e) {
 										JOptionPane.showMessageDialog(null, e.getCause().getMessage(), "R Error", JOptionPane.ERROR_MESSAGE);
-										return ;
+										return;
 									}
-									
-									if (result==null) {
+
+									if (result == null) {
 										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
-										return ;
+										return;
 									}
 									if (!"".equals(GDApplet.this.getR().getStatus())) {
 										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
 									}
-									//System.out.println("SVG RESULT:"+result);
-									final String tempFile=/*System.getProperty("java.io.tmpdir")*/"c:"+"/svgview"+System.currentTimeMillis()+".svg";
-									PrintWriter pw=new PrintWriter(new FileWriter(tempFile));
-									for (int i=0; i<result.size(); ++i) pw.println(result.elementAt(i));
+									// System.out.println("SVG RESULT:"+result);
+									final String tempFile = /* System.getProperty("java.io.tmpdir") */"c:" + "/svgview" + System.currentTimeMillis() + ".svg";
+									PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
+									for (int i = 0; i < result.size(); ++i)
+										pw.println(result.elementAt(i));
 									pw.close();
-									
-									
-									SwingUtilities.invokeLater(new Runnable(){
+
+									SwingUtilities.invokeLater(new Runnable() {
 										public void run() {
 											try {
-											_svgCanvas.setURI(new File(tempFile).toURL().toString());
-											repaint();
+												_svgCanvas.setURI(new File(tempFile).toURL().toString());
+												repaint();
 											} catch (Exception e) {
 												e.printStackTrace();
 											}
@@ -3452,7 +3479,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									e.printStackTrace();
 								} finally {
 									GDApplet.this.getRLock().unlock();
-									SwingUtilities.invokeLater(new Runnable(){
+									SwingUtilities.invokeLater(new Runnable() {
 										public void run() {
 											_area.setEnabled(true);
 										}
@@ -3470,23 +3497,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, _svgCanvas);
 			splitPane.setDividerSize(3);
-			
+
 			((JPanel) getComponent()).setLayout(new BorderLayout());
 			((JPanel) getComponent()).setBorder(BorderFactory.createLineBorder(Color.gray, 2));
 			((JPanel) getComponent()).add(splitPane);
 
-			
-			
-			new Thread(new Runnable(){
+			new Thread(new Runnable() {
 				public void run() {
-					SwingUtilities.invokeLater(new Runnable(){
+					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
-							splitPane.setDividerLocation((int)60);
+							splitPane.setDividerLocation((int) 60);
 						}
 					});
 				}
 			}).start();
-			
 
 		}
 

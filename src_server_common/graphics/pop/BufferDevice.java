@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +25,7 @@ import java.util.Vector;
 import org.rosuda.javaGD.GDObject;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class BufferDevice implements GDDevice {
 	private Dimension _dim;
@@ -48,66 +50,62 @@ public class BufferDevice implements GDDevice {
 		return _l;
 	}
 
-	
 	public boolean hasGraphicObjects() throws RemoteException {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
 	public void putLocation(Point2D p) throws RemoteException {
 	}
-	
-	
+
 	public boolean hasLocations() throws RemoteException {
-	
+
 		return false;
 	}
-	
+
 	public int getDeviceNumber() throws RemoteException {
 		return -1;
 	}
-	
-	
+
 	public boolean isCurrentDevice() throws RemoteException {
 		return false;
 	}
-	
-	
+
 	public void setAsCurrentDevice() throws RemoteException {
 	}
 
 	public Point2D[] getRealPoints(Point2D[] points) throws RemoteException {
 		return null;
 	}
-	
+
 	public Vector<String> getSVG() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getBmp() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getJpg() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getPdf() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getPictex() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getPng() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getPostScript() throws RemoteException {
 		return null;
 	}
-	
+
 	public byte[] getXfig() throws RemoteException {
 		return null;
 	}

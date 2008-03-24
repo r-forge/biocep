@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +18,7 @@
 package uk.ac.ebi.microarray.pools.db;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class NodeDataDB {
 	private String _nodeName;
@@ -33,9 +35,8 @@ public class NodeDataDB {
 	private String _poolPrefix;
 	private int _processCounter;
 
-	public NodeDataDB(String _nodeName, String _host_ip, String host_name, String _login, String _pwd,
-			String _install_dir, String create_servant_command, String kill_servant_command, String os,
-			int servant_nbr_min, int servant_nbr_max, String _pool_prefix, int _processCounter) {
+	public NodeDataDB(String _nodeName, String _host_ip, String host_name, String _login, String _pwd, String _install_dir, String create_servant_command,
+			String kill_servant_command, String os, int servant_nbr_min, int servant_nbr_max, String _pool_prefix, int _processCounter) {
 		super();
 		this._nodeName = _nodeName;
 		this._hostIp = _host_ip;

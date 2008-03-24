@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +16,6 @@
  * limitations under the License.
  */
 package uk.ac.ebi.microarray.pools;
-
-
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -72,9 +72,8 @@ import javax.swing.SwingUtilities;
 import org.neilja.net.interruptiblermi.InterruptibleRMISocketFactory;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 
-
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class PoolUtils {
 
@@ -198,8 +197,7 @@ public class PoolUtils {
 			return;
 		injectSystemProperties(ServerDefaults.class.getResourceAsStream("/globals.properties"));
 
-		if (System.getProperty("properties.extension") != null
-				&& !System.getProperty("properties.extension").equals("")) {
+		if (System.getProperty("properties.extension") != null && !System.getProperty("properties.extension").equals("")) {
 
 			if (new File(System.getProperty("properties.extension")).exists()) {
 				try {
@@ -208,8 +206,7 @@ public class PoolUtils {
 					e.printStackTrace();
 				}
 			} else {
-				System.out.println("Invalid File Name in 'properties.extension' <"
-						+ System.getProperty("properties.extension") + ">");
+				System.out.println("Invalid File Name in 'properties.extension' <" + System.getProperty("properties.extension") + ">");
 			}
 		}
 
@@ -301,17 +298,17 @@ public class PoolUtils {
 	}
 
 	public static String currentWinProcessID() throws Exception {
-		
+
 		String pslistpath = System.getProperty("pstools.home") + "/pslist.exe";
 		if (!new File(pslistpath).exists()) {
-			String psToolsHome=System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
-			pslistpath=psToolsHome + "/pslist.exe" ;
+			String psToolsHome = System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
+			pslistpath = psToolsHome + "/pslist.exe";
 			if (!new File(pslistpath).exists()) {
 				new File(psToolsHome).mkdirs();
 				MainPsToolsDownload.main(new String[] { psToolsHome });
-			}			
-		}	
-		
+			}
+		}
+
 		String[] command = new String[] { pslistpath, "-t" };
 		Runtime rt = Runtime.getRuntime();
 		final Process proc = rt.exec(command);
@@ -348,16 +345,17 @@ public class PoolUtils {
 
 		int exitVal = proc.waitFor();
 		/*
-		System.out.println(">"+exitVal+"<");
-		for (int i=0; i<pslistPrint.size(); ++i)
-			System.out.println(">>"+pslistPrint.elementAt(i)+"<<");
-			*/
-		
+		 * System.out.println(">"+exitVal+"<"); for (int i=0; i<pslistPrint.size();
+		 * ++i) System.out.println(">>"+pslistPrint.elementAt(i)+"<<");
+		 */
+
 		if (exitVal != 0)
 			throw new Exception("pslist exit code : " + exitVal);
 		int i = 0;
-		while (!pslistPrint.elementAt(i).trim().startsWith("pslist ")) ++i;		
-		//System.out.println(">>>>>>>>>>>"+pslistPrint.elementAt(i - 1)+"<<<<<<<<<<<<<");		
+		while (!pslistPrint.elementAt(i).trim().startsWith("pslist "))
+			++i;
+		// System.out.println(">>>>>>>>>>>"+pslistPrint.elementAt(i -
+		// 1)+"<<<<<<<<<<<<<");
 		StringTokenizer st = new StringTokenizer(pslistPrint.elementAt(i - 1), " ");
 		st.nextElement();
 		return (String) st.nextElement();
@@ -393,8 +391,7 @@ public class PoolUtils {
 
 	public static Remote hexToStub(String stubHex, ClassLoader cl) {
 		try {
-			return (Remote) new ObjectInputStreamCL(new ByteArrayInputStream(PoolUtils.hexToBytes(stubHex)), cl)
-					.readObject();
+			return (Remote) new ObjectInputStreamCL(new ByteArrayInputStream(PoolUtils.hexToBytes(stubHex)), cl).readObject();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -426,8 +423,7 @@ public class PoolUtils {
 
 	public static Object hexToObject(String hex, ClassLoader cl) {
 		try {
-			return (Object) new ObjectInputStreamCL(new ByteArrayInputStream(PoolUtils.hexToBytes(hex)), cl)
-					.readObject();
+			return (Object) new ObjectInputStreamCL(new ByteArrayInputStream(PoolUtils.hexToBytes(hex)), cl).readObject();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -539,8 +535,7 @@ public class PoolUtils {
 	}
 
 	public static Point deriveLocation(Point origin, double radius) {
-		return new Point((int) ((origin.getX() - radius) + (Math.random() * 2 * radius)),
-				(int) ((origin.getY() - radius) + (Math.random() * 2 * radius)));
+		return new Point((int) ((origin.getX() - radius) + (Math.random() * 2 * radius)), (int) ((origin.getY() - radius) + (Math.random() * 2 * radius)));
 	}
 
 	public static boolean deleteDirectory(File path) {
@@ -678,8 +673,6 @@ public class PoolUtils {
 		}
 	}
 
-
-
 	public static String replaceAll(String input, String replaceWhat, String replaceWith) throws Exception {
 		int p;
 		while ((p = input.indexOf(replaceWhat)) != -1) {
@@ -693,8 +686,8 @@ public class PoolUtils {
 		c.setLocation((screenDim.width - c.getWidth()) / 2, (screenDim.height - c.getHeight()) / 2);
 	}
 
-	public static void unzip(InputStream is, String destination, NameFilter nameFilter, int bufferSize,
-			boolean showProgress, String taskName, int estimatedFilesNumber) {
+	public static void unzip(InputStream is, String destination, NameFilter nameFilter, int bufferSize, boolean showProgress, String taskName,
+			int estimatedFilesNumber) {
 
 		final JTextArea area = new JTextArea();
 		final JProgressBar jpb = new JProgressBar(0, 100);
@@ -996,9 +989,9 @@ public class PoolUtils {
 			keys[i++] = k;
 		return orderP(keys);
 	}
-	
-	 public static void main(String[] args)  throws Exception{
-		
+
+	public static void main(String[] args) throws Exception {
+
 	}
 
 	public static void killLocalUnixProcess(String processId, boolean isKILLSIG) throws Exception {
@@ -1007,9 +1000,9 @@ public class PoolUtils {
 		final Process proc = rt.exec(command);
 		final Vector<String> killPrint = new Vector<String>();
 		final Vector<String> errorPrint = new Vector<String>();
-	
+
 		System.out.println("Kill command : " + Arrays.toString(command));
-	
+
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -1024,7 +1017,7 @@ public class PoolUtils {
 				}
 			}
 		}).start();
-	
+
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -1039,33 +1032,34 @@ public class PoolUtils {
 				}
 			}
 		}).start();
-	
+
 		int exitVal = proc.waitFor();
 		if (exitVal != 0)
 			throw new Exception("kill exit code : " + exitVal + "\n" + errorPrint);
 	}
 
 	public static void killLocalWinProcess(String processId, boolean isKILLSIG) throws Exception {
-		//String[] command = isKILLSIG ? new String[] { "taskkill", "/F", "/PID", processId } : new String[] {"taskkill", "/PID", processId };
-		
-		String pskillCommand=System.getProperty("pstools.home") + "/pskill.exe" ;
+		// String[] command = isKILLSIG ? new String[] { "taskkill", "/F",
+		// "/PID", processId } : new String[] {"taskkill", "/PID", processId };
+
+		String pskillCommand = System.getProperty("pstools.home") + "/pskill.exe";
 		if (!new File(pskillCommand).exists()) {
-			String psToolsHome=System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
-			pskillCommand=psToolsHome + "/pskill.exe" ;
+			String psToolsHome = System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
+			pskillCommand = psToolsHome + "/pskill.exe";
 			if (!new File(pskillCommand).exists()) {
 				new File(psToolsHome).mkdirs();
 				MainPsToolsDownload.main(new String[] { psToolsHome });
-			}			
-		}		
-		String[] command = new String[] { pskillCommand , processId};
-		
+			}
+		}
+		String[] command = new String[] { pskillCommand, processId };
+
 		Runtime rt = Runtime.getRuntime();
 		final Process proc = rt.exec(command);
 		final Vector<String> killPrint = new Vector<String>();
 		final Vector<String> errorPrint = new Vector<String>();
-	
+
 		System.out.println("Kill command : " + Arrays.toString(command));
-	
+
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -1080,7 +1074,7 @@ public class PoolUtils {
 				}
 			}
 		}).start();
-	
+
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -1095,20 +1089,20 @@ public class PoolUtils {
 				}
 			}
 		}).start();
-	
+
 		int exitVal = proc.waitFor();
 		if (exitVal != 0)
 			throw new Exception("kill exit code : " + exitVal + "\n" + errorPrint);
 	}
-	
-	public static void callBack(final ServantCreationListener servantCreationListener, final ManagedServant servant,final  RemoteException exception) {
+
+	public static void callBack(final ServantCreationListener servantCreationListener, final ManagedServant servant, final RemoteException exception) {
 		try {
-	
+
 			final Object[] resultHolder = new Object[1];
 			Runnable setServantStubRunnable = new Runnable() {
 				public void run() {
 					try {
-						if (servant!=null) {
+						if (servant != null) {
 							servantCreationListener.setServantStub(servant);
 						} else {
 							servantCreationListener.setRemoteException(exception);
@@ -1124,11 +1118,10 @@ public class PoolUtils {
 					}
 				}
 			};
-	
-			Thread setServantStubThread = InterruptibleRMIThreadFactory.getInstance().newThread(
-					setServantStubRunnable);
+
+			Thread setServantStubThread = InterruptibleRMIThreadFactory.getInstance().newThread(setServantStubRunnable);
 			setServantStubThread.start();
-	
+
 			long t1 = System.currentTimeMillis();
 			while (resultHolder[0] == null) {
 				if ((System.currentTimeMillis() - t1) > PoolUtils.SET_SERVANT_STUB_TIMEOUT_MILLISEC) {
@@ -1141,90 +1134,97 @@ public class PoolUtils {
 				} catch (Exception e) {
 				}
 			}
-	
+
 			if (resultHolder[0] instanceof Throwable) {
 				throw (RemoteException) resultHolder[0];
 			}
-	
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
+
 	}
 
 	public static final Integer SET_SERVANT_STUB_DONE = new Integer(0);
 	public static final int SET_SERVANT_STUB_TIMEOUT_MILLISEC = 2000;
-	
-	
-	public static boolean isPortInUse(String hostIp,int port) {
-		Socket s=null;
+
+	public static boolean isPortInUse(String hostIp, int port) {
+		Socket s = null;
 		try {
-			s = new Socket(hostIp,port);
+			s = new Socket(hostIp, port);
 		} catch (Exception e) {
 			return false;
 		} finally {
-			if (s!=null) try {s.close();} catch (Exception ex) {}
+			if (s != null)
+				try {
+					s.close();
+				} catch (Exception ex) {
+				}
 		}
 		return true;
 	}
-	
-	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec,final int maxFailure) {
-		new Thread(new Runnable(){
-			int failureCounter=maxFailure;
+
+	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {
+		new Thread(new Runnable() {
+			int failureCounter = maxFailure;
+
 			public void run() {
-				while(true) {
-					if (!PoolUtils.isPortInUse(hostIp,port)) --failureCounter;
-					if (failureCounter==0) {
+				while (true) {
+					if (!PoolUtils.isPortInUse(hostIp, port))
+						--failureCounter;
+					if (failureCounter == 0) {
 						System.out.println("The Creator Process doesn't respond, going to die");
 						System.exit(0);
-					}					
-					try {Thread.sleep(1000*periodicitySec);} catch (Exception e) {}
-				}				
+					}
+					try {
+						Thread.sleep(1000 * periodicitySec);
+					} catch (Exception e) {
+					}
+				}
 			}
 		}).start();
 	}
 
-	private static Integer _localTomcatPort=null;
-	private static Integer _localRmiregistryPort=null;
+	private static Integer _localTomcatPort = null;
+	private static Integer _localRmiregistryPort = null;
 
 	public static synchronized Integer getLocalTomcatPort() {
-		if (_localTomcatPort==null){			
-			
-			if (System.getProperty("localtomcat.port")==null || System.getProperty("localtomcat.port").equals("")) {
-				_localTomcatPort=3001;
+		if (_localTomcatPort == null) {
+
+			if (System.getProperty("localtomcat.port") == null || System.getProperty("localtomcat.port").equals("")) {
+				_localTomcatPort = 3001;
 			} else {
-				_localTomcatPort=Integer.decode(System.getProperty("localtomcat.port"));
-			}	
-			
-			for (int i=0;i<1000;++i) {				
-				if (!isPortInUse("127.0.0.1",_localTomcatPort+i)) {
-					_localTomcatPort=_localTomcatPort+i;
+				_localTomcatPort = Integer.decode(System.getProperty("localtomcat.port"));
+			}
+
+			for (int i = 0; i < 1000; ++i) {
+				if (!isPortInUse("127.0.0.1", _localTomcatPort + i)) {
+					_localTomcatPort = _localTomcatPort + i;
 					break;
 				}
 			}
-		} 
-		
-		return _localTomcatPort;		
+		}
+
+		return _localTomcatPort;
 	}
 
 	public static synchronized Integer getLocalRmiRegistryPort() {
-		if (_localRmiregistryPort==null){			
-			
-			if (System.getProperty("localrmiregistry.port")==null || System.getProperty("localrmiregistry.port").equals("")) {
-				_localRmiregistryPort= 2560;
+		if (_localRmiregistryPort == null) {
+
+			if (System.getProperty("localrmiregistry.port") == null || System.getProperty("localrmiregistry.port").equals("")) {
+				_localRmiregistryPort = 2560;
 			} else {
-				_localRmiregistryPort= Integer.decode(System.getProperty("localrmiregistry.port"));
+				_localRmiregistryPort = Integer.decode(System.getProperty("localrmiregistry.port"));
 			}
-			for (int i=0;i<1000;++i) {				
-				if (!isPortInUse("127.0.0.1",_localRmiregistryPort+i)) {
-					_localRmiregistryPort=_localRmiregistryPort+i;
+			for (int i = 0; i < 1000; ++i) {
+				if (!isPortInUse("127.0.0.1", _localRmiregistryPort + i)) {
+					_localRmiregistryPort = _localRmiregistryPort + i;
 					break;
 				}
 			}
 		}
 		return _localRmiregistryPort;
-	
-	}
 
+	}
 
 }

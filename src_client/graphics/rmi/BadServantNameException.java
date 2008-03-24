@@ -2,6 +2,9 @@ package graphics.rmi;
 
 import java.rmi.RemoteException;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class BadServantNameException extends RemoteException {
 
 	public BadServantNameException() {
@@ -15,5 +18,5 @@ public class BadServantNameException extends RemoteException {
 	public BadServantNameException(String s) {
 		super(s);
 	}
-	
+
 }

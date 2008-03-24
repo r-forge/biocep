@@ -1,4 +1,4 @@
-// Class Patched by Karim Chine kchine@ebi.ac.uk to embed JOI as a view of R Workbench
+// Class Patched by Karim Chine  k.chine@imperial.ac.uk to embed JOI as a view of R Workbench
 
 // ===========================================================================
 // CONTENT  : CLASS Preferences

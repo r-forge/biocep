@@ -1,4 +1,4 @@
-// Class Patched by Karim Chine kchine@ebi.ac.uk to embed JOI as a view of R Workbench
+// Class Patched by Karim Chine  k.chine@imperial.ac.uk to embed JOI as a view of R Workbench
 
 // ===========================================================================
 // CONTENT  : CLASS InspectionWindowController
@@ -15,7 +15,6 @@ package org.pf.joi;
 // ===========================================================================
 // IMPORTS
 // ===========================================================================
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -31,11 +30,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import org.gjt.sp.jedit.View;
-import org.gjt.sp.jedit.jEdit;
-import org.gjt.sp.jedit.jEdit.TaggedPanel;
 import org.pf.file.FileFinder;
 import org.pf.file.FileUtil;
 
