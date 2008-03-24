@@ -3459,7 +3459,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
 									}
 									// System.out.println("SVG RESULT:"+result);
-									final String tempFile = /* System.getProperty("java.io.tmpdir") */"c:" + "/svgview" + System.currentTimeMillis() + ".svg";
+									final String tempFile = System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg";
 									PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
 									for (int i = 0; i < result.size(); ++i)
 										pw.println(result.elementAt(i));
