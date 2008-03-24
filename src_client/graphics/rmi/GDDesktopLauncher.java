@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +33,7 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class GDDesktopLauncher {
 
@@ -50,20 +52,16 @@ public class GDDesktopLauncher {
 			redirectIO();
 
 		Class<?> ServiceManagerClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.ServiceManager");
-		Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null,
-				"javax.jnlp.BasicService");
+		Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null, "javax.jnlp.BasicService");
 		Class<?> BasicServiceClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.BasicService");
 		String urlprefix = BasicServiceClass.getMethod("getCodeBase").invoke(basicServiceInstance).toString();
 
 		System.out.println("code base :" + urlprefix);
-		URL[] urls = new URL[] { new URL(urlprefix + "appletlibs/RJB.jar"),
-				new URL(urlprefix + "appletlibs/commons-httpclient-3.1-rc1.jar"),
-				new URL(urlprefix + "appletlibs/commons-codec-1.3.jar"),
-				new URL(urlprefix + "appletlibs/commons-logging-1.1.jar"),
-				new URL(urlprefix + "appletlibs/idw-gpl.jar"), new URL(urlprefix + "appletlibs/jeditmodes.jar"),
-				new URL(urlprefix + "appletlibs/jedit.jar"), new URL(urlprefix + "appletlibs/pf-joi-full.jar"),
-				new URL(urlprefix + "appletlibs/OpenXLS.jar"), new URL(urlprefix + "jawslibs/htmlparser.jar"),
-				new URL(urlprefix + "jawslibs/webserver.jar"), new URL(urlprefix + "jawslibs/servlet-api.jar"),
+		URL[] urls = new URL[] { new URL(urlprefix + "appletlibs/RJB.jar"), new URL(urlprefix + "appletlibs/commons-httpclient-3.1-rc1.jar"),
+				new URL(urlprefix + "appletlibs/commons-codec-1.3.jar"), new URL(urlprefix + "appletlibs/commons-logging-1.1.jar"),
+				new URL(urlprefix + "appletlibs/idw-gpl.jar"), new URL(urlprefix + "appletlibs/jeditmodes.jar"), new URL(urlprefix + "appletlibs/jedit.jar"),
+				new URL(urlprefix + "appletlibs/pf-joi-full.jar"), new URL(urlprefix + "appletlibs/OpenXLS.jar"),
+				new URL(urlprefix + "jawslibs/htmlparser.jar"), new URL(urlprefix + "jawslibs/webserver.jar"), new URL(urlprefix + "jawslibs/servlet-api.jar"),
 				new URL(urlprefix + "jawslibs/JRI.jar") };
 
 		URL rjbURL = null;
@@ -93,8 +91,8 @@ public class GDDesktopLauncher {
 			rinfo = GUtils.getRInfo(home);
 		}
 
-		String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : (System
-				.getenv("R_HOME") != null ? System.getenv("R_HOME") : null);
+		String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : (System.getenv("R_HOME") != null ? System
+				.getenv("R_HOME") : null);
 		System.out.println("rpath=" + rpath);
 		System.out.println("rversion=" + (rinfo != null ? rinfo[1] : ""));
 
@@ -102,8 +100,7 @@ public class GDDesktopLauncher {
 
 			if (isWindowsOs()) {
 
-				int n = JOptionPane.showConfirmDialog(null,
-						"R is not accessible from the command line\nWould you like to use the Embedded R?", "",
+				int n = JOptionPane.showConfirmDialog(null, "R is not accessible from the command line\nWould you like to use the Embedded R?", "",
 						JOptionPane.YES_NO_OPTION);
 				if (n == JOptionPane.OK_OPTION) {
 					String rZipFileName = null;
@@ -122,15 +119,13 @@ public class GDDesktopLauncher {
 					}
 
 					if (rZipFileName != null) {
-						URL rUrl = new URL(rjbURL.toString().substring(0, rjbURL.toString().indexOf("/appletlibs"))
-								+ "/jawslibs/" + rZipFileName);
+						URL rUrl = new URL(rjbURL.toString().substring(0, rjbURL.toString().indexOf("/appletlibs")) + "/jawslibs/" + rZipFileName);
 
 						InputStream is = null;
 						try {
 							is = rUrl.openConnection().getInputStream();
 						} catch (Exception e) {
-							rUrl = new URL("http://www.ebi.ac.uk/microarray-srv/frontendapp/" + "jawslibs/"
-									+ rZipFileName);
+							rUrl = new URL("http://www.ebi.ac.uk/microarray-srv/frontendapp/" + "jawslibs/" + rZipFileName);
 							is = rUrl.openConnection().getInputStream();
 						}
 
@@ -141,16 +136,13 @@ public class GDDesktopLauncher {
 					rpath = root + "R/R-2.6.0/";
 
 				} else {
-					JOptionPane
-							.showMessageDialog(null,
-									"please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
+					JOptionPane.showMessageDialog(null, "please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
 					System.exit(0);
 				}
 
 			} else {
 				JOptionPane
-						.showMessageDialog(
-								null,
+						.showMessageDialog(null,
 								"R is not accessible from the command line\n please add R to your System path \nor set R_HOME to the root Directory of your local R installation\n");
 				System.exit(0);
 			}
@@ -216,8 +208,7 @@ public class GDDesktopLauncher {
 
 			System.out.println(installCommand);
 
-			final Process installProc = Runtime.getRuntime().exec(installCommand.toArray(new String[0]),
-					envVector.toArray(new String[0]));
+			final Process installProc = Runtime.getRuntime().exec(installCommand.toArray(new String[0]), envVector.toArray(new String[0]));
 			final Vector<String> installPrint = new Vector<String>();
 			final Vector<String> installErrorPrint = new Vector<String>();
 
@@ -252,8 +243,7 @@ public class GDDesktopLauncher {
 			}).start();
 			installProc.waitFor();
 
-			if (installPackagesOutputFile.exists()
-					&& installPackagesOutputFile.lastModified() > installPackagesFile.lastModified()) {
+			if (installPackagesOutputFile.exists() && installPackagesOutputFile.lastModified() > installPackagesFile.lastModified()) {
 				BufferedReader br = new BufferedReader(new FileReader(installPackagesOutputFile));
 				String line = null;
 				while ((line = br.readLine()) != null) {
@@ -270,8 +260,7 @@ public class GDDesktopLauncher {
 			}
 
 			if (missingLibs.size() > 0) {
-				System.out.println("The following packages probably couldn't be automatically installed\n"
-						+ missingLibs);
+				System.out.println("The following packages probably couldn't be automatically installed\n" + missingLibs);
 			}
 
 		}
@@ -310,20 +299,15 @@ public class GDDesktopLauncher {
 					pw.println("SET" + " Path=" + rpath + "bin" + ";%Path%");
 					pw.println("SET" + " R_HOME=" + rpath);
 
-					pw.println("SET R_LIBS=" + rlibs
-							+ (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : ""));
+					pw.println("SET R_LIBS=" + rlibs + (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : ""));
 				} else if (isMacOs()) {
 					pw.println("export" + " LD_LIBRARY_PATH=" + rpath + "lib");
 					pw.println("export" + " R_HOME=" + rpath);
-					pw.println("export" + " R_LIBS=" + rlibs
-							+ (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : ""));
+					pw.println("export" + " R_LIBS=" + rlibs + (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : ""));
 				} else {
 					pw.println("LD_LIBRARY_PATH=" + rpath + "lib" + ";export LD_LIBRARY_PATH");
 					pw.println("R_HOME=" + rpath + ";export R_HOME");
-					pw
-							.println("R_LIBS=" + rlibs
-									+ (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : "")
-									+ ";export R_LIBS");
+					pw.println("R_LIBS=" + rlibs + (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : "") + ";export R_LIBS");
 				}
 
 				pw.print((isWindowsOs() ? "\"" : "") + command.elementAt(0) + (isWindowsOs() ? "\"" : "") + " ");
@@ -338,8 +322,7 @@ public class GDDesktopLauncher {
 			}
 		}
 
-		final Process proc = Runtime.getRuntime()
-				.exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
+		final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
 		final Vector<String> killPrint = new Vector<String>();
 		final Vector<String> errorPrint = new Vector<String>();
 
@@ -392,6 +375,5 @@ public class GDDesktopLauncher {
 			return null;
 		}
 	}
-
 
 }

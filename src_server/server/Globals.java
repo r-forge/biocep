@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +55,7 @@ import org.bioconductor.packages.rservices.RVector;
 import util.Utils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class Globals {
 
@@ -67,6 +69,7 @@ public class Globals {
 	private static final String LOC_STR_LEFT = "It represents the S4 Class";
 	private static final String LOC_STR_RIGHT = "in R package";
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(Globals.class);
+
 	public static void scanJavaFiles(File node, Vector<String> result) {
 		if (!node.isDirectory() && node.getName().endsWith(".java")) {
 			result.add(node.getAbsolutePath());
@@ -81,15 +84,13 @@ public class Globals {
 	}
 
 	private static String getRClassForBean(JarFile jarFile, String beanClassName) throws Exception {
-		BufferedReader br = new BufferedReader(new InputStreamReader(jarFile.getInputStream(jarFile
-				.getEntry(beanClassName.replace('.', '/') + ".java"))));
+		BufferedReader br = new BufferedReader(new InputStreamReader(jarFile.getInputStream(jarFile.getEntry(beanClassName.replace('.', '/') + ".java"))));
 		do {
 			String line = br.readLine();
 			if (line != null) {
 				int p = line.indexOf(Globals.LOC_STR_LEFT);
 				if (p != -1) {
-					return line.substring(p + Globals.LOC_STR_LEFT.length(), line.indexOf(Globals.LOC_STR_RIGHT))
-							.trim();
+					return line.substring(p + Globals.LOC_STR_LEFT.length(), line.indexOf(Globals.LOC_STR_RIGHT)).trim();
 				}
 			} else
 				break;
@@ -116,18 +117,15 @@ public class Globals {
 
 			for (int i = 0; i < list.size(); ++i) {
 				String className = list.elementAt(i);
-				if (className.startsWith("org.bioconductor.packages.")
-						&& !className.startsWith("org.bioconductor.packages.rservices")) {
+				if (className.startsWith("org.bioconductor.packages.") && !className.startsWith("org.bioconductor.packages.rservices")) {
 					Class<?> c_ = DirectJNI._mappingClassLoader.loadClass(className);
 
-					if (c_.getSuperclass() != null && c_.getSuperclass().equals(RObject.class)
-							&& !Modifier.isAbstract(c_.getModifiers())) {
+					if (c_.getSuperclass() != null && c_.getSuperclass().equals(RObject.class) && !Modifier.isAbstract(c_.getModifiers())) {
 
-						if (c_.equals(RLogical.class) || c_.equals(RInteger.class) || c_.equals(RNumeric.class)
-								|| c_.equals(RComplex.class) || c_.equals(RChar.class) || c_.equals(RMatrix.class)
-								|| c_.equals(RArray.class) || c_.equals(RList.class) || c_.equals(RDataFrame.class)
-								|| c_.equals(RFactor.class) || c_.equals(REnvironment.class)
-								|| c_.equals(RVector.class) || c_.equals(RUnknown.class)) {
+						if (c_.equals(RLogical.class) || c_.equals(RInteger.class) || c_.equals(RNumeric.class) || c_.equals(RComplex.class)
+								|| c_.equals(RChar.class) || c_.equals(RMatrix.class) || c_.equals(RArray.class) || c_.equals(RList.class)
+								|| c_.equals(RDataFrame.class) || c_.equals(RFactor.class) || c_.equals(REnvironment.class) || c_.equals(RVector.class)
+								|| c_.equals(RUnknown.class)) {
 						} else {
 							String rclass = getRClassForBean(jarfile, className);
 							DirectJNI._s4BeansHash.put(className, c_);
@@ -150,8 +148,7 @@ public class Globals {
 
 					} else {
 						String nameWithoutPackage = className.substring(className.lastIndexOf('.') + 1);
-						if (nameWithoutPackage.indexOf("Factory") != -1
-								&& c_.getMethod("setData", new Class[] { RObject.class }) != null) {
+						if (nameWithoutPackage.indexOf("Factory") != -1 && c_.getMethod("setData", new Class[] { RObject.class }) != null) {
 							// if
 							// (DirectJNI._factoriesMapping.get(nameWithoutPackage)
 							// != null) throw new Exception("Factories Names
@@ -184,62 +181,54 @@ public class Globals {
 			String className = (String) iter.next();
 			String shortClassName = className.substring(className.lastIndexOf('.') + 1);
 
-			String outputFileName = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR
-					+ className.replace('.', Globals.FILE_SEPARATOR) + "Impl.java";
+			String outputFileName = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR + className.replace('.', Globals.FILE_SEPARATOR) + "Impl.java";
 			new File(outputFileName.substring(0, outputFileName.lastIndexOf(FILE_SEPARATOR))).mkdirs();
 			log.info("output file:" + outputFileName);
 			PrintWriter outputWriter = new PrintWriter(outputFileName);
 			outputWriter.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
 			outputWriter.println("public class " + shortClassName + "Impl" + " implements " + shortClassName + " {");
-			outputWriter.println("private " + className.substring(className.lastIndexOf('.') + 1) + "Impl"
-					+ "(){ init(); }");
+			outputWriter.println("private " + className.substring(className.lastIndexOf('.') + 1) + "Impl" + "(){ init(); }");
 			outputWriter.println("public void init() { "
 					+ (embedRScript ? "try {server.DirectJNI.getInstance().getRServices().sourceFromResource(\"/"
-							+ className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/"
-							+ className.substring(className.lastIndexOf('.') + 1)
+							+ className.substring(0, className.lastIndexOf('.')).replace('.', '/') + "/" + className.substring(className.lastIndexOf('.') + 1)
 							+ ".R\");} catch (Exception e) {e.printStackTrace();}\n" : "") + " }");
 
-			String outputFileNameRemote = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR
-					+ className.replace('.', Globals.FILE_SEPARATOR) + ".java";
+			String outputFileNameRemote = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR + className.replace('.', Globals.FILE_SEPARATOR) + ".java";
 			new File(outputFileNameRemote.substring(0, outputFileNameRemote.lastIndexOf(FILE_SEPARATOR))).mkdirs();
 			log.info("output remote file:" + outputFileNameRemote);
 			PrintWriter outputWriterRemote = new PrintWriter(outputFileNameRemote);
 			outputWriterRemote.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
 			outputWriterRemote.println("public interface " + shortClassName + " extends mapping.RPackage  {");
-			outputWriter.println("private static " + shortClassName
-					+ " _packageInstance = null;private static Integer _lock = new Integer(0);");
+			outputWriter.println("private static " + shortClassName + " _packageInstance = null;private static Integer _lock = new Integer(0);");
 			outputWriter
 					.println("public static "
 							+ shortClassName
 							+ " getInstance() {	if (_packageInstance != null) return _packageInstance; synchronized (_lock) { if (_packageInstance == null) { _packageInstance = new "
 							+ shortClassName + "Impl" + "(); }	return _packageInstance;}}");
 
-			String outputFileNameRemoteImpl = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR
-					+ className.replace('.', Globals.FILE_SEPARATOR) + "ImplRemote" + ".java";
-			new File(outputFileNameRemoteImpl.substring(0, outputFileNameRemoteImpl.lastIndexOf(FILE_SEPARATOR)))
-					.mkdirs();
+			String outputFileNameRemoteImpl = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR + className.replace('.', Globals.FILE_SEPARATOR) + "ImplRemote"
+					+ ".java";
+			new File(outputFileNameRemoteImpl.substring(0, outputFileNameRemoteImpl.lastIndexOf(FILE_SEPARATOR))).mkdirs();
 			log.info("output remote impl file:" + outputFileNameRemoteImpl);
 			PrintWriter outputWriterRemoteImpl = new PrintWriter(outputFileNameRemoteImpl);
 			outputWriterRemoteImpl.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
-			outputWriterRemoteImpl.println("public class " + shortClassName
-					+ "ImplRemote extends java.rmi.server.UnicastRemoteObject implements " + shortClassName + " {");
-			outputWriterRemoteImpl.println("public " + className.substring(className.lastIndexOf('.') + 1)
-					+ "ImplRemote" + "() throws java.rmi.RemoteException { super(); };");
+			outputWriterRemoteImpl.println("public class " + shortClassName + "ImplRemote extends java.rmi.server.UnicastRemoteObject implements "
+					+ shortClassName + " {");
+			outputWriterRemoteImpl.println("public " + className.substring(className.lastIndexOf('.') + 1) + "ImplRemote"
+					+ "() throws java.rmi.RemoteException { super(); };");
 
 			PrintWriter outputWriterWebservice = null;
 			if (_webPublishingEnabled) {
-				String outputFileNameWebservice = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR
-						+ className.replace('.', Globals.FILE_SEPARATOR) + "Web" + ".java";
-				new File(outputFileNameWebservice.substring(0, outputFileNameWebservice.lastIndexOf(FILE_SEPARATOR)))
-						.mkdirs();
+				String outputFileNameWebservice = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR + className.replace('.', Globals.FILE_SEPARATOR) + "Web"
+						+ ".java";
+				new File(outputFileNameWebservice.substring(0, outputFileNameWebservice.lastIndexOf(FILE_SEPARATOR))).mkdirs();
 				log.info("output web service file:" + outputFileNameWebservice);
 				outputWriterWebservice = new PrintWriter(outputFileNameWebservice);
 				outputWriterWebservice.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
 				outputWriterWebservice
 						.println("import javax.jws.WebService;\nimport org.bioconductor.packages.rservices.*;\n import static  uk.ac.ebi.microarray.pools.PoolUtils.*;\n @WebService\n");
 				outputWriterWebservice.println("public class " + shortClassName + "Web {");
-				outputWriterWebservice.println("public " + className.substring(className.lastIndexOf('.') + 1) + "Web"
-						+ "(){};");
+				outputWriterWebservice.println("public " + className.substring(className.lastIndexOf('.') + 1) + "Web" + "(){};");
 			}
 
 			Vector<Method> methodsVector = new Vector<Method>();
@@ -267,13 +256,10 @@ public class Globals {
 
 				String m_name = fattrs.getRenameTo() == null ? m.getName() : fattrs.getRenameTo();
 
-				String mHeader = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName()) + " "
-						+ m_name + "(";
-				String mHeaderAsRef = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName())
-						+ " " + m_name + "AsReference" + "(";
+				String mHeader = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName()) + " " + m_name + "(";
+				String mHeaderAsRef = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName()) + " " + m_name + "AsReference" + "(";
 
-				String[] formalArgs = ((RChar) DirectJNI.getInstance().getRServices().evalAndGetObject(
-						"names(formals('" + m.getName() + "'))")).getValue();
+				String[] formalArgs = ((RChar) DirectJNI.getInstance().getRServices().evalAndGetObject("names(formals('" + m.getName() + "'))")).getValue();
 				boolean hasDotDotDot = formalArgs.length > 0 && formalArgs[formalArgs.length - 1].equals("...");
 
 				String paramsStr = "";
@@ -290,8 +276,7 @@ public class Globals {
 					}
 
 					mHeader += (" " + pclassName + " " + "p" + j + (j == m.getParameterTypes().length - 2 ? "" : ","));
-					mHeaderAsRef += (" " + pclassName + " " + "p" + j + (j == m.getParameterTypes().length - 2 ? ""
-							: ","));
+					mHeaderAsRef += (" " + pclassName + " " + "p" + j + (j == m.getParameterTypes().length - 2 ? "" : ","));
 
 					paramsStr += "p" + j + (j == m.getParameterTypes().length - 2 ? "" : ",");
 
@@ -306,13 +291,10 @@ public class Globals {
 
 				}
 
-				outputWriter
-						.print(mHeader
-								+ ") throws java.rmi.RemoteException {remoting.RServices r=server.DirectJNI.getInstance().getRServices();");
+				outputWriter.print(mHeader + ") throws java.rmi.RemoteException {remoting.RServices r=server.DirectJNI.getInstance().getRServices();");
 				outputWriterRemote.print(mHeader + ") throws java.rmi.RemoteException ;\n");
 				outputWriterRemoteImpl
-						.print(mHeader
-								+ ") throws java.rmi.RemoteException {remoting.RServices r=server.DirectJNI.getInstance().getRServices();");
+						.print(mHeader + ") throws java.rmi.RemoteException {remoting.RServices r=server.DirectJNI.getInstance().getRServices();");
 
 				if (fattrs.isPublishToWeb()) {
 					outputWriterWebservice
@@ -324,19 +306,17 @@ public class Globals {
 
 				String callStrImpl = null;
 				if (hasDotDotDot) {
-					varargsStr += "for (int k=0; k<args.length;++k) {params[" + (m.getParameterTypes().length - 1)
-							+ "+k]=args[k];}";
-					callStrImpl = varargsStr + m.getReturnType().getName() + " result= (" + m.getReturnType().getName()
-							+ ")r.call(\"" + m.getName() + "\", params);";
+					varargsStr += "for (int k=0; k<args.length;++k) {params[" + (m.getParameterTypes().length - 1) + "+k]=args[k];}";
+					callStrImpl = varargsStr + m.getReturnType().getName() + " result= (" + m.getReturnType().getName() + ")r.call(\"" + m.getName()
+							+ "\", params);";
 
 				} else {
-					callStrImpl = m.getReturnType().getName() + " result= (" + m.getReturnType().getName()
-							+ ")r.call(\"" + m.getName() + "\"," + paramsStr + ");";
+					callStrImpl = m.getReturnType().getName() + " result= (" + m.getReturnType().getName() + ")r.call(\"" + m.getName() + "\"," + paramsStr
+							+ ");";
 				}
 
-				String callStrRemoteImpl = " try{ " + m.getReturnType().getName() + " result= ((" + className
-						+ ")r.getPackage(\"" + shortClassName + "\"))." + m_name + "(" + paramsStr
-						+ (hasDotDotDot ? ",args" : "") + ");";
+				String callStrRemoteImpl = " try{ " + m.getReturnType().getName() + " result= ((" + className + ")r.getPackage(\"" + shortClassName + "\"))."
+						+ m_name + "(" + paramsStr + (hasDotDotDot ? ",args" : "") + ");";
 				outputWriter.print(callStrImpl);
 				outputWriterRemoteImpl.print(callStrRemoteImpl);
 				if (fattrs.isPublishToWeb())
@@ -352,37 +332,30 @@ public class Globals {
 				}
 
 				outputWriter.println("}");
-				outputWriterRemoteImpl
-						.println("} catch (Exception ex) {throw new java.rmi.RemoteException( util.Utils.getStackTraceAsString(ex) );}}");
+				outputWriterRemoteImpl.println("} catch (Exception ex) {throw new java.rmi.RemoteException( util.Utils.getStackTraceAsString(ex) );}}");
 				if (fattrs.isPublishToWeb()) {
-					outputWriterWebservice
-							.println("} catch (Exception ex) {throw new Exception( util.Utils.getStackTraceAsString(ex) );} finally {"
-									+ (fattrs.isSingleThreadedWeb() ? ""
-											: "uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);")
-									+ "} }");
+					outputWriterWebservice.println("} catch (Exception ex) {throw new Exception( util.Utils.getStackTraceAsString(ex) );} finally {"
+							+ (fattrs.isSingleThreadedWeb() ? ""
+									: "uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);") + "} }");
 				}
 
-				outputWriter
-						.print(mHeaderAsRef
-								+ ") throws java.rmi.RemoteException { remoting.RServices r=server.DirectJNI.getInstance().getRServices(); ");
+				outputWriter.print(mHeaderAsRef + ") throws java.rmi.RemoteException { remoting.RServices r=server.DirectJNI.getInstance().getRServices(); ");
 				outputWriterRemote.print(mHeaderAsRef + ") throws java.rmi.RemoteException ;\n");
-				outputWriterRemoteImpl
-						.print(mHeaderAsRef
-								+ ") throws java.rmi.RemoteException { remoting.RServices r=server.DirectJNI.getInstance().getRServices(); ");
+				outputWriterRemoteImpl.print(mHeaderAsRef
+						+ ") throws java.rmi.RemoteException { remoting.RServices r=server.DirectJNI.getInstance().getRServices(); ");
 
 				String callStrImplAsRef = null;
 				if (hasDotDotDot) {
-					callStrImplAsRef = varargsStr + m.getReturnType().getName() + " result= ("
-							+ m.getReturnType().getName() + ")r.callAsReference(\"" + m.getName() + "\", params);";
+					callStrImplAsRef = varargsStr + m.getReturnType().getName() + " result= (" + m.getReturnType().getName() + ")r.callAsReference(\""
+							+ m.getName() + "\", params);";
 
 				} else {
-					callStrImplAsRef = m.getReturnType().getName() + " result= (" + m.getReturnType().getName()
-							+ ")r.callAsReference(\"" + m.getName() + "\", " + paramsStr + ");";
+					callStrImplAsRef = m.getReturnType().getName() + " result= (" + m.getReturnType().getName() + ")r.callAsReference(\"" + m.getName()
+							+ "\", " + paramsStr + ");";
 				}
 
-				String callStrRemoteImplAsRef = " try{ " + m.getReturnType().getName() + " result= ((" + className
-						+ ")r.getPackage(\"" + shortClassName + "\"))." + m_name + "AsReference" + "(" + paramsStr
-						+ (hasDotDotDot ? ",args" : "") + ");";
+				String callStrRemoteImplAsRef = " try{ " + m.getReturnType().getName() + " result= ((" + className + ")r.getPackage(\"" + shortClassName
+						+ "\"))." + m_name + "AsReference" + "(" + paramsStr + (hasDotDotDot ? ",args" : "") + ");";
 
 				outputWriter.print(callStrImplAsRef);
 				outputWriterRemoteImpl.print(callStrRemoteImplAsRef);
@@ -395,8 +368,7 @@ public class Globals {
 				}
 
 				outputWriter.println("}");
-				outputWriterRemoteImpl
-						.println("} catch (Exception ex) {throw new java.rmi.RemoteException( util.Utils.getStackTraceAsString(ex) );}}");
+				outputWriterRemoteImpl.println("} catch (Exception ex) {throw new java.rmi.RemoteException( util.Utils.getStackTraceAsString(ex) );}}");
 
 			}
 
@@ -413,8 +385,7 @@ public class Globals {
 					outputWriterWebservice
 							.println("\npublic String evaluateExpressions(String expression, int n) throws Exception { "
 									+ "remoting.RServices r = null;"
-									+ (System.getProperty("SingleThreadedWeb") != null
-											&& System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
+									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { String result =  r.evaluateExpressions(expression,n); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
@@ -423,8 +394,7 @@ public class Globals {
 					outputWriterWebservice
 							.println("\npublic RObject call(String methodName, RObject... args) throws Exception { "
 									+ "remoting.RServices r = null;"
-									+ (System.getProperty("SingleThreadedWeb") != null
-											&& System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
+									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { RObject result =  r.call(methodName, args); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
@@ -433,8 +403,7 @@ public class Globals {
 					outputWriterWebservice
 							.println("\npublic void callAndAssignName(String varName, String methodName, RObject... args) throws Exception { "
 									+ "remoting.RServices r = null;"
-									+ (System.getProperty("SingleThreadedWeb") != null
-											&& System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
+									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { r.callAndAssignName(varName, methodName, args); } catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
@@ -443,8 +412,7 @@ public class Globals {
 					outputWriterWebservice
 							.println("\npublic RObject evalAndGetObject(String expression) throws Exception { "
 									+ "remoting.RServices r = null;"
-									+ (System.getProperty("SingleThreadedWeb") != null
-											&& System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
+									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { RObject result =  r.evalAndGetObject(expression); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
@@ -453,8 +421,7 @@ public class Globals {
 					outputWriterWebservice
 							.println("\npublic String consoleSubmit(String expression) throws Exception { "
 									+ "remoting.RServices r = null;"
-									+ (System.getProperty("SingleThreadedWeb") != null
-											&& System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
+									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { String result =  r.consoleSubmit(expression); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
@@ -654,8 +621,7 @@ public class Globals {
 
 			String classShortName = className.substring(className.lastIndexOf('.') + 1);
 
-			String outputFileName = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR
-					+ className.replace('.', Globals.FILE_SEPARATOR) + "Ref" + ".java";
+			String outputFileName = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR + className.replace('.', Globals.FILE_SEPARATOR) + "Ref" + ".java";
 			new File(outputFileName.substring(0, outputFileName.lastIndexOf(FILE_SEPARATOR))).mkdirs();
 
 			log.info("output file:" + outputFileName);
@@ -688,49 +654,32 @@ public class Globals {
 			String nullifyFields = "";
 			for (int i = 0; i < fields.length; ++i)
 				nullifyFields += "super.set" + Utils.captalizeFirstChar(fields[i].getName()) + "(null);";
-			outputWriter.println("public " + classShortName + "Ref " + "(){ super(); _rObjectIdHolder=new long[1];"
-					+ nullifyFields + " };");
-			outputWriter
-					.println("public "
-							+ classShortName
-							+ "Ref "
-							+ "(long rObjectId, String slotsPath){ super(); _rObjectIdHolder=new long[1]; _rObjectIdHolder[0]=rObjectId; _slotsPath=slotsPath; "
-							+ nullifyFields + "};");
-			outputWriter
-					.println("public "
-							+ classShortName
-							+ "Ref "
-							+ "(long[] rObjectIdHolder, String slotsPath){ super(); _rObjectIdHolder=rObjectIdHolder; _slotsPath=slotsPath; "
-							+ nullifyFields + "};");
+			outputWriter.println("public " + classShortName + "Ref " + "(){ super(); _rObjectIdHolder=new long[1];" + nullifyFields + " };");
+			outputWriter.println("public " + classShortName + "Ref "
+					+ "(long rObjectId, String slotsPath){ super(); _rObjectIdHolder=new long[1]; _rObjectIdHolder[0]=rObjectId; _slotsPath=slotsPath; "
+					+ nullifyFields + "};");
+			outputWriter.println("public " + classShortName + "Ref "
+					+ "(long[] rObjectIdHolder, String slotsPath){ super(); _rObjectIdHolder=rObjectIdHolder; _slotsPath=slotsPath; " + nullifyFields + "};");
 
 			for (int i = 0; i < fields.length; ++i) {
 				Field f = fields[i];
-				String getterName = (f.getType().equals(boolean.class) || f.getType().equals(Boolean.class) ? "is"
-						: "get")
+				String getterName = (f.getType().equals(boolean.class) || f.getType().equals(Boolean.class) ? "is" : "get")
 						+ Utils.captalizeFirstChar(f.getName());
 				String setterName = "set" + Utils.captalizeFirstChar(f.getName());
 
 				if (f.getDeclaringClass().getName().equals(className)) {
 					outputWriter.print("\n public " + "void " + setterName + "(" + f.getType().getName() + " p0" + ")");
-					outputWriter
-							.print("{ "
-									+ "if ( p0 instanceof mapping.ReferenceInterface ) {"
-									+ "super."
-									+ setterName
-									+ "(p0);"
-									+ "} else "
-									+ "   {try {_rObjectIdHolder[0]=_assignInterface.assign(_rObjectIdHolder[0],_slotsPath+\"@\"+\""
-									+ slotsContainer[0][i]
-									+ "\",p0);} \n catch (Exception ex) {ex.printStackTrace();}}" + " }\n");
+					outputWriter.print("{ " + "if ( p0 instanceof mapping.ReferenceInterface ) {" + "super." + setterName + "(p0);" + "} else "
+							+ "   {try {_rObjectIdHolder[0]=_assignInterface.assign(_rObjectIdHolder[0],_slotsPath+\"@\"+\"" + slotsContainer[0][i]
+							+ "\",p0);} \n catch (Exception ex) {ex.printStackTrace();}}" + " }\n");
 					outputWriter.print("\n public " + f.getType().getName() + " " + getterName + "(){");
 
 					if (!DirectJNI._abstractFactories.contains(f.getType().getName())) {
 
 						outputWriter.print("if (super." + getterName + "()==null){ ");
-						outputWriter.print(f.getType().getName() + "Ref" + " result=new " + f.getType().getName()
-								+ "Ref(_rObjectIdHolder,_slotsPath+\"@\"+\"" + slotsContainer[0][i]
-								+ "\"); result.setAssignInterface(_assignInterface); " + "super." + setterName
-								+ "(result);" + "} return " + "super." + getterName + "();");
+						outputWriter.print(f.getType().getName() + "Ref" + " result=new " + f.getType().getName() + "Ref(_rObjectIdHolder,_slotsPath+\"@\"+\""
+								+ slotsContainer[0][i] + "\"); result.setAssignInterface(_assignInterface); " + "super." + setterName + "(result);"
+								+ "} return " + "super." + getterName + "();");
 					} else {
 						outputWriter.print(" return null;/* !!!!!! to be changed */ ");
 					}
@@ -741,9 +690,8 @@ public class Globals {
 
 			outputWriter.println(
 
-			"public void writeExternal(java.io.ObjectOutput out) throws java.io.IOException {"
-					+ "	out.writeLong(_rObjectIdHolder[0]);" + "	out.writeUTF(_slotsPath);"
-					+ "	out.writeObject(_assignInterface);");
+			"public void writeExternal(java.io.ObjectOutput out) throws java.io.IOException {" + "	out.writeLong(_rObjectIdHolder[0]);"
+					+ "	out.writeUTF(_slotsPath);" + "	out.writeObject(_assignInterface);");
 
 			if (true) {
 
@@ -759,35 +707,29 @@ public class Globals {
 								+ "mapping.ReferenceInterface fValue=(mapping.ReferenceInterface)fields[i].get(this);"
 								+ "if ( fValue!= null && (!fValue.getAssignInterface().equals(_assignInterface) || fValue.getRObjectId()!=_rObjectIdHolder[0] ||  server.DirectJNI.hasDistributedReferences(fValue)) ) {"
 								+ "   nonNullFields.add(fields[i]);" + "}}" + "	out.writeInt(nonNullFields.size());"
-								+ "	for (java.lang.reflect.Field f:nonNullFields) {" + "		out.writeUTF(f.getName());"
-								+ "       out.writeObject(f.get(this));" + "	}" + "}" + "catch (Exception e) {"
-								+ "	e.printStackTrace();"
+								+ "	for (java.lang.reflect.Field f:nonNullFields) {" + "		out.writeUTF(f.getName());" + "       out.writeObject(f.get(this));"
+								+ "	}" + "}" + "catch (Exception e) {" + "	e.printStackTrace();"
 								+ "} finally {for (int i=0;i<fields.length;++i) fields[i].setAccessible(false);}");
 
 			} else {
 				outputWriter.print("int counter=0;");
 				for (int i = 0; i < fields.length; ++i) {
-					outputWriter.print(" if (super.get" + Utils.captalizeFirstChar(fields[i].getName())
-							+ "()!=null) ++counter;");
+					outputWriter.print(" if (super.get" + Utils.captalizeFirstChar(fields[i].getName()) + "()!=null) ++counter;");
 				}
 				outputWriter.println("out.writeInt(counter);");
 				for (int i = 0; i < fields.length; ++i) {
 					Field f = fields[i];
 					outputWriter.print(" if (super.get" + Utils.captalizeFirstChar(f.getName()) + "()!=null) {");
 					outputWriter.print(" out.writeUTF(\"" + f.getName() + "\");");
-					outputWriter.print(" out.writeObject(super."
-							+ (f.getType().equals(boolean.class) || f.getType().equals(Boolean.class) ? "is" : "get")
+					outputWriter.print(" out.writeObject(super." + (f.getType().equals(boolean.class) || f.getType().equals(Boolean.class) ? "is" : "get")
 							+ Utils.captalizeFirstChar(f.getName()) + "());}");
 
 				}
 			}
 
 			outputWriter.println("}");
-			outputWriter
-					.println("public void readExternal(java.io.ObjectInput in) throws java.io.IOException, ClassNotFoundException {"
-							+ "	_rObjectIdHolder[0]=in.readLong();"
-							+ "	_slotsPath=in.readUTF();"
-							+ "	_assignInterface=(remoting.AssignInterface)in.readObject();");
+			outputWriter.println("public void readExternal(java.io.ObjectInput in) throws java.io.IOException, ClassNotFoundException {"
+					+ "	_rObjectIdHolder[0]=in.readLong();" + "	_slotsPath=in.readUTF();" + "	_assignInterface=(remoting.AssignInterface)in.readObject();");
 
 			outputWriter.println("int counter=in.readInt();  if (counter>0) {");
 			outputWriter.println("try { for (int i=0; i<counter; ++i) {String fname=in.readUTF();");
@@ -809,27 +751,22 @@ public class Globals {
 			outputWriter.println("}");
 
 			outputWriter.println("public String toString() {" + "StringBuffer result=new StringBuffer();" + "try {"
-					+ "result.append(\"A Reference to an object of Class \\\"" + classShortName
-					+ "\\\" on the R servant "
+					+ "result.append(\"A Reference to an object of Class \\\"" + classShortName + "\\\" on the R servant "
 					+ "<\"+_assignInterface.getName()+\">  [\"+_rObjectIdHolder[0]+\"/\"+_slotsPath+\"]\\n\");");
 			for (int i = 0; i < fields.length; ++i) {
 				Field f = fields[i];
 
 				outputWriter.print("result.append(" + "\"Field \\\"" + f.getName() + "\\\":\\n\");");
-				outputWriter.print("if (super.get" + Utils.captalizeFirstChar(f.getName())
-						+ "()!=null) result.append(util.Utils.indent (super.get"
-						+ Utils.captalizeFirstChar(f.getName()) + "().toString(),1)); "
-						+ "else result.append(\"null(\"+_rObjectIdHolder[0]+\"@" + slotsContainer[0][i] + ")\\n\");");
+				outputWriter.print("if (super.get" + Utils.captalizeFirstChar(f.getName()) + "()!=null) result.append(util.Utils.indent (super.get"
+						+ Utils.captalizeFirstChar(f.getName()) + "().toString(),1)); " + "else result.append(\"null(\"+_rObjectIdHolder[0]+\"@"
+						+ slotsContainer[0][i] + ")\\n\");");
 			}
-			outputWriter.println("} catch (java.rmi.RemoteException e) {e.printStackTrace();}"
-					+ "return result.toString();" + "}");
+			outputWriter.println("} catch (java.rmi.RemoteException e) {e.printStackTrace();}" + "return result.toString();" + "}");
 
 			outputWriter.println("public boolean equals(Object inputObject) {");
-			outputWriter.println("if (inputObject==null || !(inputObject instanceof " + classShortName + "Ref"
-					+ ")) return false;");
-			outputWriter.println("return  ((" + classShortName + "Ref)"
-					+ "inputObject)._assignInterface.equals( _assignInterface ) && ((" + classShortName + "Ref"
-					+ ")inputObject)._rObjectIdHolder[0]==_rObjectIdHolder[0] && ((" + classShortName + "Ref"
+			outputWriter.println("if (inputObject==null || !(inputObject instanceof " + classShortName + "Ref" + ")) return false;");
+			outputWriter.println("return  ((" + classShortName + "Ref)" + "inputObject)._assignInterface.equals( _assignInterface ) && ((" + classShortName
+					+ "Ref" + ")inputObject)._rObjectIdHolder[0]==_rObjectIdHolder[0] && ((" + classShortName + "Ref"
 					+ ")inputObject)._slotsPath.equals(_slotsPath);");
 			outputWriter.println("}");
 
@@ -922,8 +859,7 @@ public class Globals {
 		}
 
 		public String toString() {
-			return "{renameTo=" + renameTo + "  publishToWeb=" + publishToWeb + " singleThreadedWeb="
-					+ singleThreadedWeb + "}";
+			return "{renameTo=" + renameTo + "  publishToWeb=" + publishToWeb + " singleThreadedWeb=" + singleThreadedWeb + "}";
 		}
 
 	}

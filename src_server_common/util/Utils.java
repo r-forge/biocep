@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +35,13 @@ import java.rmi.registry.Registry;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
-import org.apache.commons.logging.Log;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class Utils {
-	
 
 	public static String flatArray(Object[] array) {
 		String result = "{";
@@ -166,8 +166,7 @@ public class Utils {
 
 	public static String getGetterName(Field field) {
 
-		return (field.getClass().equals(Boolean.class) ? "is" + Utils.captalizeFirstChar(field.getName()) : "get")
-				+ Utils.captalizeFirstChar(field.getName());
+		return (field.getClass().equals(Boolean.class) ? "is" + Utils.captalizeFirstChar(field.getName()) : "get") + Utils.captalizeFirstChar(field.getName());
 
 	}
 
@@ -305,8 +304,7 @@ public class Utils {
 		}
 		if (ServiceManagerClass == null)
 			return false;
-		Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null,
-				"javax.jnlp.BasicService");
+		Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null, "javax.jnlp.BasicService");
 		Class<?> BasicServiceClass = Utils.class.getClassLoader().loadClass("javax.jnlp.BasicService");
 		return (Boolean) BasicServiceClass.getMethod("isWebBrowserSupported").invoke(basicServiceInstance);
 	}
@@ -320,8 +318,7 @@ public class Utils {
 		}
 		if (ServiceManagerClass == null)
 			return;
-		Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null,
-				"javax.jnlp.BasicService");
+		Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null, "javax.jnlp.BasicService");
 		Class<?> BasicServiceClass = Utils.class.getClassLoader().loadClass("javax.jnlp.BasicService");
 		BasicServiceClass.getMethod("showDocument", URL.class).invoke(basicServiceInstance, url);
 	}

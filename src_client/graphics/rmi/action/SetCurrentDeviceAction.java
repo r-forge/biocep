@@ -7,29 +7,32 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
+/**
+ * @author Karim Chine   k.chine@imperial.ac.uk
+ */
 public class SetCurrentDeviceAction extends AbstractAction {
 	private GDDevice _device;
 	private RGui _rgui;
-	public SetCurrentDeviceAction(RGui rgui , GDDevice device) {
+
+	public SetCurrentDeviceAction(RGui rgui, GDDevice device) {
 		super("Set As Current Device");
-		_device=device;
-		_rgui=rgui;
+		_device = device;
+		_rgui = rgui;
 	}
-	
+
 	public void actionPerformed(ActionEvent e) {
-		try  {						
+		try {
 			_device.setAsCurrentDevice();
 			_rgui.setCurrentDevice(_device);
 		} catch (Exception ex) {
-			ex.printStackTrace();	
+			ex.printStackTrace();
 		}
-		
+
 	}
-	
 
 	@Override
 	public boolean isEnabled() {
-		return _rgui.getR()!=null;
+		return _rgui.getR() != null;
 	}
 
 }

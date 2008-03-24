@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +26,11 @@ import java.util.Vector;
 import org.rosuda.javaGD.GDObject;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public interface GDDevice extends Remote {
 	public Vector<GDObject> popAllGraphicObjects() throws RemoteException;
-	
+
 	public boolean hasGraphicObjects() throws RemoteException;
 
 	void fireSizeChangedEvent(int w, int h) throws RemoteException;
@@ -38,31 +40,31 @@ public interface GDDevice extends Remote {
 	public Dimension getSize() throws RemoteException;
 
 	public void putLocation(Point2D p) throws RemoteException;
-	
+
 	public boolean hasLocations() throws RemoteException;
 
 	public Point2D[] getRealPoints(Point2D[] points) throws RemoteException;
-	
+
 	public int getDeviceNumber() throws RemoteException;
-	
+
 	public boolean isCurrentDevice() throws RemoteException;
-	
+
 	public void setAsCurrentDevice() throws RemoteException;
-	
+
 	public Vector<String> getSVG() throws RemoteException;
-	
+
 	public byte[] getPostScript() throws RemoteException;
-	
+
 	public byte[] getPdf() throws RemoteException;
-	
+
 	public byte[] getPictex() throws RemoteException;
-	
+
 	public byte[] getPng() throws RemoteException;
-	
+
 	public byte[] getJpg() throws RemoteException;
-	
+
 	public byte[] getBmp() throws RemoteException;
-	
+
 	public byte[] getXfig() throws RemoteException;
-	
+
 }

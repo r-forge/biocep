@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,29 +22,26 @@ import java.io.File;
 import remoting.RServices;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class UserUtils {
 	public static String WKS_FILE_NAME = ".RData_biocep";
 
 	public static void saveWorkspace(String login, RServices rservices) throws Exception {
 		if (rservices != null && login != null && !login.equals("") && !login.equalsIgnoreCase("guest")) {
-			File wdirFile = new File(System.getProperty("users.data.dir.root") + System.getProperty("file.separator")
-					+ login);
+			File wdirFile = new File(System.getProperty("users.data.dir.root") + System.getProperty("file.separator") + login);
 			if (!wdirFile.exists()) {
 				wdirFile.mkdirs();
 			}
 			rservices.consoleSubmit("save.image(file = '" + WKS_FILE_NAME + "')");
-			FileLoad.download(WKS_FILE_NAME, new File(wdirFile.getAbsolutePath() + System.getProperty("file.separator")
-					+ WKS_FILE_NAME), rservices);
+			FileLoad.download(WKS_FILE_NAME, new File(wdirFile.getAbsolutePath() + System.getProperty("file.separator") + WKS_FILE_NAME), rservices);
 			rservices.consoleSubmit("unlink('" + WKS_FILE_NAME + "')");
 		}
 	}
 
 	public static void loadWorkspace(String login, RServices rservices) throws Exception {
 		if (rservices != null && login != null && !login.equals("") && !login.equalsIgnoreCase("guest")) {
-			File wdirFile = new File(System.getProperty("users.data.dir.root") + System.getProperty("file.separator")
-					+ login);
+			File wdirFile = new File(System.getProperty("users.data.dir.root") + System.getProperty("file.separator") + login);
 			if (!wdirFile.exists())
 				return;
 			File f = new File(wdirFile.getAbsolutePath() + System.getProperty("file.separator") + WKS_FILE_NAME);

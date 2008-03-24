@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +26,7 @@ import java.net.URL;
 import uk.ac.ebi.microarray.pools.PoolUtils.EqualNameFilter;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class MainPsToolsDownload {
 
@@ -32,20 +34,21 @@ public class MainPsToolsDownload {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String location=null;
-		if (System.getProperty("location")!=null && !System.getProperty("location").equals("")) {
+		String location = null;
+		if (System.getProperty("location") != null && !System.getProperty("location").equals("")) {
 			location = System.getProperty("location");
 		} else {
-			location=args[0];
+			location = args[0];
 		}
-		if (!location.endsWith("/") && !location.endsWith("\\")) location += "/";
+		if (!location.endsWith("/") && !location.endsWith("\\"))
+			location += "/";
 
 		try {
 			if (isWindowsOs()
-					&& (!new File(location + "pskill.exe").exists() || !new File(location + "pslist.exe").exists() || !new File(location + "psexec.exe").exists())) {
-				unzip(new URL("http://download.sysinternals.com/Files/PsTools.zip").openConnection().getInputStream(),
-						location, new EqualNameFilter("pslist.exe", "pskill.exe", "psexec.exe"), 1024 * 16, true,
-						"Unzipping psTools..", 3);
+					&& (!new File(location + "pskill.exe").exists() || !new File(location + "pslist.exe").exists() || !new File(location + "psexec.exe")
+							.exists())) {
+				unzip(new URL("http://download.sysinternals.com/Files/PsTools.zip").openConnection().getInputStream(), location, new EqualNameFilter(
+						"pslist.exe", "pskill.exe", "psexec.exe"), 1024 * 16, true, "Unzipping psTools..", 3);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

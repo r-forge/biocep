@@ -2,6 +2,9 @@ package graphics.rmi;
 
 import java.rmi.RemoteException;
 
+/**
+ * @author Karim Chine   k.chine@imperial.ac.uk
+ */
 public class RBusyException extends RemoteException {
 
 	public RBusyException() {
@@ -15,6 +18,5 @@ public class RBusyException extends RemoteException {
 	public RBusyException(String message) {
 		super(message);
 	}
-
 
 }

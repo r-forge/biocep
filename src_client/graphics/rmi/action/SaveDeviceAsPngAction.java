@@ -1,4 +1,5 @@
 package graphics.rmi.action;
+
 import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
 import graphics.rmi.RGui;
@@ -10,15 +11,17 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 
-public class SaveDeviceAsPngAction extends AbstractAction{
-	
-	RGui _rgui;		
-	
+/**
+ * @author Karim Chine   k.chine@imperial.ac.uk
+ */
+public class SaveDeviceAsPngAction extends AbstractAction {
+
+	RGui _rgui;
+
 	public SaveDeviceAsPngAction(RGui rgui) {
 		super("Save as PNG");
-		_rgui=rgui;
+		_rgui = rgui;
 	}
-	
 
 	public void actionPerformed(final ActionEvent e) {
 		new Thread(new Runnable() {
@@ -28,9 +31,9 @@ public class SaveDeviceAsPngAction extends AbstractAction{
 					final JFileChooser chooser = new JFileChooser();
 					int returnVal = chooser.showOpenDialog(_rgui.getRootComponent());
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GDApplet
-								.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
-						
+						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GDApplet.getComponentParent((Component) e.getSource(),
+								JBufferedImagePanel.class);
+
 						ImageIO.write(bufferedImagePanel.getImage(), "png", chooser.getSelectedFile());
 					}
 
@@ -39,12 +42,12 @@ public class SaveDeviceAsPngAction extends AbstractAction{
 				}
 			}
 		}).start();
-		
+
 	}
-	
+
 	@Override
 	public boolean isEnabled() {
-		return _rgui.getR()!=null;
+		return _rgui.getR() != null;
 	}
 
 }

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +33,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.apache.commons.logging.Log;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 import remoting.RKit;
@@ -42,10 +43,9 @@ import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
 import uk.ac.ebi.microarray.pools.RmiCallTimeout;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 import uk.ac.ebi.microarray.pools.db.RPFSessionInfo;
-import util.Utils;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class CommandServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(CommandServlet.class);
@@ -95,8 +95,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 					String login = (String) PoolUtils.hexToObject(request.getParameter("login"));
 					String pwd = (String) PoolUtils.hexToObject(request.getParameter("pwd"));
-					System.out.println("login :"+login);
-					System.out.println("pwd :"+pwd);
+					System.out.println("login :" + login);
+					System.out.println("pwd :" + pwd);
 					HashMap<String, Object> options = (HashMap<String, Object>) PoolUtils.hexToObject(request.getParameter("options"));
 					if (options == null)
 						options = new HashMap<String, Object>();
@@ -178,7 +178,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					((HashMap<String, HashMap<String, Object>>) getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP")).put(session.getId(),
 							cloneAttributes(session));
 
-					if (_rkit==null && save) {
+					if (_rkit == null && save) {
 						UserUtils.loadWorkspace((String) session.getAttribute("LOGIN"), r);
 					}
 
@@ -194,11 +194,11 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 				}
 
 				if (command.equals("logoff")) {
-					
-					if (_rkit!=null) { 
-						Enumeration<String> attributeNames=session.getAttributeNames();
+
+					if (_rkit != null) {
+						Enumeration<String> attributeNames = session.getAttributeNames();
 						while (attributeNames.hasMoreElements()) {
-							String aname=attributeNames.nextElement();
+							String aname = attributeNames.nextElement();
 							if (session.getAttribute(aname) instanceof GDDevice) {
 								try {
 									_rkit.getRLock().lock();
@@ -245,7 +245,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					Runnable rmiRunnable = new Runnable() {
 						public void run() {
 							try {
-								if (_rkit!=null) _rkit.getRLock().lock();
+								if (_rkit != null)
+									_rkit.getRLock().lock();
 								resultHolder[0] = m.invoke(servant, methodParams);
 								if (resultHolder[0] == null)
 									resultHolder[0] = RMICALL_DONE;
@@ -264,7 +265,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									resultHolder[0] = e;
 								}
 							} finally {
-								if (_rkit!=null) _rkit.getRLock().unlock();
+								if (_rkit != null)
+									_rkit.getRLock().unlock();
 							}
 						}
 					};
@@ -330,15 +332,18 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					break;
 				} else if (command.equals("newdevice")) {
 					try {
-						if (_rkit!=null) _rkit.getRLock().lock();
-						GDDevice deviceProxy=((RServices) session	.getAttribute("R")).newDevice(Integer.decode(request.getParameter("width")), Integer.decode(request.getParameter("height")));
+						if (_rkit != null)
+							_rkit.getRLock().lock();
+						GDDevice deviceProxy = ((RServices) session.getAttribute("R")).newDevice(Integer.decode(request.getParameter("width")), Integer
+								.decode(request.getParameter("height")));
 						String deviceName = "device" + "_" + deviceProxy.getDeviceNumber();
 						System.out.println("deviceName=" + deviceName);
 						session.setAttribute(deviceName, deviceProxy);
 						result = deviceName;
 						break;
 					} finally {
-						if (_rkit!=null) _rkit.getRLock().unlock();
+						if (_rkit != null)
+							_rkit.getRLock().unlock();
 					}
 				}
 
@@ -363,11 +368,11 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 	public void init(ServletConfig sConfig) throws ServletException {
 		super.init(sConfig);
-		
+
 		log.info("command servlet init");
-		if (_rkit==null) {
+		if (_rkit == null) {
 			PoolUtils.injectSystemProperties(true);
-			//Utils.initLog();
+			// Utils.initLog();
 		}
 		PoolUtils.initRmiSocketFactory();
 		getServletContext().setAttribute("SESSIONS_MAP", new HashMap<String, HttpSession>());

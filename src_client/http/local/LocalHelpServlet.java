@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,28 +26,26 @@ import remoting.RKit;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class LocalHelpServlet extends javax.servlet.http.HttpServlet {
-	
+
 	private RKit _rgui;
 
 	public LocalHelpServlet(RKit rgui) {
 		super();
-		_rgui=rgui;
+		_rgui = rgui;
 	}
-	
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
 
-	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Object result = null;
 		try {
 			do {
@@ -56,7 +56,7 @@ public class LocalHelpServlet extends javax.servlet.http.HttpServlet {
 				if (helpuri.indexOf(";jsessionid") != -1) {
 					helpuri = helpuri.substring(0, helpuri.indexOf(";jsessionid"));
 				}
-				//System.out.println("helpuri:"+helpuri);	
+				// System.out.println("helpuri:"+helpuri);
 
 				if (uri.toLowerCase().endsWith(".jpg")) {
 					response.setContentType("image/jpeg");
@@ -64,7 +64,7 @@ public class LocalHelpServlet extends javax.servlet.http.HttpServlet {
 					response.setContentType("text/html; charset=utf-8");
 				}
 
-				//System.out.println("uri="+uri);
+				// System.out.println("uri="+uri);
 				result = _rgui.getR().getRHelpFile(helpuri);
 
 				break;

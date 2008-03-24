@@ -15,6 +15,9 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.apache.batik.swing.JSVGCanvas;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class SnapshotDeviceSvgAction extends AbstractAction {
 	RGui _rgui;
 
@@ -33,7 +36,7 @@ public class SnapshotDeviceSvgAction extends AbstractAction {
 
 				try {
 					_rgui.getRLock().lock();
-					
+
 					JGDPanelPop panel = (JGDPanelPop) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 
 					Vector<String> result = panel.getGdDevice().getSVG();
@@ -47,7 +50,7 @@ public class SnapshotDeviceSvgAction extends AbstractAction {
 					svgCanvas.setEnableZoomInteractor(true);
 
 					_rgui.createView(svgCanvas, "SVG Snapshot");
-					
+
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							try {
@@ -57,7 +60,6 @@ public class SnapshotDeviceSvgAction extends AbstractAction {
 							}
 						}
 					});
-
 
 				} catch (Exception e) {
 					e.printStackTrace();

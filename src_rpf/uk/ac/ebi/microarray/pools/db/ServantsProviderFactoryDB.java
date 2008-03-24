@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +31,7 @@ import uk.ac.ebi.microarray.pools.TimeoutException;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class ServantsProviderFactoryDB extends ServantProviderFactory {
 
@@ -59,7 +61,7 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 			_dbLayer = DBLayer.getLayer(getDBType(_url), conn);
 			_poolHashMap = _dbLayer.getPoolDataHashMap();
 			conn.commit();
-			//conn.close();
+			// conn.close();
 		}
 
 		_servantProvider = new ServantProvider() {
@@ -70,8 +72,7 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 				long tstart = System.currentTimeMillis();
 				do {
 					try {
-						proxy = (ManagedServant) ServantProxyPoolSingletonDB.getInstance(poolName, _driver, _url,
-								_user, _password).borrowObject();
+						proxy = (ManagedServant) ServantProxyPoolSingletonDB.getInstance(poolName, _driver, _url, _user, _password).borrowObject();
 					} catch (NoSuchElementException e) {
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -79,7 +80,9 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 
 					if (proxy != null) {
 						try {
-							//log	.info("<" + Thread.currentThread().getName()+ "> obtained resource : "+ proxy.getServantName());
+							// log .info("<" + Thread.currentThread().getName()+
+							// "> obtained resource : "+
+							// proxy.getServantName());
 						} catch (Exception e) {
 						}
 						break;
@@ -94,7 +97,10 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 					} catch (Exception e) {
 					}
 
-					//log.info("<" + Thread.currentThread().getName()	+ "> thread waiting for resource for  : "+ ((System.currentTimeMillis() - tstart) / 1000)+ " seconds");
+					// log.info("<" + Thread.currentThread().getName() + ">
+					// thread waiting for resource for : "+
+					// ((System.currentTimeMillis() - tstart) / 1000)+ "
+					// seconds");
 
 				} while (true);
 
@@ -105,8 +111,7 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 			public ManagedServant borrowServantProxyNoWait(String poolName) {
 				ManagedServant proxy = null;
 				try {
-					proxy = (ManagedServant) ServantProxyPoolSingletonDB.getInstance(poolName, _driver, _url, _user,
-							_password).borrowObject();
+					proxy = (ManagedServant) ServantProxyPoolSingletonDB.getInstance(poolName, _driver, _url, _user, _password).borrowObject();
 				} catch (NoSuchElementException e) {
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -122,8 +127,7 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 				try {
 					String poolName = _borrowedServants.get(proxy);
 					_borrowedServants.remove(proxy);
-					ServantProxyPoolSingletonDB.getInstance(poolName, _driver, _url, _user, _password).returnObject(
-							proxy);
+					ServantProxyPoolSingletonDB.getInstance(poolName, _driver, _url, _user, _password).returnObject(proxy);
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.exit(0);

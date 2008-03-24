@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +18,7 @@
 package uk.ac.ebi.microarray.pools;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public abstract class ServantProviderFactory {
 
@@ -27,19 +29,16 @@ public abstract class ServantProviderFactory {
 			return;
 		PoolUtils.injectSystemProperties(true);
 		PoolUtils.initRmiSocketFactory();
-		if (System.getProperty("pools.provider.factory") != null
-				&& !System.getProperty("pools.provider.factory").equals("")) {
+		if (System.getProperty("pools.provider.factory") != null && !System.getProperty("pools.provider.factory").equals("")) {
 			try {
-				_defaultFacory = (ServantProviderFactory) Class.forName(System.getProperty("pools.provider.factory"))
-						.newInstance();
+				_defaultFacory = (ServantProviderFactory) Class.forName(System.getProperty("pools.provider.factory")).newInstance();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 		} else {
 			try {
-			_defaultFacory = (ServantProviderFactory) Class.forName("uk.ac.ebi.microarray.pools.reg.ServantProviderFactoryReg")
-				.newInstance();
+				_defaultFacory = (ServantProviderFactory) Class.forName("uk.ac.ebi.microarray.pools.reg.ServantProviderFactoryReg").newInstance();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

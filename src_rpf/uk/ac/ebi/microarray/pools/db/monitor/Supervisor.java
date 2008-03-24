@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,20 +70,18 @@ import javax.crypto.*;
 import javax.crypto.spec.*;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine   k.chine@imperial.ac.uk
  */
 public class Supervisor {
-	private static final String[] servantTableColumns = new String[] { "NAME", "#POOL_NAME", "IN_USE", "PING_FAILURES",
-			"NODE_NAME", "REGISTER_TIME", "REGISTER_PROCESS_ID", "REGISTER_HOST_NAME", "REGISTER_HOST_IP",
-			"REGISTER_OS", "BORROW_TIME", "BORROW_PROCESS_ID", "BORROW_HOST_NAME", "BORROW_HOST_IP", "RETURN_TIME",
-			"RETURN_PROCESS_ID", "RETURN_HOST_NAME", "RETURN_HOST_IP", "BORROW_SESSION_INFO_HEX", "ATTRIBUTES_HEX",
+	private static final String[] servantTableColumns = new String[] { "NAME", "#POOL_NAME", "IN_USE", "PING_FAILURES", "NODE_NAME", "REGISTER_TIME",
+			"REGISTER_PROCESS_ID", "REGISTER_HOST_NAME", "REGISTER_HOST_IP", "REGISTER_OS", "BORROW_TIME", "BORROW_PROCESS_ID", "BORROW_HOST_NAME",
+			"BORROW_HOST_IP", "RETURN_TIME", "RETURN_PROCESS_ID", "RETURN_HOST_NAME", "RETURN_HOST_IP", "BORROW_SESSION_INFO_HEX", "ATTRIBUTES_HEX",
 			"CODEBASE", "STUB_HEX"
 
 	};
 
-	private static final String[] servantTableLabels = new String[] { "Servant Name", "Pool", "Used", "Ping F.",
-			"Node Name", "Reg Time", "Reg Proc", "Reg Host", "Reg IP", "Reg OS", "Borrow Time", "Borrow Proc",
-			"Borrow Host", "Borrow IP",
+	private static final String[] servantTableLabels = new String[] { "Servant Name", "Pool", "Used", "Ping F.", "Node Name", "Reg Time", "Reg Proc",
+			"Reg Host", "Reg IP", "Reg OS", "Borrow Time", "Borrow Proc", "Borrow Host", "Borrow IP",
 
 			"Return Time", "Return Proc", "Return Host", "Return IP",
 
@@ -118,11 +118,9 @@ public class Supervisor {
 
 	private static final String[] poolTableLabels = new String[] { "Pool Name", "Pool Prefixes", "Timeout" };
 
-	private static final String[] nodeTableLabels = new String[] { "Node Name", "Pool Prefix", "Host Ip", "Host Name",
-			"Login", "Pwd", "Install Dir", "Create Servant Command", "Kill Servant Command", "OS",
-			"Servants Number Min", "Servants Number Max", "Process Counter" };
-	private static final int[] nodeTableWidths = new int[] { 140, 240, 120, 160, 100, 100, 160, 200, 120, 120, 100,
-			100, 100 };
+	private static final String[] nodeTableLabels = new String[] { "Node Name", "Pool Prefix", "Host Ip", "Host Name", "Login", "Pwd", "Install Dir",
+			"Create Servant Command", "Kill Servant Command", "OS", "Servants Number Min", "Servants Number Max", "Process Counter" };
+	private static final int[] nodeTableWidths = new int[] { 140, 240, 120, 160, 100, 100, 160, 200, 120, 120, 100, 100, 100 };
 
 	private static final String[] reportTableLabels = new String[] { "Action", "Status" };
 	private static final int[] reportTableWidths = new int[] { 80, 300 };
@@ -153,8 +151,7 @@ public class Supervisor {
 			KeyGenerator desEdeGen = KeyGenerator.getInstance("DESede");
 			SecretKey desEdeKey = desEdeGen.generateKey();
 			SecretKeyFactory desEdeFactory = SecretKeyFactory.getInstance("DESede");
-			DESedeKeySpec desEdeSpec = (DESedeKeySpec) desEdeFactory.getKeySpec(desEdeKey,
-					javax.crypto.spec.DESedeKeySpec.class);
+			DESedeKeySpec desEdeSpec = (DESedeKeySpec) desEdeFactory.getKeySpec(desEdeKey, javax.crypto.spec.DESedeKeySpec.class);
 			byte[] rawDesEdeKey = desEdeSpec.getKey();
 			return PoolUtils.bytesToHex(rawDesEdeKey);
 		} catch (Exception e) {
@@ -298,9 +295,8 @@ public class Supervisor {
 
 		String BORROW_HOST_IP = (String) servantRow.get("BORROW_HOST_IP");
 		String BORROW_PROCESS_ID = (String) servantRow.get("BORROW_PROCESS_ID");
-		return BORROW_HOST_IP != null && !BORROW_HOST_IP.equals("") && BORROW_PROCESS_ID != null
-				&& !BORROW_PROCESS_ID.equals("") && BORROW_HOST_IP.equals(PoolUtils.getHostIp())
-				&& BORROW_PROCESS_ID.equals(PoolUtils.getProcessId());
+		return BORROW_HOST_IP != null && !BORROW_HOST_IP.equals("") && BORROW_PROCESS_ID != null && !BORROW_PROCESS_ID.equals("")
+				&& BORROW_HOST_IP.equals(PoolUtils.getHostIp()) && BORROW_PROCESS_ID.equals(PoolUtils.getProcessId());
 
 	}
 
@@ -314,8 +310,7 @@ public class Supervisor {
 			setBorder(m_noFocusBorder);
 		}
 
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-				boolean hasFocus, int row, int column) {
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
 			if (value != null) {
 				if (column == colIndex("BORROW_SESSION_INFO_HEX")) {
@@ -352,15 +347,13 @@ public class Supervisor {
 			setOpaque(true);
 		}
 
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-				boolean hasFocus, int row, int column) {
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			if (value != null)
 				setText(value.toString());
 			else {
 				setText(value.toString());
 			}
-			setBackground((_disconnected ? _colors[(int) _colorCounter % _colors.length] : (_autoRefresh ? table
-					.getTableHeader().getBackground() : Color.blue)));
+			setBackground((_disconnected ? _colors[(int) _colorCounter % _colors.length] : (_autoRefresh ? table.getTableHeader().getBackground() : Color.blue)));
 			setForeground(_autoRefresh ? table.getTableHeader().getForeground() : Color.white);
 			setFont(table.getTableHeader().getFont());
 			setBorder(UIManager.getBorder("TableHeader.cellBorder"));
@@ -648,8 +641,7 @@ public class Supervisor {
 						return _NDATA.elementAt(rowIndex).getNodeName();
 					}
 					if (columnIndex == 1) {
-						return _NDATA.elementAt(rowIndex).getPoolPrefix() + " ( pool "
-								+ _prefixToName.get(_NDATA.elementAt(rowIndex).getPoolPrefix()) + " )";
+						return _NDATA.elementAt(rowIndex).getPoolPrefix() + " ( pool " + _prefixToName.get(_NDATA.elementAt(rowIndex).getPoolPrefix()) + " )";
 					} else if (columnIndex == 2) {
 						return _NDATA.elementAt(rowIndex).getHostIp();
 					} else if (columnIndex == 3) {
@@ -829,8 +821,7 @@ public class Supervisor {
 						return;
 					else {
 						try {
-							((ManagedServant) _registry.lookup((String) _V
-									.elementAt(_servantTable.getSelectedRows()[0]).get("NAME"))).ping();
+							((ManagedServant) _registry.lookup((String) _V.elementAt(_servantTable.getSelectedRows()[0]).get("NAME"))).ping();
 						} catch (Exception re) {
 							return;
 						}
@@ -1160,8 +1151,8 @@ public class Supervisor {
 						putValue(Action.NAME, "Enable Reset Unavailable");
 					} else {
 						try {
-							boolean isResetEnabled = ((ManagedServant) _registry.lookup((String) _V.elementAt(
-									_servantTable.getSelectedRows()[0]).get("NAME"))).isResetEnabled();
+							boolean isResetEnabled = ((ManagedServant) _registry.lookup((String) _V.elementAt(_servantTable.getSelectedRows()[0]).get("NAME")))
+									.isResetEnabled();
 							putValue(Action.NAME, (isResetEnabled ? "Disable Reset" : "Enable Reset"));
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -1173,8 +1164,7 @@ public class Supervisor {
 
 			public void actionPerformed(ActionEvent e) {
 				try {
-					ManagedServant servant = ((ManagedServant) _registry.lookup((String) _V.elementAt(
-							_servantTable.getSelectedRows()[0]).get("NAME")));
+					ManagedServant servant = ((ManagedServant) _registry.lookup((String) _V.elementAt(_servantTable.getSelectedRows()[0]).get("NAME")));
 					servant.setResetEnabled(!servant.isResetEnabled());
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -1187,8 +1177,7 @@ public class Supervisor {
 
 					if (_servantTable.getSelectedRows().length != 1)
 						return false;
-					((ManagedServant) _registry.lookup((String) _V.elementAt(_servantTable.getSelectedRows()[0]).get(
-							"NAME"))).ping();
+					((ManagedServant) _registry.lookup((String) _V.elementAt(_servantTable.getSelectedRows()[0]).get("NAME"))).ping();
 					return true;
 
 				} catch (Exception e) {
@@ -1217,8 +1206,7 @@ public class Supervisor {
 										}
 									}).setVisible(true);
 								} else {
-									System.out.println("servant " + servant.getServantName()
-											+ " doesn't support console mode");
+									System.out.println("servant " + servant.getServantName() + " doesn't support console mode");
 								}
 
 							} catch (NotBoundException nbe) {
@@ -1254,8 +1242,7 @@ public class Supervisor {
 								if (servant.hasGraphicMode()) {
 									new DeviceDialog(_frame, servant).setVisible(true);
 								} else {
-									System.out.println("servant " + servant.getServantName()
-											+ " doesn't have Graphics mode");
+									System.out.println("servant " + servant.getServantName() + " doesn't have Graphics mode");
 								}
 
 							} catch (NotBoundException nbe) {
@@ -1285,13 +1272,11 @@ public class Supervisor {
 							String name = (String) _V.elementAt(_servantTable.getSelectedRows()[0]).get("NAME");
 							ManagedServant servant = (ManagedServant) _registry.lookup(name);
 							if (!servant.hasPushPopMode()) {
-								System.out.println("servant " + servant.getServantName()
-										+ " doesn't support push/pop mode");
+								System.out.println("servant " + servant.getServantName() + " doesn't support push/pop mode");
 								return;
 							}
 
-							final SymbolPopDialog sdialog = new SymbolPopDialog(_frame, servant.getServantName(),
-									servant.listSymbols(), false);
+							final SymbolPopDialog sdialog = new SymbolPopDialog(_frame, servant.getServantName(), servant.listSymbols(), false);
 							SwingUtilities.invokeAndWait(new Runnable() {
 								public void run() {
 									sdialog.setVisible(true);
@@ -1334,13 +1319,11 @@ public class Supervisor {
 							String name = (String) m.get("NAME");
 							ManagedServant servant = (ManagedServant) _registry.lookup(name);
 							if (!servant.hasPushPopMode()) {
-								System.out.println("servant " + servant.getServantName()
-										+ " doesn't support push/pop mode");
+								System.out.println("servant " + servant.getServantName() + " doesn't support push/pop mode");
 								return;
 							}
 
-							final SymbolPopDialog sdialog = new SymbolPopDialog(_frame, servant.getServantName(),
-									servant.listSymbols(), true);
+							final SymbolPopDialog sdialog = new SymbolPopDialog(_frame, servant.getServantName(), servant.listSymbols(), true);
 							SwingUtilities.invokeAndWait(new Runnable() {
 								public void run() {
 									sdialog.setVisible(true);
@@ -1392,13 +1375,12 @@ public class Supervisor {
 							String name = (String) _V.elementAt(_servantTable.getSelectedRows()[0]).get("NAME");
 							ManagedServant servant = (ManagedServant) _registry.lookup(name);
 							if (!servant.hasPushPopMode()) {
-								System.out.println("servant " + servant.getServantName()
-										+ " doesn't support push/pop mode");
+								System.out.println("servant " + servant.getServantName() + " doesn't support push/pop mode");
 								return;
 							}
 
-							final SymbolPushDialog sdialog = new SymbolPushDialog(_frame, servant.getServantName(),
-									(Symbol[]) _symbols.toArray(new Symbol[0]), false);
+							final SymbolPushDialog sdialog = new SymbolPushDialog(_frame, servant.getServantName(), (Symbol[]) _symbols.toArray(new Symbol[0]),
+									false);
 							SwingUtilities.invokeAndWait(new Runnable() {
 								public void run() {
 									sdialog.setVisible(true);
@@ -1406,8 +1388,8 @@ public class Supervisor {
 							});
 
 							if (sdialog.getSymbol() != null) {
-								System.out.println("going to push symbol " + sdialog.getSymbol().getName() + " as "
-										+ sdialog.getPushAs() + " --> value:" + sdialog.getSymbol().getValue());
+								System.out.println("going to push symbol " + sdialog.getSymbol().getName() + " as " + sdialog.getPushAs() + " --> value:"
+										+ sdialog.getSymbol().getValue());
 								servant.push(sdialog.getPushAs(), sdialog.getSymbol().getValue());
 							}
 
@@ -1442,13 +1424,12 @@ public class Supervisor {
 							String name = (String) m.get("NAME");
 							ManagedServant servant = (ManagedServant) _registry.lookup(name);
 							if (!servant.hasPushPopMode()) {
-								System.out.println("servant " + servant.getServantName()
-										+ " doesn't support push/pop mode");
+								System.out.println("servant " + servant.getServantName() + " doesn't support push/pop mode");
 								return;
 							}
 
-							final SymbolPushDialog sdialog = new SymbolPushDialog(_frame, servant.getServantName(),
-									(Symbol[]) _symbols.toArray(new Symbol[0]), true);
+							final SymbolPushDialog sdialog = new SymbolPushDialog(_frame, servant.getServantName(), (Symbol[]) _symbols.toArray(new Symbol[0]),
+									true);
 							SwingUtilities.invokeAndWait(new Runnable() {
 								public void run() {
 									sdialog.setVisible(true);
@@ -1463,10 +1444,9 @@ public class Supervisor {
 								raf.readFully(buffer);
 								raf.close();
 
-								Object value = PoolUtils.bytesToObject(buffer, new URLClassLoader(PoolUtils
-										.getURLS((String) m.get("CODEBASE")), Supervisor.class.getClassLoader()));
-								System.out.println("going to push symbol  as " + sdialog.getPushAs() + " --> value:"
-										+ value);
+								Object value = PoolUtils.bytesToObject(buffer, new URLClassLoader(PoolUtils.getURLS((String) m.get("CODEBASE")),
+										Supervisor.class.getClassLoader()));
+								System.out.println("going to push symbol  as " + sdialog.getPushAs() + " --> value:" + value);
 
 								servant.push(sdialog.getPushAs(), (Serializable) value);
 							}
@@ -1523,8 +1503,7 @@ public class Supervisor {
 		actions.put("lock_servants", new AbstractAction("Lock Servant") {
 			public void actionPerformed(ActionEvent e) {
 				if (PoolUtils.getProcessId().equals(PoolUtils.UNKOWN)) {
-					System.out
-							.println("pslist.exe couldn't be found, set PSTOOLS_HOME to the install dir of pslist tool");
+					System.out.println("pslist.exe couldn't be found, set PSTOOLS_HOME to the install dir of pslist tool");
 					return;
 				}
 
@@ -1557,8 +1536,7 @@ public class Supervisor {
 		actions.put("new_servant_without_log_console", new AbstractAction("New Servant") {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					SupervisorUtils.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", false,
-							PoolUtils.getHostIp());
+					SupervisorUtils.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", false, PoolUtils.getHostIp());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -1573,8 +1551,7 @@ public class Supervisor {
 		actions.put("new_servant_with_log_console", new AbstractAction("New Servant (Log Console)") {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					SupervisorUtils.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", true,
-							PoolUtils.getHostIp());
+					SupervisorUtils.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", true, PoolUtils.getHostIp());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}

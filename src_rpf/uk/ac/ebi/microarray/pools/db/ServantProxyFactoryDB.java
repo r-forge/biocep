@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +30,7 @@ import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class ServantProxyFactoryDB implements PoolableObjectFactory {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(ServantProxyFactoryDB.class);
@@ -52,8 +54,7 @@ public class ServantProxyFactoryDB implements PoolableObjectFactory {
 		try {
 			String servantName = _dbLayer.getNameFromStub((ManagedServant) obj);
 			_dbLayer.unReserve(servantName);
-			boolean killUsed = System.getProperty("pools.dbmode.killused") != null
-					&& System.getProperty("pools.dbmode.killused").equalsIgnoreCase("true");
+			boolean killUsed = System.getProperty("pools.dbmode.killused") != null && System.getProperty("pools.dbmode.killused").equalsIgnoreCase("true");
 			if (killUsed) {
 				_dbLayer.registerPingFailure(servantName);
 			}
@@ -72,7 +73,7 @@ public class ServantProxyFactoryDB implements PoolableObjectFactory {
 
 				_dbLayer.lock();
 				servantNames.addAll(_dbLayer.list(_poolData.getPrefixes()));
-				//System.out.println("servant Names : " + servantNames);
+				// System.out.println("servant Names : " + servantNames);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new NoSuchElementException("No R Servant available / No DB ");
@@ -85,8 +86,7 @@ public class ServantProxyFactoryDB implements PoolableObjectFactory {
 			for (int i = 0; i < servantNames.size(); ++i) {
 				try {
 
-					ManagedServant servant = (ManagedServant) _dbLayer.lookup(servantNames
-							.elementAt(order.elementAt(i)));
+					ManagedServant servant = (ManagedServant) _dbLayer.lookup(servantNames.elementAt(order.elementAt(i)));
 					PoolUtils.ping(servant);
 					_dbLayer.reserve(servantNames.elementAt(order.elementAt(i)));
 					return servant;

@@ -15,6 +15,9 @@ import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.RemotePanel;
 
+/**
+ * @author Karim Chine   k.chine@imperial.ac.uk
+ */
 public class RServicesObject implements RServices {
 
 	public void addErrListener(RemoteLogListener listener) throws RemoteException {
@@ -265,11 +268,11 @@ public class RServicesObject implements RServices {
 
 	public void stopHttpServer() throws RemoteException {
 	}
-	
+
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 	}
-	
-	public Vector<String> evalAndGetSvg(String expression,int width, int height) throws RemoteException {
+
+	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
 		return null;
 	}
 }

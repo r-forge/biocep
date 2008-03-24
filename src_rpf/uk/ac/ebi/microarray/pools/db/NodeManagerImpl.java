@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +29,11 @@ import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.RemotePanel;
-import uk.ac.ebi.microarray.pools.ServantCreationListener;
 import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
 import uk.ac.ebi.microarray.pools.db.monitor.SupervisorUtils;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager {
 	DBLayer _dbLayer;
@@ -51,12 +52,12 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 
 		ManagedServant[] servantHolder = new ManagedServant[1];
 		RemoteException[] exceptionHolder = new RemoteException[1];
-		
+
 		CreationCallBack callBack = new CreationCallBack(servantHolder, exceptionHolder);
 		try {
 			String listenerStub = PoolUtils.stubToHex(callBack);
-			SupervisorUtils.launch(nodeName, "-Dprivate=" + new Boolean(isPrivate).toString() + " -Dlistener.stub="
-					+ listenerStub, false, PoolUtils.getHostIp());
+			SupervisorUtils.launch(nodeName, "-Dprivate=" + new Boolean(isPrivate).toString() + " -Dlistener.stub=" + listenerStub, false, PoolUtils
+					.getHostIp());
 			long t1 = System.currentTimeMillis();
 			while (servantHolder[0] == null && exceptionHolder[0] == null) {
 				if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
@@ -66,7 +67,6 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 				} catch (Exception e) {
 				}
 			}
-			
 
 		} catch (Exception e) {
 			throw new RemoteException("", e);
@@ -76,7 +76,8 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 			}
 		}
 
-		if (exceptionHolder[0]!=null) throw exceptionHolder[0];
+		if (exceptionHolder[0] != null)
+			throw exceptionHolder[0];
 
 		return servantHolder[0];
 	}
@@ -86,8 +87,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	}
 
 	public void kill(ManagedServant servant) throws RemoteException {
-		Vector<HashMap<String, Object>> servants = _dbLayer.getTableData("SERVANTS", "STUB_HEX='"
-				+ PoolUtils.stubToHex(servant) + "'");
+		Vector<HashMap<String, Object>> servants = _dbLayer.getTableData("SERVANTS", "STUB_HEX='" + PoolUtils.stubToHex(servant) + "'");
 		if (servants.size() != 1)
 			throw new RemoteException("Servant Not In The DB Registry");
 
@@ -132,8 +132,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	}
 
 	public void incrementPingFailure(ManagedServant servant) throws RemoteException {
-		Vector<HashMap<String, Object>> servants = _dbLayer.getTableData("SERVANTS", "STUB_HEX='"
-				+ PoolUtils.stubToHex(servant) + "'");
+		Vector<HashMap<String, Object>> servants = _dbLayer.getTableData("SERVANTS", "STUB_HEX='" + PoolUtils.stubToHex(servant) + "'");
 		if (servants.size() != 1)
 			throw new RemoteException("Servant Not In The DB Registry");
 		try {
@@ -151,7 +150,6 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		}
 		return result;
 	}
-
 
 	public void addErrListener(RemoteLogListener listener) throws RemoteException {
 	}
@@ -231,23 +229,23 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	public void setResetEnabled(boolean enable) throws RemoteException {
 	}
 
-	public String getProcessId() throws RemoteException {	
+	public String getProcessId() throws RemoteException {
 		return PoolUtils.getProcessId();
 	}
-	public String getHostIp() throws RemoteException {	
+
+	public String getHostIp() throws RemoteException {
 		return PoolUtils.getHostIp();
 	}
-	
+
 	public ManagedServant cloneServer() throws RemoteException {
 		return null;
 	}
-	
+
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 	}
-	
+
 	public boolean isBusy() throws RemoteException {
 		return false;
 	}
-	
-	
+
 }

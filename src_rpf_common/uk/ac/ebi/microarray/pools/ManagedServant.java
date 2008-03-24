@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +20,7 @@ package uk.ac.ebi.microarray.pools;
 import java.io.Serializable;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public interface ManagedServant extends java.rmi.Remote {
 
@@ -53,9 +55,9 @@ public interface ManagedServant extends java.rmi.Remote {
 	public boolean hasConsoleMode() throws java.rmi.RemoteException;
 
 	public String consoleSubmit(String cmd) throws java.rmi.RemoteException;
-	
+
 	public void asynchronousConsoleSubmit(String cmd) throws java.rmi.RemoteException;
-	
+
 	public boolean isBusy() throws java.rmi.RemoteException;
 
 	public boolean hasPushPopMode() throws java.rmi.RemoteException;
@@ -69,11 +71,11 @@ public interface ManagedServant extends java.rmi.Remote {
 	public boolean hasGraphicMode() throws java.rmi.RemoteException;
 
 	public RemotePanel getPanel(int w, int h) throws java.rmi.RemoteException;
-	
+
 	public String getProcessId() throws java.rmi.RemoteException;
-	
+
 	public String getHostIp() throws java.rmi.RemoteException;
-	
+
 	public ManagedServant cloneServer() throws java.rmi.RemoteException;
 
 }

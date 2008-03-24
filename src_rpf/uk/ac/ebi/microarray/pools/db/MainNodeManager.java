@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +31,7 @@ import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class MainNodeManager {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(MainNodeManager.class);
@@ -40,7 +42,9 @@ public class MainNodeManager {
 	public static void main(String args[]) throws Exception {
 		try {
 
-			//for (Object key:PoolUtils.orderO(System.getProperties().keySet())) {System.out.println(key+" = "+System.getProperty((String)key));}
+			// for (Object
+			// key:PoolUtils.orderO(System.getProperties().keySet()))
+			// {System.out.println(key+" = "+System.getProperty((String)key));}
 
 			_registry = (DBLayer) DBLayer.getRmiRegistry();
 			_nodeManagerName = System.getProperty("node.manager.name");
@@ -133,8 +137,8 @@ public class MainNodeManager {
 				String nodeIp = nodes.elementAt(i).getHostIp();
 				String nodePrefix = nodes.elementAt(i).getPoolPrefix();
 
-				Vector<HashMap<String, Object>> servants = _registry.getTableData("SERVANTS", "NODE_NAME='" + nodeName
-						+ "'" + " OR (REGISTER_HOST_IP='" + nodeIp + "' AND NAME like '" + nodePrefix + "%')");
+				Vector<HashMap<String, Object>> servants = _registry.getTableData("SERVANTS", "NODE_NAME='" + nodeName + "'" + " OR (REGISTER_HOST_IP='"
+						+ nodeIp + "' AND NAME like '" + nodePrefix + "%')");
 
 				final int missing = nodes.elementAt(i).getServantNbrMin() - servants.size();
 				if (missing > 0) {
@@ -160,11 +164,9 @@ public class MainNodeManager {
 										String nodeName = indexesQueue.poll();
 										if (nodeName != null) {
 											try {
-												_registry.lookup(System.getProperty("node.manager.name") + '_'
-														+ nodeName);
+												_registry.lookup(System.getProperty("node.manager.name") + '_' + nodeName);
 											} catch (NotBoundException nbe) {
-												NodeManager _manager = (NodeManager) _registry.lookup(System
-														.getProperty("node.manager.name"));
+												NodeManager _manager = (NodeManager) _registry.lookup(System.getProperty("node.manager.name"));
 												_manager.createServant(nodeName);
 											}
 										}

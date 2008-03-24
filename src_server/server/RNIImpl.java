@@ -4,16 +4,17 @@ import java.rmi.RemoteException;
 
 import remoting.RNI;
 
+/**
+ * @author Karim Chine   k.chine@imperial.ac.uk
+ */
 public class RNIImpl extends java.rmi.server.UnicastRemoteObject implements RNI {
 
 	private String _status;
-	StringBuffer _log=null;
-	
-		
-	
+	StringBuffer _log = null;
+
 	public RNIImpl(StringBuffer log) throws RemoteException {
 		super();
-		_log=log;
+		_log = log;
 	}
 
 	public void rniAssign(String name, long exp, long rho) throws RemoteException {

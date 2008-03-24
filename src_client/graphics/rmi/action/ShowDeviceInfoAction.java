@@ -5,29 +5,30 @@ import graphics.rmi.RGui;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
-public class ShowDeviceInfoAction extends AbstractAction {		
+/**
+ * @author Karim Chine   k.chine@imperial.ac.uk
+ */
+public class ShowDeviceInfoAction extends AbstractAction {
 	private GDDevice _device;
-	private RGui _rgui;	
-	
-	public ShowDeviceInfoAction(RGui rgui , GDDevice device) {
+	private RGui _rgui;
+
+	public ShowDeviceInfoAction(RGui rgui, GDDevice device) {
 		super("Show Device Info");
-		_device=device;
-		_rgui=rgui;
+		_device = device;
+		_rgui = rgui;
 	}
-	
 
 	public void actionPerformed(ActionEvent e) {
-		try  {
-		System.out.println("device number :"+_device.getDeviceNumber());
+		try {
+			System.out.println("device number :" + _device.getDeviceNumber());
 		} catch (Exception ex) {
-			ex.printStackTrace();	
+			ex.printStackTrace();
 		}
 	}
-	
 
 	@Override
 	public boolean isEnabled() {
-		return _rgui.getR()!=null;
+		return _rgui.getR() != null;
 	}
-	
+
 }

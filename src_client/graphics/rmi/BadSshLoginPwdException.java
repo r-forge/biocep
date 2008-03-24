@@ -1,6 +1,9 @@
 package graphics.rmi;
 
-public class BadSshLoginPwdException extends Exception{
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
+public class BadSshLoginPwdException extends Exception {
 
 	public BadSshLoginPwdException() {
 		super();

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +29,7 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemoteObject implements ManagedServant {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(ManagedServant.class);
@@ -35,23 +37,15 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	private String _servantName;
 	private boolean _resetEnabled = true;
 
-	//	/**
-	//	 * Instantiate the managed servant and register it in the given RMI registry
-	//	 * creates a name for the new servant  automatically by adding a number to the end of the servant pool name prefix.
-	//	 * @param registry RMI registry where to bind the new instance
-	//	 * @param servant pool prefix
-	//	 * @throws RemoteException
-	//	 */
-	//	public ManagedServantAbstract(String prefix, Registry registry)
-	//			throws RemoteException {
-	//		this(null, prefix, registry);
-	//	}
-
 	/**
-	 * Instantiates a managed servant and registers it a registry under a concrete name.
-	 * If such a servant already exists, will call die() on it to try to avoid two servants with the same name.
-	 * @param name      name under which to register the servant
-	 * @param registry  in which registry to register the servant
+	 * Instantiates a managed servant and registers it a registry under a
+	 * concrete name. If such a servant already exists, will call die() on it to
+	 * try to avoid two servants with the same name.
+	 * 
+	 * @param name
+	 *            name under which to register the servant
+	 * @param registry
+	 *            in which registry to register the servant
 	 */
 	public ManagedServantAbstract(String name, String prefix, Registry registry) throws RemoteException {
 		super();
@@ -120,7 +114,7 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 
 	/**
 	 * Obtain the name this servant is registered under
-	 *
+	 * 
 	 * @return Servant's name, if any.
 	 * @throws java.rmi.RemoteException
 	 */
@@ -245,7 +239,7 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		throw new RemoteException("graphic mode not supported");
 
 	}
-	
+
 	public String getProcessId() throws RemoteException {
 		return PoolUtils.getProcessId();
 	}
@@ -253,21 +247,22 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	public String getHostIp() throws RemoteException {
 		return PoolUtils.getHostIp();
 	}
-	
+
 	public boolean isPortInUse(int port) throws RemoteException {
 		return PoolUtils.isPortInUse("127.0.0.1", port);
 	}
-	
+
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 	}
+
 	public ManagedServant cloneServer() throws RemoteException {
 		return null;
 	}
-	
+
 	public boolean isBusy() throws RemoteException {
 		return false;
 	}
-	
+
 	public String toString() {
 		return super.toString() + " " + _servantName;
 	}

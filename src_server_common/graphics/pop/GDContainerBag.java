@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +29,7 @@ import org.rosuda.javaGD.GDObject;
 import org.rosuda.javaGD.GDState;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class GDContainerBag implements GDContainer {
 
@@ -35,7 +37,7 @@ public class GDContainerBag implements GDContainer {
 	private Vector<GDObject> _actions = new Vector<GDObject>();
 	private Dimension _size = null;
 	private GDState _gs;
-	private int _devNr=-1;
+	private int _devNr = -1;
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(GDContainerBag.class);
 
@@ -61,11 +63,11 @@ public class GDContainerBag implements GDContainer {
 			_actions.remove(0);
 		return result;
 	}
-	
+
 	public boolean hasGraphicObjects() {
-		return _actions.size()>0;
+		return _actions.size() > 0;
 	}
-	
+
 	public Dimension getSize() throws RemoteException {
 		return _size;
 	}
@@ -100,8 +102,9 @@ public class GDContainerBag implements GDContainer {
 	}
 
 	public void setDeviceNumber(int dn) throws RemoteException {
-		if (_devNr==-1) _devNr = dn;
-		//_actions.add(new GDSetDeviceNumber(dn));
+		if (_devNr == -1)
+			_devNr = dn;
+		// _actions.add(new GDSetDeviceNumber(dn));
 	}
 
 	public void setGFont(Font f) throws RemoteException {

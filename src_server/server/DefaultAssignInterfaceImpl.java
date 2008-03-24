@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +35,7 @@ import remoting.RNI;
 import util.Utils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class DefaultAssignInterfaceImpl implements AssignInterface {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(DefaultAssignInterfaceImpl.class);
@@ -54,8 +56,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 					} else {
 						String argvar2 = DirectJNI.getInstance().newTemporaryVariableName();
 						e.rniAssign(argvar2, ((mapping.ReferenceInterface) robj).getRObjectId(), 0);
-						e.rniEval(e.rniParse(argvar + "<-" + argvar2
-								+ ((mapping.ReferenceInterface) robj).getSlotsPath(), 1), 0);
+						e.rniEval(e.rniParse(argvar + "<-" + argvar2 + ((mapping.ReferenceInterface) robj).getSlotsPath(), 1), 0);
 						e.rniEval(e.rniParse("rm(" + argvar2 + ")", 1), 0);
 					}
 
@@ -139,8 +140,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					e.rniEval(e.rniParse("comment(" + rootvar + slotsPath + ")<-"
-							+ (msg == null ? "NULL" : "'" + msg + "'"), 1), 0);
+					e.rniEval(e.rniParse("comment(" + rootvar + slotsPath + ")<-" + (msg == null ? "NULL" : "'" + msg + "'"), 1), 0);
 					result[0] = e.rniEval(e.rniParse(rootvar, 1), 0);
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 
@@ -162,8 +162,8 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					int[] isNaIdx = e.rniGetIntArray(e.rniEval(e.rniParse("(0:(length(" + rootvar + slotsPath
-							+ ")-1))[is.na(" + rootvar + slotsPath + ")]", 1), 0));
+					int[] isNaIdx = e.rniGetIntArray(e.rniEval(
+							e.rniParse("(0:(length(" + rootvar + slotsPath + ")-1))[is.na(" + rootvar + slotsPath + ")]", 1), 0));
 					result[0] = isNaIdx.length == 0 ? null : isNaIdx;
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 
@@ -189,8 +189,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 					e.rniAssign(rootvar, rObjectId, 0);
 
 					if (indexNA != null) {
-						int length = e.rniGetIntArray(e
-								.rniEval(e.rniParse("length(" + rootvar + slotsPath + ")", 1), 0))[0];
+						int length = e.rniGetIntArray(e.rniEval(e.rniParse("length(" + rootvar + slotsPath + ")", 1), 0))[0];
 						boolean[] naBooleans = new boolean[length];
 						for (int i = 0; i < indexNA.length; ++i)
 							naBooleans[indexNA[i]] = true;
@@ -270,7 +269,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		if (exceptionHolder[0] != null)
 			throw new RemoteException(Utils.getStackTraceAsString(exceptionHolder[0]));
 
-		//System.out.println("after set name ->" + result[0]);
+		// System.out.println("after set name ->" + result[0]);
 		return result[0];
 
 	}
@@ -303,8 +302,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setValueStringArray(final long rObjectId, final String slotsPath, final String[] value)
-			throws RemoteException {
+	public long setValueStringArray(final long rObjectId, final String slotsPath, final String[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -365,8 +363,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setValueBoolArray(final long rObjectId, final String slotsPath, final boolean[] value)
-			throws RemoteException {
+	public long setValueBoolArray(final long rObjectId, final String slotsPath, final boolean[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -424,8 +421,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setValueDoubleArray(final long rObjectId, final String slotsPath, final double[] value)
-			throws RemoteException {
+	public long setValueDoubleArray(final long rObjectId, final String slotsPath, final double[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -484,8 +480,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setValueIntArray(final long rObjectId, final String slotsPath, final int[] value)
-			throws RemoteException {
+	public long setValueIntArray(final long rObjectId, final String slotsPath, final int[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -573,8 +568,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setValueCP(final long rObjectId, final String slotsPath, final double[] real, final double[] imaginary)
-			throws RemoteException {
+	public long setValueCP(final long rObjectId, final String slotsPath, final double[] real, final double[] imaginary) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -662,8 +656,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 					String argvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
 					e.rniAssign(argvar, DirectJNI.getInstance().putObject(
-							value instanceof ReferenceInterface ? (RList) ((ReferenceInterface) value).extractRObject()
-									: value), 0);
+							value instanceof ReferenceInterface ? (RList) ((ReferenceInterface) value).extractRObject() : value), 0);
 					e.rniEval(e.rniParse("dim(" + argvar + ")<-" + "dim(" + rootvar + slotsPath + ")", 1), 0);
 					e.rniEval(e.rniParse("dimnames(" + argvar + ")<-" + "dimnames(" + rootvar + slotsPath + ")", 1), 0);
 					result[0] = e.rniEval(e.rniParse(argvar, 1), 0);
@@ -754,8 +747,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 
 	}
 
-	public long setArrayDimnames(final long rObjectId, final String slotsPath, final RList dimnames)
-			throws RemoteException {
+	public long setArrayDimnames(final long rObjectId, final String slotsPath, final RList dimnames) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -794,8 +786,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					result[0] = e.rniGetStringArray(e.rniEval(e
-							.rniParse("as.character(" + rootvar + slotsPath + ")", 1), 0));
+					result[0] = e.rniGetStringArray(e.rniEval(e.rniParse("as.character(" + rootvar + slotsPath + ")", 1), 0));
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 
 				} catch (Exception ex) {
@@ -816,8 +807,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					result[0] = e
-							.rniGetIntArray(e.rniEval(e.rniParse("as.integer(" + rootvar + slotsPath + ")", 1), 0));
+					result[0] = e.rniGetIntArray(e.rniEval(e.rniParse("as.integer(" + rootvar + slotsPath + ")", 1), 0));
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 
 				} catch (Exception ex) {
@@ -876,8 +866,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setFactorLevels(final long rObjectId, final String slotsPath, final String[] levels)
-			throws RemoteException {
+	public long setFactorLevels(final long rObjectId, final String slotsPath, final String[] levels) throws RemoteException {
 
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
@@ -906,7 +895,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	//Dataframes	
+	// Dataframes
 	public RList getDataframeData(final long rObjectId, final String slotsPath) throws RemoteException {
 
 		final RList[] result = new RList[1];
@@ -938,8 +927,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
 
-					result[0] = e.rniGetStringArray(e.rniEval(e.rniParse("row.names(" + rootvar + slotsPath + ")", 1),
-							0));
+					result[0] = e.rniGetStringArray(e.rniEval(e.rniParse("row.names(" + rootvar + slotsPath + ")", 1), 0));
 
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 				} catch (Exception ex) {
@@ -962,10 +950,8 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 					String argvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
 					e.rniAssign(argvar, DirectJNI.getInstance().putObject(
-							new RDataFrame(data instanceof ReferenceInterface ? (RList) ((ReferenceInterface) data)
-									.extractRObject() : data, null)), 0);
-					e.rniEval(e.rniParse("row.names(" + argvar + ")<-" + "row.names(" + rootvar + slotsPath + ")", 1),
-							0);
+							new RDataFrame(data instanceof ReferenceInterface ? (RList) ((ReferenceInterface) data).extractRObject() : data, null)), 0);
+					e.rniEval(e.rniParse("row.names(" + argvar + ")<-" + "row.names(" + rootvar + slotsPath + ")", 1), 0);
 					result[0] = e.rniEval(e.rniParse(argvar, 1), 0);
 					e.rniEval(e.rniParse("rm(" + rootvar + "," + argvar + ")", 1), 0);
 				} catch (Exception ex) {
@@ -979,8 +965,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setDataframeRowNames(final long rObjectId, final String slotsPath, final String[] rowNames)
-			throws RemoteException {
+	public long setDataframeRowNames(final long rObjectId, final String slotsPath, final String[] rowNames) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -1009,7 +994,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	//Lists
+	// Lists
 	public RObject[] getListValue(final long rObjectId, final String slotsPath) throws RemoteException {
 		final RObject[][] result = new RObject[1][];
 		final Exception[] exceptionHolder = new Exception[1];
@@ -1030,8 +1015,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setListValue(final long rObjectId, final String slotsPath, final RObject[] value)
-			throws RemoteException {
+	public long setListValue(final long rObjectId, final String slotsPath, final RObject[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -1084,8 +1068,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long putEnv(final long rObjectId, final String slotsPath, final String theKey, final RObject theValue)
-			throws RemoteException {
+	public long putEnv(final long rObjectId, final String slotsPath, final String theKey, final RObject theValue) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -1095,11 +1078,8 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 					String argvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
 					e.rniAssign(argvar, DirectJNI.getInstance().putObject(
-							theValue instanceof ReferenceInterface ? ((ReferenceInterface) theValue).extractRObject()
-									: theValue), 0);
-					e.rniEval(
-							e.rniParse("assign('" + theKey + "'," + argvar + ", env=" + rootvar + slotsPath + ")", 1),
-							0);
+							theValue instanceof ReferenceInterface ? ((ReferenceInterface) theValue).extractRObject() : theValue), 0);
+					e.rniEval(e.rniParse("assign('" + theKey + "'," + argvar + ", env=" + rootvar + slotsPath + ")", 1), 0);
 					result[0] = e.rniEval(e.rniParse(rootvar, 1), 0);
 					e.rniEval(e.rniParse("rm(" + rootvar + "," + argvar + ")", 1), 0);
 				} catch (Exception ex) {
@@ -1113,8 +1093,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setEnvData(final long rObjectId, final String slotsPath, final HashMap<String, RObject> data)
-			throws RemoteException {
+	public long setEnvData(final long rObjectId, final String slotsPath, final HashMap<String, RObject> data) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {

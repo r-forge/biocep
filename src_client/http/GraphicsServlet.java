@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +30,7 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class GraphicsServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
@@ -68,22 +70,29 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					break;
 				}
 				long t3 = System.currentTimeMillis();
-				
-				Integer width=null;
-				try {width=Integer.decode(request.getParameter("width"));} catch (Exception e) {}
-				if (width==null) width=600;
-				
-				Integer height=null;
-				try {height=Integer.decode(request.getParameter("height"));} catch (Exception e) {}
-				if (height==null) height=400;
-				
+
+				Integer width = null;
+				try {
+					width = Integer.decode(request.getParameter("width"));
+				} catch (Exception e) {
+				}
+				if (width == null)
+					width = 600;
+
+				Integer height = null;
+				try {
+					height = Integer.decode(request.getParameter("height"));
+				} catch (Exception e) {
+				}
+				if (height == null)
+					height = 400;
 
 				String command = request.getParameter("expression");
 				if (command == null) {
 					command = "hist(rnorm(100))";
 				}
 
-				device = r.newDevice(width,height);
+				device = r.newDevice(width, height);
 				long t4 = System.currentTimeMillis();
 				r.sourceFromBuffer(new StringBuffer(command));
 				long t5 = System.currentTimeMillis();

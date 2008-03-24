@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +99,7 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 import static javax.swing.JOptionPane.*;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
@@ -106,39 +108,39 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
 		f.getContentPane().add(new SpreadsheetPanel(300, 40, new RGui() {
-			
+
 			public ConsoleLogger getConsoleLogger() {
 				return null;
 			}
-			
+
 			public View createView(Component panel, String title) {
 				return null;
 			}
-			
+
 			public RServices getR() {
 				return null;
 			}
-			
+
 			public ReentrantLock getRLock() {
 				return null;
 			}
-						
+
 			public void setCurrentDevice(GDDevice device) {
-				
+
 			}
-						
+
 			public GDDevice getCurrentDevice() {
 				return null;
 			}
-						
+
 			public Component getRootComponent() {
 				return null;
 			}
-			
+
 			public JGDPanelPop getCurrentJGPanelPop() {
 				return null;
 			}
-			
+
 		}), BorderLayout.CENTER);
 		f.setSize(new Dimension(800, 800));
 		f.pack();
@@ -152,8 +154,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	public static final int R_COMPLEX = 4;
 	public static final int R_FACTOR = 5;
 	public static final int R_DATAFRAME = 6;
-	public static final String[] R_TYPES_NAMES = { "numeric", "character", "integer", "logical", "complex", "factor",
-			"data frame" };
+	public static final String[] R_TYPES_NAMES = { "numeric", "character", "integer", "logical", "complex", "factor", "data frame" };
 
 	private JSpreadsheet ss;
 	private CopyAction copy = new CopyAction();
@@ -175,8 +176,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private RemoveRowAction removeRow = new RemoveRowAction();
 	private FindAction find = new FindAction();
 	private FindNextAction findNext = new FindNextAction();
-	private RGui _rgui=null;
-	
+	private RGui _rgui = null;
 
 	private SpreadsheetSelectionListener sl = new SpreadsheetSelectionListener() {
 		public void selectionChanged(SpreadsheetSelectionEvent e) {
@@ -222,7 +222,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	public SpreadsheetPanel(int nrows, int ncols, RGui rgui) {
 		super();
-		_rgui = rgui;	
+		_rgui = rgui;
 		ss = new JSpreadsheet(nrows, ncols, rgui);
 
 		ss.addUndoableEditListener(um);
@@ -376,8 +376,8 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		String fillValue = first.toString();
 
 		Icon fillIcon = getIcon("fill32.gif");
-		String inputValue = (String) JOptionPane.showInputDialog(this, "Please enter a value to fill the range",
-				"Fill", JOptionPane.INFORMATION_MESSAGE, fillIcon, null, fillValue);
+		String inputValue = (String) JOptionPane.showInputDialog(this, "Please enter a value to fill the range", "Fill", JOptionPane.INFORMATION_MESSAGE,
+				fillIcon, null, fillValue);
 
 		// if input is cancelled or nothing is entered
 		// then don't change anything
@@ -405,15 +405,12 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	}
 
 	private void tooMuchDeletion() {
-		JOptionPane.showMessageDialog(this, "You can not delete all the rows or columns!", "Delete",
-				JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(this, "You can not delete all the rows or columns!", "Delete", JOptionPane.ERROR_MESSAGE);
 	}
 
 	private boolean unsafeDeletion() {
-		int choice = JOptionPane.showConfirmDialog(this,
-				"The deletion may cause irriversible data loss in other cells.\n\n"
-						+ "Do you really want to proceed?\n\n", "Delete", JOptionPane.YES_NO_OPTION,
-				JOptionPane.WARNING_MESSAGE);
+		int choice = JOptionPane.showConfirmDialog(this, "The deletion may cause irriversible data loss in other cells.\n\n"
+				+ "Do you really want to proceed?\n\n", "Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
 		return choice == JOptionPane.YES_OPTION;
 	}
@@ -485,22 +482,17 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 					try {
 						_rgui.getRLock().lock();
 						_rgui.getR().putObjectAndAssignName(robj, tempVarName);
-						
+
 						if (_rgui.getR().getStatus().toUpperCase().contains("ERROR")) {
-							JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error",
-									JOptionPane.ERROR_MESSAGE);
+							JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
 							return;
 						}
 
-						String output = PoolUtils.replaceAll(evalDialog.getEvalInfo().getExpression(), "%%",
-								tempVarName);
+						String output = PoolUtils.replaceAll(evalDialog.getEvalInfo().getExpression(), "%%", tempVarName);
 
-						_rgui.getR().consoleSubmit(
-								replaceAll(conversionCommandHolder[0], "${VAR}", tempVarName) + tempVarName + "<-("
-										+ output + ")");
+						_rgui.getR().consoleSubmit(replaceAll(conversionCommandHolder[0], "${VAR}", tempVarName) + tempVarName + "<-(" + output + ")");
 						if (_rgui.getR().getStatus().toUpperCase().contains("ERROR")) {
-							JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error",
-									JOptionPane.ERROR_MESSAGE);
+							JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
 							return;
 						}
 
@@ -516,7 +508,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 					} finally {
 						try {
 							_rgui.getR().evaluate("rm(" + tempVarName + ")");
-						}catch (Exception ex) {
+						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
 						_rgui.getRLock().unlock();
@@ -841,8 +833,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 					int[] indexNA = null;
 					try {
-						indexNA = (int[]) list.getValue()[i].getClass().getMethod("getIndexNA").invoke(
-								list.getValue()[i]);
+						indexNA = (int[]) list.getValue()[i].getClass().getMethod("getIndexNA").invoke(list.getValue()[i]);
 					} catch (Exception e) {
 					}
 
@@ -871,8 +862,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 								} else if (v instanceof RLogical) {
 									sb.append(((RLogical) v).getValue()[i]);
 								} else if (v instanceof RComplex) {
-									sb.append(((RComplex) v).getReal()[i] + "+" + ((RComplex) v).getImaginary()[i]
-											+ "i");
+									sb.append(((RComplex) v).getReal()[i] + "+" + ((RComplex) v).getImaginary()[i] + "i");
 								}
 							}
 						}
@@ -902,12 +892,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				toRDataStore.setCellRange(Formula.getCellString(r0, c0) + ":" + Formula.getCellString(r1, c1));
 				toRDataStore.setDatatype(dtype);
 				if (converter != null) {
-					toRDataStore.setPostAssignCommand(toRDataStore.getAssignTo() + "<-" + converter + "("
-							+ toRDataStore.getAssignTo() + ");");
+					toRDataStore.setPostAssignCommand(toRDataStore.getAssignTo() + "<-" + converter + "(" + toRDataStore.getAssignTo() + ");");
 					if (robj instanceof RMatrix) {
-						toRDataStore.setPostAssignCommand(toRDataStore.getPostAssignCommand() + "dim("
-								+ toRDataStore.getAssignTo() + ")<-c(" + ((RMatrix) robj).getDim()[0] + ","
-								+ ((RMatrix) robj).getDim()[1] + ")");
+						toRDataStore.setPostAssignCommand(toRDataStore.getPostAssignCommand() + "dim(" + toRDataStore.getAssignTo() + ")<-c("
+								+ ((RMatrix) robj).getDim()[0] + "," + ((RMatrix) robj).getDim()[1] + ")");
 					}
 				}
 			}
@@ -1073,15 +1061,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 			switch (dataType) {
 			case R_NUMERIC:
-				conversionCommandHolder[0] = "${VAR}" + "=as.numeric(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0]
-						+ "," + dims[1] + ");";
+				conversionCommandHolder[0] = "${VAR}" + "=as.numeric(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
 				break;
 			case R_CHARACTER:
 				conversionCommandHolder[0] = "";
 				break;
 			case R_INTEGER:
-				conversionCommandHolder[0] = "${VAR}" + "=as.integer(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0]
-						+ "," + dims[1] + ");";
+				conversionCommandHolder[0] = "${VAR}" + "=as.integer(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
 				break;
 			case R_LOGICAL:
 				for (int i = 0; i < value.length; ++i) {
@@ -1093,16 +1079,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 						}
 					}
 				}
-				conversionCommandHolder[0] = "${VAR}" + "=as.logical(as.numeric(" + "${VAR}" + "));"
-						+ "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
+				conversionCommandHolder[0] = "${VAR}" + "=as.logical(as.numeric(" + "${VAR}" + "));" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
 				break;
 			case R_COMPLEX:
-				conversionCommandHolder[0] = "${VAR}" + "=as.complex(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0]
-						+ "," + dims[1] + ");";
+				conversionCommandHolder[0] = "${VAR}" + "=as.complex(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
 				break;
 			case R_FACTOR:
-				conversionCommandHolder[0] = "${VAR}" + "=as.factor(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0]
-						+ "," + dims[1] + ");";
+				conversionCommandHolder[0] = "${VAR}" + "=as.factor(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
 				break;
 			default:
 				break;
@@ -1155,8 +1138,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 			for (int j = 0; j < colnames.length; ++j) {
 				if (colnames[j].equals("")) {
-					JOptionPane.showMessageDialog(SpreadsheetPanel.this, "the data frame columns must be titeled",
-							"Invalid Data", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(SpreadsheetPanel.this, "the data frame columns must be titeled", "Invalid Data", JOptionPane.ERROR_MESSAGE);
 					return null;
 				}
 			}
@@ -1164,8 +1146,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			Vector<String> rowNamesVector = new Vector<String>();
 			for (int i = 0; i < rownames.length; ++i) {
 				if (rowNamesVector.contains(rownames[i])) {
-					JOptionPane.showMessageDialog(SpreadsheetPanel.this, "the data frame row names must be unique",
-							"Invalid Data", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(SpreadsheetPanel.this, "the data frame row names must be unique", "Invalid Data", JOptionPane.ERROR_MESSAGE);
 					return null;
 				} else {
 
@@ -1204,11 +1185,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 								}
 							}
 						}
-						conversionCommandHolder[0] += "${VAR}$" + colnames[i] + "=as.logical(as.numeric(" + "${VAR}$"
-								+ colnames[i] + "));";
+						conversionCommandHolder[0] += "${VAR}$" + colnames[i] + "=as.logical(as.numeric(" + "${VAR}$" + colnames[i] + "));";
 					} else {
-						conversionCommandHolder[0] += "${VAR}$" + colnames[i] + "=as." + classnames[i] + "("
-								+ "${VAR}$" + colnames[i] + ");";
+						conversionCommandHolder[0] += "${VAR}$" + colnames[i] + "=as." + classnames[i] + "(" + "${VAR}$" + colnames[i] + ");";
 					}
 
 				}
@@ -1252,41 +1231,36 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 						if (!_rgui.getR().getStatus().equals("")) {
 							int messageType = getMessageType(_rgui.getR().getStatus());
-							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message",
-									messageType);
+							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message", messageType);
 							if (messageType == ERROR_MESSAGE)
 								return;
 						}
 						String log = _rgui.getR().consoleSubmit(toRData.getAssignTo() + "<-" + tempVarName);
 						if (!log.equals("")) {
 							int messageType = getMessageType(_rgui.getR().getStatus());
-							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message",
-									messageType);
+							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message", messageType);
 							if (messageType == ERROR_MESSAGE)
 								return;
 						}
 
-						System.out.println("--->"
-								+ PoolUtils.replaceAll(conversionCommandHolder[0], "${VAR}", toRData.getAssignTo()));
+						System.out.println("--->" + PoolUtils.replaceAll(conversionCommandHolder[0], "${VAR}", toRData.getAssignTo()));
 						log = _rgui.getR().consoleSubmit(
-								PoolUtils.replaceAll(conversionCommandHolder[0], "${VAR}", toRData.getAssignTo())
-										+ toRData.getPostAssignCommand());
+								PoolUtils.replaceAll(conversionCommandHolder[0], "${VAR}", toRData.getAssignTo()) + toRData.getPostAssignCommand());
 						if (!log.equals("")) {
 							int messageType = getMessageType(_rgui.getR().getStatus());
-							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message",
-									messageType);
+							JOptionPane.showMessageDialog(SpreadsheetPanel.this, _rgui.getR().getStatus(), "R Message", messageType);
 							if (messageType == ERROR_MESSAGE)
 								return;
 						}
 
-						_rgui.getConsoleLogger().printAsOutput("\n" + toRData.getAssignTo()
-								+ " has been assigned a new value from the cell range " + toRData.getCellRange() + "\n");
+						_rgui.getConsoleLogger().printAsOutput(
+								"\n" + toRData.getAssignTo() + " has been assigned a new value from the cell range " + toRData.getCellRange() + "\n");
 					} finally {
 						try {
-							_rgui.getR().evaluate("rm(" + tempVarName + ")");													
+							_rgui.getR().evaluate("rm(" + tempVarName + ")");
 						} catch (Exception ex) {
 							ex.printStackTrace();
-						}						
+						}
 						_rgui.getRLock().unlock();
 					}
 
@@ -1332,9 +1306,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			DimensionsDialog ddialog = new DimensionsDialog(ss);
 			ddialog.setVisible(true);
 			if (ddialog.getDimensions() != null) {
-				try {					
-					_rgui.createView(new SpreadsheetPanel((int) ddialog.getDimensions().getHeight(), (int) ddialog.getDimensions()
-							.getWidth(),_rgui), "Spreadsheet View");										
+				try {
+					_rgui.createView(new SpreadsheetPanel((int) ddialog.getDimensions().getHeight(), (int) ddialog.getDimensions().getWidth(), _rgui),
+							"Spreadsheet View");
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -2085,16 +2059,14 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		public ToRData getToRData() {
 			if (_closedOnOK)
-				return new ToRData(cellRange.getText(), dataType.getSelectedIndex(), assignTo.getText(),
-						postAssignCommand.getText());
+				return new ToRData(cellRange.getText(), dataType.getSelectedIndex(), assignTo.getText(), postAssignCommand.getText());
 			else
 				return null;
 		}
 
 		private void update() {
 			CellRange r = ss.getSelectedRange();
-			String rect = Formula.getCellString(r.getStartRow(), r.getStartCol()) + ":"
-					+ Formula.getCellString(r.getEndRow(), r.getEndCol());
+			String rect = Formula.getCellString(r.getStartRow(), r.getStartCol()) + ":" + Formula.getCellString(r.getEndRow(), r.getEndCol());
 			if (cellRange.getText().trim().equals(rect)) {
 				cellRange.setForeground(Color.blue);
 				setRange.setEnabled(false);
@@ -2138,8 +2110,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			setRange.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					CellRange r = ss.getSelectedRange();
-					String rect = Formula.getCellString(r.getStartRow(), r.getStartCol()) + ":"
-							+ Formula.getCellString(r.getEndRow(), r.getEndCol());
+					String rect = Formula.getCellString(r.getStartRow(), r.getStartCol()) + ":" + Formula.getCellString(r.getEndRow(), r.getEndCol());
 					System.out.println("rect=" + rect);
 					cellRange.setText(rect);
 
@@ -2219,8 +2190,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		private void okMethod() {
-			toRDataStore = new ToRData(cellRange.getText(), dataType.getSelectedIndex(), assignTo.getText(),
-					postAssignCommand.getText());
+			toRDataStore = new ToRData(cellRange.getText(), dataType.getSelectedIndex(), assignTo.getText(), postAssignCommand.getText());
 			_closedOnOK = true;
 			setVisible(false);
 		}

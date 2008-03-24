@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +48,7 @@ import org.rosuda.javaGD.GDObject;
 import org.rosuda.javaGD.GDState;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class JGDPanelPop extends JBufferedImagePanel {
 	static final long serialVersionUID = 85376389L;
@@ -130,12 +132,13 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		setBackground(Color.white);
 		setOpaque(true);
 		_actions = actions;
-		if (_actions!=null) {
-			for (int i=0; i<_actions.length; ++i) {
-				if (_actions[i] instanceof LinkedToPanel) ((LinkedToPanel)_actions[i]).setPanel(this);
+		if (_actions != null) {
+			for (int i = 0; i < _actions.length; ++i) {
+				if (_actions[i] instanceof LinkedToPanel)
+					((LinkedToPanel) _actions[i]).setPanel(this);
 			}
 		}
-		
+
 		_x0 = sz.getWidth() / 2;
 		_y0 = sz.getHeight() / 2;
 		_fx = 1;
@@ -961,17 +964,16 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		}
 	}
 
-
 	public void paintAll(Graphics2D g, Point o, Dimension dSize) {
 		if (_forceAntiAliasing) {
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		}		
+		}
 		int i = 0, j = _l.size();
 		g.setFont(_gs.f);
 		g.setClip(o.x, o.y, dSize.width, dSize.height); // reset
 		g.setColor(Color.white);
-		g.fillRect(o.x, o.y, dSize.width, dSize.height);		
-		g.translate(-o.x,-o.y);
+		g.fillRect(o.x, o.y, dSize.width, dSize.height);
+		g.translate(-o.x, -o.y);
 		while (i < j) {
 			GDObject gdo = (GDObject) _l.elementAt(i++);
 			if (gdo instanceof GDActionMarker) {
@@ -982,7 +984,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		}
 	}
 
-	
 	Color _transparentBlack = new Color(Color.black.getColorSpace(), new float[] { Color.black.getRed(), Color.black.getGreen(), Color.black.getBlue() },
 			(float) 0.2);
 

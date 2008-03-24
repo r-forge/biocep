@@ -10,11 +10,15 @@ import org.bioconductor.packages.rservices.RVector;
 import remoting.AssignInterface;
 import remoting.RNI;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class AssignInterfaceImpl extends java.rmi.server.UnicastRemoteObject implements AssignInterface {
-	RServantImpl _rservantImpl=null;
+	RServantImpl _rservantImpl = null;
+
 	public AssignInterfaceImpl(RServantImpl rservantImpl) throws RemoteException {
 		super();
-		_rservantImpl=rservantImpl;
+		_rservantImpl = rservantImpl;
 	}
 
 	public long assign(long rObjectId, String slotsPath, RObject robj) throws RemoteException {
@@ -77,10 +81,8 @@ public class AssignInterfaceImpl extends java.rmi.server.UnicastRemoteObject imp
 		return DirectJNI.getInstance().getDefaultAssignInterface().getValueCPReal(rObjectId, slotsPath);
 	}
 
-	public long setValueCP(long rObjectId, String slotsPath, double[] real, double[] imaginary)
-			throws RemoteException {
-		return DirectJNI.getInstance().getDefaultAssignInterface()
-				.setValueCP(rObjectId, slotsPath, real, imaginary);
+	public long setValueCP(long rObjectId, String slotsPath, double[] real, double[] imaginary) throws RemoteException {
+		return DirectJNI.getInstance().getDefaultAssignInterface().setValueCP(rObjectId, slotsPath, real, imaginary);
 	}
 
 	public RNI getRNI() throws RemoteException {
@@ -152,7 +154,7 @@ public class AssignInterfaceImpl extends java.rmi.server.UnicastRemoteObject imp
 		return DirectJNI.getInstance().getDefaultAssignInterface().setFactorLevels(rObjectId, slotsPath, levels);
 	}
 
-	//Dataframes	
+	// Dataframes
 	public RList getDataframeData(long rObjectId, String slotsPath) throws RemoteException {
 		return DirectJNI.getInstance().getDefaultAssignInterface().getDataframeData(rObjectId, slotsPath);
 	}
@@ -166,11 +168,10 @@ public class AssignInterfaceImpl extends java.rmi.server.UnicastRemoteObject imp
 	}
 
 	public long setDataframeRowNames(long rObjectId, String slotsPath, String[] rowNames) throws RemoteException {
-		return DirectJNI.getInstance().getDefaultAssignInterface().setDataframeRowNames(rObjectId, slotsPath,
-				rowNames);
+		return DirectJNI.getInstance().getDefaultAssignInterface().setDataframeRowNames(rObjectId, slotsPath, rowNames);
 	}
 
-	//Lists
+	// Lists
 	public RObject[] getListValue(long rObjectId, String slotsPath) throws RemoteException {
 		return DirectJNI.getInstance().getDefaultAssignInterface().getListValue(rObjectId, slotsPath);
 	}
@@ -179,7 +180,7 @@ public class AssignInterfaceImpl extends java.rmi.server.UnicastRemoteObject imp
 		return DirectJNI.getInstance().getDefaultAssignInterface().setListValue(rObjectId, slotsPath, value);
 	}
 
-	//env		
+	// env
 	public HashMap getEnvData(long rObjectId, String slotsPath) throws RemoteException {
 		return DirectJNI.getInstance().getDefaultAssignInterface().getEnvData(rObjectId, slotsPath);
 	}

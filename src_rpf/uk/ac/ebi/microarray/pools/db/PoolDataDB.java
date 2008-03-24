@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +20,7 @@ package uk.ac.ebi.microarray.pools.db;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class PoolDataDB {
 	private String _poolName;
@@ -45,8 +47,7 @@ public class PoolDataDB {
 	}
 
 	public String toString() {
-		return "PoolData[name=" + _poolName + " prefixes=" + PoolUtils.flatArray(_prefixes) + " bto=" + _borrowTimeout
-				+ "]";
+		return "PoolData[name=" + _poolName + " prefixes=" + PoolUtils.flatArray(_prefixes) + " bto=" + _borrowTimeout + "]";
 	}
 
 }

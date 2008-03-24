@@ -1,4 +1,4 @@
-// Class Patched by Karim Chine kchine@ebi.ac.uk to embed jEdit as a view of Virtual R Workbench
+// Class Patched by Karim Chine  k.chine@imperial.ac.uk to embed jEdit as a view of Virtual R Workbench
 
 /*
  * SettingsReloader.java - Utility class reloads macros and modes when necessary

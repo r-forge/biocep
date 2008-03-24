@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +21,7 @@ import org.apache.commons.logging.Log;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 /**
- * @author Karim Chine   kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public abstract class ServerDefaults {
 
@@ -31,14 +33,11 @@ public abstract class ServerDefaults {
 
 	static {
 
-		_servantPoolPrefix = System.getProperty("prefix") != null && !System.getProperty("prefix").equals("") ? System
-				.getProperty("prefix") : DEFAULT_PREFIX;
-		_registryHost = System.getProperty("registryhost") != null && !System.getProperty("registryhost").equals("") ? System
-				.getProperty("registryhost")
+		_servantPoolPrefix = System.getProperty("prefix") != null && !System.getProperty("prefix").equals("") ? System.getProperty("prefix") : DEFAULT_PREFIX;
+		_registryHost = System.getProperty("registryhost") != null && !System.getProperty("registryhost").equals("") ? System.getProperty("registryhost")
 				: DEFAULT_REGISTRY_HOST;
-		_registryPort = System.getProperty("registryport") != null && !System.getProperty("registryport").equals("") ? Integer
-				.decode(System.getProperty("registryport"))
-				: DEFAULT_REGISTRY_PORT;
+		_registryPort = System.getProperty("registryport") != null && !System.getProperty("registryport").equals("") ? Integer.decode(System
+				.getProperty("registryport")) : DEFAULT_REGISTRY_PORT;
 
 	}
 }

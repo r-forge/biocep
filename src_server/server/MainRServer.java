@@ -8,18 +8,16 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import org.apache.commons.logging.Log;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
-
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationListener;
 import uk.ac.ebi.microarray.pools.YesSecurityManager;
-import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class MainRServer {
-	
+
 	private static String _mainServantClassName = System.getProperty("servantclass");
 
 	private static Class<?> mainServantClass = null;
@@ -32,15 +30,15 @@ public class MainRServer {
 
 	private static ManagedServant mservant = null;
 	private static ServantCreationListener servantCreationListener = null;
+
 	public static void main(String[] args) throws Exception {
-				
+
 		try {
 
 			if (System.getSecurityManager() == null) {
 				System.setSecurityManager(new YesSecurityManager());
 			}
 
-			
 			if (System.getProperty("autoname") != null && System.getProperty("autoname").equalsIgnoreCase("true")) {
 				log.info("Instantiating " + _mainServantClassName + " with autonaming, prefix " + _servantPoolPrefix);
 				servantName = null;
@@ -49,18 +47,16 @@ public class MainRServer {
 				if (System.getProperty("name") != null && !System.getProperty("name").equals("")) {
 					servantName = System.getProperty("name");
 				}
-				log.info("Instantiating " + _mainServantClassName + " with name " + servantName + " , prefix "
-						+ _servantPoolPrefix);
+				log.info("Instantiating " + _mainServantClassName + " with name " + servantName + " , prefix " + _servantPoolPrefix);
 			}
 
-			if (rmiRegistry == null) rmiRegistry = LocateRegistry.getRegistry(_registryHost, _registryPort);
-			System.out.println("### code base:"+System.getProperty("java.rmi.server.codebase"));
-			
-			
+			if (rmiRegistry == null)
+				rmiRegistry = LocateRegistry.getRegistry(_registryHost, _registryPort);
+			System.out.println("### code base:" + System.getProperty("java.rmi.server.codebase"));
+
 			mainServantClass = RServantImpl.class;
 
-			boolean isPrivateServant = (System.getProperty("private") != null && System.getProperty("private")
-					.equalsIgnoreCase("true"));
+			boolean isPrivateServant = (System.getProperty("private") != null && System.getProperty("private").equalsIgnoreCase("true"));
 
 			String servantCreationListenerStub = System.getProperty("listener.stub");
 			if (servantCreationListenerStub != null && !servantCreationListenerStub.equals("")) {
@@ -68,14 +64,12 @@ public class MainRServer {
 			}
 
 			if (!isPrivateServant) {
-				mservant = (ManagedServant) mainServantClass.getConstructor(
-						new Class[] { String.class, String.class, Registry.class }).newInstance(
+				mservant = (ManagedServant) mainServantClass.getConstructor(new Class[] { String.class, String.class, Registry.class }).newInstance(
 						new Object[] { servantName, _servantPoolPrefix, rmiRegistry });
 
 			} else {
 
-				mservant = (ManagedServant) mainServantClass.getConstructor(
-						new Class[] { String.class, String.class, Registry.class }).newInstance(
+				mservant = (ManagedServant) mainServantClass.getConstructor(new Class[] { String.class, String.class, Registry.class }).newInstance(
 						new Object[] { null, "PRIVATE_", rmiRegistry });
 
 			}
@@ -90,19 +84,19 @@ public class MainRServer {
 
 		} catch (InvocationTargetException ite) {
 			if (servantCreationListener != null) {
-				PoolUtils.callBack(servantCreationListener, null, new RemoteException("",ite.getTargetException()));
+				PoolUtils.callBack(servantCreationListener, null, new RemoteException("", ite.getTargetException()));
 			}
 			throw new Exception(PoolUtils.getStackTraceAsString(ite.getTargetException()));
 
 		} catch (Exception e) {
-			
+
 			log.info("----------------------");
 			log.info(PoolUtils.getStackTraceAsString(e));
 			e.printStackTrace();
 			log.error(e);
-			
+
 			if (servantCreationListener != null) {
-				PoolUtils.callBack(servantCreationListener, null, new RemoteException("",e));
+				PoolUtils.callBack(servantCreationListener, null, new RemoteException("", e));
 			}
 
 			System.exit(1);

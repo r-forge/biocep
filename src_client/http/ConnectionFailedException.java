@@ -1,5 +1,8 @@
 package http;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class ConnectionFailedException extends TunnelingException {
 
 	public ConnectionFailedException() {

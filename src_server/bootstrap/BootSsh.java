@@ -10,30 +10,31 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class BootSsh {
-	public static final String STUB_BEGIN_MARKER="#STUBBEGIN#";
-	public static final String STUB_END_MARKER="#STUBEND#";
-	
-	public static final String PROCESS_ID_BEGIN_MARKER="#PROCESSIDBEGIN#";
-	public static final String PROCESS_ID_END_MARKER="#PROCESSIDEND#";	
+	public static final String STUB_BEGIN_MARKER = "#STUBBEGIN#";
+	public static final String STUB_END_MARKER = "#STUBEND#";
 
-	public static final String R_PROCESS_ID_BEGIN_MARKER="#RPROCESSIDBEGIN#";
-	public static final String R_PROCESS_ID_END_MARKER="#RPROCESSIDEND#";	
+	public static final String PROCESS_ID_BEGIN_MARKER = "#PROCESSIDBEGIN#";
+	public static final String PROCESS_ID_END_MARKER = "#PROCESSIDEND#";
 
-	public static void main(String[] args) throws Exception{
-		String logFileName=args[7];
-		PrintStream bw=null;
+	public static final String R_PROCESS_ID_BEGIN_MARKER = "#RPROCESSIDBEGIN#";
+	public static final String R_PROCESS_ID_END_MARKER = "#RPROCESSIDEND#";
+
+	public static void main(String[] args) throws Exception {
+		String logFileName = args[7];
+		PrintStream bw = null;
 		if (logFileName.equals("System.out")) {
-			bw=System.out;
+			bw = System.out;
 		} else {
-			bw=new PrintStream(new File(logFileName));
+			bw = new PrintStream(new File(logFileName));
 		}
-		
-		System.out.println("+*+*+*+*+*+*+*");
-		bw.println("/*/**/**/**/*/*///*/");
+
 		try {
-			
-			URL classServerUrl=new URL("http://" + args[1] + ":" + args[2] + "/classes/");			
+
+			URL classServerUrl = new URL("http://" + args[1] + ":" + args[2] + "/classes/");
 			bw.println(classServerUrl);
 			URLClassLoader cl = new URLClassLoader(new URL[] { classServerUrl }, BootSsh.class.getClassLoader());
 			cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils").getMethod("startPortInUseDogwatcher",
@@ -44,24 +45,27 @@ public class BootSsh {
 					null,
 					new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), args[3],
 							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), false });
-			
-			
-			
-			Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");			
-			String processId=(String)poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);
-			bw.println(PROCESS_ID_BEGIN_MARKER+processId+ PROCESS_ID_END_MARKER);			
-			bw.println(R_PROCESS_ID_BEGIN_MARKER+(String)r.getClass().getMethod("getProcessId", new Class<?>[0]).invoke(r, new Object[0])+ R_PROCESS_ID_END_MARKER);
-			bw.println(STUB_BEGIN_MARKER+ stubToHex(r)+ STUB_END_MARKER);	
+
+			Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");
+			String processId = (String) poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);
+			bw.println(PROCESS_ID_BEGIN_MARKER + processId + PROCESS_ID_END_MARKER);
+			bw.println(R_PROCESS_ID_BEGIN_MARKER + (String) r.getClass().getMethod("getProcessId", new Class<?>[0]).invoke(r, new Object[0])
+					+ R_PROCESS_ID_END_MARKER);
+			bw.println(STUB_BEGIN_MARKER + stubToHex(r) + STUB_END_MARKER);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (bw!=null){
-				try {bw.close();} catch (Exception e) {e.printStackTrace();}
+			if (bw != null) {
+				try {
+					bw.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		System.exit(0);
 	}
-	
+
 	public static String stubToHex(Remote obj) throws NoSuchObjectException {
 		if (obj instanceof UnicastRemoteObject) {
 			obj = java.rmi.server.RemoteObject.toStub(obj);

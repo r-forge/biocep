@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +54,7 @@ import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
 import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public abstract class DBLayer implements Registry {
 
@@ -142,8 +144,8 @@ public abstract class DBLayer implements Registry {
 							+ "','"
 							+ System.getProperty("os.name")
 							+ "',"
-							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'"
-									+ System.getProperty("java.rmi.server.codebase") + "'") + ")");
+							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "'")
+							+ ")");
 		} catch (SQLException sqle) {
 			if (isConstraintViolationError(sqle))
 				throw new AlreadyBoundException();
@@ -212,11 +214,10 @@ public abstract class DBLayer implements Registry {
 
 				final String stubHex = rset.getString(1);
 				final String codeBaseStr = rset.getString(2);
-				final ClassLoader cl = (codeBaseStr != null ? new URLClassLoader(PoolUtils.getURLS(codeBaseStr),
-						DBLayer.class.getClassLoader()) : DBLayer.class.getClassLoader());
-				System.out.println("codeBaseStr ::"+ codeBaseStr);
-				
-				
+				final ClassLoader cl = (codeBaseStr != null ? new URLClassLoader(PoolUtils.getURLS(codeBaseStr), DBLayer.class.getClassLoader())
+						: DBLayer.class.getClassLoader());
+				System.out.println("codeBaseStr ::" + codeBaseStr);
+
 				final Object[] resultHolder = new Object[1];
 				Runnable lookupRunnable = new Runnable() {
 					public void run() {
@@ -346,8 +347,8 @@ public abstract class DBLayer implements Registry {
 							+ "','"
 							+ System.getProperty("os.name")
 							+ "',"
-							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'"
-									+ System.getProperty("java.rmi.server.codebase") + "'") + ")");
+							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "'")
+							+ ")");
 
 		} catch (SQLException sqle) {
 			throw new RemoteException("", (sqle));
@@ -415,8 +416,8 @@ public abstract class DBLayer implements Registry {
 
 			stmt = _connection.createStatement();
 
-			String stmtStr = "select NAME from SERVANTS where IN_USE=0 AND PING_FAILURES<"
-					+ PoolUtils.PING_FAILURES_NBR_MAX + " AND (NAME like '" + prefixes[0] + "%'";
+			String stmtStr = "select NAME from SERVANTS where IN_USE=0 AND PING_FAILURES<" + PoolUtils.PING_FAILURES_NBR_MAX + " AND (NAME like '"
+					+ prefixes[0] + "%'";
 			for (int i = 1; i < prefixes.length; ++i)
 				stmtStr += " OR NAME like '" + prefixes[i] + "%'";
 			stmtStr += ")";
@@ -453,10 +454,9 @@ public abstract class DBLayer implements Registry {
 		return getTableData("SERVANTS", "PING_FAILURES>=" + PoolUtils.PING_FAILURES_NBR_MAX);
 	}
 
-	public Vector<HashMap<String, Object>> listKillable(String nodeIp, String nodePrefix) throws RemoteException,
-			AccessException {
-		return getTableData("SERVANTS", "PING_FAILURES>=" + PoolUtils.PING_FAILURES_NBR_MAX + " AND "
-				+ "REGISTER_HOST_IP='" + nodeIp + "' AND NAME like '" + nodePrefix + "%'");
+	public Vector<HashMap<String, Object>> listKillable(String nodeIp, String nodePrefix) throws RemoteException, AccessException {
+		return getTableData("SERVANTS", "PING_FAILURES>=" + PoolUtils.PING_FAILURES_NBR_MAX + " AND " + "REGISTER_HOST_IP='" + nodeIp + "' AND NAME like '"
+				+ nodePrefix + "%'");
 	}
 
 	public void lock() throws RemoteException, AccessException {
@@ -505,12 +505,10 @@ public abstract class DBLayer implements Registry {
 		Statement stmt = null;
 		try {
 			stmt = _connection.createStatement();
-			stmt.execute("UPDATE SERVANTS SET IN_USE=1, BORROW_TIME=" + sysdateFunctionName() + ",BORROW_HOST_NAME='"
-					+ getHostName() + "'" + ",BORROW_HOST_IP='" + getHostIp() + "'" + ",BORROW_PROCESS_ID='"
-					+ getProcessId() + "'" + ",BORROW_SESSION_INFO_HEX="
-					+ (RPFSessionInfo.get() == null ? "NULL" : "'" + objectToHex(RPFSessionInfo.get()) + "'")
-					+ ",RETURN_TIME=NULL" + ",RETURN_HOST_NAME=NULL" + ",RETURN_HOST_IP=NULL"
-					+ ",RETURN_PROCESS_ID=NULL" + " WHERE NAME='" + name + "'");
+			stmt.execute("UPDATE SERVANTS SET IN_USE=1, BORROW_TIME=" + sysdateFunctionName() + ",BORROW_HOST_NAME='" + getHostName() + "'"
+					+ ",BORROW_HOST_IP='" + getHostIp() + "'" + ",BORROW_PROCESS_ID='" + getProcessId() + "'" + ",BORROW_SESSION_INFO_HEX="
+					+ (RPFSessionInfo.get() == null ? "NULL" : "'" + objectToHex(RPFSessionInfo.get()) + "'") + ",RETURN_TIME=NULL" + ",RETURN_HOST_NAME=NULL"
+					+ ",RETURN_HOST_IP=NULL" + ",RETURN_PROCESS_ID=NULL" + " WHERE NAME='" + name + "'");
 		} catch (SQLException sqle) {
 			if (isNoConnectionError(sqle) && canReconnect()) {
 				reserve(name);
@@ -531,9 +529,8 @@ public abstract class DBLayer implements Registry {
 		Statement stmt = null;
 		try {
 			stmt = _connection.createStatement();
-			stmt.execute("UPDATE SERVANTS SET IN_USE=0  " + ",RETURN_TIME=" + sysdateFunctionName()
-					+ ",RETURN_HOST_NAME='" + getHostName() + "'" + ",RETURN_HOST_IP='" + getHostIp() + "'"
-					+ ",RETURN_PROCESS_ID='" + getProcessId() + "'" + " WHERE NAME='" + name + "'");
+			stmt.execute("UPDATE SERVANTS SET IN_USE=0  " + ",RETURN_TIME=" + sysdateFunctionName() + ",RETURN_HOST_NAME='" + getHostName() + "'"
+					+ ",RETURN_HOST_IP='" + getHostIp() + "'" + ",RETURN_PROCESS_ID='" + getProcessId() + "'" + " WHERE NAME='" + name + "'");
 		} catch (SQLException sqle) {
 			if (isNoConnectionError(sqle) && canReconnect()) {
 				unReserve(name);
@@ -593,8 +590,7 @@ public abstract class DBLayer implements Registry {
 		}
 	}
 
-	public void updateServantNodeName(String servantName, String nodeName) throws RemoteException, NotBoundException,
-			AccessException {
+	public void updateServantNodeName(String servantName, String nodeName) throws RemoteException, NotBoundException, AccessException {
 		Statement stmt = null;
 		try {
 			stmt = _connection.createStatement();
@@ -616,13 +612,11 @@ public abstract class DBLayer implements Registry {
 		}
 	}
 
-	public void updateServantAttributes(String servantName, HashMap<String, Object> attributes) throws RemoteException,
-			NotBoundException, AccessException {
+	public void updateServantAttributes(String servantName, HashMap<String, Object> attributes) throws RemoteException, NotBoundException, AccessException {
 		Statement stmt = null;
 		try {
 			stmt = _connection.createStatement();
-			stmt.execute("update SERVANTS SET ATTRIBUTES_HEX='" + PoolUtils.objectToHex(attributes) + "' WHERE NAME='"
-					+ servantName + "'");
+			stmt.execute("update SERVANTS SET ATTRIBUTES_HEX='" + PoolUtils.objectToHex(attributes) + "' WHERE NAME='" + servantName + "'");
 			_connection.commit();
 		} catch (SQLException sqle) {
 			if (isNoConnectionError(sqle) && canReconnect()) {
@@ -664,8 +658,7 @@ public abstract class DBLayer implements Registry {
 			stmt = _connection.createStatement();
 			rset = stmt.executeQuery("select POOL_NAME,POOL_PREFIXES,TIMEOUT from POOL_DATA");
 			while (rset.next()) {
-				result.put(rset.getString(1), new PoolDataDB(rset.getString(1), getPrefixes(rset.getString(2)), rset
-						.getInt(3)));
+				result.put(rset.getString(1), new PoolDataDB(rset.getString(1), getPrefixes(rset.getString(2)), rset.getInt(3)));
 			}
 		} catch (SQLException sqle) {
 			throw new RemoteException("", (sqle));
@@ -698,8 +691,7 @@ public abstract class DBLayer implements Registry {
 		Vector<HashMap<String, Object>> nodeTable = getTableData("POOL_DATA");
 		Vector<PoolDataDB> result = new Vector<PoolDataDB>();
 		for (HashMap<String, Object> hm : nodeTable) {
-			result.add(new PoolDataDB((String) hm.get("POOL_NAME"), getPrefixes((String) hm.get("POOL_PREFIXES")),
-					(Integer) hm.get("TIMEOUT")));
+			result.add(new PoolDataDB((String) hm.get("POOL_NAME"), getPrefixes((String) hm.get("POOL_PREFIXES")), (Integer) hm.get("TIMEOUT")));
 		}
 		return result;
 	}
@@ -712,11 +704,10 @@ public abstract class DBLayer implements Registry {
 			if (!pwd.equals("")) {
 				pwd = decipherPwd(pwd);
 			}
-			result.add(new NodeDataDB((String) hm.get("NODE_NAME"), (String) hm.get("HOST_IP"), (String) hm
-					.get("HOST_NAME"), (String) hm.get("LOGIN"), pwd, (String) hm.get("INSTALL_DIR"), (String) hm
-					.get("CREATE_SERVANT_COMMAND"), (String) hm.get("KILL_SERVANT_COMMAND"), (String) hm.get("OS"),
-					(Integer) hm.get("SERVANT_NBR_MIN"), (Integer) hm.get("SERVANT_NBR_MAX"), (String) hm
-							.get("POOL_PREFIX"), (Integer) hm.get("PROCESS_COUNTER")));
+			result.add(new NodeDataDB((String) hm.get("NODE_NAME"), (String) hm.get("HOST_IP"), (String) hm.get("HOST_NAME"), (String) hm.get("LOGIN"), pwd,
+					(String) hm.get("INSTALL_DIR"), (String) hm.get("CREATE_SERVANT_COMMAND"), (String) hm.get("KILL_SERVANT_COMMAND"), (String) hm.get("OS"),
+					(Integer) hm.get("SERVANT_NBR_MIN"), (Integer) hm.get("SERVANT_NBR_MAX"), (String) hm.get("POOL_PREFIX"), (Integer) hm
+							.get("PROCESS_COUNTER")));
 		}
 		return result;
 	}
@@ -785,8 +776,8 @@ public abstract class DBLayer implements Registry {
 			for (int i = 0; i < poolData.getPrefixes().length; ++i)
 				prefixes += poolData.getPrefixes()[i] + (i == poolData.getPrefixes().length - 1 ? "" : ",");
 			stmt = _connection.createStatement();
-			stmt.execute("INSERT INTO POOL_DATA(POOL_NAME, TIMEOUT,POOL_PREFIXES) values (" + "'"
-					+ poolData.getPoolName() + "'," + poolData.getBorrowTimeout() + "," + "'" + prefixes + "')");
+			stmt.execute("INSERT INTO POOL_DATA(POOL_NAME, TIMEOUT,POOL_PREFIXES) values (" + "'" + poolData.getPoolName() + "'," + poolData.getBorrowTimeout()
+					+ "," + "'" + prefixes + "')");
 
 			_connection.commit();
 		} catch (SQLException sqle) {
@@ -823,14 +814,12 @@ public abstract class DBLayer implements Registry {
 
 		try {
 			stmt = _connection.createStatement();
-			String updateStr = "UPDATE NODE_DATA set " + " HOST_IP=" + "'" + ip + "'," + " HOST_NAME=" + "'" + host
-					+ "'," + " POOL_PREFIX=" + "'" + prefix + "'," + " LOGIN=" + "'" + nodeData.getLogin() + "',"
-					+ " PWD=" + "'" + (nodeData.getPwd().trim().equals("") ? "" : cipherPwd(nodeData.getPwd())) + "',"
-					+ " INSTALL_DIR=" + "'" + nodeData.getInstallDir() + "'," + " CREATE_SERVANT_COMMAND=" + "'"
-					+ nodeData.getCreateServantCommand() + "'," + " KILL_SERVANT_COMMAND=" + "'"
-					+ nodeData.getKillServantCommand() + "'," + " OS=" + "'" + nodeData.getOS() + "',"
-					+ " SERVANT_NBR_MIN=" + nodeData.getServantNbrMin() + "," + " SERVANT_NBR_MAX="
-					+ nodeData.getServantNbrMax() + "" + " where NODE_NAME='" + nodeName + "'";
+			String updateStr = "UPDATE NODE_DATA set " + " HOST_IP=" + "'" + ip + "'," + " HOST_NAME=" + "'" + host + "'," + " POOL_PREFIX=" + "'" + prefix
+					+ "'," + " LOGIN=" + "'" + nodeData.getLogin() + "'," + " PWD=" + "'"
+					+ (nodeData.getPwd().trim().equals("") ? "" : cipherPwd(nodeData.getPwd())) + "'," + " INSTALL_DIR=" + "'" + nodeData.getInstallDir()
+					+ "'," + " CREATE_SERVANT_COMMAND=" + "'" + nodeData.getCreateServantCommand() + "'," + " KILL_SERVANT_COMMAND=" + "'"
+					+ nodeData.getKillServantCommand() + "'," + " OS=" + "'" + nodeData.getOS() + "'," + " SERVANT_NBR_MIN=" + nodeData.getServantNbrMin()
+					+ "," + " SERVANT_NBR_MAX=" + nodeData.getServantNbrMax() + "" + " where NODE_NAME='" + nodeName + "'";
 			System.out.println(updateStr);
 			stmt.execute(updateStr);
 			_connection.commit();
@@ -907,8 +896,8 @@ public abstract class DBLayer implements Registry {
 
 		try {
 			stmt = _connection.createStatement();
-			String updateStr = "UPDATE POOL_DATA set TIMEOUT=" + poolData.getBorrowTimeout() + "," + " POOL_PREFIXES='"
-					+ prefixes + "' where POOL_NAME='" + poolData.getPoolName() + "'";
+			String updateStr = "UPDATE POOL_DATA set TIMEOUT=" + poolData.getBorrowTimeout() + "," + " POOL_PREFIXES='" + prefixes + "' where POOL_NAME='"
+					+ poolData.getPoolName() + "'";
 			System.out.println(updateStr);
 			stmt.execute(updateStr);
 			_connection.commit();
@@ -934,11 +923,9 @@ public abstract class DBLayer implements Registry {
 		Statement stmt = null;
 		try {
 			stmt = _connection.createStatement();
-			stmt.execute("UPDATE SERVANTS SET IN_USE=0, PING_FAILURES=0" + ",BORROW_HOST_NAME=NULL"
-					+ ",BORROW_HOST_IP=NULL" + ",BORROW_PROCESS_ID=NULL" + ",BORROW_SESSION_INFO_HEX=NULL"
-					+ ",RETURN_TIME=" + sysdateFunctionName() + ",RETURN_HOST_NAME='" + getHostName() + "'"
-					+ ",RETURN_HOST_IP='" + getHostIp() + "'" + ",RETURN_PROCESS_ID='" + getProcessId() + "'"
-					+ " WHERE NAME='" + servantName + "'");
+			stmt.execute("UPDATE SERVANTS SET IN_USE=0, PING_FAILURES=0" + ",BORROW_HOST_NAME=NULL" + ",BORROW_HOST_IP=NULL" + ",BORROW_PROCESS_ID=NULL"
+					+ ",BORROW_SESSION_INFO_HEX=NULL" + ",RETURN_TIME=" + sysdateFunctionName() + ",RETURN_HOST_NAME='" + getHostName() + "'"
+					+ ",RETURN_HOST_IP='" + getHostIp() + "'" + ",RETURN_PROCESS_ID='" + getProcessId() + "'" + " WHERE NAME='" + servantName + "'");
 
 		} catch (SQLException sqle) {
 			if (isNoConnectionError(sqle) && canReconnect()) {
@@ -966,8 +953,7 @@ public abstract class DBLayer implements Registry {
 		ResultSet rset = null;
 		try {
 			stmt = _connection.createStatement();
-			rset = stmt.executeQuery("select * from " + tableName
-					+ (condition == null || condition.equals("") ? "" : " WHERE " + condition));
+			rset = stmt.executeQuery("select * from " + tableName + (condition == null || condition.equals("") ? "" : " WHERE " + condition));
 			while (rset.next()) {
 				HashMap<String, Object> hm = new HashMap<String, Object>();
 				for (int i = 1; i <= rset.getMetaData().getColumnCount(); ++i) {
@@ -1049,9 +1035,8 @@ public abstract class DBLayer implements Registry {
 		try {
 			stmt = _connection.createStatement();
 			lock(stmt);
-			stmt.execute("UPDATE SERVANTS SET IN_USE=0  " + ",RETURN_TIME=" + sysdateFunctionName()
-					+ ",RETURN_HOST_NAME='" + getHostName() + "'" + ",RETURN_HOST_IP='" + getHostIp() + "'"
-					+ ",RETURN_PROCESS_ID='" + getProcessId() + "'" + " WHERE BORROW_HOST_IP='" + getHostIp()
+			stmt.execute("UPDATE SERVANTS SET IN_USE=0  " + ",RETURN_TIME=" + sysdateFunctionName() + ",RETURN_HOST_NAME='" + getHostName() + "'"
+					+ ",RETURN_HOST_IP='" + getHostIp() + "'" + ",RETURN_PROCESS_ID='" + getProcessId() + "'" + " WHERE BORROW_HOST_IP='" + getHostIp()
 					+ "' AND BORROW_PROCESS_ID='" + getProcessId() + "'");
 		} catch (SQLException sqle) {
 			if (isNoConnectionError(sqle) && canReconnect()) {
@@ -1092,8 +1077,7 @@ public abstract class DBLayer implements Registry {
 			String functionName = expression.substring(expression.lastIndexOf('.') + 1, expression.lastIndexOf("()"));
 			String replaceWith = "ERROR";
 			try {
-				replaceWith = (String) Class.forName(className).getMethod(functionName, (Class[]) null).invoke(null,
-						(Object[]) null);
+				replaceWith = (String) Class.forName(className).getMethod(functionName, (Class[]) null).invoke(null, (Object[]) null);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1215,11 +1199,11 @@ public abstract class DBLayer implements Registry {
 		this._connectionProvider = connectionProvider;
 	}
 
-	
 	public static Registry _registry = null;
 	public static Integer _lock = new Integer(0);
+
 	public static Registry getRmiRegistry() throws Exception {
-	
+
 		if (_registry != null)
 			return _registry;
 		synchronized (_lock) {
@@ -1233,7 +1217,7 @@ public abstract class DBLayer implements Registry {
 						public Connection newConnection() throws java.sql.SQLException {
 							return DriverManager.getConnection(dburl, user, password);
 						};
-	
+
 					});
 				} else {
 					_registry = LocateRegistry.getRegistry(_registryHost, _registryPort);
@@ -1241,14 +1225,12 @@ public abstract class DBLayer implements Registry {
 			}
 			return _registry;
 		}
-	
+
 	}
 
 	public static DBLayer getLayer(String dbtype, Connection conn) throws Exception {
-		String className = "uk.ac.ebi.microarray.pools.db.DBLayer" + ("" + dbtype.charAt(0)).toUpperCase()
-				+ dbtype.substring(1);
-		return (DBLayer) Class.forName(className).getConstructor(new Class[] { Connection.class }).newInstance(
-				new Object[] { conn });
+		String className = "uk.ac.ebi.microarray.pools.db.DBLayer" + ("" + dbtype.charAt(0)).toUpperCase() + dbtype.substring(1);
+		return (DBLayer) Class.forName(className).getConstructor(new Class[] { Connection.class }).newInstance(new Object[] { conn });
 	}
 
 	public static DBLayer getLayer(String dbtype, ConnectionProvider connProvider) throws Exception {
