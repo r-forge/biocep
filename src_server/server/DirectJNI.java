@@ -2326,9 +2326,11 @@ public class DirectJNI {
 				return;
 			for (int i = 0; i < files.length; i++) {
 				if (files[i].isDirectory()) {
+					/*
 					String name = (files[i].getAbsolutePath().substring(WDIR.length() + 1, files[i].getAbsolutePath().length())).replace('\\', '/');
 					result.add(new FileDescription(name, 0, true, new Date(files[i].lastModified())));
 					getWorkingDirectoryFileDescriptions(files[i], result);
+					*/
 				} else {
 					String name = path.getAbsolutePath().substring(WDIR.length(), path.getAbsolutePath().length()) + System.getProperty("file.separator")
 							+ files[i].getName();
