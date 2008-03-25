@@ -65,6 +65,19 @@ public class ServerLauncher {
 	 */
 
 	
+	private void getFileNames(File path, Vector<String> result) throws java.rmi.RemoteException {
+		File[] files = path.listFiles();
+		if (files == null)
+			return;
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].isDirectory()) {
+				getFileNames(files[i], result);
+			} else {
+				String name = files[i].getName();
+				System.out.println(name);
+			}
+		}
+	}
 	
 	public static void main(String[] args) throws Exception {
 		//File f=new File("J:/workspace/distrib/plugins/test/plugins_test.jar");

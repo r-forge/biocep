@@ -56,6 +56,7 @@ public class PluginDialog extends JDialog {
 	private JTextField _pluginJar;
 	private JComboBox _pluginViewClass;
 	private JButton _chooseFile;
+	private JButton _refreshButton;
 
 	private JButton _ok;
 	private JButton _cancel;
@@ -107,6 +108,22 @@ public class PluginDialog extends JDialog {
 			}
 		});
 
+		_refreshButton = new JButton("Refresh");
+
+		_refreshButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Vector<String> viewClassList = getPluginViewsClasses(new File(_pluginJar.getText()).toURL());
+					_pluginViewClass.removeAllItems();
+					for (String s : viewClassList)
+						_pluginViewClass.addItem(s);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+			}
+
+		});
 
 		KeyListener keyListener = new KeyListener() {
 			public void keyPressed(KeyEvent e) {
@@ -155,7 +172,8 @@ public class PluginDialog extends JDialog {
 		p1.add(_pluginJar);
 		p1.add(_chooseFile);
 		p2.add(new JLabel("   Plugin View Class"));
-		p2.add(_pluginViewClass);p2.add(new JLabel(""));
+		p2.add(_pluginViewClass);
+		p2.add(_refreshButton);
 
 		setSize(new Dimension(460, 160));
 		PoolUtils.locateInScreenCenter(this);
