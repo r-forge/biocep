@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -33,9 +32,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-
 import net.infonode.docking.View;
-
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -67,16 +64,13 @@ public class ServerLauncher {
 	 * @param args
 	 */
 
+	
+	
 	public static void main(String[] args) throws Exception {
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					createAndShowGUI();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		//File f=new File("J:/workspace/distrib/plugins/test/plugins_test.jar");
+		//System.out.println(getPluginViewsClasses(f.toURL()));
+		new PluginDialog(null).setVisible(true);
+		//new Fi
 	}
 
 	private static void createAndShowGUI() throws Exception {

@@ -72,6 +72,7 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -1326,6 +1327,22 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(demoMenu);
 
+			final JMenu pluginsMenu = new JMenu("Plugins");
+			pluginsMenu.addMenuListener(new MenuListener() {
+				public void menuSelected(MenuEvent e) {
+					pluginsMenu.removeAll();
+					pluginsMenu.add(_actions.get("showpluginview"));
+				}
+
+				public void menuCanceled(MenuEvent e) {
+				}
+
+				public void menuDeselected(MenuEvent e) {
+				}
+			});
+			menuBar.add(pluginsMenu);
+			
+			
 			final JMenu helpMenu = new JMenu("Help");
 			helpMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -3032,6 +3049,29 @@ public class GDApplet extends GDAppletBase implements RGui {
 				return getR() != null;
 			}
 		});
+		
+		_actions.put("showpluginview", new AbstractAction("Open Plugin View") {
+			public void actionPerformed(final ActionEvent e) {
+				PluginDialog pdialog=new PluginDialog(GDApplet.this);
+				pdialog.setVisible(true);
+				String[] viewDetail=pdialog.getPluginViewDetail();
+				if (viewDetail!=null) {
+					try {
+						URLClassLoader cl = new URLClassLoader(new URL[] { new File(viewDetail[0]).toURL() }, GDApplet.class.getClassLoader());
+						Class<?> c_ = cl.loadClass(viewDetail[1]);
+						JPanel panel=(JPanel)c_.getConstructor(RGui.class).newInstance(GDApplet.this);
+						createView(panel, "plugin view");
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+
 
 	}
 
@@ -3364,6 +3404,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		private void showPopup(MouseEvent e) {
 			JPopupMenu popupMenu = new JPopupMenu();
 
+			
 			popupMenu.add(new AbstractAction("Load Svg From File") {
 				public void actionPerformed(ActionEvent e) {
 					final JFileChooser chooser = new JFileChooser();
