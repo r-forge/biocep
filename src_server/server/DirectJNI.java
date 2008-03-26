@@ -1605,7 +1605,7 @@ public class DirectJNI {
 			resource = resource.substring(1);
 
 		try {
-			final File tempFile = new File(TEMP_DIR + "/" + resource.substring(resource.lastIndexOf('/') + 1)).getCanonicalFile();
+			final File tempFile = new File(TEMP_DIR + "/" + "T"+System.currentTimeMillis()+"_"+resource.substring(resource.lastIndexOf('/') + 1) ).getCanonicalFile();
 			if (tempFile.exists())
 				tempFile.delete();
 

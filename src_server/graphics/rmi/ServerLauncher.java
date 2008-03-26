@@ -8,18 +8,23 @@ import graphics.pop.GDDevice;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.StringWriter;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -34,8 +39,11 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import net.infonode.docking.View;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.python.util.PythonInterpreter;
+
 import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
@@ -63,27 +71,33 @@ public class ServerLauncher {
 	/**
 	 * @param args
 	 */
-
-	
-	private void getFileNames(File path, Vector<String> result) throws java.rmi.RemoteException {
-		File[] files = path.listFiles();
-		if (files == null)
-			return;
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].isDirectory()) {
-				getFileNames(files[i], result);
-			} else {
-				String name = files[i].getName();
-				System.out.println(name);
-			}
-		}
-	}
 	
 	public static void main(String[] args) throws Exception {
-		//File f=new File("J:/workspace/distrib/plugins/test/plugins_test.jar");
-		//System.out.println(getPluginViewsClasses(f.toURL()));
-		new PluginDialog(null).setVisible(true);
-		//new Fi
+
+		PythonInterpreter _pythonInterp=null;
+		
+		StringWriter sw=new StringWriter();
+		try {
+			if (_pythonInterp==null) {
+				_pythonInterp=new PythonInterpreter();
+			}
+			_pythonInterp.setOut(sw);
+			_pythonInterp.setErr(sw);
+
+			_pythonInterp.exec("x=5");
+			_pythonInterp.exec("print x");
+			
+			System.out.println("#######>>>>>>>>:"+sw.toString());
+			//return new String[] { "OK", convertToPrintCommand(sw.toString()) };
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("#######>>>>>>>>:"+sw.toString());
+			//return new String[] { "NOK", convertToPrintCommand(sw.toString()) };
+		} 
+
+		System.exit(0);
+		
+		
 	}
 
 	private static void createAndShowGUI() throws Exception {
@@ -153,19 +167,21 @@ public class ServerLauncher {
 		Context root = new Context(server, "/", Context.SESSIONS);
 		root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 		server.start();
+		
+		
 
 		while (!server.isStarted()) {
 			try {
 				Thread.sleep(20);
-			} catch (Exception e) {
+			} catch (Exception ex) {
 			}
 		}
 
+		
 		new Thread(new Runnable() {
 			public void run() {
 				try {
 					LocateRegistry.createRegistry(rmiregistryPort);
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -473,6 +489,11 @@ public class ServerLauncher {
 	static JProgressBar createRProgressBar;
 	static JFrame createRProgressFrame;
 
+	public static RServices createR() throws Exception {
+		runServers(PoolUtils.getLocalTomcatPort(), PoolUtils.getLocalRmiRegistryPort());
+		return createR(false, "127.0.0.1", PoolUtils.getLocalTomcatPort(), "127.0.0.1" , PoolUtils.getLocalRmiRegistryPort(), 256,256,false);
+	}
+	
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
 			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws Exception {
 
@@ -970,56 +991,31 @@ public class ServerLauncher {
 	public static void killSshProcess(String processId, String sshHostIp, String sshLogin, String sshPwd, boolean forcedKill) throws Exception {
 		SSHUtils.killSshProcess(processId, sshHostIp, sshLogin, sshPwd, forcedKill);
 	}
-	/*
-	 * public static void main(String[] args) { // Create a new JFrame. JFrame f =
-	 * new JFrame("Batik"); ServerLauncher app = new ServerLauncher(f);
-	 *  // Add components to the frame.
-	 * f.getContentPane().add(app.createComponents());
-	 *  // Display the frame. f.addWindowListener(new WindowAdapter() { public
-	 * void windowClosing(WindowEvent e) { System.exit(0); } }); f.setSize(400,
-	 * 400); f.setVisible(true); }
-	 *  // The frame. protected JFrame frame;
-	 *  // The "Load" button, which displays up a file chooser upon clicking.
-	 * protected JButton button = new JButton("Load...");
-	 *  // The status label. protected JLabel label = new JLabel();
-	 *  // The SVG canvas. protected JSVGCanvas svgCanvas = new JSVGCanvas();
-	 * 
-	 * public ServerLauncher(JFrame f) { frame = f; }
-	 * 
-	 * public JComponent createComponents() { // Create a panel and add the
-	 * button, status label and the SVG canvas. final JPanel panel = new
-	 * JPanel(new BorderLayout());
-	 * 
-	 * JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT)); p.add(button);
-	 * p.add(label);
-	 * 
-	 * panel.add("North", p); panel.add("Center", svgCanvas);
-	 *  // Set the button action. button.addActionListener(new ActionListener() {
-	 * public void actionPerformed(ActionEvent ae) { try { svgCanvas.setURI(new
-	 * File("c:/Rplots.svg").toURL().toString()); } catch (Exception e) {
-	 * e.printStackTrace(); } } });
-	 *  // Set the JSVGCanvas listeners.
-	 * svgCanvas.addSVGDocumentLoaderListener(new SVGDocumentLoaderAdapter() {
-	 * public void documentLoadingStarted(SVGDocumentLoaderEvent e) {
-	 * label.setText("Document Loading..."); }
-	 * 
-	 * public void documentLoadingCompleted(SVGDocumentLoaderEvent e) {
-	 * label.setText("Document Loaded."); } });
-	 * 
-	 * svgCanvas.addGVTTreeBuilderListener(new GVTTreeBuilderAdapter() { public
-	 * void gvtBuildStarted(GVTTreeBuilderEvent e) { label.setText("Build
-	 * Started..."); }
-	 * 
-	 * public void gvtBuildCompleted(GVTTreeBuilderEvent e) {
-	 * label.setText("Build Done."); frame.pack(); } });
-	 * 
-	 * svgCanvas.addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
-	 * public void gvtRenderingPrepare(GVTTreeRendererEvent e) {
-	 * label.setText("Rendering Started..."); }
-	 * 
-	 * public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
-	 * label.setText(""); } });
-	 * 
-	 * return panel; }
-	 */
+	
+	static private void getFileNames(File path, Vector<String> result) throws Exception {
+		File[] files = path.listFiles(new FileFilter(){
+			public boolean accept(File pathname) {
+				return pathname.isDirectory() || pathname.toString().toLowerCase().endsWith(".java") || pathname.toString().toLowerCase().endsWith(".r")  || pathname.toString().toLowerCase().endsWith("build.xml");
+			}			
+		});
+		if (files == null)
+			return;
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].isDirectory()) {
+				getFileNames(files[i], result);
+			} else {
+				String name = files[i].getAbsolutePath();
+				System.out.println(name+" --> "+countLines(name) );
+				result.add(name);
+			}
+		}
+	}
+	
+	static int countLines(String fileName) throws Exception {
+		BufferedReader br=new BufferedReader(new FileReader(fileName));
+		String line=null; int counter=0;
+		while ((line=br.readLine())!=null) ++counter;
+		return counter;
+	}
+	
 }

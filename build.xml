@@ -205,6 +205,7 @@
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>
+				<pathelement path="lib/desktop/jython.jar"/>
 				<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
 				
 				
@@ -573,7 +574,7 @@
 		<if><not><isset property="localtomcat.port"/></not><then><property name="localtomcat.port" value="9999"/></then></if>
 		<if><not><isset property="url"/></not><then><property name="url" value=""/></then></if>
 		<if><not><isset property="name"/></not><then><property name="name" value=""/></then></if>
-		<if><not><isset property="save"/></not><then><property name="save" value="true"/></then></if>
+		<if><not><isset property="save"/></not><then><property name="save" value="false"/></then></if>
 
 		<if><not><isset property="registryhost"/></not><then><property name="registryhost" value=""/></then></if>
 		<if><not><isset property="registryport"/></not><then><property name="registryport" value=""/></then></if>		
@@ -598,6 +599,7 @@
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>
+				<pathelement path="lib/desktop/jython.jar"/>
 				<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
 
 	
@@ -636,8 +638,9 @@
 				<pathelement path="lib/svg/xml-apis.jar"/>
 				<pathelement path="lib/svg/xml-apis-ext.jar"/>				
 				
-				<!--optional-->
+				<!--
 				<pathelement path="VirtualRWorkbench/distrib/mapping.jar"/>
+				-->
 				
 			</classpath>
 			
@@ -718,6 +721,7 @@
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>
+				<pathelement path="lib/desktop/jython.jar"/>
 				<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
 
 				<pathelement path="lib/svg/batik-anim.jar"/>
