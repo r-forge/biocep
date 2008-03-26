@@ -19,7 +19,10 @@ package server;
 
 import graphics.rmi.RClustserInterface;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
@@ -45,6 +48,7 @@ import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
+import org.python.util.PythonInterpreter;
 
 import remoting.RAction;
 import remoting.RCallback;
@@ -574,9 +578,19 @@ public abstract class RListener {
 		for (int i = 0; i < s.length(); ++i) {
 			char si = s.charAt(i);
 			if (si == '\n') {
-				result.append("\",quote=FALSE);print(\"");
+				if (i==s.length()-1) {
+
+				} else {
+					result.append("\",quote=FALSE);print(\"");
+				}
 			} else if (si == '\"') {
 				result.append("\\'");
+			} else if (si == '\t') {
+				result.append("    ");
+			} else if (si == '\r') {
+				result.append("");
+			} else if (si == '\\') {
+				result.append("/");
 			} else {
 				result.append(si);
 			}
@@ -584,5 +598,25 @@ public abstract class RListener {
 		result.append("\",quote=FALSE);");
 		return result.toString();
 	}
+	
+	public static PythonInterpreter _pythonInterp = null;	    
+	public static String[] pythonExec(String command) {
+		StringWriter sw=new StringWriter();
+		try {
+			if (_pythonInterp==null) {
+				_pythonInterp=new PythonInterpreter();
+			}
+			_pythonInterp.setOut(sw);
+			_pythonInterp.setErr(sw);
+			_pythonInterp.exec(command);
+			System.out.println("#>>>:"+sw.toString());
+			return new String[] { "OK", convertToPrintCommand(sw.toString()) };
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("#>>>:"+sw.toString());
+			return new String[] { "NOK", convertToPrintCommand(sw.toString()) };
+		} 
+	}
+
 
 }

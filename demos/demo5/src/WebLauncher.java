@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.util.Arrays;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import javax.xml.ws.Endpoint;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.PropertyConfigurator;
-import org.bioconductor.packages.rGlobalEnv.RGlobalEnvFunctionWeb;
-import org.bioconductor.packages.rGlobalEnv.RGlobalEnvFunctionWebServiceLocator;
-import org.bioconductor.packages.rGlobalEnv.RInteger;
-import org.bioconductor.packages.rGlobalEnv.RNumeric;
-
-import remoting.RServices;
 import server.DirectJNI;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class WebLauncher {
 

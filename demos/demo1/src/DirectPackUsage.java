@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +21,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.util.Vector;
-
 import javax.swing.JFrame;
-
 import org.apache.batik.swing.JSVGCanvas;
 import org.bioconductor.packages.biobase.ExpressionSet;
 import org.bioconductor.packages.rGlobalEnv.Point;
 import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
-import org.bioconductor.packages.rservices.RInteger;
 import org.bioconductor.packages.rservices.RNamedArgument;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.vsn.Vsn;
@@ -38,7 +36,7 @@ import server.DirectJNI;
 import util.Utils;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class DirectPackUsage {
 
@@ -51,7 +49,7 @@ public class DirectPackUsage {
 
 		
 	
-		Vector<String> result=r.evalAndGetSvg("plot(rnorm(100))");
+		Vector<String> result=r.evalAndGetSvg("plot(rnorm(100))",100,100);
 		System.out.println(result);
 		String tempFile=System.getProperty("java.io.tmpdir")+"/svgview"+System.currentTimeMillis()+".svg";
 		PrintWriter pw=new PrintWriter(new FileWriter(tempFile));

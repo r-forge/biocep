@@ -273,6 +273,7 @@
 							<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 							<pathelement path="lib/desktop/activation.jar"/>
 							<pathelement path="lib/desktop/mail.jar"/>
+							<pathelement path="lib/desktop/jython.jar"/>
 							<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
 														
 							<pathelement path="lib/desktop/idw-gpl.jar"/>
@@ -416,6 +417,7 @@
 						<fileset dir="lib/desktop" includes="jetty-6.1.8.jar"/>
 				  		<fileset dir="lib/desktop" includes="activation.jar"/>
 				  		<fileset dir="lib/desktop" includes="mail.jar"/>
+				  		<fileset dir="lib/desktop" includes="jython.jar"/>
 				  		<fileset dir="lib/desktop" includes="swing-layout-1.0.3.jar"/>
 				  	
 					  	<fileset dir="lib/svg" includes="batik-anim.jar"/>
@@ -529,7 +531,8 @@
 		<unjar src="lib/desktop/jetty-util-6.1.8.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
 		<unjar src="lib/desktop/jetty-6.1.8.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>				
 		<unjar src="lib/desktop/activation.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
-		<unjar src="lib/desktop/mail.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
+		<unjar src="lib/desktop/mail.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/desktop/jython.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
 		<unjar src="lib/desktop/swing-layout-1.0.3.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
 		<unjar src="lib/svg/batik-anim.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
 		<unjar src="lib/svg/batik-awt-util.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>

@@ -1,5 +1,7 @@
 <!--
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +16,7 @@
  * limitations under the License.
  * 
  *		
- * author Karim Chine   kchine@ebi.ac.uk
+ * author Karim Chine   k.chine@ebi.ac.uk
 -->
 <project name="demo1" default="compile" basedir="../.." >	
 	<import file="../../build.xml"/>
@@ -51,6 +53,7 @@
 				<pathelement path="lib/svg/batik-parser.jar"/>
 				<pathelement path="lib/svg/batik-script.jar"/>
 				<pathelement path="lib/svg/batik-svg-dom.jar"/>
+				<pathelement path="lib/svg/batik-svggen.jar"/>
 				<pathelement path="lib/svg/batik-swing.jar"/>
 				<pathelement path="lib/svg/batik-util.jar"/>
 				<pathelement path="lib/svg/batik-xml.jar"/>
@@ -84,6 +87,7 @@
 				<pathelement path="lib/svg/batik-parser.jar"/>
 				<pathelement path="lib/svg/batik-script.jar"/>
 				<pathelement path="lib/svg/batik-svg-dom.jar"/>
+				<pathelement path="lib/svg/batik-svggen.jar"/>
 				<pathelement path="lib/svg/batik-swing.jar"/>
 				<pathelement path="lib/svg/batik-util.jar"/>
 				<pathelement path="lib/svg/batik-xml.jar"/>

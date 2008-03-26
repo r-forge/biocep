@@ -212,3 +212,17 @@ stopCluster <- function( cl )  {
 	}
 }
 
+pythonExec <- function( exp )  {  
+	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"pythonExec", exp ); 
+	if (result[1]=='OK') {		
+		if (result[2]!="") { eval(parse("", text=result[2])) } else {return(invisible(NULL)); }
+	} else {
+		if (result[2]!="") {eval(parse("", text=result[2])) } else {return(invisible(NULL)); }
+	}
+}
+
+aaa <- function( exp )  {  
+	return(invisible(NULL)); 
+}
+
+q<-function (save = "default", status = 0, runLast = TRUE) {'quit not allowed in this context'}
