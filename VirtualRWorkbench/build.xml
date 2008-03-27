@@ -401,7 +401,10 @@
 				  </copy>
 				
 				  <copy todir="VirtualRWorkbench/frontendapp/appletlibs">
-						<fileset dir="" includes="RJB.jar"/>					  
+				  	
+						<fileset dir="" includes="RJB.jar"/>
+				  	
+						<!--				  	
 						<fileset dir="lib/log" includes="commons-logging-1.1.jar"/>	
 						<fileset dir="lib/log" includes="log4j-1.2.14.jar"/>	
 						<fileset dir="lib/j2ee" includes="commons-codec-1.3.jar"/>
@@ -411,15 +414,13 @@
 				  		<fileset dir="lib/desktop" includes="jeditmodes.jar"/>
 				  		<fileset dir="lib/desktop" includes="pf-joi-full.jar"/>
 						<fileset dir="lib/desktop" includes="OpenXLS.jar"/>
-				  	
 						<fileset dir="lib/desktop" includes="servlet-api-2.5-6.1.8.jar"/>
 				  		<fileset dir="lib/desktop" includes="jetty-util-6.1.8.jar"/>
 						<fileset dir="lib/desktop" includes="jetty-6.1.8.jar"/>
 				  		<fileset dir="lib/desktop" includes="activation.jar"/>
 				  		<fileset dir="lib/desktop" includes="mail.jar"/>
 				  		<fileset dir="lib/desktop" includes="jython.jar"/>
-				  		<fileset dir="lib/desktop" includes="swing-layout-1.0.3.jar"/>
-				  	
+				  		<fileset dir="lib/desktop" includes="swing-layout-1.0.3.jar"/>				  	
 					  	<fileset dir="lib/svg" includes="batik-anim.jar"/>
 					  	<fileset dir="lib/svg" includes="batik-awt-util.jar"/>
 					  	<fileset dir="lib/svg" includes="batik-bridge.jar"/>
@@ -438,18 +439,14 @@
 					  	<fileset dir="lib/svg" includes="batik-xml.jar"/>
 					  	<fileset dir="lib/svg" includes="js.jar"/>
 					  	<fileset dir="lib/svg" includes="xml-apis.jar"/>
-					  	<fileset dir="lib/svg" includes="xml-apis-ext.jar"/>	
-				  	
+					  	<fileset dir="lib/svg" includes="xml-apis-ext.jar"/>					  	
 						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>									
 						<fileset dir="lib/desktop" includes="JRI.jar"/>
 				  		<fileset dir="lib/jdbc" includes="derbyclient.jar"/>
 				  		<fileset dir="lib/pool" includes="ganymed-ssh2.jar"/>
 				  		<fileset dir="lib/pool" includes="edtftpj.jar"/>
-				  	
-				  	
-				  	
-				  	
 						<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
+						-->
 				  </copy>
 				
 				
@@ -494,8 +491,54 @@
 				 -->
 
 				<signjar destDir="VirtualRWorkbench/frontendapp/appletlibs" alias="appletsigningkey" keystore="VirtualRWorkbench/appletKeyStore.ks"  storepass="emblebi" >
-				  <path>					  
-					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="**/*.jar" />					
+					
+				  <path>				  	
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="RJB.jar"/>
+				  	
+				  	<!--
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-logging-1.1.jar"/>	
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="log4j-1.2.14.jar"/>	
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-codec-1.3.jar"/>
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-httpclient-3.1-rc1.jar"/>					  					  
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="idw-gpl.jar"/>				  		
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jedit.jar"/>				  		
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jeditmodes.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="pf-joi-full.jar"/>
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="OpenXLS.jar"/>
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="servlet-api-2.5-6.1.8.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jetty-util-6.1.8.jar"/>
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jetty-6.1.8.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="activation.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mail.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jython.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="swing-layout-1.0.3.jar"/>				  	
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-anim.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-awt-util.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-bridge.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-css.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-dom.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-ext.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-extension.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-gui-util.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-gvt.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-parser.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-script.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-svg-dom.jar"/>
+			  	    <fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-svggen.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-swing.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-util.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-xml.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="js.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="xml-apis.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="xml-apis-ext.jar"/>					  	
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="htmlparser.jar"/>									
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="JRI.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="derbyclient.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="ganymed-ssh2.jar"/>
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="edtftpj.jar"/>
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
+					-->
+				
 				  </path>
 				</signjar>
 				

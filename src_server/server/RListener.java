@@ -18,17 +18,13 @@
 package server;
 
 import graphics.rmi.RClustserInterface;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
-
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -36,7 +32,6 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RChar;
@@ -48,8 +43,13 @@ import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
+import org.python.core.PyComplex;
+import org.python.core.PyException;
+import org.python.core.PyFloat;
+import org.python.core.PyInteger;
+import org.python.core.PyLong;
+import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
-
 import remoting.RAction;
 import remoting.RCallback;
 import remoting.RServices;
@@ -599,7 +599,8 @@ public abstract class RListener {
 		return result.toString();
 	}
 	
-	public static PythonInterpreter _pythonInterp = null;	    
+	public static PythonInterpreter _pythonInterp = null;
+	public static String _lastPythonStatus = null;
 	public static String[] pythonExec(String command) {
 		StringWriter sw=new StringWriter();
 		try {
@@ -609,14 +610,68 @@ public abstract class RListener {
 			_pythonInterp.setOut(sw);
 			_pythonInterp.setErr(sw);
 			_pythonInterp.exec(command);
-			System.out.println("#>>>:"+sw.toString());
-			return new String[] { "OK", convertToPrintCommand(sw.toString()) };
+			_lastPythonStatus=sw.toString();
+			System.out.println("#>>>:"+_lastPythonStatus);
+			return new String[] { "OK", convertToPrintCommand(_lastPythonStatus) };
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("#>>>:"+sw.toString());
-			return new String[] { "NOK", convertToPrintCommand(sw.toString()) };
+			return new String[] { "NOK", convertToPrintCommand(_lastPythonStatus) };
 		} 
 	}
 
+	public static String[] pythonEval(String expression) {
+		StringWriter sw=new StringWriter();
+		try {
+			if (_pythonInterp==null) {
+				_pythonInterp=new PythonInterpreter();
+			}
+			_pythonInterp.setOut(sw);
+			_pythonInterp.setErr(sw);
+			
+			
+			
+			PyObject pyObject=_pythonInterp.eval(expression);
+			if (pyObject!=null) {
+				System.out.println("Python Object Class ::"+pyObject.getClass().getName());
+				RObject v=null;
+				if (pyObject instanceof PyInteger) {
+					v=new RInteger(((PyInteger)pyObject).getValue());
+				} else if (pyObject instanceof PyLong) {
+					v=new RInteger(((PyLong)pyObject).getValue().intValue());
+				} else if (pyObject instanceof PyFloat) {
+					v=new RNumeric(((PyFloat)pyObject).getValue());
+				} else if (pyObject instanceof PyFloat) {
+					v=new RNumeric(((PyFloat)pyObject).getValue());
+				} else if (pyObject instanceof PyComplex) {
+					v=new RComplex(new double[]{((PyComplex)pyObject).getReal().getValue()},new double[]{((PyComplex)pyObject).getImag().getValue()},null,null);
+				} 
+				
+				
+				if (v!=null) {
+					DirectJNI.getInstance().putObjectAndAssignName(v, "pythonEvalResult", true);
+					_lastPythonStatus=sw.toString();
+					return new String[] { "OK", convertToPrintCommand(_lastPythonStatus) };
+				} else {
+					_lastPythonStatus="The python type <"+pyObject.getClass().getName()+"> cannot be imported to R";
+					throw new Exception(_lastPythonStatus);
+				}
+			} else {
+				DirectJNI.getInstance().getRServices().evaluate("pythonEvalResult<-NULL");
+				_lastPythonStatus=sw.toString();
+				return new String[] { "OK", convertToPrintCommand(_lastPythonStatus) };
+			}
+			
+			
+		} catch (Exception e) {
+			if (e instanceof PyException) {
+				_lastPythonStatus=e.toString();
+			} else {
+				e.printStackTrace();
+				_lastPythonStatus=e.getMessage();
+			}
+			return new String[] { "NOK", convertToPrintCommand(_lastPythonStatus) };
+		} 
+	}
 
 }

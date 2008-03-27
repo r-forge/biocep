@@ -221,6 +221,17 @@ pythonExec <- function( exp )  {
 	}
 }
 
+pythonEval <- function( exp )  {  
+	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"pythonEval", exp ); 
+	if (result[1]=='OK') {
+		res<-.PrivateEnv$pythonEvalResult;
+		rm('pythonEvalResult', envir=.PrivateEnv);	
+		res;
+	} else {
+		if (result[2]!="") {eval(parse("", text=result[2])) } else {return(invisible(NULL)); }
+	}
+}
+
 aaa <- function( exp )  {  
 	return(invisible(NULL)); 
 }
