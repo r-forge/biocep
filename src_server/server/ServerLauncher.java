@@ -1,11 +1,9 @@
-package graphics.rmi;
+package server;
 
 import static uk.ac.ebi.microarray.pools.PoolUtils.isMacOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
-import graphics.pop.GDDevice;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -24,16 +22,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import net.infonode.docking.View;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -60,13 +55,13 @@ import ch.ethz.ssh2.StreamGobbler;
  * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class ServerLauncher {
-
+	public static String INSTALL_DIR = new File(System.getProperty("user.home") + "/RWorkbench/").getAbsolutePath() + "/";
 	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
 	public static int BUFFER_SIZE = 8192 * 5;
-
-	/**
-	 * @param args
-	 */
+	private static final String RLIBSTART = "R$LIB$START";
+	private static final String RLIBEND = "R$LIB$END";
+	private static final String RVERSTART = "R$VER$START";
+	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
 
@@ -84,76 +79,20 @@ public class ServerLauncher {
 
 			System.out.println("иии>" + po);
 			System.out.println("#######>>>>:" + sw.toString());
-			//return new String[] { "OK", convertToPrintCommand(sw.toString()) };
+			// return new String[] { "OK", convertToPrintCommand(sw.toString())
+			// };
 		} catch (PyException e) {
-			//System.out.println(PoolUtils.getStackTraceAsString(e));
-			//new Exception().printStackTrace();
+			// System.out.println(PoolUtils.getStackTraceAsString(e));
+			// new Exception().printStackTrace();
 			System.out.println(">>" + e.toString() + "<<");
 
 			System.out.println("#######>>>>>>>>:" + sw.toString());
-			//return new String[] { "NOK", convertToPrintCommand(sw.toString()) };
+			// return new String[] { "NOK", convertToPrintCommand(sw.toString())
+			// };
 		}
 
 		System.exit(0);
 
-	}
-
-	private static void createAndShowGUI() throws Exception {
-
-		ServerLauncher.runServers(3000, 3001);
-		final RServices r = ServerLauncher.createRLocal(false, "127.0.0.1", 3000, "127.0.0.1", 3001, 256, 256, false);
-		final ReentrantLock lock = new ReentrantLock();
-		final String processId = r.getProcessId();
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-			public void run() {
-				try {
-					ServerLauncher.killLocalWinProcess(processId, true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}));
-		RGui rgui = new RGui() {
-			public View createView(Component panel, String title) {
-				return null;
-			}
-
-			public ConsoleLogger getConsoleLogger() {
-				return null;
-			}
-
-			public GDDevice getCurrentDevice() {
-				return null;
-			}
-
-			public JGDPanelPop getCurrentJGPanelPop() {
-				return null;
-			}
-
-			public Component getRootComponent() {
-				return null;
-			}
-
-			public void setCurrentDevice(GDDevice device) {
-			}
-
-			public RServices getR() {
-				return r;
-			}
-
-			public ReentrantLock getRLock() {
-				return lock;
-			}
-		};
-
-		JFrame frame = new JFrame("R Workbench Plugins");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		JLabel label = new JLabel("Hello World");
-		frame.getContentPane().add(label);
-
-		frame.pack();
-		frame.setVisible(true);
 	}
 
 	static JTextArea createRSshProgressArea;
@@ -522,9 +461,9 @@ public class ServerLauncher {
 		try {
 			String urlprefix = null;
 			try {
-				Class<?> ServiceManagerClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.ServiceManager");
+				Class<?> ServiceManagerClass = ServerLauncher.class.getClassLoader().loadClass("javax.jnlp.ServiceManager");
 				Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null, "javax.jnlp.BasicService");
-				Class<?> BasicServiceClass = GDDesktopLauncher.class.getClassLoader().loadClass("javax.jnlp.BasicService");
+				Class<?> BasicServiceClass = ServerLauncher.class.getClassLoader().loadClass("javax.jnlp.BasicService");
 				urlprefix = BasicServiceClass.getMethod("getCodeBase").invoke(basicServiceInstance).toString();
 			} catch (Exception e) {
 
@@ -536,7 +475,7 @@ public class ServerLauncher {
 			if (urlprefix != null) {
 				rjbURL = new URL(urlprefix + "appletlibs/RJB.jar");
 			} else {
-				String thisUrl = ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class").toString();
+				String thisUrl = ServerLauncher.class.getResource("/server/ServerLauncher.class").toString();
 				if (thisUrl.indexOf("http:") != -1) {
 
 					if (thisUrl.indexOf("RJB.jar") != -1) {
@@ -551,10 +490,10 @@ public class ServerLauncher {
 				urlprefix = "http://biocep.r-forge.r-project.org/appletlibs/";
 			}
 
-			String root = GUtils.INSTALL_DIR;
+			String root = INSTALL_DIR;
 			new File(root).mkdir();
 
-			String[] rinfo = GUtils.getRInfo(null);
+			String[] rinfo = getRInfo(null);
 			System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
 
 			/*
@@ -838,7 +777,8 @@ public class ServerLauncher {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryhost=" + rmiRegistryHostIp + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
 
-				command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+ (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"
+						+ (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=DEBUG,A1,A2" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
@@ -972,6 +912,180 @@ public class ServerLauncher {
 		SSHUtils.killSshProcess(processId, sshHostIp, sshLogin, sshPwd, forcedKill);
 	}
 
+	public static String[] getRInfo(String rhome) {
+
+		File getInfoFile = new File(INSTALL_DIR + "getInfo.R");
+
+		File getInfoOutputFile = new File(INSTALL_DIR + "getInfo.Rout");
+
+		String rversion = null;
+
+		String rlibraypath = null;
+
+		try {
+
+			FileWriter fw = new FileWriter(getInfoFile);
+
+			PrintWriter pw = new PrintWriter(fw);
+
+			pw.println("paste('" + RLIBSTART + "',.Library, '" + RLIBEND + "',sep='%')");
+
+			pw.println("paste('" + RVERSTART + "', R.version.string , '" + RVEREND + "', sep='%')");
+
+			fw.close();
+
+			Vector<String> getInfoCommand = new Vector<String>();
+
+			if (rhome != null) {
+				getInfoCommand.add(rhome + "bin/R");
+				getInfoCommand.add("CMD");
+				getInfoCommand.add("BATCH");
+				getInfoCommand.add("--no-save");
+				getInfoCommand.add(getInfoFile.getAbsolutePath());
+				getInfoCommand.add(getInfoOutputFile.getAbsolutePath());
+
+			} else {
+
+				if (isWindowsOs()) {
+
+					getInfoCommand.add(System.getenv().get("ComSpec"));
+					getInfoCommand.add("/C");
+					getInfoCommand.add("R");
+					getInfoCommand.add("CMD");
+					getInfoCommand.add("BATCH");
+					getInfoCommand.add("--no-save");
+					getInfoCommand.add(getInfoFile.getAbsolutePath());
+					getInfoCommand.add(getInfoOutputFile.getAbsolutePath());
+
+				} else {
+					getInfoCommand.add(/* System.getenv().get("SHELL") */"/bin/sh");
+					getInfoCommand.add("-c");
+					getInfoCommand.add("R CMD BATCH --no-save " + getInfoFile.getAbsolutePath() + " " + getInfoOutputFile.getAbsolutePath());
+				}
+			}
+
+			Vector<String> systemEnvVector = new Vector<String>();
+			{
+
+				Map<String, String> osenv = System.getenv();
+
+				Map<String, String> env = new HashMap<String, String>(osenv);
+
+				for (String k : env.keySet()) {
+
+					systemEnvVector.add(k + "=" + env.get(k));
+
+				}
+
+			}
+
+			System.out.println("exec->" + getInfoCommand);
+
+			System.out.println(systemEnvVector);
+
+			final Process getInfoProc = Runtime.getRuntime().exec(getInfoCommand.toArray(new String[0]),
+
+			systemEnvVector.toArray(new String[0]));
+
+			new Thread(new Runnable() {
+
+				public void run() {
+
+					try {
+
+						BufferedReader br = new BufferedReader(new InputStreamReader(getInfoProc.getErrorStream()));
+
+						String line = null;
+
+						while ((line = br.readLine()) != null) {
+
+							System.out.println(line);
+
+						}
+
+					} catch (Exception e) {
+
+						e.printStackTrace();
+
+					}
+
+				}
+
+			}).start();
+
+			new Thread(new Runnable() {
+
+				public void run() {
+
+					try {
+
+						BufferedReader br = new BufferedReader(new InputStreamReader(getInfoProc.getInputStream()));
+
+						String line = null;
+
+						while ((line = br.readLine()) != null) {
+
+							System.out.println(line);
+
+						}
+
+					} catch (Exception e) {
+
+						e.printStackTrace();
+
+					}
+
+				}
+
+			}).start();
+
+			getInfoProc.waitFor();
+
+			if (getInfoOutputFile.exists() && getInfoOutputFile.lastModified() > getInfoFile.lastModified()) {
+
+				BufferedReader br = new BufferedReader(new FileReader(getInfoOutputFile));
+
+				String line = null;
+
+				while ((line = br.readLine()) != null) {
+
+					// System.out.println(line);
+
+					if (line.contains(RLIBSTART + "%")) {
+
+						rlibraypath = line.substring(line.indexOf(RLIBSTART + "%") + (RLIBSTART + "%").length(), (line.indexOf("%" + RLIBEND) > 0 ? line
+								.indexOf("%" + RLIBEND) : line.length()));
+
+					}
+
+					if (line.contains(RVERSTART + "%")) {
+
+						rversion = line.substring(line.indexOf(RVERSTART + "%") + (RVERSTART + "%").length(), line.indexOf("%" + RVEREND));
+
+					}
+
+				}
+
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+		}
+
+		if (rversion != null && rlibraypath != null) {
+
+			return new String[] { rlibraypath, rversion };
+
+		} else {
+
+			return null;
+
+		}
+
+	}
+
 	static private void getFileNames(File path, Vector<String> result) throws Exception {
 		File[] files = path.listFiles(new FileFilter() {
 			public boolean accept(File pathname) {
@@ -1000,5 +1114,4 @@ public class ServerLauncher {
 			++counter;
 		return counter;
 	}
-
 }

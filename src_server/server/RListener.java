@@ -50,6 +50,8 @@ import org.python.core.PyInteger;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
+
+import python.PythonInterpreterSingleton;
 import remoting.RAction;
 import remoting.RCallback;
 import remoting.RServices;
@@ -564,7 +566,6 @@ public abstract class RListener {
 		public String getNodeName() {
 			return _nodeName;
 		}
-
 	}
 
 	private static long CLUSTER_COUNTER = 0;
@@ -599,39 +600,27 @@ public abstract class RListener {
 		return result.toString();
 	}
 	
-	public static PythonInterpreter _pythonInterp = null;
-	public static String _lastPythonStatus = null;
+	
 	public static String[] pythonExec(String command) {
-		StringWriter sw=new StringWriter();
+		
 		try {
-			if (_pythonInterp==null) {
-				_pythonInterp=new PythonInterpreter();
-			}
-			_pythonInterp.setOut(sw);
-			_pythonInterp.setErr(sw);
-			_pythonInterp.exec(command);
-			_lastPythonStatus=sw.toString();
-			System.out.println("#>>>:"+_lastPythonStatus);
-			return new String[] { "OK", convertToPrintCommand(_lastPythonStatus) };
+			
+			PythonInterpreterSingleton.startLogCapture();
+			PythonInterpreterSingleton.getInstance().exec(command);
+			System.out.println("#>>>:"+PythonInterpreterSingleton.getPythonStatus());
+			return new String[] { "OK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
+			
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("#>>>:"+sw.toString());
-			return new String[] { "NOK", convertToPrintCommand(_lastPythonStatus) };
+			return new String[] { "NOK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
 		} 
 	}
 
 	public static String[] pythonEval(String expression) {
-		StringWriter sw=new StringWriter();
+
 		try {
-			if (_pythonInterp==null) {
-				_pythonInterp=new PythonInterpreter();
-			}
-			_pythonInterp.setOut(sw);
-			_pythonInterp.setErr(sw);
 			
-			
-			
-			PyObject pyObject=_pythonInterp.eval(expression);
+			PythonInterpreterSingleton.startLogCapture();
+			PyObject pyObject=PythonInterpreterSingleton.getInstance().eval(expression);
 			if (pyObject!=null) {
 				System.out.println("Python Object Class ::"+pyObject.getClass().getName());
 				RObject v=null;
@@ -650,27 +639,20 @@ public abstract class RListener {
 				
 				if (v!=null) {
 					DirectJNI.getInstance().putObjectAndAssignName(v, "pythonEvalResult", true);
-					_lastPythonStatus=sw.toString();
-					return new String[] { "OK", convertToPrintCommand(_lastPythonStatus) };
+					return new String[] { "OK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
 				} else {
-					_lastPythonStatus="The python type <"+pyObject.getClass().getName()+"> cannot be imported to R";
-					throw new Exception(_lastPythonStatus);
+					PythonInterpreterSingleton.insertLog("The python type <"+pyObject.getClass().getName()+"> cannot be imported to R");
+					throw new Exception();
 				}
 			} else {
 				DirectJNI.getInstance().getRServices().evaluate("pythonEvalResult<-NULL");
-				_lastPythonStatus=sw.toString();
-				return new String[] { "OK", convertToPrintCommand(_lastPythonStatus) };
+				return new String[] { "OK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
 			}
 			
 			
 		} catch (Exception e) {
-			if (e instanceof PyException) {
-				_lastPythonStatus=e.toString();
-			} else {
-				e.printStackTrace();
-				_lastPythonStatus=e.getMessage();
-			}
-			return new String[] { "NOK", convertToPrintCommand(_lastPythonStatus) };
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
 		} 
 	}
 

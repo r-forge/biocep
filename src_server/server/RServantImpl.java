@@ -21,7 +21,6 @@ import graphics.pop.GDDevice;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
 import graphics.rmi.RClustserInterface;
-import graphics.rmi.ServerLauncher;
 import java.io.Serializable;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
@@ -80,6 +79,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	RServices _rCreationPb = new RServicesObject();
 
+	public static RServices _instance=null;
+	
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RServantImpl.class);
 
 	public String runR(ExecutionUnit eu) {
@@ -207,7 +208,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				}
 
 			});
-
+			
+			_instance=(RServices)java.rmi.server.RemoteObject.toStub(this);
 			_isReady = true;
 
 		} catch (Exception ex) {
@@ -668,5 +670,35 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().evalAndGetSvg(expression, width, height);
 	}
 
+	public String getPythonStatus() throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getPythonStatus();
+	}
 
+	public String pythonExceFromResource(String resource) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().pythonExceFromResource(resource);
+	}
+
+	public String pythonExec(String pythonCommand) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().pythonExec(pythonCommand);
+	}
+
+	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().pythonExecFromBuffer(buffer);
+	}
+
+	public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().pythonExecFromWorkingDirectoryFile(fileName);
+	}
+
+	public RObject pythonEval(String pythonCommand) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().pythonEval(pythonCommand);
+	}
+
+	public RObject pythonGet(String name) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().pythonGet(name);
+	}
+	
+	public void pythonSet(String name, RObject Value) throws RemoteException {
+		DirectJNI.getInstance().getRServices().pythonSet(name, Value);
+	}
 }

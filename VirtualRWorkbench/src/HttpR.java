@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2007 EMBL-EBI
+ * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
+ * Copyright (C) 2008  Imperial College London - Internet Center
+ * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,24 +30,12 @@ import graphics.pop.GDDevice;
 import graphics.rmi.JGDPanelPop;
 import http.RHttpProxy;
 
+/**
+ * @author Karim Chine k.chine@imperial.ac.uk
+ */
 public class HttpR {
 
 	public static void main(String[] args) throws Throwable {
-		{
-			final String cmdUrl = "http://127.0.0.1:9999/cmd";
-			HashMap<String, Object> options = new HashMap<String, Object>();
-			options.put("ooo", "iiii");
-			final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
-			
-			System.out.println("session id : "+sessionId);
-			
-			RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", RServices.class,
-					new HttpClient(new MultiThreadedHttpConnectionManager()));
-			
-		r.consoleSubmit("a<-100");			
-			RHttpProxy.logOff(cmdUrl, sessionId);
-			System.exit(0);
-		}
 		
 		final String cmdUrl = System.getProperty("url");
 		HashMap<String, Object> options = new HashMap<String, Object>();
@@ -54,9 +44,9 @@ public class HttpR {
 		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
 		try {
 
-			RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", RServices.class,
+			RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", new Class<?>[]{RServices.class},
 					new HttpClient(new MultiThreadedHttpConnectionManager()));
-			GDDevice d = (GDDevice) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "device", GDDevice.class,
+			GDDevice d = (GDDevice) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "device", new Class<?>[]{GDDevice.class},
 					new HttpClient(new MultiThreadedHttpConnectionManager()));
 
 			JPanel panel = new JGDPanelPop(d);
