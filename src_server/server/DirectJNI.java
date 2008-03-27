@@ -107,6 +107,8 @@ import org.rosuda.javaGD.JavaGD;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import python.PythonInterpreterSingleton;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -2687,8 +2689,8 @@ public class DirectJNI {
 		}
 
 		public String getPythonStatus() throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
+			return PythonInterpreterSingleton.getPythonStatus();
+			
 		}
 
 		public String pythonExceFromResource(String resource) throws RemoteException {
@@ -2697,8 +2699,14 @@ public class DirectJNI {
 		}
 
 		public String pythonExec(String pythonCommand) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
+			try {				
+				PythonInterpreterSingleton.startLogCapture();
+				PythonInterpreterSingleton.getInstance().exec(pythonCommand);
+				System.out.println("#>>>:"+PythonInterpreterSingleton.getPythonStatus());
+				return PythonInterpreterSingleton.getPythonStatus();				
+			} catch (Exception e) {
+				throw new RemoteException("",e);
+			} 
 		}
 
 		public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException {
