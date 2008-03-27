@@ -4,18 +4,15 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.isMacOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 import graphics.pop.GDDevice;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.StringWriter;
@@ -24,7 +21,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -39,11 +35,11 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import net.infonode.docking.View;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.python.core.PyException;
+import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
-
 import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
@@ -71,33 +67,35 @@ public class ServerLauncher {
 	/**
 	 * @param args
 	 */
-	
+
 	public static void main(String[] args) throws Exception {
 
-		PythonInterpreter _pythonInterp=null;
-		
-		StringWriter sw=new StringWriter();
+		PythonInterpreter _pythonInterp = null;
+
+		StringWriter sw = new StringWriter();
 		try {
-			if (_pythonInterp==null) {
-				_pythonInterp=new PythonInterpreter();
+			if (_pythonInterp == null) {
+				_pythonInterp = new PythonInterpreter();
 			}
 			_pythonInterp.setOut(sw);
 			_pythonInterp.setErr(sw);
 
-			_pythonInterp.exec("x=5");
-			_pythonInterp.exec("print x");
-			
-			System.out.println("#######>>>>>>>>:"+sw.toString());
+			PyObject po = _pythonInterp.eval("HHH");
+
+			System.out.println("иии>" + po);
+			System.out.println("#######>>>>:" + sw.toString());
 			//return new String[] { "OK", convertToPrintCommand(sw.toString()) };
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("#######>>>>>>>>:"+sw.toString());
+		} catch (PyException e) {
+			//System.out.println(PoolUtils.getStackTraceAsString(e));
+			//new Exception().printStackTrace();
+			System.out.println(">>" + e.toString() + "<<");
+
+			System.out.println("#######>>>>>>>>:" + sw.toString());
 			//return new String[] { "NOK", convertToPrintCommand(sw.toString()) };
-		} 
+		}
 
 		System.exit(0);
-		
-		
+
 	}
 
 	private static void createAndShowGUI() throws Exception {
@@ -114,7 +112,7 @@ public class ServerLauncher {
 					e.printStackTrace();
 				}
 			}
-		}));		
+		}));
 		RGui rgui = new RGui() {
 			public View createView(Component panel, String title) {
 				return null;
@@ -167,8 +165,6 @@ public class ServerLauncher {
 		Context root = new Context(server, "/", Context.SESSIONS);
 		root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 		server.start();
-		
-		
 
 		while (!server.isStarted()) {
 			try {
@@ -177,7 +173,6 @@ public class ServerLauncher {
 			}
 		}
 
-		
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -491,9 +486,9 @@ public class ServerLauncher {
 
 	public static RServices createR() throws Exception {
 		runServers(PoolUtils.getLocalTomcatPort(), PoolUtils.getLocalRmiRegistryPort());
-		return createR(false, "127.0.0.1", PoolUtils.getLocalTomcatPort(), "127.0.0.1" , PoolUtils.getLocalRmiRegistryPort(), 256,256,false);
+		return createR(false, "127.0.0.1", PoolUtils.getLocalTomcatPort(), "127.0.0.1", PoolUtils.getLocalRmiRegistryPort(), 256, 256, false);
 	}
-	
+
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
 			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws Exception {
 
@@ -843,29 +838,14 @@ public class ServerLauncher {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryhost=" + rmiRegistryHostIp + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
 
-				/*
-				 * command.add((isWindowsOs() ? "\"" : "") +
-				 * "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") + "-Dlog4j.rootCategory=INFO,A1,A2"+
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"+
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"+
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern=
-				 * [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
-				 * command.add((isWindowsOs() ? "\"" : "") +
-				 * "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"+
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"+
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern=
-				 * [%-5p] - %m%n"+ (isWindowsOs() ? "\"" : ""));
-				 */
+				command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+ (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=DEBUG,A1,A2" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
 
 				command.add("bootstrap.Boot");
 				command.add(new Boolean(keepAlive).toString());
@@ -991,12 +971,13 @@ public class ServerLauncher {
 	public static void killSshProcess(String processId, String sshHostIp, String sshLogin, String sshPwd, boolean forcedKill) throws Exception {
 		SSHUtils.killSshProcess(processId, sshHostIp, sshLogin, sshPwd, forcedKill);
 	}
-	
+
 	static private void getFileNames(File path, Vector<String> result) throws Exception {
-		File[] files = path.listFiles(new FileFilter(){
+		File[] files = path.listFiles(new FileFilter() {
 			public boolean accept(File pathname) {
-				return pathname.isDirectory() || pathname.toString().toLowerCase().endsWith(".java") || pathname.toString().toLowerCase().endsWith(".r")  || pathname.toString().toLowerCase().endsWith("build.xml");
-			}			
+				return pathname.isDirectory() || pathname.toString().toLowerCase().endsWith(".java") || pathname.toString().toLowerCase().endsWith(".r")
+						|| pathname.toString().toLowerCase().endsWith("build.xml");
+			}
 		});
 		if (files == null)
 			return;
@@ -1005,17 +986,19 @@ public class ServerLauncher {
 				getFileNames(files[i], result);
 			} else {
 				String name = files[i].getAbsolutePath();
-				System.out.println(name+" --> "+countLines(name) );
+				System.out.println(name + " --> " + countLines(name));
 				result.add(name);
 			}
 		}
 	}
-	
+
 	static int countLines(String fileName) throws Exception {
-		BufferedReader br=new BufferedReader(new FileReader(fileName));
-		String line=null; int counter=0;
-		while ((line=br.readLine())!=null) ++counter;
+		BufferedReader br = new BufferedReader(new FileReader(fileName));
+		String line = null;
+		int counter = 0;
+		while ((line = br.readLine()) != null)
+			++counter;
 		return counter;
 	}
-	
+
 }

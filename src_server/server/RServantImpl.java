@@ -28,6 +28,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +38,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.Log4JLogger;
+import org.apache.log4j.PropertyConfigurator;
 import org.bioconductor.packages.rservices.RObject;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
@@ -85,6 +88,20 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	public RServantImpl(String name, String prefix, Registry registry) throws RemoteException {
 		super(name, prefix, registry);
+		// --------------
+
+
+			if (log instanceof Log4JLogger) {
+				Properties log4jProperties = new Properties();
+				for (Object sprop : System.getProperties().keySet()) {
+					if (((String) sprop).startsWith("log4j.")) {
+						log4jProperties.put(sprop, System.getProperties().get(sprop));
+					}
+				}
+				PropertyConfigurator.configure(log4jProperties);
+			}
+			
+	
 		init();
 		log.info("Stub:" + PoolUtils.stubToHex(this));
 	}
@@ -650,14 +667,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().evalAndGetSvg(expression, width, height);
 	}
-	// --------------
 
-	/*
-	 * static { if (log instanceof Log4JLogger) { Properties log4jProperties =
-	 * new Properties(); for (Object sprop : System.getProperties().keySet()) {
-	 * if (((String) sprop).startsWith("log4j.")) { log4jProperties.put(sprop,
-	 * System.getProperties().get(sprop)); } }
-	 * PropertyConfigurator.configure(log4jProperties); } }
-	 */
 
 }
