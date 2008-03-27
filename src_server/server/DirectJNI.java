@@ -2686,6 +2686,46 @@ public class DirectJNI {
 			}
 		}
 
+		public String getPythonStatus() throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String pythonExceFromResource(String resource) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String pythonExec(String pythonCommand) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public RObject pythonEval(String pythonCommand) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		public RObject pythonGet(String name) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public void pythonSet(String name, RObject Value) throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
 	};
 
 	public static Vector<RAction> _rActions = new Vector<RAction>();

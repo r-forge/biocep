@@ -275,4 +275,38 @@ public class RServicesObject implements RServices {
 	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
 		return null;
 	}
+
+	public String getPythonStatus() throws RemoteException {
+		return null;
+	}
+
+	public String pythonExceFromResource(String resource) throws RemoteException {
+		return null;
+	}
+
+	public String pythonExec(String pythonCommand) throws RemoteException {
+		return null;
+	}
+
+	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException {
+		return null;
+	}
+
+	public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
+		return null;
+	}
+
+	public RObject pythonEval(String pythonCommand) throws RemoteException {
+		return null;
+	}
+	
+	public RObject pythonGet(String name) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void pythonSet(String name, RObject Value) throws RemoteException {		
+	}
+	
+	
 }

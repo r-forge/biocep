@@ -150,8 +150,11 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
+import server.BadSshHostException;
+import server.BadSshLoginPwdException;
 import server.DirectJNI;
 import server.NoMappingAvailable;
+import server.ServerLauncher;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
@@ -3593,8 +3596,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	HashMap<Integer, DynamicView> dynamicViews = new HashMap<Integer, DynamicView>();
 	View[] views = new View[3];
-	public static String NEW_R_STUB_FILE = GUtils.INSTALL_DIR + "new_R_stub.txt";
-	public static String SETTINGS_FILE = GUtils.INSTALL_DIR + "settings.xml";
+	public static String NEW_R_STUB_FILE = ServerLauncher.INSTALL_DIR + "new_R_stub.txt";
+	public static String SETTINGS_FILE = ServerLauncher.INSTALL_DIR + "settings.xml";
 
 	int getDynamicViewId() {
 		int id = 0;

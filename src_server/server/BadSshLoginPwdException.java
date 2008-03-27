@@ -1,4 +1,4 @@
-package graphics.rmi;
+package server;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk

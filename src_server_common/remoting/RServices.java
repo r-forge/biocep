@@ -104,6 +104,7 @@ public interface RServices extends ManagedServant {
 
 	public Vector<RAction> popRActions() throws java.rmi.RemoteException;
 
+	
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
 
 	public void startHttpServer(int port) throws java.rmi.RemoteException;
@@ -111,7 +112,25 @@ public interface RServices extends ManagedServant {
 	public boolean isHttpServerStarted(int port) throws java.rmi.RemoteException;
 
 	public void stopHttpServer() throws java.rmi.RemoteException;
-
+	
+	
 	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException;
+	
+	
+	public String pythonExec(String pythonCommand) throws RemoteException;
+	
+	public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException;
+	
+	public String pythonExceFromResource(String resource) throws RemoteException;
+
+	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException;
+
+	public RObject pythonEval(String pythonCommand) throws RemoteException;
+	
+	public RObject pythonGet(String name) throws RemoteException;
+	
+	public void pythonSet(String name, RObject Value) throws RemoteException;
+	
+	public String getPythonStatus() throws RemoteException;
 
 }

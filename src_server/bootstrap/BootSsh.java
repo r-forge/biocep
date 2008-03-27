@@ -39,7 +39,7 @@ public class BootSsh {
 			URLClassLoader cl = new URLClassLoader(new URL[] { classServerUrl }, BootSsh.class.getClassLoader());
 			cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils").getMethod("startPortInUseDogwatcher",
 					new Class<?>[] { String.class, int.class, int.class, int.class }).invoke(null, args[1], Integer.decode(args[2]), 3, 3);
-			Class<?> ServerLauncherClass = cl.loadClass("graphics.rmi.ServerLauncher");
+			Class<?> ServerLauncherClass = cl.loadClass("server.ServerLauncher");
 			Remote r = (Remote) ServerLauncherClass.getMethod("createR",
 					new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class, boolean.class }).invoke(
 					null,
