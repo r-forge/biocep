@@ -870,7 +870,7 @@ public class Formula
     	  
     	  boolean isRFunc=false;
     	  try {
-    		  isRFunc=((RLogical)table.getRGui().getR().evalAndGetObject("exists('"+funcName+"')")).getValue()[0];
+    		  isRFunc=((RLogical)table.getRGui().getR().get("exists('"+funcName+"')")).getValue()[0];
     	  } catch (Exception e) {
     		  e.printStackTrace();
     	  }

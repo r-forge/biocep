@@ -533,7 +533,7 @@ public abstract class RListener {
 
 			for (int i = 0; i < cluster.getWorkers().size(); ++i) {
 				RServices r = cluster.getWorkers().elementAt(i);
-				r.putObjectAndAssignName(v, varName);
+				r.putAndAssign(v, varName);
 				String s = r.getStatus();
 				if (s != null && !s.trim().equals(""))
 					feedback.append("worker<" + r.getServantName() + ">:" + s + "\n");

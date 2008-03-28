@@ -148,6 +148,8 @@ import org.gjt.sp.jedit.gui.FloatingWindowContainer;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
+
+import python.server.PythonInterpreterSingleton;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RServices;
@@ -168,7 +170,6 @@ import uk.ac.ebi.microarray.pools.db.monitor.ConsolePanel;
 import uk.ac.ebi.microarray.pools.db.monitor.SubmitInterface;
 import uk.ac.ebi.microarray.pools.db.monitor.SymbolPopDialog;
 import uk.ac.ebi.microarray.pools.db.monitor.SymbolPushDialog;
-import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 import util.PropertiesGenerator;
 import util.Utils;
 import static graphics.rmi.JGDPanelPop.*;
@@ -220,6 +221,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private String _rProcessId = null;
 	Server _virtualizationServer = null;
 	Identification ident = null;
+	
+	public static RGui _instance;
 
 	private final ReentrantLock _protectR = new ReentrantLock() {
 		@Override
@@ -946,8 +949,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 					toolsMenu.add(_actions.get("editor"));
 					toolsMenu.add(_actions.get("spreadsheet"));
 					toolsMenu.add(_actions.get("svgview"));
-					toolsMenu.add(_actions.get("pythonconsole"));
+					toolsMenu.addSeparator();
+					toolsMenu.add(_actions.get("pythonconsole"));	
+					toolsMenu.add(_actions.get("clientpythonconsole"));									
+					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("logview"));
+					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("sourcebioclite"));
 					toolsMenu.add(_actions.get("installpackage"));
 				}
@@ -1646,6 +1653,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}).start();
 
+		
+		_instance=this;
 		System.out.println("INIT ends");
 
 	}
@@ -1703,17 +1712,27 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return null;
 	}
 
-	private PythonConsoleView getOpenedPythonConsoleView() {
+	private ServerPythonConsoleView getOpenedServerPythonConsoleView() {
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
 		while (iter.hasNext()) {
 			DynamicView dv = iter.next();
-			if (dv instanceof PythonConsoleView) {
-				return (PythonConsoleView) dv;
+			if (dv instanceof ServerPythonConsoleView) {
+				return (ServerPythonConsoleView) dv;
 			}
 		}
 		return null;
 	}
-	
+
+	private ClientPythonConsoleView getOpenedClientPythonConsoleView() {
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof ClientPythonConsoleView) {
+				return (ClientPythonConsoleView) dv;
+			}
+		}
+		return null;
+	}
 	private void setHelpBrowserURL(String url) {
 		GDHelpBrowser openedBrowser = getOpenedBrowser();
 		if (openedBrowser == null) {
@@ -1921,7 +1940,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private void persistState() {
 		try {
 			PropertiesGenerator.main(new String[] { GDApplet.SETTINGS_FILE,
-					"working.dir.root=" + ((RChar) _rForConsole.evalAndGetObject("getwd()")).getValue()[0],
+					"working.dir.root=" + ((RChar) _rForConsole.get("getwd()")).getValue()[0],
 					"command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()) });
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2804,10 +2823,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		_actions.put("pythonconsole", new AbstractAction("Python Console") {
 			public void actionPerformed(final ActionEvent e) {
-				if (getOpenedPythonConsoleView() == null) {
+				if (getOpenedServerPythonConsoleView() == null) {
 					int id = getDynamicViewId();
 
-					final PythonConsoleView lv = new PythonConsoleView("Python Console", null, id);
+					final ServerPythonConsoleView lv = new ServerPythonConsoleView("Python Console", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new DockingWindowListener() {
 						public void viewFocusChanged(View arg0, View arg1) {
@@ -2874,6 +2893,79 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+
+		_actions.put("clientpythonconsole", new AbstractAction("Local Python Console") {
+			public void actionPerformed(final ActionEvent e) {
+				if (getOpenedClientPythonConsoleView() == null) {
+					int id = getDynamicViewId();
+
+					final ClientPythonConsoleView lv = new ClientPythonConsoleView("Local Python Console", null, id);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+					lv.addListener(new DockingWindowListener() {
+						public void viewFocusChanged(View arg0, View arg1) {
+						}
+
+						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowClosed(DockingWindow arg0) {
+						}
+
+						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+							try {
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+
+						public void windowDocked(DockingWindow arg0) {
+						}
+
+						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowHidden(DockingWindow arg0) {
+						}
+
+						public void windowMaximized(DockingWindow arg0) {
+						}
+
+						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowMinimized(DockingWindow arg0) {
+						}
+
+						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowRestored(DockingWindow arg0) {
+						}
+
+						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowShown(DockingWindow arg0) {
+						}
+
+						public void windowUndocked(DockingWindow arg0) {
+						}
+
+						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+					});
+
+				}
+			}
+
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+		
 		
 		_actions.put("inspect", new AbstractAction("Inspect") {
 			public void actionPerformed(final ActionEvent e) {
@@ -2890,7 +2982,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											RObject robj = null;
 											try {
 												((JGDPanelPop) _graphicPanel).setAutoModes(true, false);
-												robj = _rForConsole.evalAndGetObject(dialog.getExpr());
+												robj = _rForConsole.get(dialog.getExpr());
 											} catch (NoMappingAvailable re) {
 												JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), re.getMessage(), "R Error",
 														JOptionPane.ERROR_MESSAGE);
@@ -3225,7 +3317,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			try {
 				_rForConsole.reset();
 			} catch (Exception e) {
-				System.out.println("333333333333333333333333333");
 				e.printStackTrace();
 			}
 			if (_sshParameters == null) {
@@ -3425,10 +3516,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 	
-	class PythonConsoleView extends DynamicView {
+	class ServerPythonConsoleView extends DynamicView {
 		ConsolePanel _consolePanel;
 
-		PythonConsoleView(String title, Icon icon, int id) {
+		ServerPythonConsoleView(String title, Icon icon, int id) {
 			super(title, icon, new JPanel(), id);
 			((JPanel) getComponent()).setLayout(new BorderLayout());
 			_consolePanel = new ConsolePanel(new SubmitInterface(){
@@ -3455,6 +3546,41 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
+	class ClientPythonConsoleView extends DynamicView {
+		ConsolePanel _consolePanel;
+
+		ClientPythonConsoleView(String title, Icon icon, int id) {
+			super(title, icon, new JPanel(), id);
+			((JPanel) getComponent()).setLayout(new BorderLayout());
+			_consolePanel = new ConsolePanel(new SubmitInterface(){
+				public String submit(final String expression) {
+					if (getRLock().isLocked()) {
+						return "R is busy, please retry\n";
+					}
+					try {
+						getRLock().lock();
+						try {				
+							python.client.PythonInterpreterSingleton.startLogCapture();
+							python.client.PythonInterpreterSingleton.getInstance().exec(expression);
+							return python.client.PythonInterpreterSingleton.getPythonStatus();				
+						} catch (Exception e) {
+							return PoolUtils.getStackTraceAsString(e);
+						} 
+					} catch (Exception e) {
+						return PoolUtils.getStackTraceAsString(e);
+					} finally {
+						getRLock().unlock();
+					}
+				}
+			});
+			((JPanel) getComponent()).add(_consolePanel);
+		}
+
+		public ConsolePanel getConsolePanel() {
+			return _consolePanel;
+		}
+	}
+	
 	public static class ServerLogView extends DynamicView {
 		JTextArea _area;
 		JScrollPane _scrollPane;
@@ -3586,7 +3712,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 									Vector<String> result = null;
 									try {
-										result = GDApplet.this.getR().evalAndGetSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
+										result = GDApplet.this.getR().getSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
 									} catch (RemoteException e) {
 										JOptionPane.showMessageDialog(null, e.getCause().getMessage(), "R Error", JOptionPane.ERROR_MESSAGE);
 										return;

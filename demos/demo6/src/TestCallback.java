@@ -36,7 +36,7 @@ public class TestCallback {
 					.println("***"
 							+ r
 									.evaluate("democallback<-function() { .PrivateEnv$callbackPercentage(0.1);.PrivateEnv$callbackPercentage(0.1); .PrivateEnv$callbackPercentage(0.5); .PrivateEnv$callbackPercentage(1.0);}"));
-			System.out.println("***" + r.evaluateExpressions(".jinit();democallback()", 2));
+			System.out.println("***" + r.evaluate(".jinit();democallback()", 2));
 		} finally {
 			ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);
 		}

@@ -481,7 +481,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 					String tempVarName = "TEMP_____";
 					try {
 						_rgui.getRLock().lock();
-						_rgui.getR().putObjectAndAssignName(robj, tempVarName);
+						_rgui.getR().putAndAssign(robj, tempVarName);
 
 						if (_rgui.getR().getStatus().toUpperCase().contains("ERROR")) {
 							JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
@@ -538,7 +538,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		try {
 			_rgui.getRLock().lock();
-			RObject robj = _rgui.getR().evalAndGetObject(expr);
+			RObject robj = _rgui.getR().get(expr);
 			if (_rgui.getR().getStatus().toUpperCase().contains("ERROR")) {
 				JOptionPane.showMessageDialog(ss, _rgui.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
 				return null;
@@ -1227,7 +1227,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 					String tempVarName = "TEMP_____";
 					try {
 						_rgui.getRLock().lock();
-						_rgui.getR().putObjectAndAssignName(result, tempVarName);
+						_rgui.getR().putAndAssign(result, tempVarName);
 
 						if (!_rgui.getR().getStatus().equals("")) {
 							int messageType = getMessageType(_rgui.getR().getStatus());

@@ -31,12 +31,12 @@ import util.Utils;
 public class DirectRRmi {
 	public static void main(String[] args) throws Throwable {
 		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
-		System.out.println("Available Packages : " + Utils.flatArray(r.getAllPackageNames()));
+		System.out.println("Available Packages : " + Utils.flatArray(r.listPackages()));
 		RNumeric squareOf4 = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"))
 				.squareAsReference(new RNumeric(4));
 		System.out.println("square of 4 : " + squareOf4.getValue()[0]);
 		r.evaluate("data(kidney)");
-		ExpressionSet kidney = (ExpressionSet) r.evalAndGetObjectAsReference("kidney");
+		ExpressionSet kidney = (ExpressionSet) r.getReference("kidney");
 		Vsn fit = ((vsnFunction) r.getPackage("vsnFunction")).vsn2(kidney);
 		ExpressionSet normalizedKidney = (ExpressionSet) r.call("predict", fit, new RNamedArgument("newdata", kidney));
 		System.out.println(" Normalized Kidney : " + normalizedKidney);

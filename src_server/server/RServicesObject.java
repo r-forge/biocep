@@ -112,28 +112,28 @@ public class RServicesObject implements RServices {
 	public void appendBlockToWorkingDirectoryFile(String fileName, byte[] block) throws RemoteException {
 	}
 
-	public void assignNameToObjectReference(String name, RObject refObj) throws RemoteException {
+	public void assignReference(String name, RObject refObj) throws RemoteException {
 	}
 
 	public RObject call(String methodName, RObject... args) throws RemoteException {
 		return null;
 	}
 
-	public void callAndAssignName(String varName, String methodName, RObject... args) throws RemoteException {
+	public void callAndAssign(String varName, String methodName, RObject... args) throws RemoteException {
 	}
 
-	public RObject callAsReference(String methodName, RObject... args) throws RemoteException {
+	public RObject callAndGetReference(String methodName, RObject... args) throws RemoteException {
 		return null;
 	}
 
 	public void createWorkingDirectoryFile(String fileName) throws RemoteException {
 	}
 
-	public RObject evalAndGetObject(String expression) throws RemoteException {
+	public RObject get(String expression) throws RemoteException {
 		return null;
 	}
 
-	public RObject evalAndGetObjectAsReference(String expression) throws RemoteException {
+	public RObject getReference(String expression) throws RemoteException {
 		return null;
 	}
 
@@ -141,14 +141,14 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public String evaluateExpressions(String expression, int n) throws RemoteException {
+	public String evaluate(String expression, int n) throws RemoteException {
 		return null;
 	}
 
 	public void freeReference(RObject refObj) throws RemoteException {
 	}
 
-	public String[] getAllPackageNames() throws RemoteException {
+	public String[] listPackages() throws RemoteException {
 		return null;
 	}
 
@@ -156,7 +156,7 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public RObject getObjectFromReference(RObject refObj) throws RemoteException {
+	public RObject referenceToObject(RObject refObj) throws RemoteException {
 		return null;
 	}
 
@@ -232,10 +232,10 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public void putObjectAndAssignName(RObject obj, String name) throws RemoteException {
+	public void putAndAssign(RObject obj, String name) throws RemoteException {
 	}
 
-	public RObject putObjectAndGetReference(RObject obj) throws RemoteException {
+	public RObject putAndGetReference(RObject obj) throws RemoteException {
 		return null;
 	}
 
@@ -272,7 +272,7 @@ public class RServicesObject implements RServices {
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 	}
 
-	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
+	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException {
 		return null;
 	}
 

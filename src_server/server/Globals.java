@@ -259,7 +259,7 @@ public class Globals {
 				String mHeader = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName()) + " " + m_name + "(";
 				String mHeaderAsRef = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName()) + " " + m_name + "AsReference" + "(";
 
-				String[] formalArgs = ((RChar) DirectJNI.getInstance().getRServices().evalAndGetObject("names(formals('" + m.getName() + "'))")).getValue();
+				String[] formalArgs = ((RChar) DirectJNI.getInstance().getRServices().get("names(formals('" + m.getName() + "'))")).getValue();
 				boolean hasDotDotDot = formalArgs.length > 0 && formalArgs[formalArgs.length - 1].equals("...");
 
 				String paramsStr = "";

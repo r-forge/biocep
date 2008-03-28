@@ -61,32 +61,6 @@ public class ServerLauncher {
 
 	public static void main(String[] args) throws Exception {
 
-		PythonInterpreter _pythonInterp = null;
-
-		StringWriter sw = new StringWriter();
-		try {
-			if (_pythonInterp == null) {
-				_pythonInterp = new PythonInterpreter();
-			}
-			_pythonInterp.setOut(sw);
-			_pythonInterp.setErr(sw);
-
-			PyObject po = _pythonInterp.eval("HHH");
-
-			System.out.println("иии>" + po);
-			System.out.println("#######>>>>:" + sw.toString());
-			// return new String[] { "OK", convertToPrintCommand(sw.toString())
-			// };
-		} catch (PyException e) {
-			// System.out.println(PoolUtils.getStackTraceAsString(e));
-			// new Exception().printStackTrace();
-			System.out.println(">>" + e.toString() + "<<");
-
-			System.out.println("#######>>>>>>>>:" + sw.toString());
-			// return new String[] { "NOK", convertToPrintCommand(sw.toString())
-			// };
-		}
-
 		System.exit(0);
 
 	}
