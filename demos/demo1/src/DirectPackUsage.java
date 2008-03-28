@@ -49,7 +49,7 @@ public class DirectPackUsage {
 
 		
 	
-		Vector<String> result=r.evalAndGetSvg("plot(rnorm(100))",100,100);
+		Vector<String> result=r.getSvg("plot(rnorm(100))",100,100);
 		System.out.println(result);
 		String tempFile=System.getProperty("java.io.tmpdir")+"/svgview"+System.currentTimeMillis()+".svg";
 		PrintWriter pw=new PrintWriter(new FileWriter(tempFile));
@@ -77,7 +77,7 @@ public class DirectPackUsage {
 		System.exit(0);
 		
 		
-		System.out.println("Available Packages : " + Utils.flatArray(r.getAllPackageNames()));
+		System.out.println("Available Packages : " + Utils.flatArray(r.listPackages()));
 		rGlobalEnvFunction globalPack = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"));
 		vsnFunction vsnPack = (vsnFunction) r.getPackage("vsnFunction");
 
@@ -89,7 +89,7 @@ public class DirectPackUsage {
 			System.out.println(" distance : " + d);
 
 			r.evaluate("data(kidney)");
-			ExpressionSet kidney = (ExpressionSet) r.evalAndGetObjectAsReference("kidney");
+			ExpressionSet kidney = (ExpressionSet) r.getReference("kidney");
 			Vsn fit = vsnPack.vsn2(kidney);
 			ExpressionSet normalizedKidney = (ExpressionSet) r.call("predict", fit, new RNamedArgument("newdata",
 					kidney));

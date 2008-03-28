@@ -57,7 +57,7 @@ public class MultiR {
 							+ r.getServantName());
 
 					r.evaluate("data(kidney)");
-					ExpressionSet kidney = (ExpressionSet) r.evalAndGetObjectAsReference("kidney");
+					ExpressionSet kidney = (ExpressionSet) r.getReference("kidney");
 					Vsn fit = (Vsn) r.call("vsn2", kidney);
 					ExpressionSet normalizedKidney = (ExpressionSet) r.call("predict", fit, new RNamedArgument(
 							"newdata", kidney));

@@ -1,4 +1,4 @@
-package python.server;
+package python.client;
 
 import java.io.InputStream;
 import java.io.OutputStream;

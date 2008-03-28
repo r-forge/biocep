@@ -395,11 +395,11 @@ public class DirectJNI {
 			String initRSourcingLog = getRServices().sourceFromResource("/rscripts/init.R");
 			System.out.println("init.R sourcing log : " + initRSourcingLog);
 			initPrivateEnv();
-			_continueStr = ((RChar) ((RList) getRServices().evalAndGetObject("options('continue')")).getValue()[0]).getValue()[0];
-			_promptStr = ((RChar) ((RList) getRServices().evalAndGetObject("options('prompt')")).getValue()[0]).getValue()[0];
+			_continueStr = ((RChar) ((RList) getRServices().get("options('continue')")).getValue()[0]).getValue()[0];
+			_promptStr = ((RChar) ((RList) getRServices().get("options('prompt')")).getValue()[0]).getValue()[0];
 
 			getRServices().consoleSubmit("1");
-			_packNames = ((RChar) getRServices().evalAndGetObject(".packages(all=T)")).getValue();
+			_packNames = ((RChar) getRServices().get(".packages(all=T)")).getValue();
 
 			upgdateBootstrapObjects();
 
@@ -1665,16 +1665,16 @@ public class DirectJNI {
 	}
 
 	void shutdownDevices(String deviceType) throws RemoteException {
-		RInteger devices = (RInteger) getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+		RInteger devices = (RInteger) getRServices().get(".PrivateEnv$dev.list()");
 		for (int i = 0; i < devices.getValue().length; ++i) {
 			if (devices.getNames()[i].equals(deviceType)) {
-				getRServices().evalAndGetObject(".PrivateEnv$dev.off(" + devices.getValue()[i] + ")");
+				getRServices().get(".PrivateEnv$dev.off(" + devices.getValue()[i] + ")");
 			}
 		}
 	}
 
 	Integer getDevice(String deviceType) throws RemoteException {
-		RInteger devices = (RInteger) getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+		RInteger devices = (RInteger) getRServices().get(".PrivateEnv$dev.list()");
 		for (int i = 0; i < devices.getValue().length; ++i) {
 			if (devices.getNames()[i].equals(deviceType)) {
 				return devices.getValue()[i];
@@ -1725,7 +1725,7 @@ public class DirectJNI {
 			return clean(_lastStatus);
 		}
 
-		public String evaluateExpressions(final String expression, final int n) throws RemoteException {
+		public String evaluate(final String expression, final int n) throws RemoteException {
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
 				public void run(Rengine e) {
@@ -1854,7 +1854,7 @@ public class DirectJNI {
 		}
 
 		public String evaluate(String expression) throws RemoteException {
-			return evaluateExpressions(expression, 1);
+			return evaluate(expression, 1);
 		};
 
 		public RObject call(final String methodName, final RObject... args) throws RemoteException {
@@ -1883,7 +1883,7 @@ public class DirectJNI {
 			return objHolder[0];
 		}
 
-		public void callAndAssignName(final String varName, final String methodName, final RObject... args) throws RemoteException {
+		public void callAndAssign(final String varName, final String methodName, final RObject... args) throws RemoteException {
 			final Exception[] exceptionHolder = new Exception[1];
 
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -1910,7 +1910,7 @@ public class DirectJNI {
 
 		}
 
-		public RObject callAsReference(final String methodName, final RObject... args) throws RemoteException {
+		public RObject callAndGetReference(final String methodName, final RObject... args) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -1961,7 +1961,7 @@ public class DirectJNI {
 			}
 		}
 
-		public RObject getObjectFromReference(final RObject refObj) throws RemoteException {
+		public RObject referenceToObject(final RObject refObj) throws RemoteException {
 			if (!(refObj instanceof ReferenceInterface))
 				throw new RemoteException("not an object reference");
 			final RObject[] robjHolder = new RObject[1];
@@ -1992,7 +1992,7 @@ public class DirectJNI {
 			return obj instanceof ReferenceInterface;
 		}
 
-		public RObject putObjectAndGetReference(final RObject obj) throws RemoteException {
+		public RObject putAndGetReference(final RObject obj) throws RemoteException {
 			final RObject[] refHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -2017,7 +2017,7 @@ public class DirectJNI {
 			return refHolder[0];
 		}
 
-		public void putObjectAndAssignName(final RObject obj, final String name) throws RemoteException {
+		public void putAndAssign(final RObject obj, final String name) throws RemoteException {
 			final Exception[] exceptionHolder = new Exception[1];
 
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -2044,7 +2044,7 @@ public class DirectJNI {
 
 		}
 
-		public RObject evalAndGetObject(final String expression) throws RemoteException {
+		public RObject get(final String expression) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -2071,7 +2071,7 @@ public class DirectJNI {
 			return objHolder[0];
 		}
 
-		public RObject evalAndGetObjectAsReference(final String expression) throws RemoteException {
+		public RObject getReference(final String expression) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -2096,7 +2096,7 @@ public class DirectJNI {
 			return objHolder[0];
 		}
 
-		public void assignNameToObjectReference(final String name, final RObject refObj) throws RemoteException {
+		public void assignReference(final String name, final RObject refObj) throws RemoteException {
 			if (!(refObj instanceof ReferenceInterface))
 				throw new RemoteException("not an an object reference");
 			final Exception[] exceptionHolder = new Exception[1];
@@ -2129,7 +2129,7 @@ public class DirectJNI {
 			RListener.setCallbackInterface(callback);
 		}
 
-		public String[] getAllPackageNames() throws RemoteException {
+		public String[] listPackages() throws RemoteException {
 			return ((String[]) DirectJNI._packageNames.toArray(new String[0]));
 		}
 
@@ -2261,11 +2261,11 @@ public class DirectJNI {
 		}
 
 		public void push(String symbol, Serializable object) throws RemoteException {
-			DirectJNI.getInstance().getRServices().putObjectAndAssignName((RObject) object, symbol);
+			DirectJNI.getInstance().getRServices().putAndAssign((RObject) object, symbol);
 		}
 
 		public Serializable pop(String symbol) throws RemoteException {
-			Serializable result = DirectJNI.getInstance().getRServices().evalAndGetObject(symbol);
+			Serializable result = DirectJNI.getInstance().getRServices().get(symbol);
 			return result;
 		}
 
@@ -2328,14 +2328,16 @@ public class DirectJNI {
 				return;
 			for (int i = 0; i < files.length; i++) {
 				if (files[i].isDirectory()) {
+					String name = path.getAbsolutePath().substring(WDIR.length(), path.getAbsolutePath().length()) + System.getProperty("file.separator") + files[i].getName();
+					name = name.substring(1, name.length()).replace('\\', '/');
+					result.add(new FileDescription(name, files[i].length(), true, new Date(files[i].lastModified())));
 					/*
 					String name = (files[i].getAbsolutePath().substring(WDIR.length() + 1, files[i].getAbsolutePath().length())).replace('\\', '/');
 					result.add(new FileDescription(name, 0, true, new Date(files[i].lastModified())));
 					getWorkingDirectoryFileDescriptions(files[i], result);
 					*/
 				} else {
-					String name = path.getAbsolutePath().substring(WDIR.length(), path.getAbsolutePath().length()) + System.getProperty("file.separator")
-							+ files[i].getName();
+					String name = path.getAbsolutePath().substring(WDIR.length(), path.getAbsolutePath().length()) + System.getProperty("file.separator") + files[i].getName();
 					name = name.substring(1, name.length()).replace('\\', '/');
 					result.add(new FileDescription(name, files[i].length(), false, new Date(files[i].lastModified())));
 				}
@@ -2455,10 +2457,10 @@ public class DirectJNI {
 				}
 			} else {
 
-				String[] nameSpaces = ((RChar) DirectJNI.getInstance().getRServices().evalAndGetObject("loadedNamespaces()")).getValue();
+				String[] nameSpaces = ((RChar) DirectJNI.getInstance().getRServices().get("loadedNamespaces()")).getValue();
 				for (int i = 0; i < nameSpaces.length; ++i) {
 					if (_nameSpacesHash.get(nameSpaces[i]) == null) {
-						String[] exportedSymbols = ((RChar) DirectJNI.getInstance().getRServices().evalAndGetObject(
+						String[] exportedSymbols = ((RChar) DirectJNI.getInstance().getRServices().get(
 								"getNamespaceExports(getNamespace('" + nameSpaces[i] + "'))")).getValue();
 						Vector<String> v = new Vector<String>();
 						for (int j = 0; j < exportedSymbols.length; ++j)
@@ -2582,7 +2584,7 @@ public class DirectJNI {
 		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 		}
 
-		public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
+		public Vector<String> getSvg(String expression, int width, int height) throws RemoteException {
 
 			File tempFile = null;
 			try {
@@ -2753,7 +2755,7 @@ public class DirectJNI {
 			JavaGD.setGDContainer(gdBag);
 			Dimension dim = gdBag.getSize();
 
-			RInteger devicesBefore = (RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+			RInteger devicesBefore = (RInteger) DirectJNI.getInstance().getRServices().get(".PrivateEnv$dev.list()");
 			Vector<Integer> devicesVector = new Vector<Integer>();
 			if (devicesBefore != null) {
 				for (int i = 0; i < devicesBefore.getValue().length; ++i)
@@ -2764,7 +2766,7 @@ public class DirectJNI {
 			System.out.println(DirectJNI.getInstance().getRServices().evaluate(
 					"JavaGD(name='JavaGD', width=" + dim.getWidth() + ", height=" + dim.getHeight() + ", ps=12)"));
 
-			RInteger devicesAfter = (RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.list()");
+			RInteger devicesAfter = (RInteger) DirectJNI.getInstance().getRServices().get(".PrivateEnv$dev.list()");
 			for (int i = 0; i < devicesAfter.getValue().length; ++i)
 				if (!devicesVector.contains(devicesAfter.getValue()[i])) {
 					System.out.println("caught:" + devicesAfter.getValue()[i]);
@@ -2802,7 +2804,7 @@ public class DirectJNI {
 		}
 
 		public boolean isCurrentDevice() throws RemoteException {
-			int d = ((RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+			int d = ((RInteger) DirectJNI.getInstance().getRServices().get(".PrivateEnv$dev.cur()")).getValue()[0];
 			return d == gdBag.getDeviceNumber();
 		}
 
@@ -2829,7 +2831,7 @@ public class DirectJNI {
 					GDInterface.putLocatorLocation(points[i]);
 				}
 
-				RList l = (RList) DirectJNI.getInstance().getRServices().evalAndGetObject("locator()");
+				RList l = (RList) DirectJNI.getInstance().getRServices().get("locator()");
 
 				Point2D[] result = new Point2D[points.length];
 				for (int i = 0; i < points.length; ++i) {
@@ -2868,9 +2870,9 @@ public class DirectJNI {
 
 				GDDevice device = null;
 				try {
-					int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+					int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().get(".PrivateEnv$dev.cur()")).getValue()[0];
 					device = DirectJNI.getInstance().getRServices().newDevice(dSize.width, dSize.height);
-					DirectJNI.getInstance().getRServices().evaluateExpressions(
+					DirectJNI.getInstance().getRServices().evaluate(
 							".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + device.getDeviceNumber() + ");"
 									+ ".PrivateEnv$dev.set(" + currentDevice + ");", 3);
 					JGDPanelPop panel = new JGDPanelPop(device, false, false, null, null, null);
@@ -2912,7 +2914,7 @@ public class DirectJNI {
 				}
 			} else {
 
-				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().get(".PrivateEnv$dev.cur()")).getValue()[0];
 
 				DirectJNI.getInstance().shutdownDevices("Cairo");
 
@@ -2925,7 +2927,7 @@ public class DirectJNI {
 				}
 
 				int cairoDevice = DirectJNI.getInstance().getDevice("Cairo");
-				DirectJNI.getInstance().getRServices().evaluateExpressions(
+				DirectJNI.getInstance().getRServices().evaluate(
 						".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + cairoDevice + ");" + ".PrivateEnv$dev.set("
 								+ currentDevice + ");", 3);
 
@@ -2980,7 +2982,7 @@ public class DirectJNI {
 				throw new RemoteException("", e);
 			}
 
-			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().evalAndGetObject(".PrivateEnv$dev.cur()")).getValue()[0];
+			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().get(".PrivateEnv$dev.cur()")).getValue()[0];
 
 			DirectJNI.getInstance().shutdownDevices("pdf");
 
@@ -2993,7 +2995,7 @@ public class DirectJNI {
 			}
 
 			int pdfDevice = DirectJNI.getInstance().getDevice("pdf");
-			DirectJNI.getInstance().getRServices().evaluateExpressions(
+			DirectJNI.getInstance().getRServices().evaluate(
 					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + pdfDevice + ");" + ".PrivateEnv$dev.set("
 							+ currentDevice + ");", 3);
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
@@ -3087,7 +3089,7 @@ public class DirectJNI {
 	}
 
 	private void upgdateBootstrapObjects() throws Exception {
-		RChar objs = (RChar) getRServices().evalAndGetObject(".PrivateEnv$ls(all.names=TRUE)");
+		RChar objs = (RChar) getRServices().get(".PrivateEnv$ls(all.names=TRUE)");
 		for (int i = 0; i < objs.getValue().length; ++i)
 			if (!_bootstrapRObjects.contains(objs.getValue()[i]))
 				_bootstrapRObjects.add(objs.getValue()[i]);

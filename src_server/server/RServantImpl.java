@@ -247,14 +247,14 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
-	public RObject callAsReference(String methodName, RObject... args) throws RemoteException {
-		RObject result = DirectJNI.getInstance().getRServices().callAsReference(methodName, args);
+	public RObject callAndGetReference(String methodName, RObject... args) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().callAndGetReference(methodName, args);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
-	public void callAndAssignName(String varName, String methodName, RObject... args) throws RemoteException {
-		DirectJNI.getInstance().getRServices().callAndAssignName(varName, methodName, args);
+	public void callAndAssign(String varName, String methodName, RObject... args) throws RemoteException {
+		DirectJNI.getInstance().getRServices().callAndAssign(varName, methodName, args);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 
@@ -263,11 +263,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 
-	public RObject getObjectFromReference(RObject refObj) throws RemoteException {
+	public RObject referenceToObject(RObject refObj) throws RemoteException {
 
 		ReferenceInterface refObjCast = (ReferenceInterface) refObj;
 		if (refObjCast.getAssignInterface().equals(_assignInterface)) {
-			RObject result = DirectJNI.getInstance().getRServices().getObjectFromReference(refObj);
+			RObject result = DirectJNI.getInstance().getRServices().referenceToObject(refObj);
 			_log.append(DirectJNI.getInstance().getRServices().getStatus());
 			return result;
 		} else {
@@ -275,31 +275,31 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		}
 	};
 
-	public RObject putObjectAndGetReference(RObject obj) throws RemoteException {
-		RObject result = DirectJNI.getInstance().getRServices().putObjectAndGetReference(obj);
+	public RObject putAndGetReference(RObject obj) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().putAndGetReference(obj);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
-	public void putObjectAndAssignName(RObject obj, String name) throws RemoteException {
-		DirectJNI.getInstance().getRServices().putObjectAndAssignName(obj, name);
+	public void putAndAssign(RObject obj, String name) throws RemoteException {
+		DirectJNI.getInstance().getRServices().putAndAssign(obj, name);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 
-	public RObject evalAndGetObject(String expression) throws RemoteException {
-		RObject result = DirectJNI.getInstance().getRServices().evalAndGetObject(expression);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
-		return result;
-	}
-
-	public RObject evalAndGetObjectAsReference(String expression) throws RemoteException {
-		RObject result = DirectJNI.getInstance().getRServices().evalAndGetObjectAsReference(expression);
+	public RObject get(String expression) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().get(expression);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
-	public void assignNameToObjectReference(String varname, RObject refObj) throws RemoteException {
-		DirectJNI.getInstance().getRServices().assignNameToObjectReference(varname, refObj);
+	public RObject getReference(String expression) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().getReference(expression);
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+
+	public void assignReference(String varname, RObject refObj) throws RemoteException {
+		DirectJNI.getInstance().getRServices().assignReference(varname, refObj);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 
@@ -309,8 +309,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
-	public String evaluateExpressions(final String expression, final int n) throws RemoteException {
-		String result = DirectJNI.getInstance().getRServices().evaluateExpressions(expression, n);
+	public String evaluate(final String expression, final int n) throws RemoteException {
+		String result = DirectJNI.getInstance().getRServices().evaluate(expression, n);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
@@ -344,7 +344,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	}
 
-	public String[] getAllPackageNames() throws RemoteException {
+	public String[] listPackages() throws RemoteException {
 		return (String[]) _rim.keySet().toArray(new String[0]);
 	}
 
@@ -466,13 +466,13 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 
 	public Serializable pop(String symbol) throws RemoteException {
-		Serializable result = DirectJNI.getInstance().getRServices().evalAndGetObject(symbol);
+		Serializable result = DirectJNI.getInstance().getRServices().get(symbol);
 		System.out.println("result for " + symbol + " : " + result);
 		return result;
 	}
 
 	public void push(String symbol, Serializable object) throws RemoteException {
-		DirectJNI.getInstance().getRServices().putObjectAndAssignName((RObject) object, symbol);
+		DirectJNI.getInstance().getRServices().putAndAssign((RObject) object, symbol);
 	}
 
 	public String[] listSymbols() throws RemoteException {
@@ -615,39 +615,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	synchronized public RServices cloneServer() throws RemoteException {
 		System.out.println("cloneServer");
-
-		if (server == null) {
-			server = new Server(LocalHttpServer.getLocalHttpServerPort());
-			server.setStopAtShutdown(true);
-			Context root = new Context(server, "/", Context.SESSIONS);
-			root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
-			System.out.println("+++++++++++++++++++ going to start local http server port : " + LocalHttpServer.getLocalHttpServerPort());
-			try {
-				server.start();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			while (!server.isStarted()) {
-				try {
-					Thread.sleep(20);
-				} catch (Exception e) {
-				}
-			}
-
-			new Thread(new Runnable() {
-				public void run() {
-					System.out.println("+++++++++++++++++++ going to start local rmiregistry port : " + LocalRmiRegistry.getLocalRmiRegistryPort());
-					try {
-						LocateRegistry.createRegistry(LocalRmiRegistry.getLocalRmiRegistryPort());
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-
-		}
-
 		try {
 			RServices w = ServerLauncher.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils.getHostIp(), LocalRmiRegistry
 					.getLocalRmiRegistryPort(), 256, 256, false);
@@ -666,8 +633,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
-	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException {
-		return DirectJNI.getInstance().getRServices().evalAndGetSvg(expression, width, height);
+	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getSvg(expression, width, height);
 	}
 
 	public String getPythonStatus() throws RemoteException {

@@ -113,9 +113,9 @@ public class ParallelizedMatrixProduct {
 									rp = (RServices) uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory()
 											.getServantProvider().borrowServantProxy();
 
-									rp.putObjectAndAssignName(new RNumeric(v1), "rv1");
-									rp.putObjectAndAssignName(new RNumeric(v2), "rv2");
-									RMatrix res = ((RMatrix) rp.evalAndGetObject("rv1%*%rv2"));
+									rp.putAndAssign(new RNumeric(v1), "rv1");
+									rp.putAndAssign(new RNumeric(v2), "rv2");
+									RMatrix res = ((RMatrix) rp.get("rv1%*%rv2"));
 
 									return ((RNumeric) res.getValue()).getValue()[0];
 

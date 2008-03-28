@@ -31,27 +31,27 @@ public interface RServices extends ManagedServant {
 
 	public String evaluate(String expression) throws RemoteException;
 
-	public String evaluateExpressions(String expression, int n) throws RemoteException;
+	public String evaluate(String expression, int n) throws RemoteException;
 
 	public RObject call(String methodName, RObject... args) throws RemoteException;
 
-	public RObject callAsReference(String methodName, RObject... args) throws RemoteException;
+	public RObject callAndGetReference(String methodName, RObject... args) throws RemoteException;
 
-	public void callAndAssignName(String varName, String methodName, RObject... args) throws RemoteException;
+	public void callAndAssign(String varName, String methodName, RObject... args) throws RemoteException;
 
 	public boolean isReference(RObject obj) throws RemoteException;
 
-	public RObject getObjectFromReference(RObject refObj) throws RemoteException;
+	public RObject referenceToObject(RObject refObj) throws RemoteException;
 
-	public RObject putObjectAndGetReference(RObject obj) throws RemoteException;
+	public RObject putAndGetReference(RObject obj) throws RemoteException;
 
-	public void putObjectAndAssignName(RObject obj, String name) throws RemoteException;
+	public void putAndAssign(RObject obj, String name) throws RemoteException;
 
-	public void assignNameToObjectReference(String name, RObject refObj) throws RemoteException;
+	public void assignReference(String name, RObject refObj) throws RemoteException;
 
-	public RObject evalAndGetObject(String expression) throws RemoteException;
+	public RObject get(String expression) throws RemoteException;
 
-	public RObject evalAndGetObjectAsReference(String expression) throws RemoteException;
+	public RObject getReference(String expression) throws RemoteException;
 
 	public String print(String expression) throws RemoteException;
 
@@ -65,7 +65,7 @@ public interface RServices extends ManagedServant {
 
 	public String getStatus() throws RemoteException;
 
-	public String[] getAllPackageNames() throws RemoteException;
+	public String[] listPackages() throws RemoteException;
 
 	public RPackage getPackage(String packageName) throws RemoteException;
 
@@ -115,7 +115,7 @@ public interface RServices extends ManagedServant {
 	public void stopHttpServer() throws java.rmi.RemoteException;
 	
 	
-	public Vector<String> evalAndGetSvg(String expression, int width, int height) throws RemoteException;
+	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException;
 	
 	
 	public String pythonExec(String pythonCommand) throws RemoteException;

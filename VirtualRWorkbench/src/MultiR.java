@@ -57,14 +57,14 @@ public class MultiR {
 					
 					
 					System.out.println("++ Thread<" + Thread.currentThread().getName() + "> obtained " + r.getServantName());
-					System.out.println(" packages mapped =" + Utils.flatArray(r.getAllPackageNames()));
+					System.out.println(" packages mapped =" + Utils.flatArray(r.listPackages()));
 					RNumeric squareOf4 = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction")).square(new RNumeric(4));
 					System.out.println("square Of 4 : "+squareOf4);
 
 					
 				
 					r.evaluate("data(kidney)");
-					ExpressionSet kidney = (ExpressionSet) r.evalAndGetObjectAsReference("kidney");
+					ExpressionSet kidney = (ExpressionSet) r.getReference("kidney");
 					System.out.println("kidney:" + kidney);
 					
 					

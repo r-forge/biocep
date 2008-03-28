@@ -37,16 +37,16 @@ public class DistributedRObjects {
 		RServices r2 = ((RServices) Naming.lookup("RSERVANT_2"));
 		RServices r3 = ((RServices) Naming.lookup("RSERVANT_3"));
 
-		E eref1 = (E) r1.evalAndGetObjectAsReference("new('E')");
+		E eref1 = (E) r1.getReference("new('E')");
 
-		RNumericRef num = (RNumericRef) r3.evalAndGetObjectAsReference("c(100)");
+		RNumericRef num = (RNumericRef) r3.getReference("c(100)");
 		eref1.getC().setS(num);
 
-		B nb = (B) r2.evalAndGetObjectAsReference("new('B')");
+		B nb = (B) r2.getReference("new('B')");
 		nb.setV(new RNumeric(996));
 		eref1.setB(nb);
 
-		A na = (A) r3.evalAndGetObjectAsReference("new('A')");
+		A na = (A) r3.getReference("new('A')");
 		na.setX(new RChar("LLLLLLL"));
 		nb.setQ(na);
 
