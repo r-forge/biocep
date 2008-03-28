@@ -42,6 +42,7 @@ import http.TunnelingException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -153,6 +154,8 @@ import remoting.RServices;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
 import server.DirectJNI;
+import server.LocalHttpServer;
+import server.LocalRmiRegistry;
 import server.NoMappingAvailable;
 import server.ServerLauncher;
 import splash.SplashWindow;
@@ -229,6 +232,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
+			_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		
 		}
 
 		@Override
@@ -243,6 +248,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}
 			super.unlock();
+
+			_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
 		}
 
 		public boolean isLocked() {
@@ -314,35 +322,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		if (true) {
 
-			final Server server = new Server(PoolUtils.getLocalTomcatPort());
-			// server.setStopAtShutdown(true);
-			Context root = new Context(server, "/", Context.SESSIONS);
-			root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
-			root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/helpme/*");
-			System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
-			try {
-				server.start();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			while (!server.isStarted()) {
-				try {
-					Thread.sleep(20);
-				} catch (Exception e) {
-				}
-			}
-
-			new Thread(new Runnable() {
-				public void run() {
-					System.out.println("local rmiregistry port : " + PoolUtils.getLocalTomcatPort());
-					try {
-						LocateRegistry.createRegistry(PoolUtils.getLocalRmiRegistryPort());
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-
+			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/helpme/*");
+			LocalRmiRegistry.getLocalRmiRegistryPort();
 		}
 
 		if (getParameter("command_servlet_url") == null || getParameter("command_servlet_url").equals("")) {
@@ -476,7 +457,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							} else {
 
-								_helpServletUrl = "http://127.0.0.1:" + PoolUtils.getLocalTomcatPort() + "/" + "helpme";
+								_helpServletUrl = "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/" + "helpme";
 								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
 
 								_save = ident.isPersistentWorkspace();
@@ -499,24 +480,24 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
-										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
-												.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
+										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
+												.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
 												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), false);
 									} else {
 
 										if (PoolUtils.isWindowsOs()) {
 											if (_keepAlive) {
-												r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(),
-														PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
+												r = ServerLauncher.createRLocal(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
+														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
 														false);
 											} else {
-												r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(),
-														PoolUtils.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
+												r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
+														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
 														false);
 											}
 										} else {
-											r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils
-													.getHostIp(), PoolUtils.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
+											r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
+													.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
 										}
 									}
 
@@ -769,7 +750,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					if (getRLock().isLocked()) {
 						result = "R is busy, please retry\n";
 					} else {
-
+					
+					
 						try {
 							getRLock().lock();
 
@@ -3018,7 +3000,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (dialog.getExpr() != null) {
 									try {
 										final int port = Integer.decode(dialog.getExpr());
-										if (PoolUtils.isPortInUse("127.0.0.1", port)) {
+										if (ServerLauncher.isPortInUse("127.0.0.1", port)) {
 											JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
 										} else {
 

@@ -108,7 +108,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import python.PythonInterpreterSingleton;
+import python.server.PythonInterpreterSingleton;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -2562,7 +2562,7 @@ public class DirectJNI {
 		}
 
 		public boolean isPortInUse(int port) throws RemoteException {
-			return PoolUtils.isPortInUse("127.0.0.1", port);
+			return ServerLauncher.isPortInUse("127.0.0.1", port);
 		}
 
 		public void startHttpServer(int port) throws RemoteException {
@@ -2715,8 +2715,15 @@ public class DirectJNI {
 		}
 
 		public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
+			try {				
+				PythonInterpreterSingleton.startLogCapture();
+				System.out.println("[[[[[[["+WDIR+"/"+fileName);
+				PythonInterpreterSingleton.getInstance().execfile(WDIR+"/"+fileName);
+				System.out.println("#>>>:"+PythonInterpreterSingleton.getPythonStatus());
+				return PythonInterpreterSingleton.getPythonStatus();				
+			} catch (Exception e) {
+				throw new RemoteException("",e);
+			}
 		}
 
 		public RObject pythonEval(String pythonCommand) throws RemoteException {

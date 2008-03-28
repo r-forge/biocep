@@ -18,7 +18,17 @@
 package graphics.rmi;
 
 import http.FileLoad;
+
+import java.awt.BorderLayout;
 import java.io.File;
+
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.db.monitor.ConsolePanel;
+import uk.ac.ebi.microarray.pools.db.monitor.SubmitInterface;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -34,7 +44,34 @@ public class SaveToR {
 			FileLoad.upload(new File(path), fileName, applet.getR());
 			if (sourceIt) {
 				final String cmd = "source('" + fileName + "')";
-				applet.safeConsoleSubmit(cmd);
+				
+							if (applet.getRLock().isLocked()) {
+								JOptionPane.showMessageDialog(applet, "R is busy, please retry\n");
+								return;
+							}
+							
+							try {
+								applet.getRLock().lock();
+								
+								
+								final String log = applet.getR().pythonExecFromWorkingDirectoryFile(fileName);
+								if (!log.equals("")) {
+									JOptionPane.showMessageDialog(applet, log);
+								}
+								
+								
+							} catch (Exception e) {
+								e.printStackTrace();
+							} finally {
+								applet.getRLock().unlock();
+							}
+							
+							
+			
+
+				
+				
+				//applet.safeConsoleSubmit(cmd);
 			}
 
 		} catch (Exception e) {

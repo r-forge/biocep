@@ -1,4 +1,4 @@
-package python;
+package python.server;
 
 import remoting.RServices;
 import server.RServantImpl;

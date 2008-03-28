@@ -559,7 +559,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		System.out.println(" 2 startHttpServer called");
 		if (_virtualizationServer != null) {
 			throw new RemoteException("Server Already Running");
-		} else if (PoolUtils.isPortInUse("127.0.0.1", port)) {
+		} else if (ServerLauncher.isPortInUse("127.0.0.1", port)) {
 			throw new RemoteException("Port already in use");
 		} else {
 
@@ -617,11 +617,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		System.out.println("cloneServer");
 
 		if (server == null) {
-			server = new Server(PoolUtils.getLocalTomcatPort());
+			server = new Server(LocalHttpServer.getLocalHttpServerPort());
 			server.setStopAtShutdown(true);
 			Context root = new Context(server, "/", Context.SESSIONS);
 			root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
-			System.out.println("+++++++++++++++++++ going to start local http server port : " + PoolUtils.getLocalTomcatPort());
+			System.out.println("+++++++++++++++++++ going to start local http server port : " + LocalHttpServer.getLocalHttpServerPort());
 			try {
 				server.start();
 			} catch (Exception e) {
@@ -637,9 +637,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 			new Thread(new Runnable() {
 				public void run() {
-					System.out.println("+++++++++++++++++++ going to start local rmiregistry port : " + PoolUtils.getLocalRmiRegistryPort());
+					System.out.println("+++++++++++++++++++ going to start local rmiregistry port : " + LocalRmiRegistry.getLocalRmiRegistryPort());
 					try {
-						LocateRegistry.createRegistry(PoolUtils.getLocalRmiRegistryPort());
+						LocateRegistry.createRegistry(LocalRmiRegistry.getLocalRmiRegistryPort());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -649,7 +649,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		}
 
 		try {
-			RServices w = ServerLauncher.createR(false, PoolUtils.getHostIp(), PoolUtils.getLocalTomcatPort(), PoolUtils.getHostIp(), PoolUtils
+			RServices w = ServerLauncher.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils.getHostIp(), LocalRmiRegistry
 					.getLocalRmiRegistryPort(), 256, 256, false);
 			return w;
 		} catch (Exception e) {

@@ -18,6 +18,7 @@
 package uk.ac.ebi.microarray.pools;
 
 import java.io.Serializable;
+import java.net.Socket;
 import java.rmi.AlreadyBoundException;
 import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
+
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -249,7 +251,19 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	}
 
 	public boolean isPortInUse(int port) throws RemoteException {
-		return PoolUtils.isPortInUse("127.0.0.1", port);
+		Socket s = null;
+		try {
+			s = new Socket("127.0.0.1", port);
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (s != null)
+				try {
+					s.close();
+				} catch (Exception ex) {
+				}
+		}
+		return true;
 	}
 
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {

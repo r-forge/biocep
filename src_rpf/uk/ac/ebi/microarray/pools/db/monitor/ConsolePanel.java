@@ -19,6 +19,7 @@ package uk.ac.ebi.microarray.pools.db.monitor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -330,6 +331,11 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	}
 
 	public void lostOwnership(Clipboard clipboard, Transferable contents) {
+
 	}
 
+	public void setCursor(Cursor cursor) {
+		super.setCursor(cursor);
+		_textArea.setCursor(cursor);
+	}
 }
