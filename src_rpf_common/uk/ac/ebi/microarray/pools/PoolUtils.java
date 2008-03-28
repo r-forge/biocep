@@ -45,7 +45,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.rmi.NoSuchObjectException;
@@ -71,6 +70,8 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.neilja.net.interruptiblermi.InterruptibleRMISocketFactory;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
+
+
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -1147,84 +1148,5 @@ public class PoolUtils {
 
 	public static final Integer SET_SERVANT_STUB_DONE = new Integer(0);
 	public static final int SET_SERVANT_STUB_TIMEOUT_MILLISEC = 2000;
-
-	public static boolean isPortInUse(String hostIp, int port) {
-		Socket s = null;
-		try {
-			s = new Socket(hostIp, port);
-		} catch (Exception e) {
-			return false;
-		} finally {
-			if (s != null)
-				try {
-					s.close();
-				} catch (Exception ex) {
-				}
-		}
-		return true;
-	}
-
-	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {
-		new Thread(new Runnable() {
-			int failureCounter = maxFailure;
-
-			public void run() {
-				while (true) {
-					if (!PoolUtils.isPortInUse(hostIp, port))
-						--failureCounter;
-					if (failureCounter == 0) {
-						System.out.println("The Creator Process doesn't respond, going to die");
-						System.exit(0);
-					}
-					try {
-						Thread.sleep(1000 * periodicitySec);
-					} catch (Exception e) {
-					}
-				}
-			}
-		}).start();
-	}
-
-	private static Integer _localTomcatPort = null;
-	private static Integer _localRmiregistryPort = null;
-
-	public static synchronized Integer getLocalTomcatPort() {
-		if (_localTomcatPort == null) {
-
-			if (System.getProperty("localtomcat.port") == null || System.getProperty("localtomcat.port").equals("")) {
-				_localTomcatPort = 3001;
-			} else {
-				_localTomcatPort = Integer.decode(System.getProperty("localtomcat.port"));
-			}
-
-			for (int i = 0; i < 1000; ++i) {
-				if (!isPortInUse("127.0.0.1", _localTomcatPort + i)) {
-					_localTomcatPort = _localTomcatPort + i;
-					break;
-				}
-			}
-		}
-
-		return _localTomcatPort;
-	}
-
-	public static synchronized Integer getLocalRmiRegistryPort() {
-		if (_localRmiregistryPort == null) {
-
-			if (System.getProperty("localrmiregistry.port") == null || System.getProperty("localrmiregistry.port").equals("")) {
-				_localRmiregistryPort = 2560;
-			} else {
-				_localRmiregistryPort = Integer.decode(System.getProperty("localrmiregistry.port"));
-			}
-			for (int i = 0; i < 1000; ++i) {
-				if (!isPortInUse("127.0.0.1", _localRmiregistryPort + i)) {
-					_localRmiregistryPort = _localRmiregistryPort + i;
-					break;
-				}
-			}
-		}
-		return _localRmiregistryPort;
-
-	}
 
 }

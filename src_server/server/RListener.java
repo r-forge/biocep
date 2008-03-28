@@ -51,7 +51,7 @@ import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 
-import python.PythonInterpreterSingleton;
+import python.server.PythonInterpreterSingleton;
 import remoting.RAction;
 import remoting.RCallback;
 import remoting.RServices;

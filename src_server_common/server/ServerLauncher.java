@@ -14,9 +14,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.StringWriter;
+import java.net.Socket;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,9 +29,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
@@ -44,7 +41,6 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
-import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
@@ -99,30 +95,6 @@ public class ServerLauncher {
 	static JProgressBar createRSshProgressBar;
 	static JFrame createRSshProgressFrame;
 
-	public static void runServers(int tomcatPort, final int rmiregistryPort) throws Exception {
-		Server server = new Server(tomcatPort);
-		Context root = new Context(server, "/", Context.SESSIONS);
-		root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
-		server.start();
-
-		while (!server.isStarted()) {
-			try {
-				Thread.sleep(20);
-			} catch (Exception ex) {
-			}
-		}
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					LocateRegistry.createRegistry(rmiregistryPort);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-	}
 
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress) throws BadSshHostException,
@@ -424,8 +396,8 @@ public class ServerLauncher {
 	static JFrame createRProgressFrame;
 
 	public static RServices createR() throws Exception {
-		runServers(PoolUtils.getLocalTomcatPort(), PoolUtils.getLocalRmiRegistryPort());
-		return createR(false, "127.0.0.1", PoolUtils.getLocalTomcatPort(), "127.0.0.1", PoolUtils.getLocalRmiRegistryPort(), 256, 256, false);
+		
+		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, false);
 	}
 
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
@@ -1113,5 +1085,42 @@ public class ServerLauncher {
 		while ((line = br.readLine()) != null)
 			++counter;
 		return counter;
+	}
+
+	public static boolean isPortInUse(String hostIp, int port) {
+		Socket s = null;
+		try {
+			s = new Socket(hostIp, port);
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (s != null)
+				try {
+					s.close();
+				} catch (Exception ex) {
+				}
+		}
+		return true;
+	}
+
+	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {
+		new Thread(new Runnable() {
+			int failureCounter = maxFailure;
+	
+			public void run() {
+				while (true) {
+					if (!isPortInUse(hostIp, port))
+						--failureCounter;
+					if (failureCounter == 0) {
+						System.out.println("The Creator Process doesn't respond, going to die");
+						System.exit(0);
+					}
+					try {
+						Thread.sleep(1000 * periodicitySec);
+					} catch (Exception e) {
+					}
+				}
+			}
+		}).start();
 	}
 }

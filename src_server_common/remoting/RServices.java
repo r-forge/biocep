@@ -28,6 +28,7 @@ import uk.ac.ebi.microarray.pools.ManagedServant;
  * @author Karim Chine k.chine@imperial.ac.uk
  */
 public interface RServices extends ManagedServant {
+
 	public String evaluate(String expression) throws RemoteException;
 
 	public String evaluateExpressions(String expression, int n) throws RemoteException;
