@@ -22,9 +22,7 @@ import graphics.pop.GDDevice;
 import graphics.rmi.DoublePoint;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
-
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
@@ -46,16 +44,22 @@ import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -93,6 +97,7 @@ import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RNumericRef;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RObjectName;
+import org.bioconductor.packages.rservices.RUnknown;
 import org.bioconductor.packages.rservices.RVector;
 import org.htmlparser.Node;
 import org.htmlparser.Parser;
@@ -1715,7 +1720,7 @@ public class DirectJNI {
 	}
 
 	public static void generateMaps(URL jarUrl) {
-		Globals.generateMaps(jarUrl, false);
+		DirectJNI.generateMaps(jarUrl, false);
 	}
 
 	private RServices _rServices = new RServices() {
@@ -3163,6 +3168,100 @@ public class DirectJNI {
 		System.setProperty("wks.persitent", "true");
 		WDIR = d.getCanonicalPath().replace('\\', '/');
 		regenerateWorkingDirectory(false);
+	}
+
+	public static final String LOC_STR_LEFT = "It represents the S4 Class";
+	public static final String LOC_STR_RIGHT = "in R package";
+	
+	public static String getRClassForBean(JarFile jarFile, String beanClassName) throws Exception {
+		BufferedReader br = new BufferedReader(new InputStreamReader(jarFile.getInputStream(jarFile.getEntry(beanClassName.replace('.', '/') + ".java"))));
+		do {
+			String line = br.readLine();
+			if (line != null) {
+				int p = line.indexOf(LOC_STR_LEFT);
+				if (p != -1) {
+					return line.substring(p + LOC_STR_LEFT.length(), line.indexOf(LOC_STR_RIGHT)).trim();
+				}
+			} else
+				break;
+		} while (true);
+		return null;
+	}
+
+	public static void generateMaps(URL jarUrl, boolean rawClasses) {
+	
+		try {
+	
+			_mappingClassLoader = new URLClassLoader(new URL[] { jarUrl }, DirectJNI.class.getClassLoader());
+			Vector<String> list = new Vector<String>();
+			JarURLConnection jarConnection = (JarURLConnection) jarUrl.openConnection();
+			JarFile jarfile = jarConnection.getJarFile();
+			Enumeration<JarEntry> enu = jarfile.entries();
+			while (enu.hasMoreElements()) {
+				String entry = enu.nextElement().toString();
+				if (entry.endsWith(".class"))
+					list.add(entry.replace('/', '.').substring(0, entry.length() - ".class".length()));
+			}
+	
+			log.info(list);
+	
+			for (int i = 0; i < list.size(); ++i) {
+				String className = list.elementAt(i);
+				if (className.startsWith("org.bioconductor.packages.") && !className.startsWith("org.bioconductor.packages.rservices")) {
+					Class<?> c_ = _mappingClassLoader.loadClass(className);
+	
+					if (c_.getSuperclass() != null && c_.getSuperclass().equals(RObject.class) && !Modifier.isAbstract(c_.getModifiers())) {
+	
+						if (c_.equals(RLogical.class) || c_.equals(RInteger.class) || c_.equals(RNumeric.class) || c_.equals(RComplex.class)
+								|| c_.equals(RChar.class) || c_.equals(RMatrix.class) || c_.equals(RArray.class) || c_.equals(RList.class)
+								|| c_.equals(RDataFrame.class) || c_.equals(RFactor.class) || c_.equals(REnvironment.class) || c_.equals(RVector.class)
+								|| c_.equals(RUnknown.class)) {
+						} else {
+							String rclass = DirectJNI.getRClassForBean(jarfile, className);
+							_s4BeansHash.put(className, c_);
+							_s4BeansMapping.put(rclass, className);
+							_s4BeansMappingRevert.put(className, rclass);
+						}
+	
+					} else if ((rawClasses && c_.getSuperclass() != null && c_.getSuperclass().equals(Object.class))
+							|| (!rawClasses && RPackage.class.isAssignableFrom(c_) && (c_.isInterface()))) {
+	
+						String shortClassName = className.substring(className.lastIndexOf('.') + 1);
+						_packageNames.add(shortClassName);
+	
+						Vector<Class<?>> v = _rPackageInterfacesHash.get(className);
+						if (v == null) {
+							v = new Vector<Class<?>>();
+							_rPackageInterfacesHash.put(className, v);
+						}
+						v.add(c_);
+	
+					} else {
+						String nameWithoutPackage = className.substring(className.lastIndexOf('.') + 1);
+						if (nameWithoutPackage.indexOf("Factory") != -1 && c_.getMethod("setData", new Class[] { RObject.class }) != null) {
+							// if
+							// (DirectJNI._factoriesMapping.get(nameWithoutPackage)
+							// != null) throw new Exception("Factories Names
+							// Conflict : two " + nameWithoutPackage);
+							_factoriesMapping.put(nameWithoutPackage, className);
+							if (Modifier.isAbstract(c_.getModifiers()))
+								_abstractFactories.add(className);
+						}
+					}
+				}
+			}
+	
+			// log.info("s4Beans:" +s4Beans);
+			log.info("rPackageInterfaces:" + _packageNames);
+			log.info("s4Beans MAP :" + _s4BeansMapping);
+			log.info("s4Beans Revert MAP :" + _s4BeansMappingRevert);
+			log.info("factories :" + _factoriesMapping);
+			log.info("r package interface hash :" + _rPackageInterfacesHash);
+	
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	
 	}
 
 	synchronized public static void init(String instanceName) {

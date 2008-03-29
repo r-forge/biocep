@@ -15,11 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.microarray.pools.db.monitor;
+package uk.ac.ebi.microarray.pools.gui;
+
+import java.io.Serializable;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
  */
-public interface SubmitInterface {
-	public String submit(String expression);
+public class Symbol {
+	private String name;
+	private Serializable value;
+	private String servantName;
+
+	public Symbol(String name, Serializable value, String servantName) {
+		this.name = name;
+		this.value = value;
+		this.servantName = servantName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getServantName() {
+		return servantName;
+	}
+
+	public Serializable getValue() {
+		return value;
+	}
+
+	public String toString() {
+		return name + " from servant <" + servantName + ">";
+	}
 }

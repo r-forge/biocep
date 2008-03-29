@@ -26,6 +26,8 @@ import javax.swing.SwingUtilities;
 
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
+import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk

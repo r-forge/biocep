@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.microarray.pools.db.monitor;
+package uk.ac.ebi.microarray.pools.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -35,6 +35,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
