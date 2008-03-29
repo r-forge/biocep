@@ -602,6 +602,10 @@
 		<unjar src="lib/jdbc/derbyclient.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
 		<unjar src="lib/desktop/JRI.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>		
 		
+		<unjar src="lib/pool/commons-collections-3.2.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+		<unjar src="lib/pool/commons-pool-1.3.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>
+
+		
 		<!--<unjar src="VirtualRWorkbench/distrib/mapping.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>-->
 		
 		<unjar src="RJB.jar"  dest="VirtualRWorkbench/classes" overwrite="true"/>

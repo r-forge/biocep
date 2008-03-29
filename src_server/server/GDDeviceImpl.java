@@ -35,13 +35,9 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 
 	public GDDeviceImpl(int w, int h, HashMap<Integer, GDDevice> deviceHashMap) throws RemoteException {
 		super();
-		System.out.println("sa");
 		_localGdDevice = new DirectJNI.GDDeviceLocal(w, h);
-		System.out.println("sb");
 		_deviceHashMap = deviceHashMap;
-		System.out.println("sc");
 		_deviceHashMap.put(_localGdDevice.getDeviceNumber(), this);
-		System.out.println("sd");
 	}
 
 	public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects() throws RemoteException {

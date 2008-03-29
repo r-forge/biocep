@@ -27,8 +27,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.db.monitor.ConsolePanel;
-import uk.ac.ebi.microarray.pools.db.monitor.SubmitInterface;
+import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
+import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk

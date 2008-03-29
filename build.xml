@@ -943,15 +943,33 @@
 			<echo message="${basedir}"/>
 			
 			<property 
-				name="src_srv_target" value="src_rpf_common:src_server_common:src_client:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD"/>		
+				name="src_srv_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD"/>		
 			<javac
 				srcdir="${src_srv_target}"
 				destdir="binsrv" debug="true" source="1.5" target="1.5">
-				<classpath>
+				<classpath>										
 					<pathelement path="${JRI_JAR}"/>
-					<fileset dir="lib">
-						<include name="**/*.jar"/>
-					</fileset>
+					<pathelement path="${LOGGING_JAR}"/>
+					<pathelement path="${LOG4J_JAR}"/>
+					<pathelement path="${HTMLPARSER_JAR}"/>
+					<pathelement path="${SSH_JAR}"/>
+					<pathelement path="${FTP_JAR}"/>		
+					
+					<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+					<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
+					<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
+					<pathelement path="lib/desktop/activation.jar"/>
+					<pathelement path="lib/desktop/mail.jar"/>					
+					<pathelement path="lib/desktop/jython.jar"/>
+					<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>	
+					
+					<pathelement path="lib/svg/batik-svggen.jar"/>
+					<pathelement path="lib/svg/batik-dom.jar"/>
+					<pathelement path="lib/svg/batik-awt-util.jar"/>
+					<pathelement path="lib/svg/batik-util.jar"/>
+					
+					<pathelement path="lib/pool/commons-collections-3.2.jar"/>
+					<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				</classpath>
 			</javac>
 			
@@ -971,21 +989,46 @@
 				</copy>
 			  </sequential>
 			</for>
-					
-			
-			<jar destfile="${SRV_JAR}">
+		
+			<jar destfile="RJB-SRV.jar">
 				<fileset dir="binsrv"/>
 			</jar>
-
+		
+		
+   	        <unjar src="${JRI_JAR}"  dest="binsrv" overwrite="true"/>
+			<unjar src="${LOGGING_JAR}"  dest="binsrv" overwrite="true"/>
+   	        <unjar src="${LOG4J_JAR}"  dest="binsrv" overwrite="true"/>
+   	        <unjar src="${HTMLPARSER_JAR}"  dest="binsrv" overwrite="true"/>
+   	        <unjar src="${SSH_JAR}"  dest="binsrv" overwrite="true"/>
+   	        <unjar src="${FTP_JAR}"  dest="binsrv" overwrite="true"/>
+		
+			<unjar src="lib/desktop/servlet-api-2.5-6.1.8.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/jetty-6.1.8.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/jetty-util-6.1.8.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/activation.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/mail.jar"  dest="binsrv" overwrite="true"/>
+   	        <unjar src="lib/desktop/jython.jar"  dest="binsrv" overwrite="true"/>
+		
+			<unjar src="lib/j2ee/commons-httpclient-3.1-rc1.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-svggen.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-dom.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-awt-util.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-util.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/pool/commons-collections-3.2.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/pool/commons-pool-1.3.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
+					
 			
-			
+			<jar destfile="biocep-core.jar">
+				<fileset dir="binsrv"/>
+			</jar>
 			
 		</target>
 
 	<target name="compile" depends="compile.rpf">
 		
 		<echo message="${basedir}"/>
-		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>
+		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>
 		
 		<javac
 			srcdir="${src_compile_target}"

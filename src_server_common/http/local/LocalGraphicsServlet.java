@@ -2,24 +2,15 @@ package http.local;
 
 import graphics.pop.GDDevice;
 import http.TunnelingException;
-
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.Vector;
-
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.rosuda.javaGD.GDObject;
-
 import remoting.RKit;
-import server.DirectJNI;
 import server.Java2DUtils;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
