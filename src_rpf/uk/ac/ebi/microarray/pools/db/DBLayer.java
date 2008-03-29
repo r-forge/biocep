@@ -49,6 +49,7 @@ import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 import uk.ac.ebi.microarray.pools.LookUpInterrupted;
 import uk.ac.ebi.microarray.pools.LookUpTimeout;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.RPFSessionInfo;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
 import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;

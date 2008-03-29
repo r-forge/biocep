@@ -4,7 +4,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
-import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 
 public class LocalHttpServer {
 

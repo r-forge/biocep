@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.microarray.pools.db;
+package uk.ac.ebi.microarray.pools;
 
 import java.util.HashMap;
 

@@ -1,14 +1,26 @@
 package http.local;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.JGDPanelPop;
 import http.TunnelingException;
+
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Vector;
+
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.rosuda.javaGD.GDObject;
+
 import remoting.RKit;
+import server.DirectJNI;
+import server.Java2DUtils;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
@@ -58,11 +70,10 @@ public class LocalGraphicsServlet extends javax.servlet.http.HttpServlet impleme
 				}
 
 				device = _rgui.getR().newDevice(width, height);
-				_rgui.getR().sourceFromBuffer(new StringBuffer(command));
-				JGDPanelPop panel = new JGDPanelPop(device, false, false, null, null, null);
-				panel.popNow();
+				_rgui.getR().sourceFromBuffer(new StringBuffer(command));				
+				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects()); 				
 				response.setContentType("image/jpeg");
-				ImageIO.write(panel.getImage(), "jpg", response.getOutputStream());
+				ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
 				response.getOutputStream().flush();
 				response.getOutputStream().close();
 				return;

@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
-import java.io.StringWriter;
 import java.net.Socket;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -21,6 +20,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -29,9 +29,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import org.python.core.PyException;
-import org.python.core.PyObject;
-import org.python.util.PythonInterpreter;
 import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
@@ -60,7 +57,13 @@ public class ServerLauncher {
 	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
-
+		Stack<String> s=new Stack<String>();
+		String[] l=new String[]{"a","b","c"};
+		for (int i=l.length-1; i>=0;--i) s.push(l[i]);
+		System.out.println(s.pop());
+		System.out.println(s.pop());
+		System.out.println(s.pop());
+		System.out.println(s.empty());
 		System.exit(0);
 
 	}

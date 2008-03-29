@@ -39,10 +39,10 @@ import remoting.RKit;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.RPFSessionInfo;
 import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
 import uk.ac.ebi.microarray.pools.RmiCallTimeout;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
-import uk.ac.ebi.microarray.pools.db.RPFSessionInfo;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk

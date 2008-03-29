@@ -1,4 +1,4 @@
-package uk.ac.ebi.microarray.pools.http;
+package server;
 
 import java.io.IOException;
 import java.io.InputStream;

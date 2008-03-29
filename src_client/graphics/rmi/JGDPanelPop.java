@@ -124,10 +124,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 		_prefSize = getSize();
 		_l = new Vector<GDObject>();
-		_gs = new GDState();
-		_gs.f = new Font(null, 0, 12);
-		_gs.col = Color.black;
-		_gs.fill = Color.white;
+		_gs = new GDState( Color.black,Color.white,new Font(null, 0, 12));
 		_lastSize = getSize();
 		setBackground(Color.white);
 		setOpaque(true);
@@ -964,26 +961,6 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		}
 	}
 
-	public void paintAll(Graphics2D g, Point o, Dimension dSize) {
-		if (_forceAntiAliasing) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		}
-		int i = 0, j = _l.size();
-		g.setFont(_gs.f);
-		g.setClip(o.x, o.y, dSize.width, dSize.height); // reset
-		g.setColor(Color.white);
-		g.fillRect(o.x, o.y, dSize.width, dSize.height);
-		g.translate(-o.x, -o.y);
-		while (i < j) {
-			GDObject gdo = (GDObject) _l.elementAt(i++);
-			if (gdo instanceof GDActionMarker) {
-
-			} else {
-				gdo.paint(this, _gs, g);
-			}
-		}
-	}
-
 	Color _transparentBlack = new Color(Color.black.getColorSpace(), new float[] { Color.black.getRed(), Color.black.getGreen(), Color.black.getBlue() },
 			(float) 0.2);
 
@@ -1172,7 +1149,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		return _gdDevice;
 	}
 
-	public void dispose() {
+	public void stopThreads() {
 		_stopPopThread = true;
 		_stopResizeThread = true;
 		try {
@@ -1180,8 +1157,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			_resizeThread.join();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-
+		}		
+	}
+	
+	public void dispose() {
+		stopThreads();
 		try {
 			_gdDevice.dispose();
 		} catch (Exception e) {
