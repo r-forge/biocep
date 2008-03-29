@@ -239,19 +239,19 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().isReference(obj);
 	}
 
-	public RObject call(String methodName, RObject... args) throws RemoteException {
+	public RObject call(String methodName, Object... args) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().call(methodName, args);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
-	public RObject callAndGetReference(String methodName, RObject... args) throws RemoteException {
+	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().callAndGetReference(methodName, args);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
-	public void callAndAssign(String varName, String methodName, RObject... args) throws RemoteException {
+	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException {
 		DirectJNI.getInstance().getRServices().callAndAssign(varName, methodName, args);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
@@ -273,13 +273,13 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		}
 	};
 
-	public RObject putAndGetReference(RObject obj) throws RemoteException {
+	public RObject putAndGetReference(Object obj) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().putAndGetReference(obj);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
-	public void putAndAssign(RObject obj, String name) throws RemoteException {
+	public void putAndAssign(Object obj, String name) throws RemoteException {
 		DirectJNI.getInstance().getRServices().putAndAssign(obj, name);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}

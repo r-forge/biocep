@@ -33,19 +33,19 @@ public interface RServices extends ManagedServant {
 
 	public String evaluate(String expression, int n) throws RemoteException;
 
-	public RObject call(String methodName, RObject... args) throws RemoteException;
+	public RObject call(String methodName, Object... args) throws RemoteException;
 
-	public RObject callAndGetReference(String methodName, RObject... args) throws RemoteException;
+	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException;
 
-	public void callAndAssign(String varName, String methodName, RObject... args) throws RemoteException;
+	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException;
 
 	public boolean isReference(RObject obj) throws RemoteException;
 
 	public RObject referenceToObject(RObject refObj) throws RemoteException;
 
-	public RObject putAndGetReference(RObject obj) throws RemoteException;
+	public RObject putAndGetReference(Object obj) throws RemoteException;
 
-	public void putAndAssign(RObject obj, String name) throws RemoteException;
+	public void putAndAssign(Object obj, String name) throws RemoteException;
 
 	public void assignReference(String name, RObject refObj) throws RemoteException;
 
