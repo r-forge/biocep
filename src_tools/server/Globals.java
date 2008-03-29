@@ -238,11 +238,11 @@ public class Globals {
 
 				String callStrImplAsRef = null;
 				if (hasDotDotDot) {
-					callStrImplAsRef = varargsStr + m.getReturnType().getName() + " result= (" + m.getReturnType().getName() + ")r.callAsReference(\""
+					callStrImplAsRef = varargsStr + m.getReturnType().getName() + " result= (" + m.getReturnType().getName() + ")r.callAndGetReference(\""
 							+ m.getName() + "\", params);";
 
 				} else {
-					callStrImplAsRef = m.getReturnType().getName() + " result= (" + m.getReturnType().getName() + ")r.callAsReference(\"" + m.getName()
+					callStrImplAsRef = m.getReturnType().getName() + " result= (" + m.getReturnType().getName() + ")r.callAndGetReference(\"" + m.getName()
 							+ "\", " + paramsStr + ");";
 				}
 

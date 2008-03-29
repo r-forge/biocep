@@ -115,14 +115,14 @@ public class RServicesObject implements RServices {
 	public void assignReference(String name, RObject refObj) throws RemoteException {
 	}
 
-	public RObject call(String methodName, RObject... args) throws RemoteException {
+	public RObject call(String methodName, Object... args) throws RemoteException {
 		return null;
 	}
 
-	public void callAndAssign(String varName, String methodName, RObject... args) throws RemoteException {
+	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException {
 	}
 
-	public RObject callAndGetReference(String methodName, RObject... args) throws RemoteException {
+	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException {
 		return null;
 	}
 
@@ -236,10 +236,10 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public void putAndAssign(RObject obj, String name) throws RemoteException {
+	public void putAndAssign(Object obj, String name) throws RemoteException {
 	}
 
-	public RObject putAndGetReference(RObject obj) throws RemoteException {
+	public RObject putAndGetReference(Object obj) throws RemoteException {
 		return null;
 	}
 

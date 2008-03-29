@@ -524,7 +524,7 @@ public class DirectJNI {
 		}
 	}
 
-	long putObject(RObject obj) throws Exception {
+	long putObject(Object obj) throws Exception {
 
 		Rengine e = _rEngine;
 
@@ -534,6 +534,17 @@ public class DirectJNI {
 
 		if (obj instanceof ReferenceInterface) {
 			throw new Exception("putObject is not allowed on proxy objects");
+		}
+		
+		if (!(obj instanceof RObject)) {
+			if (obj instanceof Integer) obj=new RInteger((Integer)obj);
+			else if (obj instanceof Long) obj=new RInteger((int)((Long)obj).longValue());
+			else if (obj instanceof String) obj=new RChar((String)obj);
+			else if (obj instanceof Double) obj=new RNumeric((Double)obj);
+			else if (obj instanceof Float) obj=new RNumeric((Float)obj);
+			else if (obj instanceof String) obj=new RChar((String)obj);
+			else if (obj instanceof Boolean) obj=new RLogical((Boolean)obj);			
+			else throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
 		}
 
 		if (obj instanceof RObjectName) {
@@ -847,8 +858,8 @@ public class DirectJNI {
 
 		}
 
-		if (obj.getOutputMsg() != null)
-			e.rniSetAttr(resultId, "comment", e.rniPutString(obj.getOutputMsg()));
+		if (((RObject)obj).getOutputMsg() != null)
+			e.rniSetAttr(resultId, "comment", e.rniPutString(((RObject)obj).getOutputMsg()));
 		return resultId;
 	}
 
@@ -1282,13 +1293,13 @@ public class DirectJNI {
 		}
 	}
 
-	private RObject call(boolean resultAsReference, String varName, String methodName, RObject... args) throws Exception {
+	private RObject call(boolean resultAsReference, String varName, String methodName, Object... args) throws Exception {
 
 		Rengine e = _rEngine;
 
 		Vector<String> usedVars = new Vector<String>();
 		String callStr = methodName + "(";
-		for (RObject arg : args) {
+		for (Object arg : args) {
 			if (arg != null && arg instanceof RNamedArgument) {
 				callStr += ((RNamedArgument) arg).getName() + "=";
 				arg = ((RNamedArgument) arg).getRobject();
@@ -1425,7 +1436,7 @@ public class DirectJNI {
 
 	};
 
-	private ReferenceInterface putObjectAndGetReference(final RObject obj) throws Exception {
+	private ReferenceInterface putObjectAndGetReference(final Object obj) throws Exception {
 		long resultId = putObject(obj);
 		protectSafe(resultId);
 		Class<?> javaClass = DirectJNI._mappingClassLoader.loadClass(obj.getClass().getName() + "Ref");
@@ -1863,7 +1874,7 @@ public class DirectJNI {
 			return evaluate(expression, 1);
 		};
 
-		public RObject call(final String methodName, final RObject... args) throws RemoteException {
+		public RObject call(final String methodName, final Object... args) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -1889,7 +1900,7 @@ public class DirectJNI {
 			return objHolder[0];
 		}
 
-		public void callAndAssign(final String varName, final String methodName, final RObject... args) throws RemoteException {
+		public void callAndAssign(final String varName, final String methodName, final Object... args) throws RemoteException {
 			final Exception[] exceptionHolder = new Exception[1];
 
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -1916,7 +1927,7 @@ public class DirectJNI {
 
 		}
 
-		public RObject callAndGetReference(final String methodName, final RObject... args) throws RemoteException {
+		public RObject callAndGetReference(final String methodName, final Object... args) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -1998,7 +2009,7 @@ public class DirectJNI {
 			return obj instanceof ReferenceInterface;
 		}
 
-		public RObject putAndGetReference(final RObject obj) throws RemoteException {
+		public RObject putAndGetReference(final Object obj) throws RemoteException {
 			final RObject[] refHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -2023,7 +2034,7 @@ public class DirectJNI {
 			return refHolder[0];
 		}
 
-		public void putAndAssign(final RObject obj, final String name) throws RemoteException {
+		public void putAndAssign(final Object obj, final String name) throws RemoteException {
 			final Exception[] exceptionHolder = new Exception[1];
 
 			_lastStatus = runR(new server.ExecutionUnit() {
