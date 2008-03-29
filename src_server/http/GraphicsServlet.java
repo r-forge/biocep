@@ -18,7 +18,9 @@
 package http;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.JGDPanelPop;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
@@ -26,6 +28,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import remoting.RServices;
+import server.Java2DUtils;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 
@@ -47,14 +50,12 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 		Object result = null;
 		do {
 
-			long t1 = System.currentTimeMillis();
 			ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
 			if (spFactory == null) {
 				result = new NoRegistryAvailableException();
 				break;
 			}
 
-			long t2 = System.currentTimeMillis();
 			RServices r = null;
 			GDDevice device = null;
 			try {
@@ -69,8 +70,6 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					result = new NoServantAvailableException();
 					break;
 				}
-				long t3 = System.currentTimeMillis();
-
 				Integer width = null;
 				try {
 					width = Integer.decode(request.getParameter("width"));
@@ -93,22 +92,10 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 				}
 
 				device = r.newDevice(width, height);
-				long t4 = System.currentTimeMillis();
 				r.sourceFromBuffer(new StringBuffer(command));
-				long t5 = System.currentTimeMillis();
-				JGDPanelPop panel = new JGDPanelPop(device, false, false, null, null, null);
-				panel.popNow();
-				long t6 = System.currentTimeMillis();
+				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects());
 				response.setContentType("image/jpeg");
-				ImageIO.write(panel.getImage(), "jpg", response.getOutputStream());
-				long t7 = System.currentTimeMillis();
-
-				System.out.println("delta1:" + (t2 - t1));
-				System.out.println("delta2:" + (t3 - t2));
-				System.out.println("delta3:" + (t4 - t3));
-				System.out.println("delta4:" + (t5 - t4));
-				System.out.println("delta5:" + (t6 - t5));
-				System.out.println("delta6:" + (t7 - t6));
+				ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
 
 				return;
 

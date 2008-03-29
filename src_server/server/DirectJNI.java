@@ -22,9 +22,9 @@ import graphics.pop.GDDevice;
 import graphics.rmi.DoublePoint;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
-import graphics.rmi.JGDPanelPop;
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
@@ -103,6 +103,7 @@ import org.rosuda.JRI.RMainLoopCallbacks;
 import org.rosuda.JRI.Rengine;
 import org.rosuda.JRI.RengineWrapper;
 import org.rosuda.javaGD.GDInterface;
+import org.rosuda.javaGD.GDObject;
 import org.rosuda.javaGD.JavaGD;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -2307,6 +2308,12 @@ public class DirectJNI {
 			return new GDDeviceLocal(w, h);
 		}
 
+		public GDDevice[] listDevices() throws RemoteException {
+			GDDevice[] result=new GDDevice[_localDeviceHashMap.values().size()];
+			int i=0; for (GDDevice d:_localDeviceHashMap.values()) result[i++]=d; 
+			return result;
+		}
+	
 		private void getWorkingDirectoryFileNames(File path, Vector<String> result) throws java.rmi.RemoteException {
 			File[] files = path.listFiles();
 			if (files == null)
@@ -2609,16 +2616,15 @@ public class DirectJNI {
 				Dimension dSize = new Dimension(width, height);
 				GDDevice device = null;
 				try {
-					device = DirectJNI.getInstance().getRServices().newDevice(dSize.width, dSize.height);
-					JGDPanelPop panel = new JGDPanelPop(device, false, false, null, null, null);
+					device = DirectJNI.getInstance().getRServices().newDevice(dSize.width, dSize.height);					
 					DirectJNI.getInstance().getRServices().sourceFromBuffer(new StringBuffer(expression));
 					if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 						log.info(DirectJNI.getInstance().getRServices().getStatus());
 					}
-					panel.popNow();
-					if (panel.getGDOList().size() == 0)
+					Vector<GDObject> g2dObjects=device.popAllGraphicObjects();
+					if (g2dObjects.size() == 0)
 						throw new RemoteException(DirectJNI.getInstance().getRServices().getStatus());
-					panel.paintAll(svgGenerator, new Point(0, 0), dSize);
+					Java2DUtils.paintAll(svgGenerator, new Point(0, 0), dSize, g2dObjects);
 				} catch (Exception e) {
 					throw new RemoteException("", e);
 				} finally {
@@ -2747,6 +2753,7 @@ public class DirectJNI {
 
 	public static Vector<RAction> _rActions = new Vector<RAction>();
 
+	private static HashMap<Integer, GDDevice> _localDeviceHashMap = new HashMap<Integer, GDDevice>();
 	public static class GDDeviceLocal implements GDDevice {
 		GDContainerBag gdBag = null;
 
@@ -2775,6 +2782,8 @@ public class DirectJNI {
 				}
 
 			System.out.println(DirectJNI.getInstance().getRServices().consoleSubmit(".PrivateEnv$dev.list()"));
+			
+			_localDeviceHashMap.put(gdBag.getDeviceNumber(), this);
 
 		}
 
@@ -2796,7 +2805,9 @@ public class DirectJNI {
 		};
 
 		public void dispose() throws RemoteException {
+			_localDeviceHashMap.remove(gdBag.getDeviceNumber());
 			DirectJNI.getInstance().getRServices().evaluate("try({ .PrivateEnv$dev.off(which=" + gdBag.getDeviceNumber() + ")},silent=TRUE)");
+			
 		};
 
 		public int getDeviceNumber() throws RemoteException {
@@ -2875,9 +2886,8 @@ public class DirectJNI {
 					DirectJNI.getInstance().getRServices().evaluate(
 							".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + device.getDeviceNumber() + ");"
 									+ ".PrivateEnv$dev.set(" + currentDevice + ");", 3);
-					JGDPanelPop panel = new JGDPanelPop(device, false, false, null, null, null);
-					panel.popNow();
-					panel.paintAll(svgGenerator, new Point(0, 0), dSize);
+					
+					Java2DUtils.paintAll(svgGenerator, new Point(0, 0), dSize, device.popAllGraphicObjects());	
 				} catch (Exception e) {
 					throw new RemoteException("", e);
 				} finally {

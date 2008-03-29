@@ -220,6 +220,10 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
+	public GDDevice[] listDevices() throws RemoteException {
+		return null;
+	}
+	
 	public Vector<RAction> popRActions() throws RemoteException {
 		return null;
 	}
@@ -307,6 +311,7 @@ public class RServicesObject implements RServices {
 
 	public void pythonSet(String name, RObject Value) throws RemoteException {		
 	}
+
 	
 	
 }

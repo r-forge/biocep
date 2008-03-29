@@ -23,7 +23,6 @@ import graphics.rmi.JGDPanel;
 import graphics.rmi.RClustserInterface;
 import java.io.Serializable;
 import java.rmi.*;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -44,6 +43,8 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.rosuda.JRI.Rengine;
+
+import python.server.R;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -55,7 +56,6 @@ import uk.ac.ebi.microarray.pools.InitializingException;
 import uk.ac.ebi.microarray.pools.ManagedServantAbstract;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemotePanel;
-import uk.ac.ebi.microarray.pools.http.LocalClassServlet;
 import util.Utils;
 
 /**
@@ -73,13 +73,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	private GraphicNotifier _graphicNotifier = null;
 
-	private HashMap<Integer, GDDeviceImpl> _deviceHashMap = new HashMap<Integer, GDDeviceImpl>();
+	private HashMap<Integer, GDDevice> _deviceHashMap = new HashMap<Integer, GDDevice>();
 
 	private boolean _isReady = false;
 
 	RServices _rCreationPb = new RServicesObject();
-
-	public static RServices _instance=null;
 	
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RServantImpl.class);
 
@@ -209,7 +207,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 			});
 			
-			_instance=(RServices)java.rmi.server.RemoteObject.toStub(this);
+			R._instance=(RServices)java.rmi.server.RemoteObject.toStub(this);
 			_isReady = true;
 
 		} catch (Exception ex) {
@@ -489,6 +487,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	public GDDevice newDevice(int w, int h) throws RemoteException {
 		return new GDDeviceImpl(w, h, _deviceHashMap);
+	}
+	
+	public GDDevice[] listDevices() throws RemoteException {
+		GDDevice[] result=new GDDevice[_deviceHashMap.values().size()];
+		int i=0; for (GDDevice d:_deviceHashMap.values()) result[i++]=d; 
+		return result;
 	}
 
 	public String[] getWorkingDirectoryFileNames() throws java.rmi.RemoteException {

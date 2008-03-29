@@ -935,6 +935,52 @@
 		
 		
 	</target>
+	
+	
+	
+	
+	<target name="cserver">
+			<echo message="${basedir}"/>
+			
+			<property 
+				name="src_srv_target" value="src_rpf_common:src_server_common:src_client:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD"/>		
+			<javac
+				srcdir="${src_srv_target}"
+				destdir="binsrv" debug="true" source="1.5" target="1.5">
+				<classpath>
+					<pathelement path="${JRI_JAR}"/>
+					<fileset dir="lib">
+						<include name="**/*.jar"/>
+					</fileset>
+				</classpath>
+			</javac>
+			
+			<for list="${src_srv_target}" param="source" delimiter=":">
+			  <sequential>
+				<copy todir="binsrv">				
+					<fileset dir="@{source}">
+						<include name="**/*.xml"/>
+						<include name="**/*.props"/>
+						<include name="**/*.properties"/>
+						<include name="**/*.R"/>
+						<include name="**/*.r"/>
+						<include name="**/*.png"/>
+						<include name="**/*.gif"/>
+						<include name="**/*.html"/>
+					</fileset>				
+				</copy>
+			  </sequential>
+			</for>
+					
+			
+			<jar destfile="${SRV_JAR}">
+				<fileset dir="binsrv"/>
+			</jar>
+
+			
+			
+			
+		</target>
 
 	<target name="compile" depends="compile.rpf">
 		
