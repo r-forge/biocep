@@ -617,8 +617,6 @@
 		</manifest>		
 		
 		<jar basedir="VirtualRWorkbench/classes" destfile="VirtualRWorkbench/biocepunsigned.jar" manifest="VirtualRWorkbench/MANIFEST.MF" />
-		
-		
 		<signjar jar="VirtualRWorkbench/biocepunsigned.jar" signedjar="VirtualRWorkbench/biocep.jar" alias="appletsigningkey" keystore="VirtualRWorkbench/appletKeyStore.ks"  storepass="emblebi" />
 		
 

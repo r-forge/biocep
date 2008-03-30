@@ -176,6 +176,7 @@ public class DirectJNI {
 	private static Vector<String> demosList = null;
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(DirectJNI.class);
 	private boolean _progrssiveConsoleFeedbackEnabled = false;
+	private HashMap<String, byte[]> _resourceCache=new HashMap<String, byte[]>();
 
 	public static DirectJNI getInstance() {
 		if (_djni != null)
@@ -302,7 +303,29 @@ public class DirectJNI {
 
 		}
 	}
-
+	
+	InputStream getResourceAsStream(String resource) {
+		if (resource.startsWith("/")) resource=resource.substring(1);
+		byte[] buffer=_resourceCache.get(resource);
+		if (buffer!=null) {
+			return new ByteArrayInputStream(buffer);
+		} else {			
+			InputStream is=_resourcesClassLoader.getResourceAsStream(resource);
+			if (is==null) return null;			
+			try {
+				ByteArrayOutputStream baos=new ByteArrayOutputStream();
+				int b; while ((b = is.read()) != -1) {baos.write(b);}
+				buffer=baos.toByteArray();
+			} catch (Exception e) {e.printStackTrace();return null;}			
+			_resourceCache.put(resource, buffer);
+			return new ByteArrayInputStream(buffer);
+		}
+	}
+	
+	boolean resourceExists(String resource) {
+		return getResourceAsStream(resource)!=null;
+	}
+	
 	public boolean runRInProgress() {
 		return _runRlock.isLocked();
 	}
@@ -2621,7 +2644,6 @@ public class DirectJNI {
 					}
 
 				}
-
 			}
 		}
 
@@ -2630,7 +2652,7 @@ public class DirectJNI {
 				demosList = new Vector<String>();
 				try {
 					Properties props = new Properties();
-					props.loadFromXML(DirectJNI.class.getResourceAsStream("/rdemos/list.properties"));
+					props.loadFromXML(getResourceAsStream("/rdemos/list.properties"));
 					for (Object key : PoolUtils.orderO(props.keySet())) {
 						demosList.add(props.getProperty((String) key));
 					}
@@ -2645,12 +2667,12 @@ public class DirectJNI {
 		}
 
 		public StringBuffer getDemoSource(String demoName) throws RemoteException {
-			if (RListener.class.getResource("/rdemos/" + demoName + ".r") == null) {
+			if (!resourceExists("/rdemos/" + demoName + ".r")) {
 				throw new RemoteException("no demo with name <" + demoName + ">");
 			} else {
 				try {
 					StringBuffer result = new StringBuffer();
-					BufferedReader br = new BufferedReader(new InputStreamReader(RListener.class.getResourceAsStream("/rdemos/" + demoName + ".r")));
+					BufferedReader br = new BufferedReader(new InputStreamReader(getResourceAsStream("/rdemos/" + demoName + ".r")));
 					String line = null;
 					while ((line = br.readLine()) != null) {
 						result.append(line + "\n");

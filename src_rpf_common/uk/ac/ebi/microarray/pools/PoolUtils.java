@@ -72,8 +72,6 @@ import javax.swing.SwingUtilities;
 import org.neilja.net.interruptiblermi.InterruptibleRMISocketFactory;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 
-
-
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
  */
@@ -1178,9 +1176,10 @@ public class PoolUtils {
 			}
 		}
 	}
-	
+
 	public static void getClasses(File root, File path, Vector<String> result) throws Exception {
-		if (path==null) path=root;
+		if (path == null)
+			path = root;
 		File[] files = path.listFiles(new FileFilter() {
 			public boolean accept(File pathname) {
 				return pathname.isDirectory() || pathname.toString().toLowerCase().endsWith(".class");
@@ -1192,8 +1191,34 @@ public class PoolUtils {
 			if (files[i].isDirectory()) {
 				getClasses(root, files[i], result);
 			} else {
-				String absolutepath=files[i].getAbsolutePath();
-				String name = absolutepath.substring(root.getAbsolutePath().length()+1, absolutepath.length()-".class".length()).replace('/', '.').replace('\\', '.');
+				String absolutepath = files[i].getAbsolutePath();
+				String name = absolutepath.substring(root.getAbsolutePath().length() + 1, absolutepath.length() - ".class".length()).replace('/', '.').replace(
+						'\\', '.');
+				result.add(name);
+			}
+		}
+	}
+
+	public static void getResources(File root, File path, Vector<String> result) throws Exception {
+		if (path == null)
+			path = root;
+		File[] files = path.listFiles(new FileFilter() {
+			public boolean accept(File pathname) {
+				return pathname.isDirectory() || pathname.toString().toLowerCase().endsWith(".xml") || pathname.toString().toLowerCase().endsWith(".props")
+						|| pathname.toString().toLowerCase().endsWith(".properties") || pathname.toString().toLowerCase().endsWith(".r")
+						|| pathname.toString().toLowerCase().endsWith(".png") || pathname.toString().toLowerCase().endsWith(".jpg")
+						|| pathname.toString().toLowerCase().endsWith(".gif") || pathname.toString().toLowerCase().endsWith(".html")
+						|| pathname.toString().toLowerCase().endsWith(".sql");
+			}
+		});
+		if (files == null)
+			return;
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].isDirectory()) {
+				getResources(root, files[i], result);
+			} else {
+				String absolutepath = files[i].getAbsolutePath();
+				String name = absolutepath.substring(root.getAbsolutePath().length()).replace('\\', '/');
 				result.add(name);
 			}
 		}

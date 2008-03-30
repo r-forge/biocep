@@ -7,6 +7,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -55,7 +57,7 @@ public class MainRServer {
 			System.out.println("### code base:" + System.getProperty("java.rmi.server.codebase"));
 
 			mainServantClass = RServantImpl.class;
-
+			
 			boolean isPrivateServant = (System.getProperty("private") != null && System.getProperty("private").equalsIgnoreCase("true"));
 
 			String servantCreationListenerStub = System.getProperty("listener.stub");
@@ -78,6 +80,7 @@ public class MainRServer {
 				PoolUtils.callBack(servantCreationListener, mservant, null);
 			}
 
+			
 			String sname = mservant.getServantName();
 			log.info("sname :::" + sname);
 			log.info("Servant " + sname + " instantiated successfully.");

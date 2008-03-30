@@ -24,6 +24,7 @@ public class BootSsh {
 	public static final String R_PROCESS_ID_END_MARKER = "#RPROCESSIDEND#";
 
 	public static void main(String[] args) throws Exception {
+				
 		String logFileName = args[7];
 		PrintStream bw = null;
 		if (logFileName.equals("System.out")) {
@@ -32,6 +33,11 @@ public class BootSsh {
 			bw = new PrintStream(new File(logFileName));
 		}
 
+		URL codeUrl=null;
+		if (args.length>8) {
+			codeUrl=new URL(args[8]);
+		}
+		
 		try {
 
 			URL classServerUrl = new URL("http://" + args[1] + ":" + args[2] + "/classes/");
@@ -41,10 +47,10 @@ public class BootSsh {
 					new Class<?>[] { String.class, int.class, int.class, int.class }).invoke(null, args[1], Integer.decode(args[2]), 3, 3);
 			Class<?> ServerLauncherClass = cl.loadClass("server.ServerManager");
 			Remote r = (Remote) ServerLauncherClass.getMethod("createR",
-					new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class, boolean.class }).invoke(
+					new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class, boolean.class, URL.class }).invoke(
 					null,
 					new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), args[3],
-							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), false });
+							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), false, codeUrl });
 
 			Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");
 			String processId = (String) poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);
