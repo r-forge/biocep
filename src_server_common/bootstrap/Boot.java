@@ -1,8 +1,8 @@
 package bootstrap;
 
-import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -13,10 +13,15 @@ public class Boot {
 		try {
 			boolean keepAlive = new Boolean(args[0]);
 			URLClassLoader cl = null;
-			if (keepAlive) {
-				String jarsUrlPrefix = args[3];
-				cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/"), new URL(jarsUrlPrefix + "biocep.jar")
-				}, Boot.class.getClassLoader());
+			
+			System.out.println("Boot Args:"+Arrays.toString(args));
+			URL codeUrl = args.length > 3 ? new URL(args[3]) : null ;  
+			if (keepAlive) {				
+				if (codeUrl!=null) {
+					cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/"), codeUrl}, Boot.class.getClassLoader());
+				} else {
+					cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/")}, Boot.class.getClassLoader());					
+				}
 			} else {
 				cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/") }, Boot.class.getClassLoader());
 				cl.loadClass("server.ServerManager").getMethod("startPortInUseDogwatcher",

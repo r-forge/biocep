@@ -22,7 +22,7 @@ import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
 import graphics.rmi.RClustserInterface;
 import java.io.Serializable;
-import java.rmi.*;
+import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -102,16 +102,30 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				
 		log.info("Stub:" + PoolUtils.stubToHex(this));
 		
-		try {
-			Properties props=new Properties();
-			props.loadFromXML(this.getClass().getResourceAsStream("/classlist.xml"));
-			for (Object c:props.keySet()) {
-				this.getClass().getClassLoader().loadClass((String)c); 
+		if (System.getProperty("preloadall")!=null && System.getProperty("preloadall").equalsIgnoreCase("true") )
+		{
+			try {
+				Properties props=new Properties();
+				props.loadFromXML(this.getClass().getResourceAsStream("/classlist.xml"));
+				for (Object c:props.keySet()) {
+					this.getClass().getClassLoader().loadClass((String)c); 
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
+					
+			try {
+				Properties props=new Properties();
+				props.loadFromXML(this.getClass().getResourceAsStream("/resourcelist.xml"));
+				for (Object c:props.keySet()) {
+					DirectJNI.getInstance().getResourceAsStream((String)c);
+				}			
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
+
 	}
 
 	public void init() throws RemoteException {
@@ -648,7 +662,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		System.out.println("cloneServer");
 		try {
 			RServices w = ServerManager.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils.getHostIp(), LocalRmiRegistry
-					.getLocalRmiRegistryPort(), 256, 256, false);
+					.getLocalRmiRegistryPort(), 256, 256, false,null);
 			return w;
 		} catch (Exception e) {
 			throw new RemoteException("", e);

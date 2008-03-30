@@ -55,9 +55,8 @@ public class ServerManager {
 	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
-		Vector<String> classes=new Vector<String>();
-		PoolUtils.getClasses(new File("J:/workspace/proj_demo2/bin"),null, classes);
-		for (int i=0; i<classes.size(); ++i) System.out.println(classes.elementAt(i));
+		RServices r=createR();
+		System.out.println(Arrays.toString(r.listDemos()));
 	}
 
 	private static JTextArea createRSshProgressArea;
@@ -65,7 +64,7 @@ public class ServerManager {
 	private static JFrame createRSshProgressFrame;
 
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress) throws BadSshHostException,
+			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress, URL codeUrl) throws BadSshHostException,
 			BadSshLoginPwdException, Exception {
 
 		if (showProgress) {
@@ -145,7 +144,7 @@ public class ServerManager {
 				sess = conn.openSession();
 				sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
 						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes + " "
-						+ "System.out");
+						+ "System.out" + " "+ codeUrl.toString());
 
 				InputStream stdout = new StreamGobbler(sess.getStdout());
 				final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
@@ -225,7 +224,7 @@ public class ServerManager {
 	private static JFrame createRLocalProgressFrame;
 
 	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress, URL codeUrl) throws Exception {
 
 		if (showProgress) {
 			createRLocalProgressArea = new JTextArea();
@@ -306,6 +305,7 @@ public class ServerManager {
 			command.add("" + memoryMinMegabytes);
 			command.add("" + memoryMaxMegabytes);
 			command.add(logFile);
+			if (codeUrl!=null) command.add(codeUrl.toString());
 			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), null);
 
 			while (!new File(logFile).exists()) {
@@ -364,11 +364,11 @@ public class ServerManager {
 	private static JFrame createRProgressFrame;
 
 	public static RServices createR() throws Exception {		
-		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, false);
+		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, false,null);
 	}
 
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress, URL codeUrl) throws Exception {
 
 		if (showProgress) {
 			createRProgressArea = new JTextArea();
@@ -672,6 +672,9 @@ public class ServerManager {
 			System.out.println("jripath:" + jripath + "\n");
 
 			String cp = root + "classes";
+			if (codeUrl!=null && codeUrl.toString().toLowerCase().startsWith("file:")) {
+				cp+=System.getProperty("path.separator")+codeUrl.toString().substring("file:".length());
+			}
 
 			ManagedServant[] servantHolder = new ManagedServant[1];
 			RemoteException[] exceptionHolder = new RemoteException[1];
@@ -699,6 +702,9 @@ public class ServerManager {
 							+ " " + urlprefix + "JRI.jar" + " " + urlprefix + "commons-logging-1.1.jar" + " " + urlprefix + "log4j-1.2.14.jar" + " "
 							+ urlprefix + "htmlparser.jar" + " " + urlprefix + "derbyclient.jar" + " " + urlprefix + "RJB.jar" + " " + urlprefix
 							+ "mapping.jar" + (isWindowsOs() ? "\"" : ""));
+					
+					
+					command.add((isWindowsOs() ? "\"" : "") + "-Dpreloadall=true" + (isWindowsOs() ? "\"" : ""));	
 				} else {
 					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"
 							+
@@ -734,8 +740,8 @@ public class ServerManager {
 				command.add(new Boolean(keepAlive).toString());
 				command.add(codeServerHostIp);
 				command.add("" + codeServerPort);
-				if (keepAlive) {
-					command.add(urlprefix);
+				if (keepAlive && codeUrl!=null) {
+					command.add(codeUrl.toString());
 				}
 
 				final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));

@@ -482,22 +482,22 @@ public class GDApplet extends GDAppletBase implements RGui {
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
 												.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
-												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), false);
+												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), false,null);
 									} else {
 
 										if (PoolUtils.isWindowsOs()) {
 											if (_keepAlive) {
 												r = ServerManager.createRLocal(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
-														false);
+														false,null);
 											} else {
 												r = ServerManager.createR(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
-														false);
+														false,null);
 											}
 										} else {
 											r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
-													.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
+													.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false,null);
 										}
 									}
 
