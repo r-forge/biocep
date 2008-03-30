@@ -28,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -1148,5 +1149,54 @@ public class PoolUtils {
 
 	public static final Integer SET_SERVANT_STUB_DONE = new Integer(0);
 	public static final int SET_SERVANT_STUB_TIMEOUT_MILLISEC = 2000;
+
+	public static int countLines(String fileName) throws Exception {
+		BufferedReader br = new BufferedReader(new FileReader(fileName));
+		String line = null;
+		int counter = 0;
+		while ((line = br.readLine()) != null)
+			++counter;
+		return counter;
+	}
+
+	public static void getFileNames(File path, Vector<String> result) throws Exception {
+		File[] files = path.listFiles(new FileFilter() {
+			public boolean accept(File pathname) {
+				return pathname.isDirectory() || pathname.toString().toLowerCase().endsWith(".java") || pathname.toString().toLowerCase().endsWith(".r")
+						|| pathname.toString().toLowerCase().endsWith("build.xml");
+			}
+		});
+		if (files == null)
+			return;
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].isDirectory()) {
+				getFileNames(files[i], result);
+			} else {
+				String name = files[i].getAbsolutePath();
+				System.out.println(name + " --> " + countLines(name));
+				result.add(name);
+			}
+		}
+	}
+	
+	public static void getClasses(File root, File path, Vector<String> result) throws Exception {
+		if (path==null) path=root;
+		File[] files = path.listFiles(new FileFilter() {
+			public boolean accept(File pathname) {
+				return pathname.isDirectory() || pathname.toString().toLowerCase().endsWith(".class");
+			}
+		});
+		if (files == null)
+			return;
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].isDirectory()) {
+				getClasses(root, files[i], result);
+			} else {
+				String absolutepath=files[i].getAbsolutePath();
+				String name = absolutepath.substring(root.getAbsolutePath().length()+1, absolutepath.length()-".class".length()).replace('/', '.').replace('\\', '.');
+				result.add(name);
+			}
+		}
+	}
 
 }

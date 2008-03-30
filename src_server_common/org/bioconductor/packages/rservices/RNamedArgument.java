@@ -22,12 +22,12 @@ package org.bioconductor.packages.rservices;
  */
 public class RNamedArgument extends RObject {
 	private String _name;
-	private RObject _robject;
+	private Object _robject;
 
 	public RNamedArgument() {
 	}
 
-	public RNamedArgument(String name, RObject robject) {
+	public RNamedArgument(String name, Object robject) {
 		this._name = name;
 		this._robject = robject;
 	}
@@ -36,7 +36,7 @@ public class RNamedArgument extends RObject {
 		this._name = _name;
 	}
 
-	public void setRobject(RObject _robject) {
+	public void setRobject(Object _robject) {
 		this._robject = _robject;
 	}
 
@@ -44,7 +44,7 @@ public class RNamedArgument extends RObject {
 		return _name;
 	}
 
-	public RObject getRobject() {
+	public Object getRobject() {
 		return _robject;
 	}
 

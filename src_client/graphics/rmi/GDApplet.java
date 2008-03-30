@@ -156,7 +156,7 @@ import server.BadSshLoginPwdException;
 import server.LocalHttpServer;
 import server.LocalRmiRegistry;
 import server.NoMappingAvailable;
-import server.ServerLauncher;
+import server.ServerManager;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
@@ -480,23 +480,23 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
-										r = ServerLauncher.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
+										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
 												.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), ident
 												.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), false);
 									} else {
 
 										if (PoolUtils.isWindowsOs()) {
 											if (_keepAlive) {
-												r = ServerLauncher.createRLocal(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
+												r = ServerManager.createRLocal(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
 														false);
 											} else {
-												r = ServerLauncher.createR(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
+												r = ServerManager.createR(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
 														false);
 											}
 										} else {
-											r = ServerLauncher.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
+											r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
 													.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false);
 										}
 									}
@@ -3126,7 +3126,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (dialog.getExpr() != null) {
 									try {
 										final int port = Integer.decode(dialog.getExpr());
-										if (ServerLauncher.isPortInUse("127.0.0.1", port)) {
+										if (ServerManager.isPortInUse("127.0.0.1", port)) {
 											JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
 										} else {
 
@@ -3860,8 +3860,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	HashMap<Integer, DynamicView> dynamicViews = new HashMap<Integer, DynamicView>();
 	View[] views = new View[3];
-	public static String NEW_R_STUB_FILE = ServerLauncher.INSTALL_DIR + "new_R_stub.txt";
-	public static String SETTINGS_FILE = ServerLauncher.INSTALL_DIR + "settings.xml";
+	public static String NEW_R_STUB_FILE = ServerManager.INSTALL_DIR + "new_R_stub.txt";
+	public static String SETTINGS_FILE = ServerManager.INSTALL_DIR + "settings.xml";
 
 	int getDynamicViewId() {
 		int id = 0;

@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 
-import server.ServerLauncher;
+import server.ServerManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
@@ -78,10 +78,10 @@ public class GDDesktopLauncher {
 			System.out.println(k + "=" + System.getenv().get(k));
 		}
 
-		String root = ServerLauncher.INSTALL_DIR;
+		String root = ServerManager.INSTALL_DIR;
 		new File(root).mkdir();
 
-		String[] rinfo = ServerLauncher.getRInfo(null);
+		String[] rinfo = ServerManager.getRInfo(null);
 		if (rinfo == null && System.getenv("R_HOME") != null) {
 			String home = System.getenv("R_HOME");
 			if (isWindowsOs() && !home.endsWith("\\")) {
@@ -90,7 +90,7 @@ public class GDDesktopLauncher {
 			if (!isWindowsOs() && !home.endsWith("/")) {
 				home = home + "/";
 			}
-			rinfo = ServerLauncher.getRInfo(home);
+			rinfo = ServerManager.getRInfo(home);
 		}
 
 		String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : (System.getenv("R_HOME") != null ? System
