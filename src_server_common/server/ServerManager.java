@@ -6,7 +6,6 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -20,7 +19,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -47,31 +45,24 @@ import ch.ethz.ssh2.StreamGobbler;
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
  */
-public class ServerLauncher {
+public class ServerManager {
 	public static String INSTALL_DIR = new File(System.getProperty("user.home") + "/RWorkbench/").getAbsolutePath() + "/";
-	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
-	public static int BUFFER_SIZE = 8192 * 5;
+	private static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
+	private static int BUFFER_SIZE = 8192 * 5;
 	private static final String RLIBSTART = "R$LIB$START";
 	private static final String RLIBEND = "R$LIB$END";
 	private static final String RVERSTART = "R$VER$START";
 	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
-		Stack<String> s=new Stack<String>();
-		String[] l=new String[]{"a","b","c"};
-		for (int i=l.length-1; i>=0;--i) s.push(l[i]);
-		System.out.println(s.pop());
-		System.out.println(s.pop());
-		System.out.println(s.pop());
-		System.out.println(s.empty());
-		System.exit(0);
-
+		Vector<String> classes=new Vector<String>();
+		PoolUtils.getClasses(new File("J:/workspace/proj_demo2/bin"),null, classes);
+		for (int i=0; i<classes.size(); ++i) System.out.println(classes.elementAt(i));
 	}
 
-	static JTextArea createRSshProgressArea;
-	static JProgressBar createRSshProgressBar;
-	static JFrame createRSshProgressFrame;
-
+	private static JTextArea createRSshProgressArea;
+	private static JProgressBar createRSshProgressBar;
+	private static JFrame createRSshProgressFrame;
 
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress) throws BadSshHostException,
@@ -117,7 +108,7 @@ public class ServerLauncher {
 			if (isAuthenticated == false)
 				throw new BadSshLoginPwdException();
 
-			InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/BootSsh.class");
+			InputStream is = ServerManager.class.getResourceAsStream("/bootstrap/BootSsh.class");
 			byte[] buffer = new byte[is.available()];
 			try {
 				for (int i = 0; i < buffer.length; ++i) {
@@ -201,7 +192,7 @@ public class ServerLauncher {
 				if (eIndex != -1) {
 					int bIndex = sshOutput.indexOf(BootSsh.STUB_BEGIN_MARKER);
 					String stub = sshOutput.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
-					return (RServices) PoolUtils.hexToStub(stub, ServerLauncher.class.getClassLoader());
+					return (RServices) PoolUtils.hexToStub(stub, ServerManager.class.getClassLoader());
 				} else {
 					return null;
 				}
@@ -229,9 +220,9 @@ public class ServerLauncher {
 
 	}
 
-	static JTextArea createRLocalProgressArea;
-	static JProgressBar createRLocalProgressBar;
-	static JFrame createRLocalProgressFrame;
+	private static JTextArea createRLocalProgressArea;
+	private static JProgressBar createRLocalProgressBar;
+	private static JFrame createRLocalProgressFrame;
 
 	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
 			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress) throws Exception {
@@ -265,7 +256,7 @@ public class ServerLauncher {
 		}
 
 		try {
-			InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/BootSsh.class");
+			InputStream is = ServerManager.class.getResourceAsStream("/bootstrap/BootSsh.class");
 			byte[] buffer = new byte[is.available()];
 			try {
 				for (int i = 0; i < buffer.length; ++i) {
@@ -355,7 +346,7 @@ public class ServerLauncher {
 			if (eIndex != -1) {
 				int bIndex = outPrint.indexOf(BootSsh.STUB_BEGIN_MARKER);
 				String stub = outPrint.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
-				return (RServices) PoolUtils.hexToStub(stub, ServerLauncher.class.getClassLoader());
+				return (RServices) PoolUtils.hexToStub(stub, ServerManager.class.getClassLoader());
 			} else {
 				return null;
 			}
@@ -368,12 +359,11 @@ public class ServerLauncher {
 
 	}
 
-	static JTextArea createRProgressArea;
-	static JProgressBar createRProgressBar;
-	static JFrame createRProgressFrame;
+	private static JTextArea createRProgressArea;
+	private static JProgressBar createRProgressBar;
+	private static JFrame createRProgressFrame;
 
-	public static RServices createR() throws Exception {
-		
+	public static RServices createR() throws Exception {		
 		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, false);
 	}
 
@@ -410,27 +400,29 @@ public class ServerLauncher {
 		try {
 			String urlprefix = null;
 			try {
-				Class<?> ServiceManagerClass = ServerLauncher.class.getClassLoader().loadClass("javax.jnlp.ServiceManager");
+				Class<?> ServiceManagerClass = ServerManager.class.getClassLoader().loadClass("javax.jnlp.ServiceManager");
 				Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null, "javax.jnlp.BasicService");
-				Class<?> BasicServiceClass = ServerLauncher.class.getClassLoader().loadClass("javax.jnlp.BasicService");
+				Class<?> BasicServiceClass = ServerManager.class.getClassLoader().loadClass("javax.jnlp.BasicService");
 				urlprefix = BasicServiceClass.getMethod("getCodeBase").invoke(basicServiceInstance).toString();
 			} catch (Exception e) {
 
 			}
 			System.out.println("url prefix:" + urlprefix);
 			URL rjbURL = null;
-			System.out.println(ServerLauncher.class.getResource("/graphics/rmi/ServerLauncher.class"));
+			System.out.println(ServerManager.class.getResource("/graphics/rmi/ServerLauncher.class"));
 
 			if (urlprefix != null) {
 				rjbURL = new URL(urlprefix + "appletlibs/RJB.jar");
 			} else {
-				String thisUrl = ServerLauncher.class.getResource("/server/ServerLauncher.class").toString();
+				String thisUrl = ServerManager.class.getResource("/server/ServerManager.class").toString();
 				if (thisUrl.indexOf("http:") != -1) {
 
 					if (thisUrl.indexOf("RJB.jar") != -1) {
 						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
-					} else {
+					} else if (thisUrl.indexOf("biocep.jar")!=-1) {
 						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocep.jar") + "biocep.jar".length()));
+					} else {
+						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocep-core.jar") + "biocep-core.jar".length()));
 					}
 				}
 			}
@@ -630,7 +622,7 @@ public class ServerLauncher {
 			System.out.println(bootstrap);
 			if (!new File(bootstrap).exists())
 				new File(bootstrap).mkdirs();
-			InputStream is = ServerLauncher.class.getResourceAsStream("/bootstrap/Boot.class");
+			InputStream is = ServerManager.class.getResourceAsStream("/bootstrap/Boot.class");
 			byte[] buffer = new byte[is.available()];
 			try {
 				for (int i = 0; i < buffer.length; ++i) {
@@ -709,7 +701,9 @@ public class ServerLauncher {
 							+ "mapping.jar" + (isWindowsOs() ? "\"" : ""));
 				} else {
 					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"
-							+ (isWindowsOs() ? "\"" : ""));
+							+
+							
+							(isWindowsOs() ? "\"" : ""));
 				}
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
@@ -1033,35 +1027,6 @@ public class ServerLauncher {
 
 		}
 
-	}
-
-	static private void getFileNames(File path, Vector<String> result) throws Exception {
-		File[] files = path.listFiles(new FileFilter() {
-			public boolean accept(File pathname) {
-				return pathname.isDirectory() || pathname.toString().toLowerCase().endsWith(".java") || pathname.toString().toLowerCase().endsWith(".r")
-						|| pathname.toString().toLowerCase().endsWith("build.xml");
-			}
-		});
-		if (files == null)
-			return;
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].isDirectory()) {
-				getFileNames(files[i], result);
-			} else {
-				String name = files[i].getAbsolutePath();
-				System.out.println(name + " --> " + countLines(name));
-				result.add(name);
-			}
-		}
-	}
-
-	static int countLines(String fileName) throws Exception {
-		BufferedReader br = new BufferedReader(new FileReader(fileName));
-		String line = null;
-		int counter = 0;
-		while ((line = br.readLine()) != null)
-			++counter;
-		return counter;
 	}
 
 	public static boolean isPortInUse(String hostIp, int port) {

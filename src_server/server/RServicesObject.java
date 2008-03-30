@@ -305,13 +305,22 @@ public class RServicesObject implements RServices {
 	}
 	
 	public RObject pythonGet(String name) throws RemoteException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public void pythonSet(String name, RObject Value) throws RemoteException {		
 	}
 
+	public Object callAndConvert(String methodName, Object... args) throws RemoteException {
+		return null;
+	}
 	
+	public Object getAndConvert(String expression) throws RemoteException {
+		return null;
+	}
+	
+	public Object convert(RObject obj) throws RemoteException {
+		return null;
+	}
 	
 }

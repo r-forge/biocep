@@ -35,9 +35,11 @@ public interface RServices extends ManagedServant {
 
 	public RObject call(String methodName, Object... args) throws RemoteException;
 
-	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException;
+	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException;	
 
 	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException;
+	
+	public Object callAndConvert(String methodName, Object... args) throws RemoteException;
 
 	public boolean isReference(RObject obj) throws RemoteException;
 
@@ -52,7 +54,11 @@ public interface RServices extends ManagedServant {
 	public RObject get(String expression) throws RemoteException;
 
 	public RObject getReference(String expression) throws RemoteException;
+	
+	public Object getAndConvert(String expression) throws RemoteException;
 
+	public Object convert(RObject obj) throws RemoteException;
+	
 	public String print(String expression) throws RemoteException;
 
 	public String printExpressions(String[] expressions) throws RemoteException;
@@ -106,7 +112,6 @@ public interface RServices extends ManagedServant {
 	public String getRHelpFileUri(String topic, String pack) throws java.rmi.RemoteException;
 
 	public Vector<RAction> popRActions() throws java.rmi.RemoteException;
-
 	
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
 
@@ -116,10 +121,8 @@ public interface RServices extends ManagedServant {
 
 	public void stopHttpServer() throws java.rmi.RemoteException;
 	
-	
 	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException;
-	
-	
+		
 	public String pythonExec(String pythonCommand) throws RemoteException;
 	
 	public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException;

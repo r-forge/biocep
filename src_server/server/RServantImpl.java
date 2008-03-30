@@ -43,7 +43,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.rosuda.JRI.Rengine;
-
 import python.server.R;
 import remoting.AssignInterface;
 import remoting.FileDescription;
@@ -89,7 +88,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		super(name, prefix, registry);
 		// --------------
 
-
 			if (log instanceof Log4JLogger) {
 				Properties log4jProperties = new Properties();
 				for (Object sprop : System.getProperties().keySet()) {
@@ -99,10 +97,21 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				}
 				PropertyConfigurator.configure(log4jProperties);
 			}
-			
 	
 		init();
+				
 		log.info("Stub:" + PoolUtils.stubToHex(this));
+		
+		try {
+			Properties props=new Properties();
+			props.loadFromXML(this.getClass().getResourceAsStream("/classlist.xml"));
+			for (Object c:props.keySet()) {
+				this.getClass().getClassLoader().loadClass((String)c); 
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void init() throws RemoteException {
@@ -255,6 +264,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		DirectJNI.getInstance().getRServices().callAndAssign(varName, methodName, args);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
+	
+	public Object callAndConvert(String methodName, Object... args) throws RemoteException {
+		Object result=DirectJNI.getInstance().getRServices().callAndConvert( methodName, args);
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
 
 	public void freeReference(RObject refObj) throws RemoteException {
 		DirectJNI.getInstance().getRServices().freeReference(refObj);
@@ -292,6 +307,18 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	public RObject getReference(String expression) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().getReference(expression);
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+	
+	public Object getAndConvert(String expression) throws RemoteException {
+		Object result = DirectJNI.getInstance().getRServices().getAndConvert(expression);
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+	
+	public Object convert(RObject obj) throws RemoteException {
+		Object result = DirectJNI.getInstance().getRServices().convert(obj);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
@@ -563,7 +590,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		System.out.println(" 2 startHttpServer called");
 		if (_virtualizationServer != null) {
 			throw new RemoteException("Server Already Running");
-		} else if (ServerLauncher.isPortInUse("127.0.0.1", port)) {
+		} else if (ServerManager.isPortInUse("127.0.0.1", port)) {
 			throw new RemoteException("Port already in use");
 		} else {
 
@@ -620,7 +647,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	synchronized public RServices cloneServer() throws RemoteException {
 		System.out.println("cloneServer");
 		try {
-			RServices w = ServerLauncher.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils.getHostIp(), LocalRmiRegistry
+			RServices w = ServerManager.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils.getHostIp(), LocalRmiRegistry
 					.getLocalRmiRegistryPort(), 256, 256, false);
 			return w;
 		} catch (Exception e) {

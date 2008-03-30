@@ -537,14 +537,23 @@ public class DirectJNI {
 		}
 		
 		if (!(obj instanceof RObject)) {
-			if (obj instanceof Integer) obj=new RInteger((Integer)obj);
-			else if (obj instanceof Long) obj=new RInteger((int)((Long)obj).longValue());
-			else if (obj instanceof String) obj=new RChar((String)obj);
-			else if (obj instanceof Double) obj=new RNumeric((Double)obj);
-			else if (obj instanceof Float) obj=new RNumeric((Float)obj);
-			else if (obj instanceof String) obj=new RChar((String)obj);
-			else if (obj instanceof Boolean) obj=new RLogical((Boolean)obj);			
-			else throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
+			if (!obj.getClass().isArray()) {
+				if (obj instanceof Integer) obj=new RInteger((Integer)obj);
+				else if (obj instanceof Long) obj=new RInteger((int)((Long)obj).longValue());
+				else if (obj instanceof String) obj=new RChar((String)obj);
+				else if (obj instanceof Double) obj=new RNumeric((Double)obj);
+				else if (obj instanceof Float) obj=new RNumeric((Float)obj);
+				else if (obj instanceof String) obj=new RChar((String)obj);
+				else if (obj instanceof Boolean) obj=new RLogical((Boolean)obj);			
+				else throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
+			} else {
+				Class<?> componentType=obj.getClass().getComponentType();			
+				if (componentType==int.class) obj=new RInteger((int[])obj);
+				else if (componentType==String.class) obj=new RChar((String[])obj);
+				else if (componentType==double.class) obj=new RNumeric((double[])obj);
+				else if (componentType==boolean.class) obj=new RLogical((boolean[])obj);			
+				else throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
+			}
 		}
 
 		if (obj instanceof RObjectName) {
@@ -1734,6 +1743,39 @@ public class DirectJNI {
 		DirectJNI.generateMaps(jarUrl, false);
 	}
 
+	private Object convert(RObject obj) {
+		System.out.println("obj:"+obj);
+		Object result=obj;
+		if (result instanceof RInteger) {
+			if (((RInteger)result).getValue().length==1) {
+				result=((RInteger)result).getValue()[0]; 
+			} else {
+				result=((RInteger)result).getValue();
+			}
+		} else if (result instanceof RNumeric) {
+			if (((RNumeric)result).getValue().length==1) {
+				result=((RNumeric)result).getValue()[0]; 
+			} else {
+				result=((RNumeric)result).getValue();
+			}
+		} else if (result instanceof RChar) {
+			if (((RChar)result).getValue().length==1) {
+				result=((RChar)result).getValue()[0]; 
+			} else {
+				result=((RChar)result).getValue();
+			}
+		} else if (result instanceof RLogical) {
+			if (((RLogical)result).getValue().length==1) {
+				result=((RLogical)result).getValue()[0]; 
+			} else {
+				result=((RLogical)result).getValue();
+			}
+		}
+		return  result;
+	}
+
+	
+	
 	private RServices _rServices = new RServices() {
 
 		private String _lastStatus = null;
@@ -1952,6 +1994,34 @@ public class DirectJNI {
 			}
 			return objHolder[0];
 		}
+		
+		public Object callAndConvert(final String methodName, final Object... args) throws RemoteException {
+			final RObject[] objHolder = new RObject[1];
+			final Exception[] exceptionHolder = new Exception[1];
+			_lastStatus = runR(new server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						objHolder[0] = DirectJNI.this.call(false, null, methodName, args);
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+			
+			
+			return DirectJNI.this.convert(objHolder[0]);
+		}
 
 		public void freeReference(final RObject refObj) throws RemoteException {
 			if (!(refObj instanceof ReferenceInterface))
@@ -2113,6 +2183,37 @@ public class DirectJNI {
 			return objHolder[0];
 		}
 
+		public Object getAndConvert(final String expression) throws RemoteException {
+			final RObject[] objHolder = new RObject[1];
+			final Exception[] exceptionHolder = new Exception[1];
+			_lastStatus = runR(new server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, false);
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+			
+			return DirectJNI.this.convert(objHolder[0]);
+		}
+
+		public Object convert(RObject obj) throws RemoteException {
+			return DirectJNI.this.convert(obj);		}
+		
 		public void assignReference(final String name, final RObject refObj) throws RemoteException {
 			if (!(refObj instanceof ReferenceInterface))
 				throw new RemoteException("not an an object reference");
@@ -2587,7 +2688,7 @@ public class DirectJNI {
 		}
 
 		public boolean isPortInUse(int port) throws RemoteException {
-			return ServerLauncher.isPortInUse("127.0.0.1", port);
+			return ServerManager.isPortInUse("127.0.0.1", port);
 		}
 
 		public void startHttpServer(int port) throws RemoteException {

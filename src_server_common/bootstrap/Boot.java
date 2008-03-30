@@ -1,5 +1,6 @@
 package bootstrap;
 
+import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -14,13 +15,11 @@ public class Boot {
 			URLClassLoader cl = null;
 			if (keepAlive) {
 				String jarsUrlPrefix = args[3];
-				cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/"), new URL(jarsUrlPrefix + "JRI.jar"),
-						new URL(jarsUrlPrefix + "commons-logging-1.1.jar"), new URL(jarsUrlPrefix + "log4j-1.2.14.jar"),
-						new URL(jarsUrlPrefix + "htmlparser.jar"), new URL(jarsUrlPrefix + "derbyclient.jar"), new URL(jarsUrlPrefix + "RJB.jar"),
-						new URL(jarsUrlPrefix + "mapping.jar") }, Boot.class.getClassLoader());
+				cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/"), new URL(jarsUrlPrefix + "biocep.jar")
+				}, Boot.class.getClassLoader());
 			} else {
 				cl = new URLClassLoader(new URL[] { new URL("http://" + args[1] + ":" + args[2] + "/classes/") }, Boot.class.getClassLoader());
-				cl.loadClass("server.ServerLauncher").getMethod("startPortInUseDogwatcher",
+				cl.loadClass("server.ServerManager").getMethod("startPortInUseDogwatcher",
 						new Class<?>[] { String.class, int.class, int.class, int.class }).invoke(null, args[1], Integer.decode(args[2]), 3, 3);
 			}
 			Class<?> mainClass = cl.loadClass("server.MainRServer");

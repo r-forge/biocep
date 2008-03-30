@@ -32,6 +32,11 @@ public class RObjectName extends RObject {
 		this._env = ".GlobalEnv";
 	}
 
+	public RObjectName(String name, String environment) {
+		this._name = name;
+		this._env = environment;
+	}
+	
 	public void setName(String _name) {
 		this._name = _name;
 	}
