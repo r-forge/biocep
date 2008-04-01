@@ -24,11 +24,8 @@ import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.PropertyConfigurator;
 
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
@@ -152,7 +149,7 @@ public class MainServer {
 
 				((DBLayer) rmiRegistry).updateServantAttributes(sname, attributes);
 			}
-			log.info("*************************$$$$$$$$$$$$");
+			//log.info("*************************$$$$$$$$$$$$");
 			log.info("Servant " + sname + " instantiated successfully.");
 
 		} catch (InvocationTargetException ite) {

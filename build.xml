@@ -994,9 +994,10 @@
 		
 			<java classname="server.ListResources" fork="true" >
 				<classpath>
-					<pathelement location="binsrv"/>
+					<pathelement path="${LOGGING_JAR}"/>					
+					<pathelement location="binsrv"/>					
 				</classpath>					  				
-				<arg value="${basedir}/binsrv"/>							  
+				<arg value="${basedir}/binsrv"/>
 			</java>	
 		
    	        <unjar src="${JRI_JAR}"  dest="binsrv" overwrite="true"/>

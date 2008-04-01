@@ -558,7 +558,8 @@ public class LoginDialog extends JDialog {
 		_pwd.addKeyListener(keyListener);
 		_nopoolCheckBox.addKeyListener(keyListener);
 		_waitForResourceBox.addKeyListener(keyListener);
-
+		_privateName.addKeyListener(keyListener);
+		
 		_rmiregistryIp.addKeyListener(keyListener);
 		_rmiregistryPort.addKeyListener(keyListener);
 		_servantName.addKeyListener(keyListener);

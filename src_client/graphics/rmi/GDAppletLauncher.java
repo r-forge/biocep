@@ -52,6 +52,7 @@ public class GDAppletLauncher {
 			params.put("name", System.getProperty("name"));
 			params.put("registryhost", System.getProperty("registryhost"));
 			params.put("registryport", System.getProperty("registryport"));
+			
 			System.out.println("params=" + params);
 			final GDApplet gDApplet = new GDApplet(params);
 			gDApplet.init();
