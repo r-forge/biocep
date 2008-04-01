@@ -69,6 +69,9 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.Log4JLogger;
+import org.apache.log4j.PropertyConfigurator;
 import org.neilja.net.interruptiblermi.InterruptibleRMISocketFactory;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 
@@ -101,6 +104,8 @@ public class PoolUtils {
 	private static boolean _propertiesInjected = false;
 	private static boolean _rmiSocketFactoryInitialized = false;
 
+	private static final Log log = org.apache.commons.logging.LogFactory.getLog(PoolUtils.class);
+	
 	public static String getHostName() {
 		if (_hostName == null) {
 			try {
@@ -1221,6 +1226,18 @@ public class PoolUtils {
 				String name = absolutepath.substring(root.getAbsolutePath().length()).replace('\\', '/');
 				result.add(name);
 			}
+		}
+	}
+	
+	public static void initLog4J() {
+		if (log instanceof Log4JLogger) {
+			Properties log4jProperties = new Properties();
+			for (Object sprop : System.getProperties().keySet()) {
+				if (((String) sprop).startsWith("log4j.")) {
+					log4jProperties.put(sprop, System.getProperties().get(sprop));
+				}
+			}
+			PropertyConfigurator.configure(log4jProperties);
 		}
 	}
 

@@ -55,8 +55,7 @@ public class ServerManager {
 	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
-		RServices r=createR();
-		System.out.println(Arrays.toString(r.listDemos()));
+		RServices r=createR("");
 	}
 
 	private static JTextArea createRSshProgressArea;
@@ -363,12 +362,12 @@ public class ServerManager {
 	private static JProgressBar createRProgressBar;
 	private static JFrame createRProgressFrame;
 
-	public static RServices createR() throws Exception {		
-		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, false,null);
+	public static RServices createR(String name) throws Exception {		
+		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, name, false,null);
 	}
 
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress, URL codeUrl) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL codeUrl) throws Exception {
 
 		if (showProgress) {
 			createRProgressArea = new JTextArea();
@@ -714,7 +713,13 @@ public class ServerManager {
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
 
+				
 				command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
+				if (name!=null && !name.equals("")) {
+					command.add((isWindowsOs() ? "\"" : "") + "-Dname="+ name + (isWindowsOs() ? "\"" : ""));	
+				} 
+				
+				
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dpreprocess.help=true" + (isWindowsOs() ? "\"" : ""));
@@ -855,6 +860,11 @@ public class ServerManager {
 
 	public static void killLocalWinProcess(String processId, boolean isKILLSIG) throws Exception {
 		PoolUtils.killLocalWinProcess(processId, isKILLSIG);
+	}
+	
+	public static void killLocalProcess(String processId, boolean isKILLSIG) throws Exception {
+		if (isWindowsOs()) PoolUtils.killLocalWinProcess(processId, isKILLSIG);
+		else PoolUtils.killLocalUnixProcess(processId, isKILLSIG);
 	}
 
 	public static void killSshProcess(String processId, String sshHostIp, String sshLogin, String sshPwd, boolean forcedKill) throws Exception {

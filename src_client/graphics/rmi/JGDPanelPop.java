@@ -124,7 +124,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 		_prefSize = getSize();
 		_l = new Vector<GDObject>();
-		_gs = new GDState( Color.black,Color.white,new Font(null, 0, 12));
+		_gs = new GDState( Color.black,Color.white,new Font(null, 0, 10));
 		_lastSize = getSize();
 		setBackground(Color.white);
 		setOpaque(true);

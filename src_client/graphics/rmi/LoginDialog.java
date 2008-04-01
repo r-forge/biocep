@@ -62,9 +62,11 @@ public class LoginDialog extends JDialog {
 	public static String url_str = "http://127.0.0.1:8080/cmd";
 	public static String login_str = "guest";
 	public static String pwd_str = "guest";
-	public static boolean nopool_bool = false;
+	public static boolean nopool_bool = true;
 	public static boolean waitForResource_bool = false;
-
+	public static String privateName_str = "";
+	
+	
 	public static int rmiMode_int = GDApplet.RMI_MODE_REGISTRY_MODE;
 
 	public static String rmiregistryIp_str = "127.0.0.1";
@@ -93,6 +95,8 @@ public class LoginDialog extends JDialog {
 
 	public static boolean persistentWorkspace_bool = false;
 	public static boolean playDemo_bool = false;
+	
+
 
 	JRadioButton localModeButton;
 	JRadioButton httpModeButton;
@@ -102,7 +106,9 @@ public class LoginDialog extends JDialog {
 	private JTextField _login;
 	private JPasswordField _pwd;
 	private JCheckBox _nopoolCheckBox;
-	private JCheckBox _waitForResourceBox;
+	private JCheckBox _waitForResourceBox;	
+	private JTextField _privateName = null;
+	private JLabel _privateNameLabel = null;
 
 	JRadioButton rmiModeRegistryModeButton;
 	JRadioButton rmiModeDbModeButton;
@@ -139,6 +145,7 @@ public class LoginDialog extends JDialog {
 	private JCheckBox _persistentWorkspaceCheckBox;
 	private JCheckBox _playDemoBox;
 
+
 	private JButton _ok;
 	private JButton _cancel;
 
@@ -149,7 +156,7 @@ public class LoginDialog extends JDialog {
 
 	public Identification getIndentification() {
 		if (_closedOnOK)
-			return new Identification(mode_int, url_str, login_str, pwd_str, nopool_bool, waitForResource_bool, rmiMode_int, rmiregistryIp_str,
+			return new Identification(mode_int, url_str, login_str, pwd_str, nopool_bool, waitForResource_bool, privateName_str, rmiMode_int, rmiregistryIp_str,
 					rmiregistryPort_int, servantName_str, dbDriver_str, dbHostIp_str, dbHostPort_int, dbName_str, dbUser_str, dbPwd_str, dbServantName_str,
 					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, sshHost_str, sshLogin_str, sshPwd_str, persistentWorkspace_bool,
 					playDemo_bool);
@@ -223,9 +230,16 @@ public class LoginDialog extends JDialog {
 			p2.add(_pwd);
 			p1.add(new JLabel(""));
 			p2.add(new JLabel(""));
+			
 			p1.add(_nopoolCheckBox);
-			p2.add(new JLabel(""));
-			p1.add(_waitForResourceBox);
+			if (_nopoolCheckBox.isSelected()) {
+				JPanel pNamePanel=new JPanel(new BorderLayout());pNamePanel.add(_privateNameLabel,BorderLayout.WEST);pNamePanel.add(_privateName,BorderLayout.CENTER);
+				p2.add(pNamePanel);
+			} else {
+				p2.add(new JLabel(""));
+			}
+						
+			p1.add(new JLabel(""));
 			p2.add(new JLabel(""));
 			p1.add(new JLabel(""));
 			p2.add(new JLabel(""));
@@ -404,8 +418,18 @@ public class LoginDialog extends JDialog {
 		_url = new JTextField(url_str);
 		_login = new JTextField(login_str);
 		_pwd = new JPasswordField(pwd_str);
-		_nopoolCheckBox = new JCheckBox("Create Private R", nopool_bool);
+		_nopoolCheckBox = new JCheckBox("Private R", nopool_bool);
+		_nopoolCheckBox.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				recreateDynamicPanel();
+			}
+		});
+		
 		_waitForResourceBox = new JCheckBox("Wait Until R Resource Available", waitForResource_bool);
+		_privateName=new JTextField(privateName_str);
+		_privateNameLabel=new JLabel("   Private R Name   ");
+		
+		
 
 		rmiModeRegistryModeButton = new JRadioButton("Rmi Registry");
 		rmiModeRegistryModeButton.setSelected(rmiMode_int == GDApplet.RMI_MODE_REGISTRY_MODE);
@@ -615,6 +639,7 @@ public class LoginDialog extends JDialog {
 		pwd_str = new String(_pwd.getPassword());
 		nopool_bool = _nopoolCheckBox.isSelected();
 		waitForResource_bool = _waitForResourceBox.isSelected();
+		privateName_str = _privateName.getText();
 
 		if (rmiModeRegistryModeButton.isSelected())
 			rmiMode_int = GDApplet.RMI_MODE_REGISTRY_MODE;

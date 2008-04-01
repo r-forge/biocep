@@ -36,8 +36,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.PropertyConfigurator;
 import org.bioconductor.packages.rservices.RObject;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
@@ -86,24 +84,13 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	public RServantImpl(String name, String prefix, Registry registry) throws RemoteException {
 		super(name, prefix, registry);
-		// --------------
-
-			if (log instanceof Log4JLogger) {
-				Properties log4jProperties = new Properties();
-				for (Object sprop : System.getProperties().keySet()) {
-					if (((String) sprop).startsWith("log4j.")) {
-						log4jProperties.put(sprop, System.getProperties().get(sprop));
-					}
-				}
-				PropertyConfigurator.configure(log4jProperties);
-			}
-	
+		// --------------	
 		init();
 				
 		log.info("Stub:" + PoolUtils.stubToHex(this));
 		
 		if (System.getProperty("preloadall")!=null && System.getProperty("preloadall").equalsIgnoreCase("true") )
-		{
+		{			
 			try {
 				Properties props=new Properties();
 				props.loadFromXML(this.getClass().getResourceAsStream("/classlist.xml"));
@@ -112,7 +99,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				}
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 					
 			try {
@@ -122,7 +109,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 					DirectJNI.getInstance().getResourceAsStream((String)c);
 				}			
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 
@@ -662,7 +649,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		System.out.println("cloneServer");
 		try {
 			RServices w = ServerManager.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils.getHostIp(), LocalRmiRegistry
-					.getLocalRmiRegistryPort(), 256, 256, false,null);
+					.getLocalRmiRegistryPort(), 256, 256, "", false,null);
 			return w;
 		} catch (Exception e) {
 			throw new RemoteException("", e);

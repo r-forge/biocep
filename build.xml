@@ -571,7 +571,7 @@
 		<if><not><isset property="lf"/></not><then><property name="lf" value="0"/></then></if>
 		<if><not><isset property="mode"/></not><then><property name="mode" value="local"/></then></if>
 		<if><not><isset property="stub"/></not><then><property name="stub" value=""/></then></if>				
-		<if><not><isset property="localtomcat.port"/></not><then><property name="localtomcat.port" value="9999"/></then></if>
+		<if><not><isset property="localtomcat.port"/></not><then><property name="localtomcat.port" value=""/></then></if>
 		<if><not><isset property="url"/></not><then><property name="url" value=""/></then></if>
 		<if><not><isset property="name"/></not><then><property name="name" value=""/></then></if>
 		<if><not><isset property="save"/></not><then><property name="save" value="false"/></then></if>
@@ -937,7 +937,7 @@
 	</target>
 	
 	
-	<target name="cserver">
+	<target name="distrib">
 		
 		
 			<delete dir="binsrv" failonerror="true"/>
@@ -995,15 +995,9 @@
 			<java classname="server.ListResources" fork="true" >
 				<classpath>
 					<pathelement location="binsrv"/>
-					
-					
-					
-					
-					
 				</classpath>					  				
 				<arg value="${basedir}/binsrv"/>							  
 			</java>	
-		
 		
    	        <unjar src="${JRI_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="${LOGGING_JAR}"  dest="binsrv" overwrite="true"/>
@@ -1027,8 +1021,7 @@
 			<unjar src="lib/pool/commons-collections-3.2.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/pool/commons-pool-1.3.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
-					
-		
+							
 			<manifest file="MANIFEST.MF">
 				<attribute name="Built-By" value="Karim Chine"/>
 				<attribute name="Main-Class" value="server.CoreMain"/>
@@ -1038,63 +1031,63 @@
 				<fileset dir="binsrv"/>
 			</jar>
 			
-		<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="VirtualRWorkbench/appletKeyStore.ks"  storepass="emblebi" />
+			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
 		
 		
-		<unjar src="lib/desktop/jeditmodes.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/desktop/jedit.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/desktop/OpenXLS.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/desktop/pf-joi-full.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/desktop/idw-gpl.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/desktop/swing-layout-1.0.3.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-anim.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-bridge.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-css.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-ext.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-extension.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-gui-util.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-gvt.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-parser.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-script.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-svg-dom.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-swing.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/batik-xml.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/js.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/xml-apis.jar"  dest="binsrv" overwrite="true"/>
-		<unjar src="lib/svg/xml-apis-ext.jar"  dest="binsrv" overwrite="true"/>		
+			<unjar src="lib/desktop/jeditmodes.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/jedit.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/OpenXLS.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/pf-joi-full.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/idw-gpl.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/swing-layout-1.0.3.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-anim.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-bridge.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-css.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-ext.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-extension.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-gui-util.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-gvt.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-parser.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-script.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-svg-dom.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-swing.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-xml.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/js.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/xml-apis.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/xml-apis-ext.jar"  dest="binsrv" overwrite="true"/>		
 		
-		<property 	name="src_client_target" value="src_client:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>		
-		<javac srcdir="${src_client_target}"
-			destdir="binsrv" debug="true" source="1.5" target="1.5">
-			<classpath>
-				<pathelement location="binsrv"/>				
-			</classpath>
-		</javac>
+			<property 	name="src_client_target" value="src_client:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>		
+			<javac srcdir="${src_client_target}"
+				destdir="binsrv" debug="true" source="1.5" target="1.5">
+				<classpath>
+					<pathelement location="binsrv"/>				
+				</classpath>
+			</javac>
 		
-		<for list="${src_client_target}" param="source" delimiter=":">
-				  <sequential>
-					<copy todir="binsrv">				
-						<fileset dir="@{source}">
-							<include name="**/*.xml"/>
-							<include name="**/*.props"/>
-							<include name="**/*.properties"/>
-							<include name="**/*.R"/>
-							<include name="**/*.r"/>
-							<include name="**/*.png"/>
-							<include name="**/*.gif"/>
-							<include name="**/*.html"/>
-						</fileset>				
-					</copy>
-				  </sequential>
-		</for>
+			<for list="${src_client_target}" param="source" delimiter=":">
+					  <sequential>
+						<copy todir="binsrv">				
+							<fileset dir="@{source}">
+								<include name="**/*.xml"/>
+								<include name="**/*.props"/>
+								<include name="**/*.properties"/>
+								<include name="**/*.R"/>
+								<include name="**/*.r"/>
+								<include name="**/*.png"/>
+								<include name="**/*.gif"/>
+								<include name="**/*.html"/>
+							</fileset>				
+						</copy>
+					  </sequential>
+			</for>
 		
-		<manifest file="MANIFEST.MF">
-			<attribute name="Built-By" value="Karim Chine"/>
-			<attribute name="Main-Class" value="graphics.rmi.GDAppletLauncher"/>
-		</manifest>		
-		
-		<jar basedir="binsrv" destfile="biocepunsigned.jar" manifest="MANIFEST.MF" />
-		<signjar jar="biocepunsigned.jar" signedjar="biocep.jar" alias="appletsigningkey" keystore="VirtualRWorkbench/appletKeyStore.ks"  storepass="emblebi" />
+			<manifest file="MANIFEST.MF">
+				<attribute name="Built-By" value="Karim Chine"/>
+				<attribute name="Main-Class" value="graphics.rmi.GDAppletLauncher"/>
+			</manifest>		
+			
+			<jar basedir="binsrv" destfile="biocepunsigned.jar" manifest="MANIFEST.MF" />
+			<signjar jar="biocepunsigned.jar" signedjar="biocep.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
 
 		
 	</target>
