@@ -27,7 +27,7 @@ public class CoreMain {
 						.getHostIp(), 1099, 256, 256,false,codeURL);
 		} else {
 			r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
-					.getHostIp(), 1099, 256, 256, false,codeURL );
+					.getHostIp(), 1099, 256, 256, "", false,codeURL );
 		}
 		
 		System.exit(0);

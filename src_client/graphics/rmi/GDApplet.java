@@ -249,6 +249,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
+			popActions();
 			super.unlock();
 
 			_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -303,6 +304,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public void init() {
 		super.init();
 
+		PoolUtils.initLog4J();
+		
 		System.setErr(System.out);
 		if (getParameter("debug") != null && getParameter("debug").equalsIgnoreCase("true")) {
 			redirectIO();
@@ -385,6 +388,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					if (expression.equals("logon") || expression.startsWith("logon ")) {
 
+						if (getR()!=null) {
+							return "Already Logged On";
+						}
+						
 						try {
 
 							GDDevice d = null;
@@ -400,7 +407,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									String stub = pr.readLine();
 									pr.close();
 
-									ident = new Identification(RMI_MODE, "", "", "", false, false, RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "", "",
+									ident = new Identification(RMI_MODE, "", "", "", false, false,"", RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "", "",
 											stub, -1, -1, false, false, "", "", "", false, false);
 								}
 							}
@@ -432,6 +439,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								String oldSessionId = _sessionId;
 								HashMap<String, Object> options = new HashMap<String, Object>();
 								options.put("nopool", new Boolean(_nopool).toString());
+								options.put("privatename", ident.getPrivateName());
 								options.put("save", new Boolean(_save).toString());
 								options.put("wait", new Boolean(_wait).toString());
 								_sessionId = RHttpProxy.logOn(_commandServletUrl, _sessionId, _login, pwd, options);
@@ -493,11 +501,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 											} else {
 												r = ServerManager.createR(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
-														false,null);
+														"", false,null);
 											}
 										} else {
 											r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
-													.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), false,null);
+													.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(), "", false,null);
 										}
 									}
 
@@ -599,18 +607,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 							GDDevice[] ldevices=_rForConsole.listDevices();
 							for (int i=ldevices.length-1; i>=0;--i) s.push(ldevices[i]);
 							
-							if (getMode()==HTTP_MODE) {
+							if (_rForConsole instanceof HttpMarker) {
 								d = RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
 								System.out.println("device id:" + d.getDeviceNumber());
-							} else {
-								
+							} else {								
 								if (s.empty()) {
 									d = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 								} else {
 									d=s.pop();
 									d.fireSizeChangedEvent(_graphicPanel.getWidth(), _graphicPanel.getHeight());									
-								}
-								
+								}								
 							}
 							
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] {
@@ -646,19 +652,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 							for (int i = 0; i < deviceViews.size(); ++i) {
 								final JPanel rootComponent = (JPanel) deviceViews.elementAt(i).getComponent();
 								GDDevice newDevice = null;
-								if (_mode == HTTP_MODE) {
+								if (_rForConsole instanceof HttpMarker) {
 									newDevice = RHttpProxy.newDevice(_commandServletUrl, _sessionId, rootComponent.getWidth(), rootComponent.getHeight());
-								} else {
-									
-									//newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
-									
+								} else {			
 									if (s.empty()) {
 										newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 									}  else {
 										newDevice = s.pop();
 										newDevice.fireSizeChangedEvent(rootComponent.getWidth(), rootComponent.getHeight());
 									}
-
 								}
 								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 										new SetCurrentDeviceAction(GDApplet.this, newDevice), null, new FitDeviceAction(GDApplet.this, newDevice), null,
@@ -680,7 +682,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 								});
 
 								deviceViews.elementAt(i).setPanel((JGDPanelPop) gp);
-
 							}
 
 							
@@ -688,8 +689,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 							setCurrentDevice(d);
 							d.setAsCurrentDevice();
 
-							while(!s.empty()) {
-								_actions.get("createdevice").actionPerformed(null);
+							if (!(_rForConsole instanceof HttpMarker)) {
+								while(!s.empty()) {
+									_actions.get("createdevice").actionPerformed(null);
+								}
 							}
 
 							
@@ -1605,79 +1608,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 		new Thread(new Runnable() {
 			public void run() {
 				while (true) {
-					try {
-						if (_sessionId != null && _rForPopCmd != null) {
-							Vector<RAction> ractions = _rForPopCmd.popRActions();
-
-							if (ractions != null) {
-
-								for (int i = 0; i < ractions.size(); ++i) {
-									final RAction action = ractions.elementAt(i);
-									if (action.getActionName().equals("help")) {
-										String topic = (String) action.getAttributes().get("topic");
-										String pack = (String) action.getAttributes().get("package");
-
-										String helpUri = _rForPopCmd.getRHelpFileUri(topic, pack);
-
-										// System.out.println("<" + topic + "><"
-										// + pack + "><" + helpUri + ">");
-
-										if (helpUri == null) {
-											setHelpBrowserURL(_defaultHelpUrl);
-										} else {
-											setHelpBrowserURL(_helpServletUrl + helpUri);
-										}
-
-									} else if (action.getActionName().equals("RESET_CONSOLE_LOG")) {
-										final JTextArea area = getOpenedLogViewerArea();
-										if (area != null) {
-											SwingUtilities.invokeLater(new Runnable() {
-												public void run() {
-													area.setText("");
-													area.repaint();
-												}
-											});
-										}
-									} else if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {
-										final JTextArea area = getOpenedLogViewerArea();
-										if (area != null) {
-											SwingUtilities.invokeLater(new Runnable() {
-												public void run() {
-													area.setText(area.getText() + action.getAttributes().get("log"));
-												}
-											});
-											SwingUtilities.invokeLater(new Runnable() {
-												public void run() {
-													area.setCaretPosition(area.getText().length());
-													area.repaint();
-												}
-											});
-
-										}
-									} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
-										SwingUtilities.invokeLater(new Runnable() {
-											public void run() {
-												_consolePanel.print(null, (String) action.getAttributes().get("result"));
-											}
-										});
-									}
-
-								}
-
-							}
-
-						}
-					} catch (NotLoggedInException nle) {
-						noSession();
-						nle.printStackTrace();
-					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						try {
-							Thread.sleep(1000);
-						} catch (Exception e) {
-						}
-					}
+					
+						popActions();					
+						try {Thread.sleep(1000);} catch (Exception e) {}
+					
 				}
 			}
 		}).start();
@@ -1688,6 +1622,79 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 
+	
+	private synchronized void popActions()  {
+		try {
+			if (_sessionId != null && _rForPopCmd != null) {
+				Vector<RAction> ractions = _rForPopCmd.popRActions();
+
+				if (ractions != null) {
+
+					for (int i = 0; i < ractions.size(); ++i) {
+						final RAction action = ractions.elementAt(i);
+						if (action.getActionName().equals("help")) {
+							String topic = (String) action.getAttributes().get("topic");
+							String pack = (String) action.getAttributes().get("package");
+
+							String helpUri = _rForPopCmd.getRHelpFileUri(topic, pack);
+
+							// System.out.println("<" + topic + "><"
+							// + pack + "><" + helpUri + ">");
+
+							if (helpUri == null) {
+								setHelpBrowserURL(_defaultHelpUrl);
+							} else {
+								setHelpBrowserURL(_helpServletUrl + helpUri);
+							}
+
+						} else if (action.getActionName().equals("RESET_CONSOLE_LOG")) {
+							final JTextArea area = getOpenedLogViewerArea();
+							if (area != null) {
+								SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										area.setText("");
+										area.repaint();
+									}
+								});
+							}
+						} else if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {
+							final JTextArea area = getOpenedLogViewerArea();
+							if (area != null) {
+								SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										area.setText(area.getText() + action.getAttributes().get("log"));
+									}
+								});
+								SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										area.setCaretPosition(area.getText().length());
+										area.repaint();
+									}
+								});
+
+							}
+						} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									_consolePanel.print(null, (String) action.getAttributes().get("result"));
+								}
+							});
+						}
+
+					}
+
+				}
+
+			}
+		} catch (NotLoggedInException nle) {
+			noSession();
+			nle.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+
+	}
+	
 	private GDHelpBrowser getOpenedBrowser() {
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
 		while (iter.hasNext()) {
@@ -3319,17 +3326,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void disposeDevices() {
+		
 		((JGDPanelPop) _graphicPanel).stopThreads();
 		Vector<DeviceView> deviceViews = getDeviceViews();
 		for (int i = 0; i < deviceViews.size(); ++i)
 			deviceViews.elementAt(i).getPanel().stopThreads();
 		
-		/*
-		((JGDPanelPop) _graphicPanel).dispose();
-		Vector<DeviceView> deviceViews = getDeviceViews();
-		for (int i = 0; i < deviceViews.size(); ++i)
-			deviceViews.elementAt(i).getPanel().dispose();
-		*/	
+		if (getR() instanceof HttpMarker) {
+			((JGDPanelPop) _graphicPanel).dispose();
+			for (int i = 0; i < deviceViews.size(); ++i)
+				deviceViews.elementAt(i).getPanel().dispose();			
+		}
+		
 	}
 
 	private void setInteractor(int interactor) {

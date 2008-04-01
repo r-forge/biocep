@@ -17,13 +17,12 @@
  */
 package http;
 
-import java.rmi.registry.Registry;
 import java.util.HashMap;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.NodeManager;
+import server.ServerManager;
 
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 
@@ -61,6 +60,8 @@ public class FreeResourcesListener implements HttpSessionListener {
 		boolean nopool = (Boolean) attributes.get("NOPOOL");
 		boolean save = (Boolean) attributes.get("SAVE");
 		boolean namedAccessMode = (Boolean) attributes.get("NAMED_ACCESS_MODE");
+		String processId = (String) attributes.get("PROCESS_ID");
+		String privatename = (String) attributes.get("PRIVATE_NAME");
 
 		if (save) {
 			try {
@@ -72,6 +73,15 @@ public class FreeResourcesListener implements HttpSessionListener {
 
 		if (!namedAccessMode) {
 			if (nopool) {
+				
+				if (privatename==null || privatename.equals("")) {
+					try {
+						ServerManager.killLocalProcess(processId, true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				/*
 				try {
 					Registry registry = ServantProviderFactory.getFactory().getServantProvider().getRegistry();
 					NodeManager nm = (NodeManager) registry.lookup(System.getProperty("node.manager.name"));
@@ -79,6 +89,9 @@ public class FreeResourcesListener implements HttpSessionListener {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				*/
+				
+				
 			} else {
 				try {
 					ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(rservices);

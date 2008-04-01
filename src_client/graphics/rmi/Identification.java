@@ -56,8 +56,10 @@ class Identification {
 
 	private boolean _persistentWorkspace;
 	private boolean _playDemo;
+	
+	private String _privateName;
 
-	public Identification(int mode, String url, String user, String pwd, boolean nopool, boolean waitForResource, int rmiMode, String rmiregistryIp,
+	public Identification(int mode, String url, String user, String pwd, boolean nopool, boolean waitForResource, String privateName, int rmiMode, String rmiregistryIp,
 			Integer rmiregistryPort, String servantName, String dbDriver, String dbHostIp, Integer dbHostPort, String dbName, String dbUser, String dbPwd,
 			String dbServantName, String stub, int memoryMin, int memoryMax,
 
@@ -70,6 +72,7 @@ class Identification {
 		this._pwd = pwd;
 		this._nopool = nopool;
 		this._waitForResource = waitForResource;
+		this._privateName=privateName;		
 		this._rmiMode = rmiMode;
 		this._rmiregistryIp = rmiregistryIp;
 		this._rmiregistryPort = rmiregistryPort;
@@ -203,5 +206,9 @@ class Identification {
 
 	public String getSshPwd() {
 		return _sshPwd;
+	}
+
+	public String getPrivateName() {
+		return _privateName;
 	}
 }

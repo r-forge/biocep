@@ -5,6 +5,7 @@ import remoting.RServices;
 
 public class R {
 	static public RServices getInstance() {
-		return GDApplet._instance.getR();
+		if (GDApplet._instance==null) return null;
+		else return GDApplet._instance.getR();
 	}
 }

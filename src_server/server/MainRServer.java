@@ -7,8 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -34,6 +32,8 @@ public class MainRServer {
 	private static ServantCreationListener servantCreationListener = null;
 
 	public static void main(String[] args) throws Exception {
+
+		PoolUtils.initLog4J();
 
 		try {
 
@@ -72,7 +72,7 @@ public class MainRServer {
 			} else {
 
 				mservant = (ManagedServant) mainServantClass.getConstructor(new Class[] { String.class, String.class, Registry.class }).newInstance(
-						new Object[] { null, "PRIVATE_", rmiRegistry });
+						new Object[] { servantName, (servantName==null || servantName.equals("") ? "PRIVATE_" : "") , rmiRegistry });
 
 			}
 

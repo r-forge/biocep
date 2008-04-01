@@ -24,8 +24,12 @@ import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.impl.Log4JLogger;
+import org.apache.log4j.PropertyConfigurator;
+
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
 import static uk.ac.ebi.microarray.pools.ServerDefaults.*;
@@ -50,6 +54,8 @@ public class MainServer {
 
 	public static void main(String[] args) throws Exception {
 
+		PoolUtils.initLog4J();
+		
 		try {
 
 			if (System.getSecurityManager() == null) {

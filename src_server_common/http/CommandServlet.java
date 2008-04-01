@@ -37,12 +37,17 @@ import org.apache.commons.logging.Log;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 import remoting.RKit;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.NodeManager;
+import server.LocalHttpServer;
+import server.LocalRmiRegistry;
+import server.ServerManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RPFSessionInfo;
 import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
 import uk.ac.ebi.microarray.pools.RmiCallTimeout;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
+
+import ch.ethz.ssh2.StreamGobbler;
+
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -58,10 +63,12 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 	public CommandServlet(RKit rkit) {
 		super();
 		_rkit = rkit;
+		PoolUtils.initLog4J();
 	}
 
 	public CommandServlet() {
 		super();
+		PoolUtils.initLog4J();
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -109,20 +116,41 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					boolean nopool = options.keySet().contains("nopool") && ((String) options.get("nopool")).equalsIgnoreCase("true");
 					boolean save = options.keySet().contains("save") && ((String) options.get("save")).equalsIgnoreCase("true");
 					boolean namedAccessMode = login.contains("@@");
+					String privateName=(String)options.get("privatename");
+					
 
 					RServices r = null;
 
 					if (_rkit == null) {
 
-						ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+						if (namedAccessMode) {
 
-						if (spFactory == null) {
-							result = new NoRegistryAvailableException();
-							break;
-						}
+							ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
 
-						if (!namedAccessMode) {
+							if (spFactory == null) {
+								result = new NoRegistryAvailableException();
+								break;
+							}
+
+							Registry registry = spFactory.getServantProvider().getRegistry();
+							String sname = login.substring(login.indexOf("@@") + "@@".length());
+							login = login.substring(0, login.indexOf("@@"));
+							try {
+								r = (RServices) registry.lookup(sname);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+
+						} else {
 							if (nopool) {
+
+								/*								 
+								ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+
+								if (spFactory == null) {
+									result = new NoRegistryAvailableException();
+									break;
+								}
 
 								String nodeName = options.keySet().contains("node") ? (String) options.get("node") : System
 										.getProperty("private.servant.node.name");
@@ -137,23 +165,37 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									break;
 								}
 								r = (RServices) nm.createPrivateServant(nodeName);
+								*/
+								
+								System.out.println("LocalHttpServer.getLocalHttpServerPort():"+LocalHttpServer.getLocalHttpServerPort());
+								System.out.println("LocalRmiRegistry.getLocalRmiRegistryPort():"+LocalHttpServer.getLocalHttpServerPort());
+								if (privateName!=null && !privateName.equals("")) {
+									try {
+										r=(RServices) LocalRmiRegistry.getInstance().lookup(privateName);
+									} catch (Exception e) {	
+										e.printStackTrace();
+									}								
+								} 
+								
+								if (r==null) {
+									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,null);
+								}
+
 							} else {
+
+								ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+
+								if (spFactory == null) {
+									result = new NoRegistryAvailableException();
+									break;
+								}
+
 								boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");
 								if (wait) {
 									r = (RServices) spFactory.getServantProvider().borrowServantProxy();
 								} else {
 									r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
 								}
-							}
-						} else {
-
-							Registry registry = spFactory.getServantProvider().getRegistry();
-							String sname = login.substring(login.indexOf("@@") + "@@".length());
-							login = login.substring(0, login.indexOf("@@"));
-							try {
-								r = (RServices) registry.lookup(sname);
-							} catch (Exception e) {
-								e.printStackTrace();
 							}
 						}
 					} else {
@@ -171,6 +213,9 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("SAVE", save);
 					session.setAttribute("LOGIN", login);
 					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
+					session.setAttribute("PROCESS_ID", r.getProcessId());
+					if (privateName!=null) session.setAttribute("PRIVATE_NAME", privateName);
+					
 
 					session.setAttribute("threads", new ThreadsHolder());
 
@@ -368,11 +413,9 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 	public void init(ServletConfig sConfig) throws ServletException {
 		super.init(sConfig);
-
 		log.info("command servlet init");
 		if (_rkit == null) {
 			PoolUtils.injectSystemProperties(true);
-			// Utils.initLog();
 		}
 		PoolUtils.initRmiSocketFactory();
 		getServletContext().setAttribute("SESSIONS_MAP", new HashMap<String, HttpSession>());
