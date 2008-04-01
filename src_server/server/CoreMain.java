@@ -19,7 +19,8 @@ public class CoreMain {
 		} else {
 			String jar=CoreMain.class.getResource("/server/CoreMain.class").toString();
 			String jarfile=jar.substring("jar:".length(), jar.length()-"/server/CoreMain.class".length()-1);
-			codeURL=new URL(jarfile);			
+			System.out.println("jarfile:"+jarfile);
+			try {codeURL=new URL(jarfile);} catch (Exception e) {e.printStackTrace();}			
 		}
 		RServices r=null;
 		if (PoolUtils.isWindowsOs()) {
