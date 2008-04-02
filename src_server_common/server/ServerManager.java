@@ -55,7 +55,16 @@ public class ServerManager {
 	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
-		RServices r = createR("");
+		String[] options=new String[]{"a=677","b=88"};
+		java.util.HashMap<String,Object> map=new java.util.HashMap<String,Object>();
+		for (int i=0; i<options.length; ++i) {
+			int equalIdx=options[i].indexOf('=');
+			if (equalIdx!=-1) {
+				map.put(options[i].substring(0,equalIdx),options[i].substring(equalIdx+1));
+			}
+		}
+		System.out.println(map);
+
 	}
 
 	private static JTextArea createRSshProgressArea;

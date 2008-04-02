@@ -320,9 +320,16 @@ public class Globals {
 									+ "}");
 
 					outputWriterWebservice
-							.println("\npublic String logOn(String session, String login, String pwd, java.util.HashMap<String, Object> options) throws Exception { "
+							.println("\npublic String logOn(String session, String login, String pwd, String[] options) throws Exception { "
 									+ "injectSystemProperties(true);"
-									+ "try {return http.RHttpProxy.logOn(System.getProperty(\"http.frontend.url\"), session, login, pwd, options);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "java.util.HashMap<String,Object> map=new java.util.HashMap<String,Object>();"
+									+ "for (int i=0; i<options.length; ++i) {"
+									+ "	int equalIdx=options[i].indexOf('=');"
+									+ "	if (equalIdx!=-1) {"
+									+ "		map.put(options[i].substring(0,equalIdx),options[i].substring(equalIdx+1));"
+									+ "	}"
+									+ "}"
+									+ "try {return http.RHttpProxy.logOn(System.getProperty(\"http.frontend.url\"), session, login, pwd, new java.util.HashMap<String,Object>() );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
