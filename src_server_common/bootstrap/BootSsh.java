@@ -9,6 +9,7 @@ import java.net.URLClassLoader;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Vector;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -33,10 +34,13 @@ public class BootSsh {
 			bw = new PrintStream(new File(logFileName));
 		}
 
-		URL codeUrl=null;
-		if (args.length>8) {
-			codeUrl=new URL(args[8]);
-		}
+		
+		Vector<URL> codeUrls=new Vector<URL>();		
+		if (args.length > 8) {
+			for (int i=8;i<args.length;++i) {
+				codeUrls.add(new URL(args[i]));
+			}
+		}		
 		
 		try {
 
@@ -47,10 +51,10 @@ public class BootSsh {
 					new Class<?>[] { String.class, int.class, int.class, int.class }).invoke(null, args[1], Integer.decode(args[2]), 3, 3);
 			Class<?> ServerLauncherClass = cl.loadClass("server.ServerManager");
 			Remote r = (Remote) ServerLauncherClass.getMethod("createR",
-					new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class, String.class, boolean.class, URL.class }).invoke(
+					new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class, String.class, boolean.class, URL[].class }).invoke(
 					null,
 					new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), args[3],
-							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), "",  false, codeUrl });
+							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), "",  false, (URL[])codeUrls.toArray(new URL[0]) });
 
 			Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");
 			String processId = (String) poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);

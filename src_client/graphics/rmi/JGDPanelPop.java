@@ -119,8 +119,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		} catch (Exception e) {
 		}
 
-		if (sz != null)
-			setSize(sz);
+		
+		setSize(sz);
 
 		_prefSize = getSize();
 		_l = new Vector<GDObject>();
