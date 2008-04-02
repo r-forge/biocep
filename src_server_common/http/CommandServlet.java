@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.Registry;
@@ -113,7 +114,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					RPFSessionInfo.get().put("REMOTE_ADDR", request.getRemoteAddr());
 					RPFSessionInfo.get().put("REMOTE_HOST", request.getRemoteHost());
 
-					boolean nopool = options.keySet().contains("nopool") && ((String) options.get("nopool")).equalsIgnoreCase("true");
+					boolean nopool = !options.keySet().contains("nopool") || ((String) options.get("nopool")).equals("") || !((String) options.get("nopool")).equalsIgnoreCase("false");
 					boolean save = options.keySet().contains("save") && ((String) options.get("save")).equalsIgnoreCase("true");
 					boolean namedAccessMode = login.contains("@@");
 					String privateName=(String)options.get("privatename");
@@ -173,12 +174,12 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									try {
 										r=(RServices) LocalRmiRegistry.getInstance().lookup(privateName);
 									} catch (Exception e) {	
-										e.printStackTrace();
+										//e.printStackTrace();
 									}								
 								} 
 								
 								if (r==null) {
-									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,null);
+									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,new URL[]{new URL("http://127.0.0.1:8080/rv/appletlibs/mapping.jar")});
 								}
 
 							} else {

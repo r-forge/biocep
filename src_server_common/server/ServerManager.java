@@ -55,7 +55,7 @@ public class ServerManager {
 	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
-		RServices r=createR("");
+		RServices r = createR("");
 	}
 
 	private static JTextArea createRSshProgressArea;
@@ -63,8 +63,8 @@ public class ServerManager {
 	private static JFrame createRSshProgressFrame;
 
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress, URL codeUrl) throws BadSshHostException,
-			BadSshLoginPwdException, Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress, URL codeUrl)
+			throws BadSshHostException, BadSshLoginPwdException, Exception {
 
 		if (showProgress) {
 			createRSshProgressArea = new JTextArea();
@@ -143,7 +143,7 @@ public class ServerManager {
 				sess = conn.openSession();
 				sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
 						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes + " "
-						+ "System.out" + " "+ codeUrl.toString());
+						+ "System.out" + " " + codeUrl.toString());
 
 				InputStream stdout = new StreamGobbler(sess.getStdout());
 				final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
@@ -223,7 +223,7 @@ public class ServerManager {
 	private static JFrame createRLocalProgressFrame;
 
 	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress, URL codeUrl) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress, URL[] codeUrls) throws Exception {
 
 		if (showProgress) {
 			createRLocalProgressArea = new JTextArea();
@@ -304,7 +304,13 @@ public class ServerManager {
 			command.add("" + memoryMinMegabytes);
 			command.add("" + memoryMaxMegabytes);
 			command.add(logFile);
-			if (codeUrl!=null) command.add(codeUrl.toString());
+						
+			if (codeUrls != null && codeUrls.length > 0) {
+				for (int i = 0; i < codeUrls.length; ++i) {
+					command.add(codeUrls[i].toString());
+				}
+			}			
+			
 			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), null);
 
 			while (!new File(logFile).exists()) {
@@ -362,12 +368,13 @@ public class ServerManager {
 	private static JProgressBar createRProgressBar;
 	private static JFrame createRProgressFrame;
 
-	public static RServices createR(String name) throws Exception {		
-		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, name, false,null);
+	public static RServices createR(String name) throws Exception {
+		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, name,
+				false, null);
 	}
 
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL codeUrl) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls) throws Exception {
 
 		if (showProgress) {
 			createRProgressArea = new JTextArea();
@@ -418,7 +425,7 @@ public class ServerManager {
 
 					if (thisUrl.indexOf("RJB.jar") != -1) {
 						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
-					} else if (thisUrl.indexOf("biocep.jar")!=-1) {
+					} else if (thisUrl.indexOf("biocep.jar") != -1) {
 						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocep.jar") + "biocep.jar".length()));
 					} else {
 						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocep-core.jar") + "biocep-core.jar".length()));
@@ -671,8 +678,13 @@ public class ServerManager {
 			System.out.println("jripath:" + jripath + "\n");
 
 			String cp = root + "classes";
-			if (codeUrl!=null && codeUrl.toString().toLowerCase().startsWith("file:")) {
-				cp+=System.getProperty("path.separator")+codeUrl.toString().substring("file:".length());
+			if (codeUrls != null && codeUrls.length > 0) {
+				for (int i = 0; i < codeUrls.length; ++i) {
+					URL codeUrl = codeUrls[i];
+					if (codeUrl.toString().toLowerCase().startsWith("file:")) {
+						cp += System.getProperty("path.separator") + codeUrl.toString().substring("file:".length());
+					}
+				}
 			}
 
 			ManagedServant[] servantHolder = new ManagedServant[1];
@@ -701,25 +713,21 @@ public class ServerManager {
 							+ " " + urlprefix + "JRI.jar" + " " + urlprefix + "commons-logging-1.1.jar" + " " + urlprefix + "log4j-1.2.14.jar" + " "
 							+ urlprefix + "htmlparser.jar" + " " + urlprefix + "derbyclient.jar" + " " + urlprefix + "RJB.jar" + " " + urlprefix
 							+ "mapping.jar" + (isWindowsOs() ? "\"" : ""));
-					
-					
-					command.add((isWindowsOs() ? "\"" : "") + "-Dpreloadall=true" + (isWindowsOs() ? "\"" : ""));	
+
+					command.add((isWindowsOs() ? "\"" : "") + "-Dpreloadall=true" + (isWindowsOs() ? "\"" : ""));
 				} else {
-					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"
-							+
-							
-							(isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/" +
+
+					(isWindowsOs() ? "\"" : ""));
 				}
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
 
-				
 				command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
-				if (name!=null && !name.equals("")) {
-					command.add((isWindowsOs() ? "\"" : "") + "-Dname="+ name + (isWindowsOs() ? "\"" : ""));	
-				} 
-				
-				
+				if (name != null && !name.equals("")) {
+					command.add((isWindowsOs() ? "\"" : "") + "-Dname=" + name + (isWindowsOs() ? "\"" : ""));
+				}
+
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dpreprocess.help=true" + (isWindowsOs() ? "\"" : ""));
@@ -745,8 +753,11 @@ public class ServerManager {
 				command.add(new Boolean(keepAlive).toString());
 				command.add(codeServerHostIp);
 				command.add("" + codeServerPort);
-				if (keepAlive && codeUrl!=null) {
-					command.add(codeUrl.toString());
+				
+				if (codeUrls != null && codeUrls.length > 0) {
+					for (int i = 0; i < codeUrls.length; ++i) {
+						command.add(codeUrls[i].toString());
+					}
 				}
 
 				final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
@@ -861,10 +872,12 @@ public class ServerManager {
 	public static void killLocalWinProcess(String processId, boolean isKILLSIG) throws Exception {
 		PoolUtils.killLocalWinProcess(processId, isKILLSIG);
 	}
-	
+
 	public static void killLocalProcess(String processId, boolean isKILLSIG) throws Exception {
-		if (isWindowsOs()) PoolUtils.killLocalWinProcess(processId, isKILLSIG);
-		else PoolUtils.killLocalUnixProcess(processId, isKILLSIG);
+		if (isWindowsOs())
+			PoolUtils.killLocalWinProcess(processId, isKILLSIG);
+		else
+			PoolUtils.killLocalUnixProcess(processId, isKILLSIG);
 	}
 
 	public static void killSshProcess(String processId, String sshHostIp, String sshLogin, String sshPwd, boolean forcedKill) throws Exception {
@@ -1064,7 +1077,7 @@ public class ServerManager {
 	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {
 		new Thread(new Runnable() {
 			int failureCounter = maxFailure;
-	
+
 			public void run() {
 				while (true) {
 					if (!isPortInUse(hostIp, port))

@@ -37,7 +37,8 @@ public class HttpR {
 
 	public static void main(String[] args) throws Throwable {
 		
-		final String cmdUrl = System.getProperty("url");
+		//final String cmdUrl = System.getProperty("url");
+		final String cmdUrl = "http://127.0.0.1:8080/rv/cmd";
 		HashMap<String, Object> options = new HashMap<String, Object>();
 		options.put("panel.width", new Integer(400));
 		options.put("panel.height", new Integer(400));
@@ -46,9 +47,9 @@ public class HttpR {
 
 			RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", new Class<?>[]{RServices.class},
 					new HttpClient(new MultiThreadedHttpConnectionManager()));
-			GDDevice d = (GDDevice) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "device", new Class<?>[]{GDDevice.class},
-					new HttpClient(new MultiThreadedHttpConnectionManager()));
-
+			
+			GDDevice d = RHttpProxy.newDevice(cmdUrl, sessionId,100, 100);
+			
 			JPanel panel = new JGDPanelPop(d);
 
 			JFrame f = new JFrame();
