@@ -40,8 +40,7 @@ public class HttpR {
 		//final String cmdUrl = System.getProperty("url");
 		final String cmdUrl = "http://127.0.0.1:8080/rv/cmd";
 		HashMap<String, Object> options = new HashMap<String, Object>();
-		options.put("panel.width", new Integer(400));
-		options.put("panel.height", new Integer(400));
+		options.put("privatename", "toto");
 		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
 		try {
 
@@ -58,6 +57,7 @@ public class HttpR {
 			panel.repaint();
 			f.pack();
 			f.setVisible(true);
+			f.setSize(300, 300);
 			// r.evaluate("hist(rnorm(451))");
 
 			ConsoleDialog dialog = new ConsoleDialog(null, r, new ServantStatus() {

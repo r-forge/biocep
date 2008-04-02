@@ -24,7 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.rmi.ConnectException;
-import java.rmi.NotBoundException;
 import java.rmi.registry.Registry;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -46,8 +45,6 @@ import uk.ac.ebi.microarray.pools.RPFSessionInfo;
 import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
 import uk.ac.ebi.microarray.pools.RmiCallTimeout;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
-
-import ch.ethz.ssh2.StreamGobbler;
 
 
 /**
