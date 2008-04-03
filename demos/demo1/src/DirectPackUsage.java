@@ -71,7 +71,7 @@ public class DirectPackUsage {
         f.setSize(400, 400);
         f.setVisible(true);
 
-        svgCanvas.setURI(new File(tempFile).toURI().toURL().toString());
+        svgCanvas.setURI(new File(tempFile).toURL().toString());
         
         if (true) return;
 		System.exit(0);

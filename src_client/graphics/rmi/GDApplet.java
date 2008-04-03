@@ -3253,7 +3253,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				String[] viewDetail = pdialog.getPluginViewDetail();
 				if (viewDetail != null) {
 					try {
-						URLClassLoader cl = new URLClassLoader(new URL[] { new File(viewDetail[0]).toURI().toURL() }, GDApplet.class.getClassLoader());
+						URLClassLoader cl = new URLClassLoader(new URL[] { new File(viewDetail[0]).toURL() }, GDApplet.class.getClassLoader());
 						Class<?> c_ = cl.loadClass(viewDetail[1]);
 						JPanel panel = (JPanel) c_.getConstructor(RGui.class).newInstance(GDApplet.this);
 						createView(panel, "plugin view");
@@ -3679,7 +3679,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
 								try {
-									_svgCanvas.setURI(chooser.getSelectedFile().toURI().toURL().toString());
+									_svgCanvas.setURI(chooser.getSelectedFile().toURL().toString());
 									repaint();
 								} catch (Exception e) {
 									e.printStackTrace();
@@ -3775,7 +3775,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									SwingUtilities.invokeLater(new Runnable() {
 										public void run() {
 											try {
-												_svgCanvas.setURI(new File(tempFile).toURI().toURL().toString());
+												_svgCanvas.setURI(new File(tempFile).toURL().toString());
 												repaint();
 											} catch (Exception e) {
 												e.printStackTrace();
