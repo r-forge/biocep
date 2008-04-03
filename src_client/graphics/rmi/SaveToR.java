@@ -42,6 +42,14 @@ public class SaveToR {
 		try {
 			applet.getR().createWorkingDirectoryFile(fileName);
 			FileLoad.upload(new File(path), fileName, applet.getR());
+			
+			
+			if (sourceIt) {
+				final String cmd = "source('" + fileName + "')";
+				applet.safeConsoleSubmit(cmd);
+			}
+			
+			/*
 			if (sourceIt) {
 				final String cmd = "source('" + fileName + "')";
 				
@@ -73,6 +81,7 @@ public class SaveToR {
 				
 				//applet.safeConsoleSubmit(cmd);
 			}
+			*/
 
 		} catch (Exception e) {
 			e.printStackTrace();
