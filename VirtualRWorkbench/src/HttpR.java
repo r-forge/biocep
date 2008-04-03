@@ -36,66 +36,12 @@ import http.RHttpProxy;
 public class HttpR {
 
 	public static void main(String[] args) throws Throwable {
-		
+
 		//final String cmdUrl = System.getProperty("url");
 		final String cmdUrl = "http://127.0.0.1:8080/rv/cmd";
 		HashMap<String, Object> options = new HashMap<String, Object>();
-		options.put("privatename", "toto");
+		options.put("privatename", "titi");
 		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
-		try {
-
-			RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", new Class<?>[]{RServices.class},
-					new HttpClient(new MultiThreadedHttpConnectionManager()));
-			
-			GDDevice d = RHttpProxy.newDevice(cmdUrl, sessionId,100, 100);
-			
-			JPanel panel = new JGDPanelPop(d);
-
-			JFrame f = new JFrame();
-			f.getContentPane().setLayout(new BorderLayout());
-			f.getContentPane().add(panel, BorderLayout.CENTER);
-			panel.repaint();
-			f.pack();
-			f.setVisible(true);
-			f.setSize(300, 300);
-			// r.evaluate("hist(rnorm(451))");
-
-			ConsoleDialog dialog = new ConsoleDialog(null, r, new ServantStatus() {
-				public boolean isLocked() {
-					return true;
-				}
-			});
-			dialog.setVisible(true);
-
-			dialog.addWindowListener(new WindowListener() {
-				public void windowActivated(WindowEvent e) {
-				}
-
-				public void windowClosed(WindowEvent e) {
-					System.exit(0);
-				}
-
-				public void windowClosing(WindowEvent e) {
-					System.exit(0);
-				}
-
-				public void windowDeactivated(WindowEvent e) {
-				}
-
-				public void windowDeiconified(WindowEvent e) {
-				}
-
-				public void windowIconified(WindowEvent e) {
-				}
-
-				public void windowOpened(WindowEvent e) {
-				}
-			});
-
-		} finally {
-
-		}
-
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
 			public void run() {
@@ -107,6 +53,60 @@ public class HttpR {
 				}
 			}
 		}));
+
+		RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", new Class<?>[] { RServices.class }, new HttpClient(
+				new MultiThreadedHttpConnectionManager()));
+
+		System.out.println(r.consoleSubmit("x=88"));
+		
+		System.exit(0);
+		
+		
+		
+		GDDevice d = RHttpProxy.newDevice(cmdUrl, sessionId, 100, 100);
+
+		JPanel panel = new JGDPanelPop(d);
+
+		JFrame f = new JFrame();
+		f.getContentPane().setLayout(new BorderLayout());
+		f.getContentPane().add(panel, BorderLayout.CENTER);
+		panel.repaint();
+		f.pack();
+		f.setVisible(true);
+		f.setSize(300, 300);
+		// r.evaluate("hist(rnorm(451))");
+
+		ConsoleDialog dialog = new ConsoleDialog(null, r, new ServantStatus() {
+			public boolean isLocked() {
+				return true;
+			}
+		});
+		dialog.setVisible(true);
+
+		dialog.addWindowListener(new WindowListener() {
+			public void windowActivated(WindowEvent e) {
+			}
+
+			public void windowClosed(WindowEvent e) {
+				System.exit(0);
+			}
+
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+
+			public void windowDeactivated(WindowEvent e) {
+			}
+
+			public void windowDeiconified(WindowEvent e) {
+			}
+
+			public void windowIconified(WindowEvent e) {
+			}
+
+			public void windowOpened(WindowEvent e) {
+			}
+		});
 
 	}
 }

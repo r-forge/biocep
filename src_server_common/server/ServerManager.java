@@ -47,8 +47,8 @@ import ch.ethz.ssh2.StreamGobbler;
  */
 public class ServerManager {
 	public static String INSTALL_DIR = new File(System.getProperty("user.home") + "/RWorkbench/").getAbsolutePath() + "/";
-	private static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
-	private static int BUFFER_SIZE = 8192 * 5;
+	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
+	public static int BUFFER_SIZE = 8192 * 5;
 	private static final String RLIBSTART = "R$LIB$START";
 	private static final String RLIBEND = "R$LIB$END";
 	private static final String RVERSTART = "R$VER$START";
@@ -413,58 +413,12 @@ public class ServerManager {
 		}
 
 		try {
-			String urlprefix = null;
-			try {
-				Class<?> ServiceManagerClass = ServerManager.class.getClassLoader().loadClass("javax.jnlp.ServiceManager");
-				Object basicServiceInstance = ServiceManagerClass.getMethod("lookup", String.class).invoke(null, "javax.jnlp.BasicService");
-				Class<?> BasicServiceClass = ServerManager.class.getClassLoader().loadClass("javax.jnlp.BasicService");
-				urlprefix = BasicServiceClass.getMethod("getCodeBase").invoke(basicServiceInstance).toString();
-			} catch (Exception e) {
-
-			}
-			System.out.println("url prefix:" + urlprefix);
-			URL rjbURL = null;
-			System.out.println(ServerManager.class.getResource("/graphics/rmi/ServerLauncher.class"));
-
-			if (urlprefix != null) {
-				rjbURL = new URL(urlprefix + "appletlibs/RJB.jar");
-			} else {
-				String thisUrl = ServerManager.class.getResource("/server/ServerManager.class").toString();
-				if (thisUrl.indexOf("http:") != -1) {
-
-					if (thisUrl.indexOf("RJB.jar") != -1) {
-						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("RJB.jar") + "RJB.jar".length()));
-					} else if (thisUrl.indexOf("biocep.jar") != -1) {
-						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocep.jar") + "biocep.jar".length()));
-					} else {
-						rjbURL = new URL(thisUrl.substring(thisUrl.indexOf("http:"), thisUrl.indexOf("biocep-core.jar") + "biocep-core.jar".length()));
-					}
-				}
-			}
-
-			if (urlprefix == null) {
-				urlprefix = "http://biocep.r-forge.r-project.org/appletlibs/";
-			}
 
 			String root = INSTALL_DIR;
 			new File(root).mkdir();
 
 			String[] rinfo = getRInfo(null);
 			System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
-
-			/*
-			 * if (rinfo == null && System.getenv("R_HOME") != null) { String
-			 * home = System.getenv("R_HOME"); if (isWindowsOs() &&
-			 * !home.endsWith("\\")) { home = home + "\\"; } if (!isWindowsOs() &&
-			 * !home.endsWith("/")) { home = home + "/"; } rinfo =
-			 * GUtils.getRInfo(home); }
-			 * 
-			 * 
-			 * String rpath = rinfo != null ? rinfo[0].substring(0,
-			 * rinfo[0].length() - "library".length()) :
-			 * (System.getenv("R_HOME") != null ? System .getenv("R_HOME") :
-			 * null);
-			 */
 
 			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : null;
 
@@ -717,17 +671,13 @@ public class ServerManager {
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
 
-				if (keepAlive) {
-					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=" + "http://" + codeServerHostIp + ":" + codeServerPort + "/classes/"
-							+ " " + urlprefix + "JRI.jar" + " " + urlprefix + "commons-logging-1.1.jar" + " " + urlprefix + "log4j-1.2.14.jar" + " "
-							+ urlprefix + "htmlparser.jar" + " " + urlprefix + "derbyclient.jar" + " " + urlprefix + "RJB.jar" + " " + urlprefix
-							+ "mapping.jar" + (isWindowsOs() ? "\"" : ""));
-
+				String codeBase= "http://" + codeServerHostIp + ":" + codeServerPort + "/classes/";
+				if (keepAlive) {					
+					if (codeUrls!=null && codeUrls.length>0) {for (int i=0; i<codeUrls.length;++i)  codeBase+=" "+codeUrls[i].toString();}					
+					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=" + codeBase + (isWindowsOs() ? "\"" : ""));
 					command.add((isWindowsOs() ? "\"" : "") + "-Dpreloadall=true" + (isWindowsOs() ? "\"" : ""));
 				} else {
-					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=http://" + codeServerHostIp + ":" + codeServerPort + "/classes/" +
-
-					(isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase="+ codeBase+(isWindowsOs() ? "\"" : ""));
 				}
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
@@ -835,7 +785,7 @@ public class ServerManager {
 		}
 	}
 
-	private static String getLibraryPath(String libName, String rpath, String rlibs) {
+	public static String getLibraryPath(String libName, String rpath, String rlibs) {
 		if (!rpath.endsWith("/") && !rpath.endsWith("\\")) {
 			rpath += "/";
 		}

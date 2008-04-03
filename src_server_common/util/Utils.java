@@ -43,58 +43,6 @@ import org.w3c.dom.Node;
  */
 public class Utils {
 
-	public static String flatArray(Object[] array) {
-		String result = "{";
-		if (array != null) {
-			for (int i = 0; i < array.length; ++i) {
-				result += array[i].toString() + (i == (array.length - 1) ? "" : ",");
-			}
-		} else {
-			result += "null";
-		}
-		result += "}";
-		return result;
-	}
-
-	public static String flatArray(boolean[] array) {
-		String result = "{";
-		if (array != null) {
-			for (int i = 0; i < array.length; ++i) {
-				result += new Boolean(array[i]).toString() + (i == (array.length - 1) ? "" : ",");
-			}
-		} else {
-			result += "null";
-		}
-		result += "}";
-		return result;
-	}
-
-	public static String flatArray(int[] array) {
-		String result = "{";
-		if (array != null) {
-			for (int i = 0; i < array.length; ++i) {
-				result += new Integer(array[i]).toString() + (i == (array.length - 1) ? "" : ",");
-			}
-		} else {
-			result += "null";
-		}
-		result += "}";
-		return result;
-	}
-
-	public static String flatArray(double[] array) {
-		String result = "{";
-		if (array != null) {
-			for (int i = 0; i < array.length; ++i) {
-				result += new Double(array[i]).toString() + (i == (array.length - 1) ? "" : ",");
-			}
-		} else {
-			result += "null";
-		}
-		result += "}";
-		return result;
-	}
-
 	public static Vector<String> getVectorFromSet(Set<String> s) {
 		Vector<String> result = new Vector<String>();
 		for (Iterator<String> iter = s.iterator(); iter.hasNext();) {

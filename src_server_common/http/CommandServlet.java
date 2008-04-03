@@ -116,6 +116,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					boolean namedAccessMode = login.contains("@@");
 					String privateName=(String)options.get("privatename");
 					
+					System.out.println("privatename=<"+privateName+">");
+					
 
 					RServices r = null;
 
@@ -176,7 +178,9 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								} 
 								
 								if (r==null) {
-									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,new URL[]{new URL("http://127.0.0.1:8080/rv/appletlibs/mapping.jar")});
+									
+									String urlHead=request.getRequestURL().substring(0, request.getRequestURL().lastIndexOf(request.getRequestURI()));
+									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,new URL[]{new URL(urlHead+"/rmapping/appletlibs/mapping.jar")});
 								}
 
 							} else {

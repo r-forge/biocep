@@ -29,8 +29,11 @@
 			<property name="demo.scriptdir" value="${basedir}/VirtualRWorkbench/script" />		
 			<property name="demo.generatedir" value="${basedir}/VirtualRWorkbench/distrib/" />			
 			<property name="demo.mapping.jar.name" value="mapping" />	
+	
 			<property name="demo.webservices.war.name" value="rws" />
 			<property name="demo.frontend.war.name" value="rv" />							
+			<property name="demo.mapping.war.name" value="rmapping" />
+	
 			<property name="demo.db.driver" value="org.apache.derby.jdbc.ClientDriver"/>
 			<property name="demo.db.url" value="jdbc:derby://${db.host}:${db.port}/DWEP;create=true" />
 			<property name="demo.db.user" value="DWEP" />
@@ -129,6 +132,13 @@
 						<param name="propsembed" value="${demo.generatedir}/globals.properties" />
 						<param name="ws.r.api" value="true"/>						
 					</antcall>
+				
+					<copy todir="VirtualRWorkbench/rmapping/appletlibs">
+						<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
+					</copy>				  				
+
+					<jar basedir="VirtualRWorkbench/rmapping" destfile="VirtualRWorkbench/${demo.mapping.war.name}.war" />
+				
 			</target>
 			
 	

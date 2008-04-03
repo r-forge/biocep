@@ -15,6 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.Arrays;
+
 import org.bioconductor.packages.biobase.ExpressionSet;
 import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
 import org.bioconductor.packages.rservices.RNumeric;
@@ -57,7 +59,7 @@ public class MultiR {
 					
 					
 					System.out.println("++ Thread<" + Thread.currentThread().getName() + "> obtained " + r.getServantName());
-					System.out.println(" packages mapped =" + Utils.flatArray(r.listPackages()));
+					System.out.println(" packages mapped =" + Arrays.toString(r.listPackages()));
 					RNumeric squareOf4 = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction")).square(new RNumeric(4));
 					System.out.println("square Of 4 : "+squareOf4);
 

@@ -23,7 +23,21 @@ public class SVGPanel extends JSVGCanvas {
 			for (int i = 0; i < v.size(); ++i)
 				pw.println(v.elementAt(i));
 			pw.close();
-			setURI(new File(tempFile).toURL().toString());
+			setURI(new File(tempFile).toURI().toURL().toString());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void setSVGContent(String[] v) {
+		try {
+			final String tempFile = System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg";
+			PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
+			for (int i = 0; i < v.length; ++i)
+				pw.println(v[i]);
+			pw.close();
+			setURI(new File(tempFile).toURI().toURL().toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();

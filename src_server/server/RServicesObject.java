@@ -304,11 +304,19 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 	
+	public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException {
+		return null;
+	}
+	
 	public RObject pythonGet(String name) throws RemoteException {
 		return null;
 	}
+	
+	public Object pythonGetAndConvert(String name) throws RemoteException {
+		return null;
+	}
 
-	public void pythonSet(String name, RObject Value) throws RemoteException {		
+	public void pythonSet(String name, Object Value) throws RemoteException {		
 	}
 
 	public Object callAndConvert(String methodName, Object... args) throws RemoteException {
