@@ -425,7 +425,6 @@ public class Gen {
 			genWeb();
 
 		DirectJNI._mappingClassLoader = null;
-		System.gc();
 
 		System.exit(0);
 	}
