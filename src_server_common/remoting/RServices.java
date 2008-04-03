@@ -132,10 +132,14 @@ public interface RServices extends ManagedServant {
 	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException;
 
 	public RObject pythonEval(String pythonCommand) throws RemoteException;
+
+	public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException;	
 	
 	public RObject pythonGet(String name) throws RemoteException;
-	
-	public void pythonSet(String name, RObject Value) throws RemoteException;
+
+	public Object pythonGetAndConvert(String name) throws RemoteException;
+
+	public void pythonSet(String name, Object Value) throws RemoteException;
 	
 	public String getPythonStatus() throws RemoteException;
 

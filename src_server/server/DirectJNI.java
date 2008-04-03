@@ -2878,12 +2878,22 @@ public class DirectJNI {
 			return null;
 		}
 		
+		public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
 		public RObject pythonGet(String name) throws RemoteException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public void pythonSet(String name, RObject Value) throws RemoteException {
+		public Object pythonGetAndConvert(String name) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		public void pythonSet(String name, Object Value) throws RemoteException {
 			// TODO Auto-generated method stub
 			
 		}

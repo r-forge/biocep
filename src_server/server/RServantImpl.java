@@ -693,11 +693,19 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().pythonEval(pythonCommand);
 	}
 
+	public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().pythonEvalAndConvert(pythonCommand);
+	}	
+	
 	public RObject pythonGet(String name) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().pythonGet(name);
 	}
 	
-	public void pythonSet(String name, RObject Value) throws RemoteException {
+	public Object pythonGetAndConvert(String name) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().pythonGetAndConvert(name);
+	}
+	
+	public void pythonSet(String name, Object Value) throws RemoteException {
 		DirectJNI.getInstance().getRServices().pythonSet(name, Value);
 	}
 }
