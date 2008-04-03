@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JOptionPane;
-
-import server.CoreMain;
 import server.ServerManager;
 import uk.ac.ebi.microarray.pools.MainPsToolsDownload;
 
@@ -99,7 +97,11 @@ public class ToolsMain {
 				envVector.add(k + "=" + env.get(k));
 			}
 		}
+		
+		System.out.println("env:"+envVector);
 
+		
+		
 		String[] requiredPackages = null;
 
 		if (isWindowsOs()) {
@@ -201,7 +203,7 @@ public class ToolsMain {
 
 		String jripath = ServerManager.getLibraryPath("rJava", rpath, rlibs) + "jri/";
 		System.out.println("jripath:" + jripath + "\n");
-
+		
 		String cp = root + "classes";
 		if (codeUrls != null && codeUrls.length > 0) {
 			for (int i = 0; i < codeUrls.length; ++i) {
@@ -211,6 +213,8 @@ public class ToolsMain {
 				}
 			}
 		}
+		
+		System.out.println("++cp="+cp);
 
 		Vector<String> command = new Vector<String>();
 		command.add(System.getProperty("java.home") + "/bin/java");
@@ -275,34 +279,24 @@ public class ToolsMain {
 	}
 
 	public static void main(String[] args) throws Exception{
-
+		
 		HashMap<String, String> argMap=new HashMap<String, String>();
 		
 		String[] argNames=new String[]{"file","dir", "outputdir", "mappingjar", "warname", "propsembed","keepintermediate", "formatsource" , "ws.r.api", "targetjdk" };
 		for (int i=0; i<argNames.length;++i) {
 			if (System.getProperty(argNames[i])!=null && !System.getProperty(argNames[i]).equals("")) argMap.put(argNames[i], System.getProperty(argNames[i]));
-		}
- 		
+		} 		
 		String classUrl1=ToolsMain.class.getResource("/ToolsMain.class").toString();
 		URL[] codeUrls=null;
-		if (classUrl1.toLowerCase().indexOf("jar:file:")==-1) {			
-			
-			Vector<URL> v=new Vector<URL>();
-			String classPath = System.getProperty("java.class.path");
+		Vector<URL> v=new Vector<URL>();
+		String classPath = System.getProperty("java.class.path");
 
-		    StringTokenizer st = new StringTokenizer(classPath, File.pathSeparator);
-		    while (st.hasMoreTokens()) {
-		    	v.add(new File((String)st.nextElement()).toURI().toURL());
-		    }
-				
-		    System.out.println(v);
-			codeUrls=(URL[])v.toArray(new URL[0]);
-			
-			
-		} else {
-			codeUrls=new URL[]{new URL(classUrl1.substring("jar:".length(), classUrl1.length()-"/ToolsMain.class".length()-1))};
-		}
-		
+	    StringTokenizer st = new StringTokenizer(classPath, File.pathSeparator);
+	    while (st.hasMoreTokens()) {
+	    	v.add(new File((String)st.nextElement()).toURL());
+	    }
+		codeUrls=(URL[])v.toArray(new URL[0]);
+
 		System.out.println("jarfile:"+Arrays.toString(codeUrls));
 		runGen(codeUrls,argMap);
 

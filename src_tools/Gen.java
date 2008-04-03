@@ -48,7 +48,7 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 import util.Utils;
 
 /**
- * @author Karim Chine   k.chine@imperial.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class Gen {
 
@@ -96,15 +96,11 @@ public class Gen {
 			}
 		});
 		/*
-		 if (log instanceof Log4JLogger) {
-		 Properties log4jProperties = new Properties();
-		 for (Object sprop : System.getProperties().keySet()) {
-		 if (((String) sprop).startsWith("log4j.")) {
-		 log4jProperties.put(sprop, System.getProperties().get(sprop));
-		 }
-		 }
-		 PropertyConfigurator.configure(log4jProperties);
-		 }
+		 * if (log instanceof Log4JLogger) { Properties log4jProperties = new
+		 * Properties(); for (Object sprop : System.getProperties().keySet()) {
+		 * if (((String) sprop).startsWith("log4j.")) {
+		 * log4jProperties.put(sprop, System.getProperties().get(sprop)); } }
+		 * PropertyConfigurator.configure(log4jProperties); }
 		 */
 
 	}
@@ -129,22 +125,21 @@ public class Gen {
 			log.info("no files to parse");
 			System.exit(0);
 		}
-		
+
 		boolean formatsource = true;
 		if (System.getProperty("formatsource") != null && !System.getProperty("formatsource").equals("")
 				&& System.getProperty("formatsource").equalsIgnoreCase("false")) {
 			formatsource = false;
 		}
 
-		
 		GEN_ROOT = System.getProperty("outputdir");
-		
+
 		if (GEN_ROOT == null || GEN_ROOT.equals("")) {
-			GEN_ROOT=new File(files[0].getAbsolutePath()).getParent()+ FILE_SEPARATOR + "distrib";
+			GEN_ROOT = new File(files[0].getAbsolutePath()).getParent() + FILE_SEPARATOR + "distrib";
 		}
-		
-		System.out.println("GEN ROOT:"+GEN_ROOT);
-		
+
+		System.out.println("GEN ROOT:" + GEN_ROOT);
+
 		MAPPING_JAR_NAME = System.getProperty("mappingjar") != null && !System.getProperty("mappingjar").equals("") ? System.getProperty("mappingjar")
 				: "mapping.jar";
 		if (!MAPPING_JAR_NAME.endsWith(".jar"))
@@ -152,8 +147,6 @@ public class Gen {
 
 		GEN_ROOT_SRC = GEN_ROOT + FILE_SEPARATOR + "src";
 		GEN_ROOT_LIB = GEN_ROOT + FILE_SEPARATOR + "";
-
-
 
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 		domFactory.setNamespaceAware(true);
@@ -613,16 +606,25 @@ public class Gen {
 		Vector<String> warJars = new Vector<String>();
 		warJars.add(GEN_ROOT_LIB + FILE_SEPARATOR + MAPPING_JAR_NAME);
 
-		String coreMainJar = CoreMain.class.getResource("/server/CoreMain.class").toString();
-		if (coreMainJar.contains("biocep-core.jar")) {
-			String jarfile = coreMainJar.substring("jar:file:".length(), coreMainJar.length() - "/server/CoreMain.class".length() - 1);
-			warJars.add(new File(jarfile).getAbsolutePath());
+		InputStream isCore = Gen.class.getResourceAsStream("/biocep-core.jar");
+		if (isCore != null) {
+			try {
+				RandomAccessFile raf = new RandomAccessFile(GEN_WEBINF + FILE_SEPARATOR + "lib" + "/biocep-core.jar", "rw");
+				raf.setLength(0);
+				int b;
+				while ((b = isCore.read()) != -1) {
+					raf.write(b);
+				}
+				raf.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		} else {
-			
+
 			warJars.add("RJB.jar");
-			
+
 			warJars.add(System.getProperty("jri.jar"));
-			
+
 			FilenameFilter jarsFilter = new FilenameFilter() {
 				public boolean accept(File arg0, String arg1) {
 					return arg1.endsWith(".jar");

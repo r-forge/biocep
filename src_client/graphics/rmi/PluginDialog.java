@@ -96,7 +96,7 @@ public class PluginDialog extends JDialog {
 					try {
 						_pluginJar.setText(chooser.getSelectedFile().getAbsolutePath());
 
-						Vector<String> viewClassList = getPluginViewsClasses(new File(_pluginJar.getText()).toURI().toURL());
+						Vector<String> viewClassList = getPluginViewsClasses(new File(_pluginJar.getText()).toURL());
 						_pluginViewClass.removeAllItems();
 						for (String s : viewClassList)
 							_pluginViewClass.addItem(s);
@@ -113,7 +113,7 @@ public class PluginDialog extends JDialog {
 		_refreshButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					Vector<String> viewClassList = getPluginViewsClasses(new File(_pluginJar.getText()).toURI().toURL());
+					Vector<String> viewClassList = getPluginViewsClasses(new File(_pluginJar.getText()).toURL());
 					_pluginViewClass.removeAllItems();
 					for (String s : viewClassList)
 						_pluginViewClass.addItem(s);
