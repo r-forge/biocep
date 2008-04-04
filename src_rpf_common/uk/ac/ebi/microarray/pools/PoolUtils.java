@@ -876,6 +876,7 @@ public class PoolUtils {
 	}
 
 	public static void prepareFileDirectories(String destination, String entryName) {
+		destination=destination.replace('\\', '/');
 		String outputFileName = destination + entryName;
 		new File(outputFileName.substring(0, outputFileName.lastIndexOf("/"))).mkdirs();
 	}

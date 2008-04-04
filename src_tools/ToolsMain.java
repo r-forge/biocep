@@ -280,13 +280,69 @@ public class ToolsMain {
 
 	public static void main(String[] args) throws Exception{
 		
-		HashMap<String, String> argMap=new HashMap<String, String>();
 		
+		File tempFile = null;
+
+		tempFile = new File(System.getProperty("java.io.tmpdir") + "/temp_globals.properties").getCanonicalFile();
+		if (tempFile.exists())
+			tempFile.delete();
+		
+	    String[] embedPropertiesNames=new String[] {
+			   "pools.provider.factory",
+			   "pools.dbmode.driver",
+			   "pools.dbmode.url",
+			   "pools.dbmode.user",
+			   "pools.dbmode.password",
+			   "pools.dbmode.defaultpoolname",
+			   "pstools.home",
+			   "pools.dbmode.killused",
+			   "node.manager.name",
+			   "private.servant.node.name",
+			   "http.frontend.url"};
+	   
+	   String[] embedPropertiesDefaultValues=new String[] {
+			   null,
+			   null,
+			   null,
+			   null,
+			   null,
+			   null,
+			   null,
+			   null,
+			   null,
+			   null,
+			   "http://127.0.0.1:8080/rvirtual/cmd"};
+	   
+	   
+	   Vector<String> genArgs=new Vector<String>();
+	   genArgs.add(tempFile.getAbsolutePath());
+	   for (int i=0; i<embedPropertiesNames.length; ++i) { 
+		   if (embedPropertiesDefaultValues[i]!=null) genArgs.add(embedPropertiesNames[i]+"="+embedPropertiesDefaultValues[i]);
+	   }
+	   uk.ac.ebi.microarray.pools.PropertiesGenerator.main((String[])genArgs.toArray(new String[0]));   
+		
+		HashMap<String, String> argMap=new HashMap<String, String>();		
 		String[] argNames=new String[]{"file","dir", "outputdir", "mappingjar", "warname", "propsembed","keepintermediate", "formatsource" , "ws.r.api", "targetjdk" };
 		for (int i=0; i<argNames.length;++i) {
 			if (System.getProperty(argNames[i])!=null && !System.getProperty(argNames[i]).equals("")) argMap.put(argNames[i], System.getProperty(argNames[i]));
 		} 		
-		String classUrl1=ToolsMain.class.getResource("/ToolsMain.class").toString();
+		
+		if (argMap.get("propsembed")==null) {
+			argMap.put("propsembed", tempFile.getAbsolutePath());
+		}
+		
+		
+/*		
+		<param name="dir" value="${demo.scriptdir}"/>
+		<param name="outputdir" value="${demo.generatedir}"/>
+		<param name="keepintermediate" value="true"/>
+		<param name="formatsource" value="true"/>
+		<param name="mappingjar" value="${demo.mapping.jar.name}.jar" />
+		<param name="warname" value="${demo.webservices.war.name}.war" />
+		<param name="propsembed" value="${demo.generatedir}/globals.properties" />
+		<param name="ws.r.api" value="true"/>
+		*/
+		
 		URL[] codeUrls=null;
 		Vector<URL> v=new Vector<URL>();
 		String classPath = System.getProperty("java.class.path");

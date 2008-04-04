@@ -77,7 +77,7 @@
 	<target name="demogen" depends="compile">		
 			<mkdir dir="${demo.generatedir}" />
 		
-			<java classname="util.PropertiesGenerator" fork="true" >
+			<java classname="uk.ac.ebi.microarray.pools.PropertiesGenerator" fork="true" >
 					<classpath>
 						<pathelement path="${CORE_JAR}"/>
 						<pathelement path="${LOGGING_JAR}"/>

@@ -31,7 +31,7 @@
 			<property name="demo.mapping.jar.name" value="mapping" />	
 	
 			<property name="demo.webservices.war.name" value="rws" />
-			<property name="demo.frontend.war.name" value="rv" />							
+			<property name="demo.frontend.war.name" value="rvirtual" />							
 			<property name="demo.mapping.war.name" value="rmapping" />
 	
 			<property name="demo.db.driver" value="org.apache.derby.jdbc.ClientDriver"/>
@@ -93,7 +93,7 @@
 			<target name="demogen">		
 					<mkdir dir="${demo.generatedir}" />
 				
-					 <java classname="util.PropertiesGenerator" fork="true" >
+					 <java classname="uk.ac.ebi.microarray.pools.PropertiesGenerator" fork="true" >
 						<classpath>
 							<pathelement path="${CORE_JAR}"/>
 							<pathelement path="${LOGGING_JAR}"/>
@@ -439,7 +439,7 @@
 					    <fileset dir="VirtualRWorkbench/frontendapp/WEB-INF/classes" includes="**/*.class"/>  
 				  </delete>
 								
-				  <java classname="util.PropertiesGenerator" fork="true" >
+				  <java classname="uk.ac.ebi.microarray.pools.PropertiesGenerator" fork="true" >
 					<classpath>
 							<pathelement path="${CORE_JAR}"/>
 							<pathelement path="${LOGGING_JAR}"/>

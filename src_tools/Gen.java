@@ -39,7 +39,6 @@ import org.w3c.dom.Node;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.PoolUtils.EqualNameFilter;
 import de.hunsicker.jalopy.plugin.ant.AntPlugin;
-import server.CoreMain;
 import server.DirectJNI;
 import server.ExecutionUnit;
 import server.Globals;
@@ -86,22 +85,13 @@ public class Gen {
 					setMessageOutputLevel(Project.MSG_INFO);
 			}
 
-			@Override
 			protected void log(String str) {
 				log.info(str);
 			}
 
-			@Override
 			protected void printMessage(String arg0, PrintStream arg1, int arg2) {
 			}
 		});
-		/*
-		 * if (log instanceof Log4JLogger) { Properties log4jProperties = new
-		 * Properties(); for (Object sprop : System.getProperties().keySet()) {
-		 * if (((String) sprop).startsWith("log4j.")) {
-		 * log4jProperties.put(sprop, System.getProperties().get(sprop)); } }
-		 * PropertyConfigurator.configure(log4jProperties); }
-		 */
 
 	}
 
@@ -258,7 +248,7 @@ public class Gen {
 				_webPublishingEnabled = false;
 			} else {
 
-				if (System.getProperty("ws.r.api") != null && System.getProperty("ws.r.api").equalsIgnoreCase("true")) {
+				if (System.getProperty("ws.r.api") == null || System.getProperty("ws.r.api").equals("") || !System.getProperty("ws.r.api").equalsIgnoreCase("false")) {
 					_webPublishingEnabled = true;
 				}
 
@@ -606,13 +596,13 @@ public class Gen {
 		Vector<String> warJars = new Vector<String>();
 		warJars.add(GEN_ROOT_LIB + FILE_SEPARATOR + MAPPING_JAR_NAME);
 
-		InputStream isCore = Gen.class.getResourceAsStream("/biocep-core.jar");
-		if (isCore != null) {
+		InputStream inputStreamCore = Gen.class.getResourceAsStream("/biocep-core-tomcat.jar");
+		if (inputStreamCore != null) {
 			try {
 				RandomAccessFile raf = new RandomAccessFile(GEN_WEBINF + FILE_SEPARATOR + "lib" + "/biocep-core.jar", "rw");
 				raf.setLength(0);
 				int b;
-				while ((b = isCore.read()) != -1) {
+				while ((b = inputStreamCore.read()) != -1) {
 					raf.write(b);
 				}
 				raf.close();
@@ -623,7 +613,7 @@ public class Gen {
 
 			warJars.add("RJB.jar");
 
-			warJars.add(System.getProperty("jri.jar"));
+			warJars.add("lib/desktop/JRI.jar");
 
 			FilenameFilter jarsFilter = new FilenameFilter() {
 				public boolean accept(File arg0, String arg1) {

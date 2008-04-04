@@ -275,7 +275,7 @@ public class Globals {
 
 			if (_webPublishingEnabled) {
 
-				if (System.getProperty("ws.r.api") != null && System.getProperty("ws.r.api").equalsIgnoreCase("true")) {
+				if (System.getProperty("ws.r.api") == null || System.getProperty("ws.r.api").equals("") || !System.getProperty("ws.r.api").equalsIgnoreCase("false")) {
 					outputWriterWebservice
 							.println("\npublic String evaluate(String expression, int n) throws Exception { "
 									+ "remoting.RServices r = null;"

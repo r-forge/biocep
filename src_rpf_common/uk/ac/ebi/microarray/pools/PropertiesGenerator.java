@@ -15,10 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package util;
+package uk.ac.ebi.microarray.pools;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -27,6 +28,7 @@ import java.util.Properties;
 public class PropertiesGenerator {
 
 	public static void main(String[] args) throws Exception {
+		System.out.println("args:"+Arrays.toString(args));
 		String fileName = args[0];
 		String[][] key_value = new String[args.length - 1][2];
 		for (int i = 1; i < args.length; ++i) {
