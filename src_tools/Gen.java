@@ -1,3 +1,4 @@
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
@@ -36,6 +39,9 @@ import org.rosuda.JRI.Rengine;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+
+import com.sun.tools.ws.ant.WsGen;
+
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.PoolUtils.EqualNameFilter;
 import de.hunsicker.jalopy.plugin.ant.AntPlugin;
@@ -66,6 +72,7 @@ public class Gen {
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(Gen.class);
 
+	private static int BUFFER_SIZE=1024 * 16;
 	static {
 		_project.addBuildListener(new DefaultLogger() {
 			{
@@ -96,7 +103,7 @@ public class Gen {
 	}
 
 	public static void main(String[] args) throws Exception {
-
+		
 		File[] files = null;
 		if (System.getProperty("dir") != null && !System.getProperty("dir").equals("")) {
 			files = new File(System.getProperty("dir")).listFiles(new FilenameFilter() {
@@ -123,11 +130,11 @@ public class Gen {
 		}
 
 		GEN_ROOT = System.getProperty("outputdir");
-
+		
 		if (GEN_ROOT == null || GEN_ROOT.equals("")) {
 			GEN_ROOT = new File(files[0].getAbsolutePath()).getParent() + FILE_SEPARATOR + "distrib";
 		}
-
+		
 		System.out.println("GEN ROOT:" + GEN_ROOT);
 
 		MAPPING_JAR_NAME = System.getProperty("mappingjar") != null && !System.getProperty("mappingjar").equals("") ? System.getProperty("mappingjar")
@@ -186,10 +193,10 @@ public class Gen {
 				}
 				StringBuffer vbuffer = packageEmbedScriptHashMap.get(packageName);
 
-				/*
-				 * if (!packageName.equals("rGlobalEnvFunction")) {
-				 * vbuffer.append("library("+packageName.substring(0,packageName.lastIndexOf("Function"))+")\n"); }
-				 */
+				
+				 //if (!packageName.equals("rGlobalEnvFunction")) {
+				 //vbuffer.append("library("+packageName.substring(0,packageName.lastIndexOf("Function"))+")\n"); }
+				 
 
 				if (attrs.getNamedItem("inline") != null) {
 					vbuffer.append(attrs.getNamedItem("inline").getNodeValue() + "\n");
@@ -241,9 +248,9 @@ public class Gen {
 
 			}
 
-			if (System.getProperty("targetjdk") != null && !System.getProperty("targetjdk").equals("") && System.getProperty("targetjdk").compareTo("1.6") < 0) {
+			if (System.getProperty("targetjdk") != null && !System.getProperty("targetjdk").equals("") && System.getProperty("targetjdk").compareTo("1.5") < 0) {
 				if (_webPublishingEnabled || (System.getProperty("ws.r.api") != null && System.getProperty("ws.r.api").equalsIgnoreCase("true"))) {
-					log.info("be careful, web publishing disabled beacuse target JDK<1.6");
+					log.info("be careful, web publishing disabled beacuse target JDK<1.5");
 				}
 				_webPublishingEnabled = false;
 			} else {
@@ -252,8 +259,8 @@ public class Gen {
 					_webPublishingEnabled = true;
 				}
 
-				if (_webPublishingEnabled && System.getProperty("java.version").compareTo("1.6") < 0) {
-					log.info("be careful, web publishing disabled beacuse a JDK<1.6 is in use");
+				if (_webPublishingEnabled && System.getProperty("java.version").compareTo("1.5") < 0) {
+					log.info("be careful, web publishing disabled beacuse a JDK<1.5 is in use");
 					_webPublishingEnabled = false;
 				}
 			}
@@ -366,6 +373,12 @@ public class Gen {
 			rmicTask.execute();
 		}
 
+		
+		
+		
+		DirectJNI._rPackageInterfacesHash=new HashMap<String, Vector<Class<?>>>();
+		DirectJNI._rPackageInterfacesHash.put("org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction",new Vector<Class<?>>());
+
 		if (_webPublishingEnabled) {
 
 			jar(GEN_ROOT_SRC, GEN_ROOT_LIB + FILE_SEPARATOR + "__temp.jar", null);
@@ -375,9 +388,30 @@ public class Gen {
 			for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
 				if (cl.loadClass(className + "Web").getDeclaredMethods().length == 0)
 					continue;
-				log.info("### " + className);
-				Utils.exec(new String[] { "wsgen", "-wsdl", "-d", GEN_ROOT_LIB + FILE_SEPARATOR + "src", "-cp",
-						GEN_ROOT_LIB + FILE_SEPARATOR + "src" + System.getProperty("path.separator") + "RJB.jar", className + "Web" }, null, null);
+				log.info("######## " + className);
+								
+				WsGen wsgenTask = new WsGen();
+				wsgenTask.setProject(_project);
+				wsgenTask.setTaskName("wsgen");
+				
+				FileSet rjb_fileSet = new FileSet();
+				rjb_fileSet.setProject(_project);
+				rjb_fileSet.setDir(new File("."));
+				rjb_fileSet.setIncludes("RJB.jar");
+				
+				DirSet src_dirSet = new DirSet();
+				src_dirSet.setDir(new File(GEN_ROOT_LIB + FILE_SEPARATOR + "src/"));								
+				Path classPath = new Path(_project);
+				classPath.addFileset(rjb_fileSet);
+				classPath.addDirset(src_dirSet);				
+				wsgenTask.setClasspath(classPath);					            
+				wsgenTask.setKeep(true);
+				wsgenTask.setDestdir(new File(GEN_ROOT_LIB + FILE_SEPARATOR + "src/"));
+				wsgenTask.setResourcedestdir(new File(GEN_ROOT_LIB + FILE_SEPARATOR + "src/"));
+				wsgenTask.setSei(className + "Web");
+
+				wsgenTask.init();
+				wsgenTask.execute();
 			}
 
 			new File(GEN_ROOT_LIB + FILE_SEPARATOR + "__temp.jar").delete();
@@ -503,9 +537,10 @@ public class Gen {
 		compileTask.setSrcdir(new Path(_project, src_arg));
 
 		compileTask.setDestdir(new File(src_arg));
-		compileTask.setSource(_webPublishingEnabled ? "1.6" : "1.5");
-		compileTask.setTarget(_webPublishingEnabled ? "1.6" : "1.5");
-
+		
+		compileTask.setSource("1.5");
+		compileTask.setTarget("1.5");
+		
 		FileSet cp_fileSet = new FileSet();
 		cp_fileSet.setDir(new File("lib"));
 		cp_fileSet.setIncludes("**/*.jar");
@@ -598,14 +633,16 @@ public class Gen {
 
 		InputStream inputStreamCore = Gen.class.getResourceAsStream("/biocep-core-tomcat.jar");
 		if (inputStreamCore != null) {
-			try {
-				RandomAccessFile raf = new RandomAccessFile(GEN_WEBINF + FILE_SEPARATOR + "lib" + "/biocep-core.jar", "rw");
-				raf.setLength(0);
-				int b;
-				while ((b = inputStreamCore.read()) != -1) {
-					raf.write(b);
+			try {				
+				byte data[] = new byte[BUFFER_SIZE];
+				FileOutputStream fos = new FileOutputStream(GEN_WEBINF + FILE_SEPARATOR + "lib" + "/biocep-core.jar");
+				int count=0;
+				while ((count = inputStreamCore.read(data, 0, BUFFER_SIZE)) != -1) {
+					fos.write(data, 0, count);
 				}
-				raf.close();
+				fos.flush();
+				fos.close();
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -654,9 +691,9 @@ public class Gen {
 			copyTask.execute();
 		}
 
-		unzip(Gen.class.getResourceAsStream("/jaxws.zip"), GEN_WEBINF + FILE_SEPARATOR + "lib", new EqualNameFilter("jaxb-api.jar", "jaxb-impl.jar",
+		unzip(Gen.class.getResourceAsStream("/jaxws.zip"), GEN_WEBINF + FILE_SEPARATOR + "lib", new EqualNameFilter("activation.jar","jaxb-api.jar", "jaxb-impl.jar",
 				"jaxb-xjc.jar", "jaxws-api.jar", "jaxws-libs.jar", "jaxws-rt.jar", "jaxws-tools.jar", "jsr173_api.jar", "jsr181-api.jar", "jsr250-api.jar",
-				"saaj-api.jar", "saaj-impl.jar", "sjsxp.jar", "FastInfoset.jar", "http.jar", "mysql-connector-java-5.1.0-bin.jar", "ojdbc-14.jar"), 1024 * 16,
+				"saaj-api.jar", "saaj-impl.jar", "sjsxp.jar", "FastInfoset.jar", "http.jar", "mysql-connector-java-5.1.0-bin.jar", "ojdbc-14.jar"), BUFFER_SIZE,
 				false, "Unzipping psTools..", 17);
 
 		PrintWriter pw_web_xml = new PrintWriter(GEN_WEBINF + FILE_SEPARATOR + "web.xml");

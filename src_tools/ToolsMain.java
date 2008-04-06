@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JOptionPane;
+
+import server.CoreMain;
 import server.ServerManager;
 import uk.ac.ebi.microarray.pools.MainPsToolsDownload;
 
@@ -332,17 +334,6 @@ public class ToolsMain {
 		}
 		
 		
-/*		
-		<param name="dir" value="${demo.scriptdir}"/>
-		<param name="outputdir" value="${demo.generatedir}"/>
-		<param name="keepintermediate" value="true"/>
-		<param name="formatsource" value="true"/>
-		<param name="mappingjar" value="${demo.mapping.jar.name}.jar" />
-		<param name="warname" value="${demo.webservices.war.name}.war" />
-		<param name="propsembed" value="${demo.generatedir}/globals.properties" />
-		<param name="ws.r.api" value="true"/>
-		*/
-		
 		URL[] codeUrls=null;
 		Vector<URL> v=new Vector<URL>();
 		String classPath = System.getProperty("java.class.path");
@@ -351,6 +342,19 @@ public class ToolsMain {
 	    while (st.hasMoreTokens()) {
 	    	v.add(new File((String)st.nextElement()).toURL());
 	    }
+	    
+	    
+		String jar=ToolsMain.class.getResource("/ToolsMain.class").toString();
+		if (jar.startsWith("jar:")) {
+			String jarfile=jar.substring("jar:file:".length(), jar.length()-"/ToolsMain.class".length()-1);
+			jarfile.replace('\\', '/');
+			File toolsDotJarFile=new File(jarfile.substring(0,jarfile.lastIndexOf("/"))+"/tools.jar");
+			System.out.println("tools jar file :"+toolsDotJarFile);
+			if (toolsDotJarFile.exists()) {
+				try {v.add(toolsDotJarFile.toURL());} catch (Exception e) {e.printStackTrace();}
+			}
+		}
+		
 		codeUrls=(URL[])v.toArray(new URL[0]);
 
 		System.out.println("jarfile:"+Arrays.toString(codeUrls));

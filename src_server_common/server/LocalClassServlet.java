@@ -1,5 +1,6 @@
 package server;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -13,7 +14,8 @@ import javax.servlet.http.HttpServletResponse;
  * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class LocalClassServlet extends HttpServlet {
-
+	
+	public static int BUFFER_SIZE=1024*16;
 	public void init() throws ServletException {
 		super.init();
 	}
@@ -63,12 +65,17 @@ public class LocalClassServlet extends HttpServlet {
 				resp.setContentType("application/java");
 			else
 				resp.setContentType("text/plain");
-			int b;
-			while ((b = is.read()) != -1) {
-				resp.getOutputStream().write(b);
+						
+			
+			byte data[] = new byte[BUFFER_SIZE];
+			int count=0;
+			while ((count = is.read(data, 0, BUFFER_SIZE)) != -1) {
+				resp.getOutputStream().write(data, 0, count);
+				resp.getOutputStream().flush();
 			}
-			resp.getOutputStream().flush();
+			
 			resp.getOutputStream().close();
+			
 		}
 	}
 

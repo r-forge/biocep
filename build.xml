@@ -52,7 +52,7 @@
 		classname="net.sf.antcontrib.logic.IfTask"/>
 	<taskdef name="for" classpath="lib/beangenlibs/ant-contrib-1.0b3.jar"
 			classname="net.sf.antcontrib.logic.ForTask"/>
-	
+
 	<target name="setWinAwareProps">
 		<if>
 			<os family="windows"/>
@@ -71,7 +71,7 @@
 		
 		<if><not><isset property="file"/></not>	<then><property name="file" value=""/>	</then></if>
 		<if><not><isset property="dir"/></not><then><property name="dir" value=""/></then></if>
-		<if><not><isset property="outputdir"/></not><then><property name="outputdir" value="distrib"/></then></if>
+		<if><not><isset property="outputdir"/></not><then><property name="outputdir" value=""/></then></if>
 		<if><not><isset property="mappingjar"/></not><then><property name="mappingjar" value=""/></then></if>
 		<if><not><isset property="warname"/></not><then><property name="warname" value=""/></then></if>
 		<if><not><isset property="propsembed"/></not><then><property name="propsembed" value=""/></then></if>
@@ -93,12 +93,14 @@
 				<pathelement path="lib/beangenlibs/jalopy-ant.jar"/>
 				<pathelement path="lib/beangenlibs/jalopy.jar"/>
 				<pathelement path="lib/beangenlibs/jaxws-libs.jar"/>
-				<pathelement path="lib/beangenlibs/jdom.jar"/>				
+				<pathelement path="lib/beangenlibs/jdom.jar"/>		
+				
+				<pathelement path="lib/beangenlibs/jaxws-tools.jar"/>
+				
 				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
 				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
 				<pathelement path="${env.ANT_HOME}/lib/ant-launcher.jar"/>
-				
-				
+								
 				
 				<pathelement path="${JRI_JAR}"/>
 				<pathelement path="${LOGGING_JAR}"/>
@@ -195,7 +197,29 @@
 				<pathelement path="lib/beangenlibs/jalopy-ant.jar"/>
 				<pathelement path="lib/beangenlibs/jalopy.jar"/>
 				<pathelement path="lib/beangenlibs/jaxws-libs.jar"/>
-				<pathelement path="lib/beangenlibs/jdom.jar"/>				
+				<pathelement path="lib/beangenlibs/jdom.jar"/>			
+				
+				<pathelement path="lib/jaxws/jaxws-tools.jar"/>
+				
+			<!--
+				<pathelement path="lib/jaxws/FastInfoset.jar"/>
+				<pathelement path="lib/jaxws/http.jar"/>
+				<pathelement path="lib/jaxws/jaxb-api.jar"/>
+				<pathelement path="lib/jaxws/jaxb-impl.jar"/>
+				<pathelement path="lib/jaxws/jaxb-xjc.jar"/>
+				<pathelement path="lib/jaxws/jaxws-api.jar"/>
+				<pathelement path="lib/jaxws/jaxws-rt.jar"/>				
+				<pathelement path="lib/jaxws/jsr173_api.jar"/>
+				<pathelement path="lib/jaxws/jsr181-api.jar"/>
+				<pathelement path="lib/jaxws/jsr250-api.jar"/>
+				<pathelement path="lib/jaxws/saaj-api.jar"/>
+				<pathelement path="lib/jaxws/saaj-impl.jar"/>
+				<pathelement path="lib/jaxws/sjsxp.jar"/>
+				-->
+
+				
+				
+				
 				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
 				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
 				<pathelement path="${env.ANT_HOME}/lib/ant-launcher.jar"/>
@@ -1121,7 +1145,7 @@
 			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
 		
 		
-			<jar destfile="biocep-core-tomcat.jar" manifest="MANIFEST.MF">
+			<jar destfile="biocep-core-tomcat.jar" >
 				<fileset dir="binsrv"/>
 			</jar>
 		
@@ -1162,7 +1186,9 @@
 				<pathelement path="lib/beangenlibs/jalopy-ant.jar"/>
 				<pathelement path="lib/beangenlibs/jalopy.jar"/>
 				<pathelement path="lib/beangenlibs/jaxws-libs.jar"/>
-				<pathelement path="lib/beangenlibs/jdom.jar"/>				
+				<pathelement path="lib/beangenlibs/jdom.jar"/>
+				
+				<pathelement path="lib/jaxws/jaxws-tools.jar"/>
 			</classpath>
 				
 	 
@@ -1191,7 +1217,9 @@
 		
 		<unjar src="${env.ANT_HOME}/lib/ant-launcher.jar"  dest="bintools" overwrite="true"/>
 		<unjar src="${env.ANT_HOME}/lib/ant.jar"  dest="bintools" overwrite="true"/>
+		
 		<unjar src="${env.JAVA_HOME}/lib/tools.jar"  dest="bintools" overwrite="true"/>
+			
 		<unjar src="lib/beangenlibs/ant-contrib-1.0b3.jar"  dest="bintools" overwrite="true"/>
 		<unjar src="lib/beangenlibs/geronimo-jms_1.1_spec-1.0.jar"  dest="bintools" overwrite="true"/>
 		<unjar src="lib/beangenlibs/jakarta-oro-2.0.8.jar"  dest="bintools" overwrite="true"/>
@@ -1200,6 +1228,26 @@
 		<unjar src="lib/beangenlibs/jalopy.jar"  dest="bintools" overwrite="true"/>
 		<unjar src="lib/beangenlibs/jaxws-libs.jar"  dest="bintools" overwrite="true"/>
 		<unjar src="lib/beangenlibs/jdom.jar"  dest="bintools" overwrite="true"/>
+		
+		
+		
+		<unjar src="lib/jaxws/jaxws-tools.jar"  dest="bintools" overwrite="true"/>
+				
+		<unjar src="lib/jaxws/FastInfoset.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/http.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/jaxb-api.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/jaxb-impl.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/jaxb-xjc.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/jaxws-api.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/jaxws-rt.jar" dest="bintools" overwrite="true"/>				
+		<unjar src="lib/jaxws/jsr173_api.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/jsr181-api.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/jsr250-api.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/saaj-api.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/saaj-impl.jar" dest="bintools" overwrite="true"/>
+		<unjar src="lib/jaxws/sjsxp.jar" dest="bintools" overwrite="true"/>
+		
+
 		<copy file="biocep-core-tomcat.jar" todir="bintools"/>
 		
 			<manifest file="MANIFEST.MF">
