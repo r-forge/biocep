@@ -329,7 +329,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		if (true) {
 
-			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/helpme/*");
+			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
 			LocalRmiRegistry.getLocalRmiRegistryPort();
 		}
 
@@ -337,7 +337,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			if (getWebAppUrl() != null) {
 				_commandServletUrl = getWebAppUrl() + "cmd";
 			} else {
-				_commandServletUrl = "http://127.0.0.1:8080/cmd";
+				_commandServletUrl = "http://127.0.0.1:8080/rvirtual/cmd";
 			}
 		} else {
 			_commandServletUrl = getParameter("command_servlet_url");
@@ -466,7 +466,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							} else {
 
-								_helpServletUrl = "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/" + "helpme";
+								_helpServletUrl = "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/" + "rvirtual/helpme";
 								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
 
 								_save = ident.isPersistentWorkspace();
@@ -3213,9 +3213,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 											_virtualizationServer = new Server(port);
 											Context root = new Context(_virtualizationServer, "/", Context.SESSIONS);
-											root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(GDApplet.this)), "/graphics/*");
-											root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this)), "/cmd/*");
-											root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/helpme/*");
+											root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(GDApplet.this)), "/rvirtual/graphics/*");
+											root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this)), "/rvirtual/cmd/*");
+											root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
 											System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
 											_virtualizationServer.start();
 
