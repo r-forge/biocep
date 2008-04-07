@@ -281,6 +281,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	private Icon _currentDeviceIcon = null;
 	private Icon _inactiveDeviceIcon = null;
+	
+	private boolean _isGroovyEnabled=false;
 
 	public GDApplet() throws HeadlessException {
 		super();
@@ -694,11 +696,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 							}
 
+							_isGroovyEnabled=_rForConsole.isGroovyEnabled();
+							
 							if (_demo) {
 								playDemo();
 								LoginDialog.playDemo_bool = false;
 							}
 
+							
+							
 							if (_mode == HTTP_MODE) {
 								return "Logged on as " + _login + "\n";
 							} else {
@@ -980,6 +986,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("pythonconsole"));
 					toolsMenu.add(_actions.get("clientpythonconsole"));
+					toolsMenu.addSeparator();
+					toolsMenu.add(_actions.get("groovyconsole"));
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("logview"));
 					toolsMenu.addSeparator();
@@ -3001,6 +3009,79 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+		_actions.put("groovyconsole", new AbstractAction("Groovy Console") {
+			public void actionPerformed(final ActionEvent e) {
+				if (getOpenedServerPythonConsoleView() == null) {
+					int id = getDynamicViewId();
+
+					final ServerGroovyConsoleView lv = new ServerGroovyConsoleView("Groovy Console", null, id);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+					lv.addListener(new DockingWindowListener() {
+						public void viewFocusChanged(View arg0, View arg1) {
+						}
+
+						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowClosed(DockingWindow arg0) {
+						}
+
+						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+							try {
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+
+						public void windowDocked(DockingWindow arg0) {
+						}
+
+						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowHidden(DockingWindow arg0) {
+						}
+
+						public void windowMaximized(DockingWindow arg0) {
+						}
+
+						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowMinimized(DockingWindow arg0) {
+						}
+
+						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowRestored(DockingWindow arg0) {
+						}
+
+						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowShown(DockingWindow arg0) {
+						}
+
+						public void windowUndocked(DockingWindow arg0) {
+						}
+
+						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+					});
+
+				}
+			}
+
+			public boolean isEnabled() {
+				return getR() != null && _isGroovyEnabled;
+			}
+		});
+
+		
 		_actions.put("inspect", new AbstractAction("Inspect") {
 			public void actionPerformed(final ActionEvent e) {
 
@@ -3571,6 +3652,36 @@ public class GDApplet extends GDAppletBase implements RGui {
 					try {
 						getRLock().lock();
 						final String log = _rForConsole.pythonExec(expression);
+						return log;
+					} catch (Exception e) {
+						return PoolUtils.getStackTraceAsString(e);
+					} finally {
+						getRLock().unlock();
+					}
+				}
+			});
+			((JPanel) getComponent()).add(_consolePanel);
+		}
+
+		public ConsolePanel getConsolePanel() {
+			return _consolePanel;
+		}
+	}
+	
+	class ServerGroovyConsoleView extends DynamicView {
+		ConsolePanel _consolePanel;
+
+		ServerGroovyConsoleView(String title, Icon icon, int id) {
+			super(title, icon, new JPanel(), id);
+			((JPanel) getComponent()).setLayout(new BorderLayout());
+			_consolePanel = new ConsolePanel(new SubmitInterface() {
+				public String submit(final String expression) {
+					if (getRLock().isLocked()) {
+						return "R is busy, please retry\n";
+					}
+					try {
+						getRLock().lock();
+						final String log = _rForConsole.groovyExec(expression);
 						return log;
 					} catch (Exception e) {
 						return PoolUtils.getStackTraceAsString(e);

@@ -57,6 +57,7 @@ public interface RServices extends ManagedServant {
 	
 	public Object getAndConvert(String expression) throws RemoteException;
 
+	
 	public Object convert(RObject obj) throws RemoteException;
 	
 	public String print(String expression) throws RemoteException;
@@ -131,6 +132,8 @@ public interface RServices extends ManagedServant {
 
 	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException;
 
+	
+	
 	public RObject pythonEval(String pythonCommand) throws RemoteException;
 
 	public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException;	
@@ -142,5 +145,23 @@ public interface RServices extends ManagedServant {
 	public void pythonSet(String name, Object Value) throws RemoteException;
 	
 	public String getPythonStatus() throws RemoteException;
+	
+	
+	
+	public boolean isGroovyEnabled() throws RemoteException;
+	
+	public String groovyExec(String groovyCommand) throws RemoteException;
+	
+	public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException;
+	
+	public String groovyExceFromResource(String resource) throws RemoteException;
+
+	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException;
+	
+	public Object groovyEval(String expression) throws RemoteException;	
+	
+	public Object groovyGet(String name) throws RemoteException;
+
+	public void groovySet(String name, Object Value) throws RemoteException;
 
 }

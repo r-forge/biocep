@@ -2898,6 +2898,50 @@ public class DirectJNI {
 			
 		}
 
+		public Object groovyEval(String expression) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String groovyExceFromResource(String resource) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String groovyExec(String groovyCommand) throws RemoteException {
+			try {
+			return groovy.server.GroovyInterpreterSingleton.getInstance().exec(groovyCommand);
+			} catch (Exception e) {
+				throw new RemoteException("",e);
+			}
+		}
+
+		public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public Object groovyGet(String name) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public void groovySet(String name, Object Value) throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public boolean isGroovyEnabled() throws RemoteException {
+			return groovy.server.GroovyInterpreterSingleton.getInstance()!=null;
+		}
+		
+		
+
 	};
 
 	public static Vector<RAction> _rActions = new Vector<RAction>();

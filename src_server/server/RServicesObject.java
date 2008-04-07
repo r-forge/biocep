@@ -330,5 +330,38 @@ public class RServicesObject implements RServices {
 	public Object convert(RObject obj) throws RemoteException {
 		return null;
 	}
+
+	public Object groovyEval(String expression) throws RemoteException {
+		return null;
+	}
+
+	public String groovyExceFromResource(String resource) throws RemoteException {
+		return null;
+	}
+
+	public String groovyExec(String groovyCommand) throws RemoteException {
+		return null;
+	}
+
+	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException {
+		return null;
+	}
+
+	public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
+		return null;
+	}
+
+	public Object groovyGet(String name) throws RemoteException {
+		return null;
+	}
+
+	public void groovySet(String name, Object Value) throws RemoteException {		
+	}
+
+	public boolean isGroovyEnabled() throws RemoteException {
+		return false;
+	}
+	
+	
 	
 }
