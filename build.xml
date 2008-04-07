@@ -95,7 +95,24 @@
 				<pathelement path="lib/beangenlibs/jaxws-libs.jar"/>
 				<pathelement path="lib/beangenlibs/jdom.jar"/>		
 				
-				<pathelement path="lib/beangenlibs/jaxws-tools.jar"/>
+				<pathelement path="lib/jaxws/jaxws-tools.jar"/>
+				
+				<!--
+				<pathelement path="lib/jaxws/FastInfoset.jar"/>
+				<pathelement path="lib/jaxws/http.jar"/>
+				<pathelement path="lib/jaxws/jaxb-api.jar"/>
+				<pathelement path="lib/jaxws/jaxb-impl.jar"/>
+				<pathelement path="lib/jaxws/jaxb-xjc.jar"/>
+				<pathelement path="lib/jaxws/jaxws-api.jar"/>
+				<pathelement path="lib/jaxws/jaxws-rt.jar"/>				
+				<pathelement path="lib/jaxws/jsr173_api.jar"/>
+				<pathelement path="lib/jaxws/jsr181-api.jar"/>
+				<pathelement path="lib/jaxws/jsr250-api.jar"/>
+				<pathelement path="lib/jaxws/saaj-api.jar"/>
+				<pathelement path="lib/jaxws/saaj-impl.jar"/>
+				<pathelement path="lib/jaxws/sjsxp.jar"/>
+				
+				-->
 				
 				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
 				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
@@ -123,7 +140,6 @@
 				<pathelement path="lib/svg/batik-awt-util.jar"/>
 				<pathelement path="lib/svg/batik-util.jar"/>
 				
-				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 
 			</classpath>
@@ -246,7 +262,6 @@
 				<pathelement path="lib/svg/batik-awt-util.jar"/>
 				<pathelement path="lib/svg/batik-util.jar"/>
 				
-				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 
 
@@ -341,7 +356,6 @@
 				<pathelement path="lib/svg/batik-awt-util.jar"/>
 				<pathelement path="lib/svg/batik-util.jar"/>
 				
-				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				
 				
@@ -557,7 +571,6 @@
 				<pathelement path="${SSH_JAR}"/>		
 				<pathelement path="${FTP_JAR}"/>
 				
-				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
 			</classpath>
@@ -603,7 +616,6 @@
 				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>
 				
-				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
 			</classpath>
@@ -647,7 +659,6 @@
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				
-				<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
@@ -723,6 +734,9 @@
 				<pathelement path="lib/desktop/OpenXLS.jar"/>
 				<pathelement path="lib/desktop/pf-joi-full.jar"/>
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
+				
+				<pathelement path="lib/desktop/groovy-all-1.5.4.jar"/>
+				
 				
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
@@ -1085,7 +1099,6 @@
 					<pathelement path="lib/svg/batik-awt-util.jar"/>
 					<pathelement path="lib/svg/batik-util.jar"/>
 					
-					<pathelement path="lib/pool/commons-collections-3.2.jar"/>
 					<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				</classpath>
 			</javac>
@@ -1140,7 +1153,6 @@
 			<unjar src="lib/svg/batik-dom.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-awt-util.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-util.jar"  dest="binsrv" overwrite="true"/>
-			<unjar src="lib/pool/commons-collections-3.2.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/pool/commons-pool-1.3.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
 		

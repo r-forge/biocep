@@ -217,7 +217,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 			});
 			
-			R._instance=(RServices)java.rmi.server.RemoteObject.toStub(this);
+			RServices rstub=(RServices)java.rmi.server.RemoteObject.toStub(this);
+			python.server.R._instance=rstub;
+			groovy.server.R._instance=rstub;
 			_isReady = true;
 
 		} catch (Exception ex) {
@@ -708,4 +710,40 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public void pythonSet(String name, Object Value) throws RemoteException {
 		DirectJNI.getInstance().getRServices().pythonSet(name, Value);
 	}
+
+	public String groovyExceFromResource(String resource) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().groovyExceFromResource(resource);
+	}
+
+	public String groovyExec(String groovyCommand) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().groovyExec(groovyCommand);
+	}
+
+	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().groovyExecFromBuffer(buffer);
+	}
+
+	public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().groovyExecFromWorkingDirectoryFile(fileName);
+	}
+
+	public boolean isGroovyEnabled() throws RemoteException {
+		return DirectJNI.getInstance().getRServices().isGroovyEnabled();
+	}
+
+	public Object groovyEval(String expression) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().groovyEval(expression);
+	}
+
+	public Object groovyGet(String name) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().groovyGet(name);
+	}
+
+	public void groovySet(String name, Object Value) throws RemoteException {
+		DirectJNI.getInstance().getRServices().groovySet(name, Value);		
+	}
+	
+	
+	
+	
 }
