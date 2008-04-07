@@ -1,4 +1,3 @@
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,8 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.zip.ZipEntry;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
@@ -39,9 +36,7 @@ import org.rosuda.JRI.Rengine;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-
 import com.sun.tools.ws.ant.WsGen;
-
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.PoolUtils.EqualNameFilter;
 import de.hunsicker.jalopy.plugin.ant.AntPlugin;
@@ -135,6 +130,9 @@ public class Gen {
 			GEN_ROOT = new File(files[0].getAbsolutePath()).getParent() + FILE_SEPARATOR + "distrib";
 		}
 		
+		GEN_ROOT=new File(GEN_ROOT).getAbsolutePath().replace('\\', '/');
+		if (GEN_ROOT.endsWith("/")) GEN_ROOT=GEN_ROOT.substring(0,GEN_ROOT.length()-1);
+		
 		System.out.println("GEN ROOT:" + GEN_ROOT);
 
 		MAPPING_JAR_NAME = System.getProperty("mappingjar") != null && !System.getProperty("mappingjar").equals("") ? System.getProperty("mappingjar")
@@ -142,7 +140,7 @@ public class Gen {
 		if (!MAPPING_JAR_NAME.endsWith(".jar"))
 			MAPPING_JAR_NAME += ".jar";
 
-		GEN_ROOT_SRC = GEN_ROOT + FILE_SEPARATOR + "src";
+		GEN_ROOT_SRC = GEN_ROOT + FILE_SEPARATOR +  "src";
 		GEN_ROOT_LIB = GEN_ROOT + FILE_SEPARATOR + "";
 
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
@@ -540,17 +538,27 @@ public class Gen {
 		
 		compileTask.setSource("1.5");
 		compileTask.setTarget("1.5");
+
 		
-		FileSet cp_fileSet = new FileSet();
-		cp_fileSet.setDir(new File("lib"));
-		cp_fileSet.setIncludes("**/*.jar");
-
-		DirSet cp_dirSet = new DirSet();
-		cp_dirSet.setDir(new File("bin"));
-
 		Path classPath = new Path(_project);
-		classPath.addFileset(cp_fileSet);
-		classPath.addDirset(cp_dirSet);
+	
+		
+		String jar=Gen.class.getResource("/Gen.class").toString();
+		if (jar.contains("biocep-tools.jar")) {
+			File jarfile=new File(jar.substring("jar:file:".length(), jar.length()-"/Gen.class".length()-1));			
+			FileSet cp_fileSet = new FileSet();
+			cp_fileSet.setDir(jarfile.getParentFile());
+			cp_fileSet.setIncludes("biocep-tools.jar");
+			classPath.addFileset(cp_fileSet);
+		} else 	{
+			FileSet cp_fileSet = new FileSet();
+			cp_fileSet.setDir(new File("lib"));
+			cp_fileSet.setIncludes("**/*.jar");
+			DirSet cp_dirSet = new DirSet();
+			cp_dirSet.setDir(new File("bin"));
+			classPath.addFileset(cp_fileSet);
+			classPath.addDirset(cp_dirSet);
+		}
 
 		compileTask.setClasspath(classPath);
 
@@ -707,8 +715,14 @@ public class Gen {
 			pw_web_xml
 					.println("<servlet><servlet-name>"
 							+ shortClassName
-							+ "_servlet</servlet-name><servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
+							+ "_servlet</servlet-name><servlet-class>http.InterceptorServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
 		}
+		
+		pw_web_xml
+		.println("<servlet><servlet-name>"
+				+ "WSServlet"
+				+ "</servlet-name><servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
+
 
 		for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
 			String shortClassName = className.substring(className.lastIndexOf('.') + 1);

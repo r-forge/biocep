@@ -41,7 +41,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.rosuda.JRI.Rengine;
-import python.server.R;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -615,9 +614,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				_virtualizationServer = new Server(port);
 				_virtualizationServer.setStopAtShutdown(true);
 				Context root = new Context(_virtualizationServer, "/", Context.SESSIONS);
-				root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(rkit)), "/graphics/*");
-				root.addServlet(new ServletHolder(new http.CommandServlet(rkit)), "/cmd/*");
-				root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(rkit)), "/helpme/*");
+				root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(rkit)), "/rvirtual/graphics/*");
+				root.addServlet(new ServletHolder(new http.CommandServlet(rkit)), "/rvirtual/cmd/*");
+				root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
 				System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
 				_virtualizationServer.start();
 
