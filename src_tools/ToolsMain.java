@@ -313,7 +313,7 @@ public class ToolsMain {
 			   null,
 			   null,
 			   null,
-			   "http://127.0.0.1:8080/rvirtual/cmd"};
+			   null};
 	   
 	   
 	   Vector<String> genArgs=new Vector<String>();

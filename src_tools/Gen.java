@@ -723,14 +723,23 @@ public class Gen {
 				+ "WSServlet"
 				+ "</servlet-name><servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
 
+		pw_web_xml
+		.println("<servlet><servlet-name>"
+				+ "MappingClassServlet"
+				+ "</servlet-name><servlet-class>http.MappingClassServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
+
 
 		for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {
 			String shortClassName = className.substring(className.lastIndexOf('.') + 1);
 			pw_web_xml.println("<servlet-mapping><servlet-name>" + shortClassName + "_servlet</servlet-name><url-pattern>/" + shortClassName
 					+ "</url-pattern></servlet-mapping>");
 		}
+		
+		pw_web_xml.println("<servlet-mapping><servlet-name>" + "MappingClassServlet" +"</servlet-name><url-pattern>" + "/mapping/classes/*"
+				+ "</url-pattern></servlet-mapping>");
+		
+		
 		pw_web_xml.println("<session-config><session-timeout>30</session-timeout></session-config>");
-		pw_web_xml.println("<welcome-file-list><welcome-file>index.jsp</welcome-file></welcome-file-list>");
 		pw_web_xml.println("</web-app>");
 		pw_web_xml.flush();
 		pw_web_xml.close();
