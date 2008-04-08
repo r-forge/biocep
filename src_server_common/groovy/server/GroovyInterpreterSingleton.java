@@ -37,7 +37,7 @@ public class GroovyInterpreterSingleton {
 							}
 					};
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 			}
 			return _groovy;

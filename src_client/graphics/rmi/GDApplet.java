@@ -234,7 +234,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
-			_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			//_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		}
 
@@ -252,7 +252,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			popActions();
 			super.unlock();
 
-			_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			//_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		}
 
