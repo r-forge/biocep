@@ -111,8 +111,11 @@
 					    <arg value="pools.dbmode.killused=${demo.ws.kill.used.R}"/>	
 						
 						<arg value="node.manager.name=NODE_MANAGER"/>
-						<arg value="private.servant.node.name=N1"/>						 
+						<arg value="private.servant.node.name=N1"/>
+					 	
+					 	<!--
 						<arg value="http.frontend.url=http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/cmd"/>
+						-->
 						  
 						 
 					    <arg value="org.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
@@ -133,11 +136,6 @@
 						<param name="ws.r.api" value="true"/>						
 					</antcall>
 				
-					<copy todir="VirtualRWorkbench/rmapping/appletlibs">
-						<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
-					</copy>				  				
-
-					<jar basedir="VirtualRWorkbench/rmapping" destfile="VirtualRWorkbench/${demo.mapping.war.name}.war" />
 				
 			</target>
 			

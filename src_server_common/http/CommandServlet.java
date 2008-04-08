@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.rmi.ConnectException;
 import java.rmi.registry.Registry;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
@@ -180,7 +181,11 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								if (r==null) {
 									
 									String urlHead=request.getRequestURL().substring(0, request.getRequestURL().lastIndexOf(request.getRequestURI()));
-									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,new URL[]{new URL(urlHead+"/rmapping/appletlibs/mapping.jar")});
+									URL[] codeUrls=(URL[])options.get("urls");
+									
+									System.out.println("CODE URL->"+Arrays.toString(codeUrls));
+									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,
+											codeUrls);
 								}
 
 							} else {

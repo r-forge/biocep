@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -37,7 +36,7 @@ import org.bioconductor.packages.rservices.RList;
 import org.bioconductor.packages.rservices.RLogical;
 import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
-import org.bioconductor.packages.rservices.RObject;
+
 
 import util.Utils;
 
@@ -323,7 +322,6 @@ public class Globals {
 
 					outputWriterWebservice
 							.println("\npublic String logOn(String session, String login, String pwd, String[] options) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "java.util.HashMap<String,Object> map=new java.util.HashMap<String,Object>();"
 									+ "for (int i=0; i<options.length; ++i) {"
 									+ "	int equalIdx=options[i].indexOf('=');"
@@ -331,151 +329,128 @@ public class Globals {
 									+ "		map.put(options[i].substring(0,equalIdx),options[i].substring(equalIdx+1));"
 									+ "	}"
 									+ "}"
+									+ "map.put(\"urls\", new java.net.URL[]{http.InterceptorServlet.getRMappingUrl()});"
 									+ "try {return http.RHttpProxy.logOn(System.getProperty(\"http.frontend.url\"), session, login, pwd, map);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void logOff(String session) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {http.RHttpProxy.logOff(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void interrupt(String session) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {http.RHttpProxy.interrupt(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statefulEvaluate(String session, String expression) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"evaluate\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statefulEvaluateExpressions(String session, String expression, int n) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"evaluate\", new Class[]{String.class, int.class}, new Object[]{expression,n});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject statefulCall(String session, String methodName, Object... args) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"call\", new Class[]{String.class, Object[].class}, new Object[]{methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 					.println("\npublic Object statefulCallAndConvert(String session, String methodName, Object... args) throws Exception { "
-							+ "injectSystemProperties(true);"
 							+ "try {return http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"callAndConvert\", new Class[]{String.class, Object[].class}, new Object[]{methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 							+ "}");
 					
 					outputWriterWebservice
 							.println("\npublic void statefulCallAndAssign(String session, String varName, String methodName, Object... args) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"callAndAssign\", new Class[]{String.class, String.class, RObject[].class}, new Object[]{varName,methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void statefulPutAndAssign(String session, Object obj, String name) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"putAndAssign\", new Class[]{Object.class, String.class}, new Object[]{obj,name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject statefulGet(String session, String expression) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"get\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 					
 					outputWriterWebservice
 					.println("\npublic Object statefulGetAndConvert(String session, String expression) throws Exception { "
-							+ "injectSystemProperties(true);"
 							+ "try {return http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getAndConvert\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 							+ "}");
 
 
 					outputWriterWebservice
 							.println("\npublic String statefulConsoleSubmit(String session, String expression) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"consoleSubmit\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statefulPrint(String session, String expression) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"print\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statefulPrintExpressions(String session, String[] expressions) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"printExpressions\", new Class[]{String[].class}, new Object[]{expressions});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statefulSourceFromResource(String session, String resource) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"sourceFromResource\", new Class[]{String.class}, new Object[]{resource});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statefulSourceFromBuffer(String session, StringBuffer buffer) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"sourceFromBuffer\", new Class[]{StringBuffer.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statefulGetStatus(String session) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getStatus\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void statefulStop(String session) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try { http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"stop\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String[] statefulGetWorkingDirectoryFileNames(String session) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (String[])http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileNames\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic remoting.FileDescription[] statefulGetWorkingDirectoryFileDescriptions(String session) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (remoting.FileDescription[])http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescriptions\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic remoting.FileDescription statefulGetWorkingDirectoryFileDescription(String session,String fileName) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (remoting.FileDescription)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescription\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void statefulCreateWorkingDirectoryFile(String session,String fileName) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"createWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void statefulRemoveWorkingDirectoryFile(String session,String fileName) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"removeWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic byte[] statefulReadWorkingDirectoryFileBlock(String session, String fileName,long offset, int blocksize) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {return (byte[])http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"readWorkingDirectoryFileBlock\", new Class[]{String.class, long.class, int.class}, new Object[]{fileName,offset,blocksize} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void statefulAppendBlockToWorkingDirectoryFile(String session,String fileName, byte[] block) throws Exception { "
-									+ "injectSystemProperties(true);"
 									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"appendBlockToWorkingDirectoryFile\", new Class[]{String.class, byte[].class}, new Object[]{fileName,block} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
@@ -485,67 +460,56 @@ public class Globals {
 					
 					outputWriterWebservice
 					.println("\npublic String[] statefulGetSvg(String session, String expression, int width, int height) throws Exception{" +
-							"injectSystemProperties(true);" +
 							"try {return (String[])((java.util.Vector<String>)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getSvg\", new Class[]{String.class,int.class,int.class}, new Object[]{expression,width,height})).toArray(new String[0]);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 					
 					outputWriterWebservice
 					.println("\npublic String statefulPythonExec(String session, String pythonCommand) throws Exception{" +
-							"injectSystemProperties(true);" +
 							"try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExec\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 					
 					outputWriterWebservice
 					.println("\npublic String statefulPythonExecFromWorkingDirectoryFile(String session, String fileName) throws Exception{" +
-							"injectSystemProperties(true);" +
 							"try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExecFromWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 					
 					outputWriterWebservice
 					.println("\npublic String statefulPythonExceFromResource(String session, String resource) throws Exception {" +
-							"injectSystemProperties(true);" +
 							"try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExceFromResource\", new Class[]{String.class}, new Object[]{resource});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 
 					outputWriterWebservice
 					.println("\npublic String statefulPythonExecFromBuffer(String session, StringBuffer buffer) throws Exception {" +
-							"injectSystemProperties(true);" +
 							"try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExecFromBuffer\", new Class[]{StringBuffer.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 
 					outputWriterWebservice
 					.println("\npublic RObject statefulPythonEval(String session, String pythonCommand) throws Exception {" +
-							"injectSystemProperties(true);" +
 							"try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonEval\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 					
 					outputWriterWebservice
 					.println("\npublic Object statefulPythonEvalAndConvert(String session, String pythonCommand) throws Exception {" +
-							"injectSystemProperties(true);" +
 							"try {return (Object)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonEvalAndConvert\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 					
 					outputWriterWebservice
 					.println("\npublic RObject statefulPythonGet(String session, String name) throws Exception {" +
-							"injectSystemProperties(true);" +
 							"try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonGet\", new Class[]{String.class}, new Object[]{name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 					
 					outputWriterWebservice
 					.println("\npublic Object statefulPythonGetAndConvert(String session, String name) throws Exception {" +
-							"injectSystemProperties(true);" +
 							"try {return (Object)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonGetAndConvert\", new Class[]{String.class}, new Object[]{name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 					
 					outputWriterWebservice
 					.println("\npublic void statefulPythonSet(String session, String name, Object value) throws Exception {" +
-							"injectSystemProperties(true);" +
 							"try { http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonSet\", new Class[]{String.class,Object.class}, new Object[]{name,value});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 					
 					outputWriterWebservice
 					.println("\npublic String statefulGetPythonStatus(String session) throws Exception {" +
-							"injectSystemProperties(true);" +
 							"try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getPythonStatus\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
 							"}");
 
