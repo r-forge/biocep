@@ -1,6 +1,7 @@
 package groovy.server;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 
@@ -27,6 +28,23 @@ public class GroovyInterpreterSingleton {
 								System.setErr(new PrintStream(baos));
 								try {
 									GroovyShellClass.getMethod("evaluate", String.class).invoke(groovyShell, expression);
+								} catch (InvocationTargetException e){
+									return e.getCause().getMessage()+"\n";
+								} finally {
+									System.setOut(saveOut);
+									System.setErr(saveErr);			
+								}
+								return new String(baos.toByteArray(),"UTF-8");
+							}
+							
+							public String execFromFile(File f) throws Exception {
+								ByteArrayOutputStream baos=new ByteArrayOutputStream();
+								PrintStream saveOut=System.out;
+								PrintStream saveErr=System.err;
+								System.setOut(new PrintStream(baos));
+								System.setErr(new PrintStream(baos));
+								try {
+									GroovyShellClass.getMethod("evaluate", File.class).invoke(groovyShell, f);
 								} catch (InvocationTargetException e){
 									return e.getCause().getMessage()+"\n";
 								} finally {

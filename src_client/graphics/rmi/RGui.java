@@ -1,7 +1,10 @@
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
+
 import java.awt.Component;
+import java.io.File;
+
 import net.infonode.docking.View;
 import remoting.RKit;
 
@@ -20,4 +23,6 @@ public interface RGui extends RKit {
 	public GDDevice getCurrentDevice();
 
 	public JGDPanelPop getCurrentJGPanelPop();
+	
+	public void upload(File localFile, String fileName) throws Exception;
 }

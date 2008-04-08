@@ -89,7 +89,7 @@ public class GDAppletLauncher {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		SwingUtilities.invokeAndWait(new Runnable() {
+		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					createDesktopApplication();

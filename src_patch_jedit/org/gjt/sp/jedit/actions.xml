@@ -899,7 +899,20 @@
 		jEdit.runR(buffer.getPath());
 	</CODE>
 </ACTION>	
-	
+
+<ACTION NAME="run-p">
+	<CODE>
+		jEdit.runP(buffer.getPath());
+	</CODE>
+</ACTION>	
+
+<ACTION NAME="run-g">
+	<CODE>
+		jEdit.runG(buffer.getPath());
+	</CODE>
+</ACTION>	
+			
+		
 <ACTION NAME="upload-r">
 	<CODE>
 		jEdit.uploadR(buffer.getPath());
