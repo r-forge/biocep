@@ -57,7 +57,7 @@ startup=true
 #}}}
 
 #{{{ Tool bar
-view.toolbar=new-file open-file close-buffer save run-r upload-r - save-as - print page-setup - \
+view.toolbar=new-file open-file close-buffer save-as - save upload-r run-r - - run-p run-g - print page-setup - \
 	undo redo cut copy paste - find find-next - new-view unsplit \
 	split-horizontal split-vertical - buffer-options global-options 
 
@@ -65,7 +65,9 @@ new-file.icon=New.png
 open-file.icon=Open.png
 save-as.icon=SaveAs.png
 save.icon=Save.png
-run-r.icon=RunR.png
+run-r.icon=Run1.png
+run-p.icon=RunP.png
+run-g.icon=RunG.png
 upload-r.icon=UploadR.png
 close-buffer.icon=Cancel.png
 print.icon=Print.png
@@ -196,6 +198,8 @@ save.label=$Save
 save-as.label=S$ave As...
 upload-r.label=$Upload To R...
 run-r.label=Sou$rce To R...
+run-p.label=Source To $Jython...
+run-g.label=Source To $Groovy...
 save-a-copy-as.label=Save a Cop$y As...
 save-all.label=Save A$ll...
 print.label=$Print...

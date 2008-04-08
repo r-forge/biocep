@@ -50,6 +50,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Vector;
@@ -140,7 +141,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public JGDPanelPop getCurrentJGPanelPop() {
 				return null;
 			}
-
+			
+			public void upload(File localFile, String fileName) throws Exception {
+				
+			}
 		}), BorderLayout.CENTER);
 		f.setSize(new Dimension(800, 800));
 		f.pack();

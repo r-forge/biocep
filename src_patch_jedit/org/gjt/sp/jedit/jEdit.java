@@ -26,6 +26,10 @@ package org.gjt.sp.jedit;
 //{{{ Imports
 import bsh.UtilEvalError;
 import com.microstar.xml.*;
+
+import graphics.rmi.RGui;
+import http.FileLoad;
+
 import javax.swing.*;
 
 import java.awt.*;
@@ -78,7 +82,9 @@ public class jEdit {
 	 * This should never be invoked directly.
 	 * @param args The command line arguments
 	 */
-	public static void main(String[] args) {
+	private static RGui _rgui;
+	public static void main(String[] args, RGui rgui) {
+		_rgui=rgui;
 		//{{{ Check for Java 1.3 or later
 		String javaVersion = System.getProperty("java.version");
 		if (javaVersion.compareTo("1.3") < 0) {
@@ -428,9 +434,6 @@ public class jEdit {
 
 	} //}}}
 
-	static Method runRMethod = null;
-
-	static boolean busy = false;
 
 	public static void runR(final String path) {
 
@@ -438,34 +441,127 @@ public class jEdit {
 			JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to R");
 		} else {
 
-			if (busy) {
-				JOptionPane.showMessageDialog(getActiveView(), "R is busy");
+			if (_rgui.getRLock().isLocked()) {
+				JOptionPane.showMessageDialog(null, "R is busy");				
 				return;
 			}
-
-			try {
-				if (runRMethod == null)
-					runRMethod = jEdit.class.getClassLoader().loadClass(System.getProperty("jedit.save.to.r.class"))
-							.getMethod("execute", String.class, boolean.class);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			new Thread(new Runnable() {
+			
+			new Thread(new Runnable(){
 				public void run() {
-					busy = true;
 					try {
-						runRMethod.invoke(null, path, true);
+						_rgui.getRLock().lock();
+
+						
+						StringBuffer sb=new StringBuffer();
+						BufferedReader br=new BufferedReader(new FileReader(path));
+						String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
+						_rgui.getR().sourceFromBuffer(sb);						
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								_rgui.getConsoleLogger().printAsOutput("script sourced to R\n");
+							}
+						});
+
 					} catch (Exception e) {
 						e.printStackTrace();
 					} finally {
-						busy = false;
+						_rgui.getRLock().unlock();
 					}
-
 				}
 			}).start();
 
+
 		}
+	}
+
+	
+	
+	public static void runP(final String path) {
+
+		
+			if (getActiveView().getBuffer().isDirty()) {
+				JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to R");
+			} else {
+
+				if (_rgui.getRLock().isLocked()) {
+					JOptionPane.showMessageDialog(null, "R is busy");				
+					return;
+				}
+				
+				new Thread(new Runnable(){
+					public void run() {
+						try {
+							_rgui.getRLock().lock();
+
+							
+							StringBuffer sb=new StringBuffer();
+							BufferedReader br=new BufferedReader(new FileReader(path));
+							String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
+							final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);						
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									_rgui.getConsoleLogger().printAsInput("script sourced to Python On Server Side\n");
+									_rgui.getConsoleLogger().printAsOutput("python:\n"+pythonLog+"\n");
+								}
+							});
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							_rgui.getRLock().unlock();
+						}
+					}
+				}).start();
+
+
+			}
+
+			
+
+	}
+
+
+	public static void runG(final String path) {
+
+
+
+			if (getActiveView().getBuffer().isDirty()) {
+				JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to Groovy");
+			} else {
+
+				if (_rgui.getRLock().isLocked()) {
+					JOptionPane.showMessageDialog(null, "R is busy");				
+					return;
+				}
+				
+				new Thread(new Runnable(){
+					public void run() {
+						try {
+							_rgui.getRLock().lock();
+
+							
+							StringBuffer sb=new StringBuffer();
+							BufferedReader br=new BufferedReader(new FileReader(path));
+							String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
+							final String groovyLog= _rgui.getR().groovyExecFromBuffer(sb);						
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									_rgui.getConsoleLogger().printAsInput("script sourced to Groovy on Server Side\n");
+									_rgui.getConsoleLogger().printAsOutput("groovy:\n"+groovyLog+"\n");
+								}
+							});
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							_rgui.getRLock().unlock();
+						}
+					}
+				}).start();
+
+
+			}
+
 	}
 
 	public static void uploadR(final String path) {
@@ -473,37 +569,9 @@ public class jEdit {
 			JOptionPane.showMessageDialog(getActiveView(), "Please Save before uploading to R");
 		} else {
 			try {
-				if (runRMethod == null)
-					runRMethod = jEdit.class.getClassLoader().loadClass(System.getProperty("jedit.save.to.r.class"))
-							.getMethod("execute", String.class, boolean.class);
-				if (busy) {
-					JOptionPane.showMessageDialog(getActiveView(), "R is busy");
-					return;
-				}
-
-				try {
-					if (runRMethod == null)
-						runRMethod = jEdit.class.getClassLoader()
-								.loadClass(System.getProperty("jedit.save.to.r.class")).getMethod("execute",
-										String.class, boolean.class);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				new Thread(new Runnable() {
-					public void run() {
-						busy = true;
-						try {
-							runRMethod.invoke(null, path, false);
-						} catch (Exception e) {
-							e.printStackTrace();
-						} finally {
-							busy = false;
-						}
-
-					}
-				}).start();
-
+			final String fileName = new File(path).getName();
+			_rgui.getR().createWorkingDirectoryFile(fileName);
+			_rgui.upload(new File(path), fileName);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

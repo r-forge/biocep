@@ -2486,8 +2486,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 								System.setProperty("jedit.home", System.getProperty("user.dir") + "/jEdit");
 								System.setProperty("jedit.newwindow.class", "graphics.rmi.NewWindow");
 								System.setProperty("jedit.save.to.r.class", "graphics.rmi.SaveToR");
-								cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("main", new Class<?>[] { String[].class }).invoke(null,
-										new Object[] { new String[] { "-noserver", "-noplugins", "-nogui", "-nosettings" } });
+								cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("main", new Class<?>[] { String[].class, RGui.class }).invoke(null,
+										new Object[] { new String[] { "-noserver", "-noplugins", "-nogui", "-nosettings" } , GDApplet.this });
 							}
 
 							GDApplet.class.getClassLoader().loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,
@@ -4220,6 +4220,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 		return null;
 
+	}
+	
+	public void upload(File localFile, String fileName) throws Exception {
+		FileLoad.upload(localFile, fileName, getR());		
 	}
 
 }
