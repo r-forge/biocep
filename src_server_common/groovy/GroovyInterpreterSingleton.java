@@ -107,7 +107,7 @@ public class GroovyInterpreterSingleton {
 								} finally {
 									System.setOut(saveOut);
 									System.setErr(saveErr);
-									//if (tempFile!=null) tempFile.delete();
+									if (tempFile!=null) tempFile.delete();
 								}
 								return new String(baos.toByteArray(),"UTF-8");							}
 					};
