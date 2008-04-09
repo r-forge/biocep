@@ -30,6 +30,8 @@ import graphics.rmi.action.SetCurrentDeviceAction;
 import graphics.rmi.action.SnapshotDeviceAction;
 import graphics.rmi.action.SnapshotDeviceSvgAction;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
+import groovy.GroovyInterpreter;
+import groovy.GroovyInterpreterSingleton;
 import http.ConnectionFailedException;
 import http.FileLoad;
 import http.HttpMarker;
@@ -988,6 +990,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					toolsMenu.add(_actions.get("clientpythonconsole"));
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("groovyconsole"));
+					toolsMenu.add(_actions.get("clientgroovyconsole"));
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("logview"));
 					toolsMenu.addSeparator();
@@ -1543,7 +1546,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 
 			NewWindow._applet = this;
-			SaveToR.applet = this;
 			getContentPane().setLayout(new BorderLayout());
 			getContentPane().add(menuBar, BorderLayout.NORTH);
 			JPanel mainPanel = new JPanel();
@@ -1774,6 +1776,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return null;
 	}
 
+	private ClientGroovyConsoleView getOpenedClientGroovyConsoleView() {
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof ClientGroovyConsoleView) {
+				return (ClientGroovyConsoleView) dv;
+			}
+		}
+		return null;
+	}
+
+	
 	private void setHelpBrowserURL(String url) {
 		GDHelpBrowser openedBrowser = getOpenedBrowser();
 		if (openedBrowser == null) {
@@ -3082,6 +3096,79 @@ public class GDApplet extends GDAppletBase implements RGui {
 		});
 
 		
+		_actions.put("clientgroovyconsole", new AbstractAction("Local Groovy Console") {
+			public void actionPerformed(final ActionEvent e) {
+				if (getOpenedServerPythonConsoleView() == null) {
+					int id = getDynamicViewId();
+
+					final ClientGroovyConsoleView lv = new ClientGroovyConsoleView("Local Groovy Console", null, id);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+					lv.addListener(new DockingWindowListener() {
+						public void viewFocusChanged(View arg0, View arg1) {
+						}
+
+						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowClosed(DockingWindow arg0) {
+						}
+
+						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+							try {
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+
+						public void windowDocked(DockingWindow arg0) {
+						}
+
+						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowHidden(DockingWindow arg0) {
+						}
+
+						public void windowMaximized(DockingWindow arg0) {
+						}
+
+						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowMinimized(DockingWindow arg0) {
+						}
+
+						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowRestored(DockingWindow arg0) {
+						}
+
+						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowShown(DockingWindow arg0) {
+						}
+
+						public void windowUndocked(DockingWindow arg0) {
+						}
+
+						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+					});
+
+				}
+			}
+
+			public boolean isEnabled() {
+				return getR() != null && GroovyInterpreterSingleton.getInstance()!=null;
+			}
+		});
+
+		
 		_actions.put("inspect", new AbstractAction("Inspect") {
 			public void actionPerformed(final ActionEvent e) {
 
@@ -3698,6 +3785,37 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
+	class ClientGroovyConsoleView extends DynamicView {
+		ConsolePanel _consolePanel;
+
+		ClientGroovyConsoleView(String title, Icon icon, int id) {
+			super(title, icon, new JPanel(), id);
+			((JPanel) getComponent()).setLayout(new BorderLayout());
+			_consolePanel = new ConsolePanel(new SubmitInterface() {
+				public String submit(final String expression) {
+					if (getRLock().isLocked()) {
+						return "R is busy, please retry\n";
+					}
+					try {
+						getRLock().lock();
+						final String log = GroovyInterpreterSingleton.getInstance().exec(expression);
+						return log;
+					} catch (Exception e) {
+						return PoolUtils.getStackTraceAsString(e);
+					} finally {
+						getRLock().unlock();
+					}
+				}
+			});
+			((JPanel) getComponent()).add(_consolePanel);
+		}
+
+		public ConsolePanel getConsolePanel() {
+			return _consolePanel;
+		}
+	}
+	
+	
 	class ClientPythonConsoleView extends DynamicView {
 		ConsolePanel _consolePanel;
 
@@ -3712,9 +3830,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 					try {
 						getRLock().lock();
 						try {
-							python.client.PythonInterpreterSingleton.startLogCapture();
-							python.client.PythonInterpreterSingleton.getInstance().exec(expression);
-							return python.client.PythonInterpreterSingleton.getPythonStatus();
+							python.PythonInterpreterSingleton.startLogCapture();
+							python.PythonInterpreterSingleton.getInstance().exec(expression);
+							return python.PythonInterpreterSingleton.getPythonStatus();
 						} catch (Exception e) {
 							return PoolUtils.getStackTraceAsString(e);
 						}
@@ -4225,5 +4343,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public void upload(File localFile, String fileName) throws Exception {
 		FileLoad.upload(localFile, fileName, getR());		
 	}
-
+	
+	public GroovyInterpreter getGroovyInterpreter() {
+		return GroovyInterpreterSingleton.getInstance();
+	}
 }

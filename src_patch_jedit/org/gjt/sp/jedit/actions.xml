@@ -912,7 +912,19 @@
 	</CODE>
 </ACTION>	
 			
-		
+<ACTION NAME="run-pl">
+	<CODE>
+		jEdit.runPL(buffer.getPath());
+	</CODE>
+</ACTION>	
+
+<ACTION NAME="run-gl">
+	<CODE>
+		jEdit.runGL(buffer.getPath());
+	</CODE>
+</ACTION>	
+
+			
 <ACTION NAME="upload-r">
 	<CODE>
 		jEdit.uploadR(buffer.getPath());

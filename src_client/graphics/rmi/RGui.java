@@ -1,6 +1,7 @@
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
+import groovy.GroovyInterpreter;
 
 import java.awt.Component;
 import java.io.File;
@@ -25,4 +26,6 @@ public interface RGui extends RKit {
 	public JGDPanelPop getCurrentJGPanelPop();
 	
 	public void upload(File localFile, String fileName) throws Exception;
+	
+	public GroovyInterpreter getGroovyInterpreter() ;
 }

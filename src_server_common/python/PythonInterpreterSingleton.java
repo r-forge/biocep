@@ -1,4 +1,4 @@
-package python.server;
+package python;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -53,11 +53,19 @@ public class PythonInterpreterSingleton {
 					}
 
 					public void execfile(InputStream arg0) {
-						super.execfile(arg0);
+						try {
+							super.execfile(arg0);
+						} catch (PyException e) {
+							new PrintWriter(sw).println(e.toString());
+						}
 					}
 
 					public void execfile(String arg0) {
-						super.execfile(arg0);
+						try {
+							super.execfile(arg0);
+						} catch (PyException e) {
+							new PrintWriter(sw).println(e.toString());
+						}						
 					}
 
 					public Object get(String arg0, Class arg1) {

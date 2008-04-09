@@ -489,19 +489,20 @@ public class jEdit {
 				}
 				
 				new Thread(new Runnable(){
+					FileReader freader=null;
 					public void run() {
 						try {
 							_rgui.getRLock().lock();
 
-							
+							freader=new FileReader(path);
 							StringBuffer sb=new StringBuffer();
-							BufferedReader br=new BufferedReader(new FileReader(path));
+							BufferedReader br=new BufferedReader(freader);
 							String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
 							final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);						
 							SwingUtilities.invokeLater(new Runnable() {
 								public void run() {
-									_rgui.getConsoleLogger().printAsInput("script sourced to Python On Server Side\n");
-									_rgui.getConsoleLogger().printAsOutput("python:\n"+pythonLog+"\n");
+									_rgui.getConsoleLogger().printAsInput("script executed by Python On Server\n");
+									_rgui.getConsoleLogger().printAsOutput("Python:\n"+pythonLog+"\n");
 								}
 							});
 
@@ -509,24 +510,18 @@ public class jEdit {
 							e.printStackTrace();
 						} finally {
 							_rgui.getRLock().unlock();
+							if (freader!=null) try {freader.close();} catch (Exception e) {e.printStackTrace();}
 						}
 					}
 				}).start();
-
-
 			}
-
-			
-
 	}
 
 
 	public static void runG(final String path) {
 
-
-
 			if (getActiveView().getBuffer().isDirty()) {
-				JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to Groovy");
+				JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Groovy");
 			} else {
 
 				if (_rgui.getRLock().isLocked()) {
@@ -537,17 +532,15 @@ public class jEdit {
 				new Thread(new Runnable(){
 					public void run() {
 						try {
-							_rgui.getRLock().lock();
-
-							
+							_rgui.getRLock().lock();							
 							StringBuffer sb=new StringBuffer();
 							BufferedReader br=new BufferedReader(new FileReader(path));
 							String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
 							final String groovyLog= _rgui.getR().groovyExecFromBuffer(sb);						
 							SwingUtilities.invokeLater(new Runnable() {
 								public void run() {
-									_rgui.getConsoleLogger().printAsInput("script sourced to Groovy on Server Side\n");
-									_rgui.getConsoleLogger().printAsOutput("groovy:\n"+groovyLog+"\n");
+									_rgui.getConsoleLogger().printAsInput("script executed by Groovy on Server\n");
+									_rgui.getConsoleLogger().printAsOutput("Groovy:\n"+groovyLog+"\n");
 								}
 							});
 
@@ -558,12 +551,123 @@ public class jEdit {
 						}
 					}
 				}).start();
-
-
 			}
+	}
+
+	
+	
+	public static void runPL(final String path) {
+
+		
+		if (getActiveView().getBuffer().isDirty()) {
+			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Python");
+		} else {
+
+			if (_rgui.getRLock().isLocked()) {
+				JOptionPane.showMessageDialog(null, "R is busy");				
+				return;
+			}
+			
+			new Thread(new Runnable(){
+				public void run() {
+					try {
+						_rgui.getRLock().lock();
+
+						
+						StringBuffer sb=new StringBuffer();
+						BufferedReader br=new BufferedReader(new FileReader(path));
+						String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
+						final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);						
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								_rgui.getConsoleLogger().printAsInput("script executed by Python Locally\n");
+								_rgui.getConsoleLogger().printAsOutput("Python:\n"+pythonLog+"\n");
+							}
+						});
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						_rgui.getRLock().unlock();
+					}
+				}
+			}).start();
+
+
+		}
+
+		
 
 	}
 
+
+	
+	public static File createFileFromBuffer(StringBuffer buffer) throws Exception {
+		final File tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "temp_"+System.currentTimeMillis()+".groovy").getCanonicalFile();
+		if (tempFile.exists()) tempFile.delete();
+		BufferedReader breader = new BufferedReader(new StringReader(buffer.toString()));
+		PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
+		String line;
+		do {
+			line = breader.readLine();
+			if (line != null) {
+				pwriter.println(line);
+			}
+		} while (line != null);
+		pwriter.close();
+		return tempFile;
+	}
+
+	public static void runGL(final String path) {
+
+		if (getActiveView().getBuffer().isDirty()) {
+			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Groovy");
+		} else {
+
+			if (_rgui.getRLock().isLocked()) {
+				JOptionPane.showMessageDialog(null, "R is busy");				
+				return;
+			}
+			
+			new Thread(new Runnable(){
+				public void run() {
+					File f=null;
+					FileReader freader=null;
+					try {
+						_rgui.getRLock().lock();
+						freader=new FileReader(path);
+						
+						StringBuffer sb=new StringBuffer();
+						BufferedReader br=new BufferedReader(freader);
+						String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
+										
+						final String groovyLog= _rgui.getGroovyInterpreter().execFromBuffer(sb);						
+						
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								_rgui.getConsoleLogger().printAsInput("script executed by Groovy Locally\n");
+								_rgui.getConsoleLogger().printAsOutput("Groovy:\n"+groovyLog+"\n");
+							}
+						});
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						_rgui.getRLock().unlock();
+						if (f!=null) f.delete();
+						if (freader!=null) try {freader.close();} catch (Exception e) {e.printStackTrace();}
+					}
+				}
+			}).start();
+
+
+		}
+
+	}
+
+	
+	
+	
 	public static void uploadR(final String path) {
 		if (getActiveView().getBuffer().isDirty()) {
 			JOptionPane.showMessageDialog(getActiveView(), "Please Save before uploading to R");
