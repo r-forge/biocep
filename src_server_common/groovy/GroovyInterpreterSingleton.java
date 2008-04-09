@@ -65,7 +65,6 @@ public class GroovyInterpreterSingleton {
 								
 								File tempFile = null;
 								tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_"+System.currentTimeMillis()).getCanonicalFile();
-								tempFile=new File("c:\\grrovy.txt");
 								if (tempFile.exists())tempFile.delete();								
 							
 								BufferedReader breader = new BufferedReader(new StringReader(buffer.toString()));
