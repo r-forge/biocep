@@ -23,15 +23,11 @@
 
 package org.gjt.sp.jedit;
 
-//{{{ Imports
+// {{{ Imports
 import bsh.UtilEvalError;
 import com.microstar.xml.*;
-
 import graphics.rmi.RGui;
-import http.FileLoad;
-
 import javax.swing.*;
-
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Method;
@@ -50,23 +46,24 @@ import org.gjt.sp.jedit.syntax.*;
 import org.gjt.sp.jedit.textarea.*;
 import org.gjt.sp.util.Log;
 
-//}}}
+// }}}
 
 /**
  * The main class of the jEdit text editor.
+ * 
  * @author Slava Pestov
  * @version $Id: jEdit.java,v 1.238 2004/08/29 02:58:43 spestov Exp $
  */
 public class jEdit {
-	//{{{ getVersion() method
+	// {{{ getVersion() method
 	/**
 	 * Returns the jEdit version as a human-readable string.
 	 */
 	public static String getVersion() {
 		return MiscUtilities.buildToVersion(getBuild());
-	} //}}}
+	} // }}}
 
-	//{{{ getBuild() method
+	// {{{ getBuild() method
 	/**
 	 * Returns the internal version. MiscUtilities.compareStrings() can be used
 	 * to compare different internal versions.
@@ -74,24 +71,27 @@ public class jEdit {
 	public static String getBuild() {
 		// (major).(minor).(<99 = preX, 99 = final).(bug fix)
 		return "04.02.99.00";
-	} //}}}
+	} // }}}
 
-	//{{{ main() method
+	// {{{ main() method
 	/**
-	 * The main method of the jEdit application.
-	 * This should never be invoked directly.
-	 * @param args The command line arguments
+	 * The main method of the jEdit application. This should never be invoked
+	 * directly.
+	 * 
+	 * @param args
+	 *            The command line arguments
 	 */
 	private static RGui _rgui;
+
 	public static void main(String[] args, RGui rgui) {
-		_rgui=rgui;
-		//{{{ Check for Java 1.3 or later
+		_rgui = rgui;
+		// {{{ Check for Java 1.3 or later
 		String javaVersion = System.getProperty("java.version");
 		if (javaVersion.compareTo("1.3") < 0) {
 			System.err.println("You are running Java version " + javaVersion + ".");
 			System.err.println("jEdit requires Java 1.3 or later.");
 			System.exit(1);
-		} //}}}
+		} // }}}
 
 		// later on we need to know if certain code is called from
 		// the main thread
@@ -103,7 +103,7 @@ public class jEdit {
 		// are closed
 		background = OperatingSystem.isMacOS();
 
-		//{{{ Parse command line
+		// {{{ Parse command line
 		boolean endOpts = false;
 		int level = Log.WARNING;
 		String portFile = "server";
@@ -192,9 +192,9 @@ public class jEdit {
 				}
 				args[i] = null;
 			}
-		} //}}}
+		} // }}}
 
-		//{{{ We need these initializations very early on
+		// {{{ We need these initializations very early on
 		if (settingsDirectory != null) {
 			settingsDirectory = MiscUtilities.constructPath(System.getProperty("user.home"), settingsDirectory);
 			settingsDirectory = MiscUtilities.resolveSymlinks(settingsDirectory);
@@ -206,9 +206,9 @@ public class jEdit {
 			portFile = null;
 
 		Log.init(false, level);
-		//}}}
+		// }}}
 
-		//{{{ Try connecting to another running jEdit instance
+		// {{{ Try connecting to another running jEdit instance
 		if (portFile != null && new File(portFile).exists()) {
 			int port, key;
 			try {
@@ -248,11 +248,8 @@ public class jEdit {
 				// ok, this one seems to confuse newbies
 				// endlessly, so log it as NOTICE, not
 				// ERROR
-				Log.log(Log.NOTICE, jEdit.class, "An error occurred"
-						+ " while connecting to the jEdit server instance.");
-				Log
-						.log(Log.NOTICE, jEdit.class, "This probably means that"
-								+ " jEdit crashed and/or exited abnormally");
+				Log.log(Log.NOTICE, jEdit.class, "An error occurred" + " while connecting to the jEdit server instance.");
+				Log.log(Log.NOTICE, jEdit.class, "This probably means that" + " jEdit crashed and/or exited abnormally");
 				Log.log(Log.NOTICE, jEdit.class, "the last time it was run.");
 				Log.log(Log.NOTICE, jEdit.class, "If you don't" + " know what this means, don't worry.");
 				Log.log(Log.NOTICE, jEdit.class, e);
@@ -263,14 +260,15 @@ public class jEdit {
 			// if no server running and user runs jedit -quit,
 			// just exit
 			System.exit(0);
-		} //}}}
+		} // }}}
 
 		// don't show splash screen if there is a file named
 		// 'nosplash' in the settings directory
 
-		//if(!new File(settingsDirectory,"nosplash").exists()) GUIUtilities.showSplashScreen();
+		// if(!new File(settingsDirectory,"nosplash").exists())
+		// GUIUtilities.showSplashScreen();
 
-		//{{{ Initialize settings directory
+		// {{{ Initialize settings directory
 		Writer stream;
 		if (settingsDirectory != null) {
 			File _settingsDirectory = new File(settingsDirectory);
@@ -305,14 +303,14 @@ public class jEdit {
 			}
 		} else {
 			stream = null;
-		} //}}}
+		} // }}}
 
 		Log.setLogWriter(stream);
 
 		Log.log(Log.NOTICE, jEdit.class, "jEdit version " + getVersion());
 		Log.log(Log.MESSAGE, jEdit.class, "Settings directory is " + settingsDirectory);
 
-		//{{{ Get things rolling
+		// {{{ Get things rolling
 		initMisc();
 		initSystemProperties();
 
@@ -325,9 +323,9 @@ public class jEdit {
 			initSiteProperties();
 
 		initUserProperties();
-		//}}}
+		// }}}
 
-		//{{{ Initialize server
+		// {{{ Initialize server
 		if (portFile != null) {
 			server = new EditServer(portFile);
 			if (!server.isOK())
@@ -335,13 +333,11 @@ public class jEdit {
 		} else {
 			if (background) {
 				background = false;
-				Log
-						.log(Log.WARNING, jEdit.class, "You cannot specify both the"
-								+ " -background and -noserver switches");
+				Log.log(Log.WARNING, jEdit.class, "You cannot specify both the" + " -background and -noserver switches");
 			}
-		} //}}}
+		} // }}}
 
-		//{{{ Do more stuff
+		// {{{ Do more stuff
 		initPLAF();
 
 		VFSManager.init();
@@ -367,9 +363,9 @@ public class jEdit {
 		reloadModes();
 
 		GUIUtilities.advanceSplashProgress();
-		//}}}
+		// }}}
 
-		//{{{ Initialize Java 1.4-specific code
+		// {{{ Initialize Java 1.4-specific code
 		if (OperatingSystem.hasJava14()) {
 			try {
 				ClassLoader loader = jEdit.class.getClassLoader();
@@ -384,14 +380,15 @@ public class jEdit {
 				Log.log(Log.ERROR, jEdit.class, e);
 				System.exit(1);
 			}
-		} //}}}
+		} // }}}
 
-		//{{{ Activate plugins that must be activated at startup
+		// {{{ Activate plugins that must be activated at startup
 		for (int i = 0; i < jars.size(); i++) {
 			((PluginJAR) jars.elementAt(i)).activatePluginIfNecessary();
-		} //}}}
+		} // }}}
 
-		//{{{ Load macros and run startup scripts, after plugins and settings are loaded
+		// {{{ Load macros and run startup scripts, after plugins and settings
+		// are loaded
 		Macros.loadMacros();
 		Macros.getMacroActionSet().initKeyBindings();
 
@@ -409,9 +406,9 @@ public class jEdit {
 				file.mkdirs();
 			else
 				runStartupScripts(file);
-		} //}}}
+		} // }}}
 
-		//{{{ Run script specified with -run= parameter
+		// {{{ Run script specified with -run= parameter
 		if (scriptFile != null) {
 			scriptFile = MiscUtilities.constructPath(userDir, scriptFile);
 			try {
@@ -420,7 +417,7 @@ public class jEdit {
 				Log.log(Log.ERROR, jEdit.class, e);
 			}
 			BeanShell.runScript(null, scriptFile, null, false);
-		} //}}}
+		} // }}}
 
 		GUIUtilities.advanceSplashProgress();
 
@@ -432,30 +429,38 @@ public class jEdit {
 		} catch (Exception e) {
 		}
 
-	} //}}}
-
+	} // }}}
 
 	public static void runR(final String path) {
+
+		if (_rgui.getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
 
 		if (getActiveView().getBuffer().isDirty()) {
 			JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to R");
 		} else {
 
 			if (_rgui.getRLock().isLocked()) {
-				JOptionPane.showMessageDialog(null, "R is busy");				
+				JOptionPane.showMessageDialog(null, "R is busy");
 				return;
 			}
-			
-			new Thread(new Runnable(){
+
+			new Thread(new Runnable() {
+				FileReader freader = null;
+
 				public void run() {
 					try {
 						_rgui.getRLock().lock();
+						freader = new FileReader(path);
 
-						
-						StringBuffer sb=new StringBuffer();
-						BufferedReader br=new BufferedReader(new FileReader(path));
-						String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
-						_rgui.getR().sourceFromBuffer(sb);						
+						StringBuffer sb = new StringBuffer();
+						BufferedReader br = new BufferedReader(freader);
+						String l = null;
+						while ((l = br.readLine()) != null)
+							sb.append(l + "\n");
+						_rgui.getR().sourceFromBuffer(sb);
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
 								_rgui.getConsoleLogger().printAsOutput("script sourced to R\n");
@@ -466,122 +471,52 @@ public class jEdit {
 						e.printStackTrace();
 					} finally {
 						_rgui.getRLock().unlock();
+						if (freader != null)
+							try {
+								freader.close();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 					}
 				}
 			}).start();
 
-
 		}
 	}
 
-	
-	
 	public static void runP(final String path) {
+		if (_rgui.getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
 
-		
-			if (getActiveView().getBuffer().isDirty()) {
-				JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to R");
-			} else {
-
-				if (_rgui.getRLock().isLocked()) {
-					JOptionPane.showMessageDialog(null, "R is busy");				
-					return;
-				}
-				
-				new Thread(new Runnable(){
-					FileReader freader=null;
-					public void run() {
-						try {
-							_rgui.getRLock().lock();
-
-							freader=new FileReader(path);
-							StringBuffer sb=new StringBuffer();
-							BufferedReader br=new BufferedReader(freader);
-							String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
-							final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);						
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									_rgui.getConsoleLogger().printAsInput("script executed by Python On Server\n");
-									_rgui.getConsoleLogger().printAsOutput("Python:\n"+pythonLog+"\n");
-								}
-							});
-
-						} catch (Exception e) {
-							e.printStackTrace();
-						} finally {
-							_rgui.getRLock().unlock();
-							if (freader!=null) try {freader.close();} catch (Exception e) {e.printStackTrace();}
-						}
-					}
-				}).start();
-			}
-	}
-
-
-	public static void runG(final String path) {
-
-			if (getActiveView().getBuffer().isDirty()) {
-				JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Groovy");
-			} else {
-
-				if (_rgui.getRLock().isLocked()) {
-					JOptionPane.showMessageDialog(null, "R is busy");				
-					return;
-				}
-				
-				new Thread(new Runnable(){
-					public void run() {
-						try {
-							_rgui.getRLock().lock();							
-							StringBuffer sb=new StringBuffer();
-							BufferedReader br=new BufferedReader(new FileReader(path));
-							String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
-							final String groovyLog= _rgui.getR().groovyExecFromBuffer(sb);						
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									_rgui.getConsoleLogger().printAsInput("script executed by Groovy on Server\n");
-									_rgui.getConsoleLogger().printAsOutput("Groovy:\n"+groovyLog+"\n");
-								}
-							});
-
-						} catch (Exception e) {
-							e.printStackTrace();
-						} finally {
-							_rgui.getRLock().unlock();
-						}
-					}
-				}).start();
-			}
-	}
-
-	
-	
-	public static void runPL(final String path) {
-
-		
 		if (getActiveView().getBuffer().isDirty()) {
-			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Python");
+			JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to R");
 		} else {
 
 			if (_rgui.getRLock().isLocked()) {
-				JOptionPane.showMessageDialog(null, "R is busy");				
+				JOptionPane.showMessageDialog(null, "R is busy");
 				return;
 			}
-			
-			new Thread(new Runnable(){
+
+			new Thread(new Runnable() {
+				FileReader freader = null;
+
 				public void run() {
 					try {
 						_rgui.getRLock().lock();
 
-						
-						StringBuffer sb=new StringBuffer();
-						BufferedReader br=new BufferedReader(new FileReader(path));
-						String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
-						final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);						
+						freader = new FileReader(path);
+						StringBuffer sb = new StringBuffer();
+						BufferedReader br = new BufferedReader(freader);
+						String l = null;
+						while ((l = br.readLine()) != null)
+							sb.append(l + "\n");
+						final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								_rgui.getConsoleLogger().printAsInput("script executed by Python Locally\n");
-								_rgui.getConsoleLogger().printAsOutput("Python:\n"+pythonLog+"\n");
+								_rgui.getConsoleLogger().printAsInput("script executed by Python On Server\n");
+								_rgui.getConsoleLogger().printAsOutput("Python:\n" + pythonLog + "\n");
 							}
 						});
 
@@ -589,22 +524,125 @@ public class jEdit {
 						e.printStackTrace();
 					} finally {
 						_rgui.getRLock().unlock();
+						if (freader != null)
+							try {
+								freader.close();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+					}
+				}
+			}).start();
+		}
+	}
+
+	public static void runG(final String path) {
+
+		if (_rgui.getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
+		if (getActiveView().getBuffer().isDirty()) {
+			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Groovy");
+		} else {
+
+			if (_rgui.getRLock().isLocked()) {
+				JOptionPane.showMessageDialog(null, "R is busy");
+				return;
+			}
+
+			new Thread(new Runnable() {
+				public void run() {
+					FileReader freader = null;
+					try {
+						_rgui.getRLock().lock();
+						freader = new FileReader(path);
+
+						StringBuffer sb = new StringBuffer();
+						BufferedReader br = new BufferedReader(freader);
+						String l = null;
+						while ((l = br.readLine()) != null)
+							sb.append(l + "\n");
+						final String groovyLog = _rgui.getR().groovyExecFromBuffer(sb);
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								_rgui.getConsoleLogger().printAsInput("script executed by Groovy on Server\n");
+								_rgui.getConsoleLogger().printAsOutput("Groovy:\n" + groovyLog + "\n");
+							}
+						});
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						_rgui.getRLock().unlock();
+						if (freader != null)
+							try {
+								freader.close();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+					}
+				}
+			}).start();
+		}
+	}
+
+	public static void runPL(final String path) {
+		if (_rgui.getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
+
+		if (getActiveView().getBuffer().isDirty()) {
+			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Python");
+		} else {
+
+			if (_rgui.getRLock().isLocked()) {
+				JOptionPane.showMessageDialog(null, "R is busy");
+				return;
+			}
+
+			new Thread(new Runnable() {
+				public void run() {
+					FileReader freader = null;
+					try {
+						_rgui.getRLock().lock();
+						freader = new FileReader(path);
+						StringBuffer sb = new StringBuffer();
+						BufferedReader br = new BufferedReader(freader);
+						String l = null;
+						while ((l = br.readLine()) != null)
+							sb.append(l + "\n");
+						final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								_rgui.getConsoleLogger().printAsInput("script executed by Python Locally\n");
+								_rgui.getConsoleLogger().printAsOutput("Python:\n" + pythonLog + "\n");
+							}
+						});
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						_rgui.getRLock().unlock();
+						if (freader != null)
+							try {
+								freader.close();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 					}
 				}
 			}).start();
 
-
 		}
-
-		
 
 	}
 
-
-	
 	public static File createFileFromBuffer(StringBuffer buffer) throws Exception {
-		final File tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "temp_"+System.currentTimeMillis()+".groovy").getCanonicalFile();
-		if (tempFile.exists()) tempFile.delete();
+		final File tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "temp_" + System.currentTimeMillis() + ".groovy").getCanonicalFile();
+		if (tempFile.exists())
+			tempFile.delete();
 		BufferedReader breader = new BufferedReader(new StringReader(buffer.toString()));
 		PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
 		String line;
@@ -620,33 +658,40 @@ public class jEdit {
 
 	public static void runGL(final String path) {
 
+		if (_rgui.getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
+
 		if (getActiveView().getBuffer().isDirty()) {
 			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Groovy");
 		} else {
 
 			if (_rgui.getRLock().isLocked()) {
-				JOptionPane.showMessageDialog(null, "R is busy");				
+				JOptionPane.showMessageDialog(null, "R is busy");
 				return;
 			}
-			
-			new Thread(new Runnable(){
+
+			new Thread(new Runnable() {
 				public void run() {
-					File f=null;
-					FileReader freader=null;
+					File f = null;
+					FileReader freader = null;
 					try {
 						_rgui.getRLock().lock();
-						freader=new FileReader(path);
-						
-						StringBuffer sb=new StringBuffer();
-						BufferedReader br=new BufferedReader(freader);
-						String l=null; while ((l=br.readLine())!=null) sb.append(l+"\n");
-										
-						final String groovyLog= _rgui.getGroovyInterpreter().execFromBuffer(sb);						
-						
+						freader = new FileReader(path);
+
+						StringBuffer sb = new StringBuffer();
+						BufferedReader br = new BufferedReader(freader);
+						String l = null;
+						while ((l = br.readLine()) != null)
+							sb.append(l + "\n");
+
+						final String groovyLog = _rgui.getGroovyInterpreter().execFromBuffer(sb);
+
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
 								_rgui.getConsoleLogger().printAsInput("script executed by Groovy Locally\n");
-								_rgui.getConsoleLogger().printAsOutput("Groovy:\n"+groovyLog+"\n");
+								_rgui.getConsoleLogger().printAsOutput("Groovy:\n" + groovyLog + "\n");
 							}
 						});
 
@@ -654,62 +699,100 @@ public class jEdit {
 						e.printStackTrace();
 					} finally {
 						_rgui.getRLock().unlock();
-						if (f!=null) f.delete();
-						if (freader!=null) try {freader.close();} catch (Exception e) {e.printStackTrace();}
+						if (f != null)
+							f.delete();
+						if (freader != null)
+							try {
+								freader.close();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 					}
 				}
 			}).start();
-
 
 		}
 
 	}
 
-	
-	
-	
 	public static void uploadR(final String path) {
+		
+		if (_rgui.getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
+		
 		if (getActiveView().getBuffer().isDirty()) {
 			JOptionPane.showMessageDialog(getActiveView(), "Please Save before uploading to R");
 		} else {
 			try {
-			final String fileName = new File(path).getName();
-			_rgui.getR().createWorkingDirectoryFile(fileName);
-			_rgui.upload(new File(path), fileName);
+				final String fileName = new File(path).getName();
+				_rgui.getR().createWorkingDirectoryFile(fileName);
+				_rgui.upload(new File(path), fileName);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	//{{{ Property methods
+	public static boolean isRunREnabled() {
+		return _rgui.getR() != null;
+	}
 
-	//{{{ getProperties() method
+	public static boolean isRunPEnabled() {
+		return _rgui.getR() != null;
+	}
+
+	public static boolean isRunGEnabled() {
+		try {
+			return _rgui.getR() != null && _rgui.getR().isGroovyEnabled();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public static boolean isRunPLEnabled() {
+		return _rgui.getR() != null;
+	}
+
+	public static boolean isRunGLEnabled() {
+		return _rgui.getR() != null && _rgui.getGroovyInterpreter() != null;
+	}
+
+	// {{{ Property methods
+
+	// {{{ getProperties() method
 	/**
-	 * Returns the properties object which contains all known
-	 * jEdit properties. Note that as of jEdit 4.2pre10, this returns a
-	 * new collection, not the existing properties instance.
+	 * Returns the properties object which contains all known jEdit properties.
+	 * Note that as of jEdit 4.2pre10, this returns a new collection, not the
+	 * existing properties instance.
+	 * 
 	 * @since jEdit 3.1pre4
 	 */
 	public static final Properties getProperties() {
 		return propMgr.getProperties();
-	} //}}}
+	} // }}}
 
-	//{{{ getProperty() method
+	// {{{ getProperty() method
 	/**
 	 * Fetches a property, returning null if it's not defined.
-	 * @param name The property
+	 * 
+	 * @param name
+	 *            The property
 	 */
 	public static final String getProperty(String name) {
 		return propMgr.getProperty(name);
-	} //}}}
+	} // }}}
 
-	//{{{ getProperty() method
+	// {{{ getProperty() method
 	/**
-	 * Fetches a property, returning the default value if it's not
-	 * defined.
-	 * @param name The property
-	 * @param def The default value
+	 * Fetches a property, returning the default value if it's not defined.
+	 * 
+	 * @param name
+	 *            The property
+	 * @param def
+	 *            The default value
 	 */
 	public static final String getProperty(String name, String def) {
 		String value = propMgr.getProperty(name);
@@ -717,23 +800,27 @@ public class jEdit {
 			return def;
 		else
 			return value;
-	} //}}}
+	} // }}}
 
-	//{{{ getProperty() method
+	// {{{ getProperty() method
 	/**
-	 * Returns the property with the specified name.<p>
-	 *
-	 * The elements of the <code>args</code> array are substituted
-	 * into the value of the property in place of strings of the
-	 * form <code>{<i>n</i>}</code>, where <code><i>n</i></code> is an index
-	 * in the array.<p>
-	 *
-	 * You can find out more about this feature by reading the
-	 * documentation for the <code>format</code> method of the
+	 * Returns the property with the specified name.
+	 * <p>
+	 * 
+	 * The elements of the <code>args</code> array are substituted into the
+	 * value of the property in place of strings of the form
+	 * <code>{<i>n</i>}</code>, where <code><i>n</i></code> is an index
+	 * in the array.
+	 * <p>
+	 * 
+	 * You can find out more about this feature by reading the documentation for
+	 * the <code>format</code> method of the
 	 * <code>java.text.MessageFormat</code> class.
-	 *
-	 * @param name The property
-	 * @param args The positional parameters
+	 * 
+	 * @param name
+	 *            The property
+	 * @param args
+	 *            The positional parameters
 	 */
 	public static final String getProperty(String name, Object[] args) {
 		if (name == null)
@@ -747,22 +834,27 @@ public class jEdit {
 			else
 				return MessageFormat.format(value, args);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ getBooleanProperty() method
+	// {{{ getBooleanProperty() method
 	/**
 	 * Returns the value of a boolean property.
-	 * @param name The property
+	 * 
+	 * @param name
+	 *            The property
 	 */
 	public static final boolean getBooleanProperty(String name) {
 		return getBooleanProperty(name, false);
-	} //}}}
+	} // }}}
 
-	//{{{ getBooleanProperty() method
+	// {{{ getBooleanProperty() method
 	/**
 	 * Returns the value of a boolean property.
-	 * @param name The property
-	 * @param def The default value
+	 * 
+	 * @param name
+	 *            The property
+	 * @param def
+	 *            The default value
 	 */
 	public static final boolean getBooleanProperty(String name, boolean def) {
 		String value = getProperty(name);
@@ -774,13 +866,16 @@ public class jEdit {
 			return false;
 		else
 			return def;
-	} //}}}
+	} // }}}
 
-	//{{{ getIntegerProperty() method
+	// {{{ getIntegerProperty() method
 	/**
 	 * Returns the value of an integer property.
-	 * @param name The property
-	 * @param def The default value
+	 * 
+	 * @param name
+	 *            The property
+	 * @param def
+	 *            The default value
 	 * @since jEdit 4.0pre1
 	 */
 	public static final int getIntegerProperty(String name, int def) {
@@ -794,9 +889,9 @@ public class jEdit {
 				return def;
 			}
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ getDoubleProperty() method
+	// {{{ getDoubleProperty() method
 	public static double getDoubleProperty(String name, double def) {
 		String value = getProperty(name);
 		if (value == null)
@@ -810,39 +905,42 @@ public class jEdit {
 		}
 	}
 
-	//}}}
+	// }}}
 
-	//{{{ getFontProperty() method
+	// {{{ getFontProperty() method
 	/**
-	 * Returns the value of a font property. The family is stored
-	 * in the <code><i>name</i></code> property, the font size is stored
-	 * in the <code><i>name</i>size</code> property, and the font style is
-	 * stored in <code><i>name</i>style</code>. For example, if
+	 * Returns the value of a font property. The family is stored in the
+	 * <code><i>name</i></code> property, the font size is stored in the
+	 * <code><i>name</i>size</code> property, and the font style is stored in
+	 * <code><i>name</i>style</code>. For example, if
 	 * <code><i>name</i></code> is <code>view.gutter.font</code>, the
 	 * properties will be named <code>view.gutter.font</code>,
 	 * <code>view.gutter.fontsize</code>, and
 	 * <code>view.gutter.fontstyle</code>.
-	 *
-	 * @param name The property
+	 * 
+	 * @param name
+	 *            The property
 	 * @since jEdit 4.0pre1
 	 */
 	public static final Font getFontProperty(String name) {
 		return getFontProperty(name, null);
-	} //}}}
+	} // }}}
 
-	//{{{ getFontProperty() method
+	// {{{ getFontProperty() method
 	/**
-	 * Returns the value of a font property. The family is stored
-	 * in the <code><i>name</i></code> property, the font size is stored
-	 * in the <code><i>name</i>size</code> property, and the font style is
-	 * stored in <code><i>name</i>style</code>. For example, if
+	 * Returns the value of a font property. The family is stored in the
+	 * <code><i>name</i></code> property, the font size is stored in the
+	 * <code><i>name</i>size</code> property, and the font style is stored in
+	 * <code><i>name</i>style</code>. For example, if
 	 * <code><i>name</i></code> is <code>view.gutter.font</code>, the
 	 * properties will be named <code>view.gutter.font</code>,
 	 * <code>view.gutter.fontsize</code>, and
 	 * <code>view.gutter.fontstyle</code>.
-	 *
-	 * @param name The property
-	 * @param def The default value
+	 * 
+	 * @param name
+	 *            The property
+	 * @param def
+	 *            The default value
 	 * @since jEdit 4.0pre1
 	 */
 	public static final Font getFontProperty(String name, Font def) {
@@ -869,23 +967,28 @@ public class jEdit {
 
 			return new Font(family, style, size);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ getColorProperty() method
+	// {{{ getColorProperty() method
 	/**
 	 * Returns the value of a color property.
-	 * @param name The property name
+	 * 
+	 * @param name
+	 *            The property name
 	 * @since jEdit 4.0pre1
 	 */
 	public static Color getColorProperty(String name) {
 		return getColorProperty(name, Color.black);
-	} //}}}
+	} // }}}
 
-	//{{{ getColorProperty() method
+	// {{{ getColorProperty() method
 	/**
 	 * Returns the value of a color property.
-	 * @param name The property name
-	 * @param def The default value
+	 * 
+	 * @param name
+	 *            The property name
+	 * @param def
+	 *            The default value
 	 * @since jEdit 4.0pre1
 	 */
 	public static Color getColorProperty(String name, Color def) {
@@ -894,111 +997,132 @@ public class jEdit {
 			return def;
 		else
 			return GUIUtilities.parseColor(value, def);
-	} //}}}
+	} // }}}
 
-	//{{{ setColorProperty() method
+	// {{{ setColorProperty() method
 	/**
 	 * Sets the value of a color property.
-	 * @param name The property name
-	 * @param value The value
+	 * 
+	 * @param name
+	 *            The property name
+	 * @param value
+	 *            The value
 	 * @since jEdit 4.0pre1
 	 */
 	public static void setColorProperty(String name, Color value) {
 		setProperty(name, GUIUtilities.getColorHexString(value));
-	} //}}}
+	} // }}}
 
-	//{{{ setProperty() method
+	// {{{ setProperty() method
 	/**
 	 * Sets a property to a new value.
-	 * @param name The property
-	 * @param value The new value
+	 * 
+	 * @param name
+	 *            The property
+	 * @param value
+	 *            The new value
 	 */
 	public static final void setProperty(String name, String value) {
 		propMgr.setProperty(name, value);
-	} //}}}
+	} // }}}
 
-	//{{{ setTemporaryProperty() method
+	// {{{ setTemporaryProperty() method
 	/**
-	 * Sets a property to a new value. Properties set using this
-	 * method are not saved to the user properties list.
-	 * @param name The property
-	 * @param value The new value
+	 * Sets a property to a new value. Properties set using this method are not
+	 * saved to the user properties list.
+	 * 
+	 * @param name
+	 *            The property
+	 * @param value
+	 *            The new value
 	 * @since jEdit 2.3final
 	 */
 	public static final void setTemporaryProperty(String name, String value) {
 		propMgr.setTemporaryProperty(name, value);
-	} //}}}
+	} // }}}
 
-	//{{{ setBooleanProperty() method
+	// {{{ setBooleanProperty() method
 	/**
 	 * Sets a boolean property.
-	 * @param name The property
-	 * @param value The value
+	 * 
+	 * @param name
+	 *            The property
+	 * @param value
+	 *            The value
 	 */
 	public static final void setBooleanProperty(String name, boolean value) {
 		setProperty(name, value ? "true" : "false");
-	} //}}}
+	} // }}}
 
-	//{{{ setIntegerProperty() method
+	// {{{ setIntegerProperty() method
 	/**
 	 * Sets the value of an integer property.
-	 * @param name The property
-	 * @param value The value
+	 * 
+	 * @param name
+	 *            The property
+	 * @param value
+	 *            The value
 	 * @since jEdit 4.0pre1
 	 */
 	public static final void setIntegerProperty(String name, int value) {
 		setProperty(name, String.valueOf(value));
-	} //}}}
+	} // }}}
 
-	//{{{ setDoubleProperty() method
+	// {{{ setDoubleProperty() method
 	public static final void setDoubleProperty(String name, double value) {
 		setProperty(name, String.valueOf(value));
 	}
 
-	//}}}
+	// }}}
 
-	//{{{ setFontProperty() method
+	// {{{ setFontProperty() method
 	/**
-	 * Sets the value of a font property. The family is stored
-	 * in the <code><i>name</i></code> property, the font size is stored
-	 * in the <code><i>name</i>size</code> property, and the font style is
-	 * stored in <code><i>name</i>style</code>. For example, if
+	 * Sets the value of a font property. The family is stored in the
+	 * <code><i>name</i></code> property, the font size is stored in the
+	 * <code><i>name</i>size</code> property, and the font style is stored in
+	 * <code><i>name</i>style</code>. For example, if
 	 * <code><i>name</i></code> is <code>view.gutter.font</code>, the
 	 * properties will be named <code>view.gutter.font</code>,
 	 * <code>view.gutter.fontsize</code>, and
 	 * <code>view.gutter.fontstyle</code>.
-	 *
-	 * @param name The property
-	 * @param value The value
+	 * 
+	 * @param name
+	 *            The property
+	 * @param value
+	 *            The value
 	 * @since jEdit 4.0pre1
 	 */
 	public static final void setFontProperty(String name, Font value) {
 		setProperty(name, value.getFamily());
 		setIntegerProperty(name + "size", value.getSize());
 		setIntegerProperty(name + "style", value.getStyle());
-	} //}}}
+	} // }}}
 
-	//{{{ unsetProperty() method
+	// {{{ unsetProperty() method
 	/**
 	 * Unsets (clears) a property.
-	 * @param name The property
+	 * 
+	 * @param name
+	 *            The property
 	 */
 	public static final void unsetProperty(String name) {
 		propMgr.unsetProperty(name);
-	} //}}}
+	} // }}}
 
-	//{{{ resetProperty() method
+	// {{{ resetProperty() method
 	/**
 	 * Resets a property to its default value.
-	 * @param name The property
-	 *
+	 * 
+	 * @param name
+	 *            The property
+	 * 
 	 * @since jEdit 2.5pre3
 	 */
 	public static final void resetProperty(String name) {
 		propMgr.resetProperty(name);
-	} //}}}
+	} // }}}
 
-	//{{{ propertiesChanged() method
+	// {{{ propertiesChanged() method
 	/**
 	 * Reloads various settings from the properties.
 	 */
@@ -1014,7 +1138,7 @@ public class jEdit {
 		// give all text areas the same font
 		Font font = getFontProperty("view.font");
 
-		//defaults.put("TextField.font",font);
+		// defaults.put("TextField.font",font);
 		defaults.put("TextArea.font", font);
 		defaults.put("TextPane.font", font);
 
@@ -1035,16 +1159,17 @@ public class jEdit {
 		KillRing.propertiesChanged();
 
 		EditBus.send(new PropertiesChanged(null));
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ Plugin management methods
+	// {{{ Plugin management methods
 
-	//{{{ getNotLoadedPluginJARs() method
+	// {{{ getNotLoadedPluginJARs() method
 	/**
-	 * Returns a list of plugin JARs that are not currently loaded
-	 * by examining the user and system plugin directories.
+	 * Returns a list of plugin JARs that are not currently loaded by examining
+	 * the user and system plugin directories.
+	 * 
 	 * @since jEdit 3.2pre1
 	 */
 	public static String[] getNotLoadedPluginJARs() {
@@ -1069,21 +1194,22 @@ public class jEdit {
 		String[] _returnValue = new String[returnValue.size()];
 		returnValue.copyInto(_returnValue);
 		return _returnValue;
-	} //}}}
+	} // }}}
 
-	//{{{ getPlugin() method
+	// {{{ getPlugin() method
 	/**
 	 * Returns the plugin with the specified class name.
 	 */
 	public static EditPlugin getPlugin(String name) {
 		return getPlugin(name, false);
-	} //}}}
+	} // }}}
 
-	//{{{ getPlugin(String, boolean) method
+	// {{{ getPlugin(String, boolean) method
 	/**
 	 * Returns the plugin with the specified class name. If
 	 * <code>loadIfNecessary</code> is true, the plugin will be activated in
 	 * case it has not yet been started.
+	 * 
 	 * @since jEdit 4.2pre4
 	 */
 	public static EditPlugin getPlugin(String name, boolean loadIfNecessary) {
@@ -1102,9 +1228,9 @@ public class jEdit {
 		}
 
 		return plugin;
-	} //}}}
+	} // }}}
 
-	//{{{ getPlugins() method
+	// {{{ getPlugins() method
 	/**
 	 * Returns an array of installed plugins.
 	 */
@@ -1119,23 +1245,26 @@ public class jEdit {
 		EditPlugin[] array = new EditPlugin[vector.size()];
 		vector.copyInto(array);
 		return array;
-	} //}}}
+	} // }}}
 
-	//{{{ getPluginJARs() method
+	// {{{ getPluginJARs() method
 	/**
 	 * Returns an array of installed plugins.
+	 * 
 	 * @since jEdit 4.2pre1
 	 */
 	public static PluginJAR[] getPluginJARs() {
 		PluginJAR[] array = new PluginJAR[jars.size()];
 		jars.copyInto(array);
 		return array;
-	} //}}}
+	} // }}}
 
-	//{{{ getPluginJAR() method
+	// {{{ getPluginJAR() method
 	/**
 	 * Returns the JAR with the specified path name.
-	 * @param path The path name
+	 * 
+	 * @param path
+	 *            The path name
 	 * @since jEdit 4.2pre1
 	 */
 	public static PluginJAR getPluginJAR(String path) {
@@ -1146,24 +1275,25 @@ public class jEdit {
 		}
 
 		return null;
-	} //}}}
+	} // }}}
 
-	//{{{ addPluginJAR() method
+	// {{{ addPluginJAR() method
 	/**
 	 * Loads the plugin JAR with the specified path. Some notes about this
 	 * method:
-	 *
+	 * 
 	 * <ul>
 	 * <li>Calling this at a time other than jEdit startup can have
-	 * unpredictable results if the plugin has not been updated for the
-	 * jEdit 4.2 plugin API.
+	 * unpredictable results if the plugin has not been updated for the jEdit
+	 * 4.2 plugin API.
 	 * <li>You must make sure yourself the plugin is not already loaded.
-	 * <li>After loading, you just make sure all the plugin's dependencies
-	 * are satisified before activating the plugin, using the
+	 * <li>After loading, you just make sure all the plugin's dependencies are
+	 * satisified before activating the plugin, using the
 	 * {@link PluginJAR#checkDependencies()} method.
 	 * </ul>
-	 *
-	 * @param path The JAR file path
+	 * 
+	 * @param path
+	 *            The JAR file path
 	 * @since jEdit 4.2pre1
 	 */
 	public static void addPluginJAR(String path) {
@@ -1177,12 +1307,14 @@ public class jEdit {
 			EditBus.send(new DynamicMenuChanged("plugins"));
 			initKeyBindings();
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ addPluginJARsFromDirectory() method
+	// {{{ addPluginJARsFromDirectory() method
 	/**
 	 * Loads all plugins in a directory.
-	 * @param directory The directory
+	 * 
+	 * @param directory
+	 *            The directory
 	 * @since jEdit 4.2pre1
 	 */
 	private static void addPluginJARsFromDirectory(String directory) {
@@ -1203,26 +1335,27 @@ public class jEdit {
 			String path = MiscUtilities.constructPath(directory, plugin);
 
 			// remove this when 4.1 plugin API is deprecated
-			if (plugin.equals("EditBuddy.jar") || plugin.equals("PluginManager.jar") || plugin.equals("Firewall.jar")
-					|| plugin.equals("Tidy.jar") || plugin.equals("DragAndDrop.jar")) {
+			if (plugin.equals("EditBuddy.jar") || plugin.equals("PluginManager.jar") || plugin.equals("Firewall.jar") || plugin.equals("Tidy.jar")
+					|| plugin.equals("DragAndDrop.jar")) {
 				pluginError(path, "plugin-error.obsolete", null);
 				continue;
 			}
 
 			addPluginJAR(path);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ removePluginJAR() method
+	// {{{ removePluginJAR() method
 	/**
-	 * Unloads the given plugin JAR with the specified path. Note that
-	 * calling this at a time other than jEdit shutdown can have
-	 * unpredictable results if the plugin has not been updated for the
-	 * jEdit 4.2 plugin API.
-	 *
-	 * @param jar The <code>PluginJAR</code> instance
-	 * @param exit Set to true if jEdit is exiting; enables some
-	 * shortcuts so the editor can close faster.
+	 * Unloads the given plugin JAR with the specified path. Note that calling
+	 * this at a time other than jEdit shutdown can have unpredictable results
+	 * if the plugin has not been updated for the jEdit 4.2 plugin API.
+	 * 
+	 * @param jar
+	 *            The <code>PluginJAR</code> instance
+	 * @param exit
+	 *            Set to true if jEdit is exiting; enables some shortcuts so the
+	 *            editor can close faster.
 	 * @since jEdit 4.2pre1
 	 */
 	public static void removePluginJAR(PluginJAR jar, boolean exit) {
@@ -1237,88 +1370,96 @@ public class jEdit {
 		EditBus.send(new PluginUpdate(jar, PluginUpdate.UNLOADED, exit));
 		if (!isMainThread() && !exit)
 			EditBus.send(new DynamicMenuChanged("plugins"));
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ Action methods
+	// {{{ Action methods
 
-	//{{{ getActionContext() method
+	// {{{ getActionContext() method
 	/**
 	 * Returns the action context used to store editor actions.
+	 * 
 	 * @since jEdit 4.2pre1
 	 */
 	public static ActionContext getActionContext() {
 		return actionContext;
-	} //}}}
+	} // }}}
 
-	//{{{ addActionSet() method
+	// {{{ addActionSet() method
 	/**
-	 * Adds a new action set to jEdit's list. Plugins probably won't
-	 * need to call this method.
+	 * Adds a new action set to jEdit's list. Plugins probably won't need to
+	 * call this method.
+	 * 
 	 * @since jEdit 4.0pre1
 	 */
 	public static void addActionSet(ActionSet actionSet) {
 		actionContext.addActionSet(actionSet);
-	} //}}}
+	} // }}}
 
-	//{{{ removeActionSet() method
+	// {{{ removeActionSet() method
 	/**
-	 * Removes an action set from jEdit's list. Plugins probably won't
-	 * need to call this method.
+	 * Removes an action set from jEdit's list. Plugins probably won't need to
+	 * call this method.
+	 * 
 	 * @since jEdit 4.2pre1
 	 */
 	public static void removeActionSet(ActionSet actionSet) {
 		actionContext.removeActionSet(actionSet);
-	} //}}}
+	} // }}}
 
-	//{{{ getBuiltInActionSet() method
+	// {{{ getBuiltInActionSet() method
 	/**
 	 * Returns the set of commands built into jEdit.
+	 * 
 	 * @since jEdit 4.2pre1
 	 */
 	public static ActionSet getBuiltInActionSet() {
 		return builtInActionSet;
-	} //}}}
+	} // }}}
 
-	//{{{ getActionSets() method
+	// {{{ getActionSets() method
 	/**
 	 * Returns all registered action sets.
+	 * 
 	 * @since jEdit 4.0pre1
 	 */
 	public static ActionSet[] getActionSets() {
 		return actionContext.getActionSets();
-	} //}}}
+	} // }}}
 
-	//{{{ getAction() method
+	// {{{ getAction() method
 	/**
 	 * Returns the specified action.
-	 * @param name The action name
+	 * 
+	 * @param name
+	 *            The action name
 	 */
 	public static EditAction getAction(String name) {
 		return actionContext.getAction(name);
-	} //}}}
+	} // }}}
 
-	//{{{ getActionSetForAction() method
+	// {{{ getActionSetForAction() method
 	/**
 	 * Returns the action set that contains the specified action.
-	 *
-	 * @param action The action
+	 * 
+	 * @param action
+	 *            The action
 	 * @since jEdit 4.2pre1
 	 */
 	public static ActionSet getActionSetForAction(String action) {
 		return actionContext.getActionSetForAction(action);
-	} //}}}
+	} // }}}
 
-	//{{{ getActionSetForAction() method
+	// {{{ getActionSetForAction() method
 	/**
 	 * @deprecated Use the form that takes a String instead
 	 */
 	public static ActionSet getActionSetForAction(EditAction action) {
 		return actionContext.getActionSetForAction(action.getName());
-	} //}}}
+	} // }}}
 
-	//{{{ getActions() method
+	// {{{ getActions() method
 	/**
 	 * @deprecated Call getActionNames() instead
 	 */
@@ -1331,38 +1472,40 @@ public class jEdit {
 				Log.log(Log.ERROR, jEdit.class, "wtf: " + names[i]);
 		}
 		return actions;
-	} //}}}
+	} // }}}
 
-	//{{{ getActionNames() method
+	// {{{ getActionNames() method
 	/**
 	 * Returns all registered action names.
 	 */
 	public static String[] getActionNames() {
 		return actionContext.getActionNames();
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ Edit mode methods
+	// {{{ Edit mode methods
 
-	//{{{ reloadModes() method
+	// {{{ reloadModes() method
 	/**
 	 * Reloads all edit modes.
+	 * 
 	 * @since jEdit 3.2pre2
 	 */
 	public static void reloadModes() {
-		/* Try to guess the eventual size to avoid unnecessary
-		 * copying */
+		/*
+		 * Try to guess the eventual size to avoid unnecessary copying
+		 */
 		modes = new Vector(50);
 
-		//{{{ Load the global catalog
+		// {{{ Load the global catalog
 		if (true || jEditHome == null)
 			loadModeCatalog("/modes/catalog", true);
 		else {
 			loadModeCatalog(MiscUtilities.constructPath(jEditHome, "modes", "catalog"), false);
-		} //}}}
+		} // }}}
 
-		//{{{ Load user catalog
+		// {{{ Load user catalog
 		if (settingsDirectory != null) {
 			File userModeDir = new File(MiscUtilities.constructPath(settingsDirectory, "modes"));
 			if (!userModeDir.exists())
@@ -1388,7 +1531,7 @@ public class jEdit {
 			}
 
 			loadModeCatalog(userCatalog.getPath(), false);
-		} //}}}
+		} // }}}
 
 		Buffer buffer = buffersFirst;
 		while (buffer != null) {
@@ -1398,12 +1541,14 @@ public class jEdit {
 
 			buffer = buffer.next;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ getMode() method
+	// {{{ getMode() method
 	/**
 	 * Returns the edit mode with the specified name.
-	 * @param name The edit mode
+	 * 
+	 * @param name
+	 *            The edit mode
 	 */
 	public static Mode getMode(String name) {
 		for (int i = 0; i < modes.size(); i++) {
@@ -1412,9 +1557,9 @@ public class jEdit {
 				return mode;
 		}
 		return null;
-	} //}}}
+	} // }}}
 
-	//{{{ getModes() method
+	// {{{ getModes() method
 	/**
 	 * Returns an array of installed edit modes.
 	 */
@@ -1422,19 +1567,21 @@ public class jEdit {
 		Mode[] array = new Mode[modes.size()];
 		modes.copyInto(array);
 		return array;
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ Buffer creation methods
+	// {{{ Buffer creation methods
 
-	//{{{ openFiles() method
+	// {{{ openFiles() method
 	/**
-	 * Opens the file names specified in the argument array. This
-	 * handles +line and +marker arguments just like the command
-	 * line parser.
-	 * @param parent The parent directory
-	 * @param args The file names to open
+	 * Opens the file names specified in the argument array. This handles +line
+	 * and +marker arguments just like the command line parser.
+	 * 
+	 * @param parent
+	 *            The parent directory
+	 * @param args
+	 *            The file names to open
 	 * @since jEdit 3.2pre4
 	 */
 	public static Buffer openFiles(View view, String parent, String[] args) {
@@ -1461,51 +1608,59 @@ public class jEdit {
 			view.setBuffer(retVal);
 
 		return retVal;
-	} //}}}
+	} // }}}
 
-	//{{{ openFile() method
+	// {{{ openFile() method
 	/**
-	 * Opens a file. Note that as of jEdit 2.5pre1, this may return
-	 * null if the buffer could not be opened.
-	 * @param view The view to open the file in
-	 * @param path The file path
-	 *
+	 * Opens a file. Note that as of jEdit 2.5pre1, this may return null if the
+	 * buffer could not be opened.
+	 * 
+	 * @param view
+	 *            The view to open the file in
+	 * @param path
+	 *            The file path
+	 * 
 	 * @since jEdit 2.4pre1
 	 */
 	public static Buffer openFile(View view, String path) {
 		return openFile(view, null, path, false, new Hashtable());
-	} //}}}
+	} // }}}
 
-	//{{{ openFile() method
+	// {{{ openFile() method
 	/**
-	 * @deprecated The openFile() forms with the readOnly parameter
-	 * should not be used. The readOnly prameter is no longer supported.
+	 * @deprecated The openFile() forms with the readOnly parameter should not
+	 *             be used. The readOnly prameter is no longer supported.
 	 */
 	public static Buffer openFile(View view, String parent, String path, boolean readOnly, boolean newFile) {
 		return openFile(view, parent, path, newFile, new Hashtable());
-	} //}}}
+	} // }}}
 
-	//{{{ openFile() method
+	// {{{ openFile() method
 	/**
-	 * @deprecated The openFile() forms with the readOnly parameter
-	 * should not be used. The readOnly prameter is no longer supported.
+	 * @deprecated The openFile() forms with the readOnly parameter should not
+	 *             be used. The readOnly prameter is no longer supported.
 	 */
-	public static Buffer openFile(View view, String parent, String path, boolean readOnly, boolean newFile,
-			Hashtable props) {
+	public static Buffer openFile(View view, String parent, String path, boolean readOnly, boolean newFile, Hashtable props) {
 		return openFile(view, parent, path, newFile, props);
-	} //}}}
+	} // }}}
 
-	//{{{ openFile() method
+	// {{{ openFile() method
 	/**
-	 * Opens a file. This may return null if the buffer could not be
-	 * opened for some reason.
-	 * @param view The view to open the file in
-	 * @param parent The parent directory of the file
-	 * @param path The path name of the file
-	 * @param newFile True if the file should not be loaded from disk
-	 * be prompted if it should be reloaded
-	 * @param props Buffer-local properties to set in the buffer
-	 *
+	 * Opens a file. This may return null if the buffer could not be opened for
+	 * some reason.
+	 * 
+	 * @param view
+	 *            The view to open the file in
+	 * @param parent
+	 *            The parent directory of the file
+	 * @param path
+	 *            The path name of the file
+	 * @param newFile
+	 *            True if the file should not be loaded from disk be prompted if
+	 *            it should be reloaded
+	 * @param props
+	 *            Buffer-local properties to set in the buffer
+	 * 
 	 * @since jEdit 3.2pre10
 	 */
 	public static Buffer openFile(View view, String parent, String path, boolean newFile, Hashtable props) {
@@ -1539,12 +1694,11 @@ public class jEdit {
 
 			if (entry != null && saveCaret && props.get(Buffer.CARET) == null) {
 				props.put(Buffer.CARET, new Integer(entry.caret));
-				/* if(entry.selection != null)
-				{
-					// getSelection() converts from string to
-					// Selection[]
-					props.put(Buffer.SELECTION,entry.getSelection());
-				} */
+				/*
+				 * if(entry.selection != null) { // getSelection() converts from
+				 * string to // Selection[]
+				 * props.put(Buffer.SELECTION,entry.getSelection()); }
+				 */
 			}
 
 			if (entry != null && props.get(Buffer.ENCODING) == null) {
@@ -1566,19 +1720,23 @@ public class jEdit {
 			view.setBuffer(newBuffer);
 
 		return newBuffer;
-	} //}}}
+	} // }}}
 
-	//{{{ openTemporary() method
+	// {{{ openTemporary() method
 	/**
-	 * Opens a temporary buffer. A temporary buffer is like a normal
-	 * buffer, except that an event is not fired, the the buffer is
-	 * not added to the buffers list.
-	 *
-	 * @param view The view to open the file in
-	 * @param parent The parent directory of the file
-	 * @param path The path name of the file
-	 * @param newFile True if the file should not be loaded from disk
-	 *
+	 * Opens a temporary buffer. A temporary buffer is like a normal buffer,
+	 * except that an event is not fired, the the buffer is not added to the
+	 * buffers list.
+	 * 
+	 * @param view
+	 *            The view to open the file in
+	 * @param parent
+	 *            The parent directory of the file
+	 * @param path
+	 *            The path name of the file
+	 * @param newFile
+	 *            True if the file should not be loaded from disk
+	 * 
 	 * @since jEdit 3.2pre10
 	 */
 	public static Buffer openTemporary(View view, String parent, String path, boolean newFile) {
@@ -1603,14 +1761,15 @@ public class jEdit {
 			else
 				return buffer;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ commitTemporary() method
+	// {{{ commitTemporary() method
 	/**
-	 * Adds a temporary buffer to the buffer list. This must be done
-	 * before allowing the user to interact with the buffer in any
-	 * way.
-	 * @param buffer The buffer
+	 * Adds a temporary buffer to the buffer list. This must be done before
+	 * allowing the user to interact with the buffer in any way.
+	 * 
+	 * @param buffer
+	 *            The buffer
 	 */
 	public static void commitTemporary(Buffer buffer) {
 		if (!buffer.isTemporary())
@@ -1625,12 +1784,14 @@ public class jEdit {
 		EditBus.send(new BufferUpdate(buffer, null, BufferUpdate.CREATED));
 		EditBus.send(new BufferUpdate(buffer, null, BufferUpdate.LOAD_STARTED));
 		EditBus.send(new BufferUpdate(buffer, null, BufferUpdate.LOADED));
-	} //}}}
+	} // }}}
 
-	//{{{ newFile() method
+	// {{{ newFile() method
 	/**
 	 * Creates a new `untitled' file.
-	 * @param view The view to create the file in
+	 * 
+	 * @param view
+	 *            The view to create the file in
 	 */
 	public static Buffer newFile(View view) {
 		String path;
@@ -1646,20 +1807,22 @@ public class jEdit {
 			path = null;
 
 		return newFile(view, path);
-	} //}}}
+	} // }}}
 
-	//{{{ newFile() method
+	// {{{ newFile() method
 	/**
 	 * Creates a new `untitled' file.
-	 * @param view The view to create the file in
-	 * @param dir The directory to create the file in
+	 * 
+	 * @param view
+	 *            The view to create the file in
+	 * @param dir
+	 *            The directory to create the file in
 	 * @since jEdit 3.1pre2
 	 */
 	public static Buffer newFile(View view, String dir) {
 		// If only one new file is open which is clean, just close
 		// it, which will create an 'Untitled-1'
-		if (dir != null && buffersFirst != null && buffersFirst == buffersLast && buffersFirst.isUntitled()
-				&& !buffersFirst.isDirty()) {
+		if (dir != null && buffersFirst != null && buffersFirst == buffersLast && buffersFirst.isUntitled() && !buffersFirst.isDirty()) {
 			closeBuffer(view, buffersFirst);
 			// return the newly created 'untitled-1'
 			return buffersFirst;
@@ -1679,18 +1842,21 @@ public class jEdit {
 		}
 
 		return openFile(view, dir, "Untitled-" + (untitledCount + 1), true, null);
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ Buffer management methods
+	// {{{ Buffer management methods
 
-	//{{{ closeBuffer() method
+	// {{{ closeBuffer() method
 	/**
-	 * Closes a buffer. If there are unsaved changes, the user is
-	 * prompted if they should be saved first.
-	 * @param view The view
-	 * @param buffer The buffer
+	 * Closes a buffer. If there are unsaved changes, the user is prompted if
+	 * they should be saved first.
+	 * 
+	 * @param view
+	 *            The view
+	 * @param buffer
+	 *            The buffer
 	 * @return True if the buffer was really closed, false otherwise
 	 */
 	public static boolean closeBuffer(View view, Buffer buffer) {
@@ -1703,8 +1869,7 @@ public class jEdit {
 
 		if (buffer.isDirty()) {
 			Object[] args = { buffer.getName() };
-			int result = GUIUtilities.confirm(view, "notsaved", args, JOptionPane.YES_NO_CANCEL_OPTION,
-					JOptionPane.WARNING_MESSAGE);
+			int result = GUIUtilities.confirm(view, "notsaved", args, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (result == JOptionPane.YES_OPTION) {
 				if (!buffer.save(view, null, true))
 					return false;
@@ -1720,16 +1885,20 @@ public class jEdit {
 		_closeBuffer(view, buffer);
 
 		return true;
-	} //}}}
+	} // }}}
 
-	//{{{ _closeBuffer() method
+	// {{{ _closeBuffer() method
 	/**
 	 * Closes the buffer, even if it has unsaved changes.
-	 * @param view The view, may be null
-	 * @param buffer The buffer
-	 *
-	 * @exception NullPointerException if the buffer is null
-	 *
+	 * 
+	 * @param view
+	 *            The view, may be null
+	 * @param buffer
+	 *            The buffer
+	 * 
+	 * @exception NullPointerException
+	 *                if the buffer is null
+	 * 
 	 * @since jEdit 2.2pre1
 	 */
 	public static void _closeBuffer(View view, Buffer buffer) {
@@ -1747,8 +1916,7 @@ public class jEdit {
 			Integer _caret = (Integer) buffer.getProperty(Buffer.CARET);
 			int caret = (_caret == null ? 0 : _caret.intValue());
 
-			BufferHistory.setEntry(buffer.getPath(), caret, (Selection[]) buffer.getProperty(Buffer.SELECTION), buffer
-					.getStringProperty(Buffer.ENCODING));
+			BufferHistory.setEntry(buffer.getPath(), caret, (Selection[]) buffer.getProperty(Buffer.SELECTION), buffer.getStringProperty(Buffer.ENCODING));
 		}
 
 		String path = buffer.getSymlinkPath();
@@ -1765,23 +1933,28 @@ public class jEdit {
 		// Create a new file when the last is closed
 		if (buffersFirst == null && buffersLast == null)
 			newFile(view);
-	} //}}}
+	} // }}}
 
-	//{{{ closeAllBuffers() method
+	// {{{ closeAllBuffers() method
 	/**
 	 * Closes all open buffers.
-	 * @param view The view
+	 * 
+	 * @param view
+	 *            The view
 	 */
 	public static boolean closeAllBuffers(View view) {
 		return closeAllBuffers(view, false);
-	} //}}}
+	} // }}}
 
-	//{{{ closeAllBuffers() method
+	// {{{ closeAllBuffers() method
 	/**
 	 * Closes all open buffers.
-	 * @param view The view
-	 * @param isExiting This must be false unless this method is
-	 * being called by the exit() method
+	 * 
+	 * @param view
+	 *            The view
+	 * @param isExiting
+	 *            This must be false unless this method is being called by the
+	 *            exit() method
 	 */
 	public static boolean closeAllBuffers(View view, boolean isExiting) {
 		if (view != null)
@@ -1823,8 +1996,7 @@ public class jEdit {
 			if (!buffer.isNewFile()) {
 				Integer _caret = (Integer) buffer.getProperty(Buffer.CARET);
 				int caret = (_caret == null ? 0 : _caret.intValue());
-				BufferHistory.setEntry(buffer.getPath(), caret, (Selection[]) buffer.getProperty(Buffer.SELECTION),
-						buffer.getStringProperty(Buffer.ENCODING));
+				BufferHistory.setEntry(buffer.getPath(), caret, (Selection[]) buffer.getProperty(Buffer.SELECTION), buffer.getStringProperty(Buffer.ENCODING));
 			}
 
 			buffer.close();
@@ -1841,29 +2013,33 @@ public class jEdit {
 		PerspectiveManager.setPerspectiveDirty(true);
 
 		return true;
-	} //}}}
+	} // }}}
 
-	//{{{ saveAllBuffers() method
+	// {{{ saveAllBuffers() method
 	/**
 	 * Saves all open buffers.
-	 * @param view The view
+	 * 
+	 * @param view
+	 *            The view
 	 * @since jEdit 4.2pre1
 	 */
 	public static void saveAllBuffers(View view) {
 		saveAllBuffers(view, jEdit.getBooleanProperty("confirmSaveAll"));
-	} //}}}
+	} // }}}
 
-	//{{{ saveAllBuffers() method
+	// {{{ saveAllBuffers() method
 	/**
 	 * Saves all open buffers.
-	 * @param view The view
-	 * @param confirm If true, a confirmation dialog will be shown first
+	 * 
+	 * @param view
+	 *            The view
+	 * @param confirm
+	 *            If true, a confirmation dialog will be shown first
 	 * @since jEdit 2.7pre2
 	 */
 	public static void saveAllBuffers(View view, boolean confirm) {
 		if (confirm) {
-			int result = GUIUtilities.confirm(view, "saveall", null, JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE);
+			int result = GUIUtilities.confirm(view, "saveall", null, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (result != JOptionPane.YES_OPTION)
 				return;
 		}
@@ -1882,14 +2058,17 @@ public class jEdit {
 		}
 
 		view.setBuffer(current);
-	} //}}}
+	} // }}}
 
-	//{{{ reloadAllBuffers() method
+	// {{{ reloadAllBuffers() method
 	/**
 	 * Reloads all open buffers.
-	 * @param view The view
-	 * @param confirm If true, a confirmation dialog will be shown first
-	 *	if any buffers are dirty
+	 * 
+	 * @param view
+	 *            The view
+	 * @param confirm
+	 *            If true, a confirmation dialog will be shown first if any
+	 *            buffers are dirty
 	 * @since jEdit 2.7pre2
 	 */
 	public static void reloadAllBuffers(final View view, boolean confirm) {
@@ -1900,8 +2079,7 @@ public class jEdit {
 			hasDirty = buffers[i].isDirty();
 
 		if (confirm && hasDirty) {
-			int result = GUIUtilities.confirm(view, "reload-all", null, JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE);
+			int result = GUIUtilities.confirm(view, "reload-all", null, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (result != JOptionPane.YES_OPTION)
 				return;
 		}
@@ -1921,18 +2099,19 @@ public class jEdit {
 			Buffer buffer = buffers[i];
 			buffer.load(view, true);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ _getBuffer() method
+	// {{{ _getBuffer() method
 	/**
-	 * Returns the buffer with the specified path name. The path name
-	 * must be an absolute, canonical, path.
-	 *
-	 * @param path The path name
+	 * Returns the buffer with the specified path name. The path name must be an
+	 * absolute, canonical, path.
+	 * 
+	 * @param path
+	 *            The path name
 	 * @see MiscUtilities#constructPath(String,String)
 	 * @see MiscUtilities#resolveSymlinks(String)
 	 * @see #getBuffer(String)
-	 *
+	 * 
 	 * @since jEdit 4.2pre7
 	 */
 	public static Buffer _getBuffer(String path) {
@@ -1945,24 +2124,25 @@ public class jEdit {
 		synchronized (bufferListLock) {
 			return (Buffer) bufferHash.get(path);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ getBuffer() method
+	// {{{ getBuffer() method
 	/**
-	 * Returns the buffer with the specified path name. The path name
-	 * must be an absolute path. This method automatically resolves
-	 * symbolic links. If performance is critical, cache the canonical
-	 * path and call {@link #_getBuffer(String)} instead.
-	 *
-	 * @param path The path name
+	 * Returns the buffer with the specified path name. The path name must be an
+	 * absolute path. This method automatically resolves symbolic links. If
+	 * performance is critical, cache the canonical path and call
+	 * {@link #_getBuffer(String)} instead.
+	 * 
+	 * @param path
+	 *            The path name
 	 * @see MiscUtilities#constructPath(String,String)
 	 * @see MiscUtilities#resolveSymlinks(String)
 	 */
 	public static Buffer getBuffer(String path) {
 		return _getBuffer(MiscUtilities.resolveSymlinks(path));
-	} //}}}
+	} // }}}
 
-	//{{{ getBuffers() method
+	// {{{ getBuffers() method
 	/**
 	 * Returns an array of open buffers.
 	 */
@@ -1976,37 +2156,39 @@ public class jEdit {
 			}
 			return buffers;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ getBufferCount() method
+	// {{{ getBufferCount() method
 	/**
 	 * Returns the number of open buffers.
 	 */
 	public static int getBufferCount() {
 		return bufferCount;
-	} //}}}
+	} // }}}
 
-	//{{{ getFirstBuffer() method
+	// {{{ getFirstBuffer() method
 	/**
 	 * Returns the first buffer.
 	 */
 	public static Buffer getFirstBuffer() {
 		return buffersFirst;
-	} //}}}
+	} // }}}
 
-	//{{{ getLastBuffer() method
+	// {{{ getLastBuffer() method
 	/**
 	 * Returns the last buffer.
 	 */
 	public static Buffer getLastBuffer() {
 		return buffersLast;
-	} //}}}
+	} // }}}
 
-	//{{{ checkBufferStatus() method
+	// {{{ checkBufferStatus() method
 	/**
-	 * Checks each buffer's status on disk and shows the dialog box
-	 * informing the user that buffers changed on disk, if necessary.
-	 * @param view The view
+	 * Checks each buffer's status on disk and shows the dialog box informing
+	 * the user that buffers changed on disk, if necessary.
+	 * 
+	 * @param view
+	 *            The view
 	 * @since jEdit 4.2pre1
 	 */
 	public static void checkBufferStatus(View view) {
@@ -2054,65 +2236,69 @@ public class jEdit {
 
 		if (show && showDialogSetting)
 			new FilesChangedDialog(view, states, autoReloadSetting);
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ View methods
+	// {{{ View methods
 
-	//{{{ getInputHandler() method
+	// {{{ getInputHandler() method
 	/**
 	 * Returns the current input handler (key binding to action mapping)
+	 * 
 	 * @see org.gjt.sp.jedit.gui.InputHandler
 	 */
 	public static InputHandler getInputHandler() {
 		return inputHandler;
-	} //}}}
+	} // }}}
 
-	/* public static void newViewTest()
-	{
-		long time = System.currentTimeMillis();
-		for(int i = 0; i < 30; i++)
-		{
-			Buffer b = newFile(null);
-			b.insert(0,"x");
-			new View(b,null,false);
-		}
-		System.err.println(System.currentTimeMillis() - time);
-	} */
+	/*
+	 * public static void newViewTest() { long time =
+	 * System.currentTimeMillis(); for(int i = 0; i < 30; i++) { Buffer b =
+	 * newFile(null); b.insert(0,"x"); new View(b,null,false); }
+	 * System.err.println(System.currentTimeMillis() - time); }
+	 */
 
 	public static void newView() {
 		newView(null, null);
 	}
 
-	//{{{ newView() method
+	// {{{ newView() method
 	/**
 	 * Creates a new view.
-	 * @param view An existing view
+	 * 
+	 * @param view
+	 *            An existing view
 	 * @since jEdit 3.2pre2
 	 */
 	public static View newView(View view) {
 		return newView(view, null, false);
-	} //}}}
+	} // }}}
 
-	//{{{ newView() method
+	// {{{ newView() method
 	/**
 	 * Creates a new view of a buffer.
-	 * @param view An existing view
-	 * @param buffer The buffer
+	 * 
+	 * @param view
+	 *            An existing view
+	 * @param buffer
+	 *            The buffer
 	 */
 	public static View newView(View view, Buffer buffer) {
 		return newView(view, buffer, false);
-	} //}}}
+	} // }}}
 
-	//{{{ newView() method
+	// {{{ newView() method
 	/**
 	 * Creates a new view of a buffer.
-	 * @param view An existing view
-	 * @param buffer The buffer
-	 * @param plainView If true, the view will not have dockable windows or
-	 * tool bars.
-	 *
+	 * 
+	 * @param view
+	 *            An existing view
+	 * @param buffer
+	 *            The buffer
+	 * @param plainView
+	 *            If true, the view will not have dockable windows or tool bars.
+	 * 
 	 * @since 4.1pre2
 	 */
 	public static View newView(View view, Buffer buffer, boolean plainView) {
@@ -2122,7 +2308,7 @@ public class jEdit {
 		else
 			config = new View.ViewConfig(plainView);
 		return newView(view, buffer, config);
-	} //}}}
+	} // }}}
 
 	public static class TaggedPanel extends JPanel {
 		HashMap<String, Object> properties = new HashMap<String, Object>();
@@ -2161,21 +2347,25 @@ public class jEdit {
 		f.setProperty("view", view);
 		try {
 			if (newWindowMethod == null)
-				newWindowMethod = jEdit.class.getClassLoader().loadClass(System.getProperty("jedit.newwindow.class"))
-						.getMethod("create", Component.class, String.class);
+				newWindowMethod = jEdit.class.getClassLoader().loadClass(System.getProperty("jedit.newwindow.class")).getMethod("create", Component.class,
+						String.class);
 			newWindowMethod.invoke(null, f, "Edit View");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	//{{{ newView() method
+	// {{{ newView() method
 	/**
 	 * Creates a new view.
-	 * @param view An existing view
-	 * @param buffer A buffer to display, or null
-	 * @param config Encapsulates the view geometry, split configuration
-	 * and if the view is a plain view
+	 * 
+	 * @param view
+	 *            An existing view
+	 * @param buffer
+	 *            A buffer to display, or null
+	 * @param config
+	 *            Encapsulates the view geometry, split configuration and if the
+	 *            view is a plain view
 	 * @since jEdit 4.2pre1
 	 */
 	public static View newView(View view, Buffer buffer, View.ViewConfig config) {
@@ -2221,7 +2411,7 @@ public class jEdit {
 			EditBus.send(new ViewUpdate(newView, ViewUpdate.CREATED));
 
 			newWindow(newView);
-			//newView.setVisible(true);
+			// newView.setVisible(true);
 
 			// show tip of the day
 			if (newView == viewsFirst) {
@@ -2232,7 +2422,7 @@ public class jEdit {
 				if (settingsDirectory != null && getBooleanProperty("firstTime"))
 					new HelpViewer();
 				else if (jEdit.getBooleanProperty("tip.show"))
-					//new TipOfTheDay(newView);
+					// new TipOfTheDay(newView);
 
 					setBooleanProperty("firstTime", false);
 			} else
@@ -2243,19 +2433,19 @@ public class jEdit {
 			if (view != null)
 				view.hideWaitCursor();
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ closeView() method
+	// {{{ closeView() method
 	/**
 	 * Closes a view.
-	 *
+	 * 
 	 * jEdit will exit if this was the last open view.
 	 */
 	public static void closeView(View view) {
 		closeView(view, true);
-	} //}}}
+	} // }}}
 
-	//{{{ getViews() method
+	// {{{ getViews() method
 	/**
 	 * Returns an array of all open views.
 	 */
@@ -2267,35 +2457,36 @@ public class jEdit {
 			view = view.next;
 		}
 		return views;
-	} //}}}
+	} // }}}
 
-	//{{{ getViewCount() method
+	// {{{ getViewCount() method
 	/**
 	 * Returns the number of open views.
 	 */
 	public static int getViewCount() {
 		return viewCount;
-	} //}}}
+	} // }}}
 
-	//{{{ getFirstView() method
+	// {{{ getFirstView() method
 	/**
 	 * Returns the first view.
 	 */
 	public static View getFirstView() {
 		return viewsFirst;
-	} //}}}
+	} // }}}
 
-	//{{{ getLastView() method
+	// {{{ getLastView() method
 	/**
 	 * Returns the last view.
 	 */
 	public static View getLastView() {
 		return viewsLast;
-	} //}}}
+	} // }}}
 
-	//{{{ getActiveView() method
+	// {{{ getActiveView() method
 	/**
 	 * Returns the currently focused view.
+	 * 
 	 * @since jEdit 4.1pre1
 	 */
 	public static View getActiveView() {
@@ -2304,36 +2495,40 @@ public class jEdit {
 			return viewsFirst;
 		} else
 			return activeView;
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ Miscellaneous methods
+	// {{{ Miscellaneous methods
 
-	//{{{ isMainThread() method
+	// {{{ isMainThread() method
 	/**
 	 * Returns true if the currently running thread is the main thread.
+	 * 
 	 * @since jEdit 4.2pre1
 	 */
 	public static boolean isMainThread() {
 		return (Thread.currentThread() == mainThread);
-	} //}}}
+	} // }}}
 
-	//{{{ isBackgroundMode() method
+	// {{{ isBackgroundMode() method
 	/**
 	 * Returns true if jEdit was started with the <code>-background</code>
 	 * command-line switch.
+	 * 
 	 * @since jEdit 4.0pre4
 	 */
 	public static boolean isBackgroundModeEnabled() {
 		return background;
-	} //}}}
+	} // }}}
 
-	//{{{ showMemoryStatusDialog() method
+	// {{{ showMemoryStatusDialog() method
 	/**
-	 * Performs garbage collection and displays a dialog box showing
-	 * memory status.
-	 * @param view The view
+	 * Performs garbage collection and displays a dialog box showing memory
+	 * status.
+	 * 
+	 * @param view
+	 *            The view
 	 * @since jEdit 4.0pre1
 	 */
 	public static void showMemoryDialog(View view) {
@@ -2346,8 +2541,7 @@ public class jEdit {
 		JProgressBar progress = new JProgressBar(0, total);
 		progress.setValue(total - after);
 		progress.setStringPainted(true);
-		progress.setString(jEdit.getProperty("memory-status.use", new Object[] { new Integer(total - after),
-				new Integer(total) }));
+		progress.setString(jEdit.getProperty("memory-status.use", new Object[] { new Integer(total - after), new Integer(total) }));
 
 		Object[] message = new Object[4];
 		message[0] = getProperty("memory-status.gc", new Object[] { new Integer(after - before) });
@@ -2355,45 +2549,45 @@ public class jEdit {
 		message[2] = progress;
 		message[3] = Box.createVerticalStrut(6);
 
-		JOptionPane.showMessageDialog(view, message, jEdit.getProperty("memory-status.title"),
-				JOptionPane.INFORMATION_MESSAGE);
-	} //}}}
+		JOptionPane.showMessageDialog(view, message, jEdit.getProperty("memory-status.title"), JOptionPane.INFORMATION_MESSAGE);
+	} // }}}
 
-	//{{{ getJEditHome() method
+	// {{{ getJEditHome() method
 	/**
 	 * Returns the jEdit install directory.
 	 */
 	public static String getJEditHome() {
 		return jEditHome;
-	} //}}}
+	} // }}}
 
-	//{{{ getSettingsDirectory() method
+	// {{{ getSettingsDirectory() method
 	/**
-	 * Returns the path of the directory where user-specific settings
-	 * are stored. This will be <code>null</code> if jEdit was
-	 * started with the <code>-nosettings</code> command-line switch; do not
-	 * blindly use this method without checking for a <code>null</code>
-	 * return value first.
+	 * Returns the path of the directory where user-specific settings are
+	 * stored. This will be <code>null</code> if jEdit was started with the
+	 * <code>-nosettings</code> command-line switch; do not blindly use this
+	 * method without checking for a <code>null</code> return value first.
 	 */
 	public static String getSettingsDirectory() {
 		return settingsDirectory;
-	} //}}}
+	} // }}}
 
-	//{{{ getJARCacheDirectory() method
+	// {{{ getJARCacheDirectory() method
 	/**
 	 * Returns the directory where plugin cache files are stored.
+	 * 
 	 * @since jEdit 4.2pre1
 	 */
 	public static String getJARCacheDirectory() {
 		return jarCacheDirectory;
-	} //}}}
+	} // }}}
 
-	//{{{ backupSettingsFile() method
+	// {{{ backupSettingsFile() method
 	/**
-	 * Backs up the specified file in the settings directory.
-	 * You should call this on any settings files your plugin
-	 * writes.
-	 * @param file The file
+	 * Backs up the specified file in the settings directory. You should call
+	 * this on any settings files your plugin writes.
+	 * 
+	 * @param file
+	 *            The file
 	 * @since jEdit 4.0pre1
 	 */
 	public static void backupSettingsFile(File file) {
@@ -2409,9 +2603,9 @@ public class jEdit {
 		// doesn't exist.
 
 		MiscUtilities.saveBackup(file, 5, null, "~", backupDir);
-	} //}}}
+	} // }}}
 
-	//{{{ saveSettings() method
+	// {{{ saveSettings() method
 	/**
 	 * Saves all user preferences to disk.
 	 */
@@ -2445,16 +2639,18 @@ public class jEdit {
 
 			propsModTime = file2.lastModified();
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ exit() method
+	// {{{ exit() method
 	/**
-	 * Exits cleanly from jEdit, prompting the user if any unsaved files
-	 * should be saved first.
-	 * @param view The view from which this exit was called
-	 * @param reallyExit If background mode is enabled and this parameter
-	 * is true, then jEdit will close all open views instead of exiting
-	 * entirely.
+	 * Exits cleanly from jEdit, prompting the user if any unsaved files should
+	 * be saved first.
+	 * 
+	 * @param view
+	 *            The view from which this exit was called
+	 * @param reallyExit
+	 *            If background mode is enabled and this parameter is true, then
+	 *            jEdit will close all open views instead of exiting entirely.
 	 */
 	public static void exit(View view, boolean reallyExit) {
 		// Close dialog, view.close() call need a view...
@@ -2520,25 +2716,26 @@ public class jEdit {
 			Log.closeStream();
 
 			// Byebye...
-			//System.exit(0);
+			// System.exit(0);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ getEditServer() method
+	// {{{ getEditServer() method
 	/**
-	 * Returns the edit server instance. You can use this to find out the
-	 * port number jEdit is listening on.
+	 * Returns the edit server instance. You can use this to find out the port
+	 * number jEdit is listening on.
+	 * 
 	 * @since jEdit 4.2pre10
 	 */
 	public static EditServer getEditServer() {
 		return server;
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ Package-private members
+	// {{{ Package-private members
 
-	//{{{ updatePosition() method
+	// {{{ updatePosition() method
 	/**
 	 * If buffer sorting is enabled, this repositions the buffer.
 	 */
@@ -2560,25 +2757,29 @@ public class jEdit {
 			removeBufferFromList(buffer);
 			addBufferToList(buffer);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ addMode() method
+	// {{{ addMode() method
 	/**
-	 * Do not call this method. It is only public so that classes
-	 * in the org.gjt.sp.jedit.syntax package can access it.
-	 * @param mode The edit mode
+	 * Do not call this method. It is only public so that classes in the
+	 * org.gjt.sp.jedit.syntax package can access it.
+	 * 
+	 * @param mode
+	 *            The edit mode
 	 */
 	public static void addMode(Mode mode) {
-		//Log.log(Log.DEBUG,jEdit.class,"Adding edit mode "
-		//	+ mode.getName());
+		// Log.log(Log.DEBUG,jEdit.class,"Adding edit mode "
+		// + mode.getName());
 
 		modes.addElement(mode);
-	} //}}}
+	} // }}}
 
-	//{{{ loadMode() method
+	// {{{ loadMode() method
 	/**
 	 * Loads an XML-defined edit mode from the specified reader.
-	 * @param mode The edit mode
+	 * 
+	 * @param mode
+	 *            The edit mode
 	 */
 	/* package-private */static void loadMode(Mode mode) {
 
@@ -2624,7 +2825,7 @@ public class jEdit {
 		parser.setHandler(xmh);
 		try {
 			String f = fileName.substring(fileName.lastIndexOf('/') + 1);
-			//grammar = new BufferedReader(new FileReader(fileName));
+			// grammar = new BufferedReader(new FileReader(fileName));
 			grammar = new BufferedReader(new InputStreamReader(jEdit.class.getResourceAsStream("/modes/" + f)));
 
 			parser.parse(null, null, grammar);
@@ -2649,19 +2850,19 @@ public class jEdit {
 				Log.log(Log.ERROR, jEdit.class, io);
 			}
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ addPluginProps() method
+	// {{{ addPluginProps() method
 	static void addPluginProps(Properties map) {
 		propMgr.addPluginProps(map);
-	} //}}}
+	} // }}}
 
-	//{{{ removePluginProps() method
+	// {{{ removePluginProps() method
 	static void removePluginProps(Properties map) {
 		propMgr.removePluginProps(map);
-	} //}}}
+	} // }}}
 
-	//{{{ pluginError() method
+	// {{{ pluginError() method
 	static void pluginError(String path, String messageProp, Object[] args) {
 		synchronized (pluginErrorLock) {
 			if (pluginErrors == null)
@@ -2683,18 +2884,18 @@ public class jEdit {
 				});
 			}
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ setActiveView() method
+	// {{{ setActiveView() method
 	static void setActiveView(View view) {
 		jEdit.activeView = view;
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 
-	//{{{ Private members
+	// {{{ Private members
 
-	//{{{ Static variables
+	// {{{ Static variables
 	private static String jEditHome;
 	private static String settingsDirectory;
 	private static String jarCacheDirectory;
@@ -2732,12 +2933,12 @@ public class jEdit {
 
 	private static Thread mainThread;
 
-	//}}}
+	// }}}
 
 	private jEdit() {
 	}
 
-	//{{{ usage() method
+	// {{{ usage() method
 	private static void usage() {
 		System.out.println("Usage: jedit [<options>] [<files>]");
 
@@ -2772,19 +2973,18 @@ public class jEdit {
 		System.out.println("	 instance. Does nothing if passed to the initial jEdit instance.");
 		System.out.println();
 		System.out.println("Report bugs to Slava Pestov <slava@jedit.org>.");
-	} //}}}
+	} // }}}
 
-	//{{{ version() method
+	// {{{ version() method
 	private static void version() {
 		System.out.println("jEdit " + getVersion());
-	} //}}}
+	} // }}}
 
-	//{{{ makeServerScript() method
+	// {{{ makeServerScript() method
 	/**
 	 * Creates a BeanShell script that can be sent to a running edit server.
 	 */
-	private static String makeServerScript(boolean wait, boolean restore, boolean newView, boolean newPlainView,
-			String[] args, String scriptFile) {
+	private static String makeServerScript(boolean wait, boolean restore, boolean newView, boolean newPlainView, String[] args, String scriptFile) {
 		StringBuffer script = new StringBuffer();
 
 		String userDir = System.getProperty("user.dir");
@@ -2814,8 +3014,7 @@ public class jEdit {
 		}
 
 		script.append("view = jEdit.getLastView();\n");
-		script.append("buffer = EditServer.handleClient(" + restore + "," + newView + "," + newPlainView
-				+ ",parent,args);\n");
+		script.append("buffer = EditServer.handleClient(" + restore + "," + newView + "," + newPlainView + ",parent,args);\n");
 		script.append("if(buffer != null && " + wait + ") {\n");
 		script.append("\tbuffer.setWaitSocket(socket);\n");
 		script.append("\tdoNotCloseSocket = true;\n");
@@ -2829,14 +3028,13 @@ public class jEdit {
 
 		if (scriptFile != null) {
 			scriptFile = MiscUtilities.constructPath(userDir, scriptFile);
-			script.append("BeanShell.runScript(view,\"" + MiscUtilities.charsToEscapes(scriptFile)
-					+ "\",null,this.namespace);\n");
+			script.append("BeanShell.runScript(view,\"" + MiscUtilities.charsToEscapes(scriptFile) + "\",null,this.namespace);\n");
 		}
 
 		return script.toString();
-	} //}}}
+	} // }}}
 
-	//{{{ initMisc() method
+	// {{{ initMisc() method
 	/**
 	 * Initialise various objects, register protocol handlers.
 	 */
@@ -2869,18 +3067,18 @@ public class jEdit {
 		inputHandler = new DefaultInputHandler(null);
 
 		// Add our protocols to java.net.URL's list
-		System.getProperties().put("java.protocol.handler.pkgs",
-				"org.gjt.sp.jedit.proto|" + System.getProperty("java.protocol.handler.pkgs", ""));
+		System.getProperties().put("java.protocol.handler.pkgs", "org.gjt.sp.jedit.proto|" + System.getProperty("java.protocol.handler.pkgs", ""));
 
 		// Set the User-Agent string used by the java.net HTTP handler
-		String userAgent = "jEdit/" + getVersion() + " (Java " + System.getProperty("java.version") + ". "
-				+ System.getProperty("java.vendor") + "; " + System.getProperty("os.arch") + ")";
+		String userAgent = "jEdit/" + getVersion() + " (Java " + System.getProperty("java.version") + ". " + System.getProperty("java.vendor") + "; "
+				+ System.getProperty("os.arch") + ")";
 		System.getProperties().put("http.agent", userAgent);
 
-		/* Determine installation directory.
-		 * If the jedit.home property is set, use that.
-		 * Then, look for jedit.jar in the classpath.
-		 * If that fails, assume this is the web start version. */
+		/*
+		 * Determine installation directory. If the jedit.home property is set,
+		 * use that. Then, look for jedit.jar in the classpath. If that fails,
+		 * assume this is the web start version.
+		 */
 		jEditHome = System.getProperty("jedit.home");
 		if (jEditHome == null) {
 			String classpath = System.getProperty("java.class.path");
@@ -2917,8 +3115,8 @@ public class jEdit {
 			new File(jarCacheDirectory).mkdirs();
 		}
 
-		//if(jEditHome == null)
-		//	Log.log(Log.DEBUG,jEdit.class,"Web start mode");
+		// if(jEditHome == null)
+		// Log.log(Log.DEBUG,jEdit.class,"Web start mode");
 
 		// Add an EditBus component that will reload edit modes and
 		// macros if they are changed from within the editor
@@ -2931,9 +3129,9 @@ public class jEdit {
 				Thread.currentThread().setContextClassLoader(new JARClassLoader());
 			}
 		});
-	} //}}}
+	} // }}}
 
-	//{{{ initSystemProperties() method
+	// {{{ initSystemProperties() method
 	/**
 	 * Load system properties.
 	 */
@@ -2946,15 +3144,14 @@ public class jEdit {
 			propMgr.loadSystemProps(jEdit.class.getResourceAsStream("/org/gjt/sp/jedit/jedit_keys.props"));
 		} catch (Exception e) {
 			Log.log(Log.ERROR, jEdit.class, "Error while loading system properties!");
-			Log.log(Log.ERROR, jEdit.class, "One of the following property files could not be loaded:\n"
-					+ "- jedit.props\n" + "- jedit_gui.props\n" + "- jedit_keys.props\n"
-					+ "jedit.jar is probably corrupt.");
+			Log.log(Log.ERROR, jEdit.class, "One of the following property files could not be loaded:\n" + "- jedit.props\n" + "- jedit_gui.props\n"
+					+ "- jedit_keys.props\n" + "jedit.jar is probably corrupt.");
 			Log.log(Log.ERROR, jEdit.class, e);
 			System.exit(1);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ initSiteProperties() method
+	// {{{ initSiteProperties() method
 	/**
 	 * Load site properties.
 	 */
@@ -2991,9 +3188,9 @@ public class jEdit {
 				Log.log(Log.ERROR, jEdit.class, e);
 			}
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ initResources() method
+	// {{{ initResources() method
 	private static void initResources() {
 		builtInActionSet = new ActionSet(null, null, null, jEdit.class.getResource("actions.xml"));
 		builtInActionSet.setLabel(getProperty("action-set.jEdit"));
@@ -3004,9 +3201,9 @@ public class jEdit {
 		DockableWindowManager.loadDockableWindows(null, jEdit.class.getResource("dockables.xml"), null);
 
 		ServiceManager.loadServices(null, jEdit.class.getResource("services.xml"), null);
-	} //}}}
+	} // }}}
 
-	//{{{ initPlugins() method
+	// {{{ initPlugins() method
 	/**
 	 * Loads plugins.
 	 */
@@ -3026,9 +3223,9 @@ public class jEdit {
 		for (int i = 0; i < jars.length; i++) {
 			jars[i].checkDependencies();
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ initUserProperties() method
+	// {{{ initUserProperties() method
 	/**
 	 * Loads user properties.
 	 */
@@ -3040,14 +3237,14 @@ public class jEdit {
 			try {
 				propMgr.loadUserProps(new FileInputStream(file));
 			} catch (FileNotFoundException fnf) {
-				//Log.log(Log.DEBUG,jEdit.class,fnf);
+				// Log.log(Log.DEBUG,jEdit.class,fnf);
 			} catch (Exception e) {
 				Log.log(Log.ERROR, jEdit.class, e);
 			}
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ fontStyleToString() method
+	// {{{ fontStyleToString() method
 	private static String fontStyleToString(int style) {
 		if (style == 0)
 			return "PLAIN";
@@ -3059,14 +3256,14 @@ public class jEdit {
 			return "BOLDITALIC";
 		else
 			throw new RuntimeException("Invalid style: " + style);
-	} //}}}
+	} // }}}
 
-	//{{{ fontToString() method
+	// {{{ fontToString() method
 	private static String fontToString(Font font) {
 		return font.getFamily() + "-" + fontStyleToString(font.getStyle()) + "-" + font.getSize();
-	} //}}}
+	} // }}}
 
-	//{{{ initPLAF() method
+	// {{{ initPLAF() method
 	/**
 	 * Sets the Swing look and feel.
 	 */
@@ -3119,7 +3316,7 @@ public class jEdit {
 				defaults.put(prefix + ".caretForeground", caretColor);
 				defaults.put(prefix + ".selectionForeground", foreground);
 				defaults.put(prefix + ".selectionBackground", selectionColor);
-				//defaults.put(prefix + ".inactiveForeground",foreground);
+				// defaults.put(prefix + ".inactiveForeground",foreground);
 			}
 
 			defaults.put("Tree.background", background);
@@ -3132,9 +3329,9 @@ public class jEdit {
 
 		defaults.remove("SplitPane.border");
 		defaults.remove("SplitPaneDivider.border");
-	} //}}}
+	} // }}}
 
-	//{{{ runStartupScripts() method
+	// {{{ runStartupScripts() method
 	/**
 	 * Runs scripts in a directory.
 	 */
@@ -3162,9 +3359,9 @@ public class jEdit {
 				Log.log(Log.ERROR, jEdit.class, e);
 			}
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ initProxy() method
+	// {{{ initProxy() method
 	private static void initProxy() {
 		boolean socksEnabled = jEdit.getBooleanProperty("socks.enabled");
 		if (!socksEnabled) {
@@ -3228,9 +3425,9 @@ public class jEdit {
 				Authenticator.setDefault(new FirewallAuthenticator(pw));
 			}
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ FirewallAuthenticator class
+	// {{{ FirewallAuthenticator class
 	static class FirewallAuthenticator extends Authenticator {
 		PasswordAuthentication pw;
 
@@ -3241,11 +3438,10 @@ public class jEdit {
 		protected PasswordAuthentication getPasswordAuthentication() {
 			return pw;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ finishStartup() method
-	private static void finishStartup(final boolean gui, final boolean restore, final String userDir,
-			final String[] args) {
+	// {{{ finishStartup() method
+	private static void finishStartup(final boolean gui, final boolean restore, final String userDir, final String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				Buffer buffer = openFiles(null, userDir, args);
@@ -3256,8 +3452,7 @@ public class jEdit {
 
 				View view = null;
 
-				boolean restoreFiles = restore && jEdit.getBooleanProperty("restore")
-						&& (getBufferCount() == 0 || jEdit.getBooleanProperty("restore.cli"));
+				boolean restoreFiles = restore && jEdit.getBooleanProperty("restore") && (getBufferCount() == 0 || jEdit.getBooleanProperty("restore.cli"));
 
 				if (gui || count != 0) {
 					view = PerspectiveManager.loadPerspective(restoreFiles);
@@ -3281,10 +3476,10 @@ public class jEdit {
 
 				Log.log(Log.MESSAGE, jEdit.class, "Startup " + "complete");
 
-				//{{{ Report any plugin errors
+				// {{{ Report any plugin errors
 				if (pluginErrors != null) {
 					showPluginErrorDialog();
-				} //}}}
+				} // }}}
 
 				startupDone = true;
 
@@ -3295,9 +3490,9 @@ public class jEdit {
 				Toolkit.getDefaultToolkit();
 			}
 		});
-	} //}}}
+	} // }}}
 
-	//{{{ showPluginErrorDialog() method
+	// {{{ showPluginErrorDialog() method
 	private static void showPluginErrorDialog() {
 		if (pluginErrors == null)
 			return;
@@ -3308,9 +3503,9 @@ public class jEdit {
 
 		new ErrorListDialog(frame, getProperty("plugin-error.title"), caption, pluginErrors, true);
 		pluginErrors = null;
-	} //}}}
+	} // }}}
 
-	//{{{ getNotLoadedPluginJARs() method
+	// {{{ getNotLoadedPluginJARs() method
 	private static void getNotLoadedPluginJARs(Vector returnValue, String dir, String[] list) {
 		loop: for (int i = 0; i < list.length; i++) {
 			String name = list[i];
@@ -3332,9 +3527,9 @@ public class jEdit {
 
 			returnValue.addElement(path);
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ gotoMarker() method
+	// {{{ gotoMarker() method
 	private static void gotoMarker(final View view, final Buffer buffer, final String marker) {
 		VFSManager.runInAWTThread(new Runnable() {
 			public void run() {
@@ -3371,9 +3566,9 @@ public class jEdit {
 				}
 			}
 		});
-	} //}}}
+	} // }}}
 
-	//{{{ addBufferToList() method
+	// {{{ addBufferToList() method
 	private static void addBufferToList(Buffer buffer) {
 		synchronized (bufferListLock) {
 			String symlinkPath = buffer.getSymlinkPath();
@@ -3383,8 +3578,7 @@ public class jEdit {
 
 			// if only one, clean, 'untitled' buffer is open, we
 			// replace it
-			if (viewCount <= 1 && buffersFirst != null && buffersFirst == buffersLast && buffersFirst.isUntitled()
-					&& !buffersFirst.isDirty()) {
+			if (viewCount <= 1 && buffersFirst != null && buffersFirst == buffersLast && buffersFirst.isUntitled() && !buffersFirst.isDirty()) {
 				Buffer oldBuffersFirst = buffersFirst;
 				buffersFirst = buffersLast = buffer;
 				DisplayManager.bufferClosed(oldBuffersFirst);
@@ -3404,7 +3598,7 @@ public class jEdit {
 				buffersFirst = buffersLast = buffer;
 				return;
 			}
-			//{{{ Sort buffer list
+			// {{{ Sort buffer list
 			else if (sortBuffers) {
 				String str11, str12;
 				if (sortByName) {
@@ -3440,7 +3634,7 @@ public class jEdit {
 
 					_buffer = _buffer.next;
 				}
-			} //}}}
+			} // }}}
 
 			buffer.prev = buffersLast;
 			// fixes the hang that can occur if we 'save as' to a
@@ -3449,9 +3643,9 @@ public class jEdit {
 			buffersLast.next = buffer;
 			buffersLast = buffer;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ removeBufferFromList() method
+	// {{{ removeBufferFromList() method
 	private static void removeBufferFromList(Buffer buffer) {
 		synchronized (bufferListLock) {
 			bufferCount--;
@@ -3486,9 +3680,9 @@ public class jEdit {
 			// filename which requires re-sorting
 			buffer.next = buffer.prev = null;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ addViewToList() method
+	// {{{ addViewToList() method
 	private static void addViewToList(View view) {
 		viewCount++;
 
@@ -3499,9 +3693,9 @@ public class jEdit {
 			viewsLast.next = view;
 			viewsLast = view;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ removeViewFromList() method
+	// {{{ removeViewFromList() method
 	private static void removeViewFromList(View view) {
 		viewCount--;
 
@@ -3523,9 +3717,9 @@ public class jEdit {
 		} else {
 			view.next.prev = view.prev;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ closeView() method
+	// {{{ closeView() method
 	/**
 	 * closeView() used by exit().
 	 */
@@ -3543,11 +3737,12 @@ public class jEdit {
 			if (view == activeView)
 				activeView = null;
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ loadModeCatalog() method
+	// {{{ loadModeCatalog() method
 	/**
 	 * Loads a mode catalog file.
+	 * 
 	 * @since jEdit 3.2pre2
 	 */
 	private static void loadModeCatalog(String path, boolean resource) {
@@ -3579,11 +3774,12 @@ public class jEdit {
 				Log.log(Log.ERROR, jEdit.class, io);
 			}
 		}
-	} //}}}
+	} // }}}
 
-	//{{{ initKeyBindings() method
+	// {{{ initKeyBindings() method
 	/**
 	 * Loads all key bindings from the properties.
+	 * 
 	 * @since 3.1pre1
 	 */
 	private static void initKeyBindings() {
