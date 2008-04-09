@@ -898,30 +898,47 @@
 	<CODE>
 		jEdit.runR(buffer.getPath());
 	</CODE>
+	
+	<IS_SELECTED>
+		return jEdit.isRunREnabled();
+	</IS_SELECTED>
 </ACTION>	
 
 <ACTION NAME="run-p">
 	<CODE>
 		jEdit.runP(buffer.getPath());
 	</CODE>
+	
+	<IS_SELECTED>
+		return jEdit.isRunPEnabled();
+	</IS_SELECTED>
 </ACTION>	
 
 <ACTION NAME="run-g">
 	<CODE>
 		jEdit.runG(buffer.getPath());
 	</CODE>
+	<IS_SELECTED>
+		return jEdit.isRunGEnabled();
+	</IS_SELECTED>
 </ACTION>	
 			
 <ACTION NAME="run-pl">
 	<CODE>
 		jEdit.runPL(buffer.getPath());
 	</CODE>
+	<IS_SELECTED>
+		return jEdit.isRunPLEnabled();
+	</IS_SELECTED>
 </ACTION>	
 
 <ACTION NAME="run-gl">
 	<CODE>
 		jEdit.runGL(buffer.getPath());
 	</CODE>
+	<IS_SELECTED>
+		return jEdit.isRunGLEnabled();
+	</IS_SELECTED>
 </ACTION>	
 
 			
@@ -929,6 +946,9 @@
 	<CODE>
 		jEdit.uploadR(buffer.getPath());
 	</CODE>
+	<IS_SELECTED>
+		return jEdit.isUploadREnabled();
+	</IS_SELECTED>
 </ACTION>	
 	
 <ACTION NAME="save-a-copy-as">
