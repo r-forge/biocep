@@ -114,7 +114,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import python.server.PythonInterpreterSingleton;
+import python.PythonInterpreterSingleton;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -1705,27 +1705,9 @@ public class DirectJNI {
 		}
 	}
 
-	public File createFileFromBuffer(StringBuffer buffer) throws Exception {
-		final File tempFile = new File(TEMP_DIR + "/" + "temp.R").getCanonicalFile();
-		if (tempFile.exists())
-			tempFile.delete();
-
-		BufferedReader breader = new BufferedReader(new StringReader(buffer.toString()));
-		PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
-		String line;
-		do {
-			line = breader.readLine();
-			if (line != null) {
-				pwriter.println(line);
-			}
-		} while (line != null);
-		pwriter.close();
-		return tempFile;
-	}
-
 	public String sourceFromBuffer(StringBuffer buffer) {
 		try {
-			File tempFile = createFileFromBuffer(buffer);
+			File tempFile = PoolUtils.createFileFromBuffer(null,buffer);
 			toggleMarker();
 			_rEngine.rniEval(_rEngine.rniParse("source(\"" + tempFile.getAbsolutePath().replace('\\', '/') + "\")", 1), 0);
 
@@ -2890,9 +2872,9 @@ public class DirectJNI {
 		public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException {
 			File f = null;
 			try {
-				f = createFileFromBuffer(buffer);
+				f = PoolUtils.createFileFromBuffer(null,buffer);
 				PythonInterpreterSingleton.startLogCapture();
-				PythonInterpreterSingleton.getInstance().execfile(new java.io.FileInputStream(f));
+				PythonInterpreterSingleton.getInstance().execfile(f.getAbsolutePath());
 				System.out.println("#>>>:" + PythonInterpreterSingleton.getPythonStatus());
 				return PythonInterpreterSingleton.getPythonStatus();
 			} catch (Exception e) {
@@ -2948,7 +2930,7 @@ public class DirectJNI {
 
 		public String groovyExec(String groovyCommand) throws RemoteException {
 			try {
-				return groovy.server.GroovyInterpreterSingleton.getInstance().exec(groovyCommand);
+				return groovy.GroovyInterpreterSingleton.getInstance().exec(groovyCommand);
 			} catch (Exception e) {
 				throw new RemoteException("", e);
 			}
@@ -2957,9 +2939,7 @@ public class DirectJNI {
 		public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException {
 			File f = null;
 			try {
-				f = createFileFromBuffer(buffer);
-				return groovy.server.GroovyInterpreterSingleton.getInstance().execFromFile(f);
-
+				return groovy.GroovyInterpreterSingleton.getInstance().execFromBuffer(buffer);
 			} catch (Exception e) {
 				throw new RemoteException("", e);
 			} finally {
@@ -2970,7 +2950,7 @@ public class DirectJNI {
 
 		public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
 			try {
-				return groovy.server.GroovyInterpreterSingleton.getInstance().execFromFile(new File(WDIR + "/" + fileName));
+				return groovy.GroovyInterpreterSingleton.getInstance().execFromFile(new File(WDIR + "/" + fileName));
 			} catch (Exception e) {
 				throw new RemoteException("", e);
 			}
@@ -2987,7 +2967,7 @@ public class DirectJNI {
 		}
 
 		public boolean isGroovyEnabled() throws RemoteException {
-			return groovy.server.GroovyInterpreterSingleton.getInstance() != null;
+			return groovy.GroovyInterpreterSingleton.getInstance() != null;
 		}
 
 	};

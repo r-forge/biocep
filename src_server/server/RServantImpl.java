@@ -217,8 +217,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			});
 			
 			RServices rstub=(RServices)java.rmi.server.RemoteObject.toStub(this);
-			python.server.R._instance=rstub;
-			groovy.server.R._instance=rstub;
+			R._instance=rstub;
 			_isReady = true;
 
 		} catch (Exception ex) {

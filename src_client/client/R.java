@@ -1,4 +1,4 @@
-package python.client;
+package client;
 
 import graphics.rmi.GDApplet;
 import remoting.RServices;

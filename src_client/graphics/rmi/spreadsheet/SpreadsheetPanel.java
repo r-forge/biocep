@@ -32,6 +32,8 @@ import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GDApplet;
 import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
+import groovy.GroovyInterpreter;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -139,6 +141,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			}
 
 			public JGDPanelPop getCurrentJGPanelPop() {
+				return null;
+			}
+			
+			public GroovyInterpreter getGroovyInterpreter() {
 				return null;
 			}
 			

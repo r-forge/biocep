@@ -1,4 +1,4 @@
-package groovy.server;
+package server;
 
 import remoting.RServices;
 

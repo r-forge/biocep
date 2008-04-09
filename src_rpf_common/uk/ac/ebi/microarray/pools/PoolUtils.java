@@ -32,6 +32,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,6 +42,7 @@ import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -1240,6 +1242,26 @@ public class PoolUtils {
 			}
 			PropertyConfigurator.configure(log4jProperties);
 		}
+	}
+
+	public static File createFileFromBuffer(String fileExtension, StringBuffer buffer) throws Exception {
+		File tempFile=null;
+		tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_"+System.currentTimeMillis()+(fileExtension==null || fileExtension.equals("")?"":"."+fileExtension)).getCanonicalFile();	
+		
+		if (tempFile.exists())	tempFile.delete();
+		
+	
+		BufferedReader breader = new BufferedReader(new StringReader(buffer.toString()));
+		PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
+		String line;
+		do {
+			line = breader.readLine();
+			if (line != null) {
+				pwriter.println(line);
+			}
+		} while (line != null);
+		pwriter.close();
+		return tempFile;
 	}
 
 }

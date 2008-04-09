@@ -3,6 +3,8 @@ package server;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isMacOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
+import groovy.GroovyInterpreterSingleton;
+
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,6 +29,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+
 import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
@@ -55,16 +58,8 @@ public class ServerManager {
 	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
-		String[] options=new String[]{"a=677","b=88"};
-		java.util.HashMap<String,Object> map=new java.util.HashMap<String,Object>();
-		for (int i=0; i<options.length; ++i) {
-			int equalIdx=options[i].indexOf('=');
-			if (equalIdx!=-1) {
-				map.put(options[i].substring(0,equalIdx),options[i].substring(equalIdx+1));
-			}
-		}
-		System.out.println(map);
-
+		StringBuffer sb=new StringBuffer("print 78+9;\n<R>\nx=88\nplot(rnorm(566))\n</R>\n\nprint 6+9;\n");
+		System.out.println(GroovyInterpreterSingleton.getInstance().execFromBuffer(sb));
 	}
 
 	private static JTextArea createRSshProgressArea;
