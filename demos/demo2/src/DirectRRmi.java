@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 import java.rmi.Naming;
+import java.util.Arrays;
+
 import org.bioconductor.packages.biobase.ExpressionSet;
 import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
 import org.bioconductor.packages.rservices.RNamedArgument;
@@ -23,7 +25,6 @@ import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.vsn.vsnFunction;
 import org.bioconductor.packages.vsn.Vsn;
 import remoting.RServices;
-import util.Utils;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -31,7 +32,7 @@ import util.Utils;
 public class DirectRRmi {
 	public static void main(String[] args) throws Throwable {
 		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
-		System.out.println("Available Packages : " + Utils.flatArray(r.listPackages()));
+		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));
 		RNumeric squareOf4 = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"))
 				.squareAsReference(new RNumeric(4));
 		System.out.println("square of 4 : " + squareOf4.getValue()[0]);

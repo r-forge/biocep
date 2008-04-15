@@ -3312,7 +3312,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 															"A Virtualization HTTP Engine is now running on port "
 																	+ port
 																	+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
-																	+ PoolUtils.getHostIp() + ":" + port + "/cmd", "", JOptionPane.INFORMATION_MESSAGE);
+																	+ PoolUtils.getHostIp() + ":" + port + "/rvirtual/cmd", "", JOptionPane.INFORMATION_MESSAGE);
 											break;
 
 										}
@@ -3375,7 +3375,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 														"A Virtualization HTTP Engine is now running on port "
 																+ port
 																+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
-																+ _rForConsole.getHostIp() + ":" + port + "/cmd", "", JOptionPane.INFORMATION_MESSAGE);
+																+ _rForConsole.getHostIp() + ":" + port + "/rvirtual/cmd", "", JOptionPane.INFORMATION_MESSAGE);
 
 										break;
 									}
