@@ -9,8 +9,6 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 
-import uk.ac.ebi.microarray.pools.PoolUtils;
-
 public class GroovyInterpreterSingleton {
 
 	private static GroovyInterpreter _groovy = null;
@@ -26,6 +24,7 @@ public class GroovyInterpreterSingleton {
 					final Class<?> GroovyShellClass=GroovyInterpreterSingleton.class.getClassLoader().loadClass("groovy.lang.GroovyShell");
 					final Object groovyShell=GroovyShellClass.newInstance();
 					_groovy = new GroovyInterpreter() {
+						    private String _status;
 							public String exec(String expression) throws Exception {
 								ByteArrayOutputStream baos=new ByteArrayOutputStream();
 								PrintStream saveOut=System.out;
@@ -40,7 +39,8 @@ public class GroovyInterpreterSingleton {
 									System.setOut(saveOut);
 									System.setErr(saveErr);			
 								}
-								return new String(baos.toByteArray(),"UTF-8");
+								_status= new String(baos.toByteArray(),"UTF-8");
+								return _status;
 							}
 							
 							public String execFromFile(File f) throws Exception {
@@ -58,7 +58,12 @@ public class GroovyInterpreterSingleton {
 									System.setOut(saveOut);
 									System.setErr(saveErr);			
 								}
-								return new String(baos.toByteArray(),"UTF-8");
+								_status=new String(baos.toByteArray(),"UTF-8");
+								return _status;
+							}
+							
+							public String getStatus() throws Exception {
+								return _status;
 							}
 							
 							public String execFromBuffer(StringBuffer buffer) throws Exception {
@@ -109,8 +114,12 @@ public class GroovyInterpreterSingleton {
 									System.setErr(saveErr);
 									if (tempFile!=null) tempFile.delete();
 								}
-								return new String(baos.toByteArray(),"UTF-8");							}
+								_status=new String(baos.toByteArray(),"UTF-8");
+								return _status;
+							}
 					};
+					
+					
 				} catch (Exception e) {
 					//e.printStackTrace();
 				}

@@ -18,8 +18,8 @@
 	  
 	  <initScript name="globals.r" embed="true"/>	 
 	    	  	   
-	  <packageScript inline="library(vsn)" package="vsn" />
- 	  <packageScript name="vsnconfig.r" package="vsn" />
+	  <packageScript inline="library(vsn)" package="vsn" embed="true"/>
+ 	  <packageScript name="vsnconfig.r" package="vsn" embed="true" />
 	  
   </scripts>
   

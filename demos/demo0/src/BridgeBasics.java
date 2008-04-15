@@ -16,6 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RNamedArgument;
@@ -30,10 +32,15 @@ public class BridgeBasics {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(BridgeBasics.class);
 
 	public static void main(String args[]) throws Exception {
+		
+		
 		final RServices rs = DirectJNI.getInstance().getRServices();
+		
+
 		RChar s = (RChar) rs.call("paste", new RChar("str1"), new RChar("str2"), new RNamedArgument("sep", new RChar(
 				"--")));
 		System.out.println("s=" + s);
+
 		System.exit(0);
 	}
 }

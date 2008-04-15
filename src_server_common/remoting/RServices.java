@@ -35,12 +35,14 @@ public interface RServices extends ManagedServant {
 
 	public RObject call(String methodName, Object... args) throws RemoteException;
 
-	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException;	
+	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException;
+	
+	public RObject callAndGetObjectName(String methodName, Object... args) throws RemoteException;
 
 	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException;
 	
 	public Object callAndConvert(String methodName, Object... args) throws RemoteException;
-
+	
 	public boolean isReference(RObject obj) throws RemoteException;
 
 	public RObject referenceToObject(RObject refObj) throws RemoteException;
@@ -154,7 +156,7 @@ public interface RServices extends ManagedServant {
 	
 	public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException;
 	
-	public String groovyExceFromResource(String resource) throws RemoteException;
+	public String groovyExecFromResource(String resource) throws RemoteException;
 
 	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException;
 	
@@ -163,5 +165,7 @@ public interface RServices extends ManagedServant {
 	public Object groovyGet(String name) throws RemoteException;
 
 	public void groovySet(String name, Object Value) throws RemoteException;
+	
+	public String getGroovyStatus() throws RemoteException;
 
 }

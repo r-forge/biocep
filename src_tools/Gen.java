@@ -371,11 +371,8 @@ public class Gen {
 			rmicTask.execute();
 		}
 
-		
-		
-		
-		DirectJNI._rPackageInterfacesHash=new HashMap<String, Vector<Class<?>>>();
-		DirectJNI._rPackageInterfacesHash.put("org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction",new Vector<Class<?>>());
+		//DirectJNI._rPackageInterfacesHash=new HashMap<String, Vector<Class<?>>>();
+		//DirectJNI._rPackageInterfacesHash.put("org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction",new Vector<Class<?>>());
 
 		if (_webPublishingEnabled) {
 
@@ -609,8 +606,8 @@ public class Gen {
 			pw.close();
 		}
 
-		for (Iterator iter = DirectJNI._rPackageInterfacesHash.keySet().iterator(); iter.hasNext();) {
-			String className = (String) iter.next();
+		for (Iterator<?> iter = DirectJNI._rPackageInterfacesHash.keySet().iterator(); iter.hasNext();) {
+			String className = (String) iter.next();			
 			String packageName = className.substring(className.lastIndexOf('.') + 1);
 			File packScriptFile = new File(GEN_ROOT_SRC + FILE_SEPARATOR + className.replace('.', FILE_SEPARATOR) + ".R");
 			PrintWriter pw = new PrintWriter(new FileWriter(packScriptFile));

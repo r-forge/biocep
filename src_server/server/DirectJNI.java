@@ -72,6 +72,7 @@ import mapping.StandardReference;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.logging.Log;
+import org.bioconductor.packages.rservices.ObjectNameInterface;
 import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RArrayRef;
 import org.bioconductor.packages.rservices.RChar;
@@ -96,7 +97,6 @@ import org.bioconductor.packages.rservices.RNamedArgument;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RNumericRef;
 import org.bioconductor.packages.rservices.RObject;
-import org.bioconductor.packages.rservices.RObjectName;
 import org.bioconductor.packages.rservices.RUnknown;
 import org.bioconductor.packages.rservices.RVector;
 import org.htmlparser.Node;
@@ -600,11 +600,11 @@ public class DirectJNI {
 			}
 		}
 
-		if (obj instanceof RObjectName) {
-			String env = ((RObjectName) obj).getEnv();
+		if (obj instanceof ObjectNameInterface) {
+			String env = ((ObjectNameInterface) obj).getRObjectEnvironment();
 			if (env == null || env.equals(""))
 				env = ".GlobalEnv";
-			return e.rniEval(e.rniParse(env + "$" + ((RObjectName) obj).getName(), 1), 0);
+			return e.rniEval(e.rniParse(env + "$" + ((ObjectNameInterface) obj).getRObjectName(), 1), 0);
 		}
 
 		long resultId = -1;
@@ -2023,6 +2023,43 @@ public class DirectJNI {
 			}
 			return objHolder[0];
 		}
+		
+		public RObject callAndGetObjectName(final String methodName,final Object... args) throws RemoteException {
+			final RObject[] objHolder = new RObject[1];
+			final Exception[] exceptionHolder = new Exception[1];
+			_lastStatus = runR(new server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						objHolder[0] = DirectJNI.this.call(true, null, methodName, args);
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+			
+			
+			try {
+				String refClassName=objHolder[0].getClass().getName();
+				ObjectNameInterface objectName=(ObjectNameInterface)_mappingClassLoader.loadClass(refClassName.substring(0, refClassName.length()-"Ref".length())+"ObjectName").newInstance();
+				objectName.setRObjectName(PROTECT_VAR_PREFIXE +((ReferenceInterface)objHolder[0]).getRObjectId());
+				objectName.setRObjectEnvironment(PENV);
+				return (RObject)objectName;
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+		}
 
 		public Object callAndConvert(final String methodName, final Object... args) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
@@ -2924,7 +2961,7 @@ public class DirectJNI {
 			return null;
 		}
 
-		public String groovyExceFromResource(String resource) throws RemoteException {
+		public String groovyExecFromResource(String resource) throws RemoteException {
 			return null;
 		}
 
@@ -2968,6 +3005,10 @@ public class DirectJNI {
 
 		public boolean isGroovyEnabled() throws RemoteException {
 			return groovy.GroovyInterpreterSingleton.getInstance() != null;
+		}
+		
+		public String getGroovyStatus() throws RemoteException {
+			return null;
 		}
 
 	};

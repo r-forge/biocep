@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Vector;
 import javax.swing.JFrame;
 import org.apache.batik.swing.JSVGCanvas;
@@ -33,7 +34,6 @@ import org.bioconductor.packages.vsn.Vsn;
 import org.bioconductor.packages.vsn.vsnFunction;
 import remoting.RServices;
 import server.DirectJNI;
-import util.Utils;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -46,38 +46,9 @@ public class DirectPackUsage {
 		System.setErr(new PrintStream(System.out));
 		DirectJNI.init();
 		RServices r = DirectJNI.getInstance().getRServices();
-
-		
-	
-		Vector<String> result=r.getSvg("plot(rnorm(100))",100,100);
-		System.out.println(result);
-		String tempFile=System.getProperty("java.io.tmpdir")+"/svgview"+System.currentTimeMillis()+".svg";
-		PrintWriter pw=new PrintWriter(new FileWriter(tempFile));
-		for (int i=0; i<result.size(); ++i) pw.println(result.elementAt(i));
-		pw.close();
-		
-				
-		
-        JFrame f = new JFrame("Batik");
-        JSVGCanvas svgCanvas = new JSVGCanvas();
-        f.getContentPane().add(svgCanvas);
-
-        f.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-        
-        f.setSize(400, 400);
-        f.setVisible(true);
-
-        svgCanvas.setURI(new File(tempFile).toURL().toString());
-        
-        if (true) return;
-		System.exit(0);
 		
 		
-		System.out.println("Available Packages : " + Utils.flatArray(r.listPackages()));
+		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));
 		rGlobalEnvFunction globalPack = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"));
 		vsnFunction vsnPack = (vsnFunction) r.getPackage("vsnFunction");
 
@@ -102,10 +73,5 @@ public class DirectPackUsage {
 		System.exit(0);
 	}
 
-	/*
-	static {
-		Utils.initLog();
-	}
-	*/
 
 }

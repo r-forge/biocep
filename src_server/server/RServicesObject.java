@@ -125,7 +125,11 @@ public class RServicesObject implements RServices {
 	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException {
 		return null;
 	}
-
+	
+	public RObject callAndGetObjectName(String methodName, Object... args) throws RemoteException {
+		return null;
+	}
+	
 	public void createWorkingDirectoryFile(String fileName) throws RemoteException {
 	}
 
@@ -335,7 +339,7 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public String groovyExceFromResource(String resource) throws RemoteException {
+	public String groovyExecFromResource(String resource) throws RemoteException {
 		return null;
 	}
 
@@ -362,6 +366,8 @@ public class RServicesObject implements RServices {
 		return false;
 	}
 	
-	
+	public String getGroovyStatus() throws RemoteException {
+		return null;
+	}
 	
 }
