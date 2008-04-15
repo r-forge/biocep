@@ -39,7 +39,13 @@
 				<pathelement location="demos/demo0/src"/>
 				<pathelement path="${LOGGING_JAR}"/>
 				<pathelement path="${LOG4J_JAR}"/>	
-				<pathelement path="${HTMLPARSER_JAR}"/>							
+				<pathelement path="${HTMLPARSER_JAR}"/>		
+				
+				<pathelement path="lib/svg/batik-svggen.jar"/>
+				<pathelement path="lib/svg/batik-dom.jar"/>
+				<pathelement path="lib/svg/batik-awt-util.jar"/>
+				<pathelement path="lib/svg/batik-util.jar"/>								
+									
 			</classpath>
 			
 			<env key="Path" path="${R_LIB_PATH}"/>

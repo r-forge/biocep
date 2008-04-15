@@ -20,20 +20,19 @@ package org.bioconductor.packages.rservices;
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
  */
-public class RObjectName extends RObject implements ObjectNameInterface{
-
+public class RLogicalObjectName extends RLogical implements ObjectNameInterface {
 	private String _name; 
 	private String _env;
 	
-	public RObjectName() {
+	public RLogicalObjectName() {
 	}
 
-	public RObjectName(String name) {
+	public RLogicalObjectName(String name) {
 		this._name = name;
 		this._env = ".GlobalEnv";
 	}
 
-	public RObjectName(String environment, String name) {
+	public RLogicalObjectName(String environment, String name) {
 		this._name = name;
 		this._env = environment;
 	}
@@ -46,13 +45,12 @@ public class RObjectName extends RObject implements ObjectNameInterface{
 
 
 	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		return (((RObjectName) obj)._name.equals(this._name)) && (((RObjectName) obj)._env.equals(_env));
+		if (obj == null || !(obj instanceof ObjectNameInterface) )	return false;
+		return (((ObjectNameInterface) obj).getRObjectName().equals(this._name)) && (((ObjectNameInterface) obj).getRObjectEnvironment().equals(_env));
 	}
 	
 	public String toString() {
-		return "RObjectName:"+_env+"$"+_name;
+		return "RLogicalObjectName:"+_env+"$"+_name;
 	}
 
     public void writeExternal(java.io.ObjectOutput out)

@@ -69,7 +69,7 @@ public class Globals {
 
 	public static void regenerateRPackageClass(boolean embedRScript) throws Exception {
 
-		for (Iterator iter = DirectJNI._rPackageInterfacesHash.keySet().iterator(); iter.hasNext();) {
+		for (Iterator<?> iter = DirectJNI._rPackageInterfacesHash.keySet().iterator(); iter.hasNext();) {
 
 			String className = (String) iter.next();
 			String shortClassName = className.substring(className.lastIndexOf('.') + 1);
@@ -125,7 +125,7 @@ public class Globals {
 			}
 
 			Vector<Method> methodsVector = new Vector<Method>();
-			Vector classes = DirectJNI._rPackageInterfacesHash.get(className);
+			Vector<?> classes = DirectJNI._rPackageInterfacesHash.get(className);
 			for (int i = 0; i < classes.size(); ++i) {
 				Class<?> c = (Class<?>) classes.elementAt(i);
 				for (int j = 0; j < c.getDeclaredMethods().length; ++j) {
@@ -456,8 +456,6 @@ public class Globals {
 
 
 					
-					
-					
 					outputWriterWebservice
 					.println("\npublic String[] statefulGetSvg(String session, String expression, int width, int height) throws Exception{" +
 							"try {return (String[])((java.util.Vector<String>)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getSvg\", new Class[]{String.class,int.class,int.class}, new Object[]{expression,width,height})).toArray(new String[0]);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" +
@@ -516,9 +514,16 @@ public class Globals {
 				}
 
 				outputWriterWebservice
-						.println("\npublic void _exportStandardTypesToWSDL(RObject robject, RDataFrame rdataframe, RList rlist, REnvironment renvironment,"
-								+ " RFactor rfactor, RUnknown runknown, RArray rarray, RMatrix rmatrix, RVector rvector, RNumeric rnumeric, RInteger rinteger,"
-								+ " RChar rchar, RComplex rcomplex, RLogical rlogical, RRaw rraw, RNamedArgument rnamedargument, RObjectName robjectname){}");
+						.println("\npublic void _exportStandardTypesToWSDL(RObject robject, " 
+							+ " RDataFrame rdataframe, RList rlist, REnvironment renvironment,"
+							+ " RFactor rfactor, RUnknown runknown, RArray rarray, RMatrix rmatrix, RVector rvector, RNumeric rnumeric, RInteger rinteger,"
+							+ " RChar rchar, RComplex rcomplex, RLogical rlogical, RRaw rraw," 
+							+ " RNamedArgument rnamedargument, RObjectName robjectname," 
+							+ " RDataFrameObjectName rdataframeobjectname, RListObjectName rlistobjectname, REnvironmentObjectName renvironmentobjectname,"
+							+ " RFactorObjectName rfactorobjectname, RUnknownObjectName runknownobjectname, RArrayObjectName rarrayobjectname, RMatrixObjectName rmatrixobjectname, RNumericObjectName rnumericobjectname, RIntegerObjectName rintegerobjectname,"
+							+ " RCharObjectName rcharobjectname, RComplexObjectName rcomplexobjectname, RLogicalObjectName rlogicalobjectname, RRawObjectName rrawobjectname"
+							
+									+"){}");
 
 				outputWriterWebservice.println("\npublic void _exportMappedTypesToWSDL(");
 
@@ -531,6 +536,14 @@ public class Globals {
 					++counter;
 				}
 
+				for (String k : DirectJNI._s4BeansMappingRevert.keySet()) {
+					if (counter > 0) {
+						outputWriterWebservice.println(",");
+					}
+					outputWriterWebservice.println(k+"ObjectName" + " p" + counter);
+					++counter;
+				}
+				
 				for (String v : DirectJNI._factoriesMapping.values()) {
 					if (counter > 0)
 						outputWriterWebservice.println(",");
@@ -552,7 +565,7 @@ public class Globals {
 
 	public static void generateS4BeanRef() throws Exception {
 
-		for (Iterator iter = DirectJNI._s4BeansHash.keySet().iterator(); iter.hasNext();) {
+		for (Iterator<?> iter = DirectJNI._s4BeansHash.keySet().iterator(); iter.hasNext();) {
 
 			String className = (String) iter.next();
 
@@ -720,6 +733,46 @@ public class Globals {
 
 			outputWriter.println("}");
 			outputWriter.close();
+			
+			
+			
+			String objectNameOutputFileName = Globals.GEN_ROOT_SRC + Globals.FILE_SEPARATOR + className.replace('.', Globals.FILE_SEPARATOR) + "ObjectName" + ".java";
+			PrintWriter objectNameOutputWriter = new PrintWriter(objectNameOutputFileName);
+
+			objectNameOutputWriter.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
+			objectNameOutputWriter.println("import org.bioconductor.packages.rservices.*;");
+			objectNameOutputWriter.println("public class " + classShortName + "ObjectName" + " extends " + classShortName
+					+ " implements org.bioconductor.packages.rservices.ObjectNameInterface {");
+			objectNameOutputWriter.println("private String _name; private String _env;");
+			objectNameOutputWriter.println("public String getRObjectName() {return _name;}");
+			objectNameOutputWriter.println("public void setRObjectName(String _name) {this._name = _name;}");
+			objectNameOutputWriter.println("public String getRObjectEnvironment() {return _env;}");
+			objectNameOutputWriter.println("public void setRObjectEnvironment(String _env) {this._env = _env;}");
+			
+			objectNameOutputWriter.println("public boolean equals(Object obj) {");
+			objectNameOutputWriter.println("	if (obj == null || !(obj instanceof ObjectNameInterface) )	return false;");
+			objectNameOutputWriter.println("	return (((ObjectNameInterface) obj).getRObjectName().equals(this._name)) && (((ObjectNameInterface) obj).getRObjectEnvironment().equals(_env));");
+			objectNameOutputWriter.println("}");
+			
+			objectNameOutputWriter.println("public String toString() {");
+			objectNameOutputWriter.println("	return \""+classShortName + "ObjectName"+":\"+_env+\"$\"+_name;");
+			objectNameOutputWriter.println("}");
+
+			objectNameOutputWriter.println("public void writeExternal(java.io.ObjectOutput out)");
+			objectNameOutputWriter.println("    throws java.io.IOException {");
+			objectNameOutputWriter.println("	out.writeUTF(_env);");
+			objectNameOutputWriter.println("	out.writeUTF(_name);");
+			objectNameOutputWriter.println("}");
+
+			objectNameOutputWriter.println("public void readExternal(java.io.ObjectInput in)");
+			objectNameOutputWriter.println("    throws java.io.IOException, ClassNotFoundException {");
+			objectNameOutputWriter.println("	_env=in.readUTF();");
+			objectNameOutputWriter.println("	_name=in.readUTF();");
+			objectNameOutputWriter.println("}");
+			
+			objectNameOutputWriter.println("}");
+			objectNameOutputWriter.close();
+			
 		}
 
 	}

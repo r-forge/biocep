@@ -260,6 +260,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
+	
+	public RObject callAndGetObjectName(String methodName, Object... args) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().callAndGetObjectName(methodName, args);
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
 
 	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException {
 		DirectJNI.getInstance().getRServices().callAndAssign(varName, methodName, args);
@@ -709,8 +715,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		DirectJNI.getInstance().getRServices().pythonSet(name, Value);
 	}
 
-	public String groovyExceFromResource(String resource) throws RemoteException {
-		return DirectJNI.getInstance().getRServices().groovyExceFromResource(resource);
+	public String groovyExecFromResource(String resource) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().groovyExecFromResource(resource);
 	}
 
 	public String groovyExec(String groovyCommand) throws RemoteException {
@@ -741,7 +747,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		DirectJNI.getInstance().getRServices().groovySet(name, Value);		
 	}
 	
-	
+	public String getGroovyStatus() throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getGroovyStatus();
+	}
 	
 	
 }
