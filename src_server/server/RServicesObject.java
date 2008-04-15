@@ -133,7 +133,7 @@ public class RServicesObject implements RServices {
 	public void createWorkingDirectoryFile(String fileName) throws RemoteException {
 	}
 
-	public RObject get(String expression) throws RemoteException {
+	public RObject getObject(String expression) throws RemoteException {
 		return null;
 	}
 
@@ -327,7 +327,7 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 	
-	public Object getAndConvert(String expression) throws RemoteException {
+	public Object getObjectConverted(String expression) throws RemoteException {
 		return null;
 	}
 	
@@ -369,5 +369,21 @@ public class RServicesObject implements RServices {
 	public String getGroovyStatus() throws RemoteException {
 		return null;
 	}
+	
+	public void freeAllReferences() throws RemoteException {
+	}
+	
+	public RObject getObjectName(String expression) throws RemoteException {
+		return null;
+	}
+	
+	public RObject realizeObjectName(RObject objectName) throws RemoteException {
+		return null;
+	}
+	
+	public RObject realizeObjectNameConverted(RObject objectName) throws RemoteException {
+		return null;
+	}
+	
 	
 }

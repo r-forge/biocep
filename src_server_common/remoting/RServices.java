@@ -22,6 +22,7 @@ import java.rmi.RemoteException;
 import java.util.Vector;
 import mapping.RPackage;
 import org.bioconductor.packages.rservices.RObject;
+
 import uk.ac.ebi.microarray.pools.ManagedServant;
 
 /**
@@ -32,17 +33,17 @@ public interface RServices extends ManagedServant {
 	public String evaluate(String expression) throws RemoteException;
 
 	public String evaluate(String expression, int n) throws RemoteException;
-
+		
 	public RObject call(String methodName, Object... args) throws RemoteException;
 
+	public Object callAndConvert(String methodName, Object... args) throws RemoteException;
+	
 	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException;
 	
 	public RObject callAndGetObjectName(String methodName, Object... args) throws RemoteException;
 
 	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException;
-	
-	public Object callAndConvert(String methodName, Object... args) throws RemoteException;
-	
+		
 	public boolean isReference(RObject obj) throws RemoteException;
 
 	public RObject referenceToObject(RObject refObj) throws RemoteException;
@@ -53,12 +54,19 @@ public interface RServices extends ManagedServant {
 
 	public void assignReference(String name, RObject refObj) throws RemoteException;
 
-	public RObject get(String expression) throws RemoteException;
+	public RObject getObject(String expression) throws RemoteException;
 
 	public RObject getReference(String expression) throws RemoteException;
 	
-	public Object getAndConvert(String expression) throws RemoteException;
-
+	public Object getObjectConverted(String expression) throws RemoteException;
+	
+	public RObject getObjectName(String expression) throws RemoteException;
+	
+	public RObject realizeObjectName(RObject objectName) throws RemoteException;
+	
+	public Object realizeObjectNameConverted(RObject objectName) throws RemoteException;
+		
+	public void freeAllReferences() throws RemoteException;	
 	
 	public Object convert(RObject obj) throws RemoteException;
 	
@@ -116,6 +124,10 @@ public interface RServices extends ManagedServant {
 
 	public Vector<RAction> popRActions() throws java.rmi.RemoteException;
 	
+	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException;
+		
+	
+	
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
 
 	public void startHttpServer(int port) throws java.rmi.RemoteException;
@@ -123,9 +135,9 @@ public interface RServices extends ManagedServant {
 	public boolean isHttpServerStarted(int port) throws java.rmi.RemoteException;
 
 	public void stopHttpServer() throws java.rmi.RemoteException;
-	
-	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException;
 		
+	
+	
 	public String pythonExec(String pythonCommand) throws RemoteException;
 	
 	public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException;
@@ -133,8 +145,6 @@ public interface RServices extends ManagedServant {
 	public String pythonExceFromResource(String resource) throws RemoteException;
 
 	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException;
-
-	
 	
 	public RObject pythonEval(String pythonCommand) throws RemoteException;
 
@@ -167,5 +177,6 @@ public interface RServices extends ManagedServant {
 	public void groovySet(String name, Object Value) throws RemoteException;
 	
 	public String getGroovyStatus() throws RemoteException;
+	
 
 }

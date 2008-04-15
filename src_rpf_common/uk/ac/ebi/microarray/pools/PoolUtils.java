@@ -681,9 +681,10 @@ public class PoolUtils {
 	}
 
 	public static String replaceAll(String input, String replaceWhat, String replaceWith) throws Exception {
-		int p;
-		while ((p = input.indexOf(replaceWhat)) != -1) {
+		int p; int bindex=0;
+		while ((p = input.indexOf(replaceWhat,bindex)) != -1) {			
 			input = input.substring(0, p) + replaceWith + input.substring(p + replaceWhat.length());
+			bindex=p + replaceWith.length();
 		}
 		return input;
 	}

@@ -219,8 +219,6 @@ public class Gen {
 				String functionName = attrs.getNamedItem("name").getNodeValue();
 
 				boolean forWeb = attrs.getNamedItem("forWeb") != null && attrs.getNamedItem("forWeb").getNodeValue().equalsIgnoreCase("true");
-				boolean singleThreadedWeb = attrs.getNamedItem("singleThreadedWeb") != null
-						&& attrs.getNamedItem("singleThreadedWeb").getNodeValue().equalsIgnoreCase("true");
 
 				String signature = (attrs.getNamedItem("signature") == null ? "" : attrs.getNamedItem("signature").getNodeValue() + ",");
 				String renameTo = (attrs.getNamedItem("renameTo") == null ? null : attrs.getNamedItem("renameTo").getNodeValue());
@@ -239,7 +237,7 @@ public class Gen {
 
 				}
 
-				sigMap.put(signature, new FAttributes(renameTo, forWeb, singleThreadedWeb));
+				sigMap.put(signature, new FAttributes(renameTo, forWeb));
 
 				if (forWeb)
 					_webPublishingEnabled = true;
@@ -292,6 +290,9 @@ public class Gen {
 		for (int i = 0; i < rwebservicesScripts.length; ++i)
 			DirectJNI.getInstance().getRServices().sourceFromResource(rwebservicesScripts[i]);
 
+		
+		
+		
 		String lastStatus = DirectJNI.getInstance().runR(new ExecutionUnit() {
 			public void run(Rengine e) {
 				DirectJNI.getInstance().toggleMarker();
@@ -343,6 +344,9 @@ public class Gen {
 
 			}
 		});
+		
+		
+		
 		log.info(lastStatus);
 
 		log.info(DirectJNI._rPackageInterfacesHash);
