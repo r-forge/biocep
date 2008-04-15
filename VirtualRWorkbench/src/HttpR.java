@@ -54,8 +54,7 @@ public class HttpR {
 			}
 		}));
 
-		RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", new Class<?>[] { RServices.class }, new HttpClient(
-				new MultiThreadedHttpConnectionManager()));
+		RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", new Class<?>[] { RServices.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));
 
 		System.out.println(r.consoleSubmit("x=88"));
 		

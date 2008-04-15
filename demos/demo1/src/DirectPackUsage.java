@@ -15,16 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileWriter;
+
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Vector;
-import javax.swing.JFrame;
-import org.apache.batik.swing.JSVGCanvas;
 import org.bioconductor.packages.biobase.ExpressionSet;
 import org.bioconductor.packages.rGlobalEnv.Point;
 import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
@@ -46,6 +39,13 @@ public class DirectPackUsage {
 		System.setErr(new PrintStream(System.out));
 		DirectJNI.init();
 		RServices r = DirectJNI.getInstance().getRServices();
+		
+		r.evaluate("data(kidney)");
+		
+		//r.callAndGetObjectName(methodName, args)
+		
+		
+		System.exit(0);
 		
 		
 		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));

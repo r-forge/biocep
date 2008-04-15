@@ -306,8 +306,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 
-	public RObject get(String expression) throws RemoteException {
-		RObject result = DirectJNI.getInstance().getRServices().get(expression);
+	public RObject getObject(String expression) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().getObject(expression);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
@@ -318,10 +318,36 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 	
-	public Object getAndConvert(String expression) throws RemoteException {
-		Object result = DirectJNI.getInstance().getRServices().getAndConvert(expression);
+	public Object getObjectConverted(String expression) throws RemoteException {
+		Object result = DirectJNI.getInstance().getRServices().getObjectConverted(expression);
 		_log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
+	}
+	
+	public RObject getObjectName(String expression) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().getObjectName(expression);
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+	
+	
+	public RObject realizeObjectName(RObject objectName) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().realizeObjectName(objectName);
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+	
+	
+	public Object realizeObjectNameConverted(RObject objectName) throws RemoteException {
+		Object result = DirectJNI.getInstance().getRServices().realizeObjectNameConverted(objectName);
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+	
+	public void freeAllReferences() throws RemoteException {
+		DirectJNI.getInstance().getRServices().freeAllReferences();
+		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		
 	}
 	
 	public Object convert(RObject obj) throws RemoteException {
@@ -498,7 +524,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 
 	public Serializable pop(String symbol) throws RemoteException {
-		Serializable result = DirectJNI.getInstance().getRServices().get(symbol);
+		Serializable result = DirectJNI.getInstance().getRServices().getObject(symbol);
 		System.out.println("result for " + symbol + " : " + result);
 		return result;
 	}

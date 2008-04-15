@@ -3,7 +3,7 @@
   <publish>
 	
 	<functions>											
-		<function name="square" />
+		<function name="square" forWeb="true"/>
 		<function name="vsn2" returnType="vsn" signature="ExpressionSet" forWeb="true" renameTo="vsn2Web"/> 					
 	</functions>
 		

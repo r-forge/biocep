@@ -1994,7 +1994,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	private void persistState() {
 		try {
-			PropertiesGenerator.main(new String[] { GDApplet.SETTINGS_FILE, "working.dir.root=" + ((RChar) _rForConsole.get("getwd()")).getValue()[0],
+			PropertiesGenerator.main(new String[] { GDApplet.SETTINGS_FILE, "working.dir.root=" + ((RChar) _rForConsole.getObject("getwd()")).getValue()[0],
 					"command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()) });
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -3184,7 +3184,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											RObject robj = null;
 											try {
 												((JGDPanelPop) _graphicPanel).setAutoModes(true, false);
-												robj = _rForConsole.get(dialog.getExpr());
+												robj = _rForConsole.getObject(dialog.getExpr());
 											} catch (NoMappingAvailable re) {
 												JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), re.getMessage(), "R Error",
 														JOptionPane.ERROR_MESSAGE);

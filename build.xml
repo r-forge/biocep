@@ -77,7 +77,7 @@
 		<if><not><isset property="propsembed"/></not><then><property name="propsembed" value=""/></then></if>
 		<if><not><isset property="keepintermediate"/></not><then><property name="keepintermediate" value=""/></then></if>
 		<if><not><isset property="formatsource"/></not><then><property name="formatsource" value=""/></then></if>
-		<if><not><isset property="ws.r.api"/></not><then><property name="ws.r.api" value="false"/></then></if>
+		<if><not><isset property="ws.r.api"/></not><then><property name="ws.r.api" value="true"/></then></if>
 		<if><not><isset property="targetjdk"/></not><then><property name="targetjdk" value=""/></then></if>
 		
 		<java maxmemory="1024m" classname="Gen" fork="true">
