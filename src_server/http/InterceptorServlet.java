@@ -65,7 +65,11 @@ public class InterceptorServlet extends javax.servlet.http.HttpServlet implement
 		}
 		
 		RequestDispatcher dispatcher=getServletContext().getNamedDispatcher("WSServlet");
-		dispatcher.forward(request, response);
+		try {
+			dispatcher.forward(request, response);
+		} catch (Throwable e) {
+			//e.printStackTrace();
+		}
 	}
 	
 	
