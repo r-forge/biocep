@@ -18,11 +18,15 @@
 import java.awt.BorderLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.bioconductor.packages.biobase.ExpressionSet;
+
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsoleDialog;
 import uk.ac.ebi.microarray.pools.db.monitor.ServantStatus;
@@ -38,9 +42,10 @@ public class HttpR {
 	public static void main(String[] args) throws Throwable {
 
 		//final String cmdUrl = System.getProperty("url");
-		final String cmdUrl = "http://127.0.0.1:8080/rv/cmd";
+		final String cmdUrl = "http://127.0.0.1:8080/rvirtual/cmd";
 		HashMap<String, Object> options = new HashMap<String, Object>();
-		options.put("privatename", "titi");
+		//options.put("privatename", "tata");
+		options.put("urls", new URL[]{new URL("http://127.0.0.1:8080/rws/mapping/classes/")});
 		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
@@ -55,8 +60,12 @@ public class HttpR {
 		}));
 
 		RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", new Class<?>[] { RServices.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));
-
-		System.out.println(r.consoleSubmit("x=88"));
+		
+		r.evaluate("library(vsn)");
+		r.evaluate("data(kidney)");
+		ExpressionSet kidney=(ExpressionSet)r.getObject("kidney");
+		
+		System.out.println(kidney);
 		
 		System.exit(0);
 		

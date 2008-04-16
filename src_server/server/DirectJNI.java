@@ -485,7 +485,7 @@ public class DirectJNI {
 					if (!new File(indexFile).exists()) {
 						indexFile = null;
 					} else {
-						System.out.println("index file:" + indexFile);
+						//System.out.println("index file:" + indexFile);
 					}
 				}
 
@@ -938,9 +938,9 @@ public class DirectJNI {
 
 	// public for internal use only (RListener)
 	public void putObjectAndAssignName(RObject obj, String name, boolean privateEnv) throws Exception {
-		System.out.println("putObjectAndAssignName called, obj:" + obj);
+		//System.out.println("putObjectAndAssignName called, obj:" + obj);
 		long resultId = putObject(obj);
-		System.out.println("Result id=" + resultId);
+		//System.out.println("Result id=" + resultId);
 		_rEngine.rniAssign(name, resultId, (privateEnv ? _privateEnvExp : 0));
 	}
 
@@ -1775,7 +1775,7 @@ public class DirectJNI {
 	}
 
 	private Object convert(RObject obj) {
-		System.out.println("obj:" + obj);
+		//System.out.println("obj:" + obj);
 		Object result = obj;
 		if (result instanceof RInteger) {
 			if (((RInteger) result).getValue().length == 1) {

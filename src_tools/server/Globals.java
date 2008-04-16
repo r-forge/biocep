@@ -166,7 +166,7 @@ public class Globals {
 				String mHeaderAsRef = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName()) + " " + m_name + "AsReference" + "(";
 				String mHeaderStatefull = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName()) + " " + m_name+"Statefull" + "( String sessionId,";
 				String mHeaderAsObjectName = " public " + (m.getReturnType() == null ? "void" : m.getReturnType().getName()) + " " + m_name+"GetObjectName" + "( String sessionId,";
-				System.out.println(DirectJNI.getInstance().getRServices().consoleSubmit("names(formals('" + m.getName() + "'))") );
+
 				String[] formalArgs = ((RChar) DirectJNI.getInstance().getRServices().getObject("names(formals('" + m.getName() + "'))")).getValue();
 				boolean hasDotDotDot = formalArgs.length > 0 && formalArgs[formalArgs.length - 1].equals("...");
 

@@ -44,7 +44,6 @@ import http.TunnelingException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -242,15 +241,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		@Override
 		public void unlock() {
+			
 			if (isCollaborativeMode()) {
 				try {
-					if (((JGDPanelPop) _graphicPanel).getGdDevice().hasGraphicObjects()) {
-						synchronizeCollaborators();
-					}
+					if (((JGDPanelPop) _graphicPanel).getGdDevice().hasGraphicObjects()) {synchronizeCollaborators();}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
+			
 			popActions();
 			super.unlock();
 
@@ -457,9 +456,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 
 								_rForConsole = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[] { RServices.class,
-										HttpMarker.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));
+										HttpMarker.class },  new HttpClient(new MultiThreadedHttpConnectionManager()));
 								_rForPopCmd = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[] { RServices.class,
-										HttpMarker.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));
+										HttpMarker.class },  new HttpClient(new MultiThreadedHttpConnectionManager()));
 								_rForFiles = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[] { RServices.class,
 										HttpMarker.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));
 

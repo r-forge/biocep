@@ -3,7 +3,6 @@ package server;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isMacOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
-import groovy.GroovyInterpreterSingleton;
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.File;
@@ -56,8 +55,9 @@ public class ServerManager {
 	private static final String RVEREND = "R$VER$END";
 
 	public static void main(String[] args) throws Exception {
-		StringBuffer sb=new StringBuffer("print 78+9;\n<R>\nx=88\nplot(rnorm(566))\n</R>\n\nprint 6+9;\n");
-		System.out.println(GroovyInterpreterSingleton.getInstance().execFromBuffer(sb));
+		RServices r=ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, "test",
+				false, new URL[]{new File("J:/workspace/biocep/VirtualRWorkbench/distrib/mapping.jar").toURL()});
+		System.out.println(r.consoleSubmit("76+9"));
 	}
 
 	private static JTextArea createRSshProgressArea;
@@ -638,7 +638,12 @@ public class ServerManager {
 				for (int i = 0; i < codeUrls.length; ++i) {
 					URL codeUrl = codeUrls[i];
 					if (codeUrl.toString().toLowerCase().startsWith("file:")) {
-						cp += System.getProperty("path.separator") + codeUrl.toString().substring("file:".length());
+						String cpElement=codeUrl.toString().substring("file:".length()).replace('\\', '/');
+						if (isWindowsOs() && cpElement.startsWith("/")) cpElement=cpElement.substring(1);
+						System.out.println("=="+cpElement
+								+"==");
+						
+						//cp += ";" + cpElement ;
 					}
 				}
 			}
@@ -659,20 +664,20 @@ public class ServerManager {
 				command.add((isWindowsOs() ? "\"" : "") + "-DXms" + memoryMinMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-DXmx" + memoryMaxMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
 
-				command.add("-classpath");
+				command.add("-cp");
 				command.add((isWindowsOs() ? "\"" : "") + cp + (isWindowsOs() ? "\"" : ""));
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
 
 				String codeBase= "http://" + codeServerHostIp + ":" + codeServerPort + "/classes/";
-				if (keepAlive) {					
-					if (codeUrls!=null && codeUrls.length>0) {for (int i=0; i<codeUrls.length;++i)  codeBase+=" "+codeUrls[i].toString();}					
-					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=" + codeBase + (isWindowsOs() ? "\"" : ""));
-					command.add((isWindowsOs() ? "\"" : "") + "-Dpreloadall=true" + (isWindowsOs() ? "\"" : ""));
-				} else {
-					command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase="+ codeBase+(isWindowsOs() ? "\"" : ""));
-				}
+				
 
+				if (codeUrls!=null && codeUrls.length>0) {for (int i=0; i<codeUrls.length;++i)  codeBase+=" "+codeUrls[i].toString();}
+				command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase="+ codeBase+(isWindowsOs() ? "\"" : ""));
+				if (keepAlive) {
+					command.add((isWindowsOs() ? "\"" : "") + "-Dpreloadall=true" + (isWindowsOs() ? "\"" : ""));
+				}
+			
 				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
