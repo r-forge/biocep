@@ -634,19 +634,6 @@ public class ServerManager {
 			System.out.println("jripath:" + jripath + "\n");
 
 			String cp = root + "classes";
-			if (codeUrls != null && codeUrls.length > 0) {
-				for (int i = 0; i < codeUrls.length; ++i) {
-					URL codeUrl = codeUrls[i];
-					if (codeUrl.toString().toLowerCase().startsWith("file:")) {
-						String cpElement=codeUrl.toString().substring("file:".length()).replace('\\', '/');
-						if (isWindowsOs() && cpElement.startsWith("/")) cpElement=cpElement.substring(1);
-						System.out.println("=="+cpElement
-								+"==");
-						
-						//cp += ";" + cpElement ;
-					}
-				}
-			}
 
 			ManagedServant[] servantHolder = new ManagedServant[1];
 			RemoteException[] exceptionHolder = new RemoteException[1];
