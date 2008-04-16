@@ -829,7 +829,7 @@
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
 							
 
-		<java maxmemory="1024m" classname="graphics.rmi.ServerLauncher"
+		<java maxmemory="1024m" classname="server.ServerManager"
 			fork="true" spawn="${spawn}">
 			<classpath>
 				

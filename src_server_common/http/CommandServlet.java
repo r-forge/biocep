@@ -18,11 +18,14 @@
 package http;
 
 import graphics.pop.GDDevice;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.ConnectException;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
@@ -46,6 +49,7 @@ import uk.ac.ebi.microarray.pools.RPFSessionInfo;
 import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
 import uk.ac.ebi.microarray.pools.RmiCallTimeout;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
+import uk.ac.ebi.microarray.pools.YesSecurityManager;
 
 
 /**
@@ -83,7 +87,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 	}
 
 	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+		
 		HttpSession session = null;
 		Object result = null;
 
@@ -121,6 +125,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					
 
 					RServices r = null;
+					URL[] codeUrls = null;
 
 					if (_rkit == null) {
 
@@ -180,9 +185,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								
 								if (r==null) {
 									
-									String urlHead=request.getRequestURL().substring(0, request.getRequestURL().lastIndexOf(request.getRequestURI()));
-									URL[] codeUrls=(URL[])options.get("urls");
-									
+									codeUrls=(URL[])options.get("urls");								
 									System.out.println("CODE URL->"+Arrays.toString(codeUrls));
 									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,
 											codeUrls);
@@ -223,6 +226,10 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("PROCESS_ID", r.getProcessId());
 					if (privateName!=null) session.setAttribute("PRIVATE_NAME", privateName);
 					
+					if (codeUrls!=null && codeUrls.length>0) {
+						session.setAttribute("CODEURLS", codeUrls);
+					} 
+					 
 
 					session.setAttribute("threads", new ThreadsHolder());
 
@@ -283,16 +290,20 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					if (servant == null) {
 						throw new Exception("Bad Servant Name :" + servantName);
 					}
-
 					String methodName = (String) PoolUtils.hexToObject(request.getParameter("methodname"));
-					Class<?>[] methodSignature = (Class[]) PoolUtils.hexToObject(request.getParameter("methodsignature"));
+					
+					ClassLoader urlClassLoader=this.getClass().getClassLoader();
+					if (session.getAttribute("CODEURLS")!=null) {
+						urlClassLoader=new URLClassLoader((URL[])session.getAttribute("CODEURLS"),this.getClass().getClassLoader());
+					}
+					
+					Class<?>[] methodSignature = (Class[]) PoolUtils.hexToObject(request.getParameter("methodsignature") );
+					
 					final Method m = servant.getClass().getMethod(methodName, methodSignature);
 					if (m == null) {
 						throw new Exception("Bad Method Name :" + methodName);
 					}
-
-					final Object[] methodParams = (Object[]) PoolUtils.hexToObject(request.getParameter("methodparameters"));
-
+					final Object[] methodParams = (Object[]) PoolUtils.hexToObject(request.getParameter("methodparameters"), urlClassLoader);
 					final Object[] resultHolder = new Object[1];
 					Runnable rmiRunnable = new Runnable() {
 						public void run() {
@@ -427,6 +438,9 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 		PoolUtils.initRmiSocketFactory();
 		getServletContext().setAttribute("SESSIONS_MAP", new HashMap<String, HttpSession>());
 		getServletContext().setAttribute("SESSIONS_ATTRIBUTES_MAP", new HashMap<String, HashMap<String, Object>>());
+		if (System.getSecurityManager() == null) {
+			System.setSecurityManager(new YesSecurityManager());
+		}
 	}
 
 	HashMap<String, Object> cloneAttributes(HttpSession session) {

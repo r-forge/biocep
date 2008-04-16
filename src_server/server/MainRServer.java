@@ -86,6 +86,8 @@ public class MainRServer {
 			log.info("Servant " + sname + " instantiated successfully.");
 
 		} catch (InvocationTargetException ite) {
+			ite.printStackTrace();
+			
 			if (servantCreationListener != null) {
 				PoolUtils.callBack(servantCreationListener, null, new RemoteException("", ite.getTargetException()));
 			}
