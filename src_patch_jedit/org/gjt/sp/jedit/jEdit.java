@@ -460,10 +460,11 @@ public class jEdit {
 						String l = null;
 						while ((l = br.readLine()) != null)
 							sb.append(l + "\n");
-						_rgui.getR().sourceFromBuffer(sb);
+						final String rLog=_rgui.getR().sourceFromBuffer(sb);
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
 								_rgui.getConsoleLogger().printAsOutput("script sourced to R\n");
+								_rgui.getConsoleLogger().printAsOutput("R:\n" + rLog + "\n");
 							}
 						});
 

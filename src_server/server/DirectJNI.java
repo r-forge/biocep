@@ -1894,17 +1894,15 @@ public class DirectJNI {
 		int[] lengthHolder=new int[1];
 		
 		int[] dim=getJavaArrayDimensions(javaArray, classHolder, lengthHolder);
-		
-		
 		RVector vector=null;
-		Class<?> componentType=classHolder[0];
 		
+		Class<?> componentType=classHolder[0];		
 		if (componentType==Integer.class || componentType==int.class) vector=new RInteger(new int[lengthHolder[0]]);
 		else if (componentType==Double.class || componentType==double.class) vector=new RNumeric(new double[lengthHolder[0]]);
 		else if (componentType==Boolean.class || componentType==boolean.class) vector=new RLogical(new boolean[lengthHolder[0]]);
 		else if (componentType==String.class) vector=new RChar(new String[lengthHolder[0]]);
-		
-		
+		else throw new RuntimeException("unsupported elements class type :"+componentType);
+				
 	    Vector<Integer> v1=new Vector<Integer>();
 		int p1=1;for (int i=dim.length-1; i>0;--i) {p1=p1*dim[i];v1.add(0,p1);}
 	    Vector<Integer> v2=new Vector<Integer>();
@@ -1971,8 +1969,7 @@ public class DirectJNI {
 				result = ((RLogical) result).getValue();
 			}
 		} else if (result instanceof RArray){
-			result=getJavaArrayFromRArray((RArray)result);
-			
+			result=getJavaArrayFromRArray((RArray)result);			
 		}
 		return result;
 	}
