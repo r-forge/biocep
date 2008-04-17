@@ -41,6 +41,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -595,8 +596,11 @@ public class DirectJNI {
 					obj = new RNumeric((double[]) obj);
 				else if (componentType == boolean.class)
 					obj = new RLogical((boolean[]) obj);
-				else
-					throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
+				else {
+					obj=getRArrayFromJavaArray(obj);
+					
+					//throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
+				}
 			}
 		}
 
@@ -1774,6 +1778,171 @@ public class DirectJNI {
 		DirectJNI.generateMaps(jarUrl, false);
 	}
 
+	
+	public static Object getJavaArrayFromRArray__(RArray array) {
+		int[] dim=array.getDim();
+		
+		RVector vector = array.getValue();
+		Class<?> componentType=null;
+		if (vector instanceof RInteger) componentType=int.class;
+		else if (vector instanceof RNumeric) componentType=double.class;
+		else if (vector instanceof RChar) componentType=String.class;
+		else if (vector instanceof RLogical) componentType=boolean.class;
+				
+	    Object result=null;
+	    try {result=Array.newInstance( componentType , dim);} catch (Exception e) {e.printStackTrace();}				
+		Vector<Integer> v=new Vector<Integer>();
+		int p=1;for (int i=dim.length-1; i>0;--i) {	p=p*dim[i];	v.add(0,p);	}
+		
+		for ( int bi=0; bi<p*dim[0]; ++bi) {
+			int bindex=bi;
+			int[] indexes=new int[dim.length];
+			for (int i=0; i<indexes.length-1;++i) {
+				indexes[i]=bindex / v.elementAt(i); 
+				bindex=bindex % v.elementAt(i); 
+			}
+			indexes[indexes.length-1]=bindex;
+		
+			Object arrayTail=null;		
+			if (dim.length==1) {
+				arrayTail=result;
+			} else {
+				arrayTail=Array.get(result, indexes[0]);
+				for (int i=1; i<indexes.length-1;++i) arrayTail=Array.get(arrayTail, indexes[i] );
+			}				
+			if (vector instanceof RInteger) Array.setInt(arrayTail, indexes[indexes.length-1], ((RInteger)vector).getValue()[bi] );
+			else if (vector instanceof RNumeric) Array.setDouble(arrayTail, indexes[indexes.length-1], ((RNumeric)vector).getValue()[bi] );
+			else if (vector instanceof RChar) Array.set(arrayTail, indexes[indexes.length-1], ((RChar)vector).getValue()[bi] );
+			else if (vector instanceof RLogical) Array.setBoolean(arrayTail, indexes[indexes.length-1], ((RLogical)vector).getValue()[bi] );
+		}
+		
+		return result;
+	}
+
+	
+	public static Object getJavaArrayFromRArray(RArray array) {
+		int[] dim=array.getDim();
+		
+		RVector vector = array.getValue();
+		Class<?> componentType=null;
+		if (vector instanceof RInteger) componentType=int.class;
+		else if (vector instanceof RNumeric) componentType=double.class;
+		else if (vector instanceof RChar) componentType=String.class;
+		else if (vector instanceof RLogical) componentType=boolean.class;
+				
+	    Object result=null;
+	    try {result=Array.newInstance( componentType , dim);} catch (Exception e) {e.printStackTrace();}				
+		
+	    Vector<Integer> v1=new Vector<Integer>();
+		int p1=1;for (int i=dim.length-1; i>0;--i) {p1=p1*dim[i];v1.add(0,p1);}
+	    Vector<Integer> v2=new Vector<Integer>();
+		int p2=1;for (int i=0 ; i<dim.length-1; ++i) {p2=p2*dim[i];v2.add(0,p2);}
+		
+		for ( int bi=0; bi<p1*dim[0]; ++bi) {
+			int bindex=bi;
+			int[] indexes=new int[dim.length];
+			for (int i=0; i<indexes.length-1;++i) {
+				indexes[i]=bindex / v1.elementAt(i); 
+				bindex=bindex % v1.elementAt(i); 
+			}
+			indexes[indexes.length-1]=bindex;
+		
+			Object arrayTail=null;		
+			if (dim.length==1) {
+				arrayTail=result;
+			} else {
+				arrayTail=Array.get(result, indexes[0]);
+				for (int i=1; i<indexes.length-1;++i) arrayTail=Array.get(arrayTail, indexes[i] );
+			}				
+			
+			int linearVectorIndex=0;
+			for (int i=(indexes.length-1); i>0; --i) linearVectorIndex+=indexes[i]*v2.elementAt((indexes.length-1)-i);
+			linearVectorIndex+=indexes[0];
+			//System.out.println("linearVectorIndex:"+linearVectorIndex);
+			
+			if (vector instanceof RInteger) Array.setInt(arrayTail, indexes[indexes.length-1], ((RInteger)vector).getValue()[linearVectorIndex] );
+			else if (vector instanceof RNumeric) Array.setDouble(arrayTail, indexes[indexes.length-1], ((RNumeric)vector).getValue()[linearVectorIndex] );
+			else if (vector instanceof RChar) Array.set(arrayTail, indexes[indexes.length-1], ((RChar)vector).getValue()[linearVectorIndex] );
+			else if (vector instanceof RLogical) Array.setBoolean(arrayTail, indexes[indexes.length-1], ((RLogical)vector).getValue()[linearVectorIndex] );
+		}
+		
+		return result;
+	}
+	
+	
+	public static int[] getJavaArrayDimensions(Object table, Class<?>[] classHolder, int[] lengthHolder) {
+		Vector<Integer> dimV=new Vector<Integer>();
+		Object obj=table;
+		while(Array.get(obj, 0).getClass().isArray()) {
+			dimV.add(Array.getLength(obj));	
+			obj=Array.get(obj, 0);
+		}
+		dimV.add(Array.getLength(obj));
+		classHolder[0]=Array.get(obj, 0).getClass();
+		
+		int[] result=new int[dimV.size()];
+		lengthHolder[0]=1;
+		for (int i=0; i<dimV.size(); ++i) {
+			result[i]=dimV.elementAt(i);
+			lengthHolder[0]=lengthHolder[0]*result[i];
+		}
+		return result;
+	}
+	
+	public static RArray getRArrayFromJavaArray(Object javaArray) {
+		Class<?>[] classHolder=new Class<?>[1];
+		int[] lengthHolder=new int[1];
+		
+		int[] dim=getJavaArrayDimensions(javaArray, classHolder, lengthHolder);
+		
+		
+		RVector vector=null;
+		Class<?> componentType=classHolder[0];
+		
+		if (componentType==Integer.class || componentType==int.class) vector=new RInteger(new int[lengthHolder[0]]);
+		else if (componentType==Double.class || componentType==double.class) vector=new RNumeric(new double[lengthHolder[0]]);
+		else if (componentType==Boolean.class || componentType==boolean.class) vector=new RLogical(new boolean[lengthHolder[0]]);
+		else if (componentType==String.class) vector=new RChar(new String[lengthHolder[0]]);
+		
+		
+	    Vector<Integer> v1=new Vector<Integer>();
+		int p1=1;for (int i=dim.length-1; i>0;--i) {p1=p1*dim[i];v1.add(0,p1);}
+	    Vector<Integer> v2=new Vector<Integer>();
+		int p2=1;for (int i=0 ; i<dim.length-1; ++i) {p2=p2*dim[i];v2.add(0,p2);}
+		
+		for ( int bi=0; bi<p1*dim[0]; ++bi) {
+			int bindex=bi;
+			int[] indexes=new int[dim.length];
+			for (int i=0; i<indexes.length-1;++i) {
+				indexes[i]=bindex / v1.elementAt(i); 
+				bindex=bindex % v1.elementAt(i); 
+			}
+			indexes[indexes.length-1]=bindex;
+		
+			Object arrayTail=null;		
+			if (dim.length==1) {
+				arrayTail=javaArray;
+			} else {
+				arrayTail=Array.get(javaArray, indexes[0]);
+				for (int i=1; i<indexes.length-1;++i) arrayTail=Array.get(arrayTail, indexes[i] );
+			}				
+			
+			int linearVectorIndex=0;
+			for (int i=(indexes.length-1); i>0; --i) linearVectorIndex+=indexes[i]*v2.elementAt((indexes.length-1)-i);
+			linearVectorIndex+=indexes[0];
+			//System.out.println("linearVectorIndex:"+linearVectorIndex);
+			
+			if (vector instanceof RInteger) ((RInteger)vector).getValue()[linearVectorIndex]=(Integer)Array.get(arrayTail, indexes[indexes.length-1]) ;
+			else if (vector instanceof RNumeric) ((RNumeric)vector).getValue()[linearVectorIndex]=(Double)Array.get(arrayTail, indexes[indexes.length-1]) ;
+			else if (vector instanceof RChar) ((RChar)vector).getValue()[linearVectorIndex] = (String)Array.get(arrayTail, indexes[indexes.length-1]);
+			else if (vector instanceof RLogical) ((RLogical)vector).getValue()[linearVectorIndex]=(Boolean)Array.get(arrayTail, indexes[indexes.length-1]);
+		}
+		
+		return new RArray(vector,dim,null);
+	}
+
+	
+
 	private Object convert(RObject obj) {
 		//System.out.println("obj:" + obj);
 		Object result = obj;
@@ -1801,6 +1970,9 @@ public class DirectJNI {
 			} else {
 				result = ((RLogical) result).getValue();
 			}
+		} else if (result instanceof RArray){
+			result=getJavaArrayFromRArray((RArray)result);
+			
 		}
 		return result;
 	}

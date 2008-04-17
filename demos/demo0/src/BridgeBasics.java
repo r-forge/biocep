@@ -18,9 +18,20 @@
  */
 
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Vector;
+
 import org.apache.commons.logging.Log;
+import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RChar;
+import org.bioconductor.packages.rservices.RInteger;
+import org.bioconductor.packages.rservices.RLogical;
 import org.bioconductor.packages.rservices.RNamedArgument;
+import org.bioconductor.packages.rservices.RNumeric;
+import org.bioconductor.packages.rservices.RVector;
+
 import remoting.RServices;
 import server.DirectJNI;
 
@@ -31,12 +42,35 @@ public class BridgeBasics {
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(BridgeBasics.class);
 
+	
+	
+	
+
+
+
 	public static void main(String args[]) throws Exception {
+		
+		
 		
 		
 		final RServices rs = DirectJNI.getInstance().getRServices();
 		
-
+		
+		int[][] table=new int[][]{ {23,1,55555}, {5,7,0}  };
+		
+		rs.putAndAssign(table, "x");
+		System.out.println(rs.consoleSubmit("x"));
+		
+		
+		System.out.println(Arrays.deepToString((Object[])rs.callAndConvert("t",table)));
+		
+		
+		//System.out.println(Arrays.deepToString((Object[])rs.getObjectConverted("x")));
+		
+		System.exit(0);
+		
+		
+		
 		RChar s = (RChar) rs.call("paste", new RChar("str1"), new RChar("str2"), new RNamedArgument("sep", new RChar(
 				"--")));
 		System.out.println("s=" + s);
