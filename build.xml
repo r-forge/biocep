@@ -727,6 +727,9 @@
 				<pathelement path="lib/desktop/mail.jar"/>
 				<pathelement path="lib/desktop/jython.jar"/>
 				<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
+				<pathelement path="lib/desktop/freemindbrowser.jar"/>
+				<pathelement path="lib/desktop/biocep-doc.jar"/>
+				
 
 	
 				<pathelement path="lib/desktop/jeditmodes.jar"/>
@@ -852,6 +855,8 @@
 				<pathelement path="lib/desktop/mail.jar"/>
 				<pathelement path="lib/desktop/jython.jar"/>
 				<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
+				<pathelement path="lib/desktop/freemindbrowser.jar"/>
+				<pathelement path="lib/desktop/biocep-doc.jar"/>
 
 				<pathelement path="lib/svg/batik-anim.jar"/>
 				<pathelement path="lib/svg/batik-awt-util.jar"/>
@@ -1283,6 +1288,9 @@
 			<unjar src="lib/desktop/pf-joi-full.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/idw-gpl.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/swing-layout-1.0.3.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/freemindbrowser.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/biocep-doc.jar"  dest="binsrv" overwrite="true"/>
+		
 			<unjar src="lib/svg/batik-anim.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-bridge.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-css.jar"  dest="binsrv" overwrite="true"/>
@@ -1299,7 +1307,7 @@
 			<unjar src="lib/svg/xml-apis.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/xml-apis-ext.jar"  dest="binsrv" overwrite="true"/>		
 		
-			<property 	name="src_client_target" value="src_client:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>		
+			<property 	name="src_client_target" value="src_client:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>		
 			<javac srcdir="${src_client_target}"
 				destdir="binsrv" debug="true" source="1.5" target="1.5">
 				<classpath>
@@ -1330,14 +1338,24 @@
 			</manifest>		
 			
 			<jar basedir="binsrv" destfile="biocepunsigned.jar" manifest="MANIFEST.MF" />
-			<signjar jar="biocepunsigned.jar" signedjar="biocep.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
+			<signjar jar="biocepunsigned.jar" signedjar="biocep.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />		
+			
+			<copy todir=".">
+				<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>			
+			</copy>
+			<signjar jar="groovy-all-1.5.4.jar" signedjar="groovy-all-1.5.4.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
+		
+			<copy todir=".">
+				<fileset dir="lib/desktop" includes="biocep-doc.jar"/>			
+			</copy>
+			<signjar jar="biocep-doc.jar" signedjar="biocep-doc.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />		
 		
 	</target>
 
 	<target name="compile" depends="compile.rpf">
 		
 		<echo message="${basedir}"/>
-		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>
+		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>
 		
 		<javac
 			srcdir="${src_compile_target}"

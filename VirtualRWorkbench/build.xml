@@ -282,7 +282,9 @@
 							<pathelement path="lib/desktop/mail.jar"/>
 							<pathelement path="lib/desktop/jython.jar"/>
 							<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
-														
+							<pathelement path="lib/desktop/freemindbrowser.jar"/>
+							<pathelement path="lib/desktop/biocep-doc.jar"/>
+							
 							<pathelement path="lib/desktop/idw-gpl.jar"/>
 							<pathelement path="lib/desktop/pf-joi-full.jar"/>
 							<pathelement path="lib/desktop/jeditmodes.jar"/>
@@ -414,6 +416,7 @@
 			  		<fileset dir="lib/desktop" includes="jython.jar"/>
 			  		<fileset dir="lib/desktop" includes="jetty-util-6.1.8.jar"/>
 					<fileset dir="lib/desktop" includes="jetty-6.1.8.jar"/>
+				  	
 					<fileset dir="lib/svg" includes="batik-svggen.jar"/>
 					<fileset dir="lib/svg" includes="batik-dom.jar"/>
 				  	<fileset dir="lib/svg" includes="batik-util.jar"/>
@@ -475,6 +478,7 @@
 				  	
 				  	
 						<fileset dir="" includes="RJB.jar"/>
+				  	    <fileset dir="lib/desktop" includes="freemindbrowser.jar"/>
 				  	
 						<!--
 						<fileset dir="lib/log" includes="commons-logging-1.1.jar"/>	
@@ -509,7 +513,10 @@
 				  		<fileset dir="lib/desktop" includes="jeditmodes.jar"/>
 				  		<fileset dir="lib/desktop" includes="pf-joi-full.jar"/>
 						<fileset dir="lib/desktop" includes="OpenXLS.jar"/>						
-				  		<fileset dir="lib/desktop" includes="swing-layout-1.0.3.jar"/>		
+				  		<fileset dir="lib/desktop" includes="swing-layout-1.0.3.jar"/>	
+				  		
+				  		<fileset dir="lib/desktop" includes="biocep-doc.jar"/>				  		
+				  			
 					  	<fileset dir="lib/svg" includes="batik-anim.jar"/>					  	
 					  	<fileset dir="lib/svg" includes="batik-bridge.jar"/>
 					  	<fileset dir="lib/svg" includes="batik-css.jar"/>					  	
@@ -525,9 +532,12 @@
 					  	<fileset dir="lib/svg" includes="js.jar"/>
 					  	<fileset dir="lib/svg" includes="xml-apis.jar"/>
 					  	<fileset dir="lib/svg" includes="xml-apis-ext.jar"/>
-					  	
-					  	-->					  	
+					  	<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>
+					  	-->			
+				  	
 					
+				  		
+				  	
 					<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
 
 				  	
@@ -540,6 +550,7 @@
 				  	
 				  	
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="RJB.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="freemindbrowser.jar"/>
 				  	
 				  	<!--
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-logging-1.1.jar"/>	
@@ -557,7 +568,9 @@
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="activation.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mail.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jython.jar"/>
-			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="swing-layout-1.0.3.jar"/>				  	
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="swing-layout-1.0.3.jar"/>			
+			  		
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="biocep-doc.jar"/>
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-anim.jar"/>
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-awt-util.jar"/>
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="batik-bridge.jar"/>
@@ -581,9 +594,9 @@
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="JRI.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="derbyclient.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="ganymed-ssh2.jar"/>
-			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="edtftpj.jar"/>
-			  		-->
-			  		
+			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="edtftpj.jar"/>			  		
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs"  includes="groovy-all-1.5.4.jar"/>
+				  	-->	
 				  	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
 					

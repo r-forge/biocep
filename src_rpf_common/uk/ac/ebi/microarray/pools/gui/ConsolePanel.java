@@ -135,11 +135,13 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 					final String cmd = _textField.getText();
 					log = _sInterface.submit(cmd);
 
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							print(cmd, log);
-						}
-					});
+					if (log!=null) {
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								print(cmd, log);
+							}
+						});
+					}
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
