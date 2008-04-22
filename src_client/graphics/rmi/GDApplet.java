@@ -17,6 +17,7 @@
  */
 package graphics.rmi;
 
+import freemind.main.FreeMindApplet;
 import graphics.pop.GDDevice;
 import graphics.rmi.action.CopyFromCurrentDeviceAction;
 import graphics.rmi.action.CopyToCurrentDeviceAction;
@@ -96,6 +97,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -336,7 +338,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		if (getParameter("command_servlet_url") == null || getParameter("command_servlet_url").equals("")) {
 			if (getWebAppUrl() != null) {
-				_commandServletUrl = getWebAppUrl() + "cmd";
+				//_commandServletUrl = getWebAppUrl() + "cmd";
+				_commandServletUrl = "http://127.0.0.1:8080/rvirtual/cmd";
 			} else {
 				_commandServletUrl = "http://127.0.0.1:8080/rvirtual/cmd";
 			}
@@ -802,7 +805,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									} catch (Exception e) {
 									}
 								}
-								result = "";
+								result = null;
 
 							} else {
 								result = _rForConsole.consoleSubmit(expression);
@@ -1379,6 +1382,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					helpMenu.removeAll();
 					helpMenu.add(_actions.get("help"));
+					helpMenu.add(_actions.get("biocepmindmap"));
 					helpMenu.addSeparator();
 					helpMenu.add(_actions.get("rbiocmanual"));
 					helpMenu.add(_actions.get("graphicstaskpage"));
@@ -1681,7 +1685,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
 							SwingUtilities.invokeLater(new Runnable() {
 								public void run() {
-									_consolePanel.print(null, (String) action.getAttributes().get("result"));
+									_consolePanel.print((String) action.getAttributes().get("command"), (String) action.getAttributes().get("result"));
 								}
 							});
 						}
@@ -3167,6 +3171,81 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+
+		_actions.put("biocepmindmap", new AbstractAction("Biocep Mind Map & Doc") {
+			public void actionPerformed(final ActionEvent e) {
+				{
+					int id = getDynamicViewId();
+
+					final BiocepMindMapView lv = new BiocepMindMapView("Biocep Mind Map & Doc", null, id);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+					lv.addListener(new DockingWindowListener() {
+						public void viewFocusChanged(View arg0, View arg1) {
+						}
+
+						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowClosed(DockingWindow arg0) {
+						}
+
+						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+							try {
+								lv.getFreeMindApplet().destroy();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+
+						public void windowDocked(DockingWindow arg0) {
+						}
+
+						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowHidden(DockingWindow arg0) {
+						}
+
+						public void windowMaximized(DockingWindow arg0) {
+						}
+
+						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowMinimized(DockingWindow arg0) {
+						}
+
+						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowRestored(DockingWindow arg0) {
+						}
+
+						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowShown(DockingWindow arg0) {
+						}
+
+						public void windowUndocked(DockingWindow arg0) {
+						}
+
+						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+					});
+
+				}
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
+		
 		
 		_actions.put("inspect", new AbstractAction("Inspect") {
 			public void actionPerformed(final ActionEvent e) {
@@ -3850,6 +3929,35 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
+	
+	class BiocepMindMapView extends DynamicView {
+		FreeMindApplet _freeMindApplet;
+
+		BiocepMindMapView(String title, Icon icon, int id) {
+			super(title, icon, new JPanel(), id);
+			((JPanel) getComponent()).setLayout(new BorderLayout());
+			
+			final HashMap<String, String> params = new HashMap<String, String>();
+			params.put("modes", "freemind.modes.browsemode.BrowseMode");			
+			params.put("initial_mode" ,"Browse");
+			params.put("selection_method","selection_method_direct");
+
+			if (GDApplet.class.getResource("/Biocep.mm")!=null) {
+				params.put("browsemode_initial_map", "http://127.0.0.1:"+LocalHttpServer.getLocalHttpServerPort()+"/classes/Biocep.mm");
+			} else {
+				params.put("browsemode_initial_map", "http://biocep-distrib.r-forge.r-project.org/Biocep.mm");
+			}						
+			_freeMindApplet = new FreeMindApplet(params);
+			_freeMindApplet.init();
+			
+			((JPanel) getComponent()).add(_freeMindApplet, BorderLayout.CENTER);
+		}
+
+		public FreeMindApplet getFreeMindApplet() {
+			return _freeMindApplet;
+		}
+	}
+	
 	public static class ServerLogView extends DynamicView {
 		JTextArea _area;
 		JScrollPane _scrollPane;
