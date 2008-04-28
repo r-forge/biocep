@@ -25,8 +25,10 @@ public class BootSsh {
 	public static final String R_PROCESS_ID_END_MARKER = "#RPROCESSIDEND#";
 
 	public static void main(String[] args) throws Exception {
-				
+						
 		String logFileName = args[7];
+		String name=args[8].equals("#NULL#")?null:args[8];
+				
 		PrintStream bw = null;
 		if (logFileName.equals("System.out")) {
 			bw = System.out;
@@ -36,7 +38,7 @@ public class BootSsh {
 
 		
 		Vector<URL> codeUrls=new Vector<URL>();		
-		if (args.length > 8) {
+		if (args.length > 9) {
 			for (int i=8;i<args.length;++i) {
 				codeUrls.add(new URL(args[i]));
 			}
@@ -54,7 +56,7 @@ public class BootSsh {
 					new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class, String.class, boolean.class, URL[].class }).invoke(
 					null,
 					new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), args[3],
-							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), "",  false, (URL[])codeUrls.toArray(new URL[0]) });
+							Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), name,  false, (URL[])codeUrls.toArray(new URL[0]) });
 
 			Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");
 			String processId = (String) poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);

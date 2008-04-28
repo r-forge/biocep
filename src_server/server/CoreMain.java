@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.Vector;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 public class CoreMain {
 
@@ -16,19 +17,31 @@ public class CoreMain {
 			}
 		} else {
 			String jar=CoreMain.class.getResource("/server/CoreMain.class").toString();
-			String jarfile=jar.substring("jar:".length(), jar.length()-"/server/CoreMain.class".length()-1);
-			System.out.println("jarfile:"+jarfile);
-			try {codeUrls.add(new URL(jarfile));} catch (Exception e) {e.printStackTrace();}
+			if (jar.startsWith("jar:")) {
+				String jarfile=jar.substring("jar:".length(), jar.length()-"/server/CoreMain.class".length()-1);
+				System.out.println("jarfile:"+jarfile);
+				try {codeUrls.add(new URL(jarfile));} catch (Exception e) {e.printStackTrace();}
+			}
 		}		
 				
 		RServices r=null;
-		if (PoolUtils.isWindowsOs()) {
-				r = ServerManager.createRLocal(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),PoolUtils
-						.getHostIp(), 1099, 256, 256,false,(URL[])codeUrls.toArray(new URL[0]));
-				
-		} else {
-			r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), PoolUtils
-					.getHostIp(), 1099, 256, 256, "", false,(URL[])codeUrls.toArray(new URL[0]) );
+		
+		if (ServerDefaults.isRegistryAccessible()) {
+		
+			if (PoolUtils.isWindowsOs()) {
+					r = ServerManager.createRLocal(true, 
+							PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
+							ServerDefaults._registryHost, ServerDefaults._registryPort , 
+							ServerDefaults._memoryMin, ServerDefaults._memoryMax,System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]));
+					
+			} else {
+				r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
+						ServerDefaults._registryHost, ServerDefaults._registryPort , 
+								ServerDefaults._memoryMin, ServerDefaults._memoryMax, System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]) );
+			}
+			
+		} else {			
+			System.out.println("Can't Launch R Server, Rmi Registry is not accessible!!");
 		}
 		
 		System.exit(0);

@@ -480,7 +480,7 @@
 						<fileset dir="" includes="RJB.jar"/>
 				  	    <fileset dir="lib/desktop" includes="freemindbrowser.jar"/>
 				  	
-						<!--
+						
 						<fileset dir="lib/log" includes="commons-logging-1.1.jar"/>	
 						<fileset dir="lib/log" includes="log4j-1.2.14.jar"/>							
 						<fileset dir="lib/j2ee" includes="commons-codec-1.3.jar"/>
@@ -533,7 +533,7 @@
 					  	<fileset dir="lib/svg" includes="xml-apis.jar"/>
 					  	<fileset dir="lib/svg" includes="xml-apis-ext.jar"/>
 					  	<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>
-					  	-->			
+					  	
 				  	
 					
 				  		
@@ -552,7 +552,6 @@
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="RJB.jar"/>
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="freemindbrowser.jar"/>
 				  	
-				  	<!--
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-logging-1.1.jar"/>	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="log4j-1.2.14.jar"/>	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-codec-1.3.jar"/>
@@ -596,7 +595,7 @@
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="ganymed-ssh2.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="edtftpj.jar"/>			  		
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs"  includes="groovy-all-1.5.4.jar"/>
-				  	-->	
+				  	
 				  	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
 					

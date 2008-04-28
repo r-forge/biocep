@@ -1,6 +1,10 @@
 <% response.setContentType("application/x-java-jnlp-file"); %>
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.5+" codebase="<%=request.getRequestURL().toString().substring(0, request.getRequestURL().toString().indexOf("/jaws"))+"/"%>" >
+
+<% java.net.URL thisUrl=new java.net.URL(request.getRequestURL().toString()); %>
+
+<jnlp spec="1.5+" codebase="<%="http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/"%>" >
+
 
 <information>
   <title>Virtual R Workbench</title>
@@ -13,7 +17,7 @@
   </security>
 <resources>
   <j2se version="1.5+" />
-  <property name="url" value="<%=request.getRequestURL().toString().substring(0, request.getRequestURL().toString().indexOf("/jaws"))+"/cmd"%>"/>
+  <property name="url" value="http://127.0.0.1:8080/rvirtual/cmd"/>
   <property name="autologon" value="true"/>
   <property name="nopool" value="=false"/>
   <property name="save" value="false"/>
@@ -63,6 +67,7 @@
   <jar href="appletlibs/jython.jar"/>
   <jar href="appletlibs/swing-layout-1.0.3.jar"/>
   <jar href="appletlibs/groovy-all-1.5.4.jar"/>
+  <jar href="appletlibs/freemindbrowser.jar"/>
   <jar href="appletlibs/biocep-doc.jar"/>
   <jar href="appletlibs/mapping.jar"/>
    

@@ -60,7 +60,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 			GDDevice device = null;
 			try {
 
-				boolean wait = true;
+				boolean wait = false;
 				if (wait) {
 					r = (RServices) spFactory.getServantProvider().borrowServantProxy();
 				} else {
