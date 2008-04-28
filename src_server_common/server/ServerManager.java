@@ -225,7 +225,7 @@ public class ServerManager {
 	private static JFrame createRLocalProgressFrame;
 
 	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, boolean showProgress, URL[] codeUrls) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls) throws Exception {
 
 		if (showProgress) {
 			createRLocalProgressArea = new JTextArea();
@@ -306,6 +306,7 @@ public class ServerManager {
 			command.add("" + memoryMinMegabytes);
 			command.add("" + memoryMaxMegabytes);
 			command.add(logFile);
+			command.add(name==null ? "#NULL#" : name);
 						
 			if (codeUrls != null && codeUrls.length > 0) {
 				for (int i = 0; i < codeUrls.length; ++i) {

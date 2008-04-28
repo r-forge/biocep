@@ -502,7 +502,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											if (_keepAlive) {
 												r = ServerManager.createRLocal(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident
-																.getMemoryMax(), false, null);
+																.getMemoryMax(), "", false, null);
 											} else {
 												r = ServerManager.createR(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident

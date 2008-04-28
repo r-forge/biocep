@@ -32,8 +32,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.ResourceBundle;
-
-import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,8 +40,6 @@ import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-
 import freemind.controller.Controller;
 import freemind.controller.MenuBar;
 import freemind.view.mindmapview.MapView;

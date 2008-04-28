@@ -1289,7 +1289,7 @@
 			<unjar src="lib/desktop/idw-gpl.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/swing-layout-1.0.3.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/freemindbrowser.jar"  dest="binsrv" overwrite="true"/>
-			<unjar src="lib/desktop/biocep-doc.jar"  dest="binsrv" overwrite="true"/>
+			
 		
 			<unjar src="lib/svg/batik-anim.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-bridge.jar"  dest="binsrv" overwrite="true"/>

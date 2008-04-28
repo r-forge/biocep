@@ -41,17 +41,15 @@ public class MainRServer {
 				System.setSecurityManager(new YesSecurityManager());
 			}
 
-			if (System.getProperty("autoname") != null && System.getProperty("autoname").equalsIgnoreCase("true")) {
-				log.info("Instantiating " + _mainServantClassName + " with autonaming, prefix " + _servantPoolPrefix);
-				servantName = null;
+			if (System.getProperty("name") != null && !System.getProperty("name").equals("")) {
+				servantName = System.getProperty("name");
 			} else {
-				// no autonaming, check the name here
-				if (System.getProperty("name") != null && !System.getProperty("name").equals("")) {
-					servantName = System.getProperty("name");
-				}
-				log.info("Instantiating " + _mainServantClassName + " with name " + servantName + " , prefix " + _servantPoolPrefix);
+				servantName = null;				
 			}
 
+			log.info("Instantiating " + _mainServantClassName + " with name " + servantName + " , prefix " + _servantPoolPrefix);
+
+			
 			if (rmiRegistry == null)
 				rmiRegistry = LocateRegistry.getRegistry(_registryHost, _registryPort);
 			System.out.println("### code base:" + System.getProperty("java.rmi.server.codebase"));

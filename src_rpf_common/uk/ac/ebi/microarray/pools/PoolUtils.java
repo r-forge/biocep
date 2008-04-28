@@ -38,19 +38,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.StreamCorruptedException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
@@ -87,6 +82,9 @@ public class PoolUtils {
 	public static final String DEFAULT_PREFIX = "RSERVANT_";
 	public static final String DEFAULT_REGISTRY_HOST = "localhost";
 	public static final int DEFAULT_REGISTRY_PORT = 1099;
+	public static final int DEFAULT_MEMORY_MIN = 256;
+	public static final int DEFAULT_MEMORY_MAX = 256;
+	
 	public static final int DEFAULT_TIMEOUT = 40000;
 
 	public static final int PING_FAILURES_NBR_MAX = 1;
