@@ -414,7 +414,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									pr.close();
 
 									ident = new Identification(RMI_MODE, "", "", "", false, false, "", RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "",
-											"", stub, -1, -1, false, false, "", "", "", false, false);
+											"", stub, -1, -1, false, false, "", -1, "", "", false, false);
 								}
 							}
 
@@ -495,7 +495,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 												PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
-												ident.getSshHostIp(), ident.getSshLogin(), ident.getSshPwd(), false, null);
+												ident.getSshHostIp(), ident.getSshPort(), ident.getSshLogin(), ident.getSshPwd(), "", false, null);
 									} else {
 
 										if (PoolUtils.isWindowsOs()) {

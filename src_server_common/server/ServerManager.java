@@ -53,11 +53,16 @@ public class ServerManager {
 	private static final String RLIBEND = "R$LIB$END";
 	private static final String RVERSTART = "R$VER$START";
 	private static final String RVEREND = "R$VER$END";
+	
 
 	public static void main(String[] args) throws Exception {
+		System.out.println("Step1");String l=new BufferedReader(new InputStreamReader(System.in)).readLine();
+		System.out.println(l);
+		/*
 		RServices r=ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, "test",
 				false, new URL[]{new File("J:/workspace/biocep/VirtualRWorkbench/distrib/mapping.jar").toURL()});
 		System.out.println(r.consoleSubmit("76+9"));
+		*/
 	}
 
 	private static JTextArea createRSshProgressArea;
@@ -65,7 +70,7 @@ public class ServerManager {
 	private static JFrame createRSshProgressFrame;
 
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, String sshLogin, String sshPwd, boolean showProgress, URL codeUrl)
+			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, int sshPort, String sshLogin, String sshPwd, String name, boolean showProgress, URL[] codeUrls)
 			throws BadSshHostException, BadSshLoginPwdException, Exception {
 
 		if (showProgress) {
@@ -98,7 +103,7 @@ public class ServerManager {
 
 		Connection conn = null;
 		try {
-			conn = new Connection(sshHostIp);
+			conn = new Connection(sshHostIp, sshPort);
 			try {
 				conn.connect();
 			} catch (Exception e) {
@@ -143,9 +148,19 @@ public class ServerManager {
 			new SCPClient(conn).put(bootstrapDir + "/BootSsh.class", "RWorkbench/classes/bootstrap");
 			try {
 				sess = conn.openSession();
-				sess.execCommand("java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
-						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes + " "
-						+ "System.out" + " " + codeUrl.toString());
+				
+				String command="java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
+				+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes + " "
+				+ "System.out" + " " +	((name==null || name.trim().equals("")) ? BootSsh.NO_NAME : name);
+				
+				if (codeUrls!=null && codeUrls.length>0) {
+					for (int i=0; i<codeUrls.length; ++i) {
+						command=command+" "+codeUrls[i];
+					}
+				}			
+				
+				System.out.println("createRSsh command:"+command);
+				sess.execCommand(command);
 
 				InputStream stdout = new StreamGobbler(sess.getStdout());
 				final BufferedReader brOut = new BufferedReader(new InputStreamReader(stdout));
@@ -306,7 +321,7 @@ public class ServerManager {
 			command.add("" + memoryMinMegabytes);
 			command.add("" + memoryMaxMegabytes);
 			command.add(logFile);
-			command.add(name==null ? "#NULL#" : name);
+			command.add(  (name==null || name.trim().equals("")) ? BootSsh.NO_NAME : name);
 						
 			if (codeUrls != null && codeUrls.length > 0) {
 				for (int i = 0; i < codeUrls.length; ++i) {
