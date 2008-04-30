@@ -21,8 +21,6 @@ import java.rmi.registry.LocateRegistry;
 
 import org.apache.commons.logging.Log;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk

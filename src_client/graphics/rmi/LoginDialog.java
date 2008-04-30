@@ -90,6 +90,7 @@ public class LoginDialog extends JDialog {
 	public static boolean keepAlive_bool = false;
 	public static boolean useSsh_bool = false;
 	public static String sshHost_str = "";
+	public static Integer sshPort_int = 22;	
 	public static String sshLogin_str = "";
 	public static String sshPwd_str = "";
 
@@ -139,6 +140,7 @@ public class LoginDialog extends JDialog {
 	private JRadioButton _useLocalHost;
 
 	private JTextField _sshHostIp;
+	private JTextField _sshPort;
 	private JTextField _sshLogin;
 	private JPasswordField _sshPwd;
 
@@ -158,7 +160,7 @@ public class LoginDialog extends JDialog {
 		if (_closedOnOK)
 			return new Identification(mode_int, url_str, login_str, pwd_str, nopool_bool, waitForResource_bool, privateName_str, rmiMode_int, rmiregistryIp_str,
 					rmiregistryPort_int, servantName_str, dbDriver_str, dbHostIp_str, dbHostPort_int, dbName_str, dbUser_str, dbPwd_str, dbServantName_str,
-					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, sshHost_str, sshLogin_str, sshPwd_str, persistentWorkspace_bool,
+					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, sshHost_str, sshPort_int, sshLogin_str, sshPwd_str, persistentWorkspace_bool,
 					playDemo_bool);
 		else
 			return null;
@@ -182,7 +184,17 @@ public class LoginDialog extends JDialog {
 			p2.add(new JLabel(""));
 			if (_useSsh.isSelected()) {
 				p1.add(new JLabel("  SSH Host"));
-				p2.add(_sshHostIp);
+				
+				JPanel hostAndPortPanel=new JPanel(new GridLayout(1,0));
+				JPanel portPanel=new JPanel(new BorderLayout());				
+				portPanel.add(new JLabel("    port  "), BorderLayout.WEST);
+				portPanel.add(_sshPort, BorderLayout.CENTER);
+				
+				hostAndPortPanel.add(_sshHostIp);
+				hostAndPortPanel.add(portPanel);
+				p2.add(hostAndPortPanel);
+				
+				
 				p1.add(new JLabel("  SSH Login"));
 				p2.add(_sshLogin);
 				p1.add(new JLabel("  SSH Pwd"));
@@ -523,6 +535,7 @@ public class LoginDialog extends JDialog {
 		useSshButtonGroup.add(_useLocalHost);
 
 		_sshHostIp = new JTextField(sshHost_str);
+		_sshPort = new JTextField(sshPort_int.toString());
 		_sshLogin = new JTextField(sshLogin_str);
 		_sshPwd = new JPasswordField(sshPwd_str);
 
@@ -582,6 +595,7 @@ public class LoginDialog extends JDialog {
 		_useSsh.addKeyListener(keyListener);
 		_useLocalHost.addKeyListener(keyListener);
 		_sshHostIp.addKeyListener(keyListener);
+		_sshPort.addKeyListener(keyListener);
 		_sshLogin.addKeyListener(keyListener);
 		_sshPwd.addKeyListener(keyListener);
 
@@ -687,6 +701,8 @@ public class LoginDialog extends JDialog {
 		keepAlive_bool = _keepAlive.isSelected();
 		useSsh_bool = _useSsh.isSelected();
 		sshHost_str = _sshHostIp.getText();
+		sshPort_int = Integer.decode(_sshPort.getText());
+		
 		sshLogin_str = _sshLogin.getText();
 		sshPwd_str = _sshPwd.getText();
 

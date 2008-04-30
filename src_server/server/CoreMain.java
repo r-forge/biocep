@@ -27,8 +27,10 @@ public class CoreMain {
 		RServices r=null;
 		
 		if (ServerDefaults.isRegistryAccessible()) {
-		
-			if (PoolUtils.isWindowsOs()) {
+			boolean local;
+			if (System.getProperty("local")!=null && !System.getProperty("local").equals("")) local=new Boolean(System.getProperty("local"));
+			else local=PoolUtils.isWindowsOs(); 
+			if (local ) {
 					r = ServerManager.createRLocal(true, 
 							PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 							ServerDefaults._registryHost, ServerDefaults._registryPort , 

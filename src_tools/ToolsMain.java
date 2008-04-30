@@ -15,18 +15,17 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JOptionPane;
-
-import server.CoreMain;
 import server.ServerManager;
 import uk.ac.ebi.microarray.pools.MainPsToolsDownload;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 
 public class ToolsMain {
 
 	public static void runGen(URL[] codeUrls, HashMap<String, String> argMap) throws Exception {
 
-		int memoryMinMegabytes = 256;
-		int memoryMaxMegabytes = 256;
+		int memoryMinMegabytes = ServerDefaults._memoryMin;
+		int memoryMaxMegabytes = ServerDefaults._memoryMax;
 		
 
 		String root = ServerManager.INSTALL_DIR;
@@ -226,6 +225,10 @@ public class ToolsMain {
 		command.add((isWindowsOs() ? "\"" : "") + cp + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dpstools.home=" + root + "PsTools/" + (isWindowsOs() ? "\"" : ""));
+		
+		
+		
+		
 		command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=DEBUG,A1,A2" + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender" + (isWindowsOs() ? "\"" : ""));
@@ -342,8 +345,7 @@ public class ToolsMain {
 	    while (st.hasMoreTokens()) {
 	    	v.add(new File((String)st.nextElement()).toURL());
 	    }
-	    
-	    
+	    	   
 		String jar=ToolsMain.class.getResource("/ToolsMain.class").toString();
 		if (jar.startsWith("jar:")) {
 			String jarfile=jar.substring("jar:file:".length(), jar.length()-"/ToolsMain.class".length()-1);

@@ -51,6 +51,7 @@ class Identification {
 	private boolean _keepAlive;
 	private boolean _useSsh;
 	private String _sshHostIp;
+	private Integer _sshPort;
 	private String _sshLogin;
 	private String _sshPwd;
 
@@ -63,7 +64,7 @@ class Identification {
 			Integer rmiregistryPort, String servantName, String dbDriver, String dbHostIp, Integer dbHostPort, String dbName, String dbUser, String dbPwd,
 			String dbServantName, String stub, int memoryMin, int memoryMax,
 
-			boolean keepAlive, boolean useSsh, String sshHostIp, String sshLogin, String sshPwd,
+			boolean keepAlive, boolean useSsh, String sshHostIp, int sshPort, String sshLogin, String sshPwd,
 
 			boolean persistentWorkspace, boolean playDemo) {
 		this._mode = mode;
@@ -94,6 +95,7 @@ class Identification {
 		this._keepAlive = keepAlive;
 		this._useSsh = useSsh;
 		this._sshHostIp = sshHostIp;
+		this._sshPort = sshPort;
 		this._sshLogin = sshLogin;
 		this._sshPwd = sshPwd;
 		this._persistentWorkspace = persistentWorkspace;
@@ -200,6 +202,10 @@ class Identification {
 		return _sshHostIp;
 	}
 
+	public Integer getSshPort() {
+		return _sshPort;
+	}
+	
 	public String getSshLogin() {
 		return _sshLogin;
 	}
