@@ -28,8 +28,8 @@
   <jar href="appletlibs/RJB.jar"/>
   <jar href="appletlibs/commons-httpclient-3.1-rc1.jar"/>
   <jar href="appletlibs/commons-codec-1.3.jar"/>
-  <jar href="appletlibs/commons-logging-1.1.jar"/>
-  <jar href="appletlibs/log4j-1.2.14.jar"/>
+  <jar href="appletlibs/commons-logging-1.1.1.jar"/>
+  <jar href="appletlibs/log4j-1.2.15.jar"/>
   <jar href="appletlibs/idw-gpl.jar"/>
   <jar href="appletlibs/jeditmodes.jar"/>
   <jar href="appletlibs/jedit.jar"/>
