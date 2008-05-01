@@ -276,6 +276,9 @@
 							<pathelement path="${FTP_JAR}"/>
 							
 							<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+							<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+							<pathelement path="lib/desktop/jsp-2.1.jar"/>
+
 							<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 							<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 							<pathelement path="lib/desktop/activation.jar"/>
@@ -494,6 +497,9 @@
 
 
 						<fileset dir="lib/desktop" includes="servlet-api-2.5-6.1.8.jar"/>
+				  		<fileset dir="lib/desktop" includes="jsp-api-2.1.jar"/>
+				  		<fileset dir="lib/desktop" includes="jsp-2.1.jar"/>
+							
 				  		<fileset dir="lib/desktop" includes="jetty-util-6.1.8.jar"/>
 						<fileset dir="lib/desktop" includes="jetty-6.1.8.jar"/>
 
@@ -562,6 +568,9 @@
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="pf-joi-full.jar"/>
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="OpenXLS.jar"/>
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="servlet-api-2.5-6.1.8.jar"/>
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jsp-api-2.1.jar"/>
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jsp-2.1.jar"/>
+				  					  	
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jetty-util-6.1.8.jar"/>
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jetty-6.1.8.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="activation.jar"/>

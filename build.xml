@@ -126,7 +126,10 @@
 				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
-				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>				
+				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+				<pathelement path="lib/desktop/jsp-2.1.jar"/>
+								
 				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
 				<pathelement path="lib/desktop/activation.jar"/>
@@ -249,6 +252,8 @@
 				<pathelement path="${FTP_JAR}"/>		
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+				<pathelement path="lib/desktop/jsp-2.1.jar"/>
 				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
 				<pathelement path="lib/desktop/activation.jar"/>
@@ -343,6 +348,8 @@
 				<pathelement path="${FTP_JAR}"/>		
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+				<pathelement path="lib/desktop/jsp-2.1.jar"/>
 				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
 				<pathelement path="lib/desktop/activation.jar"/>
@@ -721,6 +728,8 @@
 				<pathelement path="${FTP_JAR}"/>
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+				<pathelement path="lib/desktop/jsp-2.1.jar"/>
 				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				<pathelement path="lib/desktop/activation.jar"/>
@@ -812,6 +821,73 @@
 	</target>
 
 	
+	
+	<target name="httpserver" depends="setWinAwareProps,compile">
+		
+
+		
+		<java maxmemory="256m" classname="HttpServer"
+			fork="true" spawn="${spawn}">
+			
+			<classpath>
+				
+				
+				<pathelement path="${RPF_JAR}"/>
+				<pathelement path="${CORE_JAR}"/>
+				
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+								
+				<pathelement path="${JRI_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${FTP_JAR}"/>		
+				
+				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+				<pathelement path="lib/desktop/jsp-2.1.jar"/>
+				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
+				<pathelement path="lib/desktop/activation.jar"/>
+				<pathelement path="lib/desktop/mail.jar"/>					
+				<pathelement path="lib/desktop/jython.jar"/>
+				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
+				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>	
+				
+				<pathelement path="lib/svg/batik-svggen.jar"/>
+				<pathelement path="lib/svg/batik-dom.jar"/>
+				<pathelement path="lib/svg/batik-awt-util.jar"/>
+				<pathelement path="lib/svg/batik-util.jar"/>
+				
+				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
+
+				
+			</classpath>
+			
+			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			<jvmarg	value="-Djava.library.path=${JRI_LIB_PATH}${path.separator}${JGD_LIB_PATH}"/>
+			
+						
+			<!-- LOG PARAMS -->
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1,A2"/>
+			<jvmarg value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			<jvmarg	value="-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+		
+	</target>
+
+	
+	
 	<target name="s" depends="compile,setWinAwareProps">
 		
 			
@@ -849,6 +925,8 @@
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+				<pathelement path="lib/desktop/jsp-2.1.jar"/>
 				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
 				<pathelement path="lib/desktop/activation.jar"/>
@@ -1070,6 +1148,14 @@
 		
 	</target>
 	
+
+	
+	
+	
+	
+	
+	
+	
 	
 	<target name="distrib">
 		
@@ -1091,6 +1177,8 @@
 					<pathelement path="${FTP_JAR}"/>		
 					
 					<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+					<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+					<pathelement path="lib/desktop/jsp-2.1.jar"/>
 					<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
 					<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
 					<pathelement path="lib/desktop/activation.jar"/>
@@ -1167,6 +1255,8 @@
 			</jar>
 		
 			<unjar src="lib/desktop/servlet-api-2.5-6.1.8.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/jsp-api-2.1.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/jsp-2.1.jar"  dest="binsrv" overwrite="true"/>
 						
 			<manifest file="MANIFEST.MF">
 				<attribute name="Built-By" value="Karim Chine"/>

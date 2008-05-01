@@ -84,7 +84,7 @@ public class PoolUtils {
 	public static final int DEFAULT_REGISTRY_PORT = 1099;
 	public static final int DEFAULT_MEMORY_MIN = 256;
 	public static final int DEFAULT_MEMORY_MAX = 256;
-	
+
 	public static final int DEFAULT_TIMEOUT = 40000;
 
 	public static final int PING_FAILURES_NBR_MAX = 1;
@@ -106,8 +106,10 @@ public class PoolUtils {
 	private static boolean _propertiesInjected = false;
 	private static boolean _rmiSocketFactoryInitialized = false;
 
+	public static int BUFFER_SIZE = 1024 * 32;
+
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(PoolUtils.class);
-	
+
 	public static String getHostName() {
 		if (_hostName == null) {
 			try {
@@ -436,7 +438,7 @@ public class PoolUtils {
 			return null;
 		}
 	}
-	
+
 	public static byte[] objectToBytes(Object obj) throws NoSuchObjectException {
 		ByteArrayOutputStream baoStream = new ByteArrayOutputStream();
 		try {
@@ -473,8 +475,6 @@ public class PoolUtils {
 			sb.append(c);
 		return sb.toString();
 	}
-
-	
 
 	public static String getDBType(String jdbcUrl) {
 		int p1 = jdbcUrl.indexOf(':');
@@ -635,10 +635,11 @@ public class PoolUtils {
 	}
 
 	public static String replaceAll(String input, String replaceWhat, String replaceWith) throws Exception {
-		int p; int bindex=0;
-		while ((p = input.indexOf(replaceWhat,bindex)) != -1) {			
+		int p;
+		int bindex = 0;
+		while ((p = input.indexOf(replaceWhat, bindex)) != -1) {
 			input = input.substring(0, p) + replaceWith + input.substring(p + replaceWhat.length());
-			bindex=p + replaceWith.length();
+			bindex = p + replaceWith.length();
 		}
 		return input;
 	}
@@ -751,9 +752,8 @@ public class PoolUtils {
 			URLConnection urlC = url.openConnection();
 			InputStream is = url.openStream();
 			File file = new File(fileName);
-			if (file.exists()) {
-				if (file.lastModified() > urlC.getLastModified())
-					return;
+			if (file.exists() && file.length() == urlC.getContentLength() && file.lastModified() > urlC.getLastModified()) {
+				return;
 			}
 
 			if (showProgress) {
@@ -780,22 +780,33 @@ public class PoolUtils {
 				}
 			}
 
+			System.out.println("Downloading " + jarName + ":");
+			System.out.print("expected:==================================================\ndone    :");
+
 			int jarSize = urlC.getContentLength();
 			int currentPercentage = 0;
 
 			FileOutputStream fos = null;
 
 			fos = new FileOutputStream(fileName);
-			int oneChar, count = 0;
-			while ((oneChar = is.read()) != -1) {
-				fos.write(oneChar);
-				count++;
+			int count = 0;
+			int printcounter = 0;
 
+			byte data[] = new byte[BUFFER_SIZE];
+			int co = 0;
+			while ((co = is.read(data, 0, BUFFER_SIZE)) != -1) {
+				fos.write(data, 0, co);
+				count = count + co;
+
+				int expected=(50*count / jarSize);
+				while (printcounter<expected) {System.out.print("=");++printcounter;}
+					
+					
 				if (showProgress) {
-
 					final int p = (int) (100 * count / jarSize);
 					if (p > currentPercentage) {
 						currentPercentage = p;
+
 						final JTextArea fa = area;
 						final JProgressBar fjpb = jpb;
 						SwingUtilities.invokeLater(new Runnable() {
@@ -816,8 +827,45 @@ public class PoolUtils {
 
 					}
 				}
+				
+				
+			}
+
+			/*
+			while ((oneChar = is.read()) != -1) {
+				fos.write(oneChar);
+				count++;
+
+				final int p = (int) (100 * count / jarSize);
+				if (p > currentPercentage) {
+					System.out.print(p+" % ");
+					currentPercentage = p;
+					if (showProgress) {							
+							final JTextArea fa = area;
+							final JProgressBar fjpb = jpb;
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									fjpb.setIndeterminate(false);
+									fjpb.setValue(p);
+									fa.setText("\n" + p + "%" + " Done ");
+								}
+							});
+			
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									fa.setCaretPosition(fa.getText().length());
+									fa.repaint();
+									fjpb.repaint();
+								}
+							});
+					} else {
+						if (p%2==0) System.out.print("=");
+					}
+				}
 
 			}
+			
+			 */
 			is.close();
 			fos.close();
 
@@ -828,12 +876,15 @@ public class PoolUtils {
 		} finally {
 			if (showProgress) {
 				f.setVisible(false);
+			} else {
+				System.out.println(" 100% of " + jarName + " has been downloaded");
 			}
+
 		}
 	}
 
 	public static void prepareFileDirectories(String destination, String entryName) {
-		destination=destination.replace('\\', '/');
+		destination = destination.replace('\\', '/');
 		String outputFileName = destination + entryName;
 		new File(outputFileName.substring(0, outputFileName.lastIndexOf("/"))).mkdirs();
 	}
@@ -1186,7 +1237,7 @@ public class PoolUtils {
 			}
 		}
 	}
-	
+
 	public static void initLog4J() {
 		if (log instanceof Log4JLogger) {
 			Properties log4jProperties = new Properties();
@@ -1200,12 +1251,13 @@ public class PoolUtils {
 	}
 
 	public static File createFileFromBuffer(String fileExtension, StringBuffer buffer) throws Exception {
-		File tempFile=null;
-		tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_"+System.currentTimeMillis()+(fileExtension==null || fileExtension.equals("")?"":"."+fileExtension)).getCanonicalFile();	
-		
-		if (tempFile.exists())	tempFile.delete();
-		
-	
+		File tempFile = null;
+		tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_" + System.currentTimeMillis()
+				+ (fileExtension == null || fileExtension.equals("") ? "" : "." + fileExtension)).getCanonicalFile();
+
+		if (tempFile.exists())
+			tempFile.delete();
+
 		BufferedReader breader = new BufferedReader(new StringReader(buffer.toString()));
 		PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
 		String line;
