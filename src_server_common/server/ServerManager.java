@@ -27,6 +27,12 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.webapp.WebAppContext;
+
 import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
@@ -56,8 +62,29 @@ public class ServerManager {
 	
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("Step1");String l=new BufferedReader(new InputStreamReader(System.in)).readLine();
-		System.out.println(l);
+		//System.out.println("Step1");String l=new BufferedReader(new InputStreamReader(System.in)).readLine();
+		
+        Server server = new Server();
+        Connector connector = new SelectChannelConnector();
+        connector.setPort(8080);
+        connector.setHost("127.0.0.1");
+        server.addConnector(connector);
+
+        WebAppContext wac = new WebAppContext();
+        wac.setContextPath("/rvirtual");
+        wac.setWar("J:/jetty/webapps/rvirtual.war");    // this is path to .war OR TO expanded, existing webapp; WILL FIND web.xml and parse it
+        server.addHandler(wac);
+        
+        WebAppContext wac2 = new WebAppContext();
+        wac2.setContextPath("/rws");
+        wac2.setWar("J:/jetty/webapps/rws.war");    // this is path to .war OR TO expanded, existing webapp; WILL FIND web.xml and parse it
+        server.addHandler(wac2);
+                        
+        server.setStopAtShutdown(true);
+
+        server.start();
+        
+        
 		/*
 		RServices r=ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, "test",
 				false, new URL[]{new File("J:/workspace/biocep/VirtualRWorkbench/distrib/mapping.jar").toURL()});
