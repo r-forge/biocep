@@ -696,11 +696,13 @@ public class ServerManager {
 						
 			String cp = root + "classes";
 			
-			try {
-				downloadBioceCore(PoolUtils.LOG_PRGRESS_TO_LOGGER);
-				cp=cp+System.getProperty("path.separator")+new File(root+"biocep-core.jar").getAbsolutePath();
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (keepAlive) {
+				try {
+					downloadBioceCore(PoolUtils.LOG_PRGRESS_TO_LOGGER);
+					cp=cp+System.getProperty("path.separator")+new File(root+"biocep-core.jar").getAbsolutePath();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 			ManagedServant[] servantHolder = new ManagedServant[1];
