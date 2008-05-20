@@ -310,7 +310,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		super.init();
 
 		PoolUtils.initLog4J();
-
+		
 		System.setErr(System.out);
 		if (getParameter("debug") != null && getParameter("debug").equalsIgnoreCase("true")) {
 			redirectIO();
@@ -1626,6 +1626,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}
 		}).start();
+		
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					ServerManager.downloadBioceCore(0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start(); 	
 
 		_instance = this;
 		System.out.println("INIT ends");
