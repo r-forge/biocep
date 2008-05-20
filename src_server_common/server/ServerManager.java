@@ -15,6 +15,7 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.python.modules.synchronize;
 
 import bootstrap.BootSsh;
 import remoting.RServices;
@@ -62,8 +64,12 @@ public class ServerManager {
 	
 
 	public static void main(String[] args) throws Exception {
-		//System.out.println("Step1");String l=new BufferedReader(new InputStreamReader(System.in)).readLine();
 		
+		
+		System.exit(0);
+		
+		
+		/*
         Server server = new Server();
         Connector connector = new SelectChannelConnector();
         connector.setPort(8080);
@@ -83,6 +89,7 @@ public class ServerManager {
         server.setStopAtShutdown(true);
 
         server.start();
+        */
         
         
 		/*
@@ -521,7 +528,7 @@ public class ServerManager {
 				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("R_HOME", rpath);
-				env.put("R_LIBS", rlibs + (System.getenv("R_LIBS") != null ? ";" + System.getenv("R_LIBS") : ""));
+				env.put("R_LIBS", rlibs + (System.getenv("R_LIBS") != null ? System.getProperty("path.separator") + System.getenv("R_LIBS") : ""));
 				for (String k : env.keySet()) {
 					envVector.add(k + "=" + env.get(k));
 				}
@@ -539,9 +546,14 @@ public class ServerManager {
 			installLibBatch.add("source('http://bioconductor.org/biocLite.R')");
 
 			for (int i = 0; i < requiredPackages.length; ++i) {
+				if (!new File(rlibs+"/"+requiredPackages[i]).exists()) {
+					installLibBatch.add("biocLite('" + requiredPackages[i] + "',lib='" + rlibs + "')");
+				}
+				/*
 				if (getLibraryPath(requiredPackages[i], rpath, rlibs) == null) {
 					installLibBatch.add("biocLite('" + requiredPackages[i] + "',lib='" + rlibs + "')");
 				}
+				*/
 			}
 
 			if (installLibBatch.size() > 1) {
@@ -612,9 +624,14 @@ public class ServerManager {
 				Vector<String> missingLibs = new Vector<String>();
 
 				for (int i = 0; i < requiredPackages.length; ++i) {
+					if (!new File(rlibs+"/"+requiredPackages[i]).exists()) {
+						missingLibs.add(requiredPackages[i]);
+					}
+					/*
 					if (getLibraryPath(requiredPackages[i], rpath, rlibs) == null) {
 						missingLibs.add(requiredPackages[i]);
 					}
+					*/
 				}
 
 				if (missingLibs.size() > 0) {
@@ -673,11 +690,19 @@ public class ServerManager {
 
 			// ---------------------------------------
 
-			String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";
+			//String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";
+			String jripath = rlibs+"/rJava/jri/";
 			System.out.println("jripath:" + jripath + "\n");
-
+						
 			String cp = root + "classes";
-
+			
+			try {
+				downloadBioceCore(PoolUtils.LOG_PRGRESS_TO_LOGGER);
+				cp=cp+System.getProperty("path.separator")+new File(root+"biocep-core.jar").getAbsolutePath();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 			ManagedServant[] servantHolder = new ManagedServant[1];
 			RemoteException[] exceptionHolder = new RemoteException[1];
 
@@ -814,6 +839,7 @@ public class ServerManager {
 		}
 	}
 
+	// incomplete
 	public static String getLibraryPath(String libName, String rpath, String rlibs) {
 		if (!rpath.endsWith("/") && !rpath.endsWith("\\")) {
 			rpath += "/";
@@ -1082,4 +1108,8 @@ public class ServerManager {
 			}
 		}).start();
 	}
+	synchronized public static void downloadBioceCore(int logInfo) throws Exception{
+		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/biocep-core.jar"), INSTALL_DIR, logInfo);
+	}
+	
 }

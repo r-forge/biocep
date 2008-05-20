@@ -106,6 +106,10 @@ public class PoolUtils {
 	private static boolean _propertiesInjected = false;
 	private static boolean _rmiSocketFactoryInitialized = false;
 
+	public static final int LOG_PRGRESS_TO_SYSTEM_OUT=1;
+	public static final int LOG_PRGRESS_TO_LOGGER=2;
+	public static final int LOG_PRGRESS_TO_DIALOG=4;
+	
 	public static int BUFFER_SIZE = 1024 * 32;
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(PoolUtils.class);
@@ -737,7 +741,7 @@ public class PoolUtils {
 
 	}
 
-	public static void cacheJar(URL url, String location, boolean showProgress) {
+	public static void cacheJar(URL url, String location, int logInfo) {
 		String jarName = url.toString().substring(url.toString().lastIndexOf("/") + 1);
 		if (!location.endsWith("/") && !location.endsWith("\\"))
 			location += "/";
@@ -756,7 +760,7 @@ public class PoolUtils {
 				return;
 			}
 
-			if (showProgress) {
+			if ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) {
 
 				Runnable runnable = new Runnable() {
 					public void run() {
@@ -780,8 +784,15 @@ public class PoolUtils {
 				}
 			}
 
-			System.out.println("Downloading " + jarName + ":");
-			System.out.print("expected:==================================================\ndone    :");
+			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT)!=0) {
+				System.out.println("Downloading " + jarName + ":");
+				System.out.println("expected:==================================================\ndone    :");
+			} 
+			
+			if ((logInfo & LOG_PRGRESS_TO_LOGGER)!=0) {
+				log.info("Downloading " + jarName + ":");
+			}
+			
 
 			int jarSize = urlC.getContentLength();
 			int currentPercentage = 0;
@@ -796,13 +807,20 @@ public class PoolUtils {
 			int co = 0;
 			while ((co = is.read(data, 0, BUFFER_SIZE)) != -1) {
 				fos.write(data, 0, co);
-				count = count + co;
-
+				count = count + co;				
 				int expected=(50*count / jarSize);
-				while (printcounter<expected) {System.out.print("=");++printcounter;}
+				while (printcounter<expected) {
+					if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT)!=0) {
+						System.out.print("=");
+					} 
+					if ((logInfo & LOG_PRGRESS_TO_LOGGER)!=0) {
+						log.info((int) (100 * count / jarSize)+"% done.");
+					}					
 					
-					
-				if (showProgress) {
+					++printcounter;
+				}
+										
+				if ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) {
 					final int p = (int) (100 * count / jarSize);
 					if (p > currentPercentage) {
 						currentPercentage = p;
@@ -813,7 +831,7 @@ public class PoolUtils {
 							public void run() {
 								fjpb.setIndeterminate(false);
 								fjpb.setValue(p);
-								fa.setText("\n" + p + "%" + " Done ");
+								fa.setText("\n" + p + "%" + " Done. ");
 							}
 						});
 
@@ -874,12 +892,15 @@ public class PoolUtils {
 		} catch (IOException e) {
 			System.err.println(e.toString());
 		} finally {
-			if (showProgress) {
+			if ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) {
 				f.setVisible(false);
-			} else {
-				System.out.println(" 100% of " + jarName + " has been downloaded");
-			}
-
+			} 
+			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT)!=0) {
+				System.out.println(" 100% of " + jarName + " has been downloaded \n");
+			} 
+			if ((logInfo & LOG_PRGRESS_TO_LOGGER)!=0) {
+				log.info(" 100% of " + jarName + " has been downloaded");
+			}					
 		}
 	}
 

@@ -50,6 +50,7 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -580,11 +581,32 @@ public class DirectJNI {
 					obj = new RNumeric((Double) obj);
 				else if (obj instanceof Float)
 					obj = new RNumeric((Float) obj);
-				else if (obj instanceof String)
-					obj = new RChar((String) obj);
 				else if (obj instanceof Boolean)
 					obj = new RLogical((Boolean) obj);
-				else
+				else if (obj instanceof ArrayList) {
+					
+					if (((ArrayList<?>)obj).size()>0) {
+						Class<?> componentType=((ArrayList<?>)obj).get(0).getClass();
+						if (componentType==Integer.class)
+							obj = getRArrayFromJavaArray( (Integer[])((ArrayList<?>)obj).toArray(new Integer[0]) );
+						else if (obj instanceof Long)
+							obj = getRArrayFromJavaArray( (Long[])((ArrayList<?>)obj).toArray(new Long[0]) );
+						else if (obj instanceof String)
+							obj = getRArrayFromJavaArray( (String[])((ArrayList<?>)obj).toArray(new String[0]) );
+						else if (obj instanceof Double)
+							obj = getRArrayFromJavaArray( (Double[])((ArrayList<?>)obj).toArray(new Double[0]) );
+						else if (obj instanceof Float)
+							obj = getRArrayFromJavaArray( (Float[])((ArrayList<?>)obj).toArray(new Float[0]) );
+						else if (obj instanceof Boolean)
+							obj = getRArrayFromJavaArray( (Boolean[])((ArrayList<?>)obj).toArray(new Boolean[0]) );
+						else {
+							throw new Exception("cannot convert type in ArrayList");
+						}						
+					} else {
+						throw new Exception("empty ArrayList");
+					}
+						
+				} else 
 					throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
 			} else {
 				Class<?> componentType = obj.getClass().getComponentType();
