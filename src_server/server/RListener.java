@@ -19,11 +19,9 @@ package server;
 
 import graphics.rmi.RClustserInterface;
 import java.io.File;
-import java.io.StringWriter;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -44,16 +42,14 @@ import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
 import org.python.core.PyComplex;
-import org.python.core.PyException;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
-import org.python.util.PythonInterpreter;
-
 import python.PythonInterpreterSingleton;
 import remoting.RAction;
-import remoting.RCallback;
+import remoting.RCallBack;
+import remoting.RHelpListener;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -66,11 +62,34 @@ public abstract class RListener {
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RListener.class);
 
-	private static RCallback _callbackInterface = null;
-
-	public static void setCallbackInterface(RCallback callbackInterface) {
-		_callbackInterface = callbackInterface;
+	private static Vector<RCallBack> _callbacks = new Vector<RCallBack>();
+	private static Vector<RHelpListener> _helpListeners=new Vector<RHelpListener>();
+	
+	public static void addRCallback(RCallBack callback) {
+		_callbacks.add(callback);
 	}
+	
+	public static void removeRCallback(RCallBack callback) {
+		_callbacks.remove(callback);
+	}
+	
+	public static void removeAllRCallbacks() {
+		_callbacks.removeAllElements();
+	}
+	
+		
+	public static void addRHelpListener(RHelpListener helpListener) {
+		_helpListeners.add(helpListener);
+	}
+	
+	public static void removeRHelpListener(RHelpListener helpListener) {
+		_helpListeners.remove(helpListener);
+	}
+	
+	public static void removeAllRHelpListeners() {
+		_helpListeners.removeAllElements();
+	}
+	
 
 	private static RClustserInterface _rClusterInterface = new RClustserInterface() {
 		public Vector<RServices> createRs(int n, String nodeName) throws Exception {
@@ -164,11 +183,12 @@ public abstract class RListener {
 		_rClusterInterface = rClusterInterface;
 	}
 
-	public static void progress(float percentageDone, String phaseDescription, float phasePercentageDone) {
-		if (_callbackInterface != null) {
+	public static void notifyJavaListeners(String parametersStr) {
+		HashMap<String, String> parameters=PoolUtils.getParameters(parametersStr);
+		for (int i=0; i<_callbacks.size(); ++i) {
 			try {
-				_callbackInterface.progress(percentageDone, phaseDescription, phasePercentageDone);
-			} catch (RemoteException e) {
+				_callbacks.elementAt(i).notify(parameters);
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -228,6 +248,14 @@ public abstract class RListener {
 		RAction action = new RAction("help");
 		action.setAttributes(attributes);
 		DirectJNI._rActions.add(action);
+		
+		for (int i=0; i<_helpListeners.size();++i) {
+			try {
+				_helpListeners.elementAt(i).help(pack, topic);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		return null;
 	}
 

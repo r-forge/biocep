@@ -20,6 +20,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -27,11 +28,13 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.bioconductor.packages.biobase.ExpressionSet;
 
+import remoting.RCallBack;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsoleDialog;
 import uk.ac.ebi.microarray.pools.db.monitor.ServantStatus;
 import graphics.pop.GDDevice;
 import graphics.rmi.JGDPanelPop;
+import http.HttpMarker;
 import http.RHttpProxy;
 
 /**
@@ -44,13 +47,21 @@ public class HttpR {
 		//final String cmdUrl = System.getProperty("url");
 		final String cmdUrl = "http://127.0.0.1:8080/rvirtual/cmd";
 		HashMap<String, Object> options = new HashMap<String, Object>();
-		//options.put("privatename", "tata");
+		options.put("privatename", "tata");
 		options.put("urls", new URL[]{new URL("http://127.0.0.1:8080/rws/mapping/classes/")});
 		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
+		final RServices r = RHttpProxy.getR(cmdUrl, sessionId,true);
+		
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
 			public void run() {
 				System.out.println("Shutdown Hook Called");
+				try {
+					((HttpMarker)r).stopThreads();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
 				try {
 					RHttpProxy.logOff(cmdUrl, sessionId);
 				} catch (Exception e) {
@@ -59,19 +70,25 @@ public class HttpR {
 			}
 		}));
 
-		RServices r = (RServices) RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "R", new Class<?>[] { RServices.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));
 		
-		r.evaluate("library(vsn)");
-		r.evaluate("data(kidney)");
-		ExpressionSet kidney=(ExpressionSet)r.getObject("kidney");
 		
-		System.out.println(kidney);
+		r.addRCallback(new RCallBack(){
+			public void notify(HashMap<String, String> parameters) throws RemoteException {
+				System.out.println("@@@"+parameters);				
+			}
+		});
 		
+		
+		
+		r.evaluate("democallback<-function() { .PrivateEnv$notifyJavaListeners('percentageDone=0.1');"+
+				".PrivateEnv$notifyJavaListeners('percentageDone=0.2');"+"" +
+				".PrivateEnv$notifyJavaListeners('percentageDone=0.5'); .PrivateEnv$notifyJavaListeners('percentageDone=1');}");
+		System.out.println("***" + r.evaluate("democallback()"));
+
+		Thread.sleep(100);
 		System.exit(0);
 		
-		
-		
-		GDDevice d = RHttpProxy.newDevice(cmdUrl, sessionId, 100, 100);
+		GDDevice d = r.newDevice(100, 100);
 
 		JPanel panel = new JGDPanelPop(d);
 

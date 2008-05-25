@@ -85,9 +85,25 @@ public interface RServices extends ManagedServant {
 	public String[] listPackages() throws RemoteException;
 
 	public RPackage getPackage(String packageName) throws RemoteException;
+		
+	public void addRCallback(RCallBack callback) throws RemoteException;	
+	public void removeRCallback(RCallBack callback) throws RemoteException;	
+	public void removeAllRCallbacks() throws RemoteException;	
 
-	public void setCallBack(RCallback callback) throws RemoteException;
-
+	public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException;	
+	public void removeRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException;	
+	public void removeAllRCollaborationListeners() throws RemoteException;	
+	
+	public void addRHelpListener(RHelpListener helpListener) throws RemoteException;	
+	public void removeRHelpListener(RHelpListener helpListener) throws RemoteException;	
+	public void removeAllRHelpListeners() throws RemoteException;	
+	
+	public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException;	
+	public GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException;
+	
+	void chat(String sourceSession, String message) throws RemoteException;		
+	void consolePrint(String sourceSession, String expression, String result) throws RemoteException;	
+	
 	public RNI getRNI() throws RemoteException;
 
 	public void stop() throws RemoteException;
@@ -127,7 +143,6 @@ public interface RServices extends ManagedServant {
 	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException;
 		
 	
-	
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
 
 	public void startHttpServer(int port) throws java.rmi.RemoteException;
@@ -135,8 +150,7 @@ public interface RServices extends ManagedServant {
 	public boolean isHttpServerStarted(int port) throws java.rmi.RemoteException;
 
 	public void stopHttpServer() throws java.rmi.RemoteException;
-		
-	
+			
 	
 	public String pythonExec(String pythonCommand) throws RemoteException;
 	

@@ -33,6 +33,9 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 	GDDevice _localGdDevice = null;
 	HashMap<Integer, GDDevice> _deviceHashMap;
 
+	private static int _gdDeviceCounter=0;
+	private String _id="device_"+(_gdDeviceCounter++);
+	
 	public GDDeviceImpl(int w, int h, HashMap<Integer, GDDevice> deviceHashMap) throws RemoteException {
 		super();
 		_localGdDevice = new DirectJNI.GDDeviceLocal(w, h);
@@ -139,5 +142,9 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 
 	public byte[] getXfig() throws RemoteException {
 		return _localGdDevice.getXfig();
+	}
+	
+	public String getId() throws RemoteException {
+		return _id;
 	}
 }

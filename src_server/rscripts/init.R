@@ -32,10 +32,9 @@ list.lightpack <- function()  {
 	if (result[1]=='OK') { eval(parse("", text=result[2])); } else { eval(parse("", text=result[2])); }
 }
 
-assign('callbackPercentage', function(percentage, phaseDesciption='', phasePercentage=0)  {
-	.jcall( obj="server/RListener" , "V" ,"progress", .jfloat(percentage), phaseDesciption, .jfloat(phasePercentage) )	
+assign('notifyJavaListeners', function(parameters)  {
+	.jcall( obj="server/RListener" , "V" ,"notifyJavaListeners", parameters )	
 }, env=.PrivateEnv)
-
 
 assign('dev.broadcast',  function () {
 	temp_dev_list<-.PrivateEnv$dev.list();

@@ -36,6 +36,13 @@ public class RAction implements Serializable {
 		_actionName = actionName;
 	}
 
+	public RAction(String actionName, HashMap<String, Object> attributes) {
+		_actionName = actionName;
+		_actionAttributes = attributes;
+	}
+
+	
+	
 	public void setActionName(String name) {
 		_actionName = name;
 	}

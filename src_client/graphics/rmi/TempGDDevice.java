@@ -88,4 +88,9 @@ public class TempGDDevice implements GDDevice {
 	public byte[] getXfig() throws RemoteException {
 		return null;
 	}
+	
+	public String getId() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

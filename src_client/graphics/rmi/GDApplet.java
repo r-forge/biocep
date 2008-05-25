@@ -97,7 +97,6 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -143,8 +142,6 @@ import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
 import net.java.dev.jspreadsheet.CellPoint;
 import org.apache.batik.swing.JSVGCanvas;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
 import org.gjt.sp.jedit.gui.FloatingWindowContainer;
@@ -153,6 +150,7 @@ import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import remoting.FileDescription;
 import remoting.RAction;
+import remoting.RCollaborationListener;
 import remoting.RServices;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
@@ -230,7 +228,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		@Override
 		public void lock() {
 			super.lock();
-			if (_mode == HTTP_MODE) {
+			if (_rForConsole instanceof HttpMarker) {
 				try {
 					_currentDevice.setAsCurrentDevice();
 				} catch (Exception e) {
@@ -253,6 +251,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 			
 			popActions();
+						
+			if (_rForConsole instanceof HttpMarker) {
+				((HttpMarker)_rForConsole).popActions();
+			}
+			
 			super.unlock();
 
 			//_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -273,12 +276,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private String[] _expressionSave = new String[] { "" };
 	private String[] _httpPortSave = new String[] { "8080" };
 	private ConsoleLogger _consoleLogger = new ConsoleLogger() {
+		
 		public void printAsInput(String message) {
 			_consolePanel.print(message, null);
+			if (isCollaborativeMode()) {
+				try {getR().consolePrint(_sessionId, message, null);} catch (Exception e) {e.printStackTrace();}
+			}
 		}
 
 		public void printAsOutput(String message) {
 			_consolePanel.print(null, message);
+			if (isCollaborativeMode()) {
+				try {getR().consolePrint(_sessionId, null, message);} catch (Exception e) {e.printStackTrace();}
+			}
 		}
 	};
 
@@ -457,16 +467,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (_save && "guest".equals(_login) && _mode == HTTP_MODE) {
 									JOptionPane.showMessageDialog(GDApplet.this, "The login <guest> is not allowed to have workspace persistency");
 								}
-
-								_rForConsole = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[] { RServices.class,
-										HttpMarker.class },  new HttpClient(new MultiThreadedHttpConnectionManager()));
-								_rForPopCmd = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[] { RServices.class,
-										HttpMarker.class },  new HttpClient(new MultiThreadedHttpConnectionManager()));
-								_rForFiles = (RServices) RHttpProxy.getDynamicProxy(_commandServletUrl, _sessionId, "R", new Class<?>[] { RServices.class,
-										HttpMarker.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));
-
+								
+								_rForConsole = RHttpProxy.getR(_commandServletUrl, _sessionId,true);
+								_rForPopCmd = RHttpProxy.getR(_commandServletUrl, _sessionId,false);
+								_rForFiles = RHttpProxy.getR(_commandServletUrl, _sessionId,false);
+										
 								if (new File(GDApplet.NEW_R_STUB_FILE).exists())
 									new File(GDApplet.NEW_R_STUB_FILE).delete();
+								
 
 							} else {
 
@@ -611,23 +619,23 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							}
 
+							
+							_rForConsole.addRCollaborationListener(new RCollaborationListenerImpl());
+							
+							
 							s = new Stack<GDDevice>();
 							GDDevice[] ldevices = _rForConsole.listDevices();
 							for (int i = ldevices.length - 1; i >= 0; --i)
 								s.push(ldevices[i]);
 
-							if (_rForConsole instanceof HttpMarker) {
-								d = RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
-								//System.out.println("device id:" + d.getDeviceNumber());
+																
+							if (s.empty()) {
+								d = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 							} else {
-								if (s.empty()) {
-									d = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
-								} else {
-									d = s.pop();
-									d.fireSizeChangedEvent(_graphicPanel.getWidth(), _graphicPanel.getHeight());
-								}
+								d = s.pop();
+								d.fireSizeChangedEvent(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 							}
-
+							
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, d), null,
 									new FitDeviceAction(GDApplet.this, d), null, new SnapshotDeviceAction(GDApplet.this),
 									new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
@@ -658,16 +666,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 							for (int i = 0; i < deviceViews.size(); ++i) {
 								final JPanel rootComponent = (JPanel) deviceViews.elementAt(i).getComponent();
 								GDDevice newDevice = null;
-								if (_rForConsole instanceof HttpMarker) {
-									newDevice = RHttpProxy.newDevice(_commandServletUrl, _sessionId, rootComponent.getWidth(), rootComponent.getHeight());
+								
+								if (s.empty()) {
+									newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 								} else {
-									if (s.empty()) {
-										newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
-									} else {
-										newDevice = s.pop();
-										newDevice.fireSizeChangedEvent(rootComponent.getWidth(), rootComponent.getHeight());
-									}
+									newDevice = s.pop();
+									newDevice.fireSizeChangedEvent(rootComponent.getWidth(), rootComponent.getHeight());
 								}
+								
 								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 										new SetCurrentDeviceAction(GDApplet.this, newDevice), null, new FitDeviceAction(GDApplet.this, newDevice), null,
 										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this), null,
@@ -693,13 +699,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 							_currentDevice = d;
 							setCurrentDevice(d);
 							d.setAsCurrentDevice();
-
-							if (!(_rForConsole instanceof HttpMarker)) {
-								while (!s.empty()) {
-									_actions.get("createdevice").actionPerformed(null);
-								}
+							
+							while (!s.empty()) {
+								_actions.get("createdevice").actionPerformed(null);
 							}
-
+							
 							_isGroovyEnabled=_rForConsole.isGroovyEnabled();
 							
 							if (_demo) {
@@ -773,10 +777,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 								RHttpProxy.logOff(_commandServletUrl, _sessionId);
 							} else {
+								
 								if (!getRLock().isLocked()) {
 									disposeDevices();
 									persistState();
 								}
+								
 							}
 
 							noSession();
@@ -797,7 +803,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						try {
 							getRLock().lock();
 
-							if (_rForConsole instanceof HttpMarker) {
+							if (_rForConsole instanceof HttpMarker) {								
 								_rForConsole.asynchronousConsoleSubmit(expression);
 								while (_rForConsole.isBusy()) {
 									try {
@@ -810,6 +816,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} else {
 								result = _rForConsole.consoleSubmit(expression);
 							}
+							
+							if (isCollaborativeMode()) _rForConsole.consolePrint(_sessionId, expression, (String)result);
+							
 
 						} catch (NotLoggedInException nle) {
 							noSession();
@@ -2563,17 +2572,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 					_protectR.lock();
 
 					try {
-						if (_mode == HTTP_MODE) {
-							newDevice = RHttpProxy.newDevice(_commandServletUrl, _sessionId, _graphicPanel.getWidth(), _graphicPanel.getHeight());
+						
+						if (s == null || s.empty()) {
+							newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 						} else {
-							if (s == null || s.empty()) {
-								newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
-							} else {
-								newDevice = s.pop();
-								newDevice.fireSizeChangedEvent(rootGraphicPanel.getWidth(), rootGraphicPanel.getHeight());
-							}
+							newDevice = s.pop();
+							newDevice.fireSizeChangedEvent(rootGraphicPanel.getWidth(), rootGraphicPanel.getHeight());
 						}
-						//getR().evaluate("plot.new()");
+						
 					} finally {
 						_protectR.unlock();
 					}
@@ -3580,11 +3586,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 		for (int i = 0; i < deviceViews.size(); ++i)
 			deviceViews.elementAt(i).getPanel().stopThreads();
 
+		
 		if (getR() instanceof HttpMarker) {
+			((HttpMarker)getR()).stopThreads();
+			/*
 			((JGDPanelPop) _graphicPanel).dispose();
 			for (int i = 0; i < deviceViews.size(); ++i)
 				deviceViews.elementAt(i).getPanel().dispose();
+			*/
 		}
+		
 
 	}
 
@@ -4284,11 +4295,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	public void synchronizeCollaborators() throws RemoteException {
-		getR().consoleSubmit(".PrivateEnv$dev.broadcast()");
+		//getR().consoleSubmit(".PrivateEnv$dev.broadcast()");
 	}
 
 	public boolean isCollaborativeMode() {
-		return _mode == HTTP_MODE /*&& _login.indexOf("@@") != -1*/;
+		//return _mode == HTTP_MODE;
+		return true;
 	}
 
 	public GDDevice getCurrentDevice() {
@@ -4464,4 +4476,24 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public GroovyInterpreter getGroovyInterpreter() {
 		return GroovyInterpreterSingleton.getInstance();
 	}
+	
+	class RCollaborationListenerImpl extends UnicastRemoteObject implements RCollaborationListener {
+		public RCollaborationListenerImpl() throws RemoteException {
+			super();
+		}
+		
+		public void chat(String sourceSession, String message) throws RemoteException {
+			System.out.println("#CHAT:: sourceSession:"+sourceSession+"  message:"+message);
+		}
+		
+		public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
+			if (_sessionId!=null && !_sessionId.equals(sourceSession)) {
+				_consolePanel.print("Source > "+sourceSession ,null);
+				_consolePanel.print(expression ,result);
+			} 
+
+			System.out.println("##CONSOLE PRINT:: sourceSession:"+sourceSession+"  expression:"+expression+"  result:"+result);			
+		}
+	}
+	
 }

@@ -8,7 +8,9 @@ import mapping.RPackage;
 import org.bioconductor.packages.rservices.RObject;
 import remoting.FileDescription;
 import remoting.RAction;
-import remoting.RCallback;
+import remoting.RCallBack;
+import remoting.RCollaborationListener;
+import remoting.RHelpListener;
 import remoting.RNI;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.ManagedServant;
@@ -125,11 +127,11 @@ public class RServicesObject implements RServices {
 	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException {
 		return null;
 	}
-	
+
 	public RObject callAndGetObjectName(String methodName, Object... args) throws RemoteException {
 		return null;
 	}
-	
+
 	public void createWorkingDirectoryFile(String fileName) throws RemoteException {
 	}
 
@@ -227,7 +229,7 @@ public class RServicesObject implements RServices {
 	public GDDevice[] listDevices() throws RemoteException {
 		return null;
 	}
-	
+
 	public Vector<RAction> popRActions() throws RemoteException {
 		return null;
 	}
@@ -254,7 +256,7 @@ public class RServicesObject implements RServices {
 	public void removeWorkingDirectoryFile(String fileName) throws RemoteException {
 	}
 
-	public void setCallBack(RCallback callback) throws RemoteException {
+	public void setCallBack(RCallBack callback) throws RemoteException {
 	}
 
 	public void setProgressiveConsoleLogEnabled(boolean progressiveLog) throws RemoteException {
@@ -307,30 +309,30 @@ public class RServicesObject implements RServices {
 	public RObject pythonEval(String pythonCommand) throws RemoteException {
 		return null;
 	}
-	
+
 	public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException {
 		return null;
 	}
-	
+
 	public RObject pythonGet(String name) throws RemoteException {
 		return null;
 	}
-	
+
 	public Object pythonGetAndConvert(String name) throws RemoteException {
 		return null;
 	}
 
-	public void pythonSet(String name, Object Value) throws RemoteException {		
+	public void pythonSet(String name, Object Value) throws RemoteException {
 	}
 
 	public Object callAndConvert(String methodName, Object... args) throws RemoteException {
 		return null;
 	}
-	
+
 	public Object getObjectConverted(String expression) throws RemoteException {
 		return null;
 	}
-	
+
 	public Object convert(RObject obj) throws RemoteException {
 		return null;
 	}
@@ -359,31 +361,79 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public void groovySet(String name, Object Value) throws RemoteException {		
+	public void groovySet(String name, Object Value) throws RemoteException {
 	}
 
 	public boolean isGroovyEnabled() throws RemoteException {
 		return false;
 	}
-	
+
 	public String getGroovyStatus() throws RemoteException {
 		return null;
 	}
-	
+
 	public void freeAllReferences() throws RemoteException {
 	}
-	
+
 	public RObject getObjectName(String expression) throws RemoteException {
 		return null;
 	}
-	
+
 	public RObject realizeObjectName(RObject objectName) throws RemoteException {
 		return null;
 	}
-	
+
 	public RObject realizeObjectNameConverted(RObject objectName) throws RemoteException {
 		return null;
 	}
+
+	public void addRCallback(RCallBack callback) throws RemoteException {
+	}
+
+	public void removeAllRCallbacks() throws RemoteException {
+	}
+
+	public void removeRCallback(RCallBack callback) throws RemoteException {
+	}
+
+	public remoting.GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
+		return null;
+	}
+
+	public remoting.GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException {
+		return null;
+	}
+
+	public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
+
+	}
+
+	public void removeRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
+
+	}
+
+	public void removeAllRCollaborationListeners() throws RemoteException {
+
+	}
 	
+	public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
+		
+	}
 	
+	public void removeRHelpListener(RHelpListener helpListener) throws RemoteException {
+		
+	}
+	
+	public void removeAllRHelpListeners() throws RemoteException {
+		
+	}
+
+	public void chat(String sourceSession, String message) throws RemoteException {
+
+	}
+
+	public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
+
+	}
+
 }

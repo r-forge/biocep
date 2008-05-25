@@ -56,6 +56,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -499,6 +500,26 @@ public class PoolUtils {
 		return (URL[]) result.toArray(new URL[0]);
 	}
 
+	public static HashMap<String,String> getParameters(String parametersStr) {		
+		StringTokenizer st = new StringTokenizer(parametersStr, "~/~"); 
+		HashMap<String,String> result = new HashMap<String,String>();	
+		while (st.hasMoreElements()) {
+			try {
+				String element=(String)st.nextElement();
+				int p=element.indexOf('=');
+				if (p==-1) {
+					result.put(element,null);
+				}
+				else {
+					result.put(element.substring(0,p).trim(), element.substring(p+1, element.length()).trim());
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
+	
 	public static Point deriveLocation(Point origin, double radius) {
 		return new Point((int) ((origin.getX() - radius) + (Math.random() * 2 * radius)), (int) ((origin.getY() - radius) + (Math.random() * 2 * radius)));
 	}
@@ -1025,9 +1046,7 @@ public class PoolUtils {
 		return orderP(keys);
 	}
 
-	public static void main(String[] args) throws Exception {
-
-	}
+	
 
 	public static void killLocalUnixProcess(String processId, boolean isKILLSIG) throws Exception {
 		String[] command = isKILLSIG ? new String[] { "kill", "-9", processId } : new String[] { "kill", processId };
@@ -1292,4 +1311,8 @@ public class PoolUtils {
 		return tempFile;
 	}
 
+	public static void main(String args[]) {
+		System.out.println(getParameters("a=52~/~b=6778~/~l"));
+	}
+	
 }

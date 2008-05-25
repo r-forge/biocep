@@ -43,8 +43,11 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.rosuda.JRI.Rengine;
 import remoting.AssignInterface;
 import remoting.FileDescription;
+import remoting.GenericCallbackDevice;
 import remoting.RAction;
-import remoting.RCallback;
+import remoting.RCallBack;
+import remoting.RCollaborationListener;
+import remoting.RHelpListener;
 import remoting.RKit;
 import remoting.RNI;
 import remoting.RServices;
@@ -70,7 +73,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	private GraphicNotifier _graphicNotifier = null;
 
 	private HashMap<Integer, GDDevice> _deviceHashMap = new HashMap<Integer, GDDevice>();
-
+	
+	private HashMap<String, GenericCallbackDevice> _genericCallbackDeviceHashMap = new HashMap<String, GenericCallbackDevice>();
+	
 	private boolean _isReady = false;
 
 	RServices _rCreationPb = new RServicesObject();
@@ -397,11 +402,68 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
-	public void setCallBack(RCallback callback) throws RemoteException {
-		DirectJNI.getInstance().getRServices().setCallBack(callback);
-
+	
+	
+	
+	public void addRCallback(RCallBack callback) throws RemoteException {
+		DirectJNI.getInstance().getRServices().addRCallback(callback);
 	}
 
+	public void removeRCallback(RCallBack callback) throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeRCallback(callback);
+	}
+
+	public void removeAllRCallbacks() throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeAllRCallbacks();
+	}
+	
+	
+	public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
+		DirectJNI.getInstance().getRServices().addRCollaborationListener(collaborationListener);
+	}
+	
+	public void removeRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeRCollaborationListener(collaborationListener);
+	}
+	
+	public void removeAllRCollaborationListeners() throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeAllRCollaborationListeners();
+	}
+
+	public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
+		DirectJNI.getInstance().getRServices().addRHelpListener(helpListener);
+	}	
+	
+	public void removeRHelpListener(RHelpListener helpListener) throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeRHelpListener(helpListener);		
+	}
+	
+	public void removeAllRHelpListeners() throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeAllRHelpListeners();		
+	}
+		
+	public void chat(String sourceSession, String message) throws RemoteException {
+		DirectJNI.getInstance().getRServices().chat(sourceSession, message);
+	}
+	
+	public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
+		DirectJNI.getInstance().getRServices().consolePrint(sourceSession, expression, result);
+	}	
+		
+	public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
+		GenericCallbackDevice result=new GenericCallbackDeviceImpl(_genericCallbackDeviceHashMap);
+		DirectJNI.getInstance().getRServices().addRCallback(result);
+		DirectJNI.getInstance().getRServices().addRHelpListener(result);
+		DirectJNI.getInstance().getRServices().addRCollaborationListener(result);
+		return result;
+	}
+	
+	public GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException {
+		GenericCallbackDevice[] result=new GenericCallbackDevice[_genericCallbackDeviceHashMap.values().size()];
+		int i=0; for (GenericCallbackDevice d:_genericCallbackDeviceHashMap.values()) result[i++]=d; 
+		return result;
+	}
+	
 	public String[] listPackages() throws RemoteException {
 		return (String[]) _rim.keySet().toArray(new String[0]);
 	}
@@ -450,6 +512,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			}
 
 			RListener.stopAllClusters();
+			RListener.removeAllRCallbacks();
 			try {
 				DirectJNI.getInstance().regenerateWorkingDirectory(true);
 			} catch (Exception e) {
