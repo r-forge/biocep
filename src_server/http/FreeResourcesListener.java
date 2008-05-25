@@ -18,6 +18,8 @@
 package http;
 
 import java.util.HashMap;
+import java.util.Vector;
+
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -38,23 +40,24 @@ public class FreeResourcesListener implements HttpSessionListener {
 	public void sessionDestroyed(HttpSessionEvent sessionEvent) {
 		System.out.println("Session to destroy :" + sessionEvent.getSession().getId());
 
-		HashMap<String, HashMap<String, Object>> map = ((HashMap<String, HashMap<String, Object>>) sessionEvent.getSession().getServletContext().getAttribute(
-				"SESSIONS_ATTRIBUTES_MAP"));
-
+		HashMap<String, HashMap<String, Object>> map = ((HashMap<String, HashMap<String, Object>>) sessionEvent.getSession().getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP"));
 		if (map == null)
 			return;
 		HashMap<String, Object> attributes = map.get(sessionEvent.getSession().getId());
 
 		((HashMap<String, HttpSession>) sessionEvent.getSession().getServletContext().getAttribute("SESSIONS_MAP")).remove(sessionEvent.getSession().getId());
-		((HashMap<String, HttpSession>) sessionEvent.getSession().getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP")).remove(sessionEvent.getSession()
-				.getId());
-
+		((HashMap<String, HttpSession>) sessionEvent.getSession().getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP")).remove(sessionEvent.getSession().getId());
+		
+		
+		
 		if (attributes == null)
 			return;
 		RServices rservices = (RServices) attributes.get("R");
 
 		if (rservices == null)
 			return;
+		
+		((HashMap<RServices, Vector<HttpSession>>) sessionEvent.getSession().getServletContext().getAttribute("R_SESSIONS")).get(rservices).remove(sessionEvent.getSession());
 
 		String login = (String) attributes.get("LOGIN");
 		boolean nopool = (Boolean) attributes.get("NOPOOL");

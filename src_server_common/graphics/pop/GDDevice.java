@@ -66,5 +66,7 @@ public interface GDDevice extends Remote {
 	public byte[] getBmp() throws RemoteException;
 
 	public byte[] getXfig() throws RemoteException;
+	
+	public String getId() throws RemoteException;
 
 }

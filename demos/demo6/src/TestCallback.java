@@ -17,7 +17,9 @@
  */
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import remoting.RCallback;
+import java.util.HashMap;
+
+import remoting.RCallBack;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 
@@ -30,12 +32,14 @@ public class TestCallback {
 		RServices r = null;
 		try {
 			r = (RServices) ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();
-			r.setCallBack(new RCallbackImpl());
+			r.addRCallback(new RCallbackImpl());
+			r.addRCallback(new RCallbackImpl());
 			System.out.println("***" + r.evaluate("library(rJava)"));
 			System.out
 					.println("***"
-							+ r
-									.evaluate("democallback<-function() { .PrivateEnv$callbackPercentage(0.1);.PrivateEnv$callbackPercentage(0.1); .PrivateEnv$callbackPercentage(0.5); .PrivateEnv$callbackPercentage(1.0);}"));
+							+ r.evaluate("democallback<-function() { .PrivateEnv$notifyJavaListeners('percentageDone=0.1');"+
+							".PrivateEnv$notifyJavaListeners('percentageDone=0.2');"+"" +
+							".PrivateEnv$notifyJavaListeners('percentageDone=0.5'); .PrivateEnv$notifyJavaListeners('percentageDone=1');}"));
 			System.out.println("***" + r.evaluate(".jinit();democallback()", 2));
 		} finally {
 			ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);
@@ -43,14 +47,19 @@ public class TestCallback {
 		System.exit(0);
 	}
 
-	static class RCallbackImpl extends UnicastRemoteObject implements RCallback {
+	static class RCallbackImpl extends UnicastRemoteObject implements RCallBack {
 		public RCallbackImpl() throws RemoteException {
 			super();
 		}
-
-		public void progress(float percentageDone, String phaseDescription, float phasePercentageDone)
-				throws RemoteException {
-			System.out.println("percentageDone=" + percentageDone);
+		public void notify(HashMap<String, String> parameters) throws RemoteException {
+			System.out.println("percentageDone=" + parameters.get("percentageDone"));			
+		}
+		public String getId() throws RemoteException {
+			return null;
+		}
+		public String dispose() throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 }

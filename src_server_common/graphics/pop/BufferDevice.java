@@ -109,5 +109,9 @@ public class BufferDevice implements GDDevice {
 	public byte[] getXfig() throws RemoteException {
 		return null;
 	}
+	
+	public String getId() throws RemoteException {
+		return null;
+	}
 
 }

@@ -442,31 +442,40 @@
 					    <fileset dir="VirtualRWorkbench/frontendapp/WEB-INF/classes" includes="**/*.class"/>  
 				  </delete>
 								
-				  <java classname="uk.ac.ebi.microarray.pools.PropertiesGenerator" fork="true" >
-					<classpath>
-							<pathelement path="${CORE_JAR}"/>
-							<pathelement path="${LOGGING_JAR}"/>
-							<pathelement path="${LOG4J_JAR}"/>
-					</classpath>					  
-					  	<arg value="VirtualRWorkbench/frontendapp/WEB-INF/classes/globals.properties"/>
-					  
-					    <arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB"/>
-					    <arg value="pools.dbmode.driver=${demo.db.driver}"/>
-					    <arg value="pools.dbmode.url=${demo.db.url}"/>
-					    <arg value="pools.dbmode.user=${demo.db.user}"/>
-					    <arg value="pools.dbmode.password=${demo.db.password}"/>					  					  
-					    <arg value="pools.dbmode.defaultpoolname=R"/>					  
-					    <arg value="pstools.home=${PSTOOLS_HOME}"/>
-					    <arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>	
-					    <arg value="node.manager.name=NODE_MANAGER"/>
-					    <arg value="private.servant.node.name=${private.servants.node.name}"/>
-					    <arg value="users.data.dir.root=${basedir}/VirtualRWorkbench/usersdata"/>  
-					    <arg value="org.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
-					    <arg value="log4j.rootCategory=INFO,A1"/>
-					    <arg value="log4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
-					    <arg value="log4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
-					    <arg value="log4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>						  
-				</java>			
+				
+				<if>
+					<equals arg1="${mode}" arg2="reg" />
+					<then>
+					
+					</then>
+					
+					<else>
+				  		<java classname="uk.ac.ebi.microarray.pools.PropertiesGenerator" fork="true" >
+							<classpath>
+								<pathelement path="${CORE_JAR}"/>
+								<pathelement path="${LOGGING_JAR}"/>	
+								<pathelement path="${LOG4J_JAR}"/>
+							</classpath>					  
+					  		<arg value="VirtualRWorkbench/frontendapp/WEB-INF/classes/globals.properties"/>					  
+						    <arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB"/>
+						    <arg value="pools.dbmode.driver=${demo.db.driver}"/>
+						    <arg value="pools.dbmode.url=${demo.db.url}"/>
+						    <arg value="pools.dbmode.user=${demo.db.user}"/>
+						    <arg value="pools.dbmode.password=${demo.db.password}"/>					  					  
+						    <arg value="pools.dbmode.defaultpoolname=R"/>					  
+						    <arg value="pstools.home=${PSTOOLS_HOME}"/>
+						    <arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>	
+						    <arg value="node.manager.name=NODE_MANAGER"/>
+						    <arg value="private.servant.node.name=${private.servants.node.name}"/>
+						    <arg value="users.data.dir.root=${basedir}/VirtualRWorkbench/usersdata"/>  
+						    <arg value="org.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+						    <arg value="log4j.rootCategory=INFO,A1"/>
+						    <arg value="log4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+						    <arg value="log4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+						    <arg value="log4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>						  
+							</java>		
+						</else>
+				</if>
 				
 				 <!--
 					 keytool -genkey -alias appletsigningkey -keyalg RSA -validity 1095 -keypass emblebi -keystore appletKeyStore.ks -storepass emblebi
@@ -481,6 +490,10 @@
 				  	
 				  	
 						<fileset dir="" includes="RJB.jar"/>
+				  	
+				  	
+				  		<!--
+				  		
 				  	    <fileset dir="lib/desktop" includes="freemindbrowser.jar"/>
 				  	
 						
@@ -540,6 +553,8 @@
 					  	<fileset dir="lib/svg" includes="xml-apis-ext.jar"/>
 					  	<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>
 					  	
+					  	-->
+					  	
 				  	
 					
 				  		
@@ -556,6 +571,8 @@
 				  	
 				  	
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="RJB.jar"/>
+				  	
+				  	<!--
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="freemindbrowser.jar"/>
 				  	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-logging-1.1.1.jar"/>	
@@ -604,9 +621,11 @@
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="ganymed-ssh2.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="edtftpj.jar"/>			  		
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs"  includes="groovy-all-1.5.4.jar"/>
+				  	-->
 				  	
-				  	
+				  	<!--
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
+					-->
 					
 				
 				  </path>

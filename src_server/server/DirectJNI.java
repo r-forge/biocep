@@ -119,8 +119,11 @@ import org.w3c.dom.Element;
 import python.PythonInterpreterSingleton;
 import remoting.AssignInterface;
 import remoting.FileDescription;
+import remoting.GenericCallbackDevice;
 import remoting.RAction;
-import remoting.RCallback;
+import remoting.RCallBack;
+import remoting.RCollaborationListener;
+import remoting.RHelpListener;
 import remoting.RNI;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -487,7 +490,7 @@ public class DirectJNI {
 					if (!new File(indexFile).exists()) {
 						indexFile = null;
 					} else {
-						//System.out.println("index file:" + indexFile);
+						// System.out.println("index file:" + indexFile);
 					}
 				}
 
@@ -584,29 +587,29 @@ public class DirectJNI {
 				else if (obj instanceof Boolean)
 					obj = new RLogical((Boolean) obj);
 				else if (obj instanceof ArrayList) {
-					
-					if (((ArrayList<?>)obj).size()>0) {
-						Class<?> componentType=((ArrayList<?>)obj).get(0).getClass();
-						if (componentType==Integer.class)
-							obj = getRArrayFromJavaArray( (Integer[])((ArrayList<?>)obj).toArray(new Integer[0]) );
+
+					if (((ArrayList<?>) obj).size() > 0) {
+						Class<?> componentType = ((ArrayList<?>) obj).get(0).getClass();
+						if (componentType == Integer.class)
+							obj = getRArrayFromJavaArray((Integer[]) ((ArrayList<?>) obj).toArray(new Integer[0]));
 						else if (obj instanceof Long)
-							obj = getRArrayFromJavaArray( (Long[])((ArrayList<?>)obj).toArray(new Long[0]) );
+							obj = getRArrayFromJavaArray((Long[]) ((ArrayList<?>) obj).toArray(new Long[0]));
 						else if (obj instanceof String)
-							obj = getRArrayFromJavaArray( (String[])((ArrayList<?>)obj).toArray(new String[0]) );
+							obj = getRArrayFromJavaArray((String[]) ((ArrayList<?>) obj).toArray(new String[0]));
 						else if (obj instanceof Double)
-							obj = getRArrayFromJavaArray( (Double[])((ArrayList<?>)obj).toArray(new Double[0]) );
+							obj = getRArrayFromJavaArray((Double[]) ((ArrayList<?>) obj).toArray(new Double[0]));
 						else if (obj instanceof Float)
-							obj = getRArrayFromJavaArray( (Float[])((ArrayList<?>)obj).toArray(new Float[0]) );
+							obj = getRArrayFromJavaArray((Float[]) ((ArrayList<?>) obj).toArray(new Float[0]));
 						else if (obj instanceof Boolean)
-							obj = getRArrayFromJavaArray( (Boolean[])((ArrayList<?>)obj).toArray(new Boolean[0]) );
+							obj = getRArrayFromJavaArray((Boolean[]) ((ArrayList<?>) obj).toArray(new Boolean[0]));
 						else {
 							throw new Exception("cannot convert type in ArrayList");
-						}						
+						}
 					} else {
 						throw new Exception("empty ArrayList");
 					}
-						
-				} else 
+
+				} else
 					throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
 			} else {
 				Class<?> componentType = obj.getClass().getComponentType();
@@ -619,9 +622,10 @@ public class DirectJNI {
 				else if (componentType == boolean.class)
 					obj = new RLogical((boolean[]) obj);
 				else {
-					obj=getRArrayFromJavaArray(obj);
-					
-					//throw new Exception("argument classe must be a subclass of RObject or Standard Java Types");
+					obj = getRArrayFromJavaArray(obj);
+
+					// throw new Exception("argument classe must be a subclass
+					// of RObject or Standard Java Types");
 				}
 			}
 		}
@@ -964,9 +968,9 @@ public class DirectJNI {
 
 	// public for internal use only (RListener)
 	public void putObjectAndAssignName(RObject obj, String name, boolean privateEnv) throws Exception {
-		//System.out.println("putObjectAndAssignName called, obj:" + obj);
+		// System.out.println("putObjectAndAssignName called, obj:" + obj);
 		long resultId = putObject(obj);
-		//System.out.println("Result id=" + resultId);
+		// System.out.println("Result id=" + resultId);
 		_rEngine.rniAssign(name, resultId, (privateEnv ? _privateEnvExp : 0));
 	}
 
@@ -1733,7 +1737,7 @@ public class DirectJNI {
 
 	public String sourceFromBuffer(StringBuffer buffer) {
 		try {
-			File tempFile = PoolUtils.createFileFromBuffer(null,buffer);
+			File tempFile = PoolUtils.createFileFromBuffer(null, buffer);
 			toggleMarker();
 			_rEngine.rniEval(_rEngine.rniParse("source(\"" + tempFile.getAbsolutePath().replace('\\', '/') + "\")", 1), 0);
 
@@ -1800,171 +1804,224 @@ public class DirectJNI {
 		DirectJNI.generateMaps(jarUrl, false);
 	}
 
-	
 	public static Object getJavaArrayFromRArray__(RArray array) {
-		int[] dim=array.getDim();
-		
+		int[] dim = array.getDim();
+
 		RVector vector = array.getValue();
-		Class<?> componentType=null;
-		if (vector instanceof RInteger) componentType=int.class;
-		else if (vector instanceof RNumeric) componentType=double.class;
-		else if (vector instanceof RChar) componentType=String.class;
-		else if (vector instanceof RLogical) componentType=boolean.class;
-				
-	    Object result=null;
-	    try {result=Array.newInstance( componentType , dim);} catch (Exception e) {e.printStackTrace();}				
-		Vector<Integer> v=new Vector<Integer>();
-		int p=1;for (int i=dim.length-1; i>0;--i) {	p=p*dim[i];	v.add(0,p);	}
-		
-		for ( int bi=0; bi<p*dim[0]; ++bi) {
-			int bindex=bi;
-			int[] indexes=new int[dim.length];
-			for (int i=0; i<indexes.length-1;++i) {
-				indexes[i]=bindex / v.elementAt(i); 
-				bindex=bindex % v.elementAt(i); 
-			}
-			indexes[indexes.length-1]=bindex;
-		
-			Object arrayTail=null;		
-			if (dim.length==1) {
-				arrayTail=result;
-			} else {
-				arrayTail=Array.get(result, indexes[0]);
-				for (int i=1; i<indexes.length-1;++i) arrayTail=Array.get(arrayTail, indexes[i] );
-			}				
-			if (vector instanceof RInteger) Array.setInt(arrayTail, indexes[indexes.length-1], ((RInteger)vector).getValue()[bi] );
-			else if (vector instanceof RNumeric) Array.setDouble(arrayTail, indexes[indexes.length-1], ((RNumeric)vector).getValue()[bi] );
-			else if (vector instanceof RChar) Array.set(arrayTail, indexes[indexes.length-1], ((RChar)vector).getValue()[bi] );
-			else if (vector instanceof RLogical) Array.setBoolean(arrayTail, indexes[indexes.length-1], ((RLogical)vector).getValue()[bi] );
+		Class<?> componentType = null;
+		if (vector instanceof RInteger)
+			componentType = int.class;
+		else if (vector instanceof RNumeric)
+			componentType = double.class;
+		else if (vector instanceof RChar)
+			componentType = String.class;
+		else if (vector instanceof RLogical)
+			componentType = boolean.class;
+
+		Object result = null;
+		try {
+			result = Array.newInstance(componentType, dim);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
+		Vector<Integer> v = new Vector<Integer>();
+		int p = 1;
+		for (int i = dim.length - 1; i > 0; --i) {
+			p = p * dim[i];
+			v.add(0, p);
+		}
+
+		for (int bi = 0; bi < p * dim[0]; ++bi) {
+			int bindex = bi;
+			int[] indexes = new int[dim.length];
+			for (int i = 0; i < indexes.length - 1; ++i) {
+				indexes[i] = bindex / v.elementAt(i);
+				bindex = bindex % v.elementAt(i);
+			}
+			indexes[indexes.length - 1] = bindex;
+
+			Object arrayTail = null;
+			if (dim.length == 1) {
+				arrayTail = result;
+			} else {
+				arrayTail = Array.get(result, indexes[0]);
+				for (int i = 1; i < indexes.length - 1; ++i)
+					arrayTail = Array.get(arrayTail, indexes[i]);
+			}
+			if (vector instanceof RInteger)
+				Array.setInt(arrayTail, indexes[indexes.length - 1], ((RInteger) vector).getValue()[bi]);
+			else if (vector instanceof RNumeric)
+				Array.setDouble(arrayTail, indexes[indexes.length - 1], ((RNumeric) vector).getValue()[bi]);
+			else if (vector instanceof RChar)
+				Array.set(arrayTail, indexes[indexes.length - 1], ((RChar) vector).getValue()[bi]);
+			else if (vector instanceof RLogical)
+				Array.setBoolean(arrayTail, indexes[indexes.length - 1], ((RLogical) vector).getValue()[bi]);
+		}
+
 		return result;
 	}
 
-	
 	public static Object getJavaArrayFromRArray(RArray array) {
-		int[] dim=array.getDim();
-		
+		int[] dim = array.getDim();
+
 		RVector vector = array.getValue();
-		Class<?> componentType=null;
-		if (vector instanceof RInteger) componentType=int.class;
-		else if (vector instanceof RNumeric) componentType=double.class;
-		else if (vector instanceof RChar) componentType=String.class;
-		else if (vector instanceof RLogical) componentType=boolean.class;
-				
-	    Object result=null;
-	    try {result=Array.newInstance( componentType , dim);} catch (Exception e) {e.printStackTrace();}				
-		
-	    Vector<Integer> v1=new Vector<Integer>();
-		int p1=1;for (int i=dim.length-1; i>0;--i) {p1=p1*dim[i];v1.add(0,p1);}
-	    Vector<Integer> v2=new Vector<Integer>();
-		int p2=1;for (int i=0 ; i<dim.length-1; ++i) {p2=p2*dim[i];v2.add(0,p2);}
-		
-		for ( int bi=0; bi<p1*dim[0]; ++bi) {
-			int bindex=bi;
-			int[] indexes=new int[dim.length];
-			for (int i=0; i<indexes.length-1;++i) {
-				indexes[i]=bindex / v1.elementAt(i); 
-				bindex=bindex % v1.elementAt(i); 
-			}
-			indexes[indexes.length-1]=bindex;
-		
-			Object arrayTail=null;		
-			if (dim.length==1) {
-				arrayTail=result;
-			} else {
-				arrayTail=Array.get(result, indexes[0]);
-				for (int i=1; i<indexes.length-1;++i) arrayTail=Array.get(arrayTail, indexes[i] );
-			}				
-			
-			int linearVectorIndex=0;
-			for (int i=(indexes.length-1); i>0; --i) linearVectorIndex+=indexes[i]*v2.elementAt((indexes.length-1)-i);
-			linearVectorIndex+=indexes[0];
-			//System.out.println("linearVectorIndex:"+linearVectorIndex);
-			
-			if (vector instanceof RInteger) Array.setInt(arrayTail, indexes[indexes.length-1], ((RInteger)vector).getValue()[linearVectorIndex] );
-			else if (vector instanceof RNumeric) Array.setDouble(arrayTail, indexes[indexes.length-1], ((RNumeric)vector).getValue()[linearVectorIndex] );
-			else if (vector instanceof RChar) Array.set(arrayTail, indexes[indexes.length-1], ((RChar)vector).getValue()[linearVectorIndex] );
-			else if (vector instanceof RLogical) Array.setBoolean(arrayTail, indexes[indexes.length-1], ((RLogical)vector).getValue()[linearVectorIndex] );
+		Class<?> componentType = null;
+		if (vector instanceof RInteger)
+			componentType = int.class;
+		else if (vector instanceof RNumeric)
+			componentType = double.class;
+		else if (vector instanceof RChar)
+			componentType = String.class;
+		else if (vector instanceof RLogical)
+			componentType = boolean.class;
+
+		Object result = null;
+		try {
+			result = Array.newInstance(componentType, dim);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
+
+		Vector<Integer> v1 = new Vector<Integer>();
+		int p1 = 1;
+		for (int i = dim.length - 1; i > 0; --i) {
+			p1 = p1 * dim[i];
+			v1.add(0, p1);
+		}
+		Vector<Integer> v2 = new Vector<Integer>();
+		int p2 = 1;
+		for (int i = 0; i < dim.length - 1; ++i) {
+			p2 = p2 * dim[i];
+			v2.add(0, p2);
+		}
+
+		for (int bi = 0; bi < p1 * dim[0]; ++bi) {
+			int bindex = bi;
+			int[] indexes = new int[dim.length];
+			for (int i = 0; i < indexes.length - 1; ++i) {
+				indexes[i] = bindex / v1.elementAt(i);
+				bindex = bindex % v1.elementAt(i);
+			}
+			indexes[indexes.length - 1] = bindex;
+
+			Object arrayTail = null;
+			if (dim.length == 1) {
+				arrayTail = result;
+			} else {
+				arrayTail = Array.get(result, indexes[0]);
+				for (int i = 1; i < indexes.length - 1; ++i)
+					arrayTail = Array.get(arrayTail, indexes[i]);
+			}
+
+			int linearVectorIndex = 0;
+			for (int i = (indexes.length - 1); i > 0; --i)
+				linearVectorIndex += indexes[i] * v2.elementAt((indexes.length - 1) - i);
+			linearVectorIndex += indexes[0];
+			// System.out.println("linearVectorIndex:"+linearVectorIndex);
+
+			if (vector instanceof RInteger)
+				Array.setInt(arrayTail, indexes[indexes.length - 1], ((RInteger) vector).getValue()[linearVectorIndex]);
+			else if (vector instanceof RNumeric)
+				Array.setDouble(arrayTail, indexes[indexes.length - 1], ((RNumeric) vector).getValue()[linearVectorIndex]);
+			else if (vector instanceof RChar)
+				Array.set(arrayTail, indexes[indexes.length - 1], ((RChar) vector).getValue()[linearVectorIndex]);
+			else if (vector instanceof RLogical)
+				Array.setBoolean(arrayTail, indexes[indexes.length - 1], ((RLogical) vector).getValue()[linearVectorIndex]);
+		}
+
 		return result;
 	}
-	
-	
+
 	public static int[] getJavaArrayDimensions(Object table, Class<?>[] classHolder, int[] lengthHolder) {
-		Vector<Integer> dimV=new Vector<Integer>();
-		Object obj=table;
-		while(Array.get(obj, 0).getClass().isArray()) {
-			dimV.add(Array.getLength(obj));	
-			obj=Array.get(obj, 0);
+		Vector<Integer> dimV = new Vector<Integer>();
+		Object obj = table;
+		while (Array.get(obj, 0).getClass().isArray()) {
+			dimV.add(Array.getLength(obj));
+			obj = Array.get(obj, 0);
 		}
 		dimV.add(Array.getLength(obj));
-		classHolder[0]=Array.get(obj, 0).getClass();
-		
-		int[] result=new int[dimV.size()];
-		lengthHolder[0]=1;
-		for (int i=0; i<dimV.size(); ++i) {
-			result[i]=dimV.elementAt(i);
-			lengthHolder[0]=lengthHolder[0]*result[i];
+		classHolder[0] = Array.get(obj, 0).getClass();
+
+		int[] result = new int[dimV.size()];
+		lengthHolder[0] = 1;
+		for (int i = 0; i < dimV.size(); ++i) {
+			result[i] = dimV.elementAt(i);
+			lengthHolder[0] = lengthHolder[0] * result[i];
 		}
 		return result;
 	}
-	
+
 	public static RArray getRArrayFromJavaArray(Object javaArray) {
-		Class<?>[] classHolder=new Class<?>[1];
-		int[] lengthHolder=new int[1];
-		
-		int[] dim=getJavaArrayDimensions(javaArray, classHolder, lengthHolder);
-		RVector vector=null;
-		
-		Class<?> componentType=classHolder[0];		
-		if (componentType==Integer.class || componentType==int.class) vector=new RInteger(new int[lengthHolder[0]]);
-		else if (componentType==Double.class || componentType==double.class) vector=new RNumeric(new double[lengthHolder[0]]);
-		else if (componentType==Boolean.class || componentType==boolean.class) vector=new RLogical(new boolean[lengthHolder[0]]);
-		else if (componentType==String.class) vector=new RChar(new String[lengthHolder[0]]);
-		else throw new RuntimeException("unsupported elements class type :"+componentType);
-				
-	    Vector<Integer> v1=new Vector<Integer>();
-		int p1=1;for (int i=dim.length-1; i>0;--i) {p1=p1*dim[i];v1.add(0,p1);}
-	    Vector<Integer> v2=new Vector<Integer>();
-		int p2=1;for (int i=0 ; i<dim.length-1; ++i) {p2=p2*dim[i];v2.add(0,p2);}
-		
-		for ( int bi=0; bi<p1*dim[0]; ++bi) {
-			int bindex=bi;
-			int[] indexes=new int[dim.length];
-			for (int i=0; i<indexes.length-1;++i) {
-				indexes[i]=bindex / v1.elementAt(i); 
-				bindex=bindex % v1.elementAt(i); 
-			}
-			indexes[indexes.length-1]=bindex;
-		
-			Object arrayTail=null;		
-			if (dim.length==1) {
-				arrayTail=javaArray;
-			} else {
-				arrayTail=Array.get(javaArray, indexes[0]);
-				for (int i=1; i<indexes.length-1;++i) arrayTail=Array.get(arrayTail, indexes[i] );
-			}				
-			
-			int linearVectorIndex=0;
-			for (int i=(indexes.length-1); i>0; --i) linearVectorIndex+=indexes[i]*v2.elementAt((indexes.length-1)-i);
-			linearVectorIndex+=indexes[0];
-			//System.out.println("linearVectorIndex:"+linearVectorIndex);
-			
-			if (vector instanceof RInteger) ((RInteger)vector).getValue()[linearVectorIndex]=(Integer)Array.get(arrayTail, indexes[indexes.length-1]) ;
-			else if (vector instanceof RNumeric) ((RNumeric)vector).getValue()[linearVectorIndex]=(Double)Array.get(arrayTail, indexes[indexes.length-1]) ;
-			else if (vector instanceof RChar) ((RChar)vector).getValue()[linearVectorIndex] = (String)Array.get(arrayTail, indexes[indexes.length-1]);
-			else if (vector instanceof RLogical) ((RLogical)vector).getValue()[linearVectorIndex]=(Boolean)Array.get(arrayTail, indexes[indexes.length-1]);
+		Class<?>[] classHolder = new Class<?>[1];
+		int[] lengthHolder = new int[1];
+
+		int[] dim = getJavaArrayDimensions(javaArray, classHolder, lengthHolder);
+		RVector vector = null;
+
+		Class<?> componentType = classHolder[0];
+		if (componentType == Integer.class || componentType == int.class)
+			vector = new RInteger(new int[lengthHolder[0]]);
+		else if (componentType == Double.class || componentType == double.class)
+			vector = new RNumeric(new double[lengthHolder[0]]);
+		else if (componentType == Boolean.class || componentType == boolean.class)
+			vector = new RLogical(new boolean[lengthHolder[0]]);
+		else if (componentType == String.class)
+			vector = new RChar(new String[lengthHolder[0]]);
+		else
+			throw new RuntimeException("unsupported elements class type :" + componentType);
+
+		Vector<Integer> v1 = new Vector<Integer>();
+		int p1 = 1;
+		for (int i = dim.length - 1; i > 0; --i) {
+			p1 = p1 * dim[i];
+			v1.add(0, p1);
 		}
-		
-		return new RArray(vector,dim,null);
+		Vector<Integer> v2 = new Vector<Integer>();
+		int p2 = 1;
+		for (int i = 0; i < dim.length - 1; ++i) {
+			p2 = p2 * dim[i];
+			v2.add(0, p2);
+		}
+
+		for (int bi = 0; bi < p1 * dim[0]; ++bi) {
+			int bindex = bi;
+			int[] indexes = new int[dim.length];
+			for (int i = 0; i < indexes.length - 1; ++i) {
+				indexes[i] = bindex / v1.elementAt(i);
+				bindex = bindex % v1.elementAt(i);
+			}
+			indexes[indexes.length - 1] = bindex;
+
+			Object arrayTail = null;
+			if (dim.length == 1) {
+				arrayTail = javaArray;
+			} else {
+				arrayTail = Array.get(javaArray, indexes[0]);
+				for (int i = 1; i < indexes.length - 1; ++i)
+					arrayTail = Array.get(arrayTail, indexes[i]);
+			}
+
+			int linearVectorIndex = 0;
+			for (int i = (indexes.length - 1); i > 0; --i)
+				linearVectorIndex += indexes[i] * v2.elementAt((indexes.length - 1) - i);
+			linearVectorIndex += indexes[0];
+			// System.out.println("linearVectorIndex:"+linearVectorIndex);
+
+			if (vector instanceof RInteger)
+				((RInteger) vector).getValue()[linearVectorIndex] = (Integer) Array.get(arrayTail, indexes[indexes.length - 1]);
+			else if (vector instanceof RNumeric)
+				((RNumeric) vector).getValue()[linearVectorIndex] = (Double) Array.get(arrayTail, indexes[indexes.length - 1]);
+			else if (vector instanceof RChar)
+				((RChar) vector).getValue()[linearVectorIndex] = (String) Array.get(arrayTail, indexes[indexes.length - 1]);
+			else if (vector instanceof RLogical)
+				((RLogical) vector).getValue()[linearVectorIndex] = (Boolean) Array.get(arrayTail, indexes[indexes.length - 1]);
+		}
+
+		return new RArray(vector, dim, null);
 	}
 
-	
-
 	private Object convert(RObject obj) {
-		//System.out.println("obj:" + obj);
+		// System.out.println("obj:" + obj);
 		Object result = obj;
 		if (result instanceof RInteger) {
 			if (((RInteger) result).getValue().length == 1) {
@@ -1990,8 +2047,8 @@ public class DirectJNI {
 			} else {
 				result = ((RLogical) result).getValue();
 			}
-		} else if (result instanceof RArray){
-			result=getJavaArrayFromRArray((RArray)result);			
+		} else if (result instanceof RArray) {
+			result = getJavaArrayFromRArray((RArray) result);
 		}
 		return result;
 	}
@@ -2214,8 +2271,8 @@ public class DirectJNI {
 			}
 			return objHolder[0];
 		}
-		
-		public RObject callAndGetObjectName(final String methodName,final Object... args) throws RemoteException {
+
+		public RObject callAndGetObjectName(final String methodName, final Object... args) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 			_lastStatus = runR(new server.ExecutionUnit() {
@@ -2238,14 +2295,14 @@ public class DirectJNI {
 			} else if (!_lastStatus.equals("")) {
 				log.info(_lastStatus);
 			}
-			
-			
+
 			try {
-				String refClassName=objHolder[0].getClass().getName();
-				ObjectNameInterface objectName=(ObjectNameInterface)_mappingClassLoader.loadClass(refClassName.substring(0, refClassName.length()-"Ref".length())+"ObjectName").newInstance();
-				objectName.setRObjectName(PROTECT_VAR_PREFIXE +((ReferenceInterface)objHolder[0]).getRObjectId());
+				String refClassName = objHolder[0].getClass().getName();
+				ObjectNameInterface objectName = (ObjectNameInterface) _mappingClassLoader.loadClass(
+						refClassName.substring(0, refClassName.length() - "Ref".length()) + "ObjectName").newInstance();
+				objectName.setRObjectName(PROTECT_VAR_PREFIXE + ((ReferenceInterface) objHolder[0]).getRObjectId());
 				objectName.setRObjectEnvironment(PENV);
-				return (RObject)objectName;
+				return (RObject) objectName;
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
@@ -2304,11 +2361,10 @@ public class DirectJNI {
 			}
 		}
 
-		
 		public void freeAllReferences() throws RemoteException {
 			DirectJNI.this.unprotectAll();
 		}
-		
+
 		public RObject getObjectName(final String expression) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
@@ -2331,20 +2387,21 @@ public class DirectJNI {
 			} else if (!_lastStatus.equals("")) {
 				log.info(_lastStatus);
 			}
-			
+
 			try {
-				String refClassName=objHolder[0].getClass().getName();
-				ObjectNameInterface objectName=(ObjectNameInterface)_mappingClassLoader.loadClass(refClassName.substring(0, refClassName.length()-"Ref".length())+"ObjectName").newInstance();
-				objectName.setRObjectName(PROTECT_VAR_PREFIXE +((ReferenceInterface)objHolder[0]).getRObjectId());
+				String refClassName = objHolder[0].getClass().getName();
+				ObjectNameInterface objectName = (ObjectNameInterface) _mappingClassLoader.loadClass(
+						refClassName.substring(0, refClassName.length() - "Ref".length()) + "ObjectName").newInstance();
+				objectName.setRObjectName(PROTECT_VAR_PREFIXE + ((ReferenceInterface) objHolder[0]).getRObjectId());
 				objectName.setRObjectEnvironment(PENV);
-				return (RObject)objectName;
+				return (RObject) objectName;
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			}
 
 		}
-		
+
 		public Object realizeObjectName(final RObject objectName, boolean convert) throws RemoteException {
 			if (!(objectName instanceof ObjectNameInterface))
 				throw new RemoteException("not an object name");
@@ -2353,7 +2410,8 @@ public class DirectJNI {
 			_lastStatus = runR(new server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
-						robjHolder[0] = DirectJNI.this.getObjectFrom(((ObjectNameInterface)objectName).getRObjectEnvironment()+"$"+((ObjectNameInterface)objectName).getRObjectName());
+						robjHolder[0] = DirectJNI.this.getObjectFrom(((ObjectNameInterface) objectName).getRObjectEnvironment() + "$"
+								+ ((ObjectNameInterface) objectName).getRObjectName());
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2375,16 +2433,15 @@ public class DirectJNI {
 				return robjHolder[0];
 			}
 		}
-		
-		
+
 		public RObject realizeObjectName(final RObject objectName) throws RemoteException {
-			return (RObject)realizeObjectName(objectName,false);
+			return (RObject) realizeObjectName(objectName, false);
 		}
-		
+
 		public Object realizeObjectNameConverted(RObject objectName) throws RemoteException {
-			return realizeObjectName(objectName,true);
+			return realizeObjectName(objectName, true);
 		}
-		
+
 		public RObject referenceToObject(final RObject refObj) throws RemoteException {
 			if (!(refObj instanceof ReferenceInterface))
 				throw new RemoteException("not an object reference");
@@ -2471,7 +2528,7 @@ public class DirectJNI {
 		public RObject getObject(final String expression) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			
+
 			_lastStatus = runR(new server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
@@ -2582,8 +2639,66 @@ public class DirectJNI {
 			}
 		}
 
-		public void setCallBack(RCallback callback) throws RemoteException {
-			RListener.setCallbackInterface(callback);
+		public void addRCallback(RCallBack callback) throws RemoteException {
+			server.RListener.addRCallback(callback);
+		}
+
+		public void removeRCallback(RCallBack callback) throws RemoteException {
+			server.RListener.removeRCallback(callback);
+		}
+
+		public void removeAllRCallbacks() throws RemoteException {
+			server.RListener.removeAllRCallbacks();
+		}
+
+		
+		Vector<RCollaborationListener> _rCollaborationListeners=new Vector<RCollaborationListener>();
+		
+		public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
+			_rCollaborationListeners.add(collaborationListener);
+		}
+		
+		public void removeRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
+			_rCollaborationListeners.remove(collaborationListener);
+		}
+		
+		public void removeAllRCollaborationListeners() throws RemoteException {
+			_rCollaborationListeners.removeAllElements();
+		}		
+		
+
+		public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
+			server.RListener.addRHelpListener(helpListener);
+		}
+
+		public void removeRHelpListener(RHelpListener helpListener) throws RemoteException {
+			server.RListener.removeRHelpListener(helpListener);
+		}
+
+		public void removeAllRHelpListeners() throws RemoteException {
+			server.RListener.removeAllRHelpListeners();
+		}
+
+		
+		public void chat(String sourceSession, String message) throws RemoteException {
+			for (int i=0; i<_rCollaborationListeners.size();++i) {
+				_rCollaborationListeners.elementAt(i).chat(sourceSession, message);
+			}
+		}
+		
+		public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
+			for (int i=0; i<_rCollaborationListeners.size();++i) {
+				_rCollaborationListeners.elementAt(i).consolePrint(sourceSession, expression, result);
+			}		
+		}	
+
+		
+		public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
+			return null;
+		}
+
+		public GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException {
+			return null;
 		}
 
 		public String[] listPackages() throws RemoteException {
@@ -3182,7 +3297,7 @@ public class DirectJNI {
 		public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException {
 			File f = null;
 			try {
-				f = PoolUtils.createFileFromBuffer(null,buffer);
+				f = PoolUtils.createFileFromBuffer(null, buffer);
 				PythonInterpreterSingleton.startLogCapture();
 				PythonInterpreterSingleton.getInstance().execfile(f.getAbsolutePath());
 				System.out.println("#>>>:" + PythonInterpreterSingleton.getPythonStatus());
@@ -3279,7 +3394,7 @@ public class DirectJNI {
 		public boolean isGroovyEnabled() throws RemoteException {
 			return groovy.GroovyInterpreterSingleton.getInstance() != null;
 		}
-		
+
 		public String getGroovyStatus() throws RemoteException {
 			return null;
 		}
@@ -3588,6 +3703,9 @@ public class DirectJNI {
 			return null;
 		}
 
+		public String getId() throws RemoteException {
+			return null;
+		}
 	}
 
 	private GraphicNotifier gn = new LocalGraphicNotifier();
