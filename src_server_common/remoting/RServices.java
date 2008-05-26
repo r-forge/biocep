@@ -110,6 +110,8 @@ public interface RServices extends ManagedServant {
 
 	public GDDevice newDevice(int w, int h) throws java.rmi.RemoteException;
 	
+	public GDDevice newBroadcastedDevice(int w, int h) throws java.rmi.RemoteException;
+	
 	public GDDevice[] listDevices() throws java.rmi.RemoteException;
 
 	public String[] getWorkingDirectoryFileNames() throws java.rmi.RemoteException;

@@ -17,6 +17,8 @@
  */
 package http;
 
+import graphics.pop.GDDevice;
+
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -50,14 +52,32 @@ public class FreeResourcesListener implements HttpSessionListener {
 		
 		
 		
-		if (attributes == null)
-			return;
+		if (attributes == null)	return;
 		RServices rservices = (RServices) attributes.get("R");
 
 		if (rservices == null)
 			return;
 		
-		((HashMap<RServices, Vector<HttpSession>>) sessionEvent.getSession().getServletContext().getAttribute("R_SESSIONS")).get(rservices).remove(sessionEvent.getSession());
+		Vector<HttpSession> r_sessions=((HashMap<RServices, Vector<HttpSession>>) sessionEvent.getSession().getServletContext().getAttribute("R_SESSIONS")).get(rservices);
+		
+		System.out.println("sessions linked to this r :"+r_sessions);
+		for (int i=0; i<r_sessions.size();++i) System.out.print(r_sessions.elementAt(i).getId()+" ");  System.out.println();
+
+		r_sessions.remove(sessionEvent.getSession());
+		
+		if (r_sessions.size()>0) {
+			System.out.println("attributes:"+attributes);	
+			for (String a:attributes.keySet()) {
+				if (a.startsWith("device_")) {
+					try {
+						System.out.println("disposing device :"+a);
+						((GDDevice)attributes.get(a)).dispose();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 
 		String login = (String) attributes.get("LOGIN");
 		boolean nopool = (Boolean) attributes.get("NOPOOL");

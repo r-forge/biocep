@@ -447,6 +447,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 	
 	public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
+		System.out.println("[[[[[source:"+sourceSession+" [[[[[expression:"+expression +"[[[[[result:"+result);
 		DirectJNI.getInstance().getRServices().consolePrint(sourceSession, expression, result);
 	}	
 		
@@ -609,9 +610,13 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 
 	public GDDevice newDevice(int w, int h) throws RemoteException {
-		return new GDDeviceImpl(w, h, _deviceHashMap);
+		return new GDDeviceImpl(w, h, false, _deviceHashMap);
 	}
-	
+
+	public GDDevice newBroadcastedDevice(int w, int h) throws RemoteException {
+		return new GDDeviceImpl(w, h, true, _deviceHashMap);
+	}
+		
 	public GDDevice[] listDevices() throws RemoteException {
 		GDDevice[] result=new GDDevice[_deviceHashMap.values().size()];
 		int i=0; for (GDDevice d:_deviceHashMap.values()) result[i++]=d; 

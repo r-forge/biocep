@@ -103,6 +103,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private static int _counter = 0;
 	private String _name = "";
 
+	private boolean _broadcasted;
+
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions) throws RemoteException {
 		this(gdDevice, autoPop, autoResize, actions, null, null);
 	}
@@ -116,15 +118,15 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		Dimension sz = null;
 		try {
 			sz = gdDevice.getSize();
+			_broadcasted = gdDevice.isBroadcasted();
 		} catch (Exception e) {
 		}
 
-		
 		setSize(sz);
 
 		_prefSize = getSize();
 		_l = new Vector<GDObject>();
-		_gs = new GDState( Color.black,Color.white,new Font(null, 0, 10));
+		_gs = new GDState(Color.black, Color.white, new Font(null, 0, 10));
 		_lastSize = getSize();
 		setBackground(Color.white);
 		setOpaque(true);
@@ -648,7 +650,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					ex.printStackTrace();
 				} finally {
 					if (_protectR != null)
-						_protectR.unlock();
+						((RGuiReentrantLock)_protectR).unlockNoBroadcast();
 				}
 
 				SwingUtilities.invokeLater(new Runnable() {
@@ -700,6 +702,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 						repaint();
 					}
 				});
+				
 
 			}
 
@@ -795,7 +798,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			});
 		} finally {
 			if (_protectR != null)
-				_protectR.unlock();
+				((RGuiReentrantLock)_protectR).unlockNoBroadcast();
 		}
 
 		if (!_autoPop)
@@ -1157,9 +1160,9 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			_resizeThread.join();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}		
+		}
 	}
-	
+
 	public void dispose() {
 		stopThreads();
 		try {

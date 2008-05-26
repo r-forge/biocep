@@ -194,12 +194,12 @@ public class RHttpProxy {
 		}
 	}
 
-	private static GDDevice newDevice(String url, String sessionId, int width, int height) throws TunnelingException {
+	private static GDDevice newDevice(String url, String sessionId, int width, int height, boolean broadcasted) throws TunnelingException {
 		GetMethod getNewDevice = null;
 		try {
 			Object result = null;
 			mainHttpClient = new HttpClient();
-			getNewDevice = new GetMethod(url + "?method=newdevice" + "&width=" + width + "&height=" + height);
+			getNewDevice = new GetMethod(url + "?method=newdevice" + "&width=" + width + "&height=" + height+ "&broadcasted=" + broadcasted);
 			try {
 				if (sessionId != null && !sessionId.equals("")) {
 					getNewDevice.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
@@ -379,13 +379,15 @@ public class RHttpProxy {
 					
 
 					GenericCallbackDevice genericCallBackDevice = null;
+					Thread popThread=null;
 
 					boolean _stopThreads = false;
 					{
 						if (handleCallbacks) {
+							
 							try {
 								genericCallBackDevice = newGenericCallbackDevice(url, sessionId);
-								new Thread(new Runnable() {
+								popThread=new Thread(new Runnable() {
 									public void run() {
 										while (true && !_stopThreads) {										
 											popActions();
@@ -395,14 +397,10 @@ public class RHttpProxy {
 											} catch (Exception e) {
 											}
 										}
-										
-										try {
-											genericCallBackDevice.dispose();
-										} catch (Exception e) {
-											e.printStackTrace();
-										}
+																				
 									}
-								}).start();
+								});
+								popThread.start();
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -431,6 +429,8 @@ public class RHttpProxy {
 										}
 									} else if (action.getActionName().equals("consolePrint")) {
 										
+										System.out.println("77777>"+action.getAttributes());
+										
 										String sourceSession= (String)action.getAttributes().get("sourceSession");
 										String expression= (String)action.getAttributes().get("expression");
 										String result= (String)action.getAttributes().get("result");
@@ -443,17 +443,22 @@ public class RHttpProxy {
 							}
 
 						} catch (NotLoggedInException nle) {
+
 							nle.printStackTrace();
 						} catch (Exception e) {
+
 							e.printStackTrace();
 						}
 
 					}
 
+
 					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 						Object result = null;
 						if (method.getName().equals("newDevice")) {
-							result = newDevice(url, sessionId, (Integer) args[0], (Integer) args[1]);
+							result = newDevice(url, sessionId, (Integer) args[0], (Integer) args[1], false);
+						} else if (method.getName().equals("newBroadcastedDevice")) {
+							result = newDevice(url, sessionId, (Integer) args[0], (Integer) args[1], true);
 						} else if (method.getName().equals("listDevices")) {
 							result = listDevices(url, sessionId);
 						} else if (method.getName().equals("addRCallback")) {
@@ -470,13 +475,22 @@ public class RHttpProxy {
 							rCollaborationListeners.remove((RCollaborationListener) args[0]);
 						} else if (method.getName().equals("removeAllRCollaborationListeners")) {
 							rCollaborationListeners.removeAllElements();
-						} 						
+						}  
 						
 						else if (method.getName().equals("stopThreads")) {
 							_stopThreads = true;
+							popThread.join();
+							try {
+								genericCallBackDevice.dispose();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						} else if (method.getName().equals("popActions")) {
 							popActions();
-						} else {
+						} 
+						
+						else {
+							
 							result = RHttpProxy.invoke(url, sessionId, "R", method.getName(), method.getParameterTypes(), args, httpClient);
 						}
 						return result;

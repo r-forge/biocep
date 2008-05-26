@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
@@ -2067,6 +2068,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						e.rniEval(e.rniParse(expression, n), 0);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2091,6 +2093,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						_lastStatus = DirectJNI.this.sourceFromResource(resource);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2115,6 +2118,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						_lastStatus = DirectJNI.this.sourceFromBuffer(buffer);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2169,9 +2173,12 @@ public class DirectJNI {
 						for (int i = 0; i < asString.length; ++i)
 							stringHolder[0] += asString[i];
 
+						//broadcast(e);
+
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
+
 				}
 			});
 
@@ -2200,6 +2207,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(false, null, methodName, args);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2226,7 +2234,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						DirectJNI.this.call(false, varName, methodName, args);
-
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2253,6 +2261,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(true, null, methodName, args);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2279,6 +2288,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(true, null, methodName, args);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2316,6 +2326,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(false, null, methodName, args);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2533,6 +2544,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, false);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2560,6 +2572,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, true);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2585,6 +2598,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, false);
+						//broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2651,21 +2665,19 @@ public class DirectJNI {
 			server.RListener.removeAllRCallbacks();
 		}
 
-		
-		Vector<RCollaborationListener> _rCollaborationListeners=new Vector<RCollaborationListener>();
-		
+		Vector<RCollaborationListener> _rCollaborationListeners = new Vector<RCollaborationListener>();
+
 		public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
 			_rCollaborationListeners.add(collaborationListener);
 		}
-		
+
 		public void removeRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
 			_rCollaborationListeners.remove(collaborationListener);
 		}
-		
+
 		public void removeAllRCollaborationListeners() throws RemoteException {
 			_rCollaborationListeners.removeAllElements();
-		}		
-		
+		}
 
 		public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
 			server.RListener.addRHelpListener(helpListener);
@@ -2679,20 +2691,18 @@ public class DirectJNI {
 			server.RListener.removeAllRHelpListeners();
 		}
 
-		
 		public void chat(String sourceSession, String message) throws RemoteException {
-			for (int i=0; i<_rCollaborationListeners.size();++i) {
+			for (int i = 0; i < _rCollaborationListeners.size(); ++i) {
 				_rCollaborationListeners.elementAt(i).chat(sourceSession, message);
 			}
 		}
-		
-		public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
-			for (int i=0; i<_rCollaborationListeners.size();++i) {
-				_rCollaborationListeners.elementAt(i).consolePrint(sourceSession, expression, result);
-			}		
-		}	
 
-		
+		public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
+			for (int i = 0; i < _rCollaborationListeners.size(); ++i) {
+				_rCollaborationListeners.elementAt(i).consolePrint(sourceSession, expression, result);
+			}
+		}
+
 		public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
 			return null;
 		}
@@ -2813,6 +2823,20 @@ public class DirectJNI {
 				}
 			}
 
+			/*
+			if (_localBroadcastedDevices.size() > 1) {
+				runR(new server.ExecutionUnit() {
+					public void run(Rengine e) {
+						try {
+							broadcast(e);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+				});
+			}
+			*/
+
 			return clean(_lastStatus);
 
 		}
@@ -2877,6 +2901,10 @@ public class DirectJNI {
 
 		public GDDevice newDevice(int w, int h) throws RemoteException {
 			return new GDDeviceLocal(w, h);
+		}
+
+		public GDDevice newBroadcastedDevice(int w, int h) throws RemoteException {
+			return new GDDeviceLocal(w, h, true);
 		}
 
 		public GDDevice[] listDevices() throws RemoteException {
@@ -3401,9 +3429,13 @@ public class DirectJNI {
 
 	};
 
-	public static Vector<RAction> _rActions = new Vector<RAction>();
+	static public Vector<RAction> _rActions = new Vector<RAction>();
+	static private HashMap<Integer, GDDevice> _localDeviceHashMap = new HashMap<Integer, GDDevice>();
+	static private HashSet<Integer> _localBroadcastedDevices = new HashSet<Integer>();
 
-	private static HashMap<Integer, GDDevice> _localDeviceHashMap = new HashMap<Integer, GDDevice>();
+	public boolean broadcastRequired(int currentDevice) {
+		return _localBroadcastedDevices.size() > 1 && _localBroadcastedDevices.contains(currentDevice);
+	}
 
 	public static class GDDeviceLocal implements GDDevice {
 		GDContainerBag gdBag = null;
@@ -3438,6 +3470,12 @@ public class DirectJNI {
 
 		}
 
+		public GDDeviceLocal(int w, int h, boolean broadcasted) throws RemoteException {
+			this(w, h);
+			if (broadcasted)
+				_localBroadcastedDevices.add(gdBag.getDeviceNumber());
+		}
+
 		public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects() throws RemoteException {
 			return gdBag.popAllGraphicObjects();
 		};
@@ -3457,6 +3495,7 @@ public class DirectJNI {
 
 		public void dispose() throws RemoteException {
 			_localDeviceHashMap.remove(gdBag.getDeviceNumber());
+			_localBroadcastedDevices.remove(gdBag.getDeviceNumber());
 			DirectJNI.getInstance().getRServices().evaluate("try({ .PrivateEnv$dev.off(which=" + gdBag.getDeviceNumber() + ")},silent=TRUE)");
 
 		};
@@ -3705,6 +3744,47 @@ public class DirectJNI {
 
 		public String getId() throws RemoteException {
 			return null;
+		}
+		
+		public boolean isBroadcasted() throws RemoteException {
+			return _localBroadcastedDevices.contains(gdBag.getDeviceNumber());
+		}
+		
+		public void broadcast() throws RemoteException {
+			if (_localBroadcastedDevices.size() <= 1 || !_localBroadcastedDevices.contains(gdBag.getDeviceNumber()))return;
+			
+			final Exception[] exceptionHolder = new Exception[1];
+			String lastStatus = DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+
+						int currentDevice = e.rniGetIntArray(e.rniEval(e.rniParse(".PrivateEnv$dev.cur()", 1), 0))[0];												
+						String code = ".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");";
+						for (Integer d : _localBroadcastedDevices) {
+							if (d != gdBag.getDeviceNumber()) {
+								code += ".PrivateEnv$dev.copy(which=" + d + ");";
+							}
+						}
+						code += ".PrivateEnv$dev.set(" + currentDevice + ");";
+						e.rniEval(e.rniParse(code, _localBroadcastedDevices.size()+1), 0);
+						
+						System.out.println("code ="+code);
+
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+			if (exceptionHolder[0] != null) {
+				log.error(lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!lastStatus.equals("")) {
+				log.info(lastStatus);
+			}
 		}
 	}
 
