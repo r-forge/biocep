@@ -435,5 +435,13 @@ public class RServicesObject implements RServices {
 	public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
 
 	}
+	
+	public GDDevice newBroadcastedDevice(int w, int h) throws RemoteException {
+		return null;
+	}
+	
+	public void broadcastGraphics() throws RemoteException {
+		
+	}
 
 }

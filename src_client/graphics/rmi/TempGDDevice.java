@@ -90,7 +90,15 @@ public class TempGDDevice implements GDDevice {
 	}
 	
 	public String getId() throws RemoteException {
-		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public boolean isBroadcasted() throws RemoteException {
+		return false;
+	}
+	
+	public void broadcast() throws RemoteException {
+		
+	}
+	
 }

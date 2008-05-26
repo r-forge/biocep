@@ -224,19 +224,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	public static RGui _instance;
 
-	private final ReentrantLock _protectR = new ReentrantLock() {
+	private final ReentrantLock _protectR = new RGuiReentrantLock() {
 		@Override
 		public void lock() {
 			super.lock();
-			if (_rForConsole instanceof HttpMarker) {
-				try {
-					_currentDevice.setAsCurrentDevice();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+			try {
+				_currentDevice.setAsCurrentDevice();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
 			//_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
 		}
 
 		@Override
@@ -244,7 +241,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			
 			if (isCollaborativeMode()) {
 				try {
-					if (((JGDPanelPop) _graphicPanel).getGdDevice().hasGraphicObjects()) {synchronizeCollaborators();}
+					synchronizeCollaborators();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -260,6 +257,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			//_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
+		}
+		
+		@Override
+		public void unlockNoBroadcast() {
+			super.unlock();			
 		}
 
 		public boolean isLocked() {
@@ -277,19 +279,29 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private String[] _httpPortSave = new String[] { "8080" };
 	private ConsoleLogger _consoleLogger = new ConsoleLogger() {
 		
+		
 		public void printAsInput(String message) {
 			_consolePanel.print(message, null);
 			if (isCollaborativeMode()) {
 				try {getR().consolePrint(_sessionId, message, null);} catch (Exception e) {e.printStackTrace();}
 			}
 		}
-
+		
+		
 		public void printAsOutput(String message) {
 			_consolePanel.print(null, message);
 			if (isCollaborativeMode()) {
 				try {getR().consolePrint(_sessionId, null, message);} catch (Exception e) {e.printStackTrace();}
 			}
 		}
+		
+		public void print(String expression, String result) {
+			_consolePanel.print(expression, result);
+			if (isCollaborativeMode()) {
+				try {getR().consolePrint(_sessionId, expression, result);} catch (Exception e) {e.printStackTrace();}
+			}
+		}
+		
 	};
 
 	private Icon _currentDeviceIcon = null;
@@ -815,9 +827,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							} else {
 								result = _rForConsole.consoleSubmit(expression);
+								if (isCollaborativeMode()) _rForConsole.consolePrint(_sessionId, expression, (String)result);
 							}
-							
-							if (isCollaborativeMode()) _rForConsole.consolePrint(_sessionId, expression, (String)result);
 							
 
 						} catch (NotLoggedInException nle) {
@@ -1237,7 +1248,24 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			});
 			menuBar.add(graphicsMenu);
+						
+			final JMenu collaborationMenu = new JMenu("Collaboration");
+			collaborationMenu.addMenuListener(new MenuListener() {
+				public void menuSelected(MenuEvent e) {
+					collaborationMenu.removeAll();
+					collaborationMenu.add(_actions.get("createbroadcasteddevice"));
+					collaborationMenu.add(_actions.get("chatconsoleview"));
+				}
 
+				public void menuCanceled(MenuEvent e) {
+				}
+
+				public void menuDeselected(MenuEvent e) {
+				}
+			});
+			menuBar.add(collaborationMenu);
+
+			
 			final JMenu dataMenu = new JMenu("Java");
 			dataMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -1310,7 +1338,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 												getRLock().lock();
 												String log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(demos[index]));
 
-												_consolePanel.print("sourcing demo " + PoolUtils.replaceAll(demos[index], "_", " "), log);
+												getConsoleLogger().print("sourcing demo " + PoolUtils.replaceAll(demos[index], "_", " "), log);
 
 											} catch (Exception ex) {
 												ex.printStackTrace();
@@ -1704,7 +1732,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
 							SwingUtilities.invokeLater(new Runnable() {
 								public void run() {
-									_consolePanel.print((String) action.getAttributes().get("command"), (String) action.getAttributes().get("result"));
+									getConsoleLogger().print((String) action.getAttributes().get("command"), (String) action.getAttributes().get("result"));
 								}
 							});
 						}
@@ -1765,6 +1793,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return null;
 	}
 
+	
+	private ChatConsoleView getOpenedChatConsoleView() {
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof ChatConsoleView) {
+				return (ChatConsoleView) dv;
+			}
+		}
+		return null;
+	}
+	
 	private ServerLogView getOpenedServerLogView() {
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
 		while (iter.hasNext()) {
@@ -1943,6 +1983,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	synchronized private void reload() {
 
+		if (_rForFiles==null) return;
+		
 		FileDescription[] descriptions = null;
 		try {
 			descriptions = _rForFiles.getWorkingDirectoryFileDescriptions();
@@ -2627,6 +2669,75 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+		_actions.put("createbroadcasteddevice", new AbstractAction("New Broadcasted Device") {
+			public void actionPerformed(final ActionEvent e) {
+
+				JPanel rootGraphicPanel = new JPanel();
+				rootGraphicPanel.setLayout(new BorderLayout());
+				JPanel graphicPanel = new JPanel();
+				rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
+				int id = getDynamicViewId();
+				DeviceView deviceView = new graphics.rmi.GDApplet.DeviceView("Broadcasted Graphic Device", null, rootGraphicPanel, id);
+				((TabWindow) views[2].getWindowParent()).addTab(deviceView);
+
+				try {
+
+					GDDevice newDevice = null;
+
+					_protectR.lock();
+
+					try {
+				
+						newDevice = _rForConsole.newBroadcastedDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
+						
+					} finally {
+						_protectR.unlock();
+					}
+
+					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
+							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
+							new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
+							new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
+							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
+							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
+
+					rootGraphicPanel.removeAll();
+					rootGraphicPanel.setLayout(new BorderLayout());
+					rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
+
+					deviceView.setPanel((JGDPanelPop) graphicPanel);
+
+					setCurrentDevice(newDevice);
+
+					final JGDPanelPop gp = (JGDPanelPop) graphicPanel;
+					new Thread(new Runnable() {
+
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								public void run() {
+									gp.fit();
+								}
+							});
+
+						}
+					}).start();
+
+				} catch (TunnelingException te) {
+					te.printStackTrace();
+				} catch (RemoteException re) {
+					re.printStackTrace();
+				}
+
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+
+		
 		_actions.put("logview", new AbstractAction("Console Log Viewer") {
 			public void actionPerformed(final ActionEvent e) {
 				if (getOpenedLogView() == null) {
@@ -2826,6 +2937,81 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+		
+		_actions.put("chatconsoleview", new AbstractAction("Chat Console") {
+			public void actionPerformed(final ActionEvent e) {
+				if (getOpenedChatConsoleView() == null) {
+					int id = getDynamicViewId();
+
+					final ChatConsoleView lv = new ChatConsoleView("Chat Console", null, id);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+					lv.addListener(new DockingWindowListener() {
+						public void viewFocusChanged(View arg0, View arg1) {
+						}
+
+						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowClosed(DockingWindow arg0) {
+						}
+
+						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+							try {
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+
+						public void windowDocked(DockingWindow arg0) {
+						}
+
+						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowHidden(DockingWindow arg0) {
+						}
+
+						public void windowMaximized(DockingWindow arg0) {
+						}
+
+						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowMinimized(DockingWindow arg0) {
+						}
+
+						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
+						}
+
+						public void windowRestored(DockingWindow arg0) {
+						}
+
+						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
+						}
+
+						public void windowShown(DockingWindow arg0) {
+						}
+
+						public void windowUndocked(DockingWindow arg0) {
+						}
+
+						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
+						}
+					});
+				}
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+
+		
+		
 		_actions.put("svgview", new AbstractAction("SVG Viewer") {
 			public void actionPerformed(final ActionEvent e) {
 
@@ -3589,11 +3775,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 		
 		if (getR() instanceof HttpMarker) {
 			((HttpMarker)getR()).stopThreads();
+			
 			/*
 			((JGDPanelPop) _graphicPanel).dispose();
 			for (int i = 0; i < deviceViews.size(); ++i)
 				deviceViews.elementAt(i).getPanel().dispose();
-			*/
+			*/	
+			
 		}
 		
 
@@ -3950,6 +4138,39 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
+
+	class ChatConsoleView extends DynamicView {
+		ConsolePanel _consolePanel;
+		ChatConsoleView(String title, Icon icon, int id) {
+			super(title, icon, new JPanel(), id);
+			((JPanel) getComponent()).setLayout(new BorderLayout());
+			_consolePanel = new ConsolePanel(new SubmitInterface() {
+				public String submit(final String expression) {
+					
+					
+					new Thread(new Runnable() {
+						public void run() {
+							try {getRLock().lock();
+								getR().chat(_sessionId, expression);
+							} catch (Exception e) {
+								e.printStackTrace();
+							} finally {
+								((RGuiReentrantLock)getRLock()).unlockNoBroadcast();
+							}
+						}
+					}).start();
+					
+					return "";
+				}
+			});
+			((JPanel) getComponent()).add(_consolePanel);
+		}
+
+		public ConsolePanel getConsolePanel() {
+			return _consolePanel;
+		}
+	}
+
 	
 	class BiocepMindMapView extends DynamicView {
 		FreeMindApplet _freeMindApplet;
@@ -4295,7 +4516,21 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	public void synchronizeCollaborators() throws RemoteException {
-		//getR().consoleSubmit(".PrivateEnv$dev.broadcast()");
+				
+			new Thread(new Runnable() {
+				public void run() {
+					try {getRLock().lock();
+						getCurrentDevice().broadcast();
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						((RGuiReentrantLock)getRLock()).unlockNoBroadcast();
+					}
+				}
+			}).start();
+			
+			
+			
 	}
 
 	public boolean isCollaborativeMode() {
@@ -4361,7 +4596,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					_consolePanel.print(cmd, log);
+					getConsoleLogger().print(cmd, log);
 				}
 			});
 			return log;
@@ -4480,19 +4715,23 @@ public class GDApplet extends GDAppletBase implements RGui {
 	class RCollaborationListenerImpl extends UnicastRemoteObject implements RCollaborationListener {
 		public RCollaborationListenerImpl() throws RemoteException {
 			super();
+			
+			System.out.println("?????????????????????????????");
 		}
 		
 		public void chat(String sourceSession, String message) throws RemoteException {
-			System.out.println("#CHAT:: sourceSession:"+sourceSession+"  message:"+message);
+			if (_sessionId!=null && !_sessionId.equals(sourceSession)) {
+				ChatConsoleView chatConsoleView=getOpenedChatConsoleView();
+				if (chatConsoleView!=null) {
+					chatConsoleView.getConsolePanel().print("["+sourceSession+"] - "+message,null);
+				}
+			}
 		}
 		
 		public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
 			if (_sessionId!=null && !_sessionId.equals(sourceSession)) {
-				_consolePanel.print("Source > "+sourceSession ,null);
-				_consolePanel.print(expression ,result);
+				_consolePanel.print("["+sourceSession+"] - "+expression ,result);
 			} 
-
-			System.out.println("##CONSOLE PRINT:: sourceSession:"+sourceSession+"  expression:"+expression+"  result:"+result);			
 		}
 	}
 	

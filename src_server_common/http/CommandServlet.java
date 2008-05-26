@@ -19,7 +19,6 @@ package http;
 
 import graphics.pop.GDDevice;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -52,7 +51,6 @@ import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
 import uk.ac.ebi.microarray.pools.RmiCallTimeout;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 import uk.ac.ebi.microarray.pools.YesSecurityManager;
-
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -88,8 +86,12 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 		}
 	}
 
+	private void saveSessionAttributes(HttpSession session) {
+		((HashMap<String, HashMap<String, Object>>) getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP")).put(session.getId(), cloneAttributes(session));
+	}
+
 	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
+
 		HttpSession session = null;
 		Object result = null;
 
@@ -118,13 +120,13 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					RPFSessionInfo.get().put("REMOTE_ADDR", request.getRemoteAddr());
 					RPFSessionInfo.get().put("REMOTE_HOST", request.getRemoteHost());
 
-					boolean nopool = !options.keySet().contains("nopool") || ((String) options.get("nopool")).equals("") || !((String) options.get("nopool")).equalsIgnoreCase("false");
+					boolean nopool = !options.keySet().contains("nopool") || ((String) options.get("nopool")).equals("")
+							|| !((String) options.get("nopool")).equalsIgnoreCase("false");
 					boolean save = options.keySet().contains("save") && ((String) options.get("save")).equalsIgnoreCase("true");
 					boolean namedAccessMode = login.contains("@@");
-					String privateName=(String)options.get("privatename");
-					
-					System.out.println("privatename=<"+privateName+">");
-					
+					String privateName = (String) options.get("privatename");
+
+					System.out.println("privatename=<" + privateName + ">");
 
 					RServices r = null;
 					URL[] codeUrls = null;
@@ -173,23 +175,23 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									break;
 								}
 								r = (RServices) nm.createPrivateServant(nodeName);
-								*/
-								
-								System.out.println("LocalHttpServer.getLocalHttpServerPort():"+LocalHttpServer.getLocalHttpServerPort());
-								System.out.println("LocalRmiRegistry.getLocalRmiRegistryPort():"+LocalHttpServer.getLocalHttpServerPort());
-								if (privateName!=null && !privateName.equals("")) {
+								 */
+
+								System.out.println("LocalHttpServer.getLocalHttpServerPort():" + LocalHttpServer.getLocalHttpServerPort());
+								System.out.println("LocalRmiRegistry.getLocalRmiRegistryPort():" + LocalHttpServer.getLocalHttpServerPort());
+								if (privateName != null && !privateName.equals("")) {
 									try {
-										r=(RServices) LocalRmiRegistry.getInstance().lookup(privateName);
-									} catch (Exception e) {	
+										r = (RServices) LocalRmiRegistry.getInstance().lookup(privateName);
+									} catch (Exception e) {
 										//e.printStackTrace();
-									}								
-								} 
-								
-								if (r==null) {								
-									codeUrls=(URL[])options.get("urls");								
-									System.out.println("CODE URL->"+Arrays.toString(codeUrls));
-									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, privateName, false,
-											codeUrls);
+									}
+								}
+
+								if (r == null) {
+									codeUrls = (URL[]) options.get("urls");
+									System.out.println("CODE URL->" + Arrays.toString(codeUrls));
+									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry
+											.getLocalRmiRegistryPort(), 256, 256, privateName, false, codeUrls);
 								}
 
 							} else {
@@ -225,48 +227,50 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("LOGIN", login);
 					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
 					session.setAttribute("PROCESS_ID", r.getProcessId());
-					if (privateName!=null) session.setAttribute("PRIVATE_NAME", privateName);
-					
-					if (codeUrls!=null && codeUrls.length>0) {
+					if (privateName != null)
+						session.setAttribute("PRIVATE_NAME", privateName);
+
+					if (codeUrls != null && codeUrls.length > 0) {
 						session.setAttribute("CODEURLS", codeUrls);
-					} 
-					 
+					}
+
 					session.setAttribute("threads", new ThreadsHolder());
 
 					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session.getId(), session);
-					((HashMap<String, HashMap<String, Object>>) getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP")).put(session.getId(), cloneAttributes(session));
+					saveSessionAttributes(session);
 
-					Vector<HttpSession> sessionVector=((HashMap<RServices, Vector<HttpSession>>) getServletContext().getAttribute("R_SESSIONS")).get(r);
-					if (sessionVector==null) {
-						sessionVector=new Vector<HttpSession>(); 
-						((HashMap<RServices, Vector<HttpSession>>) getServletContext().getAttribute("R_SESSIONS")).put(r,sessionVector);
+					Vector<HttpSession> sessionVector = ((HashMap<RServices, Vector<HttpSession>>) getServletContext().getAttribute("R_SESSIONS")).get(r);
+					if (sessionVector == null) {
+						sessionVector = new Vector<HttpSession>();
+						((HashMap<RServices, Vector<HttpSession>>) getServletContext().getAttribute("R_SESSIONS")).put(r, sessionVector);
 					}
+
 					sessionVector.add(session);
-					
+
 					if (_rkit == null && save) {
 						UserUtils.loadWorkspace((String) session.getAttribute("LOGIN"), r);
 					}
-					
-					if (sessionVector.size()==1) {
+
+					if (sessionVector.size() == 1) {
 						try {
 							if (_rkit != null)
 								_rkit.getRLock().lock();
-							
-							GDDevice[] devices=r.listDevices();
-							for (int i=0; i<devices.length; ++i) {
+
+							GDDevice[] devices = r.listDevices();
+							for (int i = 0; i < devices.length; ++i) {
 								String deviceName = devices[i].getId();
 								System.out.println("??? ---- deviceName=" + deviceName);
 								session.setAttribute(deviceName, devices[i]);
 							}
-							
+
 						} finally {
 							if (_rkit != null)
 								_rkit.getRLock().unlock();
 						}
 					}
-					
+
 					result = session.getId();
-										
+
 					break;
 
 				}
@@ -316,14 +320,14 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						throw new Exception("Bad Servant Name :" + servantName);
 					}
 					String methodName = (String) PoolUtils.hexToObject(request.getParameter("methodname"));
-					
-					ClassLoader urlClassLoader=this.getClass().getClassLoader();
-					if (session.getAttribute("CODEURLS")!=null) {
-						urlClassLoader=new URLClassLoader((URL[])session.getAttribute("CODEURLS"),this.getClass().getClassLoader());
+
+					ClassLoader urlClassLoader = this.getClass().getClassLoader();
+					if (session.getAttribute("CODEURLS") != null) {
+						urlClassLoader = new URLClassLoader((URL[]) session.getAttribute("CODEURLS"), this.getClass().getClassLoader());
 					}
-					
-					Class<?>[] methodSignature = (Class[]) PoolUtils.hexToObject(request.getParameter("methodsignature") );
-					
+
+					Class<?>[] methodSignature = (Class[]) PoolUtils.hexToObject(request.getParameter("methodsignature"));
+
 					final Method m = servant.getClass().getMethod(methodName, methodSignature);
 					if (m == null) {
 						throw new Exception("Bad Method Name :" + methodName);
@@ -422,11 +426,20 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					try {
 						if (_rkit != null)
 							_rkit.getRLock().lock();
-						GDDevice deviceProxy = ((RServices) session.getAttribute("R")).newDevice(Integer.decode(request.getParameter("width")), Integer
-								.decode(request.getParameter("height")));
+						boolean broadcasted = new Boolean(request.getParameter("broadcasted"));
+						GDDevice deviceProxy = null;
+						if (broadcasted) {
+							deviceProxy = ((RServices) session.getAttribute("R")).newBroadcastedDevice(Integer.decode(request.getParameter("width")), Integer
+									.decode(request.getParameter("height")));
+						} else {
+							deviceProxy = ((RServices) session.getAttribute("R")).newDevice(Integer.decode(request.getParameter("width")), Integer
+									.decode(request.getParameter("height")));
+						}
+
 						String deviceName = deviceProxy.getId();
 						System.out.println("deviceName=" + deviceName);
 						session.setAttribute(deviceName, deviceProxy);
+						saveSessionAttributes(session);
 						result = deviceName;
 						break;
 					} finally {
@@ -437,28 +450,32 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					try {
 						if (_rkit != null)
 							_rkit.getRLock().lock();
-						
-						result=new Vector<String>();
-						for (Enumeration<String> e=session.getAttributeNames(); e.hasMoreElements();) {
-							String attributeName=e.nextElement();
+
+						result = new Vector<String>();
+						for (Enumeration<String> e = session.getAttributeNames(); e.hasMoreElements();) {
+							String attributeName = e.nextElement();
 							if (attributeName.startsWith("device_")) {
-								((Vector<String>)result).add(attributeName);
+								((Vector<String>) result).add(attributeName);
 							}
 						}
-						
-						break;						
-						
+
+						break;
+
 					} finally {
 						if (_rkit != null)
 							_rkit.getRLock().unlock();
 					}
 				} else if (command.equals("newgenericcallbackdevice")) {
 					try {
-						if (_rkit != null) _rkit.getRLock().lock();						
-						GenericCallbackDevice genericCallBackDevice=((RServices) session.getAttribute("R")).newGenericCallbackDevice();
+						if (_rkit != null)
+							_rkit.getRLock().lock();
+						GenericCallbackDevice genericCallBackDevice = ((RServices) session.getAttribute("R")).newGenericCallbackDevice();
 						String genericCallBackDeviceName = genericCallBackDevice.getId();
 						session.setAttribute(genericCallBackDeviceName, genericCallBackDevice);
+						saveSessionAttributes(session);
+
 						result = genericCallBackDeviceName;
+
 						break;
 					} finally {
 						if (_rkit != null)
@@ -495,7 +512,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 		getServletContext().setAttribute("SESSIONS_MAP", new HashMap<String, HttpSession>());
 		getServletContext().setAttribute("SESSIONS_ATTRIBUTES_MAP", new HashMap<String, HashMap<String, Object>>());
 		getServletContext().setAttribute("R_SESSIONS", new HashMap<RServices, HttpSession>());
-		
+
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new YesSecurityManager());
 		}

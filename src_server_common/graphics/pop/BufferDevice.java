@@ -113,5 +113,13 @@ public class BufferDevice implements GDDevice {
 	public String getId() throws RemoteException {
 		return null;
 	}
+	
+	public boolean isBroadcasted() throws RemoteException {
+		return false;
+	}
+	
+	public void broadcast() throws RemoteException {
+		
+	}
 
 }
