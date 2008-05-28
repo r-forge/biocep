@@ -1,122 +1,184 @@
-package net.java.dev.jspreadsheet;
-
-import graphics.rmi.RGui;
+package model;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-
-import java.util.EventListener;
+import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.Vector;
-
-import javax.swing.JTable;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import remoting.RServices;
 
-/**
- * This is the table data structure of the spreadsheet (i.e. the heart of the
- * backend). Although this class implements the methods needed for
- * <code>TableModel</code>, it also has methods for maintaining dependencies
- * and some data manipulation.
- * <P>
- * Note: This structure only holds Cell objects! It's methods take into account
- * the Cell object. If you modified the cell class please check the methods in
- * this class.
- * 
- * @author Ricky Chin
- * @version $Revision: 1.1 $
- */
-public class SpreadsheetTableModel extends AbstractTableModel implements SpreadsheetTableModelInterface, SpreadsheetTableModelClipboardInterface {
+import server.DirectJNI;
+import net.java.dev.jspreadsheet.Cell;
+import net.java.dev.jspreadsheet.CellPoint;
+import net.java.dev.jspreadsheet.CellRange;
+import net.java.dev.jspreadsheet.Debug;
+import net.java.dev.jspreadsheet.Formula;
+import net.java.dev.jspreadsheet.History;
+import net.java.dev.jspreadsheet.Node;
+import net.java.dev.jspreadsheet.ParserException;
+import net.java.dev.jspreadsheet.SpreadsheetClipboard;
+import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
+import net.java.dev.jspreadsheet.SpreadsheetTableModelClipboardInterface;
+import net.java.dev.jspreadsheet.SpreadsheetTableModelInterface;
 
-	/**
-	 * holds the history information for the table
-	 */
-	private History history;
+public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements SpreadsheetModelRemote {
 
-	/** Stores file name of current document */
-	private JTable table;
-
-	/**
-	 * Stores modified state of document
-	 */
-	private boolean modified;
-
-	/**
-	 * true if password has been changed
-	 */
-	private boolean passwordModified;
-
-	private RGui rgui;
-
-	private AbstractTableModel m;
-
-	/**
-	 * Constructs a default SharpTableModel which is a table of zero columns and
-	 * zeros rows.
-	 * 
-	 * @param sharp
-	 *            the gui component to tie it to
-	 */
-	public SpreadsheetTableModel(JTable table, RGui rgui) {
-		super();
-
-		// initialize state to unmodified and file to untitled
-		modified = false;
-		this.table = table;
-		this.rgui = rgui;
-	}
-
-	/**
-	 * This constructor creates an empty table with numRow rows and numCol
-	 * columns including the row and column label row and column.
-	 * <P>
-	 * The zeroth column are headers. The rows are numbered 1, 2, ... and
-	 * columns are labeled A, B, ... . Thus, it really holds numRow X numCol-1
-	 * of data. The table is initialized with no cell objects. Each coordinate
-	 * that will have data will have a cell object created for it later by the
-	 * getCell method.
-	 * 
-	 * @param sharp
-	 *            gui object to associated with this SharpTableModel
-	 * @param numRows
-	 *            total number of rows including row header
-	 * @param numColumns
-	 *            total number of columns including column header
-	 */
-	public SpreadsheetTableModel(JTable table, AbstractTableModel m, RGui rgui) {
+	public SpreadsheetModelRemoteImpl(int rowCount, int colCount) throws RemoteException {
+		super(new SpreadsheetDefaultTableModel(rowCount, colCount));
 		for (int row = 0; row < m.getRowCount(); row++)
 			for (int col = 0; col < m.getColumnCount(); col++)
-				// we initialize it here
 				m.setValueAt(new Cell(""), row, col);
-		// initialize state to unmodified and file to untitled
-		modified = false;
-		this.table = table;
-		this.rgui = rgui;
-		this.m = m;
 	}
 
-	public void addTableModelListener(TableModelListener l) {
-		m.addTableModelListener(l);
+	public SpreadsheetModelRemoteImpl(Object[] columnName, int rowCount) throws RemoteException {
+		super(columnName, rowCount);
 	}
 
-	public void removeTableModelListener(TableModelListener l) {
-		m.removeTableModelListener(l);
+	public SpreadsheetModelRemoteImpl(Object[][] data, Object[] columnName) throws RemoteException {
+		super(data, columnName);
 	}
 
-	public int getColumnCount() {
-		return m.getColumnCount();
-	}
+	
+	private History history;
+	private boolean modified = false;
+	private boolean passwordModified;
 
-	public int getRowCount() {
-		return m.getRowCount();
-	}
+	private SpreadsheetTableModelInterface _evaluateInterface = new SpreadsheetTableModelInterface() {
+		public Cell getCellAt(int aRow, int aColumn) {
+			try {
+				return SpreadsheetModelRemoteImpl.this.getCellAt(aRow, aColumn);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 
+		public Number getNumericValueAt(int row, int col) throws ParserException {
+			try {
+				return SpreadsheetModelRemoteImpl.this.getNumericValueAt(row, col);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		public remoting.RServices getR() {
+			return DirectJNI.getInstance().getRServices();
+		}
+
+		public boolean isEmptyCell(int row, int col) {
+			try {
+				return SpreadsheetModelRemoteImpl.this.isEmptyCell(row, col);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+	};
+	
+	SpreadsheetTableModelClipboardInterface _clipboardInterface=new SpreadsheetTableModelClipboardInterface() {
+		public int getColumnCount() {
+			try {
+				return SpreadsheetModelRemoteImpl.this.getColumnCount();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public int getRowCount() {
+			try {
+				return SpreadsheetModelRemoteImpl.this.getRowCount();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public void fromString(String text, char delim, int rowOff, int colOff, CellRange range) {
+			try {
+				SpreadsheetModelRemoteImpl.this.fromString( text,  delim,  rowOff,  colOff,  range);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public void clearRange(CellRange range) {
+			try {
+				SpreadsheetModelRemoteImpl.this.clearRange(range);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public String toString(CellRange range, boolean byValue, char delim) {
+			try {
+				return SpreadsheetModelRemoteImpl.this.toString( range,  byValue,  delim);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			
+		}
+		
+		public void setModified(boolean modified) {
+			try {
+				SpreadsheetModelRemoteImpl.this.setModified(modified);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public void setSelection(CellRange sel) {
+			try {
+				
+				// IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				//SpreadsheetModelRemoteImpl.this.setSelection(sel);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public void insertColumn(CellRange insertRange) {
+			try {
+				SpreadsheetModelRemoteImpl.this.insertColumn(insertRange);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public void insertRow(CellRange insertRange) {
+			try {
+				SpreadsheetModelRemoteImpl.this.insertRow(insertRange);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public void removeColumn() {
+			try {
+				SpreadsheetModelRemoteImpl.this.removeColumn();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}			
+		}
+		
+		public void removeColumn(CellRange deletionRange) {
+			try {
+				SpreadsheetModelRemoteImpl.this.removeColumn(deletionRange);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}	
+		}
+		
+		public void removeRow(CellRange deletionRange) {
+			try {
+				SpreadsheetModelRemoteImpl.this.removeRow(deletionRange);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}	
+		}
+	};
+
+
+	
+	
+	
 	/**
 	 * This constructor is convenience for loading objects that are already in
 	 * an array. It fills the SharpTableModel with the objects in the array
@@ -163,7 +225,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 */
 	public Cell getCellAt(int aRow, int aColumn) {
 		/* check for out of bounds */
-		if ((aRow < 0) || (aRow >= getRowCount()) || (aColumn < 0) || (aColumn >= getColumnCount())) {
+		if ((aRow < 0) || (aRow >= m.getRowCount()) || (aColumn < 0) || (aColumn >= m.getColumnCount())) {
 			return null;
 		}
 
@@ -224,18 +286,18 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		if (byRow) {
 			rowOff = -range.getHeight();
 			colOff = 0;
-			if (range.getEndRow() == (getRowCount() - 1)) {
+			if (range.getEndRow() == (m.getRowCount() - 1)) {
 				return true;
 			}
 
-			needCheck = new CellRange(range.getEndRow() + 1, getRowCount() - 1, 0, getColumnCount() - 1);
+			needCheck = new CellRange(range.getEndRow() + 1, m.getRowCount() - 1, 0, m.getColumnCount() - 1);
 		} else {
 			rowOff = 0;
 			colOff = -range.getWidth();
-			if (range.getEndCol() == (getColumnCount() - 1)) {
+			if (range.getEndCol() == (m.getColumnCount() - 1)) {
 				return true;
 			}
-			needCheck = new CellRange(0, getRowCount() - 1, range.getEndCol() + 1, getColumnCount() - 1);
+			needCheck = new CellRange(0, m.getRowCount() - 1, range.getEndCol() + 1, m.getColumnCount() - 1);
 		}
 
 		for (int i = needCheck.getStartRow(); i <= needCheck.getEndRow(); i++)
@@ -313,7 +375,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 				// if need recalc
 				if (form.needsRecalc()) {
 					try {
-						value = Formula.evaluate(this, row, col);
+						value = Formula.evaluate(_evaluateInterface, row, col);
 						cell.setValue(value);
 					} catch (ParserException e) {
 						cell.setValue(e);
@@ -398,26 +460,54 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		return board;
 	}
 
+
 	/**
-	 * set table selection to the range sel
+	 * From a string input determine how many rows/columns it requires for the
+	 * table - it corresponds to the number of newlines and tabs.
 	 * 
-	 * @param sel
-	 *            the range to be selected
+	 * @param input
+	 *            the string to analyze
 	 */
-	public void setSelection(CellRange sel) {
-		// validate sel
-		int maxRow = table.getRowCount() - 1;
-		int maxCol = table.getColumnCount() - 1;
+	static public CellPoint getSize(String input, char delim) {
+		BufferedReader in = new BufferedReader(new StringReader(input));
+		String line;
+		int rowcount = 0;
+		int colcount = 0;
 
-		int startRow = sel.getStartRow();
-		int startCol = sel.getStartCol();
-		int endRow = sel.getEndRow();
-		int endCol = sel.getEndCol();
+		try {
+			while ((line = in.readLine()) != null) {
+				rowcount++;
 
-		table.setColumnSelectionInterval(Math.min(startCol, maxCol), Math.min(endCol, maxCol));
-		table.setRowSelectionInterval(Math.min(startRow, maxRow), Math.min(endRow, maxRow));
+				// initialize new tokenizer on line with tab delimiter.
+				// tokenizer = new StringTokenizer(line, "\t");
+				int index;
+				int prev = 0;
+
+				// set col to 1 before each loop
+				int col = 0;
+
+				while (true) {
+					index = line.indexOf(delim, prev);
+					prev = index + 1;
+
+					// increment column number
+					col++;
+
+					if (index == -1) {
+						break;
+					}
+				}
+
+				if (colcount < col) {
+					colcount = col;
+				}
+			}
+		} catch (Exception e) {
+			return null;
+		}
+
+		return new CellPoint(rowcount, colcount);
 	}
-
 
 	/**
 	 * Determines if a cell is empty
@@ -430,15 +520,6 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 */
 	public boolean isEmptyCell(int row, int col) {
 		return getCellAt(row, col).getValue().equals("");
-	}
-
-	/**
-	 * Returns JTable
-	 * 
-	 * @return JTable
-	 */
-	public JTable getTable() {
-		return table;
 	}
 
 	/**
@@ -620,7 +701,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 */
 	public void setValueAt(Object aValue, int aRow, int aColumn) {
 		CellPoint point = new CellPoint(aRow, aColumn);
-		history.add(new CellRange(point, point));
+		// IMPORTANT !!!!!!!!!!!!!!!!!!!
+		//history.add(new CellRange(point, point));
 		doSetValueAt(aValue, aRow, aColumn);
 	}
 
@@ -764,7 +846,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 *            range of cells to add new columns to the left of creates the
 	 *            same number of new columns as range has
 	 */
-	public void insertColumn(CellRange insertRange) {
+	public CellRange insertColumn(CellRange insertRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -778,8 +860,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		int insertNum = insertRange.getWidth();
 
 		// the coordinates of the last cell in table
-		int lastRow = getRowCount() - 1;
-		int lastCol = getColumnCount() - 1;
+		int lastRow = m.getRowCount() - 1;
+		int lastCol = m.getColumnCount() - 1;
 
 		/*
 		 * everything right to new columns must be shifted right so cut them to
@@ -787,8 +869,12 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		 * guard for inserting before the label column.
 		 */
 		CellRange range = new CellRange(0, lastRow, Math.max(col, 0), lastCol);
-		SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
+		SpreadsheetClipboard scrap = new SpreadsheetClipboard( _clipboardInterface, range, true);
 
+
+
+		
+		/* IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		TableColumnModel tm = table.getColumnModel();
 		TableColumn column = tm.getColumn(col);
 
@@ -805,15 +891,16 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			newcol.setHeaderValue(Node.translateColumn(curCol));
 			tm.addColumn(newcol);
 		}
+		*/
 
 		// shift relevant columns left
-		scrap.paste(this, new CellPoint(0, col + insertNum));
+		scrap.paste(_clipboardInterface, new CellPoint(0, col + insertNum));
 
 		recalculateAll();
 
 		// set selection
-		if (table.getSelectedColumnCount() == 0) {
-			setSelection(new CellRange(0, 0, col, col));
+		{
+			return (new CellRange(0, 0, col, col));
 		}
 
 		// sharp.setBaseColumnWidth();
@@ -829,7 +916,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 *            the range to the left of to add new rows also adds number of
 	 *            new rows equal to rows in range
 	 */
-	public void insertRow(CellRange insertRange) {
+	public CellRange insertRow(CellRange insertRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -841,15 +928,15 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		int insertNum = insertRange.getHeight();
 
 		// coordinates of last cell of table
-		int lastRow = getRowCount() - 1;
-		int lastCol = getColumnCount() - 1;
+		int lastRow = m.getRowCount() - 1;
+		int lastCol = m.getColumnCount() - 1;
 
 		/*
 		 * copy things below these new rows The max is to prevent inserts above
 		 * the column headers
 		 */
 		CellRange range = new CellRange(Math.max(row, 0), lastRow, 0, lastCol);
-		SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
+		SpreadsheetClipboard scrap = new SpreadsheetClipboard(_clipboardInterface, range, true);
 
 		// add the rows to the end
 		for (int i = 0; i < insertNum; i++) {
@@ -857,14 +944,14 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		}
 
 		// shift old rows down
-		scrap.paste(this, new CellPoint(row + insertNum, 0));
+		scrap.paste(_clipboardInterface, new CellPoint(row + insertNum, 0));
 
 		recalculateAll();
 
 		// set selection
-		if (table.getSelectedColumnCount() == 0) {
-			setSelection(new CellRange(row, row, 0, 0));
-		}
+
+		return new CellRange(row, row, 0, 0);
+
 	}
 
 	/**
@@ -887,14 +974,14 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 
 		if ((goal instanceof String) && !matchCase && matchCell) {
 			String objective = (String) goal;
-			for (int i = startCol; i < getColumnCount(); i++) {
+			for (int i = startCol; i < m.getColumnCount(); i++) {
 				if (objective.equalsIgnoreCase(getCellAt(startRow, i).getValue().toString())) {
 					return new CellPoint(startRow, i);
 				}
 			}
 
-			for (int i = startRow + 1; i < getRowCount(); i++) {
-				for (int j = 1; j < getColumnCount(); j++) {
+			for (int i = startRow + 1; i < m.getRowCount(); i++) {
+				for (int j = 1; j < m.getColumnCount(); j++) {
 					if (objective.equalsIgnoreCase(getCellAt(i, j).getValue().toString())) {
 						return new CellPoint(i, j);
 					}
@@ -905,7 +992,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		} else {
 			if ((goal instanceof String) && !matchCell) {
 				String objective = (String) goal;
-				for (int i = startCol; i < getColumnCount(); i++) {
+				for (int i = startCol; i < m.getColumnCount(); i++) {
 					String test = getCellAt(startRow, i).getValue().toString();
 
 					if (!matchCase) {
@@ -919,8 +1006,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 					}
 				}
 
-				for (int i = startRow + 1; i < getRowCount(); i++) {
-					for (int j = 1; j < getColumnCount(); j++) {
+				for (int i = startRow + 1; i < m.getRowCount(); i++) {
+					for (int j = 1; j < m.getColumnCount(); j++) {
 						String test = getCellAt(i, j).getValue().toString();
 						if (!matchCase) {
 							objective = objective.toUpperCase();
@@ -936,14 +1023,14 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 
 				return null;
 			} else {
-				for (int i = startCol; i < getColumnCount(); i++) {
+				for (int i = startCol; i < m.getColumnCount(); i++) {
 					if (goal.equals(getCellAt(startRow, i).getValue())) {
 						return new CellPoint(startRow, i);
 					}
 				}
 
-				for (int i = startRow + 1; i < getRowCount(); i++) {
-					for (int j = 1; j < getColumnCount(); j++) {
+				for (int i = startRow + 1; i < m.getRowCount(); i++) {
+					for (int j = 1; j < m.getColumnCount(); j++) {
 						if (goal.equals(getCellAt(i, j).getValue())) {
 							return new CellPoint(i, j);
 						}
@@ -970,7 +1057,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			try {
 				Debug.println("recalculate");
 
-				Number eVal = Formula.evaluate(this, aRow, aColumn);
+				Number eVal = Formula.evaluate(_evaluateInterface, aRow, aColumn);
 
 				// we set the value here
 				getCellAt(aRow, aColumn).setValue(eVal);
@@ -1002,8 +1089,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * 
 	 */
 	public void recalculateAll() {
-		for (int i = 1; i < getRowCount(); i++)
-			for (int j = 1; j < getColumnCount(); j++) {
+		for (int i = 1; i < m.getRowCount(); i++)
+			for (int j = 1; j < m.getColumnCount(); j++) {
 				addRefs(i, j);
 				recalculate(i, j);
 			}
@@ -1015,7 +1102,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param deletionRange
 	 *            the range that contains the columns to delete
 	 */
-	public void removeColumn(CellRange deletionRange) {
+	public CellRange removeColumn(CellRange deletionRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -1027,8 +1114,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		int removeNum = deletionRange.getWidth();
 
 		// last entry of table
-		int lastRow = getRowCount() - 1;
-		int lastCol = getColumnCount() - 1;
+		int lastRow = m.getRowCount() - 1;
+		int lastCol = m.getColumnCount() - 1;
 
 		/*
 		 * everything to the right of the columns to remove need to be copied to
@@ -1036,26 +1123,29 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		 */
 		CellRange range = new CellRange(0, lastRow, col + removeNum, lastCol);
 
-		SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
+		SpreadsheetClipboard scrap = new SpreadsheetClipboard(_clipboardInterface, range, true);
 
 		for (int i = 0; i < removeNum; i++) {
 			// delete old column
 			removeColumn();
 
-			TableColumnModel tm = table.getColumnModel();
-			tm.removeColumn(tm.getColumn(tm.getColumnCount() - 1));
+			
+			//IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			//TableColumnModel tm = table.getColumnModel();
+			//tm.removeColumn(tm.getColumn(tm.getColumnCount() - 1));
+			
+			
 		}
 
 		// shift clipboard elements right
-		scrap.paste(this, new CellPoint(0, col));
+		scrap.paste(_clipboardInterface, new CellPoint(0, col));
 
 		// updateRefs(refs);
 		recalculateAll();
 
 		// set selection
-		if (table.getSelectedColumnCount() == 0) {
-			setSelection(new CellRange(0, 0, col, col));
-		}
+
+		return (new CellRange(0, 0, col, col));
 
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
@@ -1100,7 +1190,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param deletionRange
 	 *            CellRange that contains the rows to delete
 	 */
-	public void removeRow(CellRange deletionRange) {
+	public CellRange removeRow(CellRange deletionRange) {
 		if (m instanceof DefaultTableModel) {
 			/*
 			 * since the insertion point is given by a selected cell there will
@@ -1115,34 +1205,33 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			int removeNum = deletionRange.getHeight();
 
 			//coordinates of last cell in spreadsheet
-			int lastRow = getRowCount() - 1;
-			int lastCol = getColumnCount() - 1;
+			int lastRow = m.getRowCount() - 1;
+			int lastCol = m.getColumnCount() - 1;
 
 			//everything lower than rows to remove must be copied to be shifted
 			CellRange range = new CellRange(row + removeNum, lastRow, 0, lastCol);
-			SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
+			SpreadsheetClipboard scrap = new SpreadsheetClipboard(_clipboardInterface, range, true);
 
 			for (int i = 0; i < removeNum; i++) {
-				((DefaultTableModel) m).removeRow(getRowCount() - 1);
+				((DefaultTableModel) m).removeRow(m.getRowCount() - 1);
 			}
 
 			//shift relevent rows up
-			scrap.paste(this, new CellPoint(row, 0));
+			scrap.paste(_clipboardInterface, new CellPoint(row, 0));
 
 			recalculateAll();
 
 			// set selection
-			if (table.getSelectedColumnCount() == 0) {
-				setSelection(new CellRange(row, row, 0, 0));
-			}
+			return new CellRange(row, row, 0, 0);
+			
 		} else {
 			throw new RuntimeException("not yet implemented");
 		}
 	}
-
+	
 	/**
 	 * This method sorts an arbitrary range in the table.
-	 *
+	 * 
 	 * @param area
 	 *            range to sort
 	 * @param primary
@@ -1168,13 +1257,13 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			data = new SpreadsheetClipboard[area.getWidth()];
 			for (int i = 0; i < data.length; i++) {
 				CellRange temp = new CellRange(area.getStartRow(), area.getEndRow(), area.getStartCol() + i, area.getStartCol() + i);
-				data[i] = new SpreadsheetClipboard(this, temp, false);
+				data[i] = new SpreadsheetClipboard(_clipboardInterface, temp, false);
 			}
 		} else {
 			data = new SpreadsheetClipboard[area.getHeight()];
 			for (int i = 0; i < data.length; i++) {
 				CellRange temp = new CellRange(area.getStartRow() + i, area.getStartRow() + i, area.getStartCol(), area.getEndCol());
-				data[i] = new SpreadsheetClipboard(this, temp, false);
+				data[i] = new SpreadsheetClipboard(_clipboardInterface, temp, false);
 			}
 		}
 
@@ -1184,25 +1273,25 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		 * index array, we paste the entries in data back in the sorted order.
 		 */
 
-		//do index sorting
+		// do index sorting
 		int[] indices = internalSort(area, primary, second, isRow, ascend, tiebreaker);
 
-		//paste accordingly
+		// paste accordingly
 		if (isRow) {
 			for (int i = area.getStartCol(); i <= area.getEndCol(); i++) {
-				//point to paste at
+				// point to paste at
 				CellPoint point = new CellPoint(area.getStartRow(), i);
 
 				int y = i - area.getStartCol();
-				data[indices[y] - area.getStartCol()].paste(this, point);
+				data[indices[y] - area.getStartCol()].paste(_clipboardInterface, point);
 			}
 		} else {
 			for (int i = area.getStartRow(); i <= area.getEndRow(); i++) {
-				//point to paste at
+				// point to paste at
 				CellPoint point = new CellPoint(i, area.getStartCol());
 
 				int y = i - area.getStartRow();
-				data[indices[y] - area.getStartRow()].paste(this, point);
+				data[indices[y] - area.getStartRow()].paste(_clipboardInterface, point);
 			}
 		}
 	}
@@ -1259,11 +1348,11 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @see FileOp
 	 */
 	public String toString(char delim) {
-		return toString(new CellRange(0, getRowCount() - 1, 0, getColumnCount() - 1), false, delim);
+		return toString(new CellRange(0, m.getRowCount() - 1, 0, m.getColumnCount() - 1), false, delim);
 	}
 
 	public String toString() {
-		return toString(new CellRange(0, getRowCount() - 1, 0, getColumnCount() - 1), false, '\t');
+		return toString(new CellRange(0, m.getRowCount() - 1, 0, m.getColumnCount() - 1), false, '\t');
 	}
 
 	/**
@@ -1333,7 +1422,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	}
 
 	protected void fillRange(CellRange range, String s) {
-		fill(range, SpreadsheetTableModel.fieldParser(s, range.getminCorner()));
+		fill(range, fieldParser(s, range.getminCorner()));
 	}
 
 	/**
@@ -1589,7 +1678,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		      //Give column the appropriate label
 		      if (it.hasNext())
 		      {
-		         Cell temp = new Cell(Node.translateColumn(getColumnCount() - 1));
+		         Cell temp = new Cell(Node.translateColumn(m.getColumnCount() - 1));
 		         ((Vector) it.next()).addElement(temp);
 		      }
 	
@@ -1618,20 +1707,19 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		   if (m instanceof SpreadsheetDefaultTableModel) {
 		      //create a new row with appropriate label
 		      Vector rowData = new Vector();
-		      rowData.add(0, new Cell(new Integer(getRowCount() + 1)));
+		      rowData.add(0, new Cell(new Integer(m.getRowCount() + 1)));
 	
 		      //add it to the table
 		      ((SpreadsheetDefaultTableModel)m).addRow(rowData);
 	
-		      for (int i = 1; i < getColumnCount(); i++)
+		      for (int i = 1; i < m.getColumnCount(); i++)
 		      {
-		         m.setValueAt(new Cell(""), getRowCount() - 1, i);
+		         m.setValueAt(new Cell(""), m.getRowCount() - 1, i);
 		      }
 		   } else {
 			   throw new RuntimeException("Not Yet Implemented");
 		   }
 	   }
-
 
 	/**
 	 * This is a helper function that compares rows or columns
@@ -1707,8 +1795,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 
 	public void removeColumn() {
 		if (m instanceof SpreadsheetDefaultTableModel) {
-			int lastRow = getRowCount() - 1;
-			int lastCol = getColumnCount() - 1;
+			int lastRow = m.getRowCount() - 1;
+			int lastCol = m.getColumnCount() - 1;
 	
 			//remove the data from cells to delete to maintain references
 			clearRange(new CellRange(0, lastRow, lastCol, lastCol));
@@ -1721,7 +1809,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 				 * right and deleted the last columns.
 				 */
 				Vector temp = (Vector) it.next();
-				temp.removeElementAt(getColumnCount() - 1);
+				temp.removeElementAt(m.getColumnCount() - 1);
 			}
 
 			//update inherited field from DefaultTableModel
@@ -1733,6 +1821,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			throw new RuntimeException("Not Yet Implemented");
 		}
 	}
+
 	/**
 	 * Determines if cells are in the wrong order Used only as helper method for
 	 * sort.
@@ -1761,74 +1850,159 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		}
 	}
 
-	public int findColumn(String columnName) {
-		return m.findColumn(columnName);
-	}
+	
+	
+	
+	
+	
+	/*
+	
+	public Cell getCellAt(int aRow, int aColumn) throws RemoteException {
+		
+		// check for out of bounds //
+		if ((aRow < 0) || (aRow >= m.getRowCount()) || (aColumn < 0) || (aColumn >= m.getColumnCount())) {
+			return null;
+		}
 
-	public void fireTableCellUpdated(int row, int column) {
-		m.fireTableCellUpdated(row, column);
-	}
+		Cell temp = (Cell) m.getValueAt(aRow, aColumn);
 
-	public void fireTableChanged(TableModelEvent e) {
-		m.fireTableChanged(e);
-	}
-
-	public void fireTableDataChanged() {
-
-		m.fireTableDataChanged();
-
-	}
-
-	public void fireTableRowsDeleted(int firstRow, int lastRow) {
-
-		m.fireTableRowsDeleted(firstRow, lastRow);
-
-	}
-
-	public void fireTableRowsInserted(int firstRow, int lastRow) {
-
-		m.fireTableRowsInserted(firstRow, lastRow);
-
-	}
-
-	public void fireTableRowsUpdated(int firstRow, int lastRow) {
-
-		m.fireTableRowsUpdated(firstRow, lastRow);
-
-	}
-
-	public void fireTableStructureChanged() {
-
-		m.fireTableStructureChanged();
-
-	}
-
-	public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
-
-		return m.getListeners(listenerType);
-
-	}
-
-	public TableModelListener[] getTableModelListeners() {
-
-		return m.getTableModelListeners();
-	}
-
-	public RServices getR() {
-		return rgui.getR();
-	}
-
-	public RGui getRGui() {
-		return rgui;
+		return temp;
 	}
 	
-	/**
-	 * From a string input determine how many rows/columns it requires for the
-	 * table - it corresponds to the number of newlines and tabs.
-	 * 
-	 * @param input
-	 *            the string to analyze
-	 */
+	
+	public boolean isDeletionSafe(CellRange range, boolean byRow) throws RemoteException {
+		int rowOff;
+		int colOff;
+		CellRange needCheck;
+
+		if (byRow) {
+			rowOff = -range.getHeight();
+			colOff = 0;
+			if (range.getEndRow() == (m.getRowCount() - 1)) {
+				return true;
+			}
+
+			needCheck = new CellRange(range.getEndRow() + 1, m.getRowCount() - 1, 0, m.getColumnCount() - 1);
+		} else {
+			rowOff = 0;
+			colOff = -range.getWidth();
+			if (range.getEndCol() == (m.getColumnCount() - 1)) {
+				return true;
+			}
+			needCheck = new CellRange(0, m.getRowCount() - 1, range.getEndCol() + 1, m.getColumnCount() - 1);
+		}
+
+		for (int i = needCheck.getStartRow(); i <= needCheck.getEndRow(); i++)
+			for (int j = needCheck.getStartCol(); j <= needCheck.getEndCol(); j++) {
+				Cell cell = getCellAt(i, j);
+				if (cell.isFormula() && !Formula.isSafe(cell.getFormula(), rowOff, colOff)) {
+					Debug.println("relative addresses become invalid");
+
+					return false;
+				}
+			}
+
+		return true;
+	}
+
+	public boolean isFormula(int aRow, int aColumn) throws RemoteException {
+		Cell temp = getCellAt(aRow, aColumn);
+
+		return ((temp != null) && (temp.getType() == Cell.FORMULA));
+	}
+
+	public void setModified(boolean modified) throws RemoteException {
+		this.modified = modified | passwordModified;
+
+		// enable/disable the "Save" button
+		// sharp.checkSaveState();
+	}
+
+	public boolean isModified() throws RemoteException {
+		return modified;
+	}
+
+	public Number getNumericValueAt(int row, int col) throws RemoteException {
+		Cell cell = getCellAt(row, col);
+		if (cell != null) {
+			int type = cell.getType();
+			if (type == Cell.FORMULA) {
+				Object value = cell.getValue();
+				Formula form = cell.getFormula();
+
+				// if need recalc
+				if (form.needsRecalc()) {
+					try {
+						value = Formula.evaluate(spreadsheetTableModelInterface, row, col);
+						cell.setValue(value);
+					} catch (ParserException e) {
+						cell.setValue(e);
+						value = e;
+					}
+				}
+
+				if (value instanceof ParserException) {
+					throw (ParserException) value;
+				} else {
+					return (Number) cell.getValue();
+				}
+			} else if (type == Cell.NUMBER) {
+				return (Number) cell.getValue();
+			} else {
+				return new Float(0);
+			}
+		} else {
+			// a string or null
+			// return new Float(0);
+			throw new ParserException("#REFS?");
+		}
+	}
+
+	public void setPasswordModified(boolean modified) throws RemoteException {
+		passwordModified = modified;
+		setModified(this.modified);
+
+		// enable/disable the "Save" button
+	}
+
+	public Cell[][] getRange(CellRange range) throws RemoteException {
+		// get dimensions of range
+		Cell[][] board = new Cell[range.getHeight()][range.getWidth()];
+
+		// copy the cells
+		for (int i = range.getStartRow(); i <= range.getEndRow(); i++) {
+			for (int j = range.getStartCol(); j <= range.getEndCol(); j++) {
+				// translate to coordinates in copy array
+				int x = i - range.getStartRow();
+				int y = j - range.getStartCol();
+
+				Cell field = getCellAt(i, j);
+
+				
+				 // if it is a formula copy both the value and the formula The
+				 // value will be useful with a paste by value
+				 
+				if (field.isFormula()) {
+					try {
+						Formula form = new Formula(field.getFormula(), i, j);
+						board[x][y] = new Cell(form, field.getValue(), null);
+					} catch (ParserException e) {
+						
+						 // if there is a problem, always treat formula as a
+						 // string.
+
+						board[x][y] = new Cell(field.getFormula().toString());
+					}
+				} else {
+					// value cells have immutable objects
+					board[x][y] = new Cell(field.getValue());
+				}
+			}
+		}
+
+		return board;
+	}
+
 	static public CellPoint getSize(String input, char delim) {
 		BufferedReader in = new BufferedReader(new StringReader(input));
 		String line;
@@ -1870,5 +2044,647 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		return new CellPoint(rowcount, colcount);
 	}
 
+	public boolean isEmptyCell(int row, int col) throws RemoteException {
+		return getCellAt(row, col).getValue().equals("");
+	}
 
+	public Object getValueAt(int aRow, int aColumn) throws RemoteException {
+		return getCellAt(aRow, aColumn);
+	}
+
+	public static Object fieldParser(String input) {
+		if (input == null) {
+			return new String("");
+		}
+
+		// try making it a number 
+		try {
+			return new Float(input);
+		} catch (NumberFormatException e) {
+			// all else fails treat as string
+			return input;
+		}
+	}
+
+	public void setCellAt(Object input, int aRow, int aColumn) throws RemoteException {
+		Cell temp = getCellAt(aRow, aColumn);
+		System.out.println("TTTTT>"+temp);
+
+		// if for some reason value out of bounds ignore 
+		if (temp != null) {
+			
+			System.out.println("input="+input);
+			// always remove references old formula referred to
+			removeRefs(aRow, aColumn);
+
+			// insert new formula
+			if (input instanceof Formula) {
+				temp.setFormula((Formula) input);
+
+				if (isLoop(new CellPoint(aRow, aColumn))) {
+					ParserException loop = new ParserException("#LOOP?");
+					Formula form2 = new Formula(input.toString(), aRow, aColumn, loop);
+					setCellAt(form2, aRow, aColumn);
+					getCellAt(aRow, aColumn).setValue(loop);
+					updateRefs(aRow, aColumn);
+
+					return;
+				} else {
+					addRefs(aRow, aColumn);
+					recalculate(aRow, aColumn);
+					updateRefs(aRow, aColumn);
+				}
+			} else {
+				// treat as normal data cell
+				temp.setData(input);
+				updateRefs(aRow, aColumn);
+			}
+		}
+
+	}
+
+	public void setRange(CellRange range, Object[][] data) throws RemoteException {
+		// Loop through the paste range 
+		for (int i = range.getStartRow(); i <= range.getEndRow(); i++) {
+			for (int j = range.getStartCol(); j <= range.getEndCol(); j++) {
+				// calculate the corresponding entry in data array
+				int x = i - range.getStartRow();
+				int y = j - range.getStartCol();
+
+				// place data entry at that place
+				doSetValueAt(data[x][y], i, j);
+			}
+		}
+	}
+
+	public void setRange(CellRange range, Cell[][] data, boolean byValue) throws RemoteException {
+
+		 // there may be formula so if byValue is true paste evaluated formula
+		 // value into the range as a data cell
+
+		if (byValue) {
+			for (int i = range.getStartRow(); i <= range.getEndRow(); i++) {
+				for (int j = range.getStartCol(); j <= range.getEndCol(); j++) {
+					int x = i - range.getStartRow();
+					int y = j - range.getStartCol();
+
+					// get only value of a formula cell not formula
+					doSetValueAt(data[x][y].getValue(), i, j);
+				}
+			}
+		} else {
+			for (int i = range.getStartRow(); i <= range.getEndRow(); i++) {
+				for (int j = range.getStartCol(); j <= range.getEndCol(); j++) {
+					int x = i - range.getStartRow();
+					int y = j - range.getStartCol();
+					Cell info = data[x][y];
+
+					// paste new formula to recalculate
+					if (info.isFormula()) {
+						doSetValueAt(info.getFormula(), i, j);
+					} else {
+						doSetValueAt(info.getValue(), i, j);
+					}
+				}
+			}
+		}
+	}
+
+	public void setValueAt(Object aValue, int aRow, int aColumn) throws RemoteException {
+		System.out.println("row:"+aRow+" col:"+aColumn+" aValue:"+aValue);
+		
+		CellPoint point = new CellPoint(aRow, aColumn);
+	//	history.add(new CellRange(point, point));
+		doSetValueAt(aValue, aRow, aColumn);
+		
+		
+
+	}
+
+	public void addRefs(int aRow, int aColumn) throws RemoteException {
+		if (isFormula(aRow, aColumn)) {
+			Formula temp = getCellAt(aRow, aColumn).getFormula();
+			TreeSet list = temp.getDependency();
+
+
+			 // use formula's dependency to find cells that need to notify it if
+			 // their values change
+
+			Iterator it = list.iterator();
+			CellPoint thisRef = new CellPoint(aRow, aColumn);
+			while (it.hasNext()) {
+				CellPoint update = (CellPoint) it.next();
+				Cell field = getCellAt(update.getRow(), update.getCol());
+
+				// test of cell found was out of bounds
+				if (field != null) {
+					field.addRef(thisRef);
+				}
+			}
+		}
+	}
+
+	public void clearRange(CellRange range) throws RemoteException {
+		fill(range, null);
+	}
+
+	public void doSetValueAt(Object aValue, int aRow, int aColumn) throws RemoteException {
+
+		if (aValue == null) {
+			aValue = "";
+		}
+
+		if (aValue instanceof String) {
+			String input = (String) aValue;
+
+			// try making it a formula 
+			if (input.startsWith("=")) {
+				Formula form = null;
+
+				// create formula and its value and put in a cell
+				try {
+					form = new Formula(input.substring(1), aRow, aColumn);
+					setCellAt(form, aRow, aColumn);
+				} catch (ParserException e) {
+					// no parsing
+					form = new Formula(input.substring(1), aRow, aColumn, e);
+					setCellAt(form, aRow, aColumn);
+					getCellAt(aRow, aColumn).setValue(e);
+				}
+			} else {
+				// try {
+				// Integer idata = new Integer(input);
+				// setCellAt(idata, aRow, aColumn);
+				// }
+
+				
+				 // if it begins with "=" but invalid just treat as a string
+				 
+
+				// catch (NumberFormatException e) {
+				// try making it a number 
+				try {
+					Float data = new Float(input);
+					setCellAt(data, aRow, aColumn);
+				}
+
+				
+				 // if it begins with "=" but invalid just treat as a string
+				 
+				catch (NumberFormatException e2) {
+					// all else fails treat as string 
+					setCellAt(aValue, aRow, aColumn);
+				}
+
+				// }
+			}
+		} else {
+			
+			 // it is an object, assume it is exactly what should the cell be set
+			 // to
+			 
+			if (aValue instanceof Formula) {
+				try {
+					Formula form = (Formula) aValue;
+					setCellAt(new Formula(form, aRow, aColumn), aRow, aColumn);
+				} catch (ParserException e) {
+					// errorMessage(e.toString());
+					Formula form2 = (Formula) aValue;
+					form2 = new Formula(form2.toString(), aRow, aColumn, e);
+					setCellAt(form2, aRow, aColumn);
+					getCellAt(aRow, aColumn).setValue(e);
+				}
+			} else {
+				setCellAt(aValue, aRow, aColumn);
+			}
+		}
+	}
+
+	public CellPoint look(CellPoint begin, Object goal, boolean matchCase, boolean matchCell) throws RemoteException {
+		int startRow = begin.getRow();
+		int startCol = begin.getCol();
+
+		if ((goal instanceof String) && !matchCase && matchCell) {
+			String objective = (String) goal;
+			for (int i = startCol; i < m.getColumnCount(); i++) {
+				if (objective.equalsIgnoreCase(getCellAt(startRow, i).getValue().toString())) {
+					return new CellPoint(startRow, i);
+				}
+			}
+
+			for (int i = startRow + 1; i < m.getRowCount(); i++) {
+				for (int j = 1; j < m.getColumnCount(); j++) {
+					if (objective.equalsIgnoreCase(getCellAt(i, j).getValue().toString())) {
+						return new CellPoint(i, j);
+					}
+				}
+			}
+
+			return null;
+		} else {
+			if ((goal instanceof String) && !matchCell) {
+				String objective = (String) goal;
+				for (int i = startCol; i < m.getColumnCount(); i++) {
+					String test = getCellAt(startRow, i).getValue().toString();
+
+					if (!matchCase) {
+						objective = objective.toUpperCase();
+						test = test.toUpperCase();
+					}
+					for (int k = 0; k < test.length(); k++) {
+						if (test.startsWith(objective, k)) {
+							return new CellPoint(startRow, i);
+						}
+					}
+				}
+
+				for (int i = startRow + 1; i < m.getRowCount(); i++) {
+					for (int j = 1; j < m.getColumnCount(); j++) {
+						String test = getCellAt(i, j).getValue().toString();
+						if (!matchCase) {
+							objective = objective.toUpperCase();
+							test = test.toUpperCase();
+						}
+						for (int k = 0; k < test.length(); k++) {
+							if (test.startsWith(objective, k)) {
+								return new CellPoint(i, j);
+							}
+						}
+					}
+				}
+
+				return null;
+			} else {
+				for (int i = startCol; i < m.getColumnCount(); i++) {
+					if (goal.equals(getCellAt(startRow, i).getValue())) {
+						return new CellPoint(startRow, i);
+					}
+				}
+
+				for (int i = startRow + 1; i < m.getRowCount(); i++) {
+					for (int j = 1; j < m.getColumnCount(); j++) {
+						if (goal.equals(getCellAt(i, j).getValue())) {
+							return new CellPoint(i, j);
+						}
+					}
+				}
+
+				return null;
+			}
+		}
+	}
+
+	public void recalculate(int aRow, int aColumn) throws RemoteException {
+		if (isFormula(aRow, aColumn)) {
+			try {
+				Debug.println("recalculate");
+
+				Number eVal = Formula.evaluate(spreadsheetTableModelInterface, aRow, aColumn);
+
+				// we set the value here
+				getCellAt(aRow, aColumn).setValue(eVal);
+			} catch (ParserException e) {
+				// set value as the appropriate error message
+				getCellAt(aRow, aColumn).setValue(e);
+			}
+		}
+	}
+
+	public void recalculate(CellPoint x) throws RemoteException {
+		recalculate(x.getRow(), x.getCol());
+	}
+
+	public void recalculateAll() throws RemoteException {
+		for (int i = 1; i < m.getRowCount(); i++)
+			for (int j = 1; j < m.getColumnCount(); j++) {
+				addRefs(i, j);
+				recalculate(i, j);
+			}
+	}
+
+	public void removeRefs(int aRow, int aColumn) throws RemoteException {
+		if (isFormula(aRow, aColumn)) {
+			Formula temp = getCellAt(aRow, aColumn).getFormula();
+			TreeSet list = temp.getDependency();
+
+			
+			 // use formula dependcy list to go to cells that it references then
+			 // remove its entry form their reference list
+
+			Iterator it = list.iterator();
+			CellPoint thisRef = new CellPoint(aRow, aColumn);
+			while (it.hasNext()) {
+				CellPoint update = (CellPoint) it.next();
+				Cell field = getCellAt(update.getRow(), update.getCol());
+
+				if (field != null) {
+					field.removeRef(thisRef);
+				}
+			}
+		}
+	}
+
+	public String toString(CellRange range, boolean byValue, char delim) throws RemoteException {
+		StringBuffer sbf = new StringBuffer();
+
+		for (int i = range.getStartRow(); i <= range.getEndRow(); i++) {
+			for (int j = range.getStartCol(); j <= range.getEndCol(); j++) {
+				if (byValue) {
+					sbf.append(getValueAt(i, j));
+				} else {
+					Cell cell = getCellAt(i, j);
+
+					// if cell is not empty
+					if (cell != null) {
+						sbf.append(cell.toString());
+					}
+				}
+
+				if (j < range.getEndCol()) {
+					sbf.append(delim);
+				}
+			}
+			sbf.append("\n");
+		}
+
+		String text = sbf.toString();
+
+		// Debug.println(text);
+		return text;
+	}
+
+	public String toString(char delim) throws RemoteException {
+		return toString(new CellRange(0, getRowCount() - 1, 0, getColumnCount() - 1), false, delim);
+	}
+
+	public String toString(boolean noParam) throws RemoteException {
+		return toString(new CellRange(0, getRowCount() - 1, 0, getColumnCount() - 1), false, '\t');
+	}
+
+	public void updateRefs(int aRow, int aColumn) throws RemoteException {
+		Cell temp = getCellAt(aRow, aColumn);
+		if (temp == null) {
+			return;
+		}
+
+		TreeSet set = getRefs(aRow, aColumn);
+
+		// mark it as "needsRecalc";
+		Iterator it = set.iterator();
+		while (it.hasNext()) {
+			CellPoint point = (CellPoint) it.next();
+			Formula formula = getCellAt(point.getRow(), point.getCol()).getFormula();
+
+			formula.setNeedsRecalc(true);
+
+			// make sure JTable refreshes it
+			// fireTableCellUpdated(point.getRow(), point.getCol());
+		}
+
+		// recalculate
+		it = set.iterator();
+		while (it.hasNext()) {
+			CellPoint point = (CellPoint) it.next();
+			try {
+				getNumericValueAt(point.getRow(), point.getCol());
+			} catch (ParserException e) {
+			}
+
+			// make sure JTable refreshes it
+			m.fireTableCellUpdated(point.getRow(), point.getCol());
+		}
+
+		// make sure to tell JTable things have changed
+		m.fireTableCellUpdated(aRow, aColumn);
+	}
+
+	public void fill(CellRange range, Object input) throws RemoteException {
+		// loop through range
+		for (int i = range.getStartRow(); i <= range.getEndRow(); i++) {
+			for (int j = range.getStartCol(); j <= range.getEndCol(); j++) {
+				doSetValueAt(input, i, j);
+			}
+		}
+	}
+
+	public void fillRange(CellRange range, String s) throws RemoteException {
+		fill(range, fieldParser(s, range.getminCorner()));
+	}
+
+	void setHistory(History h) {
+		history = h;
+	}
+
+	void fromString(String text, char delim, int rowOff, int colOff, CellRange range) {
+		try {
+			BufferedReader in = new BufferedReader(new StringReader(text));
+			String line;
+			int row = range.getStartRow();
+
+			while (row <= range.getEndRow()) {
+				line = in.readLine();
+
+				int index;
+				int prev = 0;
+
+				// set col to startCol before each loop
+				int col = range.getStartCol();
+				String value;
+
+				while (col <= range.getEndCol()) {
+					index = line.indexOf(delim, prev);
+					if (index >= 0) {
+						value = line.substring(prev, index);
+					} else {
+						value = line.substring(prev);
+					}
+
+					if (value.startsWith("=")) {
+						// need to fix relative address
+						value = Formula.fixRelAddr(value.substring(1), rowOff, colOff);
+						if (value == null) {
+							value = new String("=$REFS$0");
+						} else {
+							value = "=" + value;
+						}
+					}
+
+					doSetValueAt(value, row, col);
+
+					prev = index + 1;
+
+					// increment column number
+					col++;
+
+					if (index == -1) {
+						break;
+					}
+				}
+
+				row++;
+			}
+		} catch (Exception e) {
+		}
+	}
+
+	private static Object fieldParser(String input, CellPoint c) {
+		if (input == null) {
+			return new String("");
+		}
+
+		int row = c.getRow();
+		int col = c.getCol();
+
+		// try making it a formula 
+		if (input.startsWith("=")) {
+			Formula form = null;
+
+			// create formula and its value and put in a cell
+			try {
+				return new Formula(input.substring(1), row, col);
+			} catch (ParserException e) {
+				// no parsing
+				return new Formula(input.substring(1), row, col, e);
+			}
+		} else {
+			// try making it a number 
+			try {
+				// try {
+				// return new Integer(input);
+				// }
+				// catch (NumberFormatException e) {
+				return new Float(input);
+
+				// }
+			} catch (NumberFormatException e2) {
+				// all else fails treat as string 
+				return input;
+			}
+		}
+	}
+
+	private Cell getCriteria(int interest, int i, boolean isRow) throws RemoteException {
+		if (isRow) {
+			return getCellAt(interest, i);
+		} else {
+			return getCellAt(i, interest);
+		}
+	}
+
+	private boolean isLoop(CellPoint cell) throws RemoteException {
+		return isLoop(cell, new TreeSet());
+	}
+
+	private boolean isLoop(CellPoint cell, TreeSet set) throws RemoteException {
+		if (set.contains(cell)) {
+			return true;
+		}
+
+		Cell objCell = getCellAt(cell.getRow(), cell.getCol());
+		if (objCell == null) {
+			return false;
+		}
+
+		Formula formula = objCell.getFormula();
+		if (formula == null) {
+			return false;
+		}
+
+		set.add(cell);
+
+		Iterator it = formula.getDependency().iterator();
+		while (it.hasNext()) {
+			CellPoint newCell = (CellPoint) it.next();
+			boolean ret = isLoop(newCell, set);
+			if (ret) {
+				return true;
+			}
+		}
+
+		set.remove(cell);
+
+		return false;
+	}
+
+	private TreeSet getRefs(int row, int col) throws RemoteException {
+		TreeSet set = new TreeSet();
+		getRefs(row, col, set);
+
+		return set;
+	}
+
+	private void getRefs(int row, int col, TreeSet set) throws RemoteException {
+		Cell cell = getCellAt(row, col);
+		if ((cell == null) || !cell.hasRefs()) {
+			return;
+		}
+
+		Iterator it = cell.getRefs().iterator();
+		while (it.hasNext()) {
+			CellPoint point = (CellPoint) it.next();
+			set.add(point);
+			getRefs(point.getRow(), point.getCol(), set);
+		}
+	}
+
+	private int compareLines(int primary, boolean isRow, boolean ascending, int i, int j) throws RemoteException {
+		Cell x = getCriteria(primary, i, isRow);
+		Cell y = getCriteria(primary, j, isRow);
+
+		return x.compare(y, ascending);
+	}
+
+	private int[] internalSort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker) throws RemoteException {
+		// initialize index array
+		int[] index;
+		if (isRow) {
+			index = new int[area.getWidth()];
+			for (int i = 0; i < index.length; i++) {
+				index[i] = i + area.getStartCol();
+			}
+		} else {
+			index = new int[area.getHeight()];
+			for (int i = 0; i < index.length; i++) {
+				index[i] = i + area.getStartRow();
+			}
+		}
+
+		int j;
+
+		for (int p = 1; p < index.length; p++) {
+			int tmp = index[p];
+
+			for (j = p; ((j > 0) && rightOrder(primary, second, isRow, tmp, index[j - 1], ascend, tiebreaker)); j--) {
+				index[j] = index[j - 1];
+			}
+			index[j] = tmp;
+		}
+
+		return index;
+	}
+
+	private boolean rightOrder(int primary, int second, boolean isRow, int i, int j, boolean ascend, boolean order) throws RemoteException {
+		// compare by first criteria
+		int result = compareLines(primary, isRow, ascend, i, j);
+
+		// if equal, use second as tiebreaker
+		if (result == 0) {
+			result = compareLines(second, isRow, order, i, j);
+
+			if (order) {
+				return (result < 0);
+			} else {
+				return (result > 0);
+			}
+
+			// otherwise just return results from primary criteria
+		} else {
+			if (ascend) {
+				return (result < 0);
+			} else {
+				return (result > 0);
+			}
+		}
+	}
+	*/
 }

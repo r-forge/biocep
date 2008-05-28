@@ -440,8 +440,11 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 	
-	public void broadcastGraphics() throws RemoteException {
-		
+	public void broadcastGraphics() throws RemoteException {	
+	}
+	
+	public boolean hasRCollaborationListeners() throws RemoteException {
+		return false;
 	}
 
 }

@@ -10,7 +10,7 @@ package net.java.dev.jspreadsheet;
  * @author Ricky Chin
  * @version $Revision: 1.1 $
  */
-class SpreadsheetClipboard
+public class SpreadsheetClipboard
 {
    /** the range of Cells from which the clipboard was created
     */
@@ -28,7 +28,7 @@ class SpreadsheetClipboard
     *       lower right hand corner coordinates
     * @param isCut true only if this is a cut
     */
-   public SpreadsheetClipboard(SpreadsheetTableModel model, CellRange range, boolean isCut)
+   public SpreadsheetClipboard(SpreadsheetTableModelClipboardInterface model, CellRange range, boolean isCut)
    {
       text = model.toString(range, false, '\t');
 
@@ -47,7 +47,7 @@ class SpreadsheetClipboard
     * @return the actual cell range; null if it's beyond the table range
     * @param model the SharpTableModel you are using
     */
-   public CellRange getRange(SpreadsheetTableModel model, CellPoint corner)
+   public CellRange getRange(SpreadsheetTableModelClipboardInterface model, CellPoint corner)
    {
       //limit to paste region
       int rowLimit = model.getRowCount() - 1;
@@ -92,7 +92,7 @@ class SpreadsheetClipboard
     * @param table SharpTable model you are pasting to
     * @param corner coordinate of upper left hand corner
     */
-   public void paste(SpreadsheetTableModel table, CellPoint corner)
+   public void paste(SpreadsheetTableModelClipboardInterface table, CellPoint corner)
    {
       //if region to paste to is out of bounds
       CellRange range = getRange(table, corner);
@@ -104,7 +104,7 @@ class SpreadsheetClipboard
     * @param table SharpTableModel you are pasting to
     * @param range range you are pasting to
     */
-   public void paste(SpreadsheetTableModel table, CellRange range)
+   public void paste(SpreadsheetTableModelClipboardInterface table, CellRange range)
    {
       //if region to paste to is out of bounds
       if (range != null)

@@ -5,7 +5,7 @@ package net.java.dev.jspreadsheet;
  * This is a class used for print out debug information and can be
  * easily turned on/off.
  */
-class Debug
+public class Debug
 {
    static private boolean debug = false;
 
@@ -14,12 +14,12 @@ class Debug
       debug = flag;
    }
 
-   static boolean isDebug()
+   public static boolean isDebug()
    {
       return debug;
    }
 
-   static void println(Object s)
+   public static void println(Object s)
    {
       if (debug)
       {

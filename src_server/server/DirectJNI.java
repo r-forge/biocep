@@ -2668,6 +2668,7 @@ public class DirectJNI {
 		Vector<RCollaborationListener> _rCollaborationListeners = new Vector<RCollaborationListener>();
 
 		public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
+			System.out.println("addRCollaborationListener");			
 			_rCollaborationListeners.add(collaborationListener);
 		}
 
@@ -2677,6 +2678,10 @@ public class DirectJNI {
 
 		public void removeAllRCollaborationListeners() throws RemoteException {
 			_rCollaborationListeners.removeAllElements();
+		}
+		
+		public boolean hasRCollaborationListeners() throws RemoteException {
+			return _rCollaborationListeners.size()>0;
 		}
 
 		public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
@@ -2692,15 +2697,27 @@ public class DirectJNI {
 		}
 
 		public void chat(String sourceSession, String message) throws RemoteException {
+			Vector<RCollaborationListener> removeList=new Vector<RCollaborationListener>();
 			for (int i = 0; i < _rCollaborationListeners.size(); ++i) {
-				_rCollaborationListeners.elementAt(i).chat(sourceSession, message);
+				try {
+					_rCollaborationListeners.elementAt(i).chat(sourceSession, message);
+				} catch (Exception e) {
+					removeList.add(_rCollaborationListeners.elementAt(i));
+				}
 			}
+			_rCollaborationListeners.removeAll(removeList);
 		}
 
 		public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
+			Vector<RCollaborationListener> removeList=new Vector<RCollaborationListener>();
 			for (int i = 0; i < _rCollaborationListeners.size(); ++i) {
-				_rCollaborationListeners.elementAt(i).consolePrint(sourceSession, expression, result);
+				try {
+					_rCollaborationListeners.elementAt(i).consolePrint(sourceSession, expression, result);
+				} catch (Exception e) {
+					removeList.add(_rCollaborationListeners.elementAt(i));
+				}
 			}
+			_rCollaborationListeners.removeAll(removeList);
 		}
 
 		public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
@@ -2710,7 +2727,7 @@ public class DirectJNI {
 		public GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException {
 			return null;
 		}
-
+		
 		public String[] listPackages() throws RemoteException {
 			return ((String[]) DirectJNI._packageNames.toArray(new String[0]));
 		}

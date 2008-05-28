@@ -8,7 +8,7 @@ package net.java.dev.jspreadsheet;
  * @author Hua Zhong <huaz@cs.columbia.edu>
  * @version $Revision: 1.1 $
  */
-class ParserException extends Exception
+public class ParserException extends java.rmi.RemoteException
 {
    private String msg;
    private boolean quiet;

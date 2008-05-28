@@ -1,5 +1,6 @@
 package net.java.dev.jspreadsheet;
 
+import java.io.Serializable;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +29,7 @@ import org.bioconductor.packages.rservices.RLogical;
  * @author Hua Zhong <huaz@cs.columbia.edu>
  * @version $Revision: 1.1 $
  */
-public class Formula
+public class Formula implements Serializable
 {
    // a static hash table for function handlers
    static private HashMap funcTable;
@@ -63,7 +64,7 @@ public class Formula
     * @param col the current column where the forluma is stored
     * @param e a ParserException
     */
-   Formula(String input, int row, int col, ParserException e)
+   public Formula(String input, int row, int col, ParserException e)
    {
       //formulaString = input.toUpperCase();
 	   formulaString = input;
@@ -83,7 +84,7 @@ public class Formula
     * @exception ParserException
     * @see #toPostfix
     */
-   Formula(String input, int row, int col) throws ParserException
+   public Formula(String input, int row, int col) throws ParserException
    {
       this.col = col;
       this.row = row;
@@ -122,7 +123,7 @@ public class Formula
     * @exception ParserException
     * @see #fixRelAddr
     */
-   Formula(Formula formula, int row, int col) throws ParserException
+   public Formula(Formula formula, int row, int col) throws ParserException
    {
       this.col = col;
       this.row = row;
@@ -219,7 +220,7 @@ public class Formula
     * @return the result as a Float object
     * @exception ParserException
     */
-   public static Number evaluate(SpreadsheetTableModel table, int row, int col) throws ParserException
+   public static Number evaluate(SpreadsheetTableModelInterface table, int row, int col) throws ParserException
    {
       if (Debug.isDebug())
       {
@@ -250,7 +251,7 @@ public class Formula
     * @return the result as a Float object
     * @exception ParserException
     */
-   static public Number evaluate(SpreadsheetTableModel table, LinkedList postfix, int row, int col) throws ParserException
+   static public Number evaluate(SpreadsheetTableModelInterface table, LinkedList postfix, int row, int col) throws ParserException
    {
       try
       {
@@ -858,7 +859,7 @@ public class Formula
     * @return the value as a Float object
     * @exception ParserException
     */
-   static private Number evalFunction(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   static private Number evalFunction(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       String funcName = node.getData();
 
@@ -870,7 +871,7 @@ public class Formula
     	  
     	  boolean isRFunc=false;
     	  try {
-    		  isRFunc=((RLogical)table.getRGui().getR().getObject("exists('"+funcName+"')")).getValue()[0];
+    		  isRFunc=((RLogical)table.getR().getObject("exists('"+funcName+"')")).getValue()[0];
     	  } catch (Exception e) {
     		  e.printStackTrace();
     	  }
@@ -896,7 +897,7 @@ public class Formula
     * @return the result as a Float object
     * @exception ParserException
     */
-   private Number evaluate(SpreadsheetTableModel table) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table) throws ParserException
    {
       // if the formula is bad, directly returns the error
       if (isBad())

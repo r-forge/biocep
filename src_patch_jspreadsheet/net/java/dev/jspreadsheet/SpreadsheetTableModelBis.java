@@ -1,10 +1,8 @@
 package net.java.dev.jspreadsheet;
 
 import graphics.rmi.RGui;
-
 import java.io.BufferedReader;
 import java.io.StringReader;
-
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -17,6 +15,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
 import remoting.RServices;
 
 /**
@@ -32,7 +31,7 @@ import remoting.RServices;
  * @author Ricky Chin
  * @version $Revision: 1.1 $
  */
-public class SpreadsheetTableModel extends AbstractTableModel implements SpreadsheetTableModelInterface, SpreadsheetTableModelClipboardInterface {
+public class SpreadsheetTableModelBis extends AbstractTableModel implements SpreadsheetTableModelInterface, SpreadsheetTableModelClipboardInterface {
 
 	/**
 	 * holds the history information for the table
@@ -63,7 +62,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param sharp
 	 *            the gui component to tie it to
 	 */
-	public SpreadsheetTableModel(JTable table, RGui rgui) {
+	public SpreadsheetTableModelBis(JTable table, RGui rgui) {
 		super();
 
 		// initialize state to unmodified and file to untitled
@@ -89,11 +88,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param numColumns
 	 *            total number of columns including column header
 	 */
-	public SpreadsheetTableModel(JTable table, AbstractTableModel m, RGui rgui) {
-		for (int row = 0; row < m.getRowCount(); row++)
-			for (int col = 0; col < m.getColumnCount(); col++)
-				// we initialize it here
-				m.setValueAt(new Cell(""), row, col);
+	public SpreadsheetTableModelBis(JTable table, AbstractTableModel m, RGui rgui) {
 		// initialize state to unmodified and file to untitled
 		modified = false;
 		this.table = table;
@@ -117,32 +112,15 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		return m.getRowCount();
 	}
 
-	/**
-	 * This constructor is convenience for loading objects that are already in
-	 * an array. It fills the SharpTableModel with the objects in the array
-	 * making Object[0][0] be in cell A1, etc.
-	 * <P>
-	 * <B>Note: </B> This constructor does not assume that objects are of the
-	 * desired form. It will parse a string to see if it is a number or formula.
-	 * 
-	 * @param sharp
-	 *            gui object to associate with this SharpTableModel
-	 * @param data
-	 *            the array of objects to place into the SharpTableModel
-	 */
-
-	/*
-	 * public SpreadsheetTableModel(JTable table, Object[][] data, RGui rgui) {
-	 * this(table, data.length, data[0].length, rgui);
-	 *  // load the data for (int i = 0; i < data.length; i++) { for (int j = 0;
-	 * j < data[i].length; j++) { doSetValueAt(data[i][j], i, j); } }
-	 *  // initialize state to unmodified and file to untitled modified = false; }
-	 */
+	
+	
+	
 
 	// History getHistory()
 	// {
 	// return history;
 	// }
+	
 	/**
 	 * This method gets the whole Cell object located at the these coordinates.
 	 * This method avoids the casting required when using getValueAt.
@@ -398,25 +376,6 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		return board;
 	}
 
-	/**
-	 * set table selection to the range sel
-	 * 
-	 * @param sel
-	 *            the range to be selected
-	 */
-	public void setSelection(CellRange sel) {
-		// validate sel
-		int maxRow = table.getRowCount() - 1;
-		int maxCol = table.getColumnCount() - 1;
-
-		int startRow = sel.getStartRow();
-		int startCol = sel.getStartCol();
-		int endRow = sel.getEndRow();
-		int endCol = sel.getEndCol();
-
-		table.setColumnSelectionInterval(Math.min(startCol, maxCol), Math.min(endCol, maxCol));
-		table.setRowSelectionInterval(Math.min(startRow, maxRow), Math.min(endRow, maxRow));
-	}
 
 
 	/**
@@ -453,7 +412,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @return the Cell
 	 */
 	public Object getValueAt(int aRow, int aColumn) {
-		return getCellAt(aRow, aColumn);
+		return m.getValueAt(aRow, aColumn);
 	}
 
 	/**
@@ -619,9 +578,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 *            column coordinate
 	 */
 	public void setValueAt(Object aValue, int aRow, int aColumn) {
-		CellPoint point = new CellPoint(aRow, aColumn);
-		history.add(new CellRange(point, point));
-		doSetValueAt(aValue, aRow, aColumn);
+		m.setValueAt(aValue, aRow, aColumn);
 	}
 
 	/**
@@ -1139,10 +1096,10 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			throw new RuntimeException("not yet implemented");
 		}
 	}
-
+	
 	/**
 	 * This method sorts an arbitrary range in the table.
-	 *
+	 * 
 	 * @param area
 	 *            range to sort
 	 * @param primary
@@ -1184,13 +1141,13 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		 * index array, we paste the entries in data back in the sorted order.
 		 */
 
-		//do index sorting
+		// do index sorting
 		int[] indices = internalSort(area, primary, second, isRow, ascend, tiebreaker);
 
-		//paste accordingly
+		// paste accordingly
 		if (isRow) {
 			for (int i = area.getStartCol(); i <= area.getEndCol(); i++) {
-				//point to paste at
+				// point to paste at
 				CellPoint point = new CellPoint(area.getStartRow(), i);
 
 				int y = i - area.getStartCol();
@@ -1198,7 +1155,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			}
 		} else {
 			for (int i = area.getStartRow(); i <= area.getEndRow(); i++) {
-				//point to paste at
+				// point to paste at
 				CellPoint point = new CellPoint(i, area.getStartCol());
 
 				int y = i - area.getStartRow();
@@ -1333,7 +1290,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	}
 
 	protected void fillRange(CellRange range, String s) {
-		fill(range, SpreadsheetTableModel.fieldParser(s, range.getminCorner()));
+		fill(range, fieldParser(s, range.getminCorner()));
 	}
 
 	/**
@@ -1632,7 +1589,6 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		   }
 	   }
 
-
 	/**
 	 * This is a helper function that compares rows or columns
 	 * 
@@ -1733,6 +1689,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			throw new RuntimeException("Not Yet Implemented");
 		}
 	}
+
 	/**
 	 * Determines if cells are in the wrong order Used only as helper method for
 	 * sort.
@@ -1761,6 +1718,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		}
 	}
 
+	
 	public int findColumn(String columnName) {
 		return m.findColumn(columnName);
 	}
@@ -1821,54 +1779,26 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	public RGui getRGui() {
 		return rgui;
 	}
+
 	
 	/**
-	 * From a string input determine how many rows/columns it requires for the
-	 * table - it corresponds to the number of newlines and tabs.
+	 * set table selection to the range sel
 	 * 
-	 * @param input
-	 *            the string to analyze
+	 * @param sel
+	 *            the range to be selected
 	 */
-	static public CellPoint getSize(String input, char delim) {
-		BufferedReader in = new BufferedReader(new StringReader(input));
-		String line;
-		int rowcount = 0;
-		int colcount = 0;
+	public void setSelection(CellRange sel) {
+		// validate sel
+		int maxRow = table.getRowCount() - 1;
+		int maxCol = table.getColumnCount() - 1;
 
-		try {
-			while ((line = in.readLine()) != null) {
-				rowcount++;
+		int startRow = sel.getStartRow();
+		int startCol = sel.getStartCol();
+		int endRow = sel.getEndRow();
+		int endCol = sel.getEndCol();
 
-				// initialize new tokenizer on line with tab delimiter.
-				// tokenizer = new StringTokenizer(line, "\t");
-				int index;
-				int prev = 0;
-
-				// set col to 1 before each loop
-				int col = 0;
-
-				while (true) {
-					index = line.indexOf(delim, prev);
-					prev = index + 1;
-
-					// increment column number
-					col++;
-
-					if (index == -1) {
-						break;
-					}
-				}
-
-				if (colcount < col) {
-					colcount = col;
-				}
-			}
-		} catch (Exception e) {
-			return null;
-		}
-
-		return new CellPoint(rowcount, colcount);
+		table.setColumnSelectionInterval(Math.min(startCol, maxCol), Math.min(endCol, maxCol));
+		table.setRowSelectionInterval(Math.min(startRow, maxRow), Math.min(endRow, maxRow));
 	}
-
 
 }

@@ -1,5 +1,6 @@
 package net.java.dev.jspreadsheet;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -15,7 +16,7 @@ import java.util.LinkedList;
  * @author Hua Zhong
  * @version $Revision: 1.1 $
  */
-abstract class Function
+abstract class Function implements Serializable
 {
    static private ParserException exception = new ParserException("#PARAM?");
 
@@ -67,7 +68,7 @@ abstract class Function
     * @param row the int row coordinate
     * @exception ParserException
     */
-   public abstract Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException;
+   public abstract Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException;
 
    /**
     * Whether this function requires parameters.
@@ -107,7 +108,7 @@ abstract class Function
     * @param row the int row coordinate
     * @return the float number
     */
-   static protected float getSingleParameter(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   static protected float getSingleParameter(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       //	Node param = node.getNextParam();
       LinkedList params = node.getParams();
@@ -151,7 +152,7 @@ class FunctionSum extends Function
       return "SUM(value1,value2,...)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       // requires parameters
       checkParamsExist(node);
@@ -213,7 +214,7 @@ class FunctionCount extends Function
       return "COUNT(value1,value2,...)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       // requires parameters
       checkParamsExist(node);
@@ -268,7 +269,7 @@ class FunctionAverage extends Function
       return "AVERAGE(value1,value2,...)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       float sum = (new FunctionSum()).evaluate(table, node, row, col).floatValue();
       float nCells = (new FunctionCount()).evaluate(table, node, row, col).floatValue();
@@ -296,7 +297,7 @@ class FunctionMedian extends Function
       return "MEDIAN(value1,value2,...)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       // requires parameters
       checkParamsExist(node);
@@ -382,7 +383,7 @@ class FunctionMin extends Function
       return "MIN(value1,value2,...)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       // requires parameters
       checkParamsExist(node);
@@ -446,7 +447,7 @@ class FunctionMax extends Function
       return "MAX(value1,value2,...)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       // requires parameters
       checkParamsExist(node);
@@ -507,7 +508,7 @@ class FunctionRange extends Function
       return "RANGE(value1,value2,...)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       float max = Formula.getFuncHandler("MAX").evaluate(table, node, row, col).floatValue();
       float min = Formula.getFuncHandler("MIN").evaluate(table, node, row, col).floatValue();
@@ -536,7 +537,7 @@ class FunctionAbs extends Function
       return "ABS(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.abs(getSingleParameter(table, node, row, col)));
    }
@@ -562,7 +563,7 @@ class FunctionSin extends Function
       return "SIN(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.sin(getSingleParameter(table, node, row, col)));
    }
@@ -588,7 +589,7 @@ class FunctionCos extends Function
       return "COS(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.cos(getSingleParameter(table, node, row, col)));
    }
@@ -614,7 +615,7 @@ class FunctionTan extends Function
       return "TAN(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.tan(getSingleParameter(table, node, row, col)));
    }
@@ -640,7 +641,7 @@ class FunctionAsin extends Function
       return "ASIN(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.asin(getSingleParameter(table, node, row, col)));
    }
@@ -666,7 +667,7 @@ class FunctionAcos extends Function
       return "ACOS(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.acos(getSingleParameter(table, node, row, col)));
    }
@@ -692,7 +693,7 @@ class FunctionAtan extends Function
       return "ATAN(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.atan(getSingleParameter(table, node, row, col)));
    }
@@ -715,7 +716,7 @@ class FunctionInt extends Function
       return "INT(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float((int) getSingleParameter(table, node, row, col));
    }
@@ -740,7 +741,7 @@ class FunctionRound extends Function
       return "ROUND(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.round(getSingleParameter(table, node, row, col)));
    }
@@ -765,7 +766,7 @@ class FunctionSqrt extends Function
       return "SQRT(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.sqrt(getSingleParameter(table, node, row, col)));
    }
@@ -790,7 +791,7 @@ class FunctionLog extends Function
       return "LOG(value)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       return new Float(Math.log(getSingleParameter(table, node, row, col)));
    }
@@ -816,7 +817,7 @@ class FunctionMeandev extends Function
    }
 
    // mean deviation is the average of absolute deviations from the mean value
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       float dev = 0;
       float nCells = (new FunctionCount()).evaluate(table, node, row, col).floatValue();
@@ -873,7 +874,7 @@ class FunctionStddev extends Function
       return "STDDEV(value1,value2,...)";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       float dev = 0;
       float nCells = (new FunctionCount()).evaluate(table, node, row, col).floatValue();
@@ -932,7 +933,7 @@ class FunctionPI extends Function
       return "PI()";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       // no parameters allowed
       if (node.getParams().size() != 0)
@@ -969,7 +970,7 @@ class FunctionE extends Function
       return "E()";
    }
 
-   public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException
+   public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException
    {
       // no parameters allowed
       if (node.getParams().size() != 0)
