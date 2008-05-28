@@ -92,7 +92,9 @@ public interface RServices extends ManagedServant {
 
 	public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException;	
 	public void removeRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException;	
-	public void removeAllRCollaborationListeners() throws RemoteException;	
+	public void removeAllRCollaborationListeners() throws RemoteException;
+	public boolean hasRCollaborationListeners() throws RemoteException;
+	
 	
 	public void addRHelpListener(RHelpListener helpListener) throws RemoteException;	
 	public void removeRHelpListener(RHelpListener helpListener) throws RemoteException;	
@@ -114,6 +116,7 @@ public interface RServices extends ManagedServant {
 	
 	public GDDevice[] listDevices() throws java.rmi.RemoteException;
 
+	
 	public String[] getWorkingDirectoryFileNames() throws java.rmi.RemoteException;
 
 	public FileDescription[] getWorkingDirectoryFileDescriptions() throws java.rmi.RemoteException;

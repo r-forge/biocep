@@ -26,7 +26,7 @@ class FunctionR extends Function {
 		return rFucntionName + "(value1,value2,...)";
 	}
 
-	public Number evaluate(SpreadsheetTableModel table, Node node, int row, int col) throws ParserException {
+	public Number evaluate(SpreadsheetTableModelInterface table, Node node, int row, int col) throws ParserException {
 		// requires parameters
 		checkParamsExist(node);
 
@@ -89,11 +89,11 @@ class FunctionR extends Function {
 
 		try {
 			System.out.println("v="+v);
-			RObject result= (v!=null?(RObject)table.getRGui().getR().call(rFucntionName, v):(RObject)table.getRGui().getR().call(rFucntionName)) ;
+			RObject result= (v!=null?(RObject)table.getR().call(rFucntionName, v):(RObject)table.getR().call(rFucntionName)) ;
 			System.out.println("result="+result);
 			
-			if (table.getRGui().getR().getStatus().contains("ERROR")) {
-				JOptionPane.showMessageDialog(table.getTable(), table.getRGui().getR().getStatus());
+			if (table.getR().getStatus().contains("ERROR")) {
+				JOptionPane.showMessageDialog(null, table.getR().getStatus());
 				return null;
 			}
 			
@@ -102,11 +102,11 @@ class FunctionR extends Function {
 			} else if (result instanceof RInteger && ((RInteger)result).getValue().length==1 ) {
 				return new Integer(((RInteger)result).getValue()[0]);
 			} else  {
-				JOptionPane.showMessageDialog(table.getTable(), "Bad result Format :"+result.toString() );
+				JOptionPane.showMessageDialog(null, "Bad result Format :"+result.toString() );
 				return null;
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(table.getTable(), e.getMessage());
+			JOptionPane.showMessageDialog(null, e.getMessage());
 			return null;
 		}
 

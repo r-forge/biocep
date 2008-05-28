@@ -24,11 +24,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.ConnectException;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Vector;
-
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
@@ -48,8 +45,8 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
  */
 public class RHttpProxy {
 
-	public static final String FAKE_SESSION = "11111111111111111111111111111111";
-
+	public static final String FAKE_SESSION = getRandomSession();
+	
 	static HttpClient mainHttpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
 
 	public static String logOn(String url, String sessionId, String login, String pwd, HashMap<String, Object> options) throws TunnelingException {
@@ -420,17 +417,13 @@ public class RHttpProxy {
 										for (int j=0; j<rCallbacks.size();++j) {
 											rCallbacks.elementAt(j).notify(parameters);
 										}
-									} else if (action.getActionName().equals("chat")) {
-										
+									} else if (action.getActionName().equals("chat")) {										
 										String sourceSession= (String)action.getAttributes().get("sourceSession");
 										String message= (String)action.getAttributes().get("message");											
 										for (int j=0; j<rCollaborationListeners.size();++j) {
 											rCollaborationListeners.elementAt(j).chat(sourceSession, message);
 										}
 									} else if (action.getActionName().equals("consolePrint")) {
-										
-										System.out.println("77777>"+action.getAttributes());
-										
 										String sourceSession= (String)action.getAttributes().get("sourceSession");
 										String expression= (String)action.getAttributes().get("expression");
 										String result= (String)action.getAttributes().get("result");
@@ -500,5 +493,14 @@ public class RHttpProxy {
 
 		return (RServices) proxy;
 	}
+	
+	private static String getRandomSession() {
+		String HexDigits[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" };
+		Random rnd=new Random(System.currentTimeMillis());
+		String result="";
+		for (int i=0; i<32;++i) result+=HexDigits[rnd.nextInt(16)];
+		return result;
+	}
+
 
 }

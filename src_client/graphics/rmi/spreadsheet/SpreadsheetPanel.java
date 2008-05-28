@@ -17,6 +17,10 @@
  */
 package graphics.rmi.spreadsheet;
 
+import model.ModelUtils;
+import model.SpreadsheetModelRemoteImpl;
+import model.TableModelRemote;
+import model.TableModelRemoteImpl;
 import net.infonode.docking.View;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
@@ -24,6 +28,7 @@ import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.Formula;
 import net.java.dev.jspreadsheet.JSpreadsheet;
 import net.java.dev.jspreadsheet.Node;
+import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
 import net.java.dev.jspreadsheet.SpreadsheetSelectionEvent;
 import net.java.dev.jspreadsheet.SpreadsheetSelectionListener;
 import net.java.dev.jspreadsheet.SpreadsheetTableModel;
@@ -84,6 +89,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.UndoManager;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RComplex;
@@ -97,6 +104,8 @@ import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
 import remoting.RServices;
+
+
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 import static javax.swing.JOptionPane.*;
@@ -106,56 +115,80 @@ import static javax.swing.JOptionPane.*;
  */
 public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
+	public static SpreadsheetModelRemoteImpl tmri;
 	public static void main(String[] args) throws Exception {
 
-		JFrame f = new JFrame();
+		tmri=new SpreadsheetModelRemoteImpl(3,2);
+		
+		TableModelRemote modelRemote=(TableModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
+		AbstractTableModel abstractTableModel1=ModelUtils.getTableModelWrapper(modelRemote);
+		AbstractTableModel abstractTableModel2=ModelUtils.getTableModelWrapper(modelRemote);
+		
+		JFrame f = new JFrame("F1");
 		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(new SpreadsheetPanel(300, 40, new RGui() {
-
-			public ConsoleLogger getConsoleLogger() {
-				return null;
-			}
-
-			public View createView(Component panel, String title) {
-				return null;
-			}
-
-			public RServices getR() {
-				return null;
-			}
-
-			public ReentrantLock getRLock() {
-				return null;
-			}
-
-			public void setCurrentDevice(GDDevice device) {
-
-			}
-
-			public GDDevice getCurrentDevice() {
-				return null;
-			}
-
-			public Component getRootComponent() {
-				return null;
-			}
-
-			public JGDPanelPop getCurrentJGPanelPop() {
-				return null;
-			}
-			
-			public GroovyInterpreter getGroovyInterpreter() {
-				return null;
-			}
-			
-			public void upload(File localFile, String fileName) throws Exception {
-				
-			}
-		}), BorderLayout.CENTER);
+		f.getContentPane().add(new SpreadsheetPanel(abstractTableModel1, rgui ), BorderLayout.CENTER);
 		f.setSize(new Dimension(800, 800));
 		f.pack();
 		f.setVisible(true);
+		
+		
+		
+		
+		JFrame f2 = new JFrame("F2");
+		f2.getContentPane().setLayout(new BorderLayout());
+		f2.getContentPane().add(new SpreadsheetPanel(abstractTableModel2, rgui ), BorderLayout.CENTER);
+		f2.setSize(new Dimension(800, 800));
+		f2.pack();
+		f2.setVisible(true);
+		
+		
+		
+		
+		
 	}
+	
+	static RGui rgui=new RGui() {
+
+		public ConsoleLogger getConsoleLogger() {
+			return null;
+		}
+
+		public View createView(Component panel, String title) {
+			return null;
+		}
+
+		public RServices getR() {
+			return null;
+		}
+
+		public ReentrantLock getRLock() {
+			return null;
+		}
+
+		public void setCurrentDevice(GDDevice device) {
+
+		}
+
+		public GDDevice getCurrentDevice() {
+			return null;
+		}
+
+		public Component getRootComponent() {
+			return null;
+		}
+
+		public JGDPanelPop getCurrentJGPanelPop() {
+			return null;
+		}
+		
+		public GroovyInterpreter getGroovyInterpreter() {
+			return null;
+		}
+		
+		public void upload(File localFile, String fileName) throws Exception {
+			
+		}
+	};
 
 	public static final int R_NUMERIC = 0;
 	public static final int R_CHARACTER = 1;
@@ -230,10 +263,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private boolean matchCase;
 	private boolean matchCell;
 
-	public SpreadsheetPanel(int nrows, int ncols, RGui rgui) {
+	public SpreadsheetPanel(AbstractTableModel m, RGui rgui) {
 		super();
 		_rgui = rgui;
-		ss = new JSpreadsheet(nrows, ncols, rgui);
+		ss = new JSpreadsheet(m, rgui);
 
 		ss.addUndoableEditListener(um);
 		ss.addSelectionListener(sl);
@@ -1317,7 +1350,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			ddialog.setVisible(true);
 			if (ddialog.getDimensions() != null) {
 				try {
-					_rgui.createView(new SpreadsheetPanel((int) ddialog.getDimensions().getHeight(), (int) ddialog.getDimensions().getWidth(), _rgui),
+					_rgui.createView(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getDimensions().getHeight(), (int) ddialog.getDimensions().getWidth()), _rgui),
 							"Spreadsheet View");
 				} catch (Exception ex) {
 					ex.printStackTrace();

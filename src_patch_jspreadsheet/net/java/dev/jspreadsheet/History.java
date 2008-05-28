@@ -27,14 +27,14 @@ import javax.swing.undo.UndoableEditSupport;
  * @author Hua Zhong <huaz@cs.columbia.edu>
  * @version $Revision: 1.1 $
  */
-class History extends UndoableEditSupport
+public class History extends UndoableEditSupport
 {
    final public static int UNCHANGED = 0;
    final public static int INSERTROW = 1;
    final public static int INSERTCOLUMN = 2;
    final public static int REMOVEROW = 3;
    final public static int REMOVECOLUMN = 4;
-   private SpreadsheetTableModel model;
+   private SpreadsheetTableModelClipboardInterface model;
 
    /**
     * Constructor:
@@ -117,7 +117,7 @@ class History extends UndoableEditSupport
       //sharp.checkUndoRedoState();
    }
 
-   void setTableModel(SpreadsheetTableModel model)
+   void setTableModel(SpreadsheetTableModelClipboardInterface model)
    {
       this.model = model;
    }

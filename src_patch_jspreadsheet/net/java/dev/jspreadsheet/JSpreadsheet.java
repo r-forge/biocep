@@ -26,7 +26,9 @@ import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.UndoableEditListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -44,7 +46,7 @@ public class JSpreadsheet extends JComponent
    private Clipboard system = Toolkit.getDefaultToolkit().getSystemClipboard();
    private History history = new History();
    private JTable table;
-   private SpreadsheetTableModel tableModel;
+   private SpreadsheetTableModelBis tableModel;
    /** Holds value of property columnWidth. */
    private int columnWidth;
    
@@ -53,12 +55,12 @@ public class JSpreadsheet extends JComponent
     * @param columns The number of columns in the spreadsheet
     * @param rows The number of rows in the spreadsheet
     */
-   public JSpreadsheet(int rows, int columns, RGui rgui)
+   public JSpreadsheet(AbstractTableModel m, RGui rgui)
    {
       table = createTable();
 
       setLayout(new BorderLayout());
-      newTableModel(rows, columns, rgui);
+      newTableModel(m, rgui);
 
       // clobber resizing of all columns
       table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -141,7 +143,7 @@ public class JSpreadsheet extends JComponent
    /** Set the contents of the spreadsheet. The input string should contain a
     * spreadsheet in comma-delimited format.
     */
-   public void setContents(String text)
+   public void setContents_(String text)
    {
       setContents(text, ',');
    }
@@ -160,7 +162,7 @@ public class JSpreadsheet extends JComponent
 
       // create new table model
       CellPoint size = SpreadsheetTableModel.getSize(text, delim);
-      newTableModel(size.getRow(), size.getCol(), tableModel.getRGui());
+      newTableModel(new DefaultTableModel(size.getRow(), size.getCol()), tableModel.getRGui());
       tableModel.fromString(text, delim, 0, 0, new CellRange(0, size.getRow(), 0, size.getCol()));
    }
 
@@ -667,9 +669,10 @@ public class JSpreadsheet extends JComponent
     * @param rows number of rows in new table model
     * @param cols number of columns in new table model
     */
-   private void newTableModel(int rows, int cols, RGui rgui)
+   private void newTableModel(AbstractTableModel m, RGui rgui)
    {
-      tableModel = new SpreadsheetTableModel(table, rows, cols,rgui);
+	   
+      tableModel = new SpreadsheetTableModelBis(table,m,rgui);
       table.setModel(tableModel);
 
       //      applyBaseColumnWidth();

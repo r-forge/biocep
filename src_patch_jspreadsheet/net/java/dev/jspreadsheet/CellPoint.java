@@ -1,5 +1,7 @@
 package net.java.dev.jspreadsheet;
 
+import java.io.Serializable;
+
 
 /** This is an object the represents the coordinates of a cell
  * in the table. It is used as entries in the reference list
@@ -11,7 +13,7 @@ package net.java.dev.jspreadsheet;
  * @author Ricky Chin
  * @version $Revision: 1.1 $
  */
-public class CellPoint implements Comparable
+public class CellPoint implements Comparable, Serializable
 {
    /** This holds column coordinate of a cell */
    private int col;

@@ -1,5 +1,6 @@
 package net.java.dev.jspreadsheet;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
 
@@ -24,7 +25,7 @@ import java.util.LinkedList;
  * @author Hua Zhong <huaz@cs.columbia.edu>
  * @version $Revision: 1.1 $
  */
-public class Node
+public class Node implements Serializable
 {
    public static final int DEFAULT = 0; // reserved
    public static final int REL_ADDR = 1; // LETTERS+numbers: A1

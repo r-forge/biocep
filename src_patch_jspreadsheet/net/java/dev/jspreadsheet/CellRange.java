@@ -10,7 +10,7 @@ package net.java.dev.jspreadsheet;
  * @author Ricky Chin
  * @version $Id: CellRange.java,v 1.1 2004/07/26 02:06:06 tonyj Exp $
  */
-public class CellRange
+public class CellRange implements java.io.Serializable
 {
    /** Lower right corner of range */
    CellPoint maxCorner;

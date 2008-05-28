@@ -1,5 +1,6 @@
 package net.java.dev.jspreadsheet;
 
+import java.io.Serializable;
 import java.util.TreeSet;
 
 
@@ -13,7 +14,7 @@ import java.util.TreeSet;
  * @author Ricky Chin
  * @version $Revision: 1.1 $
  */
-public class Cell
+public class Cell implements Serializable
 {
    /** The integer code that denotes the cell holds text. */
    public static final int TEXT = 0;
@@ -40,7 +41,7 @@ public class Cell
    private TreeSet refs;
 
    /** Creates an empty cell */
-   Cell()
+   public Cell()
    {
       value = null;
       expression = null;
@@ -55,7 +56,7 @@ public class Cell
     * <b>Warning:</b> Do not use this with Formulas
     * @param datum the value of the "label" cell (not a Formula)
     */
-   Cell(Object datum)
+   public Cell(Object datum)
    {
       value = datum;
       expression = null;
@@ -70,7 +71,7 @@ public class Cell
     * @param datum the value of the cell (text or number)
     * @param reference the list of cells that reference this one (can be null)
     */
-   Cell(Object datum, TreeSet reference)
+   public Cell(Object datum, TreeSet reference)
    {
       value = datum;
       expression = null;
@@ -84,7 +85,7 @@ public class Cell
     * @param eVal the evaluated value of the formula (thing)
     * @param reference the list of cells that reference this one (can be null)
     */
-   Cell(Formula thing, Object eVal, TreeSet reference)
+   public Cell(Formula thing, Object eVal, TreeSet reference)
    {
       expression = thing;
       value = eVal;
@@ -186,7 +187,7 @@ public class Cell
     *
     * @param datum the new value of cell
     */
-   void setData(Object datum)
+   public void setData(Object datum)
    {
       value = datum;
       expression = null;
@@ -200,7 +201,7 @@ public class Cell
     *
     * @param form the internal representation of formula to set this cell to
     */
-   void setFormula(Formula form)
+   public void setFormula(Formula form)
    {
       expression = form;
    }
@@ -212,7 +213,7 @@ public class Cell
     * @return the formula (string and internal object) or null if does not
     * exist
     */
-   Formula getFormula()
+   public Formula getFormula()
    {
       return expression;
    }
@@ -224,7 +225,7 @@ public class Cell
     *
     * @return all cells that reference this cell
     */
-   TreeSet getRefs()
+   public TreeSet getRefs()
    {
       return refs;
    }
@@ -234,7 +235,7 @@ public class Cell
     *
     * @param datum the object to set the value of cell to
     */
-   void setValue(Object datum)
+   public void setValue(Object datum)
    {
       value = datum;
    }
@@ -245,7 +246,7 @@ public class Cell
     * @param reference a new cell that references this one that needs to be
     * added to the reference list
     */
-   void addRef(CellPoint reference)
+   public void addRef(CellPoint reference)
    {
       //	System.out.println("add ref "+reference+" to ("+this);
       if (refs == null)
@@ -266,7 +267,7 @@ public class Cell
     * @param x cell to compare this to
     * @return -1 if this < x, 0 if this = x, 1 if this > x
     */
-   int compare(Cell x, boolean ascending)
+   public int compare(Cell x, boolean ascending)
    {
       //if this is blank which is lowest value
       if (this.value.equals(""))
@@ -361,7 +362,7 @@ public class Cell
     *
     * @return true only if there are cells that reference this one
     */
-   boolean hasRefs()
+   public boolean hasRefs()
    {
       return ((refs != null) && !refs.isEmpty());
    }
@@ -371,7 +372,7 @@ public class Cell
     *
     * @param reference the cell to be removed from the reference list
     */
-   void removeRef(CellPoint reference)
+   public void removeRef(CellPoint reference)
    {
       //	System.out.println("remove ref "+reference+" from "+this);
       if (refs != null)
@@ -383,4 +384,6 @@ public class Cell
          }
       }
    }
+   
+   
 }

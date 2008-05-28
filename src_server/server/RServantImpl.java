@@ -416,8 +416,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public void removeAllRCallbacks() throws RemoteException {
 		DirectJNI.getInstance().getRServices().removeAllRCallbacks();
 	}
-	
-	
+		
 	public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
 		DirectJNI.getInstance().getRServices().addRCollaborationListener(collaborationListener);
 	}
@@ -429,7 +428,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public void removeAllRCollaborationListeners() throws RemoteException {
 		DirectJNI.getInstance().getRServices().removeAllRCollaborationListeners();
 	}
-
+	
+	public boolean hasRCollaborationListeners() throws RemoteException {
+		return DirectJNI.getInstance().getRServices().hasRCollaborationListeners();
+	}
+	
 	public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
 		DirectJNI.getInstance().getRServices().addRHelpListener(helpListener);
 	}	
