@@ -1118,6 +1118,9 @@
 				<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
 				<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
 				
+				
+				<jvmarg value="-Djava.rmi.server.codebase=file://${windows.root.slash}${CORE_JAR} file://${windows.root.slash}${demo.mappingjar}"/>
+				
 			</java>
 		</target>
 

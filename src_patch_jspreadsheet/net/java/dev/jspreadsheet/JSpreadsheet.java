@@ -1,7 +1,6 @@
 package net.java.dev.jspreadsheet;
 
 import graphics.rmi.RGui;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -14,7 +13,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.Action;
-
 import javax.swing.CellEditor;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -25,7 +23,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.UndoableEditListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -33,8 +30,6 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-
-import com.sun.org.apache.bcel.internal.generic.INSTANCEOF;
 
 import model.SpreadsheetAbstractTableModel;
 
@@ -48,7 +43,7 @@ public class JSpreadsheet extends JComponent
 {
    private CellPoint copyPoint = new CellPoint(0, 0);
    private Clipboard system = Toolkit.getDefaultToolkit().getSystemClipboard();
-   private History history = new History();
+   
    private JTable table;
    private SpreadsheetTableModelClipboardInterface tableModel;
    /** Holds value of property columnWidth. */
@@ -283,13 +278,6 @@ public class JSpreadsheet extends JComponent
       listenerList.add(SpreadsheetSelectionListener.class, l);
    }
 
-   /** Add a listener for undoable events
-    * @param l The listener to add
-    */
-   public void addUndoableEditListener(UndoableEditListener l)
-   {
-      history.addUndoableEditListener(l);
-   }
 
    /** Clears a range of cells
     * @param range The range of cells to be deleted
@@ -301,7 +289,7 @@ public class JSpreadsheet extends JComponent
       {
          editor.cancelCellEditing();
       }
-      history.add(range);
+      tableModel.historyAdd(range);
       Debug.println("Clear");
       tableModel.clearRange(range);
    }
@@ -329,7 +317,7 @@ public class JSpreadsheet extends JComponent
       {
          editor.cancelCellEditing();
       }
-      history.add(range);
+      tableModel.historyAdd(range);
       tableModel.fillRange(range, value);
    }
 
@@ -369,12 +357,12 @@ public class JSpreadsheet extends JComponent
       CellRange range = insertRemoveRange(byRow, start, end);
       if (byRow)
       {
-         history.add(range, History.INSERTROW);
+         tableModel.historyAdd(range, History.INSERTROW);
          tableModel.insertRow(range);
       }
       else
       {
-         history.add(range, History.INSERTCOLUMN);
+    	  tableModel.historyAdd(range, History.INSERTCOLUMN);
          tableModel.insertColumn(range);
       }
    }
@@ -415,7 +403,7 @@ public class JSpreadsheet extends JComponent
             CellRange affectedRange = new CellRange(startRow, endRow, startCol, endCol);
 
             // add to history
-            history.add(affectedRange);
+            tableModel.historyAdd(affectedRange);
             tableModel.fromString(trstring, '\t', rowOff, colOff, affectedRange);
             tableModel.setSelection(affectedRange);
          }
@@ -442,7 +430,7 @@ public class JSpreadsheet extends JComponent
       CellRange range = insertRemoveRange(byRow, start, end);
       if (byRow)
       {
-         history.add(range, History.REMOVEROW);
+    	  tableModel.historyAdd(range, History.REMOVEROW);
          Debug.println(range);
          tableModel.removeRow(range);
          Debug.println("Delete row range " + range);
@@ -450,7 +438,7 @@ public class JSpreadsheet extends JComponent
       else
       {
          Debug.println("Delete column range " + range);
-         history.add(range, History.REMOVECOLUMN);
+         tableModel.historyAdd(range, History.REMOVECOLUMN);
          Debug.println(range);
          tableModel.removeColumn(range);
       }
@@ -462,14 +450,6 @@ public class JSpreadsheet extends JComponent
    public void removeSelectionListener(SpreadsheetSelectionListener l)
    {
       listenerList.remove(SpreadsheetSelectionListener.class, l);
-   }
-
-   /** Remove a listener for undo events
-    * @param l The listener to remove
-    */
-   public void removeUndoableEditListener(UndoableEditListener l)
-   {
-      history.removeUndoableEditListener(l);
    }
 
    /** Sort a range of cells
@@ -487,7 +467,7 @@ public class JSpreadsheet extends JComponent
       {
          editor.cancelCellEditing();
       }
-      history.add(range);
+      tableModel.historyAdd(range);
       if (second < 0)
       {
          second = first;
@@ -621,7 +601,7 @@ public class JSpreadsheet extends JComponent
 
          if (isCut)
          {
-            history.add(range);
+        	 tableModel.historyAdd(range);
          }
 
          // now do the copy operation
@@ -679,31 +659,15 @@ public class JSpreadsheet extends JComponent
       applyColumnWidth(columnWidth);
 
       // update history with new one
-      history.setTableModel(tableModel);
-      tableModel.setHistory(history);
+      //history.setTableModel(tableModel);
+      //tableModel.setHistory(history);
 
       // inform tableModel that it's unmodified now
       tableModel.setPasswordModified(false);
       tableModel.setModified(false);
    }
 
-   private void newTableModel(SpreadsheetAbstractTableModel m, RGui rgui)
-   {
-	   
-      tableModel = new SpreadsheetTableModelBis(table,m,rgui);
-      table.setModel((AbstractTableModel)tableModel);
 
-      //      applyBaseColumnWidth();
-      applyColumnWidth(columnWidth);
-
-      // update history with new one
-      history.setTableModel(tableModel);
-      tableModel.setHistory(history);
-
-      // inform tableModel that it's unmodified now
-      tableModel.setPasswordModified(false);
-      tableModel.setModified(false);
-   }
    public Action[] getActions()
    {
       return new Action[0]; // Fixme
@@ -846,4 +810,20 @@ public class JSpreadsheet extends JComponent
 	   return table;
    }
    
+   
+	public void undo() {
+		tableModel.undo();
+	}
+	
+	public boolean canUndo() {
+		return tableModel.canUndo();
+	}
+	
+	public void redo() {
+		tableModel.redo();
+	}
+	
+	public boolean canRedo() {
+		return tableModel.canRedo();
+	}
 }

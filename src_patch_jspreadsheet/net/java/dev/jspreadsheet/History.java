@@ -39,8 +39,9 @@ public class History extends UndoableEditSupport
    /**
     * Constructor:
     */
-   History()
+   public History(SpreadsheetTableModelClipboardInterface model)
    {
+	   this.model=model;
    }
 
    /**

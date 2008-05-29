@@ -21,11 +21,18 @@ public interface SpreadsheetTableModelClipboardInterface {
 	public boolean isModified();
 	public boolean isDeletionSafe(CellRange range, boolean byRow);
 	public void setPasswordModified(boolean modified);
-	void setHistory(History h);
 	public void sort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker);
 	public Cell getCellAt(int aRow, int aColumn);
 	public String toString(char delim); 
 	
+	public void historyAdd(CellRange range);
+	public void historyAdd(SpreadsheetClipboard clip);
+	public void historyAdd(CellRange range, int type);
 	
+	public void undo();
+	public boolean canUndo();	
+	public void redo();
+	public boolean canRedo();	
+		
 }
 	

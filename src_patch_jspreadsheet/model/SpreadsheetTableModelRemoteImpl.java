@@ -6,7 +6,10 @@ import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.Vector;
+
+import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.undo.UndoManager;
 
 import remoting.RServices;
 import server.DirectJNI;
@@ -26,11 +29,33 @@ import net.java.dev.jspreadsheet.SpreadsheetTableModelInterface;
 public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implements SpreadsheetTableModelRemote, SpreadsheetTableModelInterface,
 		SpreadsheetTableModelClipboardInterface {
 
+	private History history;
+	private UndoManager um = new UndoManager() {
+		public void undoableEditHappened(UndoableEditEvent e) {
+			super.undoableEditHappened(e);
+			//undo.update();
+			//redo.update();
+		}
+
+		public void undo() {
+			super.undo();
+			//undo.update();
+			//redo.update();
+		}
+
+		public void redo() {
+			super.redo();
+			//undo.update();
+			//redo.update();
+		}
+	};
 	public SpreadsheetTableModelRemoteImpl(int rowCount, int colCount) throws RemoteException {
 		super(new SpreadsheetDefaultTableModel(rowCount, colCount));
 		for (int row = 0; row < m.getRowCount(); row++)
 			for (int col = 0; col < m.getColumnCount(); col++)
 				m.setValueAt(new Cell(""), row, col);
+		history=new History(this);
+		history.addUndoableEditListener(um);
 	}
 
 	public SpreadsheetTableModelRemoteImpl(Object[] columnName, int rowCount) throws RemoteException {
@@ -41,7 +66,6 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 		super(data, columnName);
 	}
 
-	private History history;
 	private boolean modified = false;
 	private boolean passwordModified;
 
@@ -563,7 +587,7 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 	public void setValueAt(Object aValue, int aRow, int aColumn) {
 		CellPoint point = new CellPoint(aRow, aColumn);
 		// IMPORTANT !!!!!!!!!!!!!!!!!!!
-		// history.add(new CellRange(point, point));
+		history.add(new CellRange(point, point));
 		doSetValueAt(aValue, aRow, aColumn);
 	}
 
@@ -1697,12 +1721,45 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 		}
 	}
 
+	
+	
+	public void historyAdd(CellRange range) {
+		history.add(range);
+	}
+	public void historyAdd(SpreadsheetClipboard clip) {
+		history.add(clip);
+	}
+	public void historyAdd(CellRange range, int type) {
+		history.add(range,type);
+	}
+	
+	public void undo() {
+		um.undo();
+	}
+	
+	public boolean canUndo() {
+		return um.canUndo();
+	}
+	
+	public boolean canRedo() {
+		return um.canRedo();
+	}
+	
+	public void redo() {
+		um.redo();
+	}
+	
 	public RServices getR() {
 		return DirectJNI.getInstance().getRServices();
 	}
 
+	
+	
+	//IMPORTANT !!!!!!!!!!!  should notify
 	public void setSelection(CellRange sel) {
-		throw new RuntimeException("Shouldn't be called");
+		//throw new RuntimeException("Shouldn't be called");
 	}
+	
+	
 
 }
