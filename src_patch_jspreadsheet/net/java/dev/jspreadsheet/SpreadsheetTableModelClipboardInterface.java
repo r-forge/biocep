@@ -1,5 +1,10 @@
 package net.java.dev.jspreadsheet;
 
+import java.rmi.RemoteException;
+
+import model.SpreadsheetListener;
+import model.SpreadsheetListenerRemote;
+
 public interface SpreadsheetTableModelClipboardInterface {	
 	
 	public int getColumnCount();
@@ -33,6 +38,11 @@ public interface SpreadsheetTableModelClipboardInterface {
 	public boolean canUndo();	
 	public void redo();
 	public boolean canRedo();	
+	
+	public void addSpreadsheetListener(SpreadsheetListener l);
+	public void removeSpreadsheetListener(SpreadsheetListener l);
+	public void removeAllSpreadsheetListeners();
+	
 		
 }
 	

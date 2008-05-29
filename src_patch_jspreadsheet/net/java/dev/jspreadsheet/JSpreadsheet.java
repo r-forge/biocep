@@ -12,6 +12,8 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.rmi.RemoteException;
+
 import javax.swing.Action;
 import javax.swing.CellEditor;
 import javax.swing.JComponent;
@@ -32,6 +34,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import model.SpreadsheetAbstractTableModel;
+import model.SpreadsheetListener;
+import model.SpreadsheetListenerRemote;
 
 
 /**
@@ -826,4 +830,9 @@ public class JSpreadsheet extends JComponent
 	public boolean canRedo() {
 		return tableModel.canRedo();
 	}
+	
+	public void addSpreadsheetListener(SpreadsheetListener l) throws RemoteException {
+		tableModel.addSpreadsheetListener(l);		
+	}
+	
 }

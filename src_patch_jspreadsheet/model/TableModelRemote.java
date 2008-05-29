@@ -9,16 +9,16 @@ import javax.swing.event.TableModelListener;
 
 public interface TableModelRemote extends Remote {		
 	public void addTableModelListener(TableModelListenerRemote l) throws RemoteException;
-	public Class<?> getColumnClass(int columnIndex) throws RemoteException;
+	public void removeTableModelListener(TableModelListenerRemote l)throws RemoteException;
+	
+	public Class<?> getColumnClass(int columnIndex) throws RemoteException;	
 	public int getColumnCount() throws RemoteException;
 	public String getColumnName(int columnIndex) throws RemoteException; 
 	public int getRowCount() throws RemoteException;
 	public Object getValueAt(int rowIndex, int columnIndex) throws RemoteException;
-	public boolean isCellEditable(int rowIndex, int columnIndex) throws RemoteException ;
-	public void removeTableModelListener(TableModelListenerRemote l)throws RemoteException;
+	public boolean isCellEditable(int rowIndex, int columnIndex) throws RemoteException ;	
 	public void setValueAt(Object value, int rowIndex, int columnIndex) throws RemoteException;
-	
-	
+
 	public int findColumn(String columnName) throws RemoteException;	
 	public void fireTableCellUpdated(int row, int column) throws RemoteException;
 	public void fireTableChanged(TableModelEvent e) throws RemoteException;

@@ -20,6 +20,9 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.undo.UndoManager;
 
+import model.SpreadsheetListener;
+import model.SpreadsheetListenerRemote;
+
 import remoting.RServices;
 
 /**
@@ -44,20 +47,20 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	private UndoManager um = new UndoManager() {
 		public void undoableEditHappened(UndoableEditEvent e) {
 			super.undoableEditHappened(e);
-			//undo.update();
-			//redo.update();
+			updateUndoAction();
+			updateRedoAction();
 		}
 
 		public void undo() {
 			super.undo();
-			//undo.update();
-			//redo.update();
+			updateUndoAction();
+			updateRedoAction();
 		}
 
 		public void redo() {
 			super.redo();
-			//undo.update();
-			//redo.update();
+			updateUndoAction();
+			updateRedoAction();
 		}
 	};
 	/** Stores file name of current document */
@@ -422,27 +425,6 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 
 		return board;
 	}
-
-	/**
-	 * set table selection to the range sel
-	 * 
-	 * @param sel
-	 *            the range to be selected
-	 */
-	public void setSelection(CellRange sel) {
-		// validate sel
-		int maxRow = table.getRowCount() - 1;
-		int maxCol = table.getColumnCount() - 1;
-
-		int startRow = sel.getStartRow();
-		int startCol = sel.getStartCol();
-		int endRow = sel.getEndRow();
-		int endCol = sel.getEndCol();
-
-		table.setColumnSelectionInterval(Math.min(startCol, maxCol), Math.min(endCol, maxCol));
-		table.setRowSelectionInterval(Math.min(startRow, maxRow), Math.min(endRow, maxRow));
-	}
-
 
 	/**
 	 * Determines if a cell is empty
@@ -1942,5 +1924,54 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		um.redo();
 	}
 
+	private void updateUndoAction() {
+		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).updateUndoAction();
+			} catch (Exception e) {
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	private void updateRedoAction() {
+		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).updateRedoAction();
+			} catch (Exception e) {
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	public void setSelection(CellRange sel) {
+		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).setSelection(sel);
+			} catch (Exception e) {
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	Vector<SpreadsheetListener> _spreadsheetListeners=new Vector<SpreadsheetListener>();
+	
+	public void addSpreadsheetListener(SpreadsheetListener l){
+		_spreadsheetListeners.add(l);
+		
+	}
+	public void removeSpreadsheetListener(SpreadsheetListener l){
+		_spreadsheetListeners.remove(l);		
+	}
+	
+	public void removeAllSpreadsheetListeners(){
+		_spreadsheetListeners.removeAllElements();		
+	}
 
 }

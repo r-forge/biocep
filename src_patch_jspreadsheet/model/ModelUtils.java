@@ -1,5 +1,7 @@
 package model;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.EventListener;
 import java.util.HashMap;
 
@@ -270,6 +272,16 @@ public class ModelUtils {
 					throw new RuntimeException(e);
 				}							
 			}
+			
+			public void removeTableModelListener(TableModelListener l) {
+				try {					
+					TableModelListenerRemoteImpl tableModelListenerRemoteImpl=modelListenerHashMap.get(l);
+					spreadsheetModelRemote.removeTableModelListener(tableModelListenerRemoteImpl);
+					modelListenerHashMap.remove(l);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}	
+			}
 
 			public Class<?> getColumnClass(int columnIndex) {
 				try {					
@@ -319,15 +331,6 @@ public class ModelUtils {
 				}
 			}
 
-			public void removeTableModelListener(TableModelListener l) {
-				try {					
-					TableModelListenerRemoteImpl tableModelListenerRemoteImpl=modelListenerHashMap.get(l);
-					spreadsheetModelRemote.removeTableModelListener(tableModelListenerRemoteImpl);
-					modelListenerHashMap.remove(l);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}	
-			}
 
 			public void setValueAt(Object value, int rowIndex, int columnIndex) {
 				try {					
@@ -627,6 +630,48 @@ public class ModelUtils {
 				}
 			}
 			
+			private HashMap<SpreadsheetListener, SpreadsheetListenerRemoteImpl> spreadsheetListenerHashMap=new HashMap<SpreadsheetListener, SpreadsheetListenerRemoteImpl>(); 
+			@Override
+			public void addSpreadsheetListener(SpreadsheetListener l) {
+			
+				try {					
+					 	
+					SpreadsheetListenerRemoteImpl spreadsheetListenerRemoteImpl=new SpreadsheetListenerRemoteImpl(l);
+					spreadsheetModelRemote.addSpreadsheetListener((SpreadsheetListenerRemote)java.rmi.server.RemoteObject.toStub(spreadsheetListenerRemoteImpl));
+					spreadsheetListenerHashMap.put(l, spreadsheetListenerRemoteImpl);
+					
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
+			@Override
+			public void removeSpreadsheetListener(SpreadsheetListener l) {				
+				try {					
+					
+					SpreadsheetListenerRemoteImpl tableModelListenerRemoteImpl=spreadsheetListenerHashMap.get(l);
+					spreadsheetModelRemote.removeSpreadsheetListener(tableModelListenerRemoteImpl);
+					spreadsheetListenerHashMap.remove(l);
+					
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+				
+			}
+			
+			@Override
+			public void removeAllSpreadsheetListeners() {
+				
+				try {					
+					spreadsheetModelRemote.removeAllSpreadsheetListeners();
+					spreadsheetListenerHashMap=new HashMap<SpreadsheetListener, SpreadsheetListenerRemoteImpl>();
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+				
+			}
+			
 		};
 	}
+	
 }
