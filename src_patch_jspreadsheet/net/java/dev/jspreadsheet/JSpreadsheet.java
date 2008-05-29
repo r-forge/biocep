@@ -34,6 +34,10 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
+import com.sun.org.apache.bcel.internal.generic.INSTANCEOF;
+
+import model.SpreadsheetAbstractTableModel;
+
 
 /**
  * An encapsulation of the functionality of the Sharp Tools spreadsheet
@@ -46,10 +50,10 @@ public class JSpreadsheet extends JComponent
    private Clipboard system = Toolkit.getDefaultToolkit().getSystemClipboard();
    private History history = new History();
    private JTable table;
-   private SpreadsheetTableModelBis tableModel;
+   private SpreadsheetTableModelClipboardInterface tableModel;
    /** Holds value of property columnWidth. */
    private int columnWidth;
-   
+   private RGui rg;
 
    /** Create a new spreadsheet
     * @param columns The number of columns in the spreadsheet
@@ -57,6 +61,8 @@ public class JSpreadsheet extends JComponent
     */
    public JSpreadsheet(AbstractTableModel m, RGui rgui)
    {
+	   rg=rgui;
+	   
       table = createTable();
 
       setLayout(new BorderLayout());
@@ -162,7 +168,7 @@ public class JSpreadsheet extends JComponent
 
       // create new table model
       CellPoint size = SpreadsheetTableModel.getSize(text, delim);
-      newTableModel(new DefaultTableModel(size.getRow(), size.getCol()), tableModel.getRGui());
+      newTableModel(new DefaultTableModel(size.getRow(), size.getCol()), rg);
       tableModel.fromString(text, delim, 0, 0, new CellRange(0, size.getRow(), 0, size.getCol()));
    }
 
@@ -268,16 +274,6 @@ public class JSpreadsheet extends JComponent
       }
    }
 
-   /**
-    * Set the value of a cell
-    * @param value The new value. Treated as a formula if begins with =.
-    * @param row The row number
-    * @param col The column number
-    */
-   public void setValueAt(Object value, int row, int col)
-   {
-      tableModel.doSetValueAt(value, row, col);
-   }
 
    /** Add a listener to be notified when the selected range changes
     * @param l The listener to add
@@ -671,9 +667,13 @@ public class JSpreadsheet extends JComponent
     */
    private void newTableModel(AbstractTableModel m, RGui rgui)
    {
-	   
-      tableModel = new SpreadsheetTableModelBis(table,m,rgui);
-      table.setModel(tableModel);
+	  if (m instanceof SpreadsheetAbstractTableModel) {
+		  tableModel = new SpreadsheetTableModelBis(table,(SpreadsheetAbstractTableModel)m,rgui);  
+	  } else {
+		  tableModel = new SpreadsheetTableModel(table,m,rgui);
+	  }
+      
+      table.setModel((AbstractTableModel)tableModel);
 
       //      applyBaseColumnWidth();
       applyColumnWidth(columnWidth);
@@ -687,6 +687,23 @@ public class JSpreadsheet extends JComponent
       tableModel.setModified(false);
    }
 
+   private void newTableModel(SpreadsheetAbstractTableModel m, RGui rgui)
+   {
+	   
+      tableModel = new SpreadsheetTableModelBis(table,m,rgui);
+      table.setModel((AbstractTableModel)tableModel);
+
+      //      applyBaseColumnWidth();
+      applyColumnWidth(columnWidth);
+
+      // update history with new one
+      history.setTableModel(tableModel);
+      tableModel.setHistory(history);
+
+      // inform tableModel that it's unmodified now
+      tableModel.setPasswordModified(false);
+      tableModel.setModified(false);
+   }
    public Action[] getActions()
    {
       return new Action[0]; // Fixme

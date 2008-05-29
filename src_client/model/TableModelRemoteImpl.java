@@ -35,7 +35,7 @@ public  class TableModelRemoteImpl extends UnicastRemoteObject implements TableM
 		this.m=m;
 	}
 	
-	public void addTableModelListener(final TableModelListenerRemote l) throws RemoteException {
+	public void addTableModelListener(final TableModelListenerRemote l)  {
 		TableModelListener listener=new TableModelListener() {
 			public void tableChanged(TableModelEvent e) {
 				try {
@@ -49,31 +49,31 @@ public  class TableModelRemoteImpl extends UnicastRemoteObject implements TableM
 		m.addTableModelListener(listener);			
 	}
 
-	public Class<?> getColumnClass(int columnIndex) throws RemoteException {
+	public Class<?> getColumnClass(int columnIndex)  {
 		return m.getColumnClass(columnIndex);
 	}
 
-	public int getColumnCount() throws RemoteException {
+	public int getColumnCount()  {
 		return m.getColumnCount();
 	}
 
-	public String getColumnName(int columnIndex) throws RemoteException {
+	public String getColumnName(int columnIndex)  {
 		return m.getColumnName(columnIndex);
 	}
 
-	public int getRowCount() throws RemoteException {
+	public int getRowCount() {
 		return m.getRowCount();
 	}
 
-	public Object getValueAt(int rowIndex, int columnIndex) throws RemoteException {
+	public Object getValueAt(int rowIndex, int columnIndex)  {
 		return m.getValueAt(rowIndex, columnIndex);
 	}
 
-	public boolean isCellEditable(int rowIndex, int columnIndex) throws RemoteException {
+	public boolean isCellEditable(int rowIndex, int columnIndex)  {
 		return m.isCellEditable(rowIndex, columnIndex);
 	}
 
-	public void removeTableModelListener(TableModelListenerRemote l) throws RemoteException {
+	public void removeTableModelListener(TableModelListenerRemote l) {
 		TableModelListener listener=modelListenerHashMap.get(l);
 		if (listener!=null) {
 			m.removeTableModelListener(listener);
@@ -81,51 +81,51 @@ public  class TableModelRemoteImpl extends UnicastRemoteObject implements TableM
 		}
 	}
 
-	public void setValueAt(Object value, int rowIndex, int columnIndex) throws RemoteException {
+	public void setValueAt(Object value, int rowIndex, int columnIndex)  {
 		m.setValueAt(value, rowIndex, columnIndex);
 		System.out.println("value="+value);
 		System.out.println(new Date()+"value="+value+" value class="+value.getClass().getName());
 		
 	}
 	
-	public int findColumn(String columnName) throws RemoteException {
+	public int findColumn(String columnName)  {
 		return m.findColumn(columnName);
 	}
 	
-	public void fireTableCellUpdated(int row, int column) throws RemoteException {
+	public void fireTableCellUpdated(int row, int column) {
 		m.fireTableCellUpdated(row,column);
 	}
 	
-	public void fireTableChanged(TableModelEvent e) throws RemoteException {
+	public void fireTableChanged(TableModelEvent e) {
 		m.fireTableChanged(e);
 	}
 	
 	
-	public void fireTableDataChanged() throws RemoteException {
+	public void fireTableDataChanged() {
 		m.fireTableDataChanged();
 	}
 			
-	public void fireTableRowsDeleted(int firstRow, int lastRow) throws RemoteException {
+	public void fireTableRowsDeleted(int firstRow, int lastRow) {
 		m.fireTableRowsDeleted(firstRow, lastRow);
 	}		
 	
-	public void fireTableRowsInserted(int firstRow, int lastRow) throws RemoteException {
+	public void fireTableRowsInserted(int firstRow, int lastRow){
 		m.fireTableRowsInserted(firstRow, lastRow);
 	}
 	
-	public void fireTableRowsUpdated(int firstRow, int lastRow) throws RemoteException {
+	public void fireTableRowsUpdated(int firstRow, int lastRow)  {
 		m.fireTableRowsUpdated(firstRow, lastRow);
 	}
 	
-	public void fireTableStructureChanged() throws RemoteException {
+	public void fireTableStructureChanged()  {
 		m.fireTableStructureChanged();
 	}
 	
-	public <T extends EventListener> T[] getListeners(Class<T> listenerType) throws RemoteException {
+	public <T extends EventListener> T[] getListeners(Class<T> listenerType)  {
 		return m.getListeners(listenerType);
 	}
 	
-	public TableModelListener[] getTableModelListeners() throws RemoteException {
+	public TableModelListener[] getTableModelListeners() {
 		return m.getTableModelListeners();			
 	}		
 }

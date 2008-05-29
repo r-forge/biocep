@@ -764,7 +764,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 *            range of cells to add new columns to the left of creates the
 	 *            same number of new columns as range has
 	 */
-	public void insertColumn(CellRange insertRange) {
+	public CellRange insertColumn(CellRange insertRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -812,13 +812,21 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		recalculateAll();
 
 		// set selection
+		
 		if (table.getSelectedColumnCount() == 0) {
-			setSelection(new CellRange(0, 0, col, col));
+			CellRange selectionRange=new CellRange(0, 0, col, col);
+			setSelection(selectionRange);
+			return selectionRange;
+		} else {
+			return null;
 		}
 
+    	
 		// sharp.setBaseColumnWidth();
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
+		
+		
 	}
 
 	/**
@@ -829,7 +837,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 *            the range to the left of to add new rows also adds number of
 	 *            new rows equal to rows in range
 	 */
-	public void insertRow(CellRange insertRange) {
+	public CellRange insertRow(CellRange insertRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -863,7 +871,11 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 
 		// set selection
 		if (table.getSelectedColumnCount() == 0) {
-			setSelection(new CellRange(row, row, 0, 0));
+			CellRange selectionRange=new CellRange(row, row, 0, 0);
+			setSelection(selectionRange);
+			return selectionRange;
+		} else {
+			return null;
 		}
 	}
 
@@ -1015,7 +1027,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param deletionRange
 	 *            the range that contains the columns to delete
 	 */
-	public void removeColumn(CellRange deletionRange) {
+	public CellRange removeColumn(CellRange deletionRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -1054,9 +1066,13 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 
 		// set selection
 		if (table.getSelectedColumnCount() == 0) {
-			setSelection(new CellRange(0, 0, col, col));
+			CellRange selectionRange=new CellRange(0, 0, col, col);
+			setSelection(selectionRange);
+			return selectionRange;
+		} else {
+			return null;
 		}
-
+		
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
 	}
@@ -1100,7 +1116,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param deletionRange
 	 *            CellRange that contains the rows to delete
 	 */
-	public void removeRow(CellRange deletionRange) {
+	public CellRange removeRow(CellRange deletionRange) {
 		if (m instanceof DefaultTableModel) {
 			/*
 			 * since the insertion point is given by a selected cell there will
@@ -1133,8 +1149,13 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 
 			// set selection
 			if (table.getSelectedColumnCount() == 0) {
-				setSelection(new CellRange(row, row, 0, 0));
+				CellRange selectionRange=new CellRange(row, row, 0, 0);
+				setSelection(selectionRange);
+				return selectionRange;
+			} else {
+				return null;
 			}
+			
 		} else {
 			throw new RuntimeException("not yet implemented");
 		}
@@ -1332,7 +1353,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		}
 	}
 
-	protected void fillRange(CellRange range, String s) {
+	public void fillRange(CellRange range, String s) {
 		fill(range, SpreadsheetTableModel.fieldParser(s, range.getminCorner()));
 	}
 
@@ -1343,7 +1364,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param h
 	 *            the History object to associate with this SharpTableModel
 	 */
-	void setHistory(History h) {
+	public void setHistory(History h) {
 		history = h;
 	}
 
