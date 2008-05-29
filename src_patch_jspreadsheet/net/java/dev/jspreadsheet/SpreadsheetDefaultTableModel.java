@@ -3,8 +3,9 @@ package net.java.dev.jspreadsheet;
 import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
-public class SpreadsheetDefaultTableModel extends DefaultTableModel{
+public class SpreadsheetDefaultTableModel extends DefaultTableModel implements TableModel {
 	
 	 public SpreadsheetDefaultTableModel() {
 		super();

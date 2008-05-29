@@ -1003,6 +1003,125 @@
 		</java>
 	</target>
 	
+
+	<target name="t" depends="compile,setWinAwareProps">
+			
+				
+			<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
+			<if><not><isset property="lf"/></not><then><property name="lf" value="0"/></then></if>
+			<if><not><isset property="mode"/></not><then><property name="mode" value="local"/></then></if>
+			<if><not><isset property="stub"/></not><then><property name="stub" value=""/></then></if>				
+			<if><not><isset property="localtomcat.port"/></not><then><property name="localtomcat.port" value="9999"/></then></if>
+			<if><not><isset property="url"/></not><then><property name="url" value=""/></then></if>
+			<if><not><isset property="name"/></not><then><property name="name" value=""/></then></if>
+			<if><not><isset property="save"/></not><then><property name="save" value="true"/></then></if>
+
+			<if><not><isset property="registryhost"/></not><then><property name="registryhost" value=""/></then></if>
+			<if><not><isset property="registryport"/></not><then><property name="registryport" value=""/></then></if>		
+			<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+			<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+			<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+			<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
+								
+
+			<java maxmemory="1024m" classname="model.ModelServer"
+				fork="true" spawn="${spawn}">
+				<classpath>
+					
+					<pathelement path="${CORE_JAR}"/>
+					<pathelement path="${JRI_JAR}"/>				
+					<pathelement path="${HTMLPARSER_JAR}"/>
+					<pathelement path="${SSH_JAR}"/>	
+					<pathelement path="${FTP_JAR}"/>
+		
+					<pathelement path="lib/desktop/jeditmodes.jar"/>
+					<pathelement path="lib/desktop/jedit.jar"/>
+					<pathelement path="lib/desktop/OpenXLS.jar"/>
+					<pathelement path="lib/desktop/pf-joi-full.jar"/>
+					<pathelement path="lib/desktop/idw-gpl.jar"/>
+					
+					<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+					<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+					<pathelement path="lib/desktop/jsp-2.1.jar"/>
+					<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
+					<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+					<pathelement path="lib/desktop/activation.jar"/>
+					<pathelement path="lib/desktop/mail.jar"/>
+					<pathelement path="lib/desktop/jython.jar"/>
+					<pathelement path="lib/desktop/swing-layout-1.0.3.jar"/>
+					<pathelement path="lib/desktop/freemindbrowser.jar"/>
+					<pathelement path="lib/desktop/biocep-doc.jar"/>
+
+					<pathelement path="lib/svg/batik-anim.jar"/>
+					<pathelement path="lib/svg/batik-awt-util.jar"/>
+					<pathelement path="lib/svg/batik-bridge.jar"/>
+					<pathelement path="lib/svg/batik-css.jar"/>
+					<pathelement path="lib/svg/batik-dom.jar"/>
+					<pathelement path="lib/svg/batik-ext.jar"/>
+					<pathelement path="lib/svg/batik-extension.jar"/>
+					<pathelement path="lib/svg/batik-gui-util.jar"/>
+					<pathelement path="lib/svg/batik-gvt.jar"/>
+					<pathelement path="lib/svg/batik-parser.jar"/>
+					<pathelement path="lib/svg/batik-script.jar"/>
+					<pathelement path="lib/svg/batik-svg-dom.jar"/>
+					<pathelement path="lib/svg/batik-svggen.jar"/>
+					<pathelement path="lib/svg/batik-swing.jar"/>
+					<pathelement path="lib/svg/batik-util.jar"/>
+					<pathelement path="lib/svg/batik-xml.jar"/>
+					<pathelement path="lib/svg/js.jar"/>
+					<pathelement path="lib/svg/xml-apis.jar"/>
+					<pathelement path="lib/svg/xml-apis-ext.jar"/>				
+					
+					<pathelement path="${ORACLE_JAR}"/>
+					<pathelement path="${MYSQL_JAR}"/>
+					<pathelement path="${DERBY_JAR}"/>
+					
+					<pathelement path="${LOGGING_JAR}"/>
+					<pathelement path="${LOG4J_JAR}"/>
+					<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
+					<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
+					
+					<!--optional-->
+					<pathelement path="VirtualRWorkbench/distrib/mapping.jar"/>
+					
+				</classpath>
+				
+				<env key="Path" path="${R_LIB_PATH}"/>
+				<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+				<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
+				<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
+				<jvmarg value="-Dpreprocess.help=true"/>
+				<jvmarg value="-Dapply.sandbox=false"/>
+				<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
+				
+				<jvmarg value="-Dmode=${mode}"/>
+				<jvmarg value="-Dautologon=true"/>
+				<jvmarg value="-Durl=${url}"/>
+				<jvmarg value="-Dlf=${lf}"/>
+				<jvmarg value="-Dstub=${stub}"/>
+				<jvmarg value="-Dname=${name}"/>
+				<jvmarg value="-Dsave=${save}" />
+				<jvmarg value="-Dlocaltomcat.port=${localtomcat.port}"/>
+				
+				<jvmarg value="-Dregistryhost=${registryhost}"/>
+				<jvmarg value="-Dregistryport=${registryport}"/>
+				
+				<jvmarg value="-Ddb.driver=${db.driver}"/>
+				<jvmarg value="-Ddb.url=${db.url}"/>
+				<jvmarg value="-Ddb.user=${db.user}"/>
+				<jvmarg value="-Ddb.password=${db.password}"/>
+				
+				
+				<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+				<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+				<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+				<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+				<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+				
+			</java>
+		</target>
+
+	
 	
 	<target name="killdb">
 		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>

@@ -18,9 +18,10 @@
 package graphics.rmi.spreadsheet;
 
 import model.ModelUtils;
-import model.SpreadsheetModelRemoteImpl;
+import model.SpreadsheetAbstractTableModel;
+import model.SpreadsheetTableModelRemote;
+import model.SpreadsheetTableModelRemoteImpl;
 import model.TableModelRemote;
-import model.TableModelRemoteImpl;
 import net.infonode.docking.View;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
@@ -90,7 +91,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.UndoManager;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RComplex;
@@ -115,14 +115,14 @@ import static javax.swing.JOptionPane.*;
  */
 public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
-	public static SpreadsheetModelRemoteImpl tmri;
+	public static SpreadsheetTableModelRemoteImpl tmri;
 	public static void main(String[] args) throws Exception {
 
-		tmri=new SpreadsheetModelRemoteImpl(3,2);
+		tmri=new SpreadsheetTableModelRemoteImpl(3,2);
+		SpreadsheetTableModelRemote modelRemote=(SpreadsheetTableModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
 		
-		TableModelRemote modelRemote=(TableModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
-		AbstractTableModel abstractTableModel1=ModelUtils.getTableModelWrapper(modelRemote);
-		AbstractTableModel abstractTableModel2=ModelUtils.getTableModelWrapper(modelRemote);
+		SpreadsheetAbstractTableModel abstractTableModel1=ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
+		SpreadsheetAbstractTableModel abstractTableModel2=ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
 		
 		JFrame f = new JFrame("F1");
 		f.getContentPane().setLayout(new BorderLayout());
@@ -130,7 +130,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		f.setSize(new Dimension(800, 800));
 		f.pack();
 		f.setVisible(true);
-		
 		
 		
 		
