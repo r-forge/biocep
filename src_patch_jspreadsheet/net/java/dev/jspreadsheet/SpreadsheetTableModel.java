@@ -13,10 +13,13 @@ import java.util.Vector;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.undo.UndoManager;
+
 import remoting.RServices;
 
 /**
@@ -38,7 +41,25 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * holds the history information for the table
 	 */
 	private History history;
+	private UndoManager um = new UndoManager() {
+		public void undoableEditHappened(UndoableEditEvent e) {
+			super.undoableEditHappened(e);
+			//undo.update();
+			//redo.update();
+		}
 
+		public void undo() {
+			super.undo();
+			//undo.update();
+			//redo.update();
+		}
+
+		public void redo() {
+			super.redo();
+			//undo.update();
+			//redo.update();
+		}
+	};
 	/** Stores file name of current document */
 	private JTable table;
 
@@ -70,6 +91,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		modified = false;
 		this.table = table;
 		this.rgui = rgui;
+		history=new History(this);
+		history.addUndoableEditListener(um);
 	}
 
 	/**
@@ -99,6 +122,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		this.table = table;
 		this.rgui = rgui;
 		this.m = m;
+		history=new History(this);
+		history.addUndoableEditListener(um);
 	}
 
 	public void addTableModelListener(TableModelListener l) {
@@ -1889,6 +1914,32 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		}
 
 		return new CellPoint(rowcount, colcount);
+	}
+
+	public void historyAdd(CellRange range) {
+		history.add(range);
+	}
+	public void historyAdd(SpreadsheetClipboard clip) {
+		history.add(clip);
+	}
+	public void historyAdd(CellRange range, int type) {
+		history.add(range,type);
+	}
+	
+	public void undo() {
+		um.undo();
+	}
+	
+	public boolean canUndo() {
+		return um.canUndo();
+	}
+	
+	public boolean canRedo() {
+		return um.canRedo();
+	}
+	
+	public void redo() {
+		um.redo();
 	}
 
 

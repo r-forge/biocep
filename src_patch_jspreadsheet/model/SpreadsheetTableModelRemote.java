@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
+import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 
 public interface SpreadsheetTableModelRemote extends TableModelRemote {
 	 public void sort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker) throws RemoteException;
@@ -24,4 +25,13 @@ public interface SpreadsheetTableModelRemote extends TableModelRemote {
 	 public boolean isModified() throws RemoteException;	
 	 public void setPasswordModified(boolean modified) throws RemoteException;
 	 public boolean isDeletionSafe(CellRange range, boolean byRow) throws RemoteException;		
+	 
+	 public void historyAdd(CellRange range) throws RemoteException;
+	 public void historyAdd(SpreadsheetClipboard clip) throws RemoteException;
+	 public void historyAdd(CellRange range, int type) throws RemoteException;
+		
+	 public void undo() throws RemoteException;
+	 public boolean canUndo() throws RemoteException;	
+	 public void redo() throws RemoteException;
+	 public boolean canRedo() throws RemoteException;	
 }

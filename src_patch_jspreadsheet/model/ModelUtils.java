@@ -12,6 +12,7 @@ import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.Formula;
 import net.java.dev.jspreadsheet.ParserException;
+import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 import net.java.dev.jspreadsheet.SpreadsheetTableModel;
 
 public class ModelUtils {
@@ -564,10 +565,68 @@ public class ModelUtils {
 				}
 			}
 			
+			@Override
+			public void historyAdd(CellRange range) {
+				try {					
+					 spreadsheetModelRemote.historyAdd(range);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
+			@Override
+			public void historyAdd(SpreadsheetClipboard clip) {
+				try {					
+					 spreadsheetModelRemote.historyAdd(clip);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
+			@Override
+			public void historyAdd(CellRange range, int type) {
+				try {					
+					 spreadsheetModelRemote.historyAdd(range,type);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}				
+			}
+			
+			@Override
+			public boolean canUndo() {
+				try {					
+					 return spreadsheetModelRemote.canUndo();
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
+			@Override
+			public void undo() {
+				try {					
+					 spreadsheetModelRemote.undo();
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			@Override
+			public boolean canRedo() {
+				try {					
+					 return spreadsheetModelRemote.canRedo();
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
+			@Override
+			public void redo() {
+				try {					
+					 spreadsheetModelRemote.redo();
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
 		};
 	}
-
-
-
-
 }

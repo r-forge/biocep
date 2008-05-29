@@ -1,9 +1,12 @@
 package model;
 
+import java.rmi.RemoteException;
+
 import javax.swing.table.AbstractTableModel;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
+import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 
 abstract public class SpreadsheetAbstractTableModel extends AbstractTableModel {	
 	abstract public void sort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker);
@@ -22,4 +25,13 @@ abstract public class SpreadsheetAbstractTableModel extends AbstractTableModel {
 	abstract public boolean isModified();	
 	abstract public void setPasswordModified(boolean modified);
 	abstract public boolean isDeletionSafe(CellRange range, boolean byRow);	
+	
+	abstract public void historyAdd(CellRange range);
+	abstract public void historyAdd(SpreadsheetClipboard clip);
+	abstract public void historyAdd(CellRange range, int type);
+		
+	abstract public void undo();
+	abstract public boolean canUndo();	
+	abstract public void redo();
+	abstract public boolean canRedo();	
 }

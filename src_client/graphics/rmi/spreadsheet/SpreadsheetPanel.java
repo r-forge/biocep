@@ -21,7 +21,6 @@ import model.ModelUtils;
 import model.SpreadsheetAbstractTableModel;
 import model.SpreadsheetTableModelRemote;
 import model.SpreadsheetTableModelRemoteImpl;
-import model.TableModelRemote;
 import net.infonode.docking.View;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
@@ -60,6 +59,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.registry.LocateRegistry;
 import java.util.HashSet;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
@@ -117,9 +117,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	public static SpreadsheetTableModelRemoteImpl tmri;
 	public static void main(String[] args) throws Exception {
-
+		
+		
 		tmri=new SpreadsheetTableModelRemoteImpl(3,2);
 		SpreadsheetTableModelRemote modelRemote=(SpreadsheetTableModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
+		
+		
+		//SpreadsheetTableModelRemote modelRemote=(SpreadsheetTableModelRemote)LocateRegistry.getRegistry().lookup("toto");
 		
 		SpreadsheetAbstractTableModel abstractTableModel1=ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
 		SpreadsheetAbstractTableModel abstractTableModel2=ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
@@ -239,26 +243,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	private String findValue;
 
-	private UndoManager um = new UndoManager() {
-		public void undoableEditHappened(UndoableEditEvent e) {
-			super.undoableEditHappened(e);
-			undo.update();
-			redo.update();
-		}
-
-		public void undo() {
-			super.undo();
-			undo.update();
-			redo.update();
-		}
-
-		public void redo() {
-			super.redo();
-			undo.update();
-			redo.update();
-		}
-	};
-
 	private boolean matchCase;
 	private boolean matchCell;
 
@@ -267,7 +251,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		_rgui = rgui;
 		ss = new JSpreadsheet(m, rgui);
 
-		ss.addUndoableEditListener(um);
 		ss.addSelectionListener(sl);
 
 		ss.getTable().addMouseListener(new GDApplet.PopupListener(new PopupMenu()));
@@ -1524,11 +1507,22 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			um.redo();
+			if (ss.canRedo()) {
+				ss.redo();
+				undo.update();
+				redo.update();
+			} else {
+				Toolkit.getDefaultToolkit().beep();
+			}
 		}
 
+		@Override
+		public boolean isEnabled() {
+			return true;
+		}
+		
 		void update() {
-			setEnabled(um.canRedo());
+			//setEnabled(ss.canRedo());
 		}
 	}
 
@@ -1603,11 +1597,22 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			um.undo();
+			if (ss.canUndo()) { 
+				ss.undo();
+				undo.update();
+				redo.update();
+			} else {
+				Toolkit.getDefaultToolkit().beep();
+			}
 		}
 
+		@Override
+		public boolean isEnabled() {
+			return true;
+		}
+		
 		void update() {
-			setEnabled(um.canUndo());
+			//setEnabled(ss.canUndo());
 		}
 	}
 

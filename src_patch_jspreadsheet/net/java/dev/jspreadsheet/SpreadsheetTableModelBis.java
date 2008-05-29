@@ -5,7 +5,9 @@ import java.util.EventListener;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.undo.UndoManager;
 
 import model.ModelUtils;
 import model.SpreadsheetAbstractTableModel;
@@ -26,37 +28,16 @@ import remoting.RServices;
  */
 public class SpreadsheetTableModelBis extends AbstractTableModel implements  SpreadsheetTableModelClipboardInterface {
 
-	/**
-	 * holds the history information for the table
-	 */
-	private History history;
+
 
 	/** Stores file name of current document */
 	private JTable table;
 
-	/**
-	 * true if password has been changed
-	 */
-	private boolean passwordModified;
 
 	private RGui rgui;
 
 	private SpreadsheetAbstractTableModel m;
 
-	/**
-	 * Constructs a default SharpTableModel which is a table of zero columns and
-	 * zeros rows.
-	 * 
-	 * @param sharp
-	 *            the gui component to tie it to
-	 */
-	public SpreadsheetTableModelBis(JTable table, RGui rgui) {
-		super();
-
-		// initialize state to unmodified and file to untitled
-		this.table = table;
-		this.rgui = rgui;
-	}
 
 	/**
 	 * This constructor creates an empty table with numRow rows and numCol
@@ -455,17 +436,6 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	}
 
 	/**
-	 * This method associated the proper undo object to this SharpTableModel. It
-	 * must be called right after the constructor.
-	 * 
-	 * @param h
-	 *            the History object to associate with this SharpTableModel
-	 */
-	public void setHistory(History h) {
-		history = h;
-	}
-
-	/**
 	 * fromString is used to convert a string to valus in a range of cells. One
 	 * row per line, and each column is tab-delimited.
 	 * 
@@ -572,6 +542,32 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	 */
 	public JTable getTable() {
 		return table;
+	}
+	
+	public void historyAdd(CellRange range) {
+		m.historyAdd(range);
+	}
+	public void historyAdd(SpreadsheetClipboard clip) {
+		m.historyAdd(clip);
+	}
+	public void historyAdd(CellRange range, int type) {
+		m.historyAdd(range,type);
+	}
+	
+	public void undo() {
+		m.undo();
+	}
+	
+	public boolean canUndo() {
+		return m.canUndo();
+	}
+	
+	public boolean canRedo() {
+		return m.canRedo();
+	}
+	
+	public void redo() {
+		m.redo();
 	}
 
 }
