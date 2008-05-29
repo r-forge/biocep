@@ -19,6 +19,8 @@ package graphics.rmi.spreadsheet;
 
 import model.ModelUtils;
 import model.SpreadsheetAbstractTableModel;
+import model.SpreadsheetListener;
+import model.SpreadsheetListenerRemote;
 import model.SpreadsheetTableModelRemote;
 import model.SpreadsheetTableModelRemoteImpl;
 import net.infonode.docking.View;
@@ -59,7 +61,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashSet;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
@@ -89,9 +93,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.undo.UndoManager;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RComplex;
 import org.bioconductor.packages.rservices.RDataFrame;
@@ -252,6 +254,35 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		ss = new JSpreadsheet(m, rgui);
 
 		ss.addSelectionListener(sl);
+		try {
+			ss.addSpreadsheetListener(new SpreadsheetListener(){
+				
+				public void setSelection(CellRange sel){
+					// validate sel
+					int maxRow = ss.getTable().getRowCount() - 1;
+					int maxCol = ss.getTable().getColumnCount() - 1;
+	
+					int startRow = sel.getStartRow();
+					int startCol = sel.getStartCol();
+					int endRow = sel.getEndRow();
+					int endCol = sel.getEndCol();
+	
+					ss.getTable().setColumnSelectionInterval(Math.min(startCol, maxCol), Math.min(endCol, maxCol));
+					ss.getTable().setRowSelectionInterval(Math.min(startRow, maxRow), Math.min(endRow, maxRow));
+					
+				}
+				
+				public void updateRedoAction(){
+					redo.update();			
+				}
+				
+				public void updateUndoAction(){
+					undo.update();			
+				}
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		ss.getTable().addMouseListener(new GDApplet.PopupListener(new PopupMenu()));
 		ss.getTable().addKeyListener(new KeyListener() {
@@ -1507,22 +1538,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			if (ss.canRedo()) {
-				ss.redo();
-				undo.update();
-				redo.update();
-			} else {
-				Toolkit.getDefaultToolkit().beep();
-			}
-		}
-
-		@Override
-		public boolean isEnabled() {
-			return true;
+			ss.redo();
+			undo.update();
+			redo.update();		
 		}
 		
 		void update() {
-			//setEnabled(ss.canRedo());
+			setEnabled(ss.canRedo());
 		}
 	}
 
@@ -1597,22 +1619,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			if (ss.canUndo()) { 
-				ss.undo();
-				undo.update();
-				redo.update();
-			} else {
-				Toolkit.getDefaultToolkit().beep();
-			}
-		}
-
-		@Override
-		public boolean isEnabled() {
-			return true;
+			ss.undo();
 		}
 		
 		void update() {
-			//setEnabled(ss.canUndo());
+			setEnabled(ss.canUndo());
 		}
 	}
 
@@ -2376,5 +2387,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	public void lostOwnership(Clipboard clipboard, Transferable contents) {
 
 	}
+	
 
 }

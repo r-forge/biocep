@@ -5,12 +5,11 @@ import java.util.EventListener;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.undo.UndoManager;
-
 import model.ModelUtils;
 import model.SpreadsheetAbstractTableModel;
+import model.SpreadsheetListener;
+import model.SpreadsheetListenerRemote;
 import remoting.RServices;
 
 /**
@@ -567,7 +566,19 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	}
 	
 	public void redo() {
-		m.redo();
+		m.redo();	
+	}
+	
+	public void addSpreadsheetListener(SpreadsheetListener l) {
+		m.addSpreadsheetListener(l);
+	}
+	
+	public void removeSpreadsheetListener(SpreadsheetListener l) {
+		m.removeSpreadsheetListener(l);
+	}
+	
+	public void removeAllSpreadsheetListeners() {
+		m.removeAllSpreadsheetListeners();		
 	}
 
 }

@@ -6,11 +6,9 @@ import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.Vector;
-
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.UndoManager;
-
 import remoting.RServices;
 import server.DirectJNI;
 import net.java.dev.jspreadsheet.Cell;
@@ -33,20 +31,20 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 	private UndoManager um = new UndoManager() {
 		public void undoableEditHappened(UndoableEditEvent e) {
 			super.undoableEditHappened(e);
-			//undo.update();
-			//redo.update();
+			updateUndoAction();
+			updateRedoAction();
 		}
 
 		public void undo() {
 			super.undo();
-			//undo.update();
-			//redo.update();
+			updateUndoAction();
+			updateRedoAction();
 		}
 
 		public void redo() {
 			super.redo();
-			//undo.update();
-			//redo.update();
+			updateUndoAction();
+			updateRedoAction();
 		}
 	};
 	public SpreadsheetTableModelRemoteImpl(int rowCount, int colCount) throws RemoteException {
@@ -1752,14 +1750,77 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 	public RServices getR() {
 		return DirectJNI.getInstance().getRServices();
 	}
-
+		
+	private void updateUndoAction() {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).updateUndoAction();
+			} catch (Exception e) {
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
 	
+	private void updateRedoAction() {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).updateRedoAction();
+			} catch (Exception e) {
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
 	
-	//IMPORTANT !!!!!!!!!!!  should notify
 	public void setSelection(CellRange sel) {
-		//throw new RuntimeException("Shouldn't be called");
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).setSelection(sel);
+			} catch (Exception e) {
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	Vector<SpreadsheetListenerRemote> _spreadsheetListeners=new Vector<SpreadsheetListenerRemote>();
+	
+	public void addSpreadsheetListener(SpreadsheetListenerRemote l){
+		_spreadsheetListeners.add(l);
+		
+	}
+	public void removeSpreadsheetListener(SpreadsheetListenerRemote l){
+		_spreadsheetListeners.remove(l);		
+	}
+	
+	public void removeAllSpreadsheetListeners(){
+		_spreadsheetListeners.removeAllElements();		
+	}
+	
+	
+	
+	public void addSpreadsheetListener(SpreadsheetListener l) {
+		throw new RuntimeException("Shouldn't be called");		
+	}
+	
+	public void removeSpreadsheetListener(SpreadsheetListener l) {
+		throw new RuntimeException("Shouldn't be called");
 	}
 	
 	
 
+	public void addTableModelListener(TableModelListenerRemote l) {
+		// TODO Auto-generated method stub
+		super.addTableModelListener(l);
+	}
+	
+	@Override
+	public int findColumn(String columnName) {
+		// TODO Auto-generated method stub
+		return super.findColumn(columnName);
+	}
 }

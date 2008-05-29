@@ -34,4 +34,10 @@ public interface SpreadsheetTableModelRemote extends TableModelRemote {
 	 public boolean canUndo() throws RemoteException;	
 	 public void redo() throws RemoteException;
 	 public boolean canRedo() throws RemoteException;	
+	 
+	 public void addSpreadsheetListener(SpreadsheetListenerRemote l) throws RemoteException;
+	 public void removeSpreadsheetListener(SpreadsheetListenerRemote l)throws RemoteException;
+	 public void removeAllSpreadsheetListeners()throws RemoteException;
+	 
+		 
 }
