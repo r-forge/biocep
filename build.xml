@@ -1125,6 +1125,17 @@
 		</target>
 
 	
+	<target name="demoserver" depends="setWinAwareProps,compile">		
+		<antcall target="server">
+			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
+			<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR}"/>						
+			<param name="servantclass" value="server.RServantImpl"/>
+			<param name="name" value="RSERVANT_1" />
+			<param name="working.dir.root" value="wdir"/>
+			
+		</antcall>		
+	</target>
+	
 	
 	<target name="killdb">
 		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>

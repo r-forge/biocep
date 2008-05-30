@@ -520,7 +520,7 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	 * @param sel
 	 *            the range to be selected
 	 */
-	public void setSelection(CellRange sel) {
+	public void setSelection(String origin,CellRange sel) {
 		// validate sel
 		int maxRow = table.getRowCount() - 1;
 		int maxCol = table.getColumnCount() - 1;

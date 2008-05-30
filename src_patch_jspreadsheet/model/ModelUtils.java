@@ -670,6 +670,15 @@ public class ModelUtils {
 				}
 				
 			}
+						
+			@Override
+			public void setSpreadsheetSelection(String origin,CellRange sel) {
+				try {					
+					spreadsheetModelRemote.setSpreadsheetSelection(origin, sel);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}				
+			}
 			
 		};
 	}

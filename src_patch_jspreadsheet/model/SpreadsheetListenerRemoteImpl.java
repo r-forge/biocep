@@ -11,8 +11,8 @@ public class SpreadsheetListenerRemoteImpl extends UnicastRemoteObject implement
 		super();
 		this.localListener=localListener;
 	}
-	public void setSelection(CellRange sel) throws RemoteException {
-		localListener.setSelection(sel);			
+	public void setSelection(String origin,CellRange sel) throws RemoteException {
+		localListener.setSelection(origin,sel);			
 	}
 	public void updateRedoAction() throws RemoteException {
 		localListener.updateRedoAction();			

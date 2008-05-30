@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
+import java.util.UUID;
 
 import javax.swing.Action;
 import javax.swing.CellEditor;
@@ -32,11 +33,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-
 import model.SpreadsheetAbstractTableModel;
 import model.SpreadsheetListener;
-import model.SpreadsheetListenerRemote;
-
 
 /**
  * An encapsulation of the functionality of the Sharp Tools spreadsheet
@@ -409,7 +407,7 @@ public class JSpreadsheet extends JComponent
             // add to history
             tableModel.historyAdd(affectedRange);
             tableModel.fromString(trstring, '\t', rowOff, colOff, affectedRange);
-            tableModel.setSelection(affectedRange);
+            tableModel.setSelection(null,affectedRange);
          }
          catch (Exception e)
          {
@@ -649,10 +647,27 @@ public class JSpreadsheet extends JComponent
     * @param rows number of rows in new table model
     * @param cols number of columns in new table model
     */
-   private void newTableModel(AbstractTableModel m, RGui rgui)
+   
+   
+   private String ID=null;
+   public String getId() {
+	   if (ID==null) {
+		   ID=UUID.randomUUID().toString();
+	   }
+	   return ID;	   
+   }
+   
+   private void newTableModel(final AbstractTableModel m, RGui rgui)
    {
 	  if (m instanceof SpreadsheetAbstractTableModel) {
-		  tableModel = new SpreadsheetTableModelBis(table,(SpreadsheetAbstractTableModel)m,rgui);  
+		  tableModel = new SpreadsheetTableModelBis(table,(SpreadsheetAbstractTableModel)m,rgui);
+		  addSelectionListener(new SpreadsheetSelectionListener() {
+			  public void selectionChanged(SpreadsheetSelectionEvent e) {				  
+				  if (e.getSelectionRange()!=null) {
+					  ((SpreadsheetAbstractTableModel)m).setSpreadsheetSelection(getId(), e.getSelectionRange());
+				  }
+			  }
+		  }); 
 	  } else {
 		  tableModel = new SpreadsheetTableModel(table,m,rgui);
 	  }

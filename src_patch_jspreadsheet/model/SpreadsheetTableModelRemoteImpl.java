@@ -3,6 +3,7 @@ package model;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -28,6 +29,7 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 		SpreadsheetTableModelClipboardInterface {
 
 	private History history;
+	private HashMap<String, SpreadsheetTableModelRemoteImpl> map;
 	private UndoManager um = new UndoManager() {
 		public void undoableEditHappened(UndoableEditEvent e) {
 			super.undoableEditHappened(e);
@@ -47,21 +49,34 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 			updateRedoAction();
 		}
 	};
-	public SpreadsheetTableModelRemoteImpl(int rowCount, int colCount) throws RemoteException {
-		super(new SpreadsheetDefaultTableModel(rowCount, colCount));
+	
+	public SpreadsheetTableModelRemoteImpl(int rowCount, int colCount, HashMap<String, SpreadsheetTableModelRemoteImpl> map) throws RemoteException {
+		super(new SpreadsheetDefaultTableModel(rowCount, colCount));		
+		this.map=map;
+		init();
+		if (map!=null) map.put(getId(),this);
+	}
+
+	public SpreadsheetTableModelRemoteImpl(Object[] columnName, int rowCount) throws RemoteException {
+		super(columnName, rowCount);		
+		this.map=map;		
+		init();
+		if (map!=null) map.put(getId(),this);
+	}
+
+	public SpreadsheetTableModelRemoteImpl(Object[][] data, Object[] columnName) throws RemoteException {
+		super(data, columnName);				
+		this.map=map;
+		init();
+		if (map!=null) map.put(getId(),this);
+	}
+	
+	private void init() {
 		for (int row = 0; row < m.getRowCount(); row++)
 			for (int col = 0; col < m.getColumnCount(); col++)
 				m.setValueAt(new Cell(""), row, col);
 		history=new History(this);
 		history.addUndoableEditListener(um);
-	}
-
-	public SpreadsheetTableModelRemoteImpl(Object[] columnName, int rowCount) throws RemoteException {
-		super(columnName, rowCount);
-	}
-
-	public SpreadsheetTableModelRemoteImpl(Object[][] data, Object[] columnName) throws RemoteException {
-		super(data, columnName);
 	}
 
 	private boolean modified = false;
@@ -1757,6 +1772,7 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 			try {
 				_spreadsheetListeners.elementAt(i).updateUndoAction();
 			} catch (Exception e) {
+				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
 			}	
 		}
@@ -1769,25 +1785,33 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 			try {
 				_spreadsheetListeners.elementAt(i).updateRedoAction();
 			} catch (Exception e) {
+				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
 			}	
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	public void setSelection(CellRange sel) {
+	public void setSelection(String origin,CellRange sel) {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
-				_spreadsheetListeners.elementAt(i).setSelection(sel);
+				_spreadsheetListeners.elementAt(i).setSelection(origin, sel);
 			} catch (Exception e) {
+				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
 			}	
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
+	public void setSpreadsheetSelection(String origin,CellRange sel) throws RemoteException {		
+		setSelection(origin,sel);		
+	}
+	
 	Vector<SpreadsheetListenerRemote> _spreadsheetListeners=new Vector<SpreadsheetListenerRemote>();
+	
+	
 	
 	public void addSpreadsheetListener(SpreadsheetListenerRemote l){
 		_spreadsheetListeners.add(l);
@@ -1822,5 +1846,16 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 	public int findColumn(String columnName) {
 		// TODO Auto-generated method stub
 		return super.findColumn(columnName);
+	}
+	
+	private static int spreadsheetTableModelRemoteCounter=0;
+	private String _id="SS_"+(spreadsheetTableModelRemoteCounter++);
+	
+	public String getId() throws RemoteException {
+		return _id;
+	}
+	
+	public void dispose() throws RemoteException {
+
 	}
 }

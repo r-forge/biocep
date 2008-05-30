@@ -37,4 +37,6 @@ abstract public class SpreadsheetAbstractTableModel extends AbstractTableModel {
 	abstract public void removeSpreadsheetListener(SpreadsheetListener l);
 	abstract public void removeAllSpreadsheetListeners();
 	
+	abstract public void setSpreadsheetSelection(String origin, CellRange sel);
+	
 }

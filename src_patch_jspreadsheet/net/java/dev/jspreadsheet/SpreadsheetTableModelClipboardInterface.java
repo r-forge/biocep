@@ -13,7 +13,7 @@ public interface SpreadsheetTableModelClipboardInterface {
 	public void clearRange(CellRange range);
 	public String toString(CellRange range, boolean byValue, char delim);
 	public void setModified(boolean modified);
-	public void setSelection(CellRange sel);
+	public void setSelection(String origin , CellRange sel);
 	
 	
 	public CellRange insertColumn(CellRange insertRange);

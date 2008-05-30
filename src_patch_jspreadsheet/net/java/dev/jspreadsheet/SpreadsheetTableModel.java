@@ -822,7 +822,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(0, 0, col, col);
-			setSelection(selectionRange);
+			setSelection(null,selectionRange);
 			return selectionRange;
 		} else {
 			return null;
@@ -879,7 +879,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		// set selection
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(row, row, 0, 0);
-			setSelection(selectionRange);
+			setSelection(null,selectionRange);
 			return selectionRange;
 		} else {
 			return null;
@@ -1074,7 +1074,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		// set selection
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(0, 0, col, col);
-			setSelection(selectionRange);
+			setSelection(null,selectionRange);
 			return selectionRange;
 		} else {
 			return null;
@@ -1157,7 +1157,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			// set selection
 			if (table.getSelectedColumnCount() == 0) {
 				CellRange selectionRange=new CellRange(row, row, 0, 0);
-				setSelection(selectionRange);
+				setSelection(null,selectionRange);
 				return selectionRange;
 			} else {
 				return null;
@@ -1948,11 +1948,11 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	public void setSelection(CellRange sel) {
+	public void setSelection(String origin, CellRange sel) {
 		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
-				_spreadsheetListeners.elementAt(i).setSelection(sel);
+				_spreadsheetListeners.elementAt(i).setSelection(origin,sel);
 			} catch (Exception e) {
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
 			}	
