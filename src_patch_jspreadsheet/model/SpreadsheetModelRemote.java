@@ -6,7 +6,7 @@ import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 
-public interface SpreadsheetTableModelRemote extends TableModelRemote {
+public interface SpreadsheetModelRemote extends TableModelRemote {
 	 public void sort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker) throws RemoteException;
 	 
 	 public CellRange removeRow(CellRange deletionRange) throws RemoteException;
@@ -44,5 +44,8 @@ public interface SpreadsheetTableModelRemote extends TableModelRemote {
 	 
 	 
 	 public void setSpreadsheetSelection(String origin,CellRange sel) throws RemoteException;
+	 
+	 public SpreadsheetModelDevice newSpreadsheetModelDevice() throws RemoteException;
+	 
 	 		 
 }

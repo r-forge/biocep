@@ -35,8 +35,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
-import model.SpreadsheetTableModelRemote;
-import model.SpreadsheetTableModelRemoteImpl;
+import model.SpreadsheetModelRemote;
+import model.SpreadsheetModelRemoteImpl;
 
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RObject;
@@ -851,19 +851,19 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().getGroovyStatus();
 	}
 	
-	HashMap<String, SpreadsheetTableModelRemoteImpl> _spreadsheetTableModelRemoteHashMap=new HashMap<String, SpreadsheetTableModelRemoteImpl>();
+	HashMap<String, SpreadsheetModelRemoteImpl> _spreadsheetTableModelRemoteHashMap=new HashMap<String, SpreadsheetModelRemoteImpl>();
 
-	public SpreadsheetTableModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
-		return new SpreadsheetTableModelRemoteImpl(rowCount, colCount, _spreadsheetTableModelRemoteHashMap);
+	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
+		return new SpreadsheetModelRemoteImpl(rowCount, colCount, _spreadsheetTableModelRemoteHashMap);
 	}	
 	
-	public SpreadsheetTableModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
+	public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
 		return _spreadsheetTableModelRemoteHashMap.get(Id);
 	}
 
-	public SpreadsheetTableModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
-		SpreadsheetTableModelRemote[] result=new SpreadsheetTableModelRemote[_spreadsheetTableModelRemoteHashMap.size()];
-		int i=0;for (SpreadsheetTableModelRemote v:_spreadsheetTableModelRemoteHashMap.values()) result[i++]=v;
+	public SpreadsheetModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
+		SpreadsheetModelRemote[] result=new SpreadsheetModelRemote[_spreadsheetTableModelRemoteHashMap.size()];
+		int i=0;for (SpreadsheetModelRemote v:_spreadsheetTableModelRemoteHashMap.values()) result[i++]=v;
 		return result;
 	}
 

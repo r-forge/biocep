@@ -21,7 +21,7 @@ import graphics.pop.GDDevice;
 import java.rmi.RemoteException;
 import java.util.Vector;
 import mapping.RPackage;
-import model.SpreadsheetTableModelRemote;
+import model.SpreadsheetModelRemote;
 
 import org.bioconductor.packages.rservices.RObject;
 
@@ -199,9 +199,9 @@ public interface RServices extends ManagedServant {
 	
 	public String getGroovyStatus() throws RemoteException;
 	
-	public SpreadsheetTableModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException;	
-	public SpreadsheetTableModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException;	
-	public SpreadsheetTableModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException;	
+	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException;	
+	public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException;	
+	public SpreadsheetModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException;	
 	public String[] listSpreadsheetTableModelRemoteId() throws RemoteException;
 	
 }

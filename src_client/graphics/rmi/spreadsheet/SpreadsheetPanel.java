@@ -18,10 +18,10 @@
 package graphics.rmi.spreadsheet;
 
 import model.ModelUtils;
-import model.SpreadsheetAbstractTableModel;
+import model.AbstractSpreadsheetModel;
 import model.SpreadsheetListener;
-import model.SpreadsheetTableModelRemote;
-import model.SpreadsheetTableModelRemoteImpl;
+import model.SpreadsheetModelRemote;
+import model.SpreadsheetModelRemoteImpl;
 import net.infonode.docking.View;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
@@ -110,18 +110,18 @@ import static javax.swing.JOptionPane.*;
  */
 public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
-	public static SpreadsheetTableModelRemoteImpl tmri;
+	public static SpreadsheetModelRemoteImpl tmri;
 	public static void main(String[] args) throws Exception {
 		
 		
-		tmri=new SpreadsheetTableModelRemoteImpl(3,2, new HashMap<String, SpreadsheetTableModelRemoteImpl>());
-		SpreadsheetTableModelRemote modelRemote=(SpreadsheetTableModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
+		tmri=new SpreadsheetModelRemoteImpl(3,2, new HashMap<String, SpreadsheetModelRemoteImpl>());
+		SpreadsheetModelRemote modelRemote=(SpreadsheetModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
 		
 		
 		//SpreadsheetTableModelRemote modelRemote=(SpreadsheetTableModelRemote)LocateRegistry.getRegistry().lookup("toto");
 		
-		SpreadsheetAbstractTableModel abstractTableModel1=ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
-		SpreadsheetAbstractTableModel abstractTableModel2=ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
+		AbstractSpreadsheetModel abstractTableModel1=ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
+		AbstractSpreadsheetModel abstractTableModel2=ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
 		
 		JFrame f = new JFrame("F1");
 		f.getContentPane().setLayout(new BorderLayout());
