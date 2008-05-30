@@ -39,5 +39,10 @@ public interface SpreadsheetTableModelRemote extends TableModelRemote {
 	 public void removeSpreadsheetListener(SpreadsheetListenerRemote l)throws RemoteException;
 	 public void removeAllSpreadsheetListeners()throws RemoteException;
 	 
-		 
+	 public String getId() throws RemoteException;
+	 public void dispose() throws RemoteException;
+	 
+	 
+	 public void setSpreadsheetSelection(String origin,CellRange sel) throws RemoteException;
+	 		 
 }

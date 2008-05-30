@@ -30,6 +30,8 @@ import graphics.rmi.action.SaveDeviceAsSvgAction;
 import graphics.rmi.action.SetCurrentDeviceAction;
 import graphics.rmi.action.SnapshotDeviceAction;
 import graphics.rmi.action.SnapshotDeviceSvgAction;
+import graphics.rmi.spreadsheet.DimensionsDialog;
+import graphics.rmi.spreadsheet.SelectIdDialog;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
 import groovy.GroovyInterpreter;
 import groovy.GroovyInterpreterSingleton;
@@ -125,6 +127,10 @@ import javax.swing.event.MenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+
+import model.ModelUtils;
+import model.SpreadsheetAbstractTableModel;
+import model.SpreadsheetTableModelRemote;
 import net.infonode.docking.DockingWindow;
 import net.infonode.docking.DockingWindowAdapter;
 import net.infonode.docking.DockingWindowListener;
@@ -237,7 +243,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			//_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		}
 
 		@Override
@@ -259,7 +265,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			super.unlock();
 
-			//_consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		}
 
@@ -374,7 +380,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		if (getParameter("command_servlet_url") == null || getParameter("command_servlet_url").equals("")) {
 			if (getWebAppUrl() != null) {
-				//_commandServletUrl = getWebAppUrl() + "cmd";
+				// _commandServletUrl = getWebAppUrl() + "cmd";
 				_commandServletUrl = "http://127.0.0.1:8080/rvirtual/cmd";
 			} else {
 				_commandServletUrl = "http://127.0.0.1:8080/rvirtual/cmd";
@@ -616,7 +622,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									try {
 										r.ping();
 									} catch (Exception e) {
-										//e.printStackTrace();
+										// e.printStackTrace();
 										new File(GDApplet.NEW_R_STUB_FILE).delete();
 										throw new PingRServerFailedException();
 									}
@@ -1267,6 +1273,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					collaborationMenu.removeAll();
 					collaborationMenu.add(_actions.get("createbroadcasteddevice"));
 					collaborationMenu.add(_actions.get("chatconsoleview"));
+					collaborationMenu.add(_actions.get("newcollaborativespreadsheet"));
+					collaborationMenu.add(_actions.get("connecttocollaborativespreadsheet"));
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -2545,7 +2553,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("editor", new AbstractAction("Script Editor") {
+		_actions.put("editor", new AbstractAction("New Script Editor") {
 			private boolean firstCall = true;
 
 			public void actionPerformed(ActionEvent e) {
@@ -2593,16 +2601,89 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("spreadsheet", new AbstractAction("Spreadsheet Editor") {
+		_actions.put("spreadsheet", new AbstractAction("New Spreadsheet") {
 			public void actionPerformed(final ActionEvent ae) {
-
-				NewWindow.create(new SpreadsheetPanel(new SpreadsheetDefaultTableModel(300, 40), GDApplet.this), "Spreadsheet View");
-
+				final DimensionsDialog ddialog = new DimensionsDialog(GDApplet.this);
+				ddialog.setVisible(true);
+				if (ddialog.getSpreadsheetDimension() != null) {					
+					NewWindow.create(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getWidth(), (int) ddialog.getSpreadsheetDimension().getHeight()), GDApplet.this), "Spreadsheet View");
+				}
 			}
 
 			@Override
 			public boolean isEnabled() {
 				return true;
+			}
+		});
+
+		_actions.put("newcollaborativespreadsheet", new AbstractAction("New Collaborative Spreadsheet") {
+			public void actionPerformed(final ActionEvent ae) {
+				new Thread(new Runnable() {
+					public void run() {
+						final DimensionsDialog ddialog = new DimensionsDialog(GDApplet.this);
+						ddialog.setVisible(true);
+						if (ddialog.getSpreadsheetDimension() != null) {
+							try {
+								SpreadsheetTableModelRemote spreadsheetModelRemote = getR().newSpreadsheetTableModelRemote(
+										(int) ddialog.getSpreadsheetDimension().getWidth(), (int) ddialog.getSpreadsheetDimension().getHeight());
+								final String id = spreadsheetModelRemote.getId();
+								final SpreadsheetAbstractTableModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
+								SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										NewWindow.create(new SpreadsheetPanel(spreadsheetModel, GDApplet.this), "Collaboratibe Spreadsheet View <" + id + ">");
+									}
+								});
+
+							} catch (Exception e) {
+								e.printStackTrace();
+							} finally {
+
+							}
+						}
+					}
+				}).start();
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+
+		_actions.put("connecttocollaborativespreadsheet", new AbstractAction("Connect to Collaborative Spreadsheet") {
+			public void actionPerformed(final ActionEvent ae) {
+				new Thread(new Runnable() {
+					public void run() {
+
+						try {
+							final SelectIdDialog ddialog = new SelectIdDialog(GDApplet.this, "Connect to Collaborative Spreadsheet", "Spreadsheet Id", getR()
+									.listSpreadsheetTableModelRemoteId());
+							ddialog.setVisible(true);
+							if (ddialog.getId() != null) {
+
+								SpreadsheetTableModelRemote spreadsheetModelRemote = getR().getSpreadsheetTableModelRemote(ddialog.getId());
+								final String id = spreadsheetModelRemote.getId();
+								final SpreadsheetAbstractTableModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
+								SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										NewWindow.create(new SpreadsheetPanel(spreadsheetModel, GDApplet.this), "Collaboratibe Spreadsheet View <" + id + ">");
+									}
+								});
+
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+
+						}
+
+					}
+				}).start();
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return getR() != null;
 			}
 		});
 
@@ -3018,7 +3099,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("svgview", new AbstractAction("SVG Viewer") {
+		_actions.put("svgview", new AbstractAction("New SVG Viewer") {
 			public void actionPerformed(final ActionEvent e) {
 
 				int id = getDynamicViewId();
@@ -3786,9 +3867,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 			((HttpMarker) getR()).stopThreads();
 		} else {
 			try {
-				if (_rForConsole.hasRCollaborationListeners()) {					
+				if (_rForConsole.hasRCollaborationListeners()) {
 					((JGDPanelPop) _graphicPanel).dispose();
-					for (int i = 0; i < deviceViews.size(); ++i) deviceViews.elementAt(i).getPanel().dispose();
+					for (int i = 0; i < deviceViews.size(); ++i)
+						deviceViews.elementAt(i).getPanel().dispose();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -4542,7 +4624,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	public boolean isCollaborativeMode() {
-		//return _mode == HTTP_MODE;
+		// return _mode == HTTP_MODE;
 		return true;
 	}
 

@@ -72,6 +72,8 @@ import javax.xml.transform.stream.StreamResult;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import mapping.StandardReference;
+import model.SpreadsheetTableModelRemote;
+
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.logging.Log;
@@ -3443,6 +3445,30 @@ public class DirectJNI {
 		public String getGroovyStatus() throws RemoteException {
 			return null;
 		}
+
+		
+		
+		public SpreadsheetTableModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
+
+			return null;
+		}
+
+		public SpreadsheetTableModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
+
+			return null;
+		}
+
+		public String[] listSpreadsheetTableModelRemoteId() throws RemoteException {
+
+			return null;
+		}
+
+		public SpreadsheetTableModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
+
+			return null;
+		}
+		
+		
 
 	};
 

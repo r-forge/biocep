@@ -35,6 +35,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
+import model.SpreadsheetTableModelRemote;
+import model.SpreadsheetTableModelRemoteImpl;
+
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RObject;
 import org.mortbay.jetty.Server;
@@ -846,6 +849,28 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	
 	public String getGroovyStatus() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getGroovyStatus();
+	}
+	
+	HashMap<String, SpreadsheetTableModelRemoteImpl> _spreadsheetTableModelRemoteHashMap=new HashMap<String, SpreadsheetTableModelRemoteImpl>();
+
+	public SpreadsheetTableModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
+		return new SpreadsheetTableModelRemoteImpl(rowCount, colCount, _spreadsheetTableModelRemoteHashMap);
+	}	
+	
+	public SpreadsheetTableModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
+		return _spreadsheetTableModelRemoteHashMap.get(Id);
+	}
+
+	public SpreadsheetTableModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
+		SpreadsheetTableModelRemote[] result=new SpreadsheetTableModelRemote[_spreadsheetTableModelRemoteHashMap.size()];
+		int i=0;for (SpreadsheetTableModelRemote v:_spreadsheetTableModelRemoteHashMap.values()) result[i++]=v;
+		return result;
+	}
+
+	public String[] listSpreadsheetTableModelRemoteId() throws RemoteException {
+		String[] result=new String[_spreadsheetTableModelRemoteHashMap.size()];
+		int i=0;for (String k:_spreadsheetTableModelRemoteHashMap.keySet()) result[i++]=k;
+		return result;
 	}
 	
 	

@@ -20,7 +20,6 @@ package graphics.rmi.spreadsheet;
 import model.ModelUtils;
 import model.SpreadsheetAbstractTableModel;
 import model.SpreadsheetListener;
-import model.SpreadsheetListenerRemote;
 import model.SpreadsheetTableModelRemote;
 import model.SpreadsheetTableModelRemoteImpl;
 import net.infonode.docking.View;
@@ -30,7 +29,6 @@ import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.Formula;
 import net.java.dev.jspreadsheet.JSpreadsheet;
 import net.java.dev.jspreadsheet.Node;
-import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
 import net.java.dev.jspreadsheet.SpreadsheetSelectionEvent;
 import net.java.dev.jspreadsheet.SpreadsheetSelectionListener;
 import net.java.dev.jspreadsheet.SpreadsheetTableModel;
@@ -40,7 +38,6 @@ import graphics.rmi.GDApplet;
 import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
 import groovy.GroovyInterpreter;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -61,9 +58,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
@@ -106,8 +101,6 @@ import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
 import remoting.RServices;
-
-
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 import static javax.swing.JOptionPane.*;
@@ -121,7 +114,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	public static void main(String[] args) throws Exception {
 		
 		
-		tmri=new SpreadsheetTableModelRemoteImpl(3,2);
+		tmri=new SpreadsheetTableModelRemoteImpl(3,2, new HashMap<String, SpreadsheetTableModelRemoteImpl>());
 		SpreadsheetTableModelRemote modelRemote=(SpreadsheetTableModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
 		
 		
@@ -211,7 +204,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private FromRAction fromR = new FromRAction();
 	private ToRAction toR = new ToRAction();
 	private EvalAction eval = new EvalAction();
-	private NewViewAction newView = new NewViewAction();
+	//private NewViewAction newView = new NewViewAction();
 	private SelectAllAction selectall = new SelectAllAction();
 	private UndoAction undo = new UndoAction();
 	private FillAction fill = new FillAction();
@@ -257,7 +250,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		try {
 			ss.addSpreadsheetListener(new SpreadsheetListener(){
 				
-				public void setSelection(CellRange sel){
+				public void setSelection(String origin, CellRange sel){
+					
+					if (origin!=null && origin.equals(ss.getId())) return ;
+					
+					System.out.println("selection should change :"+sel);
 					// validate sel
 					int maxRow = ss.getTable().getRowCount() - 1;
 					int maxCol = ss.getTable().getColumnCount() - 1;
@@ -1350,6 +1347,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 	}
 
+	/*
 	private class NewViewAction extends AbstractAction {
 		NewViewAction() {
 			super("New Spreadsheet");
@@ -1361,9 +1359,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 			DimensionsDialog ddialog = new DimensionsDialog(ss);
 			ddialog.setVisible(true);
-			if (ddialog.getDimensions() != null) {
+			if (ddialog.getSpreadsheetDimension() != null) {
 				try {
-					_rgui.createView(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getDimensions().getHeight(), (int) ddialog.getDimensions().getWidth()), _rgui),
+					_rgui.createView(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getHeight(), (int) ddialog.getSpreadsheetDimension().getWidth()), _rgui),
 							"Spreadsheet View");
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -1375,6 +1373,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			setEnabled(true);
 		}
 	}
+	*/
 
 	private class CutAction extends AbstractAction {
 		CutAction() {
@@ -1408,8 +1407,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			add(find);
 			add(findNext);
 			add(fill);
-			add(newView);
-
+			//add(newView);
 		}
 	}
 
@@ -1943,115 +1941,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	}
 
-	static String rownum_str = "300";
-	static String colnum_str = "40";
 
-	public static class DimensionsDialog extends JDialog {
-
-		private boolean _closedOnOK = false;
-		private JTextField _rowNum;
-		private JTextField _colNum;
-		private JButton _ok;
-		private JButton _cancel;
-
-		public Dimension getDimensions() {
-			if (_closedOnOK)
-				try {
-					return new Dimension(Integer.decode(colnum_str), Integer.decode(rownum_str));
-				} catch (Exception e) {
-					return null;
-				}
-			else
-				return null;
-		}
-
-		public DimensionsDialog(Component c) {
-			super((Frame) null, true);
-
-			setTitle("Sprreadsheet Size");
-			setLocationRelativeTo(c);
-
-			getContentPane().setLayout(new GridLayout(1, 2));
-			((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-			JPanel p1 = new JPanel();
-			p1.setLayout(new GridLayout(0, 1));
-			getContentPane().add(p1);
-			JPanel p2 = new JPanel();
-			p2.setLayout(new GridLayout(0, 1));
-			getContentPane().add(p2);
-
-			_rowNum = new JTextField(rownum_str);
-			_colNum = new JTextField(colnum_str);
-
-			KeyListener keyListener = new KeyListener() {
-				public void keyPressed(KeyEvent e) {
-					if (e.getKeyCode() == 10) {
-						okMethod();
-					} else if (e.getKeyCode() == 27) {
-						cancelMethod();
-					}
-				}
-
-				public void keyReleased(KeyEvent e) {
-				}
-
-				public void keyTyped(KeyEvent e) {
-				}
-			};
-			_rowNum.addKeyListener(keyListener);
-			_colNum.addKeyListener(keyListener);
-
-			p2.add(_rowNum);
-			p2.add(_colNum);
-
-			p1.add(new JLabel("  Rows Number"));
-			p1.add(new JLabel("  Columns Number"));
-
-			_ok = new JButton("Ok");
-			_ok.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					okMethod();
-				}
-			});
-
-			_cancel = new JButton("Cancel");
-			_cancel.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					cancelMethod();
-				}
-			});
-
-			p1.add(_ok);
-			p2.add(_cancel);
-
-			new Thread(new Runnable() {
-				public void run() {
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							_rowNum.requestFocus();
-						}
-					});
-				}
-			}).start();
-			setSize(new Dimension(320, 150));
-			PoolUtils.locateInScreenCenter(this);
-
-		}
-
-		private void okMethod() {
-			rownum_str = _rowNum.getText();
-			colnum_str = new String(_colNum.getText());
-			_closedOnOK = true;
-			setVisible(false);
-		}
-
-		private void cancelMethod() {
-			_closedOnOK = false;
-			setVisible(false);
-		}
-
-	}
 
 	public class ToRData {
 		private String _cellRange;

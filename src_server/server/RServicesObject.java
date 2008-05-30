@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.Vector;
 import mapping.RPackage;
+import model.SpreadsheetTableModelRemote;
+
 import org.bioconductor.packages.rservices.RObject;
 import remoting.FileDescription;
 import remoting.RAction;
@@ -445,6 +447,22 @@ public class RServicesObject implements RServices {
 	
 	public boolean hasRCollaborationListeners() throws RemoteException {
 		return false;
+	}
+
+	public SpreadsheetTableModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
+		return null;
+	}
+
+	public SpreadsheetTableModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
+		return null;
+	}
+
+	public String[] listSpreadsheetTableModelRemoteId() throws RemoteException {
+		return null;
+	}
+
+	public SpreadsheetTableModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
+		return null;
 	}
 
 }

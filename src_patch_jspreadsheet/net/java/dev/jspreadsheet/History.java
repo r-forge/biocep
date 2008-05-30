@@ -145,7 +145,7 @@ public class History extends UndoableEditSupport
 
          // restore data and selection
          oldClip.paste(model, range.getminCorner());
-         model.setSelection(range);
+         model.setSelection(null,range);
       }
       else if ((type == REMOVEROW) || (type == REMOVECOLUMN))
       {
@@ -241,7 +241,7 @@ public class History extends UndoableEditSupport
       }
 
       // recover the selection
-      model.setSelection(range);
+      model.setSelection(null,range);
       model.setModified(true);
    }
 
