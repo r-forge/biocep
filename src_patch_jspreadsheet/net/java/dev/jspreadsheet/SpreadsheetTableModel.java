@@ -1,15 +1,11 @@
 package net.java.dev.jspreadsheet;
 
-import graphics.rmi.RGui;
-
 import java.io.BufferedReader;
 import java.io.StringReader;
-
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.Vector;
-
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -19,10 +15,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.undo.UndoManager;
-
 import model.SpreadsheetListener;
-import model.SpreadsheetListenerRemote;
-
+import remoting.RKit;
 import remoting.RServices;
 
 /**
@@ -76,7 +70,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 */
 	private boolean passwordModified;
 
-	private RGui rgui;
+	private RKit rkit;
 
 	private AbstractTableModel m;
 
@@ -87,13 +81,13 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param sharp
 	 *            the gui component to tie it to
 	 */
-	public SpreadsheetTableModel(JTable table, RGui rgui) {
+	public SpreadsheetTableModel(JTable table, RKit rkit) {
 		super();
 
 		// initialize state to unmodified and file to untitled
 		modified = false;
 		this.table = table;
-		this.rgui = rgui;
+		this.rkit = rkit;
 		history=new History(this);
 		history.addUndoableEditListener(um);
 	}
@@ -115,7 +109,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param numColumns
 	 *            total number of columns including column header
 	 */
-	public SpreadsheetTableModel(JTable table, AbstractTableModel m, RGui rgui) {
+	public SpreadsheetTableModel(JTable table, AbstractTableModel m, RKit rgui) {
 		for (int row = 0; row < m.getRowCount(); row++)
 			for (int col = 0; col < m.getColumnCount(); col++)
 				// we initialize it here
@@ -123,7 +117,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		// initialize state to unmodified and file to untitled
 		modified = false;
 		this.table = table;
-		this.rgui = rgui;
+		this.rkit = rgui;
 		this.m = m;
 		history=new History(this);
 		history.addUndoableEditListener(um);
@@ -1843,11 +1837,11 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	}
 
 	public RServices getR() {
-		return rgui.getR();
+		return rkit.getR();
 	}
 
-	public RGui getRGui() {
-		return rgui;
+	public RKit getRKit() {
+		return rkit;
 	}
 	
 	/**

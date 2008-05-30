@@ -3,7 +3,6 @@ package server;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isMacOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
-import graphics.rmi.JGDPanelPop;
 
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
@@ -16,12 +15,12 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.URL;
-import java.rmi.Remote;
+
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
+
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
-import java.util.EventListener;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -30,25 +29,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-
-import model.ModelUtils;
-import model.TableModelRemote;
 import model.TableModelRemoteImpl;
-
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.webapp.WebAppContext;
-import org.python.modules.synchronize;
-
 import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
@@ -83,32 +66,8 @@ public class ServerManager {
 	public static TableModelRemoteImpl tmri;
 	public static void main(String[] args) throws Exception {
 		
-		tmri=new TableModelRemoteImpl(10,3);
-		TableModelRemote modelRemote=(TableModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
-		
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(new JTable(ModelUtils.getTableModelWrapper(modelRemote)), BorderLayout.CENTER);
-		JFrame f = new JFrame();
-		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(panel, BorderLayout.CENTER);
-		panel.repaint();
-		f.pack();
-		f.setVisible(true);
-		f.setSize(300, 300);
 
-		
-		JPanel panel2 = new JPanel(new BorderLayout());
-		panel2.add(new JTable(ModelUtils.getTableModelWrapper(modelRemote)), BorderLayout.CENTER);
-		JFrame f2 = new JFrame();
-		f2.getContentPane().setLayout(new BorderLayout());
-		f2.getContentPane().add(panel2, BorderLayout.CENTER);
-		panel2.repaint();
-		f2.pack();
-		f2.setVisible(true);
-		f2.setSize(300, 300);
-
-		
-		//System.exit(0);
+		System.exit(0);
 		
 		
 		/*

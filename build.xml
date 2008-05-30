@@ -1287,7 +1287,7 @@
 			<mkdir dir="binsrv"/>
 
 			<property 
-				name="src_srv_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD"/>		
+				name="src_srv_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD:src_patch_jspreadsheet"/>		
 			<javac
 				srcdir="${src_srv_target}"
 				destdir="binsrv" debug="true" source="1.5" target="1.5">
@@ -1324,6 +1324,13 @@
 			<rmic classpath="binsrv" base="binsrv" classname="server.RNIImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="server.GraphicNotifierImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="server.GDDeviceImpl"/>
+		
+			<rmic classpath="binsrv" base="binsrv" classname="model.TableModelRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="model.TableModelListenerRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="model.SpreadsheetListenerRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="uk.ac.ebi.microarray.pools.db.NodeManagerImpl"/>
+		
+		
 		
 			<for list="${src_srv_target}" param="source" delimiter=":">
 			  <sequential>
@@ -1586,6 +1593,11 @@
 		<rmic classpath="bin" base="bin" classname="server.RNIImpl"/>
 		<rmic classpath="bin" base="bin" classname="server.GraphicNotifierImpl"/>
 		<rmic classpath="bin" base="bin" classname="server.GDDeviceImpl"/>
+		
+		<rmic classpath="bin" base="bin" classname="model.TableModelRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="model.TableModelListenerRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="model.SpreadsheetListenerRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="uk.ac.ebi.microarray.pools.db.NodeManagerImpl"/>
 		
 		<for list="${src_compile_target}" param="source" delimiter=":">
 		  <sequential>
