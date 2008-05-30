@@ -1,6 +1,5 @@
 package net.java.dev.jspreadsheet;
 
-import graphics.rmi.RGui;
 import java.util.EventListener;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
@@ -9,7 +8,7 @@ import javax.swing.table.AbstractTableModel;
 import model.ModelUtils;
 import model.SpreadsheetAbstractTableModel;
 import model.SpreadsheetListener;
-import model.SpreadsheetListenerRemote;
+import remoting.RKit;
 import remoting.RServices;
 
 /**
@@ -33,7 +32,7 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	private JTable table;
 
 
-	private RGui rgui;
+	private RKit rkit;
 
 	private SpreadsheetAbstractTableModel m;
 
@@ -55,10 +54,10 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	 * @param numColumns
 	 *            total number of columns including column header
 	 */
-	public SpreadsheetTableModelBis(JTable table, SpreadsheetAbstractTableModel m, RGui rgui) {
+	public SpreadsheetTableModelBis(JTable table, SpreadsheetAbstractTableModel m, RKit rgui) {
 		// initialize state to unmodified and file to untitled
 		this.table = table;
-		this.rgui = rgui;
+		this.rkit = rgui;
 		this.m = m;
 	}
 
@@ -507,11 +506,11 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	}
 
 	public RServices getR() {
-		return rgui.getR();
+		return rkit.getR();
 	}
 
-	public RGui getRGui() {
-		return rgui;
+	public RKit getRKit() {
+		return rkit;
 	}
 	
 	/**

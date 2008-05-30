@@ -1,6 +1,5 @@
 package net.java.dev.jspreadsheet;
 
-import graphics.rmi.RGui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -14,7 +13,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
 import java.util.UUID;
-
 import javax.swing.Action;
 import javax.swing.CellEditor;
 import javax.swing.JComponent;
@@ -33,6 +31,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import remoting.RKit;
 import model.SpreadsheetAbstractTableModel;
 import model.SpreadsheetListener;
 
@@ -50,13 +49,13 @@ public class JSpreadsheet extends JComponent
    private SpreadsheetTableModelClipboardInterface tableModel;
    /** Holds value of property columnWidth. */
    private int columnWidth;
-   private RGui rg;
+   private RKit rg;
 
    /** Create a new spreadsheet
     * @param columns The number of columns in the spreadsheet
     * @param rows The number of rows in the spreadsheet
     */
-   public JSpreadsheet(AbstractTableModel m, RGui rgui)
+   public JSpreadsheet(AbstractTableModel m, RKit rgui)
    {
 	   rg=rgui;
 	   
@@ -657,7 +656,7 @@ public class JSpreadsheet extends JComponent
 	   return ID;	   
    }
    
-   private void newTableModel(final AbstractTableModel m, RGui rgui)
+   private void newTableModel(final AbstractTableModel m, RKit rgui)
    {
 	  if (m instanceof SpreadsheetAbstractTableModel) {
 		  tableModel = new SpreadsheetTableModelBis(table,(SpreadsheetAbstractTableModel)m,rgui);
