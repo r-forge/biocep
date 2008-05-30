@@ -10,8 +10,11 @@ import java.util.Vector;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.UndoManager;
+
+import remoting.GenericCallbackDevice;
 import remoting.RServices;
 import server.DirectJNI;
+import server.GenericCallbackDeviceImpl;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
@@ -1859,10 +1862,18 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 
 	}
 	
-	
-	
+	private HashMap<String, SpreadsheetModelDevice> _spreadsheetDeviceHashMap;
 	public SpreadsheetModelDevice newSpreadsheetModelDevice() throws RemoteException {
-		return null;
+		SpreadsheetModelDeviceImpl result=new SpreadsheetModelDeviceImpl((SpreadsheetModelRemote)java.rmi.server.RemoteObject.toStub(this),_spreadsheetDeviceHashMap);
+		addSpreadsheetListener((SpreadsheetListenerRemote)java.rmi.server.RemoteObject.toStub(result));
+		addTableModelListener((TableModelListenerRemote)java.rmi.server.RemoteObject.toStub(result));		
+		return result;
+	}
+	
+	public SpreadsheetModelDevice[] listSpreadsheetModelDevice() throws RemoteException {
+		SpreadsheetModelDevice[] result=new SpreadsheetModelDevice[_spreadsheetDeviceHashMap.size()];
+		int i=0; for (SpreadsheetModelDevice d:_spreadsheetDeviceHashMap.values()) result[i++]=d; 
+		return result;
 	}
 
 }

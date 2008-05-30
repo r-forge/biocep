@@ -46,6 +46,7 @@ public interface SpreadsheetModelRemote extends TableModelRemote {
 	 public void setSpreadsheetSelection(String origin,CellRange sel) throws RemoteException;
 	 
 	 public SpreadsheetModelDevice newSpreadsheetModelDevice() throws RemoteException;
-	 
+	 public SpreadsheetModelDevice[] listSpreadsheetModelDevice() throws RemoteException;
+		 
 	 		 
 }
