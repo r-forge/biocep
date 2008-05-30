@@ -10,9 +10,8 @@ import remoting.RAction;
 
 public class GenericCallbackDeviceImpl extends UnicastRemoteObject implements GenericCallbackDevice {
 	
-	HashMap<String, GenericCallbackDevice> _genericCallbackDeviceHashMap;
-	Vector<RAction> _rActions = new Vector<RAction>();
-	
+	private HashMap<String, GenericCallbackDevice> _genericCallbackDeviceHashMap;
+	private Vector<RAction> _rActions = new Vector<RAction>();	
 	private static int _genericCallbackDeviceCounter=0;
 	private String _id="GenericCallbackDevice_"+(_genericCallbackDeviceCounter++);
 	

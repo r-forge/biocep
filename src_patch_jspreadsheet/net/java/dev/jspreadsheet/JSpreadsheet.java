@@ -32,7 +32,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import remoting.RKit;
-import model.SpreadsheetAbstractTableModel;
+import model.AbstractSpreadsheetModel;
 import model.SpreadsheetListener;
 
 /**
@@ -658,12 +658,12 @@ public class JSpreadsheet extends JComponent
    
    private void newTableModel(final AbstractTableModel m, RKit rgui)
    {
-	  if (m instanceof SpreadsheetAbstractTableModel) {
-		  tableModel = new SpreadsheetTableModelBis(table,(SpreadsheetAbstractTableModel)m,rgui);
+	  if (m instanceof AbstractSpreadsheetModel) {
+		  tableModel = new SpreadsheetTableModelBis(table,(AbstractSpreadsheetModel)m,rgui);
 		  addSelectionListener(new SpreadsheetSelectionListener() {
 			  public void selectionChanged(SpreadsheetSelectionEvent e) {				  
 				  if (e.getSelectionRange()!=null) {
-					  ((SpreadsheetAbstractTableModel)m).setSpreadsheetSelection(getId(), e.getSelectionRange());
+					  ((AbstractSpreadsheetModel)m).setSpreadsheetSelection(getId(), e.getSelectionRange());
 				  }
 			  }
 		  }); 

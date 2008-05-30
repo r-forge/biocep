@@ -25,11 +25,11 @@ import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
 import net.java.dev.jspreadsheet.SpreadsheetTableModelClipboardInterface;
 import net.java.dev.jspreadsheet.SpreadsheetTableModelInterface;
 
-public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implements SpreadsheetTableModelRemote, SpreadsheetTableModelInterface,
+public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements SpreadsheetModelRemote, SpreadsheetTableModelInterface,
 		SpreadsheetTableModelClipboardInterface {
 
 	private History history;
-	private HashMap<String, SpreadsheetTableModelRemoteImpl> map;
+	private HashMap<String, SpreadsheetModelRemoteImpl> map;
 	private UndoManager um = new UndoManager() {
 		public void undoableEditHappened(UndoableEditEvent e) {
 			super.undoableEditHappened(e);
@@ -50,21 +50,21 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 		}
 	};
 	
-	public SpreadsheetTableModelRemoteImpl(int rowCount, int colCount, HashMap<String, SpreadsheetTableModelRemoteImpl> map) throws RemoteException {
+	public SpreadsheetModelRemoteImpl(int rowCount, int colCount, HashMap<String, SpreadsheetModelRemoteImpl> map) throws RemoteException {
 		super(new SpreadsheetDefaultTableModel(rowCount, colCount));		
 		this.map=map;
 		init();
 		if (map!=null) map.put(getId(),this);
 	}
 
-	public SpreadsheetTableModelRemoteImpl(Object[] columnName, int rowCount) throws RemoteException {
+	public SpreadsheetModelRemoteImpl(Object[] columnName, int rowCount) throws RemoteException {
 		super(columnName, rowCount);		
 		this.map=map;		
 		init();
 		if (map!=null) map.put(getId(),this);
 	}
 
-	public SpreadsheetTableModelRemoteImpl(Object[][] data, Object[] columnName) throws RemoteException {
+	public SpreadsheetModelRemoteImpl(Object[][] data, Object[] columnName) throws RemoteException {
 		super(data, columnName);				
 		this.map=map;
 		init();
@@ -1858,4 +1858,11 @@ public class SpreadsheetTableModelRemoteImpl extends TableModelRemoteImpl implem
 	public void dispose() throws RemoteException {
 
 	}
+	
+	
+	
+	public SpreadsheetModelDevice newSpreadsheetModelDevice() throws RemoteException {
+		return null;
+	}
+
 }

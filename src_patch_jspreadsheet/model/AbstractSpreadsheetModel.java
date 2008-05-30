@@ -6,7 +6,7 @@ import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 
-abstract public class SpreadsheetAbstractTableModel extends AbstractTableModel {	
+abstract public class AbstractSpreadsheetModel extends AbstractTableModel {	
 	abstract public void sort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker);
 	abstract public CellRange removeRow(CellRange deletionRange);
 	abstract public CellRange removeColumn(CellRange deletionRange);

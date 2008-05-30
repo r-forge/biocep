@@ -72,7 +72,7 @@ import javax.xml.transform.stream.StreamResult;
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import mapping.StandardReference;
-import model.SpreadsheetTableModelRemote;
+import model.SpreadsheetModelRemote;
 
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -3448,12 +3448,12 @@ public class DirectJNI {
 
 		
 		
-		public SpreadsheetTableModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
+		public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
 
 			return null;
 		}
 
-		public SpreadsheetTableModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
+		public SpreadsheetModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
 
 			return null;
 		}
@@ -3463,7 +3463,7 @@ public class DirectJNI {
 			return null;
 		}
 
-		public SpreadsheetTableModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
+		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
 
 			return null;
 		}

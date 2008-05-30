@@ -259,8 +259,8 @@ public class ModelUtils {
 	}
 
 
-	public static SpreadsheetAbstractTableModel getSpreadsheetTableModelWrapper(final SpreadsheetTableModelRemote spreadsheetModelRemote) {
-		return new SpreadsheetAbstractTableModel(){
+	public static AbstractSpreadsheetModel getSpreadsheetTableModelWrapper(final SpreadsheetModelRemote spreadsheetModelRemote) {
+		return new AbstractSpreadsheetModel(){
 			private HashMap<TableModelListener, TableModelListenerRemoteImpl> modelListenerHashMap=new HashMap<TableModelListener, TableModelListenerRemoteImpl>();
 			
 			public void addTableModelListener(TableModelListener l) {			

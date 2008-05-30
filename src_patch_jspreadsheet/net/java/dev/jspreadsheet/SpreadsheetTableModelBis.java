@@ -6,7 +6,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import model.ModelUtils;
-import model.SpreadsheetAbstractTableModel;
+import model.AbstractSpreadsheetModel;
 import model.SpreadsheetListener;
 import remoting.RKit;
 import remoting.RServices;
@@ -34,7 +34,7 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 
 	private RKit rkit;
 
-	private SpreadsheetAbstractTableModel m;
+	private AbstractSpreadsheetModel m;
 
 
 	/**
@@ -54,7 +54,7 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	 * @param numColumns
 	 *            total number of columns including column header
 	 */
-	public SpreadsheetTableModelBis(JTable table, SpreadsheetAbstractTableModel m, RKit rgui) {
+	public SpreadsheetTableModelBis(JTable table, AbstractSpreadsheetModel m, RKit rgui) {
 		// initialize state to unmodified and file to untitled
 		this.table = table;
 		this.rkit = rgui;

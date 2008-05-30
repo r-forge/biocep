@@ -129,8 +129,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import model.ModelUtils;
-import model.SpreadsheetAbstractTableModel;
-import model.SpreadsheetTableModelRemote;
+import model.AbstractSpreadsheetModel;
+import model.SpreadsheetModelRemote;
 import net.infonode.docking.DockingWindow;
 import net.infonode.docking.DockingWindowAdapter;
 import net.infonode.docking.DockingWindowListener;
@@ -2624,10 +2624,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 						ddialog.setVisible(true);
 						if (ddialog.getSpreadsheetDimension() != null) {
 							try {
-								SpreadsheetTableModelRemote spreadsheetModelRemote = getR().newSpreadsheetTableModelRemote(
+								SpreadsheetModelRemote spreadsheetModelRemote = getR().newSpreadsheetTableModelRemote(
 										(int) ddialog.getSpreadsheetDimension().getWidth(), (int) ddialog.getSpreadsheetDimension().getHeight());
 								final String id = spreadsheetModelRemote.getId();
-								final SpreadsheetAbstractTableModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
+								final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
 										NewWindow.create(new SpreadsheetPanel(spreadsheetModel, GDApplet.this), "Collaboratibe Spreadsheet View <" + id + ">");
@@ -2661,9 +2661,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							ddialog.setVisible(true);
 							if (ddialog.getId() != null) {
 
-								SpreadsheetTableModelRemote spreadsheetModelRemote = getR().getSpreadsheetTableModelRemote(ddialog.getId());
+								SpreadsheetModelRemote spreadsheetModelRemote = getR().getSpreadsheetTableModelRemote(ddialog.getId());
 								final String id = spreadsheetModelRemote.getId();
-								final SpreadsheetAbstractTableModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
+								final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
 										NewWindow.create(new SpreadsheetPanel(spreadsheetModel, GDApplet.this), "Collaboratibe Spreadsheet View <" + id + ">");
