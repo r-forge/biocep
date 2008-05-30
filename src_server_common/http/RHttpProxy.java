@@ -111,7 +111,7 @@ public class RHttpProxy {
 		}
 	}
 
-	private static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters,
+	public static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters,
 			HttpClient httpClient) throws TunnelingException {
 		PostMethod postPush = null;
 		try {
@@ -146,7 +146,7 @@ public class RHttpProxy {
 		}
 	}
 
-	private static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters)
+	public static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters)
 			throws TunnelingException {
 		return invoke(url, sessionId, servantName, methodName, methodSignature, methodParameters, mainHttpClient);
 	}

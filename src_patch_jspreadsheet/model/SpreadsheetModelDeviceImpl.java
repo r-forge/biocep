@@ -91,6 +91,10 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		throw new RuntimeException("Shouldn't be called");
 	}
 	
+	public SpreadsheetModelDevice[] listSpreadsheetModelDevice() throws RemoteException {
+		throw new RuntimeException("Shouldn't be called");
+	}
+	
 	public void redo() throws RemoteException {
 		m.redo();		
 	}
