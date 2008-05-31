@@ -765,7 +765,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 *            range of cells to add new columns to the left of creates the
 	 *            same number of new columns as range has
 	 */
-	public CellRange insertColumn(CellRange insertRange) {
+	public void insertColumn(CellRange insertRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -790,23 +790,17 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		CellRange range = new CellRange(0, lastRow, Math.max(col, 0), lastCol);
 		SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
 
-		TableColumnModel tm = table.getColumnModel();
-		TableColumn column = tm.getColumn(col);
+
 
 		// add the new columns to the end
 		for (int i = 0; i < insertNum; i++) {
 			int curCol = lastCol + i + 1;
 			addColumn();
-
-			TableColumn newcol = new TableColumn(curCol, column.getPreferredWidth());
-
-			// TableColumn column = tm.getColumn(tm.getColumnCount() - 1);
-			// TableColumn newcol = new TableColumn(tm.getColumnCount(),
-			// column.getPreferredWidth());
-			newcol.setHeaderValue(Node.translateColumn(curCol));
-			tm.addColumn(newcol);
 		}
 
+		insertCols(insertNum,col);
+		
+		
 		// shift relevant columns left
 		scrap.paste(this, new CellPoint(0, col + insertNum));
 
@@ -816,11 +810,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(0, 0, col, col);
-			setSelection(null,selectionRange);
-			return selectionRange;
-		} else {
-			return null;
-		}
+			setSelection(null,selectionRange);			
+		} 
 
     	
 		// sharp.setBaseColumnWidth();
@@ -838,7 +829,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 *            the range to the left of to add new rows also adds number of
 	 *            new rows equal to rows in range
 	 */
-	public CellRange insertRow(CellRange insertRange) {
+	public void insertRow(CellRange insertRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -873,11 +864,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		// set selection
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(row, row, 0, 0);
-			setSelection(null,selectionRange);
-			return selectionRange;
-		} else {
-			return null;
-		}
+			setSelection(null,selectionRange);			
+		} 
 	}
 
 	/**
@@ -1028,7 +1016,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param deletionRange
 	 *            the range that contains the columns to delete
 	 */
-	public CellRange removeColumn(CellRange deletionRange) {
+	public void removeColumn(CellRange deletionRange) {
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -1054,11 +1042,10 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		for (int i = 0; i < removeNum; i++) {
 			// delete old column
 			removeColumn();
-
-			TableColumnModel tm = table.getColumnModel();
-			tm.removeColumn(tm.getColumn(tm.getColumnCount() - 1));
 		}
 
+		removeCols(removeNum);
+		
 		// shift clipboard elements right
 		scrap.paste(this, new CellPoint(0, col));
 
@@ -1069,10 +1056,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(0, 0, col, col);
 			setSelection(null,selectionRange);
-			return selectionRange;
-		} else {
-			return null;
-		}
+			
+		} 
 		
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
@@ -1117,7 +1102,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	 * @param deletionRange
 	 *            CellRange that contains the rows to delete
 	 */
-	public CellRange removeRow(CellRange deletionRange) {
+	public void removeRow(CellRange deletionRange) {
 		if (m instanceof DefaultTableModel) {
 			/*
 			 * since the insertion point is given by a selected cell there will
@@ -1152,10 +1137,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			if (table.getSelectedColumnCount() == 0) {
 				CellRange selectionRange=new CellRange(row, row, 0, 0);
 				setSelection(null,selectionRange);
-				return selectionRange;
-			} else {
-				return null;
-			}
+			} 
 			
 		} else {
 			throw new RuntimeException("not yet implemented");
@@ -1918,6 +1900,33 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		um.redo();
 	}
 
+	
+	private void removeCols(int removeNum) {
+		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).removeColumns(removeNum);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	private void insertCols(int insertNum, int startCol) {
+		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).insertColumn(insertNum, startCol);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
 	private void updateUndoAction() {
 		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {

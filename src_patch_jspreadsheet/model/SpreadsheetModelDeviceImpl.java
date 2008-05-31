@@ -63,12 +63,12 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		m.historyAdd(clip);
 	}
 	
-	public CellRange insertColumn(CellRange insertRange) throws RemoteException {
-		return m.insertColumn(insertRange);
+	public void insertColumn(CellRange insertRange) throws RemoteException {
+		m.insertColumn(insertRange);
 	}
 	
-	public CellRange insertRow(CellRange insertRange) throws RemoteException {
-		return m.insertRow(insertRange);
+	public void insertRow(CellRange insertRange) throws RemoteException {
+		m.insertRow(insertRange);
 	}
 	
 	public boolean isDeletionSafe(CellRange range, boolean byRow) throws RemoteException {
@@ -103,12 +103,12 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		throw new RuntimeException("Shouldn't be called");	
 	}
 	
-	public CellRange removeColumn(CellRange deletionRange) throws RemoteException {
-		return m.removeColumn(deletionRange);
+	public void removeColumn(CellRange deletionRange) throws RemoteException {
+		m.removeColumn(deletionRange);
 	}
 	
-	public CellRange removeRow(CellRange deletionRange) throws RemoteException {
-		return m.removeRow(deletionRange);
+	public void removeRow(CellRange deletionRange) throws RemoteException {
+		m.removeRow(deletionRange);
 	}
 	
 	public void removeSpreadsheetListener(SpreadsheetListenerRemote l) throws RemoteException {
@@ -319,7 +319,22 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		RAction action = new RAction("discardRowCount", null);
 		_rActions.add(action);	
 	}
-		
+	
+	
+	public void removeColumns(int removeNum) throws RemoteException {
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("removeNum", removeNum);
+		RAction action = new RAction("removeColumns", attributes);
+		_rActions.add(action);	
+	}
+	
+	public void insertColumn(int insertNum, int startCol) throws RemoteException {
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("insertNum", insertNum);
+		attributes.put("startCol", startCol);
+		RAction action = new RAction("insertColumn", attributes);
+		_rActions.add(action);
+	}
 	//-------------------------------------
 	
 	public void tableChanged(TableModelEvent e) throws RemoteException {

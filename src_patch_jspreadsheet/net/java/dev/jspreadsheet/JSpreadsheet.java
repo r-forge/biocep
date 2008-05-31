@@ -30,6 +30,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import remoting.RKit;
 import model.AbstractSpreadsheetModel;
@@ -421,6 +422,7 @@ public class JSpreadsheet extends JComponent
     	  tableModel.historyAdd(range, History.REMOVEROW);
          Debug.println(range);
          tableModel.removeRow(range);
+         
          Debug.println("Delete row range " + range);
       }
       else
@@ -429,6 +431,7 @@ public class JSpreadsheet extends JComponent
          tableModel.historyAdd(range, History.REMOVECOLUMN);
          Debug.println(range);
          tableModel.removeColumn(range);
+                                    
       }
    }
 

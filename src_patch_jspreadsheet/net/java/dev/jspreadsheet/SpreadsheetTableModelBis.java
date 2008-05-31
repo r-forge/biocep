@@ -304,8 +304,8 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	 *            range of cells to add new columns to the left of creates the
 	 *            same number of new columns as range has
 	 */
-	public CellRange insertColumn(CellRange insertRange) {
-		return m.insertColumn(insertRange);
+	public void insertColumn(CellRange insertRange) {
+		m.insertColumn(insertRange);
 	}
 
 	/**
@@ -316,8 +316,8 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	 *            the range to the left of to add new rows also adds number of
 	 *            new rows equal to rows in range
 	 */
-	public CellRange insertRow(CellRange insertRange) {
-		return m.insertRow(insertRange);
+	public void insertRow(CellRange insertRange) {
+		m.insertRow(insertRange);
 	}
 
 	/**
@@ -344,8 +344,8 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	 * @param deletionRange
 	 *            the range that contains the columns to delete
 	 */
-	public CellRange removeColumn(CellRange deletionRange) {
-		return m.removeColumn(deletionRange);
+	public void removeColumn(CellRange deletionRange) {
+		m.removeColumn(deletionRange);
 	}
 
 	/**
@@ -354,8 +354,8 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	 * @param deletionRange
 	 *            CellRange that contains the rows to delete
 	 */
-	public CellRange removeRow(CellRange deletionRange) {
-		return m.removeRow(deletionRange);
+	public void removeRow(CellRange deletionRange) {
+		m.removeRow(deletionRange);
 	}
 	
 	/**

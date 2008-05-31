@@ -16,10 +16,10 @@ public interface SpreadsheetTableModelClipboardInterface {
 	public void setSelection(String origin , CellRange sel);
 	
 	
-	public CellRange insertColumn(CellRange insertRange);
-	public CellRange insertRow(CellRange insertRange);
-	public CellRange removeColumn(CellRange deletionRange);
-	public CellRange removeRow(CellRange deletionRange);
+	public void insertColumn(CellRange insertRange);
+	public void insertRow(CellRange insertRange);
+	public void removeColumn(CellRange deletionRange);
+	public void removeRow(CellRange deletionRange);
 		
 	public CellPoint look(CellPoint begin, Object goal, boolean matchCase, boolean matchCell);	
 	public void fillRange(CellRange range, String s);

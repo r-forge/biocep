@@ -11,10 +11,10 @@ import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 public interface SpreadsheetModelRemote extends TableModelRemote {
 	 public void sort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker) throws RemoteException;
 	 
-	 public CellRange removeRow(CellRange deletionRange) throws RemoteException;
-	 public CellRange removeColumn(CellRange deletionRange) throws RemoteException;
-	 public CellRange insertColumn(CellRange insertRange) throws RemoteException;
-	 public CellRange insertRow(CellRange insertRange) throws RemoteException;
+	 public void removeRow(CellRange deletionRange) throws RemoteException;
+	 public void removeColumn(CellRange deletionRange) throws RemoteException;
+	 public void insertColumn(CellRange insertRange) throws RemoteException;
+	 public void insertRow(CellRange insertRange) throws RemoteException;
 	 
 	 public Cell getCellAt(int aRow, int aColumn) throws RemoteException;
 	 public void setRange(CellRange range, Cell[][] data, boolean byValue) throws RemoteException;

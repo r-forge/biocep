@@ -37,5 +37,12 @@ public class SpreadsheetListenerRemoteImpl extends UnicastRemoteObject implement
 		localListener.updateUndoAction();
 	}
 	
+	public void removeColumns(int removeNum) throws RemoteException {	
+		localListener.removeColumns(removeNum);
+	}
 	
+	public void insertColumn(int insertNum, int startCol) throws RemoteException {
+		localListener.insertColumn(insertNum, startCol);		
+	}
+
 }

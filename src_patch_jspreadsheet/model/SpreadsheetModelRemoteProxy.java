@@ -26,14 +26,6 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote {
 	public SpreadsheetModelRemoteProxy(SpreadsheetModelDevice device) {
 		this._device = device;
 
-		try {
-			_rowCount=_device.getRowCount();
-			_colCount=_device.getColumnCount();
-			_cellCache=_device.getRangeHashMap(new CellRange(new CellPoint(0,0), new CellPoint(52,17)));
-		
-		} catch (Exception e) {
-			
-		}
 		popThread = new Thread(new Runnable() {
 			public void run() {
 				while (true && !_stopThreads) {
@@ -44,7 +36,6 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote {
 					} catch (Exception e) {
 					}
 				}
-
 			}
 		});
 		popThread.start();
@@ -71,19 +62,28 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote {
 						for (int j = 0; j < _spreadsheetListeners.size(); ++j) {
 							_spreadsheetListeners.elementAt(j).setSelection(origin, sel);
 						}
+					} else if (action.getActionName().equals("removeColumns")) {
+						int removeNum= (Integer)action.getAttributes().get("removeNum");
+						for (int j = 0; j < _spreadsheetListeners.size(); ++j) {
+							_spreadsheetListeners.elementAt(j).removeColumns(removeNum);
+						}
+					} else if (action.getActionName().equals("insertColumn")) {
+												
+						int insertNum= (Integer)action.getAttributes().get("insertNum");
+						int startCol= (Integer)action.getAttributes().get("startCol");
+						for (int j = 0; j < _spreadsheetListeners.size(); ++j) {
+							_spreadsheetListeners.elementAt(j).insertColumn(insertNum, startCol);
+						}
+						
 					} else if (action.getActionName().equals("tableChanged")) {
 						TableModelEvent e = (TableModelEvent) action.getAttributes().get("e");
 						for (int j = 0; j < _tableModelListeners.size(); ++j) {
 							_tableModelListeners.elementAt(j).tableChanged(e);
 						}
-					} else if (action.getActionName().equals("discardRowCount")) {
-						
-						_rowCount = null;
-						
-					} else if (action.getActionName().equals("discardColumnCount")) {
-						
-						_colCount = null;
-						
+					} else if (action.getActionName().equals("discardRowCount")) {						
+						_rowCount = null;						
+					} else if (action.getActionName().equals("discardColumnCount")) {						
+						_colCount = null;						
 					} else if (action.getActionName().equals("discardCache")) {
 						_cellCache=new HashMap<Integer, Object>();
 					} else if (action.getActionName().equals("discardCacheCell")) {
@@ -97,7 +97,7 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote {
 								_cellCache.remove(l*65536+k);								
 							}
 						}
-					}
+					} 
 				}
 			}
 			
@@ -244,6 +244,10 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote {
 	}
 
 	public Object getValueAt(int rowIndex, int columnIndex) throws RemoteException {
+		if (_cellCache.size()==0) {
+			_cellCache=_device.getRangeHashMap(new CellRange(new CellPoint(rowIndex,columnIndex), new CellPoint(rowIndex+52,columnIndex+17)));
+		}
+				
 		System.out.print("getValueAt");
 		Object result=_cellCache.get(rowIndex*65536+columnIndex);
 		if (result==null) {
@@ -271,14 +275,14 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote {
 		_device.historyAdd(clip);
 	}
 
-	public CellRange insertColumn(CellRange insertRange) throws RemoteException {
+	public void insertColumn(CellRange insertRange) throws RemoteException {
 		System.out.println("insertColumn");
-		return _device.insertColumn(insertRange);
+		_device.insertColumn(insertRange);
 	}
 
-	public CellRange insertRow(CellRange insertRange) throws RemoteException {
+	public void insertRow(CellRange insertRange) throws RemoteException {
 		System.out.println("insertRow");
-		return _device.insertRow(insertRange);
+		_device.insertRow(insertRange);
 	}
 
 	public boolean isCellEditable(int rowIndex, int columnIndex) throws RemoteException {
@@ -320,14 +324,14 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote {
 		_device.redo();
 	}
 
-	public CellRange removeColumn(CellRange deletionRange) throws RemoteException {
+	public void removeColumn(CellRange deletionRange) throws RemoteException {
 		System.out.println("removeColumn");
-		return _device.removeColumn(deletionRange);
+		_device.removeColumn(deletionRange);
 	}
 
-	public CellRange removeRow(CellRange deletionRange) throws RemoteException {
+	public void removeRow(CellRange deletionRange) throws RemoteException {
 		System.out.println("removeRow");
-		return _device.removeRow(deletionRange);
+		_device.removeRow(deletionRange);
 	}
 
 	public void setModified(boolean modified) throws RemoteException {
