@@ -2626,7 +2626,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							try {
 								SpreadsheetModelRemote spreadsheetModelRemote = getR().newSpreadsheetTableModelRemote(
 										(int) ddialog.getSpreadsheetDimension().getWidth(), (int) ddialog.getSpreadsheetDimension().getHeight());
-								final String id = spreadsheetModelRemote.getId();
+								final String id = spreadsheetModelRemote.getSpreadsheetModelId();
 								final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
@@ -2662,8 +2662,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (ddialog.getId() != null) {
 
 								SpreadsheetModelRemote spreadsheetModelRemote = getR().getSpreadsheetTableModelRemote(ddialog.getId());
-								final String id = spreadsheetModelRemote.getId();
+								final String id = spreadsheetModelRemote.getSpreadsheetModelId();
 								final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
+								
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
 										NewWindow.create(new SpreadsheetPanel(spreadsheetModel, GDApplet.this), "Collaboratibe Spreadsheet View <" + id + ">");

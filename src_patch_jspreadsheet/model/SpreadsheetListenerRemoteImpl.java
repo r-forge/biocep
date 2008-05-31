@@ -11,13 +11,31 @@ public class SpreadsheetListenerRemoteImpl extends UnicastRemoteObject implement
 		super();
 		this.localListener=localListener;
 	}
-	public void setSelection(String origin,CellRange sel) throws RemoteException {
-		localListener.setSelection(origin,sel);			
+
+	public void discardCache() {
+		localListener.discardCache();
 	}
-	public void updateRedoAction() throws RemoteException {
-		localListener.updateRedoAction();			
+	public void discardCacheRange(CellRange range) {
+		localListener.discardCacheRange(range);
 	}
-	public void updateUndoAction() throws RemoteException {
-		localListener.updateUndoAction();			
+	public void discardCacheCell(int row, int col) {
+		localListener.discardCacheCell(row, col);
 	}
+	public void discardColumnCount() {
+		localListener.discardColumnCount();
+	}
+	public void discardRowCount() {
+		localListener.discardRowCount();
+	}
+	public void setSelection(String origin, CellRange sel) {
+		localListener.setSelection(origin, sel);
+	}
+	public void updateRedoAction() {
+		localListener.updateRedoAction();
+	}
+	public void updateUndoAction() {
+		localListener.updateUndoAction();
+	}
+	
+	
 }
