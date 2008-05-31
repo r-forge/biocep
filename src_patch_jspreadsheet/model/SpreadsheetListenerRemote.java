@@ -15,4 +15,9 @@ public interface SpreadsheetListenerRemote extends Remote{
 	public void discardCache() throws RemoteException;
 	public void discardCacheCell(int row, int col) throws RemoteException;
 	public void discardCacheRange(CellRange range) throws RemoteException;
+	
+	public void removeColumns(int rangeNum) throws RemoteException;
+	public void insertColumn(int insertNum, int startCol) throws RemoteException;
+	
+	
 }

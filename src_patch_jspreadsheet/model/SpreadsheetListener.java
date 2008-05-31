@@ -14,4 +14,7 @@ public interface SpreadsheetListener {
 	public void discardCacheCell(int row, int col);
 	public void discardCacheRange(CellRange range);
 	
+	public void removeColumns(int removeNum);
+	public void insertColumn(int insertNum, int startCol);
+	
 }

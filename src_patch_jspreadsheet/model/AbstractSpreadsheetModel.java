@@ -8,10 +8,10 @@ import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 
 abstract public class AbstractSpreadsheetModel extends AbstractTableModel {	
 	abstract public void sort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker);
-	abstract public CellRange removeRow(CellRange deletionRange);
-	abstract public CellRange removeColumn(CellRange deletionRange);
-	abstract public CellRange insertRow(CellRange insertRange);
-	abstract public CellRange insertColumn(CellRange insertRange);
+	abstract public void removeRow(CellRange deletionRange);
+	abstract public void removeColumn(CellRange deletionRange);
+	abstract public void insertRow(CellRange insertRange);
+	abstract public void insertColumn(CellRange insertRange);
 	abstract public Cell getCellAt(int aRow, int aColumn);
 	abstract public void setRange(CellRange range, Cell[][] data, boolean byValue);
 	abstract public void setRange(CellRange range, Object[][] data);

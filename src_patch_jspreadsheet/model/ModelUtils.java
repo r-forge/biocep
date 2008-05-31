@@ -461,18 +461,18 @@ public class ModelUtils {
 			}
 
 			@Override
-			public CellRange insertColumn(CellRange insertRange) {
+			public void insertColumn(CellRange insertRange) {
 				try {					
-					 return spreadsheetModelRemote.insertColumn(insertRange);
+					  spreadsheetModelRemote.insertColumn(insertRange);
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			}
 
 			@Override
-			public CellRange insertRow(CellRange insertRange) {
+			public void insertRow(CellRange insertRange) {
 				try {					
-					 return spreadsheetModelRemote.insertRow(insertRange);
+					  spreadsheetModelRemote.insertRow(insertRange);
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
@@ -506,18 +506,18 @@ public class ModelUtils {
 			}
 
 			@Override
-			public CellRange removeColumn(CellRange deletionRange) {
+			public void removeColumn(CellRange deletionRange) {
 				try {					
-					 return spreadsheetModelRemote.removeColumn(deletionRange);
+					 spreadsheetModelRemote.removeColumn(deletionRange);
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			}
 
 			@Override
-			public CellRange removeRow(CellRange deletionRange) {
+			public void removeRow(CellRange deletionRange) {
 				try {					
-					 return spreadsheetModelRemote.removeRow(deletionRange);
+					 spreadsheetModelRemote.removeRow(deletionRange);
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}

@@ -8,13 +8,9 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import javax.swing.event.UndoableEditEvent;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.UndoManager;
-
-import remoting.GenericCallbackDevice;
 import remoting.RServices;
 import server.DirectJNI;
-import server.GenericCallbackDeviceImpl;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
@@ -606,6 +602,33 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		doSetValueAt(aValue, aRow, aColumn);
 	}
 	
+	private void discardRowCount() {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).discardRowCount();
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	
+	private void discardColumnCount() {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).discardColumnCount();
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
 	private void discardCell(int aRow, int aColumn) {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
@@ -645,6 +668,31 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}	
 	
+	private void removeCols(int removeNum) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).removeColumns(removeNum);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	private void insertCols(int insertNum, int startCol) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).insertColumn(insertNum, startCol);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
 	
 	/**
 	 * This method should be called with a cell is set as a formula cell
@@ -786,7 +834,9 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            range of cells to add new columns to the left of creates the
 	 *            same number of new columns as range has
 	 */
-	public CellRange insertColumn(CellRange insertRange) {
+	public void insertColumn(CellRange insertRange) {
+		discardColumnCount();
+		discard();
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -800,8 +850,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		int insertNum = insertRange.getWidth();
 
 		// the coordinates of the last cell in table
-		int lastRow = m.getRowCount() - 1;
-		int lastCol = m.getColumnCount() - 1;
+		int lastRow = getRowCount() - 1;
+		int lastCol = getColumnCount() - 1;
 
 		/*
 		 * everything right to new columns must be shifted right so cut them to
@@ -811,31 +861,28 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		CellRange range = new CellRange(0, lastRow, Math.max(col, 0), lastCol);
 		SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
 
-		/*
-		 * IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TableColumnModel tm =
-		 * table.getColumnModel(); TableColumn column = tm.getColumn(col);
-		 *  // add the new columns to the end for (int i = 0; i < insertNum;
-		 * i++) { int curCol = lastCol + i + 1; addColumn();
-		 * 
-		 * TableColumn newcol = new TableColumn(curCol,
-		 * column.getPreferredWidth());
-		 *  // TableColumn column = tm.getColumn(tm.getColumnCount() - 1); //
-		 * TableColumn newcol = new TableColumn(tm.getColumnCount(), //
-		 * column.getPreferredWidth());
-		 * newcol.setHeaderValue(Node.translateColumn(curCol));
-		 * tm.addColumn(newcol); }
-		 */
 
+
+		// add the new columns to the end
+		for (int i = 0; i < insertNum; i++) {
+			int curCol = lastCol + i + 1;
+			addColumn();
+		}
+
+		insertCols(insertNum,col);
+		
+		
 		// shift relevant columns left
 		scrap.paste(this, new CellPoint(0, col + insertNum));
 
 		recalculateAll();
 
 		// set selection
-		{
-			return (new CellRange(0, 0, col, col));
-		}
-
+				
+		CellRange selectionRange=new CellRange(0, 0, col, col);
+		setSelection(null,selectionRange);
+		//return selectionRange;
+		
 		// sharp.setBaseColumnWidth();
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
@@ -849,7 +896,9 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            the range to the left of to add new rows also adds number of
 	 *            new rows equal to rows in range
 	 */
-	public CellRange insertRow(CellRange insertRange) {
+	public void insertRow(CellRange insertRange) {
+		discardRowCount();
+		discard();
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -881,9 +930,9 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 
 		recalculateAll();
 
-		// set selection
-
-		return new CellRange(row, row, 0, 0);
+		CellRange selectionRange=new CellRange(row, row, 0, 0);
+		setSelection(null,selectionRange);
+		//return selectionRange;
 
 	}
 
@@ -1035,7 +1084,9 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 * @param deletionRange
 	 *            the range that contains the columns to delete
 	 */
-	public CellRange removeColumn(CellRange deletionRange) {
+	public void removeColumn(CellRange deletionRange) {
+		discardColumnCount();
+		discard();
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -1067,6 +1118,9 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			// tm.removeColumn(tm.getColumn(tm.getColumnCount() - 1));
 
 		}
+		
+		removeCols(removeNum);
+		
 
 		// shift clipboard elements right
 		scrap.paste(this, new CellPoint(0, col));
@@ -1076,8 +1130,10 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 
 		// set selection
 
-		return (new CellRange(0, 0, col, col));
-
+		CellRange selectionRange=new CellRange(0, 0, col, col);
+		setSelection(null,selectionRange);
+		//return selectionRange;
+		
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
 	}
@@ -1121,8 +1177,11 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 * @param deletionRange
 	 *            CellRange that contains the rows to delete
 	 */
-	public CellRange removeRow(CellRange deletionRange) {
-		if (m instanceof DefaultTableModel) {
+	public void removeRow(CellRange deletionRange) {
+
+			discardRowCount();
+			discard();
+			
 			/*
 			 * since the insertion point is given by a selected cell there will
 			 * never be an out of bounds error
@@ -1144,20 +1203,18 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
 
 			for (int i = 0; i < removeNum; i++) {
-				((DefaultTableModel) m).removeRow(m.getRowCount() - 1);
+				((SpreadsheetDefaultTableModel) m).removeRow(m.getRowCount() - 1);
 			}
 
 			// shift relevent rows up
 			scrap.paste(this, new CellPoint(row, 0));
 
 			recalculateAll();
+			
+			CellRange selectionRange=new CellRange(row, row, 0, 0);
+			setSelection(null,selectionRange);
+			//return selectionRange;			
 
-			// set selection
-			return new CellRange(row, row, 0, 0);
-
-		} else {
-			throw new RuntimeException("not yet implemented");
-		}
 	}
 
 	/**
@@ -1602,7 +1659,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 * notification to JTable. Please use insertColumn method instead.
 	 */
 	private void addColumn() {
-		if (m instanceof SpreadsheetDefaultTableModel) {
+
 			((SpreadsheetDefaultTableModel) m).getColumnIdentifiers().addElement(null);
 
 			/* Initialize the new column */
@@ -1625,16 +1682,13 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			 * newColumnsAdded(new TableModelEvent(this, 0, getRowCount() - 1,
 			 * getColumnCount() - 1, TableModelEvent.INSERT));
 			 */
-		} else {
-			throw new RuntimeException("Not Yet Implemented");
-		}
 	}
 
 	/**
 	 * Adds row to end of table
 	 */
 	private void addRow() {
-		if (m instanceof SpreadsheetDefaultTableModel) {
+
 			// create a new row with appropriate label
 			Vector rowData = new Vector();
 			rowData.add(0, new Cell(new Integer(m.getRowCount() + 1)));
@@ -1645,9 +1699,6 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			for (int i = 1; i < m.getColumnCount(); i++) {
 				m.setValueAt(new Cell(""), m.getRowCount() - 1, i);
 			}
-		} else {
-			throw new RuntimeException("Not Yet Implemented");
-		}
 	}
 
 	/**
@@ -1722,8 +1773,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		return index;
 	}
 
-	public void removeColumn() {
-		if (m instanceof SpreadsheetDefaultTableModel) {
+	private void removeColumn() {
+		
 			int lastRow = m.getRowCount() - 1;
 			int lastCol = m.getColumnCount() - 1;
 
@@ -1746,9 +1797,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			columnIdentifiers.removeElementAt(columnIdentifiers.size() - 1);
 
 			// Notification is generated within the GUI
-		} else {
-			throw new RuntimeException("Not Yet Implemented");
-		}
+		
 	}
 
 	/**
