@@ -121,9 +121,6 @@ public class JSpreadsheet extends JComponent
 
       Formula.registerFunctions();
 
-      ListSelectionListener lsl = new SelectionAdapter();
-      table.getSelectionModel().addListSelectionListener(lsl);
-      table.getColumnModel().getSelectionModel().addListSelectionListener(lsl);
    }
 
    /** Get the cell at the given position
@@ -269,16 +266,6 @@ public class JSpreadsheet extends JComponent
          return null;
       }
    }
-
-
-   /** Add a listener to be notified when the selected range changes
-    * @param l The listener to add
-    */
-   public void addSelectionListener(SpreadsheetSelectionListener l)
-   {
-      listenerList.add(SpreadsheetSelectionListener.class, l);
-   }
-
 
    /** Clears a range of cells
     * @param range The range of cells to be deleted
@@ -660,13 +647,6 @@ public class JSpreadsheet extends JComponent
    {
 	  if (m instanceof AbstractSpreadsheetModel) {
 		  tableModel = new SpreadsheetTableModelBis(table,(AbstractSpreadsheetModel)m,rgui);
-		  addSelectionListener(new SpreadsheetSelectionListener() {
-			  public void selectionChanged(SpreadsheetSelectionEvent e) {				  
-				  if (e.getSelectionRange()!=null) {
-					  ((AbstractSpreadsheetModel)m).setSpreadsheetSelection(getId(), e.getSelectionRange());
-				  }
-			  }
-		  }); 
 	  } else {
 		  tableModel = new SpreadsheetTableModel(table,m,rgui);
 	  }

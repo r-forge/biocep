@@ -36,6 +36,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import model.SpreadsheetModelDevice;
+import model.SpreadsheetModelRemote;
+
 import org.apache.commons.logging.Log;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 
@@ -481,6 +485,24 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						if (_rkit != null)
 							_rkit.getRLock().unlock();
 					}
+				} else if (command.equals("newspreadsheetmodeldevice")) {
+						
+						String spreadsheetModelDeviceId = request.getParameter("id");
+						SpreadsheetModelRemote model=null;
+						
+						if (spreadsheetModelDeviceId==null || spreadsheetModelDeviceId.equals("")) {
+							model=((RServices) session.getAttribute("R")).newSpreadsheetTableModelRemote(Integer.decode(request.getParameter("rowcount")), Integer.decode(request.getParameter("colcount")));
+						} else {
+							model=((RServices) session.getAttribute("R")).getSpreadsheetTableModelRemote(spreadsheetModelDeviceId);
+						}
+						
+						SpreadsheetModelDevice spreadsheetDevice=model.newSpreadsheetModelDevice();												
+						String spreadsheetDeviceId=spreadsheetDevice.getId();
+						session.setAttribute(spreadsheetDeviceId, spreadsheetDevice);
+						saveSessionAttributes(session);
+						result = spreadsheetDeviceId;
+						break;
+						
 				}
 
 			} while (true);

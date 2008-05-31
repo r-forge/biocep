@@ -26,6 +26,11 @@ import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
+
+import model.SpreadsheetModelDevice;
+import model.SpreadsheetModelRemote;
+import model.SpreadsheetModelRemoteProxy;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
@@ -303,6 +308,44 @@ public class RHttpProxy {
 		}
 	}
 
+	public static SpreadsheetModelDevice newSpreadsheetModelDevice(String url, String sessionId, String id, String rowcount, String colcount) throws TunnelingException {
+		GetMethod getNewDevice = null;
+		try {
+			Object result = null;
+			mainHttpClient = new HttpClient();
+			getNewDevice = new GetMethod(url + "?method=newspreadsheetmodeldevice&id="+id+"&rowcount="+rowcount+"&colcount="+colcount);
+			
+			try {
+				if (sessionId != null && !sessionId.equals("")) {
+					getNewDevice.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					getNewDevice.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
+				}
+				mainHttpClient.executeMethod(getNewDevice);
+				result = new ObjectInputStream(getNewDevice.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
+			} catch (Exception e) {
+				throw new TunnelingException("", e);
+			}
+			if (result != null && result instanceof TunnelingException) {
+				throw (TunnelingException) result;
+			}
+
+			String deviceName = (String) result;
+			return (SpreadsheetModelDevice) RHttpProxy.getDynamicProxy(url, sessionId, deviceName, new Class[] { SpreadsheetModelDevice.class }, new HttpClient(
+					new MultiThreadedHttpConnectionManager()));
+
+		} finally {
+			if (getNewDevice != null) {
+				getNewDevice.releaseConnection();
+			}
+			if (mainHttpClient != null) {
+			}
+		}
+	}
+
+	
+	
 	public static void saveimage(String url, String sessionId) throws TunnelingException {
 		GetMethod getInterrupt = null;
 		try {
@@ -470,6 +513,12 @@ public class RHttpProxy {
 							rCollaborationListeners.removeAllElements();
 						}  
 						
+						else if (method.getName().equals("newSpreadsheetTableModelRemote")) {
+							SpreadsheetModelDevice d=newSpreadsheetModelDevice(url, sessionId, "", ((Integer)args[0]).toString(), ((Integer)args[1]).toString());
+							result=new SpreadsheetModelRemoteProxy(d);
+						}  
+						
+						
 						else if (method.getName().equals("stopThreads")) {
 							_stopThreads = true;
 							popThread.join();
@@ -501,6 +550,4 @@ public class RHttpProxy {
 		for (int i=0; i<32;++i) result+=HexDigits[rnd.nextInt(16)];
 		return result;
 	}
-
-
 }

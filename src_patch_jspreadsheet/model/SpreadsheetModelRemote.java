@@ -1,6 +1,8 @@
 package model;
 
 import java.rmi.RemoteException;
+import java.util.HashMap;
+
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
@@ -39,7 +41,7 @@ public interface SpreadsheetModelRemote extends TableModelRemote {
 	 public void removeSpreadsheetListener(SpreadsheetListenerRemote l)throws RemoteException;
 	 public void removeAllSpreadsheetListeners()throws RemoteException;
 	 
-	 public String getId() throws RemoteException;
+	 public String getSpreadsheetModelId() throws RemoteException;
 	 public void dispose() throws RemoteException;
 	 
 	 
@@ -47,6 +49,7 @@ public interface SpreadsheetModelRemote extends TableModelRemote {
 	 
 	 public SpreadsheetModelDevice newSpreadsheetModelDevice() throws RemoteException;
 	 public SpreadsheetModelDevice[] listSpreadsheetModelDevice() throws RemoteException;
+	 
+	 public HashMap<Integer, Object> getRangeHashMap(CellRange range) throws RemoteException;
 		 
-	 		 
 }

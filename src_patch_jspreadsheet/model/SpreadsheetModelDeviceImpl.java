@@ -223,6 +223,14 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		m.setValueAt(value, rowIndex, columnIndex);
 	}
 	
+	public String getSpreadsheetModelId() throws RemoteException {	
+		return m.getSpreadsheetModelId();
+	}
+	
+	public HashMap<Integer, Object> getRangeHashMap(CellRange range) throws RemoteException {
+		return m.getRangeHashMap(range);
+	}
+	
 	//-------------------------------
 	
 	public String getId() throws RemoteException {
@@ -281,6 +289,37 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		_rActions.add(action);
 	}
 	
+	
+	public void discardCache() throws RemoteException {
+		RAction action = new RAction("discardCache", null);
+		_rActions.add(action);
+	}
+	
+	public void discardCacheCell(int row, int col) throws RemoteException {
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("row", row);
+		attributes.put("col", col);	
+		RAction action = new RAction("discardCacheCell", attributes);
+		_rActions.add(action);	
+	}
+	
+	public void discardCacheRange(CellRange range) throws RemoteException {
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("range", range);
+		RAction action = new RAction("discardCacheRange", attributes);
+		_rActions.add(action);	
+	}
+	
+	public void discardColumnCount() throws RemoteException {
+		RAction action = new RAction("discardColumnCount", null);
+		_rActions.add(action);		
+	}
+	
+	public void discardRowCount() throws RemoteException {
+		RAction action = new RAction("discardRowCount", null);
+		_rActions.add(action);	
+	}
+		
 	//-------------------------------------
 	
 	public void tableChanged(TableModelEvent e) throws RemoteException {

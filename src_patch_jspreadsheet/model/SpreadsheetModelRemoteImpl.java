@@ -57,21 +57,21 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		super(new SpreadsheetDefaultTableModel(rowCount, colCount));		
 		this.map=map;
 		init();
-		if (map!=null) map.put(getId(),this);
+		if (map!=null) map.put(getSpreadsheetModelId(),this);
 	}
 
 	public SpreadsheetModelRemoteImpl(Object[] columnName, int rowCount) throws RemoteException {
 		super(columnName, rowCount);		
 		this.map=map;		
 		init();
-		if (map!=null) map.put(getId(),this);
+		if (map!=null) map.put(getSpreadsheetModelId(),this);
 	}
 
 	public SpreadsheetModelRemoteImpl(Object[][] data, Object[] columnName) throws RemoteException {
 		super(data, columnName);				
 		this.map=map;
 		init();
-		if (map!=null) map.put(getId(),this);
+		if (map!=null) map.put(getSpreadsheetModelId(),this);
 	}
 	
 	private void init() {
@@ -602,11 +602,50 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 */
 	public void setValueAt(Object aValue, int aRow, int aColumn) {
 		CellPoint point = new CellPoint(aRow, aColumn);
-		// IMPORTANT !!!!!!!!!!!!!!!!!!!
 		history.add(new CellRange(point, point));
 		doSetValueAt(aValue, aRow, aColumn);
 	}
+	
+	private void discardCell(int aRow, int aColumn) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).discardCacheCell(aRow, aColumn);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
 
+	private void discardRange(CellRange range) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).discardCacheRange(range);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}	
+	
+	private void discard() {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).discardCache();
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}	
+	
+	
 	/**
 	 * This method should be called with a cell is set as a formula cell
 	 * (although it does nothing if it is not a formula). When a formula is
@@ -668,7 +707,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            column coordinate of cell
 	 */
 	public void doSetValueAt(Object aValue, int aRow, int aColumn) {
-
+		
 		if (aValue == null) {
 			aValue = "";
 		}
@@ -1287,10 +1326,13 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			}
 
 			// make sure JTable refreshes it
+			discardCell(point.getRow(), point.getCol());
 			m.fireTableCellUpdated(point.getRow(), point.getCol());
+			
 		}
 
 		// make sure to tell JTable things have changed
+		discardCell(aRow, aColumn);
 		m.fireTableCellUpdated(aRow, aColumn);
 	}
 
@@ -1854,7 +1896,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	private static int spreadsheetTableModelRemoteCounter=0;
 	private String _id="SS_"+(spreadsheetTableModelRemoteCounter++);
 	
-	public String getId() throws RemoteException {
+	public String getSpreadsheetModelId() throws RemoteException {
 		return _id;
 	}
 	
@@ -1862,7 +1904,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 
 	}
 	
-	private HashMap<String, SpreadsheetModelDevice> _spreadsheetDeviceHashMap;
+	private HashMap<String, SpreadsheetModelDevice> _spreadsheetDeviceHashMap=new HashMap<String, SpreadsheetModelDevice>();
 	public SpreadsheetModelDevice newSpreadsheetModelDevice() throws RemoteException {
 		SpreadsheetModelDeviceImpl result=new SpreadsheetModelDeviceImpl((SpreadsheetModelRemote)java.rmi.server.RemoteObject.toStub(this),_spreadsheetDeviceHashMap);
 		addSpreadsheetListener((SpreadsheetListenerRemote)java.rmi.server.RemoteObject.toStub(result));
@@ -1873,6 +1915,18 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	public SpreadsheetModelDevice[] listSpreadsheetModelDevice() throws RemoteException {
 		SpreadsheetModelDevice[] result=new SpreadsheetModelDevice[_spreadsheetDeviceHashMap.size()];
 		int i=0; for (SpreadsheetModelDevice d:_spreadsheetDeviceHashMap.values()) result[i++]=d; 
+		return result;
+	}
+	
+	public HashMap<Integer, Object> getRangeHashMap(CellRange range) throws RemoteException {
+		int endRow=Math.min(range.getEndRow(), getRowCount()-1);
+		int endCol=Math.min(range.getEndCol(), getColumnCount()-1);
+		HashMap<Integer, Object> result=new HashMap<Integer, Object>();		
+		for (int l=range.getStartRow(); l<=endRow;++l) {
+			for (int k=range.getStartCol(); k<=endCol; ++k) {
+				result.put(l*65536+k, getValueAt(l,k));								
+			}
+		}
 		return result;
 	}
 
