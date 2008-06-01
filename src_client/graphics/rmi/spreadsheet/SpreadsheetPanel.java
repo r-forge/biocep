@@ -21,6 +21,7 @@ import model.ModelUtils;
 import model.AbstractSpreadsheetModel;
 import model.SpreadsheetListener;
 import model.SpreadsheetModelDevice;
+import model.SpreadsheetModelRemote;
 import model.SpreadsheetModelRemoteImpl;
 import model.SpreadsheetModelRemoteProxy;
 import net.infonode.docking.View;
@@ -34,6 +35,7 @@ import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 import net.java.dev.jspreadsheet.SpreadsheetSelectionEvent;
 import net.java.dev.jspreadsheet.SpreadsheetSelectionListener;
 import net.java.dev.jspreadsheet.SpreadsheetTableModel;
+import net.java.dev.jspreadsheet.SpreadsheetTableModelClipboardInterface;
 import graphics.pop.GDDevice;
 import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GDApplet;
@@ -50,6 +52,8 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -63,6 +67,7 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.rmi.registry.LocateRegistry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
@@ -86,8 +91,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
@@ -111,6 +118,7 @@ import org.bioconductor.packages.rservices.RLogical;
 import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
+
 import org.bioconductor.packages.rservices.RVector;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -126,27 +134,106 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	public static void main(String[] args) throws Exception {
 
-		//tmri=new SpreadsheetModelRemoteImpl(3,2, new HashMap<String, SpreadsheetModelRemoteImpl>());
-		//SpreadsheetModelRemote modelRemote=(SpreadsheetModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
+		// tmri=new SpreadsheetModelRemoteImpl(3,2, new HashMap<String,
+		// SpreadsheetModelRemoteImpl>());
+		// SpreadsheetModelRemote
+		// modelRemote=(SpreadsheetModelRemote)java.rmi.server.RemoteObject.toStub(tmri);
 
-		//RServices r=(RServices)LocateRegistry.getRegistry().lookup("RSERVANT_1");
+		final RServices r = (RServices) LocateRegistry.getRegistry().lookup("RSERVANT_1");
 
-		final String cmdUrl = "http://127.0.0.1:8080/rvirtual/cmd";
-		HashMap<String, Object> options = new HashMap<String, Object>();
-		options.put("privatename", "tata");
-		options.put("urls", new URL[] { new URL("http://127.0.0.1:8080/rws/mapping/classes/") });
-		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
-		final RServices r = RHttpProxy.getR(cmdUrl, sessionId, true);
+		r.consoleSubmit("toto<-mean");
+		
+		SpreadsheetModelRemote modelRemote = r.newSpreadsheetTableModelRemote(10, 10);
+		AbstractSpreadsheetModel abstractTableModel1 = ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
+		AbstractSpreadsheetModel abstractTableModel2 = ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
 
-		//SpreadsheetModelRemote modelRemote=r.newSpreadsheetTableModelRemote(10, 10);		
-		//SpreadsheetModelDevice d=modelRemote.newSpreadsheetModelDevice();
+		/*
+		 * final String cmdUrl = "http://127.0.0.1:8080/rvirtual/cmd"; HashMap<String,
+		 * Object> options = new HashMap<String, Object>();
+		 * options.put("privatename", "tata"); options.put("urls", new URL[] {
+		 * new URL("http://127.0.0.1:8080/rws/mapping/classes/") }); final
+		 * String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test",
+		 * options); final RServices r = RHttpProxy.getR(cmdUrl, sessionId,
+		 * true);
+		 */
 
-		SpreadsheetModelDevice d = RHttpProxy.newSpreadsheetModelDevice(cmdUrl, sessionId, "", "5", "5");
-		AbstractSpreadsheetModel abstractTableModel1 = ModelUtils.getSpreadsheetTableModelWrapper(new SpreadsheetModelRemoteProxy(d));
+		// SpreadsheetModelRemote
+		// modelRemote=r.newSpreadsheetTableModelRemote(10, 10);
+		// SpreadsheetModelDevice d=modelRemote.newSpreadsheetModelDevice();
+		// SpreadsheetModelDevice d =
+		// RHttpProxy.newSpreadsheetModelDevice(cmdUrl, sessionId, "", "5",
+		// "5");
+		// AbstractSpreadsheetModel abstractTableModel1 =
+		// ModelUtils.getSpreadsheetTableModelWrapper(new
+		// SpreadsheetModelRemoteProxy(d));
+		// SpreadsheetModelDevice d2 =
+		// RHttpProxy.newSpreadsheetModelDevice(cmdUrl, sessionId,
+		// d.getSpreadsheetModelId(), "", "");
+		// AbstractSpreadsheetModel abstractTableModel2 =
+		// ModelUtils.getSpreadsheetTableModelWrapper(new
+		// SpreadsheetModelRemoteProxy(d2));
+		
+		
+		RGui rgui = new RGui() {
+			
+			ReentrantLock _lock=new ReentrantLock(){
+				@Override
+				public void lock() {
+					super.lock();
+				}
+				
+				@Override
+				public void unlock() {
+					super.unlock();
+				}
+				
+				@Override
+				public boolean isLocked() {
+					return super.isLocked();
+				}
+			};
+			
+			
+			public ConsoleLogger getConsoleLogger() {
+				return null;
+			}
 
-		SpreadsheetModelDevice d2 = RHttpProxy.newSpreadsheetModelDevice(cmdUrl, sessionId, d.getSpreadsheetModelId(), "", "");
-		AbstractSpreadsheetModel abstractTableModel2 = ModelUtils.getSpreadsheetTableModelWrapper(new SpreadsheetModelRemoteProxy(d2));
+			public View createView(Component panel, String title) {
+				return null;
+			}
 
+			public RServices getR() {
+				return r;
+			}
+
+			public ReentrantLock getRLock() {
+				return _lock;
+			}
+
+			public void setCurrentDevice(GDDevice device) {
+
+			}
+
+			public GDDevice getCurrentDevice() {
+				return null;
+			}
+
+			public Component getRootComponent() {
+				return null;
+			}
+
+			public JGDPanelPop getCurrentJGPanelPop() {
+				return null;
+			}
+
+			public GroovyInterpreter getGroovyInterpreter() {
+				return null;
+			}
+
+			public void upload(File localFile, String fileName) throws Exception {
+
+			}
+		};
 		JFrame f = new JFrame("F1");
 		f.getContentPane().setLayout(new BorderLayout());
 		f.getContentPane().add(new SpreadsheetPanel(abstractTableModel1, rgui), BorderLayout.CENTER);
@@ -162,49 +249,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		f2.setVisible(true);
 
 	}
-
-	static RGui rgui = new RGui() {
-
-		public ConsoleLogger getConsoleLogger() {
-			return null;
-		}
-
-		public View createView(Component panel, String title) {
-			return null;
-		}
-
-		public RServices getR() {
-			return null;
-		}
-
-		public ReentrantLock getRLock() {
-			return null;
-		}
-
-		public void setCurrentDevice(GDDevice device) {
-
-		}
-
-		public GDDevice getCurrentDevice() {
-			return null;
-		}
-
-		public Component getRootComponent() {
-			return null;
-		}
-
-		public JGDPanelPop getCurrentJGPanelPop() {
-			return null;
-		}
-
-		public GroovyInterpreter getGroovyInterpreter() {
-			return null;
-		}
-
-		public void upload(File localFile, String fileName) throws Exception {
-
-		}
-	};
 
 	public static final int R_NUMERIC = 0;
 	public static final int R_CHARACTER = 1;
@@ -222,7 +266,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private FromRAction fromR = new FromRAction();
 	private ToRAction toR = new ToRAction();
 	private EvalAction eval = new EvalAction();
-	//private NewViewAction newView = new NewViewAction();
 	private SelectAllAction selectall = new SelectAllAction();
 	private UndoAction undo = new UndoAction();
 	private FillAction fill = new FillAction();
@@ -269,7 +312,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		selectionListener = new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				if (m instanceof AbstractSpreadsheetModel) {
-					System.out.println(":" + ss.getSelectedRange());
 					((AbstractSpreadsheetModel) m).setSpreadsheetSelection(ss.getId(), ss.getSelectedRange());
 				}
 			}
@@ -284,38 +326,75 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		try {
 			ss.addSpreadsheetListener(new SpreadsheetListener() {
 
-				public void setSelection(String origin, CellRange sel) {
+				public void setSelection(final String origin, final CellRange sel) {
+					if (origin != null && origin.equals(ss.getId()))
+						return;
 
-					try {
-						ss.getTable().getSelectionModel().removeListSelectionListener(selectionListener);
-						ss.getTable().getColumnModel().getSelectionModel().removeListSelectionListener(selectionListener);
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
 
-						if (origin != null && origin.equals(ss.getId()))
-							return;
+							try {
+								ss.getTable().getSelectionModel().removeListSelectionListener(selectionListener);
+								ss.getTable().getColumnModel().getSelectionModel().removeListSelectionListener(selectionListener);
 
-						if (sel == null) {
-							ss.getTable().getSelectionModel().setSelectionInterval(0, 0);
-							return;
+								if (sel == null) {
+									ss.getTable().getSelectionModel().setSelectionInterval(0, 0);
+									return;
+								}
+								// validate sel
+								int maxRow = ss.getTable().getRowCount() - 1;
+								int maxCol = ss.getTable().getColumnCount() - 1;
+
+								int startRow = sel.getStartRow();
+								int startCol = sel.getStartCol();
+								int endRow = sel.getEndRow();
+								int endCol = sel.getEndCol();
+
+								ss.getTable().setColumnSelectionInterval(Math.min(startCol, maxCol), Math.min(endCol, maxCol));
+								ss.getTable().setRowSelectionInterval(Math.min(startRow, maxRow), Math.min(endRow, maxRow));
+
+							} catch (Throwable e) {
+								e.printStackTrace();
+							} finally {
+								ss.getTable().getSelectionModel().addListSelectionListener(selectionListener);
+								ss.getTable().getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
+							}
 						}
-						// validate sel
-						int maxRow = ss.getTable().getRowCount() - 1;
-						int maxCol = ss.getTable().getColumnCount() - 1;
+					});
 
-						int startRow = sel.getStartRow();
-						int startCol = sel.getStartCol();
-						int endRow = sel.getEndRow();
-						int endCol = sel.getEndCol();
+					SwingUtilities.invokeLater(new Runnable() {
 
-						ss.getTable().setColumnSelectionInterval(Math.min(startCol, maxCol), Math.min(endCol, maxCol));
-						ss.getTable().setRowSelectionInterval(Math.min(startRow, maxRow), Math.min(endRow, maxRow));
+						public boolean isCellVisible(JTable table, int rowIndex, int vColIndex) {
+							if (!(table.getParent() instanceof JViewport)) {
+								return false;
+							}
+							JViewport viewport = (JViewport) table.getParent();
+							Rectangle rect = table.getCellRect(rowIndex, vColIndex, true);
+							Point pt = viewport.getViewPosition();
+							rect.setLocation(rect.x - pt.x, rect.y - pt.y);
+							return new Rectangle(viewport.getExtentSize()).contains(rect);
+						}
 
-					} catch (Throwable e) {
-						e.printStackTrace();
-					} finally {
-						ss.getTable().getSelectionModel().addListSelectionListener(selectionListener);
-						ss.getTable().getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
-					}
+						public boolean isOneCell(CellRange range) {
+							return range.getEndRow() == range.getStartRow() && range.getEndCol() == range.getStartCol();
+						}
 
+						public void run() {
+							try {
+								Rectangle rectUpLeft = ss.getTable().getCellRect(sel.getStartRow(), sel.getStartCol(), true);
+								Rectangle rectDownRight = ss.getTable().getCellRect(sel.getEndRow(), sel.getEndCol(), true);
+								Rectangle selectionRect = new Rectangle(rectUpLeft.x, rectUpLeft.y, rectDownRight.x + rectDownRight.width, rectDownRight.y
+										+ rectDownRight.height);
+
+								if (isOneCell(sel) && isCellVisible(ss.getTable(), sel.getStartRow(), sel.getStartCol())) {
+
+								} else {
+									ss.getTable().scrollRectToVisible(selectionRect);
+								}
+							} catch (Exception e) {
+							}
+						}
+					});
 				}
 
 				public void updateRedoAction() {
@@ -365,15 +444,33 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 								TableColumn newcol = new TableColumn(curCol, column.getPreferredWidth());
 
-								// TableColumn column = tm.getColumn(tm.getColumnCount() - 1);
-								// TableColumn newcol = new TableColumn(tm.getColumnCount(),
+								// TableColumn column =
+								// tm.getColumn(tm.getColumnCount() - 1);
+								// TableColumn newcol = new
+								// TableColumn(tm.getColumnCount(),
 								// column.getPreferredWidth());
 								newcol.setHeaderValue(Node.translateColumn(curCol));
 								tm.addColumn(newcol);
 							}
 						}
 					});
+				}
 
+				public void removeRows(int removeNum) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							ss.refreshRowHeaders();
+						}
+					});
+
+				}
+
+				public void insertRow(int insertNum, int startRow) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							ss.refreshRowHeaders();
+						}
+					});
 				}
 
 			});
@@ -1138,7 +1235,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	}
 
 	RObject getRObject(CellRange range, int dataType, String[] conversionCommandHolder) {
-		SpreadsheetTableModel model = ((SpreadsheetTableModel) ss.getTable().getModel());
+		SpreadsheetTableModelClipboardInterface model = ((SpreadsheetTableModelClipboardInterface) ss.getTable().getModel());
 		conversionCommandHolder[0] = "";
 		RObject result = null;
 		if (dataType != R_DATAFRAME && range.getWidth() == 1) {
@@ -1447,34 +1544,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		}
 	}
 
-	/*
-	private class NewViewAction extends AbstractAction {
-		NewViewAction() {
-			super("New Spreadsheet");
-			putValue(Action.SMALL_ICON, getIcon("NewView.png"));
-			setEnabled(true);
-		}
-
-		public void actionPerformed(ActionEvent e) {
-
-			DimensionsDialog ddialog = new DimensionsDialog(ss);
-			ddialog.setVisible(true);
-			if (ddialog.getSpreadsheetDimension() != null) {
-				try {
-					_rgui.createView(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getHeight(), (int) ddialog.getSpreadsheetDimension().getWidth()), _rgui),
-							"Spreadsheet View");
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		}
-
-		void update() {
-			setEnabled(true);
-		}
-	}
-	 */
-
 	private class CutAction extends AbstractAction {
 		CutAction() {
 			super("Cut");
@@ -1507,7 +1576,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			add(find);
 			add(findNext);
 			add(fill);
-			//add(newView);
+			// add(newView);
 		}
 	}
 

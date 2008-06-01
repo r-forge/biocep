@@ -13,7 +13,7 @@ public interface SpreadsheetTableModelClipboardInterface {
 	public void clearRange(CellRange range);
 	public String toString(CellRange range, boolean byValue, char delim);
 	public void setModified(boolean modified);
-	public void setSelection(String origin , CellRange sel);
+	public void fireSetSelection(String origin , CellRange sel);
 	
 	
 	public void insertColumn(CellRange insertRange);
@@ -28,6 +28,9 @@ public interface SpreadsheetTableModelClipboardInterface {
 	public void setPasswordModified(boolean modified);
 	public void sort(CellRange area, int primary, int second, boolean isRow, boolean ascend, boolean tiebreaker);
 	public Cell getCellAt(int aRow, int aColumn);
+	public boolean isEmptyCell(int row, int col);
+	
+	
 	public String toString(char delim); 
 	
 	public void historyAdd(CellRange range);

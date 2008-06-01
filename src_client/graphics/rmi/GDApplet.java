@@ -125,9 +125,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-
 import model.ModelUtils;
 import model.AbstractSpreadsheetModel;
 import model.SpreadsheetModelRemote;
@@ -149,7 +147,6 @@ import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
-
 import org.apache.batik.swing.JSVGCanvas;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
@@ -160,6 +157,7 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RCollaborationListener;
+import remoting.RKit;
 import remoting.RServices;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
@@ -1793,6 +1791,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return result;
 	}
 
+	private Vector<CollaborativeSpreadsheetView> getCollaborativeSpreadsheetViews() {
+		Vector<CollaborativeSpreadsheetView> result = new Vector<CollaborativeSpreadsheetView>();
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof CollaborativeSpreadsheetView) {
+				result.add((CollaborativeSpreadsheetView) dv);
+			}
+		}
+		return result;
+	}
+	
 	private JTextArea getOpenedLogViewerArea() {
 		LogView lv = getOpenedLogView();
 		if (lv != null)
@@ -2620,26 +2630,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 			public void actionPerformed(final ActionEvent ae) {
 				new Thread(new Runnable() {
 					public void run() {
+											
 						final DimensionsDialog ddialog = new DimensionsDialog(GDApplet.this);
 						ddialog.setVisible(true);
-						if (ddialog.getSpreadsheetDimension() != null) {
-							try {
-								SpreadsheetModelRemote spreadsheetModelRemote = getR().newSpreadsheetTableModelRemote(
-										(int) ddialog.getSpreadsheetDimension().getWidth(), (int) ddialog.getSpreadsheetDimension().getHeight());
-								final String id = spreadsheetModelRemote.getSpreadsheetModelId();
-								final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
-								SwingUtilities.invokeLater(new Runnable() {
-									public void run() {
-										NewWindow.create(new SpreadsheetPanel(spreadsheetModel, GDApplet.this), "Collaboratibe Spreadsheet View <" + id + ">");
-									}
-								});
-
-							} catch (Exception e) {
-								e.printStackTrace();
-							} finally {
-
-							}
-						}
+						if (ddialog.getSpreadsheetDimension() != null) {	
+							int id = getDynamicViewId();	
+							final CollaborativeSpreadsheetView lv = new CollaborativeSpreadsheetView(id, (int)ddialog.getSpreadsheetDimension().getHeight(), (int)ddialog.getSpreadsheetDimension().getWidth(), GDApplet.this);
+							((TabWindow) views[2].getWindowParent()).addTab(lv);							
+						}						
 					}
 				}).start();
 			}
@@ -2661,15 +2659,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							ddialog.setVisible(true);
 							if (ddialog.getId() != null) {
 
-								SpreadsheetModelRemote spreadsheetModelRemote = getR().getSpreadsheetTableModelRemote(ddialog.getId());
-								final String id = spreadsheetModelRemote.getSpreadsheetModelId();
-								final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(spreadsheetModelRemote);
-								
-								SwingUtilities.invokeLater(new Runnable() {
-									public void run() {
-										NewWindow.create(new SpreadsheetPanel(spreadsheetModel, GDApplet.this), "Collaboratibe Spreadsheet View <" + id + ">");
-									}
-								});
+								int id = getDynamicViewId();	
+								final CollaborativeSpreadsheetView lv = new CollaborativeSpreadsheetView(id,ddialog.getId() , GDApplet.this);
+								((TabWindow) views[2].getWindowParent()).addTab(lv);								
 
 							}
 						} catch (Exception e) {
@@ -2842,15 +2834,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					int id = getDynamicViewId();
 					DockingWindow lv = new graphics.rmi.GDApplet.LogView("Console Log Viewer", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new DockingWindowListener() {
-						public void viewFocusChanged(View arg0, View arg1) {
-						}
-
-						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowClosed(DockingWindow arg0) {
-						}
+					lv.addListener(new AbstractDockingWindowListener() {
 
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
@@ -2858,45 +2842,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} catch (Exception e) {
 							}
 						}
-
-						public void windowDocked(DockingWindow arg0) {
-						}
-
-						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowHidden(DockingWindow arg0) {
-						}
-
-						public void windowMaximized(DockingWindow arg0) {
-						}
-
-						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowMinimized(DockingWindow arg0) {
-						}
-
-						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowRestored(DockingWindow arg0) {
-						}
-
-						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowShown(DockingWindow arg0) {
-						}
-
-						public void windowUndocked(DockingWindow arg0) {
-						}
-
-						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
-						}
+						
 					});
 				} else {
 					getOpenedLogView().restoreFocus();
@@ -2915,15 +2861,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					int id = getDynamicViewId();
 					final ServerLogView lv = new ServerLogView("R Server Log Viewer", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new DockingWindowListener() {
-						public void viewFocusChanged(View arg0, View arg1) {
-						}
-
-						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowClosed(DockingWindow arg0) {
-						}
+					lv.addListener(new AbstractDockingWindowListener() {
 
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
@@ -2935,44 +2873,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 
-						public void windowDocked(DockingWindow arg0) {
-						}
-
-						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowHidden(DockingWindow arg0) {
-						}
-
-						public void windowMaximized(DockingWindow arg0) {
-						}
-
-						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowMinimized(DockingWindow arg0) {
-						}
-
-						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowRestored(DockingWindow arg0) {
-						}
-
-						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowShown(DockingWindow arg0) {
-						}
-
-						public void windowUndocked(DockingWindow arg0) {
-						}
-
-						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
-						}
 					});
 
 					lv.setLayout(new BorderLayout());
@@ -3035,60 +2935,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					final ChatConsoleView lv = new ChatConsoleView("Chat Console", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new DockingWindowListener() {
-						public void viewFocusChanged(View arg0, View arg1) {
-						}
-
-						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowClosed(DockingWindow arg0) {
-						}
-
+					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-						}
-
-						public void windowDocked(DockingWindow arg0) {
-						}
-
-						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowHidden(DockingWindow arg0) {
-						}
-
-						public void windowMaximized(DockingWindow arg0) {
-						}
-
-						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowMinimized(DockingWindow arg0) {
-						}
-
-						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowRestored(DockingWindow arg0) {
-						}
-
-						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowShown(DockingWindow arg0) {
-						}
-
-						public void windowUndocked(DockingWindow arg0) {
-						}
-
-						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
 						}
 					});
 				}
@@ -3107,60 +2959,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 				final SvgView lv = new SvgView("SVG Viewer", null, id);
 				((TabWindow) views[2].getWindowParent()).addTab(lv);
-				lv.addListener(new DockingWindowListener() {
-					public void viewFocusChanged(View arg0, View arg1) {
-					}
-
-					public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-					}
-
-					public void windowClosed(DockingWindow arg0) {
-					}
-
+				lv.addListener(new AbstractDockingWindowListener() {
 					public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 						try {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-					}
-
-					public void windowDocked(DockingWindow arg0) {
-					}
-
-					public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-					}
-
-					public void windowHidden(DockingWindow arg0) {
-					}
-
-					public void windowMaximized(DockingWindow arg0) {
-					}
-
-					public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-					}
-
-					public void windowMinimized(DockingWindow arg0) {
-					}
-
-					public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-					}
-
-					public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-					}
-
-					public void windowRestored(DockingWindow arg0) {
-					}
-
-					public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-					}
-
-					public void windowShown(DockingWindow arg0) {
-					}
-
-					public void windowUndocked(DockingWindow arg0) {
-					}
-
-					public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
 					}
 				});
 
@@ -3179,15 +2983,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					final ServerPythonConsoleView lv = new ServerPythonConsoleView("Python Console", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new DockingWindowListener() {
-						public void viewFocusChanged(View arg0, View arg1) {
-						}
-
-						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowClosed(DockingWindow arg0) {
-						}
+					lv.addListener(new AbstractDockingWindowListener() {
 
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
@@ -3196,44 +2992,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 
-						public void windowDocked(DockingWindow arg0) {
-						}
-
-						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowHidden(DockingWindow arg0) {
-						}
-
-						public void windowMaximized(DockingWindow arg0) {
-						}
-
-						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowMinimized(DockingWindow arg0) {
-						}
-
-						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowRestored(DockingWindow arg0) {
-						}
-
-						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowShown(DockingWindow arg0) {
-						}
-
-						public void windowUndocked(DockingWindow arg0) {
-						}
-
-						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
-						}
 					});
 
 				}
@@ -3251,60 +3009,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					final ClientPythonConsoleView lv = new ClientPythonConsoleView("Local Python Console", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new DockingWindowListener() {
-						public void viewFocusChanged(View arg0, View arg1) {
-						}
-
-						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowClosed(DockingWindow arg0) {
-						}
-
+					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-						}
-
-						public void windowDocked(DockingWindow arg0) {
-						}
-
-						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowHidden(DockingWindow arg0) {
-						}
-
-						public void windowMaximized(DockingWindow arg0) {
-						}
-
-						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowMinimized(DockingWindow arg0) {
-						}
-
-						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowRestored(DockingWindow arg0) {
-						}
-
-						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowShown(DockingWindow arg0) {
-						}
-
-						public void windowUndocked(DockingWindow arg0) {
-						}
-
-						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
 						}
 					});
 
@@ -3323,60 +3033,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					final ServerGroovyConsoleView lv = new ServerGroovyConsoleView("Groovy Console", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new DockingWindowListener() {
-						public void viewFocusChanged(View arg0, View arg1) {
-						}
-
-						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowClosed(DockingWindow arg0) {
-						}
-
+					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-						}
-
-						public void windowDocked(DockingWindow arg0) {
-						}
-
-						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowHidden(DockingWindow arg0) {
-						}
-
-						public void windowMaximized(DockingWindow arg0) {
-						}
-
-						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowMinimized(DockingWindow arg0) {
-						}
-
-						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowRestored(DockingWindow arg0) {
-						}
-
-						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowShown(DockingWindow arg0) {
-						}
-
-						public void windowUndocked(DockingWindow arg0) {
-						}
-
-						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
 						}
 					});
 
@@ -3395,60 +3057,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					final ClientGroovyConsoleView lv = new ClientGroovyConsoleView("Local Groovy Console", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new DockingWindowListener() {
-						public void viewFocusChanged(View arg0, View arg1) {
-						}
-
-						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowClosed(DockingWindow arg0) {
-						}
-
+					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-						}
-
-						public void windowDocked(DockingWindow arg0) {
-						}
-
-						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowHidden(DockingWindow arg0) {
-						}
-
-						public void windowMaximized(DockingWindow arg0) {
-						}
-
-						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowMinimized(DockingWindow arg0) {
-						}
-
-						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowRestored(DockingWindow arg0) {
-						}
-
-						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowShown(DockingWindow arg0) {
-						}
-
-						public void windowUndocked(DockingWindow arg0) {
-						}
-
-						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
 						}
 					});
 
@@ -3467,61 +3081,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					final BiocepMindMapView lv = new BiocepMindMapView("Biocep Mind Map & Doc", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new DockingWindowListener() {
-						public void viewFocusChanged(View arg0, View arg1) {
-						}
-
-						public void windowAdded(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowClosed(DockingWindow arg0) {
-						}
-
+					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
 								lv.getFreeMindApplet().destroy();
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-						}
-
-						public void windowDocked(DockingWindow arg0) {
-						}
-
-						public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowHidden(DockingWindow arg0) {
-						}
-
-						public void windowMaximized(DockingWindow arg0) {
-						}
-
-						public void windowMaximizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowMinimized(DockingWindow arg0) {
-						}
-
-						public void windowMinimizing(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowRemoved(DockingWindow arg0, DockingWindow arg1) {
-						}
-
-						public void windowRestored(DockingWindow arg0) {
-						}
-
-						public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-						}
-
-						public void windowShown(DockingWindow arg0) {
-						}
-
-						public void windowUndocked(DockingWindow arg0) {
-						}
-
-						public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
 						}
 					});
 
@@ -3864,6 +3430,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 		for (int i = 0; i < deviceViews.size(); ++i)
 			deviceViews.elementAt(i).getPanel().stopThreads();
 
+		
+		Vector<CollaborativeSpreadsheetView> collaborativeSpreadsheetViews=getCollaborativeSpreadsheetViews();
+		for (int i=0; i<collaborativeSpreadsheetViews.size();++i) {
+			collaborativeSpreadsheetViews.elementAt(i).close();
+		}
+		
+		
+		
 		if (getR() instanceof HttpMarker) {
 			((HttpMarker) getR()).stopThreads();
 		} else {
@@ -4331,6 +3905,67 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 
+	}
+
+	public static class CollaborativeSpreadsheetView extends DynamicView {
+		SpreadsheetModelRemote _spreadsheetModelRemote;
+		
+		SpreadsheetModelRemote getSpreadsheetModelRemote() {
+			return _spreadsheetModelRemote;
+		}
+		
+		DockingWindowListener l=new AbstractDockingWindowListener(){			
+			@Override
+			public void windowClosed(DockingWindow arg0) {
+				System.out.println("********* CollaborativeSpreadsheetView Closed");
+				try {
+					if (_spreadsheetModelRemote instanceof HttpMarker) {												
+						((HttpMarker)_spreadsheetModelRemote).stopThreads();
+					} 					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};	
+		
+		CollaborativeSpreadsheetView(int id, int rowCount, int colCount,  RGui rgui) {
+			super("", null, new JPanel(), id);
+			
+			addListener(l);
+			
+			try {
+				_spreadsheetModelRemote = rgui.getR().newSpreadsheetTableModelRemote(rowCount, colCount);
+				final String spreadsheetModelId = _spreadsheetModelRemote.getSpreadsheetModelId();
+				final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(_spreadsheetModelRemote);			
+				((JPanel) getComponent()).setLayout(new BorderLayout());
+				((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
+				getViewProperties().setTitle("Collaboratibe Spreadsheet View <" + spreadsheetModelId + ">");				
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+
+			}
+			
+		}
+			
+		CollaborativeSpreadsheetView(int id, String spreadsheetModelId,  RGui rgui) {
+			super("", null, new JPanel(), id);
+			
+			addListener(l);	
+			
+			try {
+				_spreadsheetModelRemote = rgui.getR().getSpreadsheetTableModelRemote(spreadsheetModelId);
+				final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(_spreadsheetModelRemote);
+				((JPanel) getComponent()).setLayout(new BorderLayout());
+				((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
+				getViewProperties().setTitle("Collaboratibe Spreadsheet View <" + spreadsheetModelId + ">");
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+
+			}			
+		}
+	
 	}
 
 	public class SvgView extends DynamicView {
@@ -4806,8 +4441,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 	class RCollaborationListenerImpl extends UnicastRemoteObject implements RCollaborationListener {
 		public RCollaborationListenerImpl() throws RemoteException {
 			super();
-
-			System.out.println("?????????????????????????????");
 		}
 
 		public void chat(String sourceSession, String message) throws RemoteException {

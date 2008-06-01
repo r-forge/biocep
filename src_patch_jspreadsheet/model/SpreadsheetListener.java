@@ -1,7 +1,5 @@
 package model;
-
 import net.java.dev.jspreadsheet.CellRange;
-
 public interface SpreadsheetListener {
 	public void setSelection(String origin,CellRange sel);
 	public void updateUndoAction();
@@ -16,5 +14,7 @@ public interface SpreadsheetListener {
 	
 	public void removeColumns(int removeNum);
 	public void insertColumn(int insertNum, int startCol);
+	public void removeRows(int removeNum);
+	public void insertRow(int insertNum, int startRow);
 	
 }

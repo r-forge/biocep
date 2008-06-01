@@ -18,6 +18,8 @@ public interface SpreadsheetListenerRemote extends Remote{
 	
 	public void removeColumns(int rangeNum) throws RemoteException;
 	public void insertColumn(int insertNum, int startCol) throws RemoteException;
+	public void removeRows(int removeNum) throws RemoteException;
+	public void insertRow(int insertNum, int startRow) throws RemoteException;
 	
 	
 }

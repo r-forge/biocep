@@ -872,6 +872,7 @@ public class Formula implements Serializable
     	  boolean isRFunc=false;
     	  try {
     		  isRFunc=((RLogical)table.getR().getObject("exists('"+funcName+"')")).getValue()[0];
+    		 
     	  } catch (Exception e) {
     		  e.printStackTrace();
     	  }

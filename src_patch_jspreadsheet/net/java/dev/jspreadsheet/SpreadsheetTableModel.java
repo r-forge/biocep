@@ -41,20 +41,20 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	private UndoManager um = new UndoManager() {
 		public void undoableEditHappened(UndoableEditEvent e) {
 			super.undoableEditHappened(e);
-			updateUndoAction();
-			updateRedoAction();
+			fireUpdateUndoAction();
+			fireUpdateRedoAction();
 		}
 
 		public void undo() {
 			super.undo();
-			updateUndoAction();
-			updateRedoAction();
+			fireUpdateUndoAction();
+			fireUpdateRedoAction();
 		}
 
 		public void redo() {
 			super.redo();
-			updateUndoAction();
-			updateRedoAction();
+			fireUpdateUndoAction();
+			fireUpdateRedoAction();
 		}
 	};
 	/** Stores file name of current document */
@@ -798,7 +798,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			addColumn();
 		}
 
-		insertCols(insertNum,col);
+		fireInsertCols(insertNum,col);
 		
 		
 		// shift relevant columns left
@@ -810,7 +810,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(0, 0, col, col);
-			setSelection(null,selectionRange);			
+			fireSetSelection(null,selectionRange);			
 		} 
 
     	
@@ -855,7 +855,9 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		for (int i = 0; i < insertNum; i++) {
 			addRow();
 		}
-
+		
+		fireInsertRows(insertNum, row);
+		
 		// shift old rows down
 		scrap.paste(this, new CellPoint(row + insertNum, 0));
 
@@ -864,7 +866,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		// set selection
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(row, row, 0, 0);
-			setSelection(null,selectionRange);			
+			fireSetSelection(null,selectionRange);			
 		} 
 	}
 
@@ -1044,7 +1046,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			removeColumn();
 		}
 
-		removeCols(removeNum);
+		fireRemoveCols(removeNum);
 		
 		// shift clipboard elements right
 		scrap.paste(this, new CellPoint(0, col));
@@ -1055,7 +1057,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		// set selection
 		if (table.getSelectedColumnCount() == 0) {
 			CellRange selectionRange=new CellRange(0, 0, col, col);
-			setSelection(null,selectionRange);
+			fireSetSelection(null,selectionRange);
 			
 		} 
 		
@@ -1127,7 +1129,9 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			for (int i = 0; i < removeNum; i++) {
 				((DefaultTableModel) m).removeRow(getRowCount() - 1);
 			}
-
+			
+			fireRemoveRows(removeNum);
+			
 			//shift relevent rows up
 			scrap.paste(this, new CellPoint(row, 0));
 
@@ -1136,7 +1140,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 			// set selection
 			if (table.getSelectedColumnCount() == 0) {
 				CellRange selectionRange=new CellRange(row, row, 0, 0);
-				setSelection(null,selectionRange);
+				fireSetSelection(null,selectionRange);
 			} 
 			
 		} else {
@@ -1901,7 +1905,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	}
 
 	
-	private void removeCols(int removeNum) {
+	private void fireRemoveCols(int removeNum) {
 		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -1914,7 +1918,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	private void insertCols(int insertNum, int startCol) {
+	private void fireInsertCols(int insertNum, int startCol) {
 		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -1927,7 +1931,34 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	private void updateUndoAction() {
+	private void fireRemoveRows(int removeNum) {
+		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).removeRows(removeNum);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	private void fireInsertRows(int insertNum, int startRow) {
+		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).insertRow(insertNum, startRow);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	
+	private void fireUpdateUndoAction() {
 		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -1939,7 +1970,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	private void updateRedoAction() {
+	private void fireUpdateRedoAction() {
 		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -1951,7 +1982,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	public void setSelection(String origin, CellRange sel) {
+	public void fireSetSelection(String origin, CellRange sel) {
 		Vector<SpreadsheetListener> spreadsheetListenersToRemove=new Vector<SpreadsheetListener>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {

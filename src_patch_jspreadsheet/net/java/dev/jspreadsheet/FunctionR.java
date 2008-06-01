@@ -88,9 +88,9 @@ class FunctionR extends Function {
 		}
 
 		try {
-			System.out.println("v="+v);
+			System.out.println("!!!!!! v="+v);
 			RObject result= (v!=null?(RObject)table.getR().call(rFucntionName, v):(RObject)table.getR().call(rFucntionName)) ;
-			System.out.println("result="+result);
+			System.out.println("!!!!!! result="+result);
 			
 			if (table.getR().getStatus().contains("ERROR")) {
 				JOptionPane.showMessageDialog(null, table.getR().getStatus());
