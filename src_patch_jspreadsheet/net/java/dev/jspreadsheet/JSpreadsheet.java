@@ -30,7 +30,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import remoting.RKit;
 import model.AbstractSpreadsheetModel;
@@ -47,10 +46,13 @@ public class JSpreadsheet extends JComponent
    private Clipboard system = Toolkit.getDefaultToolkit().getSystemClipboard();
    
    private JTable table;
+   
    private SpreadsheetTableModelClipboardInterface tableModel;
    /** Holds value of property columnWidth. */
    private int columnWidth;
    private RKit rg;
+   
+   private JTable rowHeader;   
 
    /** Create a new spreadsheet
     * @param columns The number of columns in the spreadsheet
@@ -92,13 +94,10 @@ public class JSpreadsheet extends JComponent
       JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
       add(scrollPane, BorderLayout.CENTER);
 
-      JTable rowHeader = new JTable(new RowModel(table.getModel()));
+      rowHeader = new JTable(new RowModel(table.getModel()));
       TableCellRenderer renderer = new RowHeaderRenderer();
-
       Component comp = renderer.getTableCellRendererComponent(rowHeader, null, false, false, rowHeader.getRowCount() - 1, 0);
-
       rowHeader.setIntercellSpacing(new Dimension(0, 0));
-
       Dimension d = rowHeader.getPreferredScrollableViewportSize();
       d.width = comp.getPreferredSize().width;
       rowHeader.setPreferredScrollableViewportSize(d);
@@ -394,7 +393,7 @@ public class JSpreadsheet extends JComponent
             // add to history
             tableModel.historyAdd(affectedRange);
             tableModel.fromString(trstring, '\t', rowOff, colOff, affectedRange);
-            tableModel.setSelection(null,affectedRange);
+            tableModel.fireSetSelection(null,affectedRange);
          }
          catch (Exception e)
          {
@@ -743,6 +742,7 @@ public class JSpreadsheet extends JComponent
       }
    }
 
+   
    private static class RowModel implements TableModel
    {
       private TableModel source;
@@ -783,7 +783,7 @@ public class JSpreadsheet extends JComponent
 
       public Object getValueAt(int rowIndex, int columnIndex)
       {
-         return null;
+         return rowIndex;
       }
 
       public void addTableModelListener(javax.swing.event.TableModelListener l)
@@ -811,6 +811,10 @@ public class JSpreadsheet extends JComponent
 	   return table;
    }
    
+   public void refreshRowHeaders() {
+	   rowHeader.setModel(new RowModel(table.getModel()));
+	   rowHeader.repaint();
+   }
    
 	public void undo() {
 		tableModel.undo();

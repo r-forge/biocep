@@ -75,7 +75,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			for (int col = 0; col < m.getColumnCount(); col++)
 				m.setValueAt(new Cell(""), row, col);
 		history=new History(this);
-		history.addUndoableEditListener(um);
+		history.addUndoableEditListener(um);		
+		Formula.registerFunctions();
 	}
 
 	private boolean modified = false;
@@ -602,7 +603,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		doSetValueAt(aValue, aRow, aColumn);
 	}
 	
-	private void discardRowCount() {
+	private void fireDiscardRowCount() {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -616,7 +617,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	}
 	
 	
-	private void discardColumnCount() {
+	private void fireDiscardColumnCount() {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -629,7 +630,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	private void discardCell(int aRow, int aColumn) {
+	private void fireDiscardCell(int aRow, int aColumn) {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -642,7 +643,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 
-	private void discardRange(CellRange range) {
+	private void fireDiscardRange(CellRange range) {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -655,7 +656,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}	
 	
-	private void discard() {
+	private void fireDiscard() {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -668,7 +669,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}	
 	
-	private void removeCols(int removeNum) {
+	private void fireRemoveCols(int removeNum) {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -681,7 +682,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	private void insertCols(int insertNum, int startCol) {
+	private void fireInsertCols(int insertNum, int startCol) {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -693,6 +694,32 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
+
+	private void fireRemoveRows(int removeNum) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).removeRows(removeNum);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}
+	
+	private void fireInsertRows(int insertNum, int startRow) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
+		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+			try {
+				_spreadsheetListeners.elementAt(i).insertRow(insertNum, startRow);
+			} catch (Exception e) {
+				e.printStackTrace();
+				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
+			}	
+		}
+		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
+	}	
 	
 	/**
 	 * This method should be called with a cell is set as a formula cell
@@ -835,8 +862,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            same number of new columns as range has
 	 */
 	public void insertColumn(CellRange insertRange) {
-		discardColumnCount();
-		discard();
+		fireDiscardColumnCount();
+		fireDiscard();
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -869,7 +896,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			addColumn();
 		}
 
-		insertCols(insertNum,col);
+		fireInsertCols(insertNum,col);
 		
 		
 		// shift relevant columns left
@@ -880,7 +907,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		// set selection
 				
 		CellRange selectionRange=new CellRange(0, 0, col, col);
-		setSelection(null,selectionRange);
+		fireSetSelection(null,selectionRange);
 		//return selectionRange;
 		
 		// sharp.setBaseColumnWidth();
@@ -897,8 +924,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            new rows equal to rows in range
 	 */
 	public void insertRow(CellRange insertRange) {
-		discardRowCount();
-		discard();
+		fireDiscardRowCount();
+		fireDiscard();
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -925,13 +952,15 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			addRow();
 		}
 
+		fireInsertRows(insertNum,row);
+		
 		// shift old rows down
 		scrap.paste(this, new CellPoint(row + insertNum, 0));
 
 		recalculateAll();
 
 		CellRange selectionRange=new CellRange(row, row, 0, 0);
-		setSelection(null,selectionRange);
+		fireSetSelection(null,selectionRange);
 		//return selectionRange;
 
 	}
@@ -1085,8 +1114,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            the range that contains the columns to delete
 	 */
 	public void removeColumn(CellRange deletionRange) {
-		discardColumnCount();
-		discard();
+		fireDiscardColumnCount();
+		fireDiscard();
 		/*
 		 * since the insertion point is given by a selected cell there will
 		 * never be an out of bounds error
@@ -1112,14 +1141,9 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		for (int i = 0; i < removeNum; i++) {
 			// delete old column
 			removeColumn();
-
-			// IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// TableColumnModel tm = table.getColumnModel();
-			// tm.removeColumn(tm.getColumn(tm.getColumnCount() - 1));
-
 		}
 		
-		removeCols(removeNum);
+		fireRemoveCols(removeNum);
 		
 
 		// shift clipboard elements right
@@ -1131,7 +1155,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		// set selection
 
 		CellRange selectionRange=new CellRange(0, 0, col, col);
-		setSelection(null,selectionRange);
+		fireSetSelection(null,selectionRange);
 		//return selectionRange;
 		
 		// fireTableStructureChanged();
@@ -1179,8 +1203,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 */
 	public void removeRow(CellRange deletionRange) {
 
-			discardRowCount();
-			discard();
+			fireDiscardRowCount();
+			fireDiscard();
 			
 			/*
 			 * since the insertion point is given by a selected cell there will
@@ -1205,6 +1229,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			for (int i = 0; i < removeNum; i++) {
 				((SpreadsheetDefaultTableModel) m).removeRow(m.getRowCount() - 1);
 			}
+			
+			fireRemoveRows(removeNum);
 
 			// shift relevent rows up
 			scrap.paste(this, new CellPoint(row, 0));
@@ -1212,7 +1238,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			recalculateAll();
 			
 			CellRange selectionRange=new CellRange(row, row, 0, 0);
-			setSelection(null,selectionRange);
+			fireSetSelection(null,selectionRange);
 			//return selectionRange;			
 
 	}
@@ -1383,13 +1409,13 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			}
 
 			// make sure JTable refreshes it
-			discardCell(point.getRow(), point.getCol());
+			fireDiscardCell(point.getRow(), point.getCol());
 			m.fireTableCellUpdated(point.getRow(), point.getCol());
 			
 		}
 
 		// make sure to tell JTable things have changed
-		discardCell(aRow, aColumn);
+		fireDiscardCell(aRow, aColumn);
 		m.fireTableCellUpdated(aRow, aColumn);
 	}
 
@@ -1886,7 +1912,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 	
-	public void setSelection(String origin,CellRange sel) {
+	public void fireSetSelection(String origin,CellRange sel) {
 		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
 		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
 			try {
@@ -1900,7 +1926,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	}
 	
 	public void setSpreadsheetSelection(String origin,CellRange sel) throws RemoteException {		
-		setSelection(origin,sel);		
+		fireSetSelection(origin,sel);		
 	}
 	
 	Vector<SpreadsheetListenerRemote> _spreadsheetListeners=new Vector<SpreadsheetListenerRemote>();

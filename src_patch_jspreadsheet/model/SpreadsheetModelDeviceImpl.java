@@ -335,6 +335,23 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		RAction action = new RAction("insertColumn", attributes);
 		_rActions.add(action);
 	}
+	
+	public void removeRows(int removeNum) throws RemoteException {
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("removeNum", removeNum);
+		RAction action = new RAction("removeRows", attributes);
+		_rActions.add(action);	
+	}
+	
+	public void insertRow(int insertNum, int startRow) throws RemoteException {
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("insertNum", insertNum);
+		attributes.put("startRow", startRow);
+		RAction action = new RAction("insertRow", attributes);
+		_rActions.add(action);	
+	}
+	
+	
 	//-------------------------------------
 	
 	public void tableChanged(TableModelEvent e) throws RemoteException {

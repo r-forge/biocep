@@ -52,7 +52,7 @@ public class RHttpProxy {
 
 	public static final String FAKE_SESSION = getRandomSession();
 	
-	static HttpClient mainHttpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
+	private static HttpClient mainHttpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
 
 	public static String logOn(String url, String sessionId, String login, String pwd, HashMap<String, Object> options) throws TunnelingException {
 
@@ -156,7 +156,7 @@ public class RHttpProxy {
 		return invoke(url, sessionId, servantName, methodName, methodSignature, methodParameters, mainHttpClient);
 	}
 
-	private static Object getDynamicProxy(final String url, final String sessionId, final String servantName, Class<?>[] c, final HttpClient httpClient) {
+	public static Object getDynamicProxy(final String url, final String sessionId, final String servantName, Class<?>[] c, final HttpClient httpClient) {
 		Object proxy = Proxy.newProxyInstance(RHttpProxy.class.getClassLoader(), c, new InvocationHandler() {
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				return RHttpProxy.invoke(url, sessionId, servantName, method.getName(), method.getParameterTypes(), args, httpClient);
@@ -507,11 +507,14 @@ public class RHttpProxy {
 						
 						else if (method.getName().equals("addRCollaborationListener")) {
 							rCollaborationListeners.add((RCollaborationListener) args[0]);
-						} else if (method.getName().equals("removeRCallback")) {
+						} else if (method.getName().equals("removeRCollaborationListener")) {
 							rCollaborationListeners.remove((RCollaborationListener) args[0]);
 						} else if (method.getName().equals("removeAllRCollaborationListeners")) {
 							rCollaborationListeners.removeAllElements();
-						}  
+						}   
+						
+						
+					
 						
 						else if (method.getName().equals("newSpreadsheetTableModelRemote")) {
 							SpreadsheetModelDevice d=newSpreadsheetModelDevice(url, sessionId, "", ((Integer)args[0]).toString(), ((Integer)args[1]).toString());
@@ -523,6 +526,7 @@ public class RHttpProxy {
 							_stopThreads = true;
 							popThread.join();
 							try {
+								// IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 								genericCallBackDevice.dispose();
 							} catch (Exception e) {
 								e.printStackTrace();

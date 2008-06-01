@@ -103,7 +103,7 @@ public  class SelectIdDialog extends JDialog {
 				});
 			}
 		}).start();
-		setSize(new Dimension(320, 90));
+		setSize(new Dimension(320, 110));
 		PoolUtils.locateInScreenCenter(this);
 
 	}
