@@ -22,9 +22,7 @@ import java.rmi.RemoteException;
 import java.util.Vector;
 import mapping.RPackage;
 import model.SpreadsheetModelRemote;
-
 import org.bioconductor.packages.rservices.RObject;
-
 import uk.ac.ebi.microarray.pools.ManagedServant;
 
 /**
@@ -147,8 +145,8 @@ public interface RServices extends ManagedServant {
 
 	public Vector<RAction> popRActions() throws java.rmi.RemoteException;
 	
-	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException;
-		
+	public Vector<String> getSvg(String script, int width, int height) throws RemoteException;	
+	public byte[] getPdf(String script, int width, int height) throws RemoteException;	
 	
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
 

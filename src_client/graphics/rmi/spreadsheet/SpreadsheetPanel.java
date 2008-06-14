@@ -20,10 +20,8 @@ package graphics.rmi.spreadsheet;
 import model.ModelUtils;
 import model.AbstractSpreadsheetModel;
 import model.SpreadsheetListener;
-import model.SpreadsheetModelDevice;
 import model.SpreadsheetModelRemote;
 import model.SpreadsheetModelRemoteImpl;
-import model.SpreadsheetModelRemoteProxy;
 import net.infonode.docking.View;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
@@ -31,10 +29,6 @@ import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.Formula;
 import net.java.dev.jspreadsheet.JSpreadsheet;
 import net.java.dev.jspreadsheet.Node;
-import net.java.dev.jspreadsheet.SpreadsheetClipboard;
-import net.java.dev.jspreadsheet.SpreadsheetSelectionEvent;
-import net.java.dev.jspreadsheet.SpreadsheetSelectionListener;
-import net.java.dev.jspreadsheet.SpreadsheetTableModel;
 import net.java.dev.jspreadsheet.SpreadsheetTableModelClipboardInterface;
 import graphics.pop.GDDevice;
 import graphics.rmi.ConsoleLogger;
@@ -42,8 +36,6 @@ import graphics.rmi.GDApplet;
 import graphics.rmi.JGDPanelPop;
 import graphics.rmi.RGui;
 import groovy.GroovyInterpreter;
-import http.RHttpProxy;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -66,9 +58,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.rmi.registry.LocateRegistry;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
@@ -105,9 +95,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
-import org.apache.batik.gvt.event.SelectionEvent;
-import org.apache.batik.gvt.event.SelectionListener;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RComplex;
 import org.bioconductor.packages.rservices.RDataFrame;
@@ -118,7 +105,6 @@ import org.bioconductor.packages.rservices.RLogical;
 import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
-
 import org.bioconductor.packages.rservices.RVector;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -143,7 +129,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		r.consoleSubmit("toto<-mean");
 		
-		SpreadsheetModelRemote modelRemote = r.newSpreadsheetTableModelRemote(10, 10);
+		SpreadsheetModelRemote modelRemote = r.newSpreadsheetTableModelRemote(300, 10);
 		AbstractSpreadsheetModel abstractTableModel1 = ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
 		AbstractSpreadsheetModel abstractTableModel2 = ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
 
@@ -232,6 +218,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 			public void upload(File localFile, String fileName) throws Exception {
 
+			}
+			public String getUserName() {
+				return null;
 			}
 		};
 		JFrame f = new JFrame("F1");
@@ -434,7 +423,8 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				public void insertColumn(final int insertNum, final int startCol) {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
-
+							long t1=System.currentTimeMillis();
+							System.out.println("SpreadsheetPanel.insertColumn t1="+t1);
 							int lastCol = ss.getTable().getColumnCount() - 1;
 							TableColumnModel tm = ss.getTable().getColumnModel();
 							TableColumn column = tm.getColumn(startCol);
@@ -452,6 +442,8 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 								newcol.setHeaderValue(Node.translateColumn(curCol));
 								tm.addColumn(newcol);
 							}
+							long t2=System.currentTimeMillis();
+							System.out.println("SpreadsheetPanel.insertColumn t2="+t2+" -> "+(t2-t1));
 						}
 					});
 				}

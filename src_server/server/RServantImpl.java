@@ -771,10 +771,15 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
-	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException {
-		return DirectJNI.getInstance().getRServices().getSvg(expression, width, height);
+	public Vector<String> getSvg(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getSvg(script, width, height);
 	}
 
+	public byte[] getPdf(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getPdf(script, width, height);
+	}
+
+	
 	public String getPythonStatus() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getPythonStatus();
 	}

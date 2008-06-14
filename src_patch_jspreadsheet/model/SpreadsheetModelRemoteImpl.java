@@ -862,6 +862,9 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            same number of new columns as range has
 	 */
 	public void insertColumn(CellRange insertRange) {
+		long t1=System.currentTimeMillis();
+		System.out.println("SpreadsheetModelRemoteImpl.insertColumn t1="+t1);
+		
 		fireDiscardColumnCount();
 		fireDiscard();
 		/*
@@ -913,6 +916,10 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		// sharp.setBaseColumnWidth();
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
+		
+		long t2=System.currentTimeMillis();
+		System.out.println("SpreadsheetModelRemoteImpl.insertColumn t2="+t2+" -> "+(t2-t1));
+		
 	}
 
 	/**

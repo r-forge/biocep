@@ -26,18 +26,14 @@ import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
-
 import model.SpreadsheetModelDevice;
-import model.SpreadsheetModelRemote;
 import model.SpreadsheetModelRemoteProxy;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-
 import remoting.RAction;
 import remoting.RCallBack;
 import remoting.GenericCallbackDevice;
