@@ -289,6 +289,8 @@
 							<pathelement path="lib/desktop/biocep-doc.jar"/>
 							
 							<pathelement path="lib/desktop/idw-gpl.jar"/>
+							<pathelement path="lib/desktop/PDFRenderer.jar"/>
+							
 							<pathelement path="lib/desktop/pf-joi-full.jar"/>
 							<pathelement path="lib/desktop/jeditmodes.jar"/>
 							<pathelement path="lib/desktop/jedit.jar"/>
@@ -527,7 +529,9 @@
 				  	
 				  		
 				  		
-						<fileset dir="lib/desktop" includes="idw-gpl.jar"/>				  		
+						<fileset dir="lib/desktop" includes="idw-gpl.jar"/>
+						<fileset dir="lib/desktop" includes="PDFRenderer.jar"/>			
+							  		
 				  		<fileset dir="lib/desktop" includes="jedit.jar"/>				  		
 				  		<fileset dir="lib/desktop" includes="jeditmodes.jar"/>
 				  		<fileset dir="lib/desktop" includes="pf-joi-full.jar"/>
@@ -579,7 +583,9 @@
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="log4j-1.2.15.jar"/>	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-codec-1.3.jar"/>
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-httpclient-3.1-rc1.jar"/>					  					  
-					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="idw-gpl.jar"/>				  		
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="idw-gpl.jar"/>
+					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="PDFRenderer.jar"/>
+									  		
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jedit.jar"/>				  		
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jeditmodes.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="pf-joi-full.jar"/>

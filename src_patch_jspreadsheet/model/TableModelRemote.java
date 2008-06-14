@@ -29,5 +29,7 @@ public interface TableModelRemote extends Remote {
 	public void fireTableStructureChanged() throws RemoteException;
 	
 	public <T extends EventListener> T[] getListeners(Class<T> listenerType) throws RemoteException;
-	public TableModelListener[] getTableModelListeners() throws RemoteException;			
+	public TableModelListener[] getTableModelListeners() throws RemoteException;
+	
+	
 }

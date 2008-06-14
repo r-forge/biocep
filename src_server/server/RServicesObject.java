@@ -287,6 +287,10 @@ public class RServicesObject implements RServices {
 	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException {
 		return null;
 	}
+	
+	public byte[] getPdf(String script, int width, int height) throws RemoteException {
+		return null;
+	}
 
 	public String getPythonStatus() throws RemoteException {
 		return null;

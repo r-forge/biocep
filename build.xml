@@ -744,6 +744,7 @@
 				<pathelement path="lib/desktop/OpenXLS.jar"/>
 				<pathelement path="lib/desktop/pf-joi-full.jar"/>
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
+				<pathelement path="lib/desktop/PDFRenderer.jar"/>
 				
 				<pathelement path="lib/desktop/groovy-all-1.5.4.jar"/>
 				
@@ -921,6 +922,7 @@
 				<pathelement path="lib/desktop/OpenXLS.jar"/>
 				<pathelement path="lib/desktop/pf-joi-full.jar"/>
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
+				<pathelement path="lib/desktop/PDFRenderer.jar"/>
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
@@ -1039,6 +1041,7 @@
 					<pathelement path="lib/desktop/OpenXLS.jar"/>
 					<pathelement path="lib/desktop/pf-joi-full.jar"/>
 					<pathelement path="lib/desktop/idw-gpl.jar"/>
+					<pathelement path="lib/desktop/PDFRenderer.jar"/>
 					
 					<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 					<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
@@ -1507,10 +1510,9 @@
 			<unjar src="lib/desktop/OpenXLS.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/pf-joi-full.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/idw-gpl.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/desktop/PDFRenderer.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/swing-layout-1.0.3.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/freemindbrowser.jar"  dest="binsrv" overwrite="true"/>
-			
-		
 			<unjar src="lib/svg/batik-anim.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-bridge.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-css.jar"  dest="binsrv" overwrite="true"/>

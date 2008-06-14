@@ -28,4 +28,6 @@ public interface RGui extends RKit {
 	public void upload(File localFile, String fileName) throws Exception;
 	
 	public GroovyInterpreter getGroovyInterpreter() ;
+	
+	public String getUserName(); 
 }

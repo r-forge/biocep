@@ -1756,9 +1756,11 @@ public class DirectJNI {
 
 	void shutdownDevices(String deviceType) throws RemoteException {
 		RInteger devices = (RInteger) getRServices().getObject(".PrivateEnv$dev.list()");
-		for (int i = 0; i < devices.getValue().length; ++i) {
-			if (devices.getNames()[i].equals(deviceType)) {
-				getRServices().getObject(".PrivateEnv$dev.off(" + devices.getValue()[i] + ")");
+		if (devices!=null) {
+			for (int i = 0; i < devices.getValue().length; ++i) {
+				if (devices.getNames()[i].equals(deviceType)) {
+					getRServices().getObject(".PrivateEnv$dev.off(" + devices.getValue()[i] + ")");
+				}
 			}
 		}
 	}
@@ -3215,7 +3217,7 @@ public class DirectJNI {
 		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 		}
 
-		public Vector<String> getSvg(String expression, int width, int height) throws RemoteException {
+		public Vector<String> getSvg(String script, int width, int height) throws RemoteException {
 
 			File tempFile = null;
 			try {
@@ -3241,7 +3243,7 @@ public class DirectJNI {
 				GDDevice device = null;
 				try {
 					device = DirectJNI.getInstance().getRServices().newDevice(dSize.width, dSize.height);
-					DirectJNI.getInstance().getRServices().sourceFromBuffer(new StringBuffer(expression));
+					DirectJNI.getInstance().getRServices().sourceFromBuffer(new StringBuffer(script));
 					if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 						log.info(DirectJNI.getInstance().getRServices().getStatus());
 					}
@@ -3286,7 +3288,7 @@ public class DirectJNI {
 
 			} else {
 				final StringBuffer command = new StringBuffer("CairoSVG(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-						+ new Double(10 * (width / height)) + ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);" + expression);
+						+ new Double(10 * (width / height)) + ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);" + script);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(command);
 
 				if (!_lastStatus.equals("")) {
@@ -3320,6 +3322,64 @@ public class DirectJNI {
 			}
 		}
 
+		
+		public byte[] getPdf(String script, int width, int height) throws RemoteException {
+			
+			File tempFile = null;
+			try {
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".pdf").getCanonicalFile();
+				if (tempFile.exists())
+					tempFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+
+			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
+
+			DirectJNI.getInstance().shutdownDevices("pdf");
+
+			final String createDeviceCommand = "pdf(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
+					+ new Double(6 * (width / height)) + ", height = " + 6
+					+ " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+			
+			DirectJNI.getInstance().getRServices().sourceFromBuffer(new StringBuffer(script));			
+			DirectJNI.getInstance().getRServices().evaluate( ".PrivateEnv$dev.set("	+ currentDevice + ");", 1);
+			
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+
+			if (tempFile.exists()) {
+
+				byte[] result = null;
+				try {
+
+					DirectJNI.getInstance().shutdownDevices("pdf");
+
+					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
+					result = new byte[(int) raf.length()];
+					raf.readFully(result);
+					raf.close();
+
+					tempFile.delete();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RemoteException("", e);
+				}
+				return result;
+			} else {
+				return null;
+			}
+			
+		}
+		
+		
 		public String getPythonStatus() throws RemoteException {
 			return PythonInterpreterSingleton.getPythonStatus();
 

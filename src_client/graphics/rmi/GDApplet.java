@@ -17,7 +17,6 @@
  */
 package graphics.rmi;
 
-import freemind.main.FreeMindApplet;
 import graphics.pop.GDDevice;
 import graphics.rmi.action.CopyFromCurrentDeviceAction;
 import graphics.rmi.action.CopyToCurrentDeviceAction;
@@ -29,7 +28,9 @@ import graphics.rmi.action.SaveDeviceAsPngAction;
 import graphics.rmi.action.SaveDeviceAsSvgAction;
 import graphics.rmi.action.SetCurrentDeviceAction;
 import graphics.rmi.action.SnapshotDeviceAction;
+import graphics.rmi.action.SnapshotDevicePdfAction;
 import graphics.rmi.action.SnapshotDeviceSvgAction;
+import graphics.rmi.dialogs.GetExprDialog;
 import graphics.rmi.spreadsheet.DimensionsDialog;
 import graphics.rmi.spreadsheet.SelectIdDialog;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
@@ -47,9 +48,7 @@ import http.TunnelingException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -58,8 +57,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -99,9 +96,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -112,10 +107,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -126,9 +119,6 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import model.ModelUtils;
-import model.AbstractSpreadsheetModel;
-import model.SpreadsheetModelRemote;
 import net.infonode.docking.DockingWindow;
 import net.infonode.docking.DockingWindowAdapter;
 import net.infonode.docking.DockingWindowListener;
@@ -147,7 +137,6 @@ import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
-import org.apache.batik.swing.JSVGCanvas;
 import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
 import org.gjt.sp.jedit.gui.FloatingWindowContainer;
@@ -157,10 +146,10 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RCollaborationListener;
-import remoting.RKit;
 import remoting.RServices;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
+import server.DirectJNI;
 import server.LocalHttpServer;
 import server.LocalRmiRegistry;
 import server.NoMappingAvailable;
@@ -168,7 +157,6 @@ import server.ServerManager;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.PropertiesGenerator;
-import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
@@ -177,8 +165,10 @@ import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 import uk.ac.ebi.microarray.pools.gui.SymbolPopDialog;
 import uk.ac.ebi.microarray.pools.gui.SymbolPushDialog;
 import util.Utils;
+import views.*;
 import static graphics.rmi.JGDPanelPop.*;
 import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
+
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -517,17 +507,17 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
+									
 									/*
-									 * 
-									 * DirectJNI.init(); r =
-									 * DirectJNI.getInstance().getRServices();
-									 * if (false) throw new
-									 * BadSshHostException(); if (false) throw
-									 * new BadSshLoginPwdException(); _keepAlive =
-									 * ident.isKeepAlive();
-									 * 
-									 */
-
+									  DirectJNI.init(); r =
+									  DirectJNI.getInstance().getRServices();
+									  if (false) throw new
+									  BadSshHostException(); if (false) throw
+									  new BadSshLoginPwdException(); _keepAlive =			  ident.isKeepAlive();
+									*/  
+									  
+									  
+									 
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
@@ -565,6 +555,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 										pw.println(PoolUtils.stubToHex(r));
 										pw.close();
 									}
+									
+																	
+									
+									
 
 								} else {
 
@@ -665,7 +659,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, d), null,
 									new FitDeviceAction(GDApplet.this, d), null, new SnapshotDeviceAction(GDApplet.this),
-									new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
+									new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
 									new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
 									new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
 									new CopyToCurrentDeviceAction(GDApplet.this, d), null, new CoupleToCurrentDeviceAction(GDApplet.this)
@@ -703,7 +697,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 										new SetCurrentDeviceAction(GDApplet.this, newDevice), null, new FitDeviceAction(GDApplet.this, newDevice), null,
-										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this), null,
+										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this),new SnapshotDevicePdfAction(GDApplet.this), null,
 										new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this),
 										new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
 										new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
@@ -1022,7 +1016,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 					toolsMenu.removeAll();
 					toolsMenu.add(_actions.get("editor"));
 					toolsMenu.add(_actions.get("spreadsheet"));
+					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("svgview"));
+					toolsMenu.add(_actions.get("pdfview"));
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("pythonconsole"));
 					toolsMenu.add(_actions.get("clientpythonconsole"));
@@ -1791,7 +1787,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return result;
 	}
 
-	private Vector<CollaborativeSpreadsheetView> getCollaborativeSpreadsheetViews() {
+	private Vector<views.CollaborativeSpreadsheetView> getCollaborativeSpreadsheetViews() {
 		Vector<CollaborativeSpreadsheetView> result = new Vector<CollaborativeSpreadsheetView>();
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
 		while (iter.hasNext()) {
@@ -1889,7 +1885,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 
 			int id = getDynamicViewId();
-			((TabWindow) views[2].getWindowParent()).addTab(new graphics.rmi.GDApplet.HelpView("Help View", null, _helpBrowser, id));
+			((TabWindow) views[2].getWindowParent()).addTab(new HelpView("Help View", null, _helpBrowser, id));
 
 		} else {
 
@@ -2688,7 +2684,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				JPanel graphicPanel = new JPanel();
 				rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
 				int id = getDynamicViewId();
-				DeviceView deviceView = new graphics.rmi.GDApplet.DeviceView("Graphic Device", null, rootGraphicPanel, id);
+				DeviceView deviceView = new DeviceView("Graphic Device", null, rootGraphicPanel, id);
 				((TabWindow) views[2].getWindowParent()).addTab(deviceView);
 
 				try {
@@ -2712,7 +2708,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
-							new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
+							new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
 							new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
 							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
@@ -2761,7 +2757,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				JPanel graphicPanel = new JPanel();
 				rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
 				int id = getDynamicViewId();
-				DeviceView deviceView = new graphics.rmi.GDApplet.DeviceView("Broadcasted Graphic Device", null, rootGraphicPanel, id);
+				DeviceView deviceView = new DeviceView("Broadcasted Graphic Device", null, rootGraphicPanel, id);
 				((TabWindow) views[2].getWindowParent()).addTab(deviceView);
 
 				try {
@@ -2780,7 +2776,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
-							new SnapshotDeviceSvgAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
+							new SnapshotDeviceSvgAction(GDApplet.this),new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
 							new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
 							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
@@ -2832,7 +2828,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					}
 
 					int id = getDynamicViewId();
-					DockingWindow lv = new graphics.rmi.GDApplet.LogView("Console Log Viewer", null, id);
+					DockingWindow lv = new LogView("Console Log Viewer", null, id);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 
@@ -2933,7 +2929,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (getOpenedChatConsoleView() == null) {
 					int id = getDynamicViewId();
 
-					final ChatConsoleView lv = new ChatConsoleView("Chat Console", null, id);
+					final ChatConsoleView lv = new ChatConsoleView("Chat Console", null, id, GDApplet.this);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
@@ -2957,7 +2953,30 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 				int id = getDynamicViewId();
 
-				final SvgView lv = new SvgView("SVG Viewer", null, id);
+				final SvgView lv = new SvgView("SVG Viewer", null, id, GDApplet.this);
+				((TabWindow) views[2].getWindowParent()).addTab(lv);
+				lv.addListener(new AbstractDockingWindowListener() {
+					public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+						try {
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+		
+		_actions.put("pdfview", new AbstractAction("New PDF Viewer") {
+			public void actionPerformed(final ActionEvent e) {
+
+				int id = getDynamicViewId();
+				final PdfView lv = new PdfView("PDF Viewer", null, id, GDApplet.this);
 				((TabWindow) views[2].getWindowParent()).addTab(lv);
 				lv.addListener(new AbstractDockingWindowListener() {
 					public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
@@ -2981,7 +3000,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (getOpenedServerPythonConsoleView() == null) {
 					int id = getDynamicViewId();
 
-					final ServerPythonConsoleView lv = new ServerPythonConsoleView("Python Console", null, id);
+					final ServerPythonConsoleView lv = new ServerPythonConsoleView("Python Console", null, id, GDApplet.this);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 
@@ -3007,7 +3026,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (getOpenedClientPythonConsoleView() == null) {
 					int id = getDynamicViewId();
 
-					final ClientPythonConsoleView lv = new ClientPythonConsoleView("Local Python Console", null, id);
+					final ClientPythonConsoleView lv = new ClientPythonConsoleView("Local Python Console", null, id, GDApplet.this);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
@@ -3031,7 +3050,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (getOpenedServerPythonConsoleView() == null) {
 					int id = getDynamicViewId();
 
-					final ServerGroovyConsoleView lv = new ServerGroovyConsoleView("Groovy Console", null, id);
+					final ServerGroovyConsoleView lv = new ServerGroovyConsoleView("Groovy Console", null, id, GDApplet.this);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
@@ -3055,7 +3074,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (getOpenedServerPythonConsoleView() == null) {
 					int id = getDynamicViewId();
 
-					final ClientGroovyConsoleView lv = new ClientGroovyConsoleView("Local Groovy Console", null, id);
+					final ClientGroovyConsoleView lv = new ClientGroovyConsoleView("Local Groovy Console", null, id, GDApplet.this);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
@@ -3108,7 +3127,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							SwingUtilities.invokeLater(new Runnable() {
 								public void run() {
 									try {
-										GetExprDialog dialog = new GetExprDialog("  R Expression", _expressionSave);
+										GetExprDialog dialog = new GetExprDialog(GDApplet.this,"  R Expression", _expressionSave);
 										dialog.setVisible(true);
 										if (dialog.getExpr() != null) {
 											RObject robj = null;
@@ -3190,7 +3209,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								_isBiocLiteSourced = true;
 							}
 
-							GetExprDialog dialog = new GetExprDialog("  R package", _packageNameSave);
+							GetExprDialog dialog = new GetExprDialog(GDApplet.this, "  R package", _packageNameSave);
 							dialog.setVisible(true);
 							if (dialog.getExpr() != null) {
 								_actions.get("logview").actionPerformed(null);
@@ -3219,7 +3238,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						try {
 
 							while (true) {
-								GetExprDialog dialog = new GetExprDialog(" Run Http Virtualization Engine On Port : ", _httpPortSave);
+								GetExprDialog dialog = new GetExprDialog(GDApplet.this, " Run Http Virtualization Engine On Port : ", _httpPortSave);
 								dialog.setVisible(true);
 								if (dialog.getExpr() != null) {
 									try {
@@ -3289,7 +3308,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					public void run() {
 
 						while (true) {
-							GetExprDialog dialog = new GetExprDialog(" Run Http Virtualization Engine On Port : ", _httpPortSave);
+							GetExprDialog dialog = new GetExprDialog(GDApplet.this, " Run Http Virtualization Engine On Port : ", _httpPortSave);
 							dialog.setVisible(true);
 							if (dialog.getExpr() != null) {
 								try {
@@ -3368,52 +3387,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 
-	public static class RemoteLogListenerImpl extends UnicastRemoteObject implements RemoteLogListener {
-		private ServerLogView _serverLogView;
-
-		public RemoteLogListenerImpl(ServerLogView serverLogView) throws RemoteException {
-			super();
-			_serverLogView = serverLogView;
-		}
-
-		public void scrollToEnd() {
-			_serverLogView.getScrollPane().getVerticalScrollBar().setValue(_serverLogView.getScrollPane().getVerticalScrollBar().getMaximum());
-		}
-
-		public void flush() throws RemoteException {
-		}
-
-		public void write(final byte[] b) throws RemoteException {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					_serverLogView.getArea().append(new String(b));
-					scrollToEnd();
-					_serverLogView.getArea().repaint();
-				}
-			});
-		}
-
-		public void write(final byte[] b, final int off, final int len) throws RemoteException {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					_serverLogView.getArea().append(new String(b, off, len));
-					scrollToEnd();
-					_serverLogView.getArea().repaint();
-				}
-			});
-		}
-
-		public void write(final int b) throws RemoteException {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					_serverLogView.getArea().append(new String(new byte[] { (byte) b, (byte) (b >> 8) }));
-					scrollToEnd();
-					_serverLogView.getArea().repaint();
-				}
-			});
-		}
-
-	}
+	
 
 	private void disposeDevices() {
 
@@ -3523,141 +3497,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 
-	class GetExprDialog extends JDialog {
-		String[] save;
-		String expr_str = null;
+	
 
-		private boolean _closedOnOK = false;
-		final JTextField exprs;
-
-		public String getExpr() {
-			if (_closedOnOK)
-				try {
-					return expr_str;
-				} catch (Exception e) {
-					return null;
-				}
-			else
-				return null;
-		}
-
-		public GetExprDialog(String label, String[] expr_save) {
-			super(new JFrame(), true);
-			save = expr_save;
-			setLocationRelativeTo(GDApplet.this);
-			getContentPane().setLayout(new GridLayout(1, 2));
-			((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-			JPanel p1 = new JPanel();
-			p1.setLayout(new GridLayout(0, 1));
-			getContentPane().add(p1);
-			JPanel p2 = new JPanel();
-			p2.setLayout(new GridLayout(0, 1));
-			getContentPane().add(p2);
-
-			p1.add(new JLabel(label));
-
-			exprs = new JTextField();
-			exprs.setText(save[0]);
-
-			KeyListener keyListener = new KeyListener() {
-				public void keyPressed(KeyEvent e) {
-					if (e.getKeyCode() == 10) {
-						okMethod();
-					} else if (e.getKeyCode() == 27) {
-						cancelMethod();
-					}
-				}
-
-				public void keyReleased(KeyEvent e) {
-				}
-
-				public void keyTyped(KeyEvent e) {
-				}
-			};
-			exprs.addKeyListener(keyListener);
-
-			p2.add(exprs);
-
-			JButton ok = new JButton("Ok");
-			ok.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					okMethod();
-				}
-			});
-
-			JButton cancel = new JButton("Cancel");
-			cancel.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					cancelMethod();
-				}
-			});
-
-			p1.add(ok);
-			p2.add(cancel);
-
-			setSize(new Dimension(320, 100));
-
-			PoolUtils.locateInScreenCenter(this);
-
-		}
-
-		private void okMethod() {
-			expr_str = exprs.getText();
-			save[0] = expr_str;
-			_closedOnOK = true;
-			setVisible(false);
-		}
-
-		private void cancelMethod() {
-			_closedOnOK = false;
-			setVisible(false);
-		}
-
-	}
-
-	static class DynamicView extends View {
-		private int id;
-
-		DynamicView(String title, Icon icon, Component component, int id) {
-			super(title, icon, component);
-			this.id = id;
-		}
-
-		public int getId() {
-			return id;
-		}
-	}
-
-	static class HelpView extends DynamicView {
-		GDHelpBrowser _browser;
-
-		HelpView(String title, Icon icon, GDHelpBrowser browser, int id) {
-			super(title, icon, browser, id);
-			_browser = browser;
-		}
-
-		public GDHelpBrowser getBrowser() {
-			return _browser;
-		}
-	}
-
-	static class DeviceView extends DynamicView {
-		JGDPanelPop _panel;
-
-		DeviceView(String title, Icon icon, Component component, int id) {
-			super(title, icon, component, id);
-		}
-
-		public JGDPanelPop getPanel() {
-			return _panel;
-		}
-
-		public void setPanel(JGDPanelPop panel) {
-			this._panel = panel;
-		}
-
-	}
+	
+	
 
 	static JPanel newPanel(JTextArea a) {
 		JPanel result = new JPanel(new BorderLayout());
@@ -3665,480 +3508,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return result;
 	}
 
-	static class LogView extends DynamicView {
-		JTextArea _area;
-
-		LogView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-			_area = new JTextArea();
-			((JPanel) getComponent()).add(_area);
-		}
-
-		public JTextArea getArea() {
-			return _area;
-		}
-	}
-
-	class ServerPythonConsoleView extends DynamicView {
-		ConsolePanel _consolePanel;
-
-		ServerPythonConsoleView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-			_consolePanel = new ConsolePanel(new SubmitInterface() {
-				public String submit(final String expression) {
-					if (getRLock().isLocked()) {
-						return "R is busy, please retry\n";
-					}
-					try {
-						getRLock().lock();
-						final String log = _rForConsole.pythonExec(expression);
-						return log;
-					} catch (Exception e) {
-						return PoolUtils.getStackTraceAsString(e);
-					} finally {
-						getRLock().unlock();
-					}
-				}
-			});
-			((JPanel) getComponent()).add(_consolePanel);
-		}
-
-		public ConsolePanel getConsolePanel() {
-			return _consolePanel;
-		}
-	}
-
-	class ServerGroovyConsoleView extends DynamicView {
-		ConsolePanel _consolePanel;
-
-		ServerGroovyConsoleView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-			_consolePanel = new ConsolePanel(new SubmitInterface() {
-				public String submit(final String expression) {
-					if (getRLock().isLocked()) {
-						return "R is busy, please retry\n";
-					}
-					try {
-						getRLock().lock();
-						final String log = _rForConsole.groovyExec(expression);
-						return log;
-					} catch (Exception e) {
-						return PoolUtils.getStackTraceAsString(e);
-					} finally {
-						getRLock().unlock();
-					}
-				}
-			});
-			((JPanel) getComponent()).add(_consolePanel);
-		}
-
-		public ConsolePanel getConsolePanel() {
-			return _consolePanel;
-		}
-	}
-
-	class ClientGroovyConsoleView extends DynamicView {
-		ConsolePanel _consolePanel;
-
-		ClientGroovyConsoleView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-			_consolePanel = new ConsolePanel(new SubmitInterface() {
-				public String submit(final String expression) {
-					if (getRLock().isLocked()) {
-						return "R is busy, please retry\n";
-					}
-					try {
-						getRLock().lock();
-						final String log = GroovyInterpreterSingleton.getInstance().exec(expression);
-						return log;
-					} catch (Exception e) {
-						return PoolUtils.getStackTraceAsString(e);
-					} finally {
-						getRLock().unlock();
-					}
-				}
-			});
-			((JPanel) getComponent()).add(_consolePanel);
-		}
-
-		public ConsolePanel getConsolePanel() {
-			return _consolePanel;
-		}
-	}
-
-	class ClientPythonConsoleView extends DynamicView {
-		ConsolePanel _consolePanel;
-
-		ClientPythonConsoleView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-			_consolePanel = new ConsolePanel(new SubmitInterface() {
-				public String submit(final String expression) {
-					if (getRLock().isLocked()) {
-						return "R is busy, please retry\n";
-					}
-					try {
-						getRLock().lock();
-						try {
-							python.PythonInterpreterSingleton.startLogCapture();
-							python.PythonInterpreterSingleton.getInstance().exec(expression);
-							return python.PythonInterpreterSingleton.getPythonStatus();
-						} catch (Exception e) {
-							return PoolUtils.getStackTraceAsString(e);
-						}
-					} catch (Exception e) {
-						return PoolUtils.getStackTraceAsString(e);
-					} finally {
-						getRLock().unlock();
-					}
-				}
-			});
-			((JPanel) getComponent()).add(_consolePanel);
-		}
-
-		public ConsolePanel getConsolePanel() {
-			return _consolePanel;
-		}
-	}
-
-	class ChatConsoleView extends DynamicView {
-		ConsolePanel _consolePanel;
-
-		ChatConsoleView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-			_consolePanel = new ConsolePanel(new SubmitInterface() {
-				public String submit(final String expression) {
-
-					new Thread(new Runnable() {
-						public void run() {
-							try {
-								getRLock().lock();
-								getR().chat(_sessionId, expression);
-							} catch (Exception e) {
-								e.printStackTrace();
-							} finally {
-								((RGuiReentrantLock) getRLock()).unlockNoBroadcast();
-							}
-						}
-					}).start();
-
-					return "";
-				}
-			});
-			((JPanel) getComponent()).add(_consolePanel);
-		}
-
-		public ConsolePanel getConsolePanel() {
-			return _consolePanel;
-		}
-	}
-
-	class BiocepMindMapView extends DynamicView {
-		FreeMindApplet _freeMindApplet;
-
-		BiocepMindMapView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-
-			final HashMap<String, String> params = new HashMap<String, String>();
-			params.put("modes", "freemind.modes.browsemode.BrowseMode");
-			params.put("initial_mode", "Browse");
-			params.put("selection_method", "selection_method_direct");
-
-			if (GDApplet.class.getResource("/Biocep.mm") != null) {
-				params.put("browsemode_initial_map", "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/classes/Biocep.mm");
-			} else {
-				params.put("browsemode_initial_map", "http://biocep-distrib.r-forge.r-project.org/Biocep.mm");
-			}
-			_freeMindApplet = new FreeMindApplet(params);
-			_freeMindApplet.init();
-
-			((JPanel) getComponent()).add(_freeMindApplet, BorderLayout.CENTER);
-		}
-
-		public FreeMindApplet getFreeMindApplet() {
-			return _freeMindApplet;
-		}
-	}
-
-	public static class ServerLogView extends DynamicView {
-		JTextArea _area;
-		JScrollPane _scrollPane;
-		RemoteLogListenerImpl _rll;
-
-		ServerLogView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-			_area = new JTextArea();
-			_scrollPane = new JScrollPane(_area);
-
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-			((JPanel) getComponent()).add(_scrollPane);
-			try {
-				_rll = new RemoteLogListenerImpl(this);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		public JTextArea getArea() {
-			return _area;
-		}
-
-		public JScrollPane getScrollPane() {
-			return _scrollPane;
-		}
-
-		public RemoteLogListenerImpl getRemoteLogListenerImpl() {
-			return _rll;
-		}
-
-		public void recreateRemoteLogListenerImpl() {
-			try {
-				_rll = new RemoteLogListenerImpl(this);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-	}
-
-	public static class CollaborativeSpreadsheetView extends DynamicView {
-		SpreadsheetModelRemote _spreadsheetModelRemote;
-		
-		SpreadsheetModelRemote getSpreadsheetModelRemote() {
-			return _spreadsheetModelRemote;
-		}
-		
-		DockingWindowListener l=new AbstractDockingWindowListener(){			
-			@Override
-			public void windowClosed(DockingWindow arg0) {
-				System.out.println("********* CollaborativeSpreadsheetView Closed");
-				try {
-					if (_spreadsheetModelRemote instanceof HttpMarker) {												
-						((HttpMarker)_spreadsheetModelRemote).stopThreads();
-					} 					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		};	
-		
-		CollaborativeSpreadsheetView(int id, int rowCount, int colCount,  RGui rgui) {
-			super("", null, new JPanel(), id);
-			
-			addListener(l);
-			
-			try {
-				_spreadsheetModelRemote = rgui.getR().newSpreadsheetTableModelRemote(rowCount, colCount);
-				final String spreadsheetModelId = _spreadsheetModelRemote.getSpreadsheetModelId();
-				final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(_spreadsheetModelRemote);			
-				((JPanel) getComponent()).setLayout(new BorderLayout());
-				((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
-				getViewProperties().setTitle("Collaboratibe Spreadsheet View <" + spreadsheetModelId + ">");				
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-
-			}
-			
-		}
-			
-		CollaborativeSpreadsheetView(int id, String spreadsheetModelId,  RGui rgui) {
-			super("", null, new JPanel(), id);
-			
-			addListener(l);	
-			
-			try {
-				_spreadsheetModelRemote = rgui.getR().getSpreadsheetTableModelRemote(spreadsheetModelId);
-				final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(_spreadsheetModelRemote);
-				((JPanel) getComponent()).setLayout(new BorderLayout());
-				((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
-				getViewProperties().setTitle("Collaboratibe Spreadsheet View <" + spreadsheetModelId + ">");
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-
-			}			
-		}
 	
-	}
-
-	public class SvgView extends DynamicView {
-		JTextArea _area;
-		JScrollPane _scrollPane;
-		JSVGCanvas _svgCanvas = new JSVGCanvas();
-
-		private void showPopup(MouseEvent e) {
-			JPopupMenu popupMenu = new JPopupMenu();
-
-			popupMenu.add(new AbstractAction("Load Svg From File") {
-				public void actionPerformed(ActionEvent e) {
-					final JFileChooser chooser = new JFileChooser();
-					int returnVal = chooser.showOpenDialog(_svgCanvas);
-					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						SwingUtilities.invokeLater(new Runnable() {
-							public void run() {
-								try {
-									_svgCanvas.setURI(chooser.getSelectedFile().toURL().toString());
-									repaint();
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-							}
-						});
-					}
-				}
-
-				public boolean isEnabled() {
-					return true;
-				}
-			});
-
-			popupMenu.show(_svgCanvas, e.getX(), e.getY());
-
-		}
-
-		SvgView(String title, Icon icon, int id) {
-			super(title, icon, new JPanel(), id);
-
-			_area = new JTextArea();
-			_scrollPane = new JScrollPane(_area);
-			_svgCanvas = new JSVGCanvas();
-			_svgCanvas.setEnableZoomInteractor(true);
-
-			_svgCanvas.addMouseListener(new MouseListener() {
-				public void mouseEntered(MouseEvent e) {
-				}
-
-				public void mouseClicked(MouseEvent e) {
-					if (e.isPopupTrigger()) {
-						showPopup(e);
-					}
-
-					if (e.getButton() == MouseEvent.BUTTON3) {
-						showPopup(e);
-					}
-
-				};
-
-				public void mouseExited(MouseEvent e) {
-				};
-
-				public void mousePressed(MouseEvent e) {
-				};
-
-				public void mouseReleased(MouseEvent e) {
-					if (e.isPopupTrigger()) {
-						showPopup(e);
-					}
-				};
-			});
-
-			JButton submit = new JButton("Submit");
-			submit.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					new Thread(new Runnable() {
-						public void run() {
-							if (GDApplet.this.getRLock().isLocked()) {
-								JOptionPane.showMessageDialog(null, "R is busy");
-							} else {
-								GDApplet.this.getRLock().lock();
-								try {
-									SwingUtilities.invokeLater(new Runnable() {
-										public void run() {
-											_area.setEnabled(false);
-										}
-									});
-
-									Vector<String> result = null;
-									try {
-										result = GDApplet.this.getR().getSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
-									} catch (RemoteException e) {
-										JOptionPane.showMessageDialog(null, e.getCause().getMessage(), "R Error", JOptionPane.ERROR_MESSAGE);
-										return;
-									}
-
-									if (result == null) {
-										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
-										return;
-									}
-									if (!"".equals(GDApplet.this.getR().getStatus())) {
-										JOptionPane.showMessageDialog(null, GDApplet.this.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
-									}
-									// System.out.println("SVG RESULT:"+result);
-									final String tempFile = System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg";
-									PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
-									for (int i = 0; i < result.size(); ++i)
-										pw.println(result.elementAt(i));
-									pw.close();
-
-									SwingUtilities.invokeLater(new Runnable() {
-										public void run() {
-											try {
-												_svgCanvas.setURI(new File(tempFile).toURL().toString());
-												repaint();
-											} catch (Exception e) {
-												e.printStackTrace();
-											}
-										}
-									});
-								} catch (Exception e) {
-									e.printStackTrace();
-								} finally {
-									GDApplet.this.getRLock().unlock();
-									SwingUtilities.invokeLater(new Runnable() {
-										public void run() {
-											_area.setEnabled(true);
-										}
-									});
-								}
-							}
-						}
-					}).start();
-				}
-			});
-
-			JPanel topPanel = new JPanel(new BorderLayout());
-			topPanel.add(_scrollPane, BorderLayout.CENTER);
-			topPanel.add(submit, BorderLayout.SOUTH);
-
-			final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, _svgCanvas);
-			splitPane.setDividerSize(3);
-
-			((JPanel) getComponent()).setLayout(new BorderLayout());
-			((JPanel) getComponent()).setBorder(BorderFactory.createLineBorder(Color.gray, 2));
-			((JPanel) getComponent()).add(splitPane);
-
-			new Thread(new Runnable() {
-				public void run() {
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							splitPane.setDividerLocation((int) 60);
-						}
-					});
-				}
-			}).start();
-
-		}
-
-		public JTextArea getArea() {
-			return _area;
-		}
-
-		public JScrollPane getScrollPane() {
-			return _scrollPane;
-		}
-
-		JSVGCanvas getSvgCanvas() {
-			return _svgCanvas;
-		}
-
-	}
 
 	public static class PopupListener extends MouseAdapter {
 		private JPopupMenu popup;
@@ -4345,7 +3715,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				SwingUtilities.updateComponentTreeUI(panel);
 
 				int id = getDynamicViewId();
-				graphics.rmi.GDApplet.DynamicView v = new graphics.rmi.GDApplet.DynamicView(title, null, panel, id);
+				DynamicView v = new DynamicView(title, null, panel, id);
 				((TabWindow) views[2].getWindowParent()).addTab(v);
 				result[0] = v;
 			}
@@ -4461,6 +3831,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 				_consolePanel.print("[" + sourceSession + "] - " + expression, result);
 			}
 		}
+	}
+	public String getUserName() {
+		return System.getProperty("user.name");
 	}
 
 }
