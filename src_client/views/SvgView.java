@@ -25,13 +25,17 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import org.apache.batik.swing.JSVGCanvas;
 
+import views.highlighting.HighlightDocument;
+import views.highlighting.HighlightKit;
+import views.highlighting.NonWrappingTextPane;
+
 public class SvgView extends DynamicView {
 	private RGui _rgui;
-	private JTextArea _area;
+	private JTextPane _area;
 	private JScrollPane _scrollPane;
 	private JSVGCanvas _svgCanvas = new JSVGCanvas();
 	private File tempFile;
@@ -45,10 +49,10 @@ public class SvgView extends DynamicView {
 				try {
 					Vector<String> svgbuffer = _rgui.getCurrentDevice().getSVG();
 					tempFile = new File(System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg");
-					
+
 					PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
 					for (int i = 0; i < svgbuffer.size(); ++i)
-					pw.println(svgbuffer.elementAt(i));
+						pw.println(svgbuffer.elementAt(i));
 					pw.close();
 
 					SwingUtilities.invokeLater(new Runnable() {
@@ -78,7 +82,7 @@ public class SvgView extends DynamicView {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							try {
-								tempFile=chooser.getSelectedFile();
+								tempFile = chooser.getSelectedFile();
 								_svgCanvas.setURI(tempFile.toURL().toString());
 								repaint();
 							} catch (Exception e) {
@@ -102,19 +106,24 @@ public class SvgView extends DynamicView {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					new Thread(new Runnable() {
 						public void run() {
-								PrintWriter pw=null;BufferedReader br=null;
-								try {
-									pw = new PrintWriter(new FileWriter(chooser.getSelectedFile()));
-									br= new BufferedReader(new FileReader(tempFile));
-									String l;
-									while ((l=br.readLine())!=null) {
-										pw.println(l);
-									}
-								} catch (Exception e) {
-									e.printStackTrace();
-								} finally {
-									try { br.close(); pw.close(); } catch (Exception e) {}
+							PrintWriter pw = null;
+							BufferedReader br = null;
+							try {
+								pw = new PrintWriter(new FileWriter(chooser.getSelectedFile()));
+								br = new BufferedReader(new FileReader(tempFile));
+								String l;
+								while ((l = br.readLine()) != null) {
+									pw.println(l);
 								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							} finally {
+								try {
+									br.close();
+									pw.close();
+								} catch (Exception e) {
+								}
+							}
 						}
 					}).start();
 				}
@@ -130,12 +139,77 @@ public class SvgView extends DynamicView {
 
 	}
 
+	private void showAreaPopup(MouseEvent e) {
+		JPopupMenu popupMenu = new JPopupMenu();
+		popupMenu.add(new AbstractAction("Highlight") {
+			public void actionPerformed(ActionEvent e) {
+				final HighlightDocument document = ((HighlightDocument) _area.getDocument());
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									_area.setEnabled(false);
+								}
+							});
+
+							document.processChangedLines(0, document.getLength());
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									_area.setEnabled(true);
+								}
+							});
+						}
+					}
+				}).start();
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+		popupMenu.show(_area, e.getX(), e.getY());
+	}
+
 	public SvgView(String title, Icon icon, int id, RGui rgui) {
 		super(title, icon, new JPanel(), id);
 
 		_rgui = rgui;
-		_area = new JTextArea();
+		_area = new NonWrappingTextPane();
 		_scrollPane = new JScrollPane(_area);
+		_area.setDocument(new HighlightDocument(false));
+		_area.addMouseListener(new MouseListener() {
+			public void mouseEntered(MouseEvent e) {
+			}
+
+			public void mouseClicked(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showAreaPopup(e);
+				}
+
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					showAreaPopup(e);
+				}
+
+			};
+
+			public void mouseExited(MouseEvent e) {
+			};
+
+			public void mousePressed(MouseEvent e) {
+			};
+
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showAreaPopup(e);
+				}
+			};
+		});
+
 		_svgCanvas = new JSVGCanvas();
 		_svgCanvas.setEnableZoomInteractor(true);
 
@@ -269,7 +343,7 @@ public class SvgView extends DynamicView {
 
 	}
 
-	public JTextArea getArea() {
+	public JTextPane getArea() {
 		return _area;
 	}
 

@@ -35,6 +35,18 @@ public class DirectPackUsage {
 
 	public static void main(String args[]) throws Exception {
 
+		RServices rs = DirectJNI.getInstance().getRServices();
+		rs.sourceFromBuffer(new StringBuffer("print('aaa'"));
+		System.out.println("status:"+rs.getStatus());		
+		System.exit(0);
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		System.setErr(new PrintStream(System.out));
 		DirectJNI.init();

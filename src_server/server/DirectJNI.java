@@ -62,7 +62,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -73,7 +72,6 @@ import mapping.RPackage;
 import mapping.ReferenceInterface;
 import mapping.StandardReference;
 import model.SpreadsheetModelRemote;
-
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.logging.Log;
@@ -3220,6 +3218,9 @@ public class DirectJNI {
 		public Vector<String> getSvg(String script, int width, int height) throws RemoteException {
 
 			File tempFile = null;
+			String status="";
+			
+			
 			try {
 				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".svg").getCanonicalFile();
 				if (tempFile.exists())
@@ -3229,8 +3230,8 @@ public class DirectJNI {
 				throw new RemoteException("", e);
 			}
 
-			DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");
-			String loadStatus = DirectJNI.getInstance().getRServices().getStatus();
+			evaluate("library(Cairo)");
+			String loadStatus = getStatus();
 
 			if (!loadStatus.equals("")) {
 
@@ -3242,14 +3243,15 @@ public class DirectJNI {
 				Dimension dSize = new Dimension(width, height);
 				GDDevice device = null;
 				try {
-					device = DirectJNI.getInstance().getRServices().newDevice(dSize.width, dSize.height);
-					DirectJNI.getInstance().getRServices().sourceFromBuffer(new StringBuffer(script));
-					if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
-						log.info(DirectJNI.getInstance().getRServices().getStatus());
+					device = newDevice(dSize.width, dSize.height);
+					
+					sourceFromBuffer(new StringBuffer(script));
+					status=getStatus();
+					if (!status.equals("")) {						
+						log.info(status);
 					}
+					
 					Vector<GDObject> g2dObjects = device.popAllGraphicObjects();
-					if (g2dObjects.size() == 0)
-						throw new RemoteException(DirectJNI.getInstance().getRServices().getStatus());
 					Java2DUtils.paintAll(svgGenerator, new Point(0, 0), dSize, g2dObjects);
 				} catch (Exception e) {
 					throw new RemoteException("", e);
@@ -3280,19 +3282,25 @@ public class DirectJNI {
 					String line = null;
 					while ((line = br.readLine()) != null)
 						result.add(line);
-
+					
+					_lastStatus=status;
 					return result;
 				} catch (Exception e) {
 					throw new RemoteException("", e);
 				}
 
 			} else {
-				final StringBuffer command = new StringBuffer("CairoSVG(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-						+ new Double(10 * (width / height)) + ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);" + script);
-				DirectJNI.getInstance().getRServices().sourceFromBuffer(command);
-
-				if (!_lastStatus.equals("")) {
-					log.info(_lastStatus);
+				String command = "CairoSVG(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
+						+ new Double(10 * (width / height)) + ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);" ;
+				evaluate(command);
+				if (!getStatus().equals("")) {
+					log.info(getStatus());
+				}
+				
+				sourceFromBuffer(new StringBuffer(script));
+				status=getStatus();
+				if (!status.equals("")) {						
+					log.info(status);
 				}
 
 				if (tempFile.exists()) {
@@ -3314,6 +3322,7 @@ public class DirectJNI {
 						e.printStackTrace();
 						throw new RemoteException("", e);
 					}
+					_lastStatus=status;
 					return result;
 				} else {
 					return null;
@@ -3325,6 +3334,7 @@ public class DirectJNI {
 		
 		public byte[] getPdf(String script, int width, int height) throws RemoteException {
 			
+			String status="";
 			File tempFile = null;
 			try {
 				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".pdf").getCanonicalFile();
@@ -3335,59 +3345,51 @@ public class DirectJNI {
 				throw new RemoteException("", e);
 			}
 
-			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-
-			DirectJNI.getInstance().shutdownDevices("pdf");
+			int currentDevice = ((RInteger) getObject(".PrivateEnv$dev.cur()")).getValue()[0];
+			shutdownDevices("pdf");
 
 			final String createDeviceCommand = "pdf(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
 					+ new Double(6 * (width / height)) + ", height = " + 6
 					+ " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
-			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
-			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
-				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			evaluate(createDeviceCommand);
+			if (!getStatus().equals("")) {
+				log.info(getStatus());
 			}
 			
-			DirectJNI.getInstance().getRServices().sourceFromBuffer(new StringBuffer(script));			
-			DirectJNI.getInstance().getRServices().evaluate( ".PrivateEnv$dev.set("	+ currentDevice + ");", 1);
-			
-			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
-				log.info(DirectJNI.getInstance().getRServices().getStatus());
-			}
-
+			sourceFromBuffer(new StringBuffer(script));			
+			status=getStatus();
+			if (!status.equals("")) {						
+				log.info(status);
+			}			
+			evaluate( ".PrivateEnv$dev.set("	+ currentDevice + ");", 1);
 			if (tempFile.exists()) {
-
 				byte[] result = null;
 				try {
-
-					DirectJNI.getInstance().shutdownDevices("pdf");
-
+					shutdownDevices("pdf");
 					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
 					result = new byte[(int) raf.length()];
 					raf.readFully(result);
 					raf.close();
-
 					tempFile.delete();
-
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new RemoteException("", e);
 				}
+				_lastStatus=status;
 				return result;
 			} else {
+				_lastStatus=status;
 				return null;
-			}
-			
+			}			
 		}
-		
-		
+				
 		public String getPythonStatus() throws RemoteException {
 			return PythonInterpreterSingleton.getPythonStatus();
 
 		}
 
 		public String pythonExceFromResource(String resource) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
+			throw new UnsupportedOperationException("Not supported yet.");		
 		}
 
 		public String pythonExec(String pythonCommand) throws RemoteException {
@@ -3427,33 +3429,23 @@ public class DirectJNI {
 		}
 
 		public RObject pythonEval(String pythonCommand) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+			throw new UnsupportedOperationException("Not supported yet.");		}
 
 		public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+			throw new UnsupportedOperationException("Not supported yet.");		}
 
 		public RObject pythonGet(String name) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+			throw new UnsupportedOperationException("Not supported yet.");		}
 
 		public Object pythonGetAndConvert(String name) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+			throw new UnsupportedOperationException("Not supported yet.");		}
 
 		public void pythonSet(String name, Object Value) throws RemoteException {
-			// TODO Auto-generated method stub
-
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		public Object groovyEval(String expression) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		public String groovyExecFromResource(String resource) throws RemoteException {
@@ -3489,13 +3481,11 @@ public class DirectJNI {
 		}
 
 		public Object groovyGet(String name) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		public void groovySet(String name, Object Value) throws RemoteException {
-			// TODO Auto-generated method stub
-
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		public boolean isGroovyEnabled() throws RemoteException {
@@ -3503,29 +3493,25 @@ public class DirectJNI {
 		}
 
 		public String getGroovyStatus() throws RemoteException {
-			return null;
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		
 		
 		public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
-
-			return null;
+			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
 
 		public SpreadsheetModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
-
-			return null;
+			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
 
 		public String[] listSpreadsheetTableModelRemoteId() throws RemoteException {
-
-			return null;
+			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
 
 		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
-
-			return null;
+			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
 		
 		

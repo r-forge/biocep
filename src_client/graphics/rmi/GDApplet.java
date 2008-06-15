@@ -508,16 +508,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
 									
-									/*
+									
 									  DirectJNI.init(); r =
 									  DirectJNI.getInstance().getRServices();
 									  if (false) throw new
 									  BadSshHostException(); if (false) throw
 									  new BadSshLoginPwdException(); _keepAlive =			  ident.isKeepAlive();
-									*/  
 									  
 									  
-									 
+									  
+									/* 
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
@@ -556,7 +556,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 										pw.close();
 									}
 									
-																	
+									*/								
 									
 									
 
