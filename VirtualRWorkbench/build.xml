@@ -399,6 +399,7 @@
 			<target name="unsign" >
 				  <unsignjar jar="lib/desktop/activation.jar"/>
 				  <unsignjar jar="lib/desktop/mail.jar"/>
+				  <unsignjar jar="lib/desktop/PDFRenderer.jar"/>
 			</target>
 
 	
