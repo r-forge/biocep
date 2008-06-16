@@ -1,6 +1,7 @@
 
 library(rJava);.jinit(classpath=NULL);
 library(JavaGD)
+library(iplots)
 
 .PrivateEnv<-new.env(parent = .GlobalEnv)
 library(TypeInfo)
@@ -236,3 +237,10 @@ aaa <- function( exp )  {
 }
 
 q<-function (save = "default", status = 0, runLast = TRUE) {'quit not allowed in this context'}
+
+
+
+
+
+
+

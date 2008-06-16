@@ -1,21 +1,16 @@
 package model;
 
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.EventListener;
 import java.util.HashMap;
-
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
-
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.Formula;
 import net.java.dev.jspreadsheet.ParserException;
 import net.java.dev.jspreadsheet.SpreadsheetClipboard;
-import net.java.dev.jspreadsheet.SpreadsheetTableModel;
 
 public class ModelUtils {
 	
