@@ -70,11 +70,20 @@ public class HistCanvas extends BaseCanvas {
     public boolean autoScaleXAxis=true;
     public boolean autoScaleYAxis=true;
     
+    
+    public HistCanvas(String title) {
+    	super(title);
+    }
+    
     /** creates a new histogram canvas
      * @param f frame owning this canvas or <code>null</code> if none
      * @param var source variable
      * @param mark associated marker
      */
+    MenuBar menuBar=null;
+    public MenuBar getMenuBar() {
+    	return menuBar;
+    }
     public HistCanvas(final int gd, final Frame f, final SVarInterface var, final SMarkerInterface mark)     	
     {
         super(gd,f,mark);
@@ -87,15 +96,17 @@ public class HistCanvas extends BaseCanvas {
         binw=ax.vLen/bars;
         anchor=v.getMin()-binw;
         ay=new Axis(var,Axis.O_Y,Axis.T_EqSize); ay.addDepend(this);
-        /*
-        createMenu(f,true,false,false,true,new String[]{
+        
+        
+       menuBar= createMenu(f,true,false,false,true,new String[]{
             "@MSpinogram",M_SPINE,
             "Increase binwidth (up)",M_BINUP,
             "Decrease binwidth (down)",M_BINDOWN,
             "Move Anchor Left (left)",M_ANCHORLEFT,
             "Move Anchor Right (right)",M_ANCHORRIGHT
         });
-        */
+        
+        
         
         MIspine=EzMenu.getItem(f,M_SPINE);
         

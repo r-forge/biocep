@@ -295,6 +295,14 @@ public class SVarObj extends SVar
     }
 
     public Object at(int i) { return cont.get(i); };
+    
+    public Object[] at(int start, int end) {
+    	Object[] result=new Object[end-start];
+    	for (int i=start; i<end;++i) {
+    		result[i]=cont.get(i);
+    	}
+    	return result;
+    }
 
     /** returns the ID of the category of the object
         @param object

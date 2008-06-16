@@ -3,6 +3,7 @@ package org.rosuda.ibase.toolkit;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -222,6 +223,9 @@ public class BaseCanvas extends PGSCanvas implements Dependent, MouseListener, M
      * @param f frame owning this canvas. since BaseCanvas itself doesn't modify any attribute of the frame except for title it is possible to put more canvases into one frame. This doesn't have to hold for subclasses, especially those providing their own menus.
      * @param mark marker which will be used for selection/linked highlighting
      */
+    public BaseCanvas(String title) {
+    	desc=title;
+    }
     public BaseCanvas(final int gd, final Frame f, final SMarkerInterface mark) {
 	super(gd,4); // 4 layers; 0=bg, 1=sel, 2=baseDrag, 3=pm
 	Global.forceAntiAliasing = true;
@@ -233,9 +237,8 @@ public class BaseCanvas extends PGSCanvas implements Dependent, MouseListener, M
 	addMouseListener(this);
 	addMouseMotionListener(this);
 	addKeyListener(this);
-	f.addKeyListener(this);
-	//qi=newQueryPopup(f,mark==null?null:mark.getMasterSet(),"BaseCanvas");
-	qi=newQueryPopup(f,mark==null?null:org.rosuda.iplots.Framework.F.getCurrentSet(),"BaseCanvas");
+	if (f!=null) f.addKeyListener(this);
+	qi=newQueryPopup(f,mark==null?null:mark.getMasterSet(),"BaseCanvas");
 	xLabels=new PlotTextVector(getPlotManager(),PlotObject.CS_ABS,PlotObject.CS_ABS);
 	yLabels=new PlotTextVector(getPlotManager(),PlotObject.CS_ABS,PlotObject.CS_ABS);
 	xLabels.setLayer(0);
@@ -1020,7 +1023,7 @@ public class BaseCanvas extends PGSCanvas implements Dependent, MouseListener, M
     
     public void actionPerformed(final ActionEvent e) {
 	if (e==null) return;
-	run(e.getSource(),e.getActionCommand());
+		run(null,e.getActionCommand());
     };
     
     public void setQueryText(final String s) {
@@ -1125,7 +1128,7 @@ public class BaseCanvas extends PGSCanvas implements Dependent, MouseListener, M
     };
     
     
-    protected void createMenu(Frame f, boolean rotate, boolean zoom, boolean transparency, boolean activeCB, String[] view){
+    protected MenuBar createMenu(Frame f, boolean rotate, boolean zoom, boolean transparency, boolean activeCB, String[] view){
 	String myMenu[] = new String[((view==null)?0:(view.length)) + 37];
 	int i=0;
 	myMenu[i++] = "+";
@@ -1182,7 +1185,7 @@ public class BaseCanvas extends PGSCanvas implements Dependent, MouseListener, M
 	}
 	myMenu[i++] = "~Window";
 	myMenu[i++] = "0";
-	EzMenu.getEzMenu(f,this,myMenu);
+	MenuBar result = EzMenu.getEzMenu(f,this,myMenu);
 	
 	if(view!=null) {
 	    String[] temp=view; String[] view2=new String[temp.length+1];
@@ -1200,6 +1203,8 @@ public class BaseCanvas extends PGSCanvas implements Dependent, MouseListener, M
 	if(MIhalphadown!=null) MIhalphadown.setEnabled(false);
 	MIhalphaup = EzMenu.getItem(f,M_HALPHAUP);
 	if(MIhalphaup!=null) MIhalphaup.setEnabled(false);
+	
+	return result;
     }
     
     /** needed for setting manually extended query string */

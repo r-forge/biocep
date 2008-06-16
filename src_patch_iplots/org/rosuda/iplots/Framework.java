@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -43,6 +44,9 @@ import org.rosuda.ibase.toolkit.TFrame;
 import org.rosuda.ibase.toolkit.TJFrame;
 import org.rosuda.util.Global;
 import org.rosuda.util.MsgDialog;
+
+import remoting.RAction;
+import server.DirectJNI;
 
 
 
@@ -213,12 +217,12 @@ public class Framework implements Dependent, ActionListener {
     public int addVar(final SVarInterface v) {
         if (cvs.getMarker()==null) {
             final SMarker m;
-            cvs.setMarker(m=new SMarker(v.size()));
+            ((SVarSet)cvs).setMarker(m=new SMarker(v.size()));
             m.addDepend(this);
         }
         final SMarkerInterface m=cvs.getMarker();
         if (v.size()>m.size()) m.resize(v.size());
-        return cvs.add(v);
+        return ((SVarSet)cvs).add(v);
     }
     
     /** shows a variable length mismatch dialog.
@@ -519,7 +523,7 @@ public class Framework implements Dependent, ActionListener {
     public void updateMarker(final SVarSetInterface vs, final int vid) {
         if (vs.getMarker()==null) {
             final SMarker m=new SMarker(vs.at(vid).size());
-            vs.setMarker(m);
+            ((SVarSet)vs).setMarker(m);
             m.addDepend(this);
         }
     }
@@ -566,9 +570,22 @@ public class Framework implements Dependent, ActionListener {
      * @return scatterplot canvas object */
     public ScatterCanvas newScatterplot(final int v1, final int v2) { return newScatterplot(cvs,v1,v2); }
     public ScatterCanvas newScatterplot(final SVarSetInterface vs, final int v1, final int v2) {
-        updateMarker(vs,v1);
+        updateMarker(vs,v1);        
+        String title="Scatterplot ("+vs.at(v2).getName()+" vs "+vs.at(v1).getName()+")";
         
-	String title="Scatterplot ("+vs.at(v2).getName()+" vs "+vs.at(v1).getName()+")";
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("title", title);
+		attributes.put("gd", graphicsEngine);
+		attributes.put("vs1", vs.at(v1).getRemote());
+		attributes.put("vs2", vs.at(v2).getRemote());
+		attributes.put("mark", vs.getMarker().getRemote());
+		RAction action = new RAction("newScatterplot",attributes);
+		DirectJNI._rActions.add(action);
+        		
+		return new ScatterCanvas(title);
+        
+        
+        /*
         FrameDevice frdev;
         frdev=newFrame(title,TFrame.clsScatter);
         frdev.initPlacement();
@@ -578,13 +595,13 @@ public class Framework implements Dependent, ActionListener {
 		frdev.add(sc.getComponent());
         if (vs.getMarker()!=null) vs.getMarker().addDepend(sc);
         sc.setSize(new Dimension(400,300));
-	sc.setTitle(title);
+        sc.setTitle(title);
         frdev.setSize(new Dimension(sc.getWidth(),sc.getHeight()));
         frdev.pack();
         sc.repaint();
-
         addNewPlot(sc);
         return sc;
+        */
     }
     
 	public MapCanvas newMap(final int v) { return newMap(cvs, v); }
@@ -763,25 +780,40 @@ public class Framework implements Dependent, ActionListener {
     public HistCanvas newHistogram(final int v) { return newHistogram(cvs,v); };
     public HistCanvas newHistogram(final SVarSetInterface vs, final int i) {
         updateMarker(vs,i);
-
+        String title="Histogram ("+vs.at(i).getName()+")";        
+        
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("title", title);
+		attributes.put("gd", graphicsEngine);
+		attributes.put("vs", vs.at(i).getRemote());
+		attributes.put("mark", vs.getMarker().getRemote());
+		RAction action = new RAction("newHistogram",attributes);
+		DirectJNI._rActions.add(action);
+        
+		return new HistCanvas(title);
+		
+        /*
         FrameDevice frdev;
-	String title="Histogram ("+vs.at(i).getName()+")";
+        
         frdev = newFrame(title, TFrame.clsHist);
         frdev.initPlacement();
         frdev.setVisible(true);
         frdev.addWindowListener(Common.getDefaultWindowListener());
+        
         final HistCanvas hc=new HistCanvas(graphicsEngine,frdev.getFrame(),vs.at(i),vs.getMarker());
         frdev.add(hc.getComponent());
         hc.updateObjects();
         if (vs.getMarker()!=null) vs.getMarker().addDepend(hc);
         hc.setSize(new Dimension(400,300));
-	hc.setTitle(title);
+        hc.setTitle(title);
         frdev.setSize(new Dimension(hc.getWidth(), hc.getHeight()));
         frdev.pack();
         hc.repaint();
         
-        addNewPlot(hc);
+        addNewPlot(hc);        
         return hc;
+        
+        */
     };
     
     public ParallelAxesCanvas newBoxplot(final int i) { return newBoxplot(cvs,new int[]{i},-1); }

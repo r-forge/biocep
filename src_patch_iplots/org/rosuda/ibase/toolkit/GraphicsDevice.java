@@ -2,12 +2,13 @@ package org.rosuda.ibase.toolkit;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.Serializable;
 
 /** GraphicsDevice handles graphics-, mouse-, keyboard- and layer interactivity on lowest level 
  * @version $Id: GraphicsDevice.java 2626 2006-10-10 18:58:58Z urbaneks $
  */
 
-public interface GraphicsDevice {
+public interface GraphicsDevice extends Serializable{
 
 	int AWTGrDevID = 0;
 	int SWINGGrDevID = 1;

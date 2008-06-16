@@ -10,6 +10,12 @@ package org.rosuda.ibase.toolkit;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+
 import org.rosuda.ibase.*;
 
 /** class that simplified menu building from lists */
@@ -63,6 +69,8 @@ public class EzMenu {
         f.add(m);
         return m;
     }
+    
+
     
     public static MenuBar getEzMenu(final Frame f, final ActionListener al, final String[] menuDef) {
         if (!staticInitDone) {
@@ -118,7 +126,8 @@ public class EzMenu {
                     m.add(mi=new MenuItem("Break",new MenuShortcut('B',true))).setActionCommand("BREAK"); mi.addActionListener(al);
                     m.addSeparator();
                 }
-                m.add(mi=new MenuItem(M_CLOSEWINDOW,new MenuShortcut('W'))).setActionCommand(AC_WTMCLOSE+we.id); mi.addActionListener(wt);
+                m.add(mi=new MenuItem(M_CLOSEWINDOW,new MenuShortcut('W'))).setActionCommand(AC_WTMCLOSE+(we!=null? we.id : null)); 
+                mi.addActionListener(wt);
                 if (!Common.isMac())
                     m.add(mi=new MenuItem(M_QUIT,new MenuShortcut('Q'))).setActionCommand(AC_EXIT); mi.addActionListener(al);
             };

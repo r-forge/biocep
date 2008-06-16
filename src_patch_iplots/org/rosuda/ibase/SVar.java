@@ -122,7 +122,7 @@ public abstract class SVar extends Notifier implements SVarInterface
 	  }
     }
 
-    public SVarInterfaceRemote getSVarRemote() {
+    public SVarInterfaceRemote getRemote() {
     	try {
     		return (SVarInterfaceRemote)java.rmi.server.RemoteObject.toStub(svarRemote);
     	} catch (Exception e) {
@@ -270,7 +270,13 @@ public abstract class SVar extends Notifier implements SVarInterface
     public double getMax() { return max; }
 
     public abstract Object at(int i);
-
+    public Object[] at(int start, int end) {
+    	Object[] result=new Object[end-start];
+    	for (int i=start; i<end;++i) {
+    		result[i]=at(i);
+    	}
+    	return result;
+    }
     /** for compatibility with old code that used Vector class */
     public Object elementAt(int i) { return at(i); }
 

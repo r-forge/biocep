@@ -15,7 +15,7 @@ public class SVarSet implements SVarSetInterface {
     protected List<SVarInterface> vars;
     /** marker associated with this dataset */
     protected SMarkerInterface mark;
-    protected SMarkerInterfaceRemoteImpl markRemote;
+
     /** dataset name */
     protected String name;
 
@@ -24,31 +24,37 @@ public class SVarSet implements SVarSetInterface {
     public int globalResudialStat1ID=-1;
     public int globalResudialStat2ID=-1;
     public int classifierCounter=1;
+    
+    transient private SVarSetInterfaceRemoteImpl svarsetRemote;
+    
     public int regressionCounter=0;
-
+    
     /** default constructor of empty dataset */
-    public SVarSet() { vars=new ArrayList<SVarInterface>(); name="<unknown>"; };
-
-    /** sets the marker for this dataset
-	@param m marker */
-    public void setMarker(SMarkerInterface m) { 
-    	mark=m; m.setMasterSet(this); 
+    public SVarSet() { 
+    	vars=new ArrayList<SVarInterface>(); name="<unknown>"; 
     	try {
-    		markRemote=new SMarkerInterfaceRemoteImpl(mark);
+    		svarsetRemote=new SVarSetInterfaceRemoteImpl(this);
     	} catch (RemoteException e) {
-    		e.printStackTrace();
+    		e.printStackTrace();    		
 		}
-    };
-    /** returns the marker of this dataset
-	@return marker */
-    public SMarkerInterface getMarker() { return mark; };
-    public SMarkerInterfaceRemote getMarkerRemote() {
+    }
+        
+    public SVarSetInterfaceRemote getRemote() {
     	try {
-    		return (SMarkerInterfaceRemote)java.rmi.server.RemoteObject.toStub(markRemote);
+    		return (SVarSetInterfaceRemote)java.rmi.server.RemoteObject.toStub(svarsetRemote);
     	} catch (Exception e) {
     		throw new RuntimeException(e);
 		}
     }
+
+    /** sets the marker for this dataset
+	@param m marker */
+    public void setMarker(SMarkerInterface m) { 
+    	mark=m; ((SMarker)m).setMasterSet(this);     	
+    };
+    /** returns the marker of this dataset
+	@return marker */
+    public SMarkerInterface getMarker() { return mark; };
     
     /** set dataset name
 	@param s name */

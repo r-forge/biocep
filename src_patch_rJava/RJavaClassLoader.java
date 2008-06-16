@@ -131,8 +131,12 @@ public class RJavaClassLoader extends URLClassLoader {
     
     protected Class findClass(String name) throws ClassNotFoundException {
 	Class cl = null;
-	//System.out.println(""+this+".findClass("+name+")");
+	System.out.println("-->"+this+".findClass("+name+")");
 	if ("RJavaClassLoader".equals(name)) return getClass();
+		
+	cl= RJavaClassLoader.class.getClassLoader().loadClass(name);
+	if (cl!=null) return cl;
+	
 	if (useSystem) {
 	    try {
 		cl = super.findClass(name);

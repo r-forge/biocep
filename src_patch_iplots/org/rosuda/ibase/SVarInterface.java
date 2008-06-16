@@ -61,11 +61,12 @@ public double atF(int i)  ;
 public double atD(int i) ;
 public String atS(int i)  ;
 public Object at(int i) ;
+public Object[] at(int start,int end) ;
 public int size() ;
 public int getNumCats() ;
 public int getSizeCatAt(int i) ;
 public Object getCatAt(int i) ;
 public boolean isLinked() ;
 
-public SVarInterfaceRemote getSVarRemote();
+public SVarInterfaceRemote getRemote();
 }

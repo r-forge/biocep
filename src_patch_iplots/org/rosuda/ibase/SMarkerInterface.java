@@ -24,9 +24,8 @@ public interface SMarkerInterface extends NotifierInterface, Commander, Serializ
     public void selectAll();	
     public void selectInverse();
 	public void resetSec();
-    public SVarSetInterface getMasterSet();
-    public void setMasterSet(SVarSetInterface varset);
-    
+    public SVarSetInterface getMasterSet();    
     public void setSecBySelection(int markSel, int markNonsel);
+    public SMarkerInterfaceRemote getRemote();
 
 }

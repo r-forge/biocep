@@ -1,5 +1,6 @@
 package org.rosuda.ibase;
 
+import java.rmi.RemoteException;
 import java.util.*;
 
 /**
@@ -31,6 +32,8 @@ public class SMarker extends Notifier implements SMarkerInterface{
     
     SVarSetInterface masterSet;
     
+    protected SMarkerInterfaceRemoteImpl markRemote;
+    
     /** The only constructor, allocates a new marker
 	@param reqsize desired size of the marker array (# of indices) */
     public SMarker(int reqsize) {
@@ -40,7 +43,21 @@ public class SMarker extends Notifier implements SMarkerInterface{
         masterSet=null;
         maxMark=1; // it is never below 1 since 0 and 1 are used for primary mask
 	//curIV=null; curOp=0;
+        
+        try {
+    		markRemote=new SMarkerInterfaceRemoteImpl(this);
+    	} catch (RemoteException e) {
+    		e.printStackTrace();
+		}
     };
+    
+    public SMarkerInterfaceRemote getRemote() {
+    	try {
+    		return (SMarkerInterfaceRemote)java.rmi.server.RemoteObject.toStub(markRemote);
+    	} catch (Exception e) {
+    		throw new RuntimeException(e);
+		}
+    }
 
     /** This methods allows to resize the marker. To ensure consistency the marker is never downsized. */
     public void resize(int newsize) {

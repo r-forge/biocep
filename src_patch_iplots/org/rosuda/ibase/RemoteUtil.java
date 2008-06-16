@@ -63,6 +63,14 @@ public abstract class RemoteUtil {
 					throw new RuntimeException(e);
 				}
 			}
+			
+			public Object[] at(int start, int end) {
+				try {
+					return _svarRemote.at(start,end);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
 
 			public double atD(int i) {
 				try {
@@ -352,7 +360,7 @@ public abstract class RemoteUtil {
 				}
 			}
 			
-			public SVarInterfaceRemote getSVarRemote() {
+			public SVarInterfaceRemote getRemote() {
 				throw new UnsupportedOperationException("Shouldn't be called");
 			}
 
@@ -395,8 +403,60 @@ public abstract class RemoteUtil {
 			}
 
 			public SVarSetInterface getMasterSet() {
-				try {return _smarkerRemote.getMasterSet();} catch (Exception e) {
+				try {
+					
+					final SVarSetInterfaceRemote svarsetRemote=_smarkerRemote.getMasterSet();
+					return new SVarSetInterface(){
+						public SVarInterface at(int i) {
+							try {
+							return getSVarWrapper(svarsetRemote.at(i));} catch (Exception e) {
+								throw new RuntimeException(e);
+							}							
+						}
+						public SVarInterface byName(String nam) {
+							
+							try {return getSVarWrapper(svarsetRemote.byName(nam));} catch (Exception e) {
+								throw new RuntimeException(e);
+							}
+						}
+						
+						public int count() {
+							try {return svarsetRemote.count();} catch (Exception e) {
+								throw new RuntimeException(e);
+							}
+						}
+						
+						public SMarkerInterface getMarker() {	
+							throw new RuntimeException("Not Yet Implemented");
+						}
+						
+						public String getName() {
+							try {return svarsetRemote.getName();} catch (Exception e) {
+								throw new RuntimeException(e);
+							}
+						}
+						public SVarSetInterfaceRemote getRemote() {
+							try {return svarsetRemote;} catch (Exception e) {
+								throw new RuntimeException(e);
+							}
+						}
+						public int indexOf(String nam) {
+							try {return svarsetRemote.indexOf(nam);} catch (Exception e) {
+								throw new RuntimeException(e);
+							}
+						}
+						public void setName(String s) {
+							try {svarsetRemote.setName(s);} catch (Exception e) {
+								throw new RuntimeException(e);
+							}
+							
+						}
+					};
+					
+				
+				} catch (Exception e) {
 					throw new RuntimeException(e);
+					
 				}
 			}
 
@@ -466,12 +526,6 @@ public abstract class RemoteUtil {
 				}
 			}
 
-			public void setMasterSet(SVarSetInterface varset) {
-				try {_smarkerRemote.setMasterSet(varset);} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-
 			public void setSec(int pos, int mark)  {
 				try {_smarkerRemote.setSec(pos, mark);} catch (Exception e) {
 					throw new RuntimeException(e);
@@ -504,7 +558,7 @@ public abstract class RemoteUtil {
 				try {
 					DependentRemoteImpl tableModelListenerRemoteImpl=new DependentRemoteImpl(l);
 					_smarkerRemote.addDepend((DependentRemote)java.rmi.server.RemoteObject.toStub(tableModelListenerRemoteImpl));
-					modelListenerHashMap.put(l, tableModelListenerRemoteImpl);
+					modelListenerHashMap.put(l, tableModelListenerRemoteImpl);					
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}							
@@ -539,21 +593,30 @@ public abstract class RemoteUtil {
 				
 			}
 			public void NotifyAll(NotifyMsg msg, Dependent c) {
+				throw new UnsupportedOperationException("Shouldn't be called");
+				/*
 				try {_smarkerRemote.NotifyAll(msg, c);} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
+				*/
 				
 			}
 			public void NotifyAll(NotifyMsg msg, Dependent c, Vector path) {
+				throw new UnsupportedOperationException("Shouldn't be called");
+				/*
 				try {_smarkerRemote.NotifyAll(msg, c,path);} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
+				*/
 				
 			}
 			public void NotifyAll(NotifyMsg msg, Vector path) {
+				throw new UnsupportedOperationException("Shouldn't be called");
+				/*
 				try {_smarkerRemote.NotifyAll(msg, path);} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
+				*/
 				
 			}
 			
@@ -569,6 +632,9 @@ public abstract class RemoteUtil {
 				}				
 			}
 			
+			public SMarkerInterfaceRemote getRemote() {
+				return _smarkerRemote;
+			}
 			
 			
 		};
