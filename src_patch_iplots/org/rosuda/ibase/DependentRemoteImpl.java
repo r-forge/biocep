@@ -10,7 +10,7 @@ public class DependentRemoteImpl extends UnicastRemoteObject implements Dependen
 		super();
 		_dep=dep;
 	}
-	public void Notifying(NotifyMsg msg, Object src, Vector path) throws RemoteException {
+	public void Notifying(NotifyMsg msg, Object src, Vector path) throws RemoteException {		
 		_dep.Notifying(msg, src, path);		
 	}
 }

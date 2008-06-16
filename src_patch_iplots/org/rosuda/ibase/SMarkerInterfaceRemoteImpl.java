@@ -39,8 +39,8 @@ public class SMarkerInterfaceRemoteImpl extends UnicastRemoteObject implements S
 	public int[] getMaskCopy(int maskType) {
 		return _smarker.getMaskCopy(maskType);
 	}
-	public SVarSetInterface getMasterSet() {
-		return _smarker.getMasterSet();
+	public SVarSetInterfaceRemote getMasterSet() {
+		return _smarker.getMasterSet().getRemote();
 	}
 	public int getMaxMark() {
 		return _smarker.getMaxMark();
@@ -90,9 +90,7 @@ public class SMarkerInterfaceRemoteImpl extends UnicastRemoteObject implements S
 	public void set(int pos, boolean mark) {
 		_smarker.set(pos, mark);
 	}
-	public void setMasterSet(SVarSetInterface varset) {
-		_smarker.setMasterSet(varset);
-	}
+	
 	public void setSec(int pos, int mark) {
 		_smarker.setSec(pos, mark);
 	}
@@ -115,7 +113,12 @@ public class SMarkerInterfaceRemoteImpl extends UnicastRemoteObject implements S
 		Dependent listener=new Dependent() {
 			public void Notifying(NotifyMsg msg, Object src, Vector path) {
 				try {
-					l.Notifying(msg, src, path);
+
+					if (src instanceof SMarker) {
+						src=((SMarker)src).getRemote();
+					}
+					l.Notifying(msg, null, path);
+					
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}

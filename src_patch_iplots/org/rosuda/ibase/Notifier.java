@@ -46,21 +46,28 @@ public class Notifier implements NotifierInterface {
 
     /** general NotifyAll */    
     public void NotifyAll(NotifyMsg msg, Dependent c, Vector path) {
-        if (Global.DEBUG>1)
-            System.out.println("Notifier("+toString()+"): send to all message "+msg);
-	if (batchMode>0 || ton==null || ton.isEmpty()) return;
-	for (Enumeration e=ton.elements(); e.hasMoreElements();) {
-	    Dependent o=(Dependent)e.nextElement();	    
-	    if (o!=c) {
-                if (Global.DEBUG>0)
-                    System.out.println("Notifier("+toString()+"): send "+msg+" to ["+o.toString()+"]");
-		if (path!=null) {
-		    path.addElement(this);
-		    o.Notifying(msg,this,path);
-		    path.removeElement(this);
-		} else o.Notifying(msg,this,null);
-	    };
-	};
+        if (Global.DEBUG>1) System.out.println("Notifier("+toString()+"): send to all message "+msg);
+        
+        if (batchMode>0 || ton==null || ton.isEmpty()) return;
+        
+        
+		for (Enumeration e=ton.elements(); e.hasMoreElements();) {
+			
+			
+		    Dependent o=(Dependent)e.nextElement();	    
+		    if (o!=c) {
+	                if (Global.DEBUG>0)
+	                    System.out.println("Notifier("+toString()+"): send "+msg+" to ["+o.toString()+"]");
+	             
+	                
+				if (path!=null) {
+				    path.addElement(this);
+				    o.Notifying(msg,this,path);
+				    path.removeElement(this);
+				} 
+				else o.Notifying(msg,this,null);
+		    };
+		};
     };    
     
     /** notifies all {@link Dependent} classes in the notify list of a change. (Results in calling {@link #NotifyAll} with <code>NULL</code> parameter */

@@ -15,6 +15,12 @@ import org.rosuda.util.*;
  * @version $Id: ScatterCanvas.java 2734 2007-04-25 09:44:28Z wichtrey $
  */
 public class ScatterCanvas extends BaseCanvas {
+	
+	
+	public ScatterCanvas(String title) {
+		super(title);
+	}
+	
     static final String M_PLUS = "+";
     static final String M_EQUISCALE = "equiscale";
     static final String M_MINUS = "-";
@@ -57,10 +63,10 @@ public class ScatterCanvas extends BaseCanvas {
     protected int Y,W,H, TW,TH;
     
     // needed for axis-query
-    private final int[] axcoordX;
-    private final int[] axcoordY;
-    private final int[] aycoordX;
-    private final int[] aycoordY;
+    private  int[] axcoordX;
+    private  int[] axcoordY;
+    private  int[] aycoordX;
+    private  int[] aycoordY;
     
     protected int []filter=null;
     
@@ -102,6 +108,10 @@ public class ScatterCanvas extends BaseCanvas {
 	public static final int TYPE_X=0;
 	public static final int TYPE_Y=1;
 	
+	
+	
+
+	
 	public PointComparator(final int type){
 	    this.type=type;
 	}
@@ -131,6 +141,7 @@ public class ScatterCanvas extends BaseCanvas {
 	}
     }
     
+    
     /** create a new scatterplot
      * @param f associated frame (or <code>null</code> if none)
      * @param v1 variable 1
@@ -144,7 +155,7 @@ public class ScatterCanvas extends BaseCanvas {
 	axcoordX=new int[2]; axcoordY=new int[2];
 	aycoordX=new int[2]; aycoordY=new int[2];
 	
-	v=new SVar[2];
+	v=new SVarInterface[2];
 	v[0]=v1; v[1]=v2; m=mark;
 	ax=new Axis(v[0],Axis.O_X,v[0].isCat()?Axis.T_EqCat:Axis.T_Num); ax.addDepend(this);
 	ay=new Axis(v[1],Axis.O_Y,v[1].isCat()?Axis.T_EqCat:Axis.T_Num); ay.addDepend(this);

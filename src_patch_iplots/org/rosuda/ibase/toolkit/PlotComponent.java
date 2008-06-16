@@ -1,5 +1,6 @@
 package org.rosuda.ibase.toolkit;
 
+import java.io.Serializable;
 import java.lang.reflect.*;
 import java.awt.*;
 import java.awt.event.KeyListener;
@@ -17,7 +18,7 @@ import org.rosuda.pograss.PoGraSS;
  * @version $Id: PlotComponent.java 2312 2006-04-27 22:16:43Z urbaneks $
  */
 
-public abstract class PlotComponent {
+public abstract class PlotComponent implements Serializable {
 	
 	public final static int AWTGrDevID = 0;
 	public final static int SWINGGrDevID = 1;

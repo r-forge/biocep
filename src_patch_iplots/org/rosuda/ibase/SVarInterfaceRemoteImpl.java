@@ -48,6 +48,11 @@ public class SVarInterfaceRemoteImpl extends UnicastRemoteObject implements SVar
 	public Object at(int i) {
 		return _svarInterface.at(i);
 	}
+	
+	public Object[] at(int start, int end) throws RemoteException {
+		return _svarInterface.at(start,end);
+	}
+	
 	public double atD(int i) {
 		return _svarInterface.atD(i);
 	}

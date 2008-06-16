@@ -143,6 +143,14 @@ import org.gjt.sp.jedit.gui.FloatingWindowContainer;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.rosuda.ibase.RemoteUtil;
+import org.rosuda.ibase.SMarkerInterface;
+import org.rosuda.ibase.SMarkerInterfaceRemote;
+import org.rosuda.ibase.SVarInterface;
+import org.rosuda.ibase.SVarInterfaceRemote;
+import org.rosuda.ibase.plots.HistCanvas;
+import org.rosuda.ibase.plots.ScatterCanvas;
+
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RCollaborationListener;
@@ -508,16 +516,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
 									
-									
+									/*
+									  
 									  DirectJNI.init(); r =
 									  DirectJNI.getInstance().getRServices();
 									  if (false) throw new
 									  BadSshHostException(); if (false) throw
 									  new BadSshLoginPwdException(); _keepAlive =			  ident.isKeepAlive();
 									  
+									  */
 									  
 									  
-									/* 
+									   
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
@@ -556,7 +566,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 										pw.close();
 									}
 									
-									*/								
+							
 									
 									
 
@@ -1748,8 +1758,31 @@ public class GDApplet extends GDAppletBase implements RGui {
 									getConsoleLogger().print((String) action.getAttributes().get("command"), (String) action.getAttributes().get("result"));
 								}
 							});
+						} else if (action.getActionName().equals("newHistogram")) {							
+							SVarInterface varProxy=RemoteUtil.getSVarWrapper((SVarInterfaceRemote)action.getAttributes().get("vs"));
+							SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper((SMarkerInterfaceRemote)action.getAttributes().get("mark"));
+							String title=(String)action.getAttributes().get("title");
+							HistCanvas histCanvas=new HistCanvas((Integer)action.getAttributes().get("gd"),new JFrame(),varProxy,markerProxy);
+							createView(histCanvas.getComponent(), title);							
+							histCanvas.updateObjects();
+							markerProxy.addDepend(histCanvas);
+							histCanvas.setTitle(title);														
+						} else if (action.getActionName().equals("newScatterplot")) {
+							SVarInterface varProxy1=RemoteUtil.getSVarWrapper((SVarInterfaceRemote)action.getAttributes().get("vs1"));
+							SVarInterface varProxy2=RemoteUtil.getSVarWrapper((SVarInterfaceRemote)action.getAttributes().get("vs2"));							
+							SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper((SMarkerInterfaceRemote)action.getAttributes().get("mark"));
+							
+							String title=(String)action.getAttributes().get("title");
+							ScatterCanvas scatterCanvas=new ScatterCanvas((Integer)action.getAttributes().get("gd"),new JFrame(),varProxy1,varProxy2,markerProxy);
+							createView(scatterCanvas.getComponent(), title);							
+							//scatterCanvas.updateObjects();
+							markerProxy.addDepend(scatterCanvas);
+							scatterCanvas.setTitle(title);
 						}
+							
 
+						
+						
 					}
 
 				}

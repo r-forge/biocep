@@ -11,7 +11,7 @@ public class NotifyMsg implements Serializable{
     Object[] par;
 
     public NotifyMsg(Object src, int msgid, String command, Object[] params) {
-        source=src; messageID=msgid; cmd=command; par=params;	
+        source=null; messageID=msgid; cmd=command; par=params;	
     }
 
     public NotifyMsg(Object src, int msgid, String command) {
@@ -26,9 +26,11 @@ public class NotifyMsg implements Serializable{
         this(src, 0, null, null);
     }
 
+    /*
     public Object getSource() {
         return source;
     }
+    */
 
     public int getMessageID() {
         return messageID;

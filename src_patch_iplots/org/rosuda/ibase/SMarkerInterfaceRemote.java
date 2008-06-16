@@ -1,6 +1,5 @@
 package org.rosuda.ibase;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -25,7 +24,6 @@ public interface SMarkerInterfaceRemote extends NotifierInterfaceRemote, Command
     public void selectAll() throws RemoteException;	
     public void selectInverse() throws RemoteException;
 	public void resetSec() throws RemoteException;
-    public SVarSetInterface getMasterSet() throws RemoteException;
-    public void setMasterSet(SVarSetInterface varset) throws RemoteException;    
+    public SVarSetInterfaceRemote getMasterSet() throws RemoteException;
     public void setSecBySelection(int markSel, int markNonsel) throws RemoteException;
 }

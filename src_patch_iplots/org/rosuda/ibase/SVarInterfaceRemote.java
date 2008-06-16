@@ -31,6 +31,7 @@ public interface SVarInterfaceRemote extends NotifierInterfaceRemote {
 	public double atD(int i) throws RemoteException;
 	public String atS(int i) throws RemoteException;
 	public Object at(int i) throws RemoteException;
+	public Object[] at(int start, int end) throws RemoteException;
 	public int size() throws RemoteException;
 	public int getNumCats() throws RemoteException;
 	public int getSizeCatAt(int i) throws RemoteException;

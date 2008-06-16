@@ -5,7 +5,6 @@ import java.awt.event.*;
 
 import org.rosuda.ibase.Common;
 import org.rosuda.ibase.NotifyMsg;
-import org.rosuda.ibase.SMarker;
 import org.rosuda.ibase.SMarkerInterface;
 import org.rosuda.ibase.SVarInterface;
 import org.rosuda.ibase.toolkit.Axis;
