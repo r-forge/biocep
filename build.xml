@@ -1577,7 +1577,7 @@
 	<target name="compile" depends="compile.rpf">
 		
 		<echo message="${basedir}"/>
-		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>
+		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_iplots:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>
 		
 		<javac
 			srcdir="${src_compile_target}"
