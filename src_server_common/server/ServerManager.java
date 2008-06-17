@@ -538,9 +538,9 @@ public class ServerManager {
 			String[] requiredPackages = null;
 
 			if (isWindowsOs()) {
-				requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo", "Cairo" };
+				requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo", "Cairo" };
 			} else {
-				requiredPackages = new String[] { "rJava", "JavaGD", "TypeInfo" };
+				requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo" };
 			}
 
 			Vector<String> installLibBatch = new Vector<String>();
