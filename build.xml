@@ -1290,7 +1290,7 @@
 			<mkdir dir="binsrv"/>
 
 			<property 
-				name="src_srv_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD:src_patch_jspreadsheet"/>		
+				name="src_srv_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD:src_patch_iplots:src_patch_jspreadsheet"/>		
 			<javac
 				srcdir="${src_srv_target}"
 				destdir="binsrv" debug="true" source="1.5" target="1.5">
@@ -1561,19 +1561,50 @@
 			
 			<jar basedir="binsrv" destfile="biocepunsigned.jar" manifest="MANIFEST.MF" />
 			<signjar jar="biocepunsigned.jar" signedjar="biocep.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />		
-			
-			<copy todir=".">
-				<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>			
-			</copy>
-			<signjar jar="groovy-all-1.5.4.jar" signedjar="groovy-all-1.5.4.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
-		
-			<copy todir=".">
-				<fileset dir="lib/desktop" includes="biocep-doc.jar"/>			
-			</copy>
-			<signjar jar="biocep-doc.jar" signedjar="biocep-doc.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />		
+					
+			<antcall target="sign.extra"/>
 		
 	</target>
+	
+	
+	<target name="sign.extra" >
+	
+		<copy todir=".">
+			<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>			
+		</copy>
+		<signjar jar="groovy-all-1.5.4.jar" signedjar="groovy-all-1.5.4.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
+	
+		<copy todir=".">
+			<fileset dir="lib/desktop" includes="biocep-doc.jar"/>			
+		</copy>
+		<signjar jar="biocep-doc.jar" signedjar="biocep-doc.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
+		
+	</target>
+	
+	<target name="pdfviewer">
 
+		<javac
+			srcdir="src_pdfviewer" destdir="binpdfviewer" debug="true" source="1.5" target="1.5">
+			<classpath>
+				<pathelement path="${CORE_JAR}"/>
+				<fileset dir="lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+		
+		<copy todir="binpdfviewer">				
+			<fileset dir="src_pdfviewer">
+				<include name="**/*.pdf"/>
+			</fileset>				
+		</copy>
+		
+		<jar destfile="pdfviewer.jar">
+			<fileset dir="binpdfviewer"/>
+		</jar>
+
+	</target>
+	
 	<target name="compile" depends="compile.rpf">
 		
 		<echo message="${basedir}"/>
