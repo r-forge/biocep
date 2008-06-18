@@ -110,6 +110,8 @@ import org.htmlparser.util.NodeList;
 import org.rosuda.JRI.RMainLoopCallbacks;
 import org.rosuda.JRI.Rengine;
 import org.rosuda.JRI.RengineWrapper;
+import org.rosuda.ibase.SVarInterfaceRemote;
+import org.rosuda.ibase.SVarSetInterfaceRemote;
 import org.rosuda.javaGD.GDInterface;
 import org.rosuda.javaGD.GDObject;
 import org.rosuda.javaGD.JavaGD;
@@ -3513,9 +3515,26 @@ public class DirectJNI {
 		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
+				
+		public int countSets() throws RemoteException {
+			throw new UnsupportedOperationException("Not supported at this layer.");
+		}
+		public SVarSetInterfaceRemote getSet(int i) throws RemoteException {
+			throw new UnsupportedOperationException("Not supported at this layer.");
+		}
+		public SVarSetInterfaceRemote getCurrentSet() throws RemoteException {
+			throw new UnsupportedOperationException("Not supported at this layer.");
+		}
+		public int curSetId() throws RemoteException {
+			throw new UnsupportedOperationException("Not supported at this layer.");
+		}
+		public SVarInterfaceRemote getVar(int setId, int i) throws RemoteException {
+			throw new UnsupportedOperationException("Not supported at this layer.");
+		}
+		public SVarInterfaceRemote getVar(int setId, String name) throws RemoteException {
+			throw new UnsupportedOperationException("Not supported at this layer.");
+		}
 		
-		
-
 	};
 
 	static public Vector<RAction> _rActions = new Vector<RAction>();

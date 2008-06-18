@@ -62,6 +62,8 @@ public class BarCanvas extends BaseCanvas {
     public boolean drawTicks = false;
     private int[] axcoordY;
     
+    
+    public BarCanvas(String title) {super(title);}
     /** creates a (weighted) barchart
      * @param f associated frame (or <code>null</code> if common default frame is to be used)
      * @param var associated variable

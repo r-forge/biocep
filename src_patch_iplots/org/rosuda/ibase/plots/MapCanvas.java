@@ -22,6 +22,8 @@ public class MapCanvas extends BaseCanvas
 	boolean fixedAspectRatio = true;
     double minX, minY, maxX, maxY;
 
+    public MapCanvas(String title) {super(title);}
+    
     public MapCanvas(int gd, Frame f, SVarInterface mv, SMarkerInterface mark) {
         super(gd,f,mark);
         setTitle("Polygon Map ("+mv.getName()+")");

@@ -56,6 +56,7 @@ import server.DirectJNI;
 public class Framework implements Dependent, ActionListener {
 	
 	public static Framework F=null;
+	
     List<SVarSetInterface> dataset;
     SVarSetInterface cvs;
     int tvctr;
@@ -87,8 +88,11 @@ public class Framework implements Dependent, ActionListener {
         cvs.setName("default");
         dataset=new ArrayList();
         dataset.add(cvs);
-        
         F=this;
+    }
+    
+    public static Framework getInstance() {
+    	return F;
     }
     
     public String getNewTmpVar(final String t) {
@@ -128,10 +132,10 @@ public class Framework implements Dependent, ActionListener {
     };
     
 
-    public int indexOfSet(final SVarSet s) {
+    public int indexOfSet(final SVarSetInterface s) {
 	int i=0;
         while (i<dataset.size()) {
-            final SVarSet s2=(SVarSet)dataset.get(i);
+            final SVarSetInterface s2=(SVarSetInterface)dataset.get(i);
             if (s2!=null && s2.equals(s)) return i;
 	    i++;
         }
@@ -576,15 +580,14 @@ public class Framework implements Dependent, ActionListener {
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("title", title);
 		attributes.put("gd", graphicsEngine);
-		attributes.put("vs1", vs.at(v1).getRemote());
-		attributes.put("vs2", vs.at(v2).getRemote());
-		attributes.put("mark", vs.getMarker().getRemote());
+		attributes.put("vs", indexOfSet(vs));
+		attributes.put("v1", v1);
+		attributes.put("v2", v2);
 		RAction action = new RAction("newScatterplot",attributes);
 		DirectJNI._rActions.add(action);
         		
 		return new ScatterCanvas(title);
-        
-        
+        		
         /*
         FrameDevice frdev;
         frdev=newFrame(title,TFrame.clsScatter);
@@ -610,7 +613,15 @@ public class Framework implements Dependent, ActionListener {
 		final SVarInterface segs = vs.at(v);
 		if (segs == null || segs.getContentsType()!=SVar.CT_Map) return null;
 		String title = "Map ("+segs.getName()+")";
-
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("title", title);
+		attributes.put("gd", graphicsEngine);
+		attributes.put("vs", indexOfSet(vs));
+		attributes.put("v", v);
+		RAction action = new RAction("newMap",attributes);
+		DirectJNI._rActions.add(action);        		
+		return new MapCanvas(title);		
+		/*
 		FrameDevice frdev = newFrame(title,TFrame.clsMap);
         frdev.initPlacement();
         frdev.setVisible(true);
@@ -626,6 +637,7 @@ public class Framework implements Dependent, ActionListener {
 		
         addNewPlot(bc);
         return bc;
+        */
 	}
 	
     public BarCanvas newBarchart(final int v) { return newBarchart(cvs,v,-1); }
@@ -636,9 +648,23 @@ public class Framework implements Dependent, ActionListener {
         final SVarInterface theNum=(wgt<0)?null:vs.at(wgt);
         if (theCat==null) return null;
         if (!theCat.isCat()) theCat.categorize();
+        String title=(theNum!=null)?"w.Barchart ("+theCat.getName()+"*"+theNum.getName()+")":"Barchart ("+theCat.getName()+")";
         
+        
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("title", title);
+		attributes.put("gd", graphicsEngine);
+		attributes.put("vs", indexOfSet(vs));
+		attributes.put("v", v);
+		attributes.put("wgt", wgt);
+		RAction action = new RAction("newBarchart",attributes);
+		DirectJNI._rActions.add(action);
+        		
+		return new BarCanvas(title);
+        		
+		/*
         FrameDevice frdev;
-	String title=(theNum!=null)?"w.Barchart ("+theCat.getName()+"*"+theNum.getName()+")":"Barchart ("+theCat.getName()+")";
+	
         frdev = newFrame(title,TFrame.clsBar);
         frdev.initPlacement();
         frdev.setVisible(true);
@@ -656,6 +682,7 @@ public class Framework implements Dependent, ActionListener {
 
         addNewPlot(bc);
         return bc;
+        */
     }
     
     public LineCanvas newLineplot(final int[] v) { return newLineplot(cvs,-1,v); }
@@ -664,7 +691,7 @@ public class Framework implements Dependent, ActionListener {
     public LineCanvas newLineplot(final SVarSetInterface vs, final int rv, final int[] v) {
         if (v.length==0) return null;
         updateMarker(vs,v[0]);
-        
+                
         FrameDevice frdev;
 	String title="Lineplot";
         frdev = newFrame(title,TFrame.clsLine);
@@ -692,9 +719,18 @@ public class Framework implements Dependent, ActionListener {
     public HamCanvas newHammock(final SVarSetInterface vs, final int[] v) {
         if (v.length==0) return null;
         updateMarker(vs,v[0]);
-        
+        String title="Hammock plot";        
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("title", title);
+		attributes.put("gd", graphicsEngine);		
+		attributes.put("vs", indexOfSet(vs));
+		attributes.put("v", v);
+		RAction action = new RAction("newHammock",attributes);
+		DirectJNI._rActions.add(action);        
+		return new HamCanvas(title);      
+
+        /*
         FrameDevice frdev;
-	String title="Hammock plot";
         frdev = newFrame(title,TFrame.clsPCP);
         frdev.initPlacement();
         frdev.setVisible(true);
@@ -706,13 +742,14 @@ public class Framework implements Dependent, ActionListener {
         frdev.add(hc.getComponent());
         if (vs.getMarker()!=null) vs.getMarker().addDepend(hc);
         hc.setSize(new Dimension(400,300));
-	hc.setTitle(title);
+        hc.setTitle(title);
         frdev.setSize(new Dimension(hc.getWidth(),hc.getHeight()));
         frdev.pack();
         hc.repaint();
         
         addNewPlot(hc);
         return hc;
+        */
     }
     
     
@@ -725,14 +762,30 @@ public class Framework implements Dependent, ActionListener {
             title += vs.at(v[i]).getName()+", ";
         title += vs.at(v[v.length-1]).getName()+")";
         
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("title", title);
+		attributes.put("gd", graphicsEngine);		
+		attributes.put("vs", indexOfSet(vs));
+		attributes.put("v", v);
+		RAction action = new RAction("newMosaic",attributes);
+		DirectJNI._rActions.add(action);
+        
+		return new MosaicCanvas(title);      
+        
+        /*
         FrameDevice frdev;
         frdev = newFrame("Mosaic plot "+title,TFrame.clsPCP);
     	frdev.initPlacement();
         frdev.setVisible(true);
         frdev.addWindowListener(Common.getDefaultWindowListener());
-        final SVarInterface[] vl=new SVar[v.length];
+        
+        
+        final SVarInterface[] vl=new SVarInterface[v.length];
         int i=0;
         while(i<v.length) { vl[i]=vs.at(v[i]); i++; }
+        
+        
+        
         final MosaicCanvas mc=new MosaicCanvas(graphicsEngine,frdev.getFrame(),vl,vs.getMarker());
         frdev.add(mc.getComponent());
         if (vs.getMarker()!=null) vs.getMarker().addDepend(mc);
@@ -744,6 +797,7 @@ public class Framework implements Dependent, ActionListener {
         
         addNewPlot(mc);
         return mc;
+        */
     }
     
     
@@ -784,9 +838,9 @@ public class Framework implements Dependent, ActionListener {
         
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("title", title);
-		attributes.put("gd", graphicsEngine);
-		attributes.put("vs", vs.at(i).getRemote());
-		attributes.put("mark", vs.getMarker().getRemote());
+		attributes.put("gd", graphicsEngine);		
+		attributes.put("vs", indexOfSet(vs));
+		attributes.put("v", i);
 		RAction action = new RAction("newHistogram",attributes);
 		DirectJNI._rActions.add(action);
         
@@ -823,13 +877,16 @@ public class Framework implements Dependent, ActionListener {
     public ParallelAxesCanvas newBoxplot(final SVarSetInterface vs, final int i[], final int ic) {
         final SVarInterface catVar=(ic<0)?null:vs.at(ic);
         updateMarker(vs,i[0]);
-        
-        FrameDevice frdev;
-	String title="Boxplot ("+vs.at(i[0]).getName()+")"+((catVar!=null)?" by "+catVar.getName():"");
+        String title="Boxplot ("+vs.at(i[0]).getName()+")"+((catVar!=null)?" by "+catVar.getName():"");
+	
+	
+		FrameDevice frdev;
         frdev = newFrame(title,TFrame.clsBox);
         frdev.initPlacement();
         frdev.setVisible(true);
         frdev.addWindowListener(Common.getDefaultWindowListener());
+        
+        
         final SVarInterface[] vl=new SVar[i.length];
         int j=0;
         while(j<i.length) { vl[j]=vs.at(i[j]); j++; }

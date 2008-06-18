@@ -8,6 +8,9 @@ import mapping.RPackage;
 import model.SpreadsheetModelRemote;
 
 import org.bioconductor.packages.rservices.RObject;
+import org.rosuda.ibase.SVarInterfaceRemote;
+import org.rosuda.ibase.SVarSetInterfaceRemote;
+
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RCallBack;
@@ -468,5 +471,29 @@ public class RServicesObject implements RServices {
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
 		return null;
 	}
+		
+	public int countSets() throws RemoteException {
+		return 0;
+	}
+	
+	public SVarSetInterfaceRemote getSet(int i) throws RemoteException {
+		return null;
+	}
+	
+	public SVarSetInterfaceRemote getCurrentSet() throws RemoteException {
+		return null;
+	}
+	
+	public int curSetId() throws RemoteException {
+		return 0;
+	}
+	
+	public SVarInterfaceRemote getVar(int setId, int i) throws RemoteException {
+		return null;
+	}
+	
+	public SVarInterfaceRemote getVar(int setId, String name) throws RemoteException {
+		return null;
+	}	
 
 }

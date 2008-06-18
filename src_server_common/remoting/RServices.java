@@ -23,6 +23,13 @@ import java.util.Vector;
 import mapping.RPackage;
 import model.SpreadsheetModelRemote;
 import org.bioconductor.packages.rservices.RObject;
+import org.rosuda.ibase.SVar;
+import org.rosuda.ibase.SVarInterface;
+import org.rosuda.ibase.SVarInterfaceRemote;
+import org.rosuda.ibase.SVarSet;
+import org.rosuda.ibase.SVarSetInterface;
+import org.rosuda.ibase.SVarSetInterfaceRemote;
+
 import uk.ac.ebi.microarray.pools.ManagedServant;
 
 /**
@@ -156,50 +163,37 @@ public interface RServices extends ManagedServant {
 
 	public void stopHttpServer() throws java.rmi.RemoteException;
 			
-	
-	public String pythonExec(String pythonCommand) throws RemoteException;
-	
-	public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException;
-	
+	public String pythonExec(String pythonCommand) throws RemoteException;	
+	public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException;	
 	public String pythonExceFromResource(String resource) throws RemoteException;
-
-	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException;
-	
+	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException;	
 	public RObject pythonEval(String pythonCommand) throws RemoteException;
-
-	public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException;	
-	
+	public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException;		
 	public RObject pythonGet(String name) throws RemoteException;
-
 	public Object pythonGetAndConvert(String name) throws RemoteException;
-
-	public void pythonSet(String name, Object Value) throws RemoteException;
-	
+	public void pythonSet(String name, Object Value) throws RemoteException;	
 	public String getPythonStatus() throws RemoteException;
-	
-	
-	
-	public boolean isGroovyEnabled() throws RemoteException;
-	
-	public String groovyExec(String groovyCommand) throws RemoteException;
-	
-	public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException;
-	
+		
+	public boolean isGroovyEnabled() throws RemoteException;	
+	public String groovyExec(String groovyCommand) throws RemoteException;	
+	public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException;	
 	public String groovyExecFromResource(String resource) throws RemoteException;
-
-	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException;
-	
-	public Object groovyEval(String expression) throws RemoteException;	
-	
+	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException;	
+	public Object groovyEval(String expression) throws RemoteException;		
 	public Object groovyGet(String name) throws RemoteException;
-
-	public void groovySet(String name, Object Value) throws RemoteException;
-	
+	public void groovySet(String name, Object Value) throws RemoteException;	
 	public String getGroovyStatus() throws RemoteException;
-	
+		
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException;	
 	public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException;	
 	public SpreadsheetModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException;	
 	public String[] listSpreadsheetTableModelRemoteId() throws RemoteException;
-	
+		
+    public int countSets() throws RemoteException;
+    public SVarSetInterfaceRemote getSet( int i) throws RemoteException;
+    public SVarInterfaceRemote getVar( int setId, int i) throws RemoteException;
+    public SVarInterfaceRemote getVar( int setId, String name) throws RemoteException;
+    public SVarSetInterfaceRemote getCurrentSet() throws RemoteException;
+    public int curSetId() throws RemoteException;
+    	
 }

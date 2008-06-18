@@ -1331,10 +1331,14 @@
 			<rmic classpath="binsrv" base="binsrv" classname="model.TableModelRemoteImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="model.TableModelListenerRemoteImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="model.SpreadsheetListenerRemoteImpl"/>
+				
+			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.SVarSetInterfaceRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.SVarInterfaceRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.SMarkerInterfaceRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.DependentRemoteImpl"/>
+		
 			<rmic classpath="binsrv" base="binsrv" classname="uk.ac.ebi.microarray.pools.db.NodeManagerImpl"/>
-		
-		
-		
+				
 			<for list="${src_srv_target}" param="source" delimiter=":">
 			  <sequential>
 				<copy todir="binsrv">				
@@ -1630,6 +1634,12 @@
 		<rmic classpath="bin" base="bin" classname="model.TableModelRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="model.TableModelListenerRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="model.SpreadsheetListenerRemoteImpl"/>
+				
+		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.SVarSetInterfaceRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.SVarInterfaceRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.SMarkerInterfaceRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.DependentRemoteImpl"/>
+		
 		<rmic classpath="bin" base="bin" classname="uk.ac.ebi.microarray.pools.db.NodeManagerImpl"/>
 		
 		<for list="${src_compile_target}" param="source" delimiter=":">
