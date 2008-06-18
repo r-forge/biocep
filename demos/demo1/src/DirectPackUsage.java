@@ -76,8 +76,8 @@ public class DirectPackUsage {
 		JFrame f=new JFrame("test");
 
 		
-		//HistCanvas histCanvas=new HistCanvas(HistCanvas.SWINGGrDevID,new JFrame(),varProxy,markerProxy);				
-		ScatterCanvas histCanvas=new ScatterCanvas(HistCanvas.SWINGGrDevID,new JFrame(),varProxy,varProxy2,markerProxy);
+		HistCanvas histCanvas=new HistCanvas(HistCanvas.SWINGGrDevID,new JFrame(),varProxy,markerProxy);				
+		//ScatterCanvas histCanvas=new ScatterCanvas(HistCanvas.SWINGGrDevID,new JFrame(),varProxy,varProxy2,markerProxy);
 		
 		
 		/*

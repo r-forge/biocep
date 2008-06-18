@@ -55,6 +55,8 @@ public class MosaicCanvas extends BaseCanvas {
     
     private final int standardMLeft=20;
     
+    
+    public MosaicCanvas(String title){super(title);}
     public MosaicCanvas(final int gd, final Frame f, final SVarInterface[] vars, final SMarkerInterface mark) {
         super(gd,f, mark);
         this.frame=f;

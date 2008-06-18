@@ -44,6 +44,10 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.rosuda.JRI.Rengine;
+import org.rosuda.ibase.SVarInterfaceRemote;
+import org.rosuda.ibase.SVarSetInterfaceRemote;
+import org.rosuda.iplots.Framework;
+
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.GenericCallbackDevice;
@@ -877,6 +881,29 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		int i=0;for (String k:_spreadsheetTableModelRemoteHashMap.keySet()) result[i++]=k;
 		return result;
 	}
+			
+	public int countSets() throws RemoteException {
+		return Framework.getInstance().countSets();
+	}
 	
+	public SVarSetInterfaceRemote getSet(int i) throws RemoteException {
+		return Framework.getInstance().getSet(i).getRemote();
+	}
 	
+	public SVarSetInterfaceRemote getCurrentSet() throws RemoteException {
+		return Framework.getInstance().getCurrentSet().getRemote();
+	}
+	
+	public int curSetId() throws RemoteException {
+		return Framework.getInstance().curSetId();
+	}
+	
+	public SVarInterfaceRemote getVar(int setId, int i) throws RemoteException {
+		return Framework.getInstance().getSet(setId).at(i).getRemote();
+	}
+	
+	public SVarInterfaceRemote getVar(int setId, String name) throws RemoteException {
+		return Framework.getInstance().getSet(setId).byName(name).getRemote();
+	}
+		
 }

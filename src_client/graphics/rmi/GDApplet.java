@@ -148,7 +148,11 @@ import org.rosuda.ibase.SMarkerInterface;
 import org.rosuda.ibase.SMarkerInterfaceRemote;
 import org.rosuda.ibase.SVarInterface;
 import org.rosuda.ibase.SVarInterfaceRemote;
+import org.rosuda.ibase.plots.BarCanvas;
+import org.rosuda.ibase.plots.HamCanvas;
 import org.rosuda.ibase.plots.HistCanvas;
+import org.rosuda.ibase.plots.MapCanvas;
+import org.rosuda.ibase.plots.MosaicCanvas;
 import org.rosuda.ibase.plots.ScatterCanvas;
 
 import remoting.FileDescription;
@@ -1759,34 +1763,133 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 							});
 						} else if (action.getActionName().equals("newHistogram")) {							
-							SVarInterface varProxy=RemoteUtil.getSVarWrapper((SVarInterfaceRemote)action.getAttributes().get("vs"));
-							SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper((SMarkerInterfaceRemote)action.getAttributes().get("mark"));
-							String title=(String)action.getAttributes().get("title");
-							HistCanvas histCanvas=new HistCanvas((Integer)action.getAttributes().get("gd"),new JFrame(),varProxy,markerProxy);
-							createView(histCanvas.getComponent(), title);							
-							histCanvas.updateObjects();
-							markerProxy.addDepend(histCanvas);
-							histCanvas.setTitle(title);														
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									try {
+										int vsId=(Integer)action.getAttributes().get("vs");
+										int vId=(Integer)action.getAttributes().get("v");
+										SVarInterface varProxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
+										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());										
+										String title=(String)action.getAttributes().get("title");
+										HistCanvas histCanvas=new HistCanvas((Integer)action.getAttributes().get("gd"),new JFrame(),varProxy,markerProxy);
+										createView(histCanvas.getComponent(), title);
+										histCanvas.updateObjects();
+										markerProxy.addDepend(histCanvas);							
+										histCanvas.setTitle(title);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
 						} else if (action.getActionName().equals("newScatterplot")) {
-							SVarInterface varProxy1=RemoteUtil.getSVarWrapper((SVarInterfaceRemote)action.getAttributes().get("vs1"));
-							SVarInterface varProxy2=RemoteUtil.getSVarWrapper((SVarInterfaceRemote)action.getAttributes().get("vs2"));							
-							SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper((SMarkerInterfaceRemote)action.getAttributes().get("mark"));
-							
-							String title=(String)action.getAttributes().get("title");
-							ScatterCanvas scatterCanvas=new ScatterCanvas((Integer)action.getAttributes().get("gd"),new JFrame(),varProxy1,varProxy2,markerProxy);
-							createView(scatterCanvas.getComponent(), title);							
-							//scatterCanvas.updateObjects();
-							markerProxy.addDepend(scatterCanvas);
-							scatterCanvas.setTitle(title);
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									try {										
+										int vsId=(Integer)action.getAttributes().get("vs");
+										int v1Id=(Integer)action.getAttributes().get("v1");
+										int v2Id=(Integer)action.getAttributes().get("v2");												
+										SVarInterface var1Proxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, v1Id));
+										SVarInterface var2Proxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, v2Id));
+										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());	
+										String title=(String)action.getAttributes().get("title");
+										int gd=(Integer)action.getAttributes().get("gd");										
+										ScatterCanvas scatterCanvas=new ScatterCanvas(gd,new JFrame(),var1Proxy,var2Proxy,markerProxy);
+										createView(scatterCanvas.getComponent(), title);							
+										scatterCanvas.updateObjects();
+										markerProxy.addDepend(scatterCanvas);
+										scatterCanvas.setTitle(title);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
+						} else if (action.getActionName().equals("newMosaic")) {							
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									try {
+										int vsId=(Integer)action.getAttributes().get("vs");
+										int[] vId=(int[])action.getAttributes().get("v");
+										SVarInterface[] v=new SVarInterface[vId.length];
+										for (int i=0; i<vId.length; ++i) v[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId[i]));										
+										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
+										String title=(String)action.getAttributes().get("title");								
+										int gd=(Integer)action.getAttributes().get("gd");
+										MosaicCanvas mosaicCanvas=new MosaicCanvas(gd,new JFrame(),v,markerProxy);
+										createView(mosaicCanvas.getComponent(), title);										
+										mosaicCanvas.updateObjects();
+										markerProxy.addDepend(mosaicCanvas);							
+										mosaicCanvas.setTitle(title);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
+						} else if (action.getActionName().equals("newMap")) {
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									try {										
+										int vsId=(Integer)action.getAttributes().get("vs");
+										int vId=(Integer)action.getAttributes().get("v");
+										SVarInterface var1Proxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
+										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());	
+										String title=(String)action.getAttributes().get("title");
+										int gd=(Integer)action.getAttributes().get("gd");										
+										MapCanvas mapCanvas=new MapCanvas(gd,new JFrame(),var1Proxy,markerProxy);
+										createView(mapCanvas.getComponent(), title);							
+										mapCanvas.updateObjects();
+										markerProxy.addDepend(mapCanvas);
+										mapCanvas.setTitle(title);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
+						} else if (action.getActionName().equals("newBarchart")) {
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									try {										
+										int vsId=(Integer)action.getAttributes().get("vs");
+										int vId=(Integer)action.getAttributes().get("v");
+										int wgtId=(Integer)action.getAttributes().get("wgt");												
+										SVarInterface varProxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
+										SVarInterface wgtProxy=wgtId<0 ? null : RemoteUtil.getSVarWrapper(getR().getVar(vsId, wgtId));										
+										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
+										String title=(String)action.getAttributes().get("title");
+										int gd=(Integer)action.getAttributes().get("gd");										
+										BarCanvas barCanvas=new BarCanvas(gd,new JFrame(),varProxy,markerProxy,wgtProxy);
+										createView(barCanvas.getComponent(), title);							
+										barCanvas.updateObjects();
+										markerProxy.addDepend(barCanvas);
+										barCanvas.setTitle(title);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
+						} else if (action.getActionName().equals("newHammock")) {							
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									try {
+										int vsId=(Integer)action.getAttributes().get("vs");
+										int[] vId=(int[])action.getAttributes().get("v");
+										SVarInterface[] v=new SVarInterface[vId.length];
+										for (int i=0; i<vId.length; ++i) v[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId[i]));										
+										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
+										String title=(String)action.getAttributes().get("title");								
+										int gd=(Integer)action.getAttributes().get("gd");
+										HamCanvas mosaicCanvas=new HamCanvas(gd,new JFrame(),v,markerProxy);
+										createView(mosaicCanvas.getComponent(), title);										
+										mosaicCanvas.updateObjects();
+										markerProxy.addDepend(mosaicCanvas);							
+										mosaicCanvas.setTitle(title);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
 						}
-							
-
-						
-						
 					}
-
 				}
-
 			}
 		} catch (NotLoggedInException nle) {
 			noSession();

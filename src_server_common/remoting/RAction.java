@@ -40,8 +40,6 @@ public class RAction implements Serializable {
 		_actionName = actionName;
 		_actionAttributes = attributes;
 	}
-
-	
 	
 	public void setActionName(String name) {
 		_actionName = name;
@@ -57,6 +55,10 @@ public class RAction implements Serializable {
 
 	public HashMap<String, Object> getAttributes() {
 		return _actionAttributes;
+	}
+	
+	public String toString() {
+		return "[action name="+_actionName+" attributes="+_actionAttributes+"]";
 	}
 
 }

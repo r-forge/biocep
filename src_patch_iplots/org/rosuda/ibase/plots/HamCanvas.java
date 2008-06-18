@@ -23,6 +23,9 @@ public class HamCanvas extends BaseCanvas {
     
     Axis[] ai;
     
+    
+    public HamCanvas(String title) {super(title);}
+    
     public HamCanvas(final int gd, Frame f, SVarInterface[] mv, SMarkerInterface mark) {
         super(gd,f,mark);
         setTitle("Hammock Plot");
