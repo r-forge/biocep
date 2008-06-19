@@ -878,8 +878,18 @@ public class Framework implements Dependent, ActionListener {
         final SVarInterface catVar=(ic<0)?null:vs.at(ic);
         updateMarker(vs,i[0]);
         String title="Boxplot ("+vs.at(i[0]).getName()+")"+((catVar!=null)?" by "+catVar.getName():"");
+               
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("title", title);
+		attributes.put("gd", graphicsEngine);		
+		attributes.put("vs", indexOfSet(vs));
+		attributes.put("i",i);
+		attributes.put("ic",ic);
+		RAction action = new RAction("newBoxplot",attributes);
+		DirectJNI._rActions.add(action);
+		return new ParallelAxesCanvas(title);      
 	
-	
+		/*
 		FrameDevice frdev;
         frdev = newFrame(title,TFrame.clsBox);
         frdev.initPlacement();
@@ -887,7 +897,7 @@ public class Framework implements Dependent, ActionListener {
         frdev.addWindowListener(Common.getDefaultWindowListener());
         
         
-        final SVarInterface[] vl=new SVar[i.length];
+        final SVarInterface[] vl=new SVarInterface[i.length];
         int j=0;
         while(j<i.length) { vl[j]=vs.at(i[j]); j++; }
         final ParallelAxesCanvas bc=(catVar==null)?new ParallelAxesCanvas(graphicsEngine,frdev.getFrame(),vl,vs.getMarker(),ParallelAxesCanvas.TYPE_BOX):new ParallelAxesCanvas(graphicsEngine,frdev.getFrame(),vl[0],catVar,vs.getMarker(),ParallelAxesCanvas.TYPE_BOX);
@@ -896,13 +906,15 @@ public class Framework implements Dependent, ActionListener {
         int xdim=(catVar==null)?(40+40*i.length):(40+40*catVar.getNumCats());
         if (xdim>800) xdim=800;
         bc.setSize(new Dimension(xdim,200));
-	bc.setTitle(title);
+		bc.setTitle(title);
         frdev.setSize(new Dimension(bc.getWidth(),bc.getHeight()));
         frdev.pack();
         bc.repaint();
         
         addNewPlot(bc);
         return bc;
+        */
+        
     };
     
     // no VarFRame since that's Klimt-specific

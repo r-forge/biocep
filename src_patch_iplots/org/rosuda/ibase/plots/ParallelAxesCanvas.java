@@ -172,6 +172,10 @@ public class ParallelAxesCanvas extends BaseCanvas {
     public Color COL_AXES=Color.WHITE;
     
     public boolean isMouseOnHilite=false;
+        
+    public ParallelAxesCanvas(String title) {
+    	super(title);
+    }    
     
     /** create a boxplot canvas for a multiple grouped boxplots side-by-side
      * @param f associated frame (or <code>null</code> if none)
@@ -306,10 +310,11 @@ public class ParallelAxesCanvas extends BaseCanvas {
         if(type==TYPE_BOX || type==TYPE_PCPBOX) setDefaultMargins(new int[] {smallMLeft,smallMRight,smallMTop,smallMBottom});
         else setDefaultMargins(new int[] {smallMLeft,smallMRight,bigMTop,bigMBottom, bigMLeft,smallMRight,smallMTop,smallMBottom});
         
-        v=new SVar[yvs.length];
+        v=new SVarInterface[yvs.length];
         opAy=new Axis[yvs.length-1];
         
         xv=new SVarObj(getShortClassName() + ".index",true);
+        
         int i = 0;
         while(i<yvs.length) {
             if (yvs[i].isNum()) {
@@ -323,6 +328,7 @@ public class ParallelAxesCanvas extends BaseCanvas {
             xv.add(yvs[i].getName());
             v[i]=yvs[i]; i++;
         }
+        
         ax=new Axis(xv,Axis.O_X,xv.isCat()?Axis.T_EqCat:Axis.T_Num); ax.addDepend(this);
         ay=new Axis(yvs[0],Axis.O_Y,yvs[0].isCat()?Axis.T_EqCat:Axis.T_Num); ay.addDepend(this);
         

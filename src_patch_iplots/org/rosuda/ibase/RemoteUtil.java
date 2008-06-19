@@ -7,6 +7,7 @@ import java.util.Vector;
 
 public abstract class RemoteUtil {
 	public static SVarInterface getSVarWrapper(final SVarInterfaceRemote _svarRemote) {
+		if (_svarRemote==null) return null;
 		return new SVarInterface() {
 
 			private HashMap<Dependent, DependentRemoteImpl> modelListenerHashMap=new HashMap<Dependent, DependentRemoteImpl>();

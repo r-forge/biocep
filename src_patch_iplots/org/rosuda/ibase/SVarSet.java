@@ -54,7 +54,7 @@ public class SVarSet implements SVarSetInterface {
     };
     /** returns the marker of this dataset
 	@return marker */
-    public SMarkerInterface getMarker() { return mark; };
+    public SMarker getMarker() { return (SMarker)mark; };
     
     /** set dataset name
 	@param s name */

@@ -153,6 +153,7 @@ import org.rosuda.ibase.plots.HamCanvas;
 import org.rosuda.ibase.plots.HistCanvas;
 import org.rosuda.ibase.plots.MapCanvas;
 import org.rosuda.ibase.plots.MosaicCanvas;
+import org.rosuda.ibase.plots.ParallelAxesCanvas;
 import org.rosuda.ibase.plots.ScatterCanvas;
 
 import remoting.FileDescription;
@@ -1808,9 +1809,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								public void run() {
 									try {
 										int vsId=(Integer)action.getAttributes().get("vs");
-										int[] vId=(int[])action.getAttributes().get("v");
-										SVarInterface[] v=new SVarInterface[vId.length];
-										for (int i=0; i<vId.length; ++i) v[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId[i]));										
+										int[] vIds=(int[])action.getAttributes().get("v");
+										SVarInterface[] v=new SVarInterface[vIds.length];
+										for (int i=0; i<vIds.length; ++i) v[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vIds[i]));										
 										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
 										String title=(String)action.getAttributes().get("title");								
 										int gd=(Integer)action.getAttributes().get("gd");
@@ -1871,9 +1872,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								public void run() {
 									try {
 										int vsId=(Integer)action.getAttributes().get("vs");
-										int[] vId=(int[])action.getAttributes().get("v");
-										SVarInterface[] v=new SVarInterface[vId.length];
-										for (int i=0; i<vId.length; ++i) v[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId[i]));										
+										int[] vIds=(int[])action.getAttributes().get("v");
+										SVarInterface[] v=new SVarInterface[vIds.length];
+										for (int i=0; i<vIds.length; ++i) v[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vIds[i]));										
 										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
 										String title=(String)action.getAttributes().get("title");								
 										int gd=(Integer)action.getAttributes().get("gd");
@@ -1887,7 +1888,45 @@ public class GDApplet extends GDAppletBase implements RGui {
 									}
 								}
 							});
+						} else if (action.getActionName().equals("newBoxplot")) {							
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									try {
+										
+										int vsId=(Integer)action.getAttributes().get("vs");
+										int[] iIds=(int[])action.getAttributes().get("i");
+										int icId=(Integer)action.getAttributes().get("ic");										
+										SVarInterface[] vl=new SVarInterface[iIds.length];
+										for (int i=0; i<iIds.length; ++i) vl[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, iIds[i]));
+										
+										SVarInterface catVar=RemoteUtil.getSVarWrapper((icId<0)?null:getR().getVar(vsId, icId));
+										
+										System.out.println("-->catVar:"+catVar);
+										SMarkerInterface marker=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
+										String title=(String)action.getAttributes().get("title");								
+										int gd=(Integer)action.getAttributes().get("gd");										
+										ParallelAxesCanvas bc=(catVar==null)?new ParallelAxesCanvas(gd,new JFrame(),vl,marker,ParallelAxesCanvas.TYPE_BOX):new ParallelAxesCanvas(gd,new JFrame(),vl[0],catVar,marker,ParallelAxesCanvas.TYPE_BOX);
+										createView(bc.getComponent(), title);										
+										bc.updateObjects();
+										marker.addDepend(bc);							
+										bc.setTitle(title);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
 						}
+						
+						
+						
+						
+						/*
+				        final SVarInterface[] vl=new SVarInterface[i.length];
+				        int j=0;
+				        while(j<i.length) { vl[j]=vs.at(i[j]); j++; }
+				        final ParallelAxesCanvas bc=(catVar==null)?new ParallelAxesCanvas(graphicsEngine,frdev.getFrame(),vl,vs.getMarker(),ParallelAxesCanvas.TYPE_BOX):new ParallelAxesCanvas(graphicsEngine,frdev.getFrame(),vl[0],catVar,vs.getMarker(),ParallelAxesCanvas.TYPE_BOX);
+				        */
+						
 					}
 				}
 			}
