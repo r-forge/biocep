@@ -22,6 +22,7 @@ import java.io.File;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -49,7 +50,8 @@ import org.python.core.PyObject;
 import python.PythonInterpreterSingleton;
 import remoting.RAction;
 import remoting.RCallBack;
-import remoting.RHelpListener;
+import remoting.RConsoleActionListener;
+import remoting.RConsoleAction;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -63,7 +65,14 @@ public abstract class RListener {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RListener.class);
 
 	private static Vector<RCallBack> _callbacks = new Vector<RCallBack>();
-	private static Vector<RHelpListener> _helpListeners=new Vector<RHelpListener>();
+	private static Vector<RConsoleActionListener> _ractionListeners=new Vector<RConsoleActionListener>();
+	private static String _originatorUID;
+	static public void setOrginatorUID(String uid){
+		_originatorUID=uid;
+	}
+	static public String getOriginatorUID() {
+		return _originatorUID;		
+	}
 	
 	public static void addRCallback(RCallBack callback) {
 		_callbacks.add(callback);
@@ -77,20 +86,31 @@ public abstract class RListener {
 		_callbacks.removeAllElements();
 	}
 	
-		
-	public static void addRHelpListener(RHelpListener helpListener) {
-		_helpListeners.add(helpListener);
-	}
-	
-	public static void removeRHelpListener(RHelpListener helpListener) {
-		_helpListeners.remove(helpListener);
-	}
-	
-	public static void removeAllRHelpListeners() {
-		_helpListeners.removeAllElements();
-	}
-	
 
+	
+	public static void addRActionListener(RConsoleActionListener ractionListener) {
+		_ractionListeners.add(ractionListener);
+	}
+	
+	public static void removeRActionListener(RConsoleActionListener ractionListener) {
+		_ractionListeners.remove(ractionListener);
+	}
+	
+	public static void removeAllRActionListeners() {
+		_ractionListeners.removeAllElements();
+	}
+
+	public static void notifyRActionListeners(RConsoleAction action) {
+		action.getAttributes().put("originatorUID",getOriginatorUID());
+		for (int i=0; i<_ractionListeners.size();++i) {
+			try {
+				_ractionListeners.elementAt(i).rConsoleActionPerformed(action);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	private static RClustserInterface _rClusterInterface = new RClustserInterface() {
 		public Vector<RServices> createRs(int n, String nodeName) throws Exception {
 			Vector<RServices> workers = null;
@@ -245,17 +265,8 @@ public abstract class RListener {
 			pack = null;
 		attributes.put("topic", topic);
 		attributes.put("package", pack);
-		RAction action = new RAction("help");
-		action.setAttributes(attributes);
-		DirectJNI._rActions.add(action);
-		
-		for (int i=0; i<_helpListeners.size();++i) {
-			try {
-				_helpListeners.elementAt(i).help(pack, topic);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		RAction action = new RAction("help",attributes);	
+		notifyRActionListeners(new RConsoleAction("help",attributes));
 		return null;
 	}
 

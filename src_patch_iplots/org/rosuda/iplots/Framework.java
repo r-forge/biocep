@@ -44,9 +44,8 @@ import org.rosuda.ibase.toolkit.TFrame;
 import org.rosuda.ibase.toolkit.TJFrame;
 import org.rosuda.util.Global;
 import org.rosuda.util.MsgDialog;
-
-import remoting.RAction;
-import server.DirectJNI;
+import remoting.RConsoleAction;
+import server.RListener;
 
 
 
@@ -583,8 +582,8 @@ public class Framework implements Dependent, ActionListener {
 		attributes.put("vs", indexOfSet(vs));
 		attributes.put("v1", v1);
 		attributes.put("v2", v2);
-		RAction action = new RAction("newScatterplot",attributes);
-		DirectJNI._rActions.add(action);
+		RConsoleAction action = new RConsoleAction("newScatterplot",attributes);
+		RListener.notifyRActionListeners(action);
         		
 		return new ScatterCanvas(title);
         		
@@ -618,8 +617,8 @@ public class Framework implements Dependent, ActionListener {
 		attributes.put("gd", graphicsEngine);
 		attributes.put("vs", indexOfSet(vs));
 		attributes.put("v", v);
-		RAction action = new RAction("newMap",attributes);
-		DirectJNI._rActions.add(action);        		
+		RConsoleAction action = new RConsoleAction("newMap",attributes);
+		RListener.notifyRActionListeners(action);      		
 		return new MapCanvas(title);		
 		/*
 		FrameDevice frdev = newFrame(title,TFrame.clsMap);
@@ -657,8 +656,8 @@ public class Framework implements Dependent, ActionListener {
 		attributes.put("vs", indexOfSet(vs));
 		attributes.put("v", v);
 		attributes.put("wgt", wgt);
-		RAction action = new RAction("newBarchart",attributes);
-		DirectJNI._rActions.add(action);
+		RConsoleAction action = new RConsoleAction("newBarchart",attributes);
+		RListener.notifyRActionListeners(action);
         		
 		return new BarCanvas(title);
         		
@@ -725,8 +724,8 @@ public class Framework implements Dependent, ActionListener {
 		attributes.put("gd", graphicsEngine);		
 		attributes.put("vs", indexOfSet(vs));
 		attributes.put("v", v);
-		RAction action = new RAction("newHammock",attributes);
-		DirectJNI._rActions.add(action);        
+		RConsoleAction action = new RConsoleAction("newHammock",attributes);
+		RListener.notifyRActionListeners(action);       
 		return new HamCanvas(title);      
 
         /*
@@ -767,8 +766,8 @@ public class Framework implements Dependent, ActionListener {
 		attributes.put("gd", graphicsEngine);		
 		attributes.put("vs", indexOfSet(vs));
 		attributes.put("v", v);
-		RAction action = new RAction("newMosaic",attributes);
-		DirectJNI._rActions.add(action);
+		RConsoleAction action = new RConsoleAction("newMosaic",attributes);
+		RListener.notifyRActionListeners(action);
         
 		return new MosaicCanvas(title);      
         
@@ -841,8 +840,8 @@ public class Framework implements Dependent, ActionListener {
 		attributes.put("gd", graphicsEngine);		
 		attributes.put("vs", indexOfSet(vs));
 		attributes.put("v", i);
-		RAction action = new RAction("newHistogram",attributes);
-		DirectJNI._rActions.add(action);
+		RConsoleAction action = new RConsoleAction("newHistogram",attributes);
+		RListener.notifyRActionListeners(action);
         
 		return new HistCanvas(title);
 		
@@ -885,8 +884,8 @@ public class Framework implements Dependent, ActionListener {
 		attributes.put("vs", indexOfSet(vs));
 		attributes.put("i",i);
 		attributes.put("ic",ic);
-		RAction action = new RAction("newBoxplot",attributes);
-		DirectJNI._rActions.add(action);
+		RConsoleAction action = new RConsoleAction("newBoxplot",attributes);
+		RListener.notifyRActionListeners(action);
 		return new ParallelAxesCanvas(title);      
 	
 		/*

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Vector;
 import remoting.GenericCallbackDevice;
 import remoting.RAction;
+import remoting.RConsoleAction;
 
 public class GenericCallbackDeviceImpl extends UnicastRemoteObject implements GenericCallbackDevice {
 	
@@ -25,6 +26,13 @@ public class GenericCallbackDeviceImpl extends UnicastRemoteObject implements Ge
 		attributes.put("parameters", parameters);		
 		RAction action = new RAction("notify", attributes);
 		_rActions.add(action);
+	}
+		
+	public void rConsoleActionPerformed(RConsoleAction consoleAction) throws RemoteException {
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("consoleAction", consoleAction);		
+		RAction action = new RAction("rConsoleActionPerformed", attributes);
+		_rActions.add(action);		
 	}
 	
 	public void help(String pack, String topic) throws RemoteException {

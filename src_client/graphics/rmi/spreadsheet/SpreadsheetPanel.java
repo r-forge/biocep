@@ -222,6 +222,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public String getUserName() {
 				return null;
 			}
+			
+			public String getUID() {
+				return null;
+			}
 		};
 		JFrame f = new JFrame("F1");
 		f.getContentPane().setLayout(new BorderLayout());

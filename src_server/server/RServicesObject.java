@@ -15,7 +15,7 @@ import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RCallBack;
 import remoting.RCollaborationListener;
-import remoting.RHelpListener;
+import remoting.RConsoleActionListener;
 import remoting.RNI;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.ManagedServant;
@@ -425,15 +425,15 @@ public class RServicesObject implements RServices {
 
 	}
 	
-	public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
+	public void addRConsoleActionListener(RConsoleActionListener helpListener) throws RemoteException {
 		
 	}
 	
-	public void removeRHelpListener(RHelpListener helpListener) throws RemoteException {
+	public void removeRConsoleActionListener(RConsoleActionListener helpListener) throws RemoteException {
 		
 	}
 	
-	public void removeAllRHelpListeners() throws RemoteException {
+	public void removeAllRConsoleActionListeners() throws RemoteException {
 		
 	}
 
@@ -494,6 +494,14 @@ public class RServicesObject implements RServices {
 	
 	public SVarInterfaceRemote getVar(int setId, String name) throws RemoteException {
 		return null;
-	}	
+	}
+	
+	public void setOrginatorUID(String uid) throws RemoteException {
+		
+	}
+	
+	public String getOriginatorUID() throws RemoteException {
+		return null;
+	} 
 
 }

@@ -38,6 +38,8 @@ import remoting.RAction;
 import remoting.RCallBack;
 import remoting.GenericCallbackDevice;
 import remoting.RCollaborationListener;
+import remoting.RConsoleAction;
+import remoting.RConsoleActionListener;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
@@ -412,8 +414,8 @@ public class RHttpProxy {
 
 					Vector<RCallBack> rCallbacks = new Vector<RCallBack>();
 					Vector<RCollaborationListener> rCollaborationListeners = new Vector<RCollaborationListener>();
+					Vector<RConsoleActionListener> rConsoleActionListeners = new Vector<RConsoleActionListener>();
 					
-
 					GenericCallbackDevice genericCallBackDevice = null;
 					Thread popThread=null;
 
@@ -455,6 +457,11 @@ public class RHttpProxy {
 										HashMap<String, String> parameters=(HashMap<String, String>)action.getAttributes().get("parameters");
 										for (int j=0; j<rCallbacks.size();++j) {
 											rCallbacks.elementAt(j).notify(parameters);
+										}
+									} if (action.getActionName().equals("rConsoleActionPerformed")) {
+										RConsoleAction consoleAction=(RConsoleAction)action.getAttributes().get("consoleAction");
+										for (int j=0; j<rConsoleActionListeners.size();++j) {
+											rConsoleActionListeners.elementAt(j).rConsoleActionPerformed(consoleAction);
 										}
 									} else if (action.getActionName().equals("chat")) {										
 										String sourceSession= (String)action.getAttributes().get("sourceSession");
@@ -509,7 +516,13 @@ public class RHttpProxy {
 							rCollaborationListeners.removeAllElements();
 						}   
 						
-						
+						else if (method.getName().equals("addRConsoleActionListener")) {
+							rConsoleActionListeners.add((RConsoleActionListener) args[0]);
+						} else if (method.getName().equals("removeRConsoleActionListener")) {
+							rConsoleActionListeners.remove((RConsoleActionListener) args[0]);
+						} else if (method.getName().equals("removeAllRConsoleActionListeners")) {
+							rConsoleActionListeners.removeAllElements();
+						}
 					
 						
 						else if (method.getName().equals("newSpreadsheetTableModelRemote")) {

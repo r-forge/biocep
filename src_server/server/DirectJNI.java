@@ -123,10 +123,10 @@ import python.PythonInterpreterSingleton;
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.GenericCallbackDevice;
-import remoting.RAction;
 import remoting.RCallBack;
 import remoting.RCollaborationListener;
-import remoting.RHelpListener;
+import remoting.RConsoleAction;
+import remoting.RConsoleActionListener;
 import remoting.RNI;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -371,7 +371,7 @@ public class DirectJNI {
 						if (_sharedExecutionUnit.emptyConsoleBufferBefore())
 							_sharedBuffer.setLength(0);
 						if (_progrssiveConsoleFeedbackEnabled) {
-							_rActions.add(new RAction("RESET_CONSOLE_LOG"));
+							RListener.notifyRActionListeners(new RConsoleAction("RESET_CONSOLE_LOG"));
 						}
 
 						_markerA = -1;
@@ -410,11 +410,11 @@ public class DirectJNI {
 		private void appendText(String t) {
 			_sharedBuffer.append(t);
 			if (_progrssiveConsoleFeedbackEnabled) {
-				RAction consoleLogAppend = new RAction("APPEND_CONSOLE_LOG");
+				RConsoleAction consoleLogAppend = new RConsoleAction("APPEND_CONSOLE_LOG");
 				HashMap<String, Object> attrs = new HashMap<String, Object>();
 				attrs.put("log", t);
 				consoleLogAppend.setAttributes(attrs);
-				_rActions.add(consoleLogAppend);
+				RListener.notifyRActionListeners(consoleLogAppend);
 			}
 		}
 
@@ -462,10 +462,6 @@ public class DirectJNI {
 			e.printStackTrace();
 		}
 
-	}
-
-	public void addAction(RAction action) {
-		_rActions.add(action);
 	}
 
 	public Vector<String> getBootStrapRObjects() {
@@ -2688,16 +2684,25 @@ public class DirectJNI {
 			return _rCollaborationListeners.size()>0;
 		}
 
-		public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
-			server.RListener.addRHelpListener(helpListener);
+		public void addRConsoleActionListener(RConsoleActionListener helpListener) throws RemoteException {
+			server.RListener.addRActionListener(helpListener);
 		}
 
-		public void removeRHelpListener(RHelpListener helpListener) throws RemoteException {
-			server.RListener.removeRHelpListener(helpListener);
+		public void removeRConsoleActionListener(RConsoleActionListener helpListener) throws RemoteException {
+			server.RListener.removeRActionListener(helpListener);
 		}
 
-		public void removeAllRHelpListeners() throws RemoteException {
-			server.RListener.removeAllRHelpListeners();
+		public void removeAllRConsoleActionListeners() throws RemoteException {
+			server.RListener.removeAllRActionListeners();
+		}
+		
+		public void setOrginatorUID(String uid) throws RemoteException {
+			server.RListener.setOrginatorUID(uid);
+			
+		}
+		
+		public String getOriginatorUID() throws RemoteException {
+			return server.RListener.getOriginatorUID();
 		}
 
 		public void chat(String sourceSession, String message) throws RemoteException {
@@ -3179,15 +3184,6 @@ public class DirectJNI {
 			return _progrssiveConsoleFeedbackEnabled;
 		}
 
-		public Vector<RAction> popRActions() throws RemoteException {
-			if (_rActions.size() == 0)
-				return null;
-			Vector<RAction> result = (Vector<RAction>) _rActions.clone();
-			for (int i = 0; i < result.size(); ++i)
-				_rActions.remove(0);
-			return result;
-		}
-
 		public String getProcessId() throws RemoteException {
 			return PoolUtils.getProcessId();
 		}
@@ -3537,7 +3533,6 @@ public class DirectJNI {
 		
 	};
 
-	static public Vector<RAction> _rActions = new Vector<RAction>();
 	static private HashMap<Integer, GDDevice> _localDeviceHashMap = new HashMap<Integer, GDDevice>();
 	static private HashSet<Integer> _localBroadcastedDevices = new HashSet<Integer>();
 
