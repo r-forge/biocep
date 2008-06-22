@@ -88,6 +88,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.imageio.ImageIO;
@@ -159,6 +160,8 @@ import org.rosuda.ibase.plots.ScatterCanvas;
 import remoting.FileDescription;
 import remoting.RAction;
 import remoting.RCollaborationListener;
+import remoting.RConsoleAction;
+import remoting.RConsoleActionListener;
 import remoting.RServices;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
@@ -181,7 +184,6 @@ import util.Utils;
 import views.*;
 import static graphics.rmi.JGDPanelPop.*;
 import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
-
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -234,6 +236,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	public static RGui _instance;
 	private RCollaborationListenerImpl _collaborationListenerImpl;
+	private RConsoleActionListenerImpl _rConsoleActionListenerImpl;
 
 	private final ReentrantLock _protectR = new RGuiReentrantLock() {
 		@Override
@@ -241,6 +244,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			super.lock();
 			try {
 				_currentDevice.setAsCurrentDevice();
+				_rForConsole.setOrginatorUID(getUID());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -257,8 +261,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
-
-			popActions();
 
 			if (_rForConsole instanceof HttpMarker) {
 				((HttpMarker) _rForConsole).popActions();
@@ -520,7 +522,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
-									
 									/*
 									  
 									  DirectJNI.init(); r =
@@ -529,10 +530,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 									  BadSshHostException(); if (false) throw
 									  new BadSshLoginPwdException(); _keepAlive =			  ident.isKeepAlive();
 									  
-									  */
-									  
-									  
-									   
+									 */
+
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
@@ -570,10 +569,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 										pw.println(PoolUtils.stubToHex(r));
 										pw.close();
 									}
-									
-							
-									
-									
 
 								} else {
 
@@ -674,10 +669,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, d), null,
 									new FitDeviceAction(GDApplet.this, d), null, new SnapshotDeviceAction(GDApplet.this),
-									new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
-									new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
-									new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
-									new CopyToCurrentDeviceAction(GDApplet.this, d), null, new CoupleToCurrentDeviceAction(GDApplet.this)
+									new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
+									new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this),
+									new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
+									new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, d), null,
+									new CoupleToCurrentDeviceAction(GDApplet.this)
 
 							}, getRLock(), getConsoleLogger());
 							_rootGraphicPanel.removeAll();
@@ -712,11 +708,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 										new SetCurrentDeviceAction(GDApplet.this, newDevice), null, new FitDeviceAction(GDApplet.this, newDevice), null,
-										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this),new SnapshotDevicePdfAction(GDApplet.this), null,
-										new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this),
-										new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
-										new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
-										new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
+										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this),
+										new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
+										new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
+										new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+										new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) },
+										getRLock(), getConsoleLogger());
 
 								rootComponent.removeAll();
 								rootComponent.setLayout(new BorderLayout());
@@ -744,6 +741,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							_collaborationListenerImpl = new RCollaborationListenerImpl();
 							_rForConsole.addRCollaborationListener(_collaborationListenerImpl);
+
+							_rConsoleActionListenerImpl = new RConsoleActionListenerImpl();
+							_rForConsole.addRConsoleActionListener(_rConsoleActionListenerImpl);
 
 							if (_demo) {
 								playDemo();
@@ -1680,20 +1680,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		new Thread(new Runnable() {
 			public void run() {
-				while (true) {
-
-					popActions();
-					try {
-						Thread.sleep(1000);
-					} catch (Exception e) {
-					}
-
-				}
-			}
-		}).start();
-
-		new Thread(new Runnable() {
-			public void run() {
 				try {
 					ServerManager.downloadBioceCore(0);
 				} catch (Exception e) {
@@ -1704,238 +1690,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		_instance = this;
 		System.out.println("INIT ends");
-
-	}
-
-	private synchronized void popActions() {
-		try {
-			if (_sessionId != null && _rForPopCmd != null) {
-				Vector<RAction> ractions = _rForPopCmd.popRActions();
-
-				if (ractions != null) {
-
-					for (int i = 0; i < ractions.size(); ++i) {
-						final RAction action = ractions.elementAt(i);
-						if (action.getActionName().equals("help")) {
-							String topic = (String) action.getAttributes().get("topic");
-							String pack = (String) action.getAttributes().get("package");
-
-							String helpUri = _rForPopCmd.getRHelpFileUri(topic, pack);
-
-							// System.out.println("<" + topic + "><"
-							// + pack + "><" + helpUri + ">");
-
-							if (helpUri == null) {
-								setHelpBrowserURL(_defaultHelpUrl);
-							} else {
-								setHelpBrowserURL(_helpServletUrl + helpUri);
-							}
-
-						} else if (action.getActionName().equals("RESET_CONSOLE_LOG")) {
-							final JTextArea area = getOpenedLogViewerArea();
-							if (area != null) {
-								SwingUtilities.invokeLater(new Runnable() {
-									public void run() {
-										area.setText("");
-										area.repaint();
-									}
-								});
-							}
-						} else if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {
-							final JTextArea area = getOpenedLogViewerArea();
-							if (area != null) {
-								SwingUtilities.invokeLater(new Runnable() {
-									public void run() {
-										area.setText(area.getText() + action.getAttributes().get("log"));
-									}
-								});
-								SwingUtilities.invokeLater(new Runnable() {
-									public void run() {
-										area.setCaretPosition(area.getText().length());
-										area.repaint();
-									}
-								});
-
-							}
-						} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									getConsoleLogger().print((String) action.getAttributes().get("command"), (String) action.getAttributes().get("result"));
-								}
-							});
-						} else if (action.getActionName().equals("newHistogram")) {							
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {
-										int vsId=(Integer)action.getAttributes().get("vs");
-										int vId=(Integer)action.getAttributes().get("v");
-										SVarInterface varProxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
-										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());										
-										String title=(String)action.getAttributes().get("title");
-										HistCanvas histCanvas=new HistCanvas((Integer)action.getAttributes().get("gd"),new JFrame(),varProxy,markerProxy);
-										createView(histCanvas.getComponent(), title);
-										histCanvas.updateObjects();
-										markerProxy.addDepend(histCanvas);							
-										histCanvas.setTitle(title);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						} else if (action.getActionName().equals("newScatterplot")) {
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {										
-										int vsId=(Integer)action.getAttributes().get("vs");
-										int v1Id=(Integer)action.getAttributes().get("v1");
-										int v2Id=(Integer)action.getAttributes().get("v2");												
-										SVarInterface var1Proxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, v1Id));
-										SVarInterface var2Proxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, v2Id));
-										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());	
-										String title=(String)action.getAttributes().get("title");
-										int gd=(Integer)action.getAttributes().get("gd");										
-										ScatterCanvas scatterCanvas=new ScatterCanvas(gd,new JFrame(),var1Proxy,var2Proxy,markerProxy);
-										createView(scatterCanvas.getComponent(), title);							
-										scatterCanvas.updateObjects();
-										markerProxy.addDepend(scatterCanvas);
-										scatterCanvas.setTitle(title);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						} else if (action.getActionName().equals("newMosaic")) {							
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {
-										int vsId=(Integer)action.getAttributes().get("vs");
-										int[] vIds=(int[])action.getAttributes().get("v");
-										SVarInterface[] v=new SVarInterface[vIds.length];
-										for (int i=0; i<vIds.length; ++i) v[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vIds[i]));										
-										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
-										String title=(String)action.getAttributes().get("title");								
-										int gd=(Integer)action.getAttributes().get("gd");
-										MosaicCanvas mosaicCanvas=new MosaicCanvas(gd,new JFrame(),v,markerProxy);
-										createView(mosaicCanvas.getComponent(), title);										
-										mosaicCanvas.updateObjects();
-										markerProxy.addDepend(mosaicCanvas);							
-										mosaicCanvas.setTitle(title);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						} else if (action.getActionName().equals("newMap")) {
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {										
-										int vsId=(Integer)action.getAttributes().get("vs");
-										int vId=(Integer)action.getAttributes().get("v");
-										SVarInterface var1Proxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
-										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());	
-										String title=(String)action.getAttributes().get("title");
-										int gd=(Integer)action.getAttributes().get("gd");										
-										MapCanvas mapCanvas=new MapCanvas(gd,new JFrame(),var1Proxy,markerProxy);
-										createView(mapCanvas.getComponent(), title);							
-										mapCanvas.updateObjects();
-										markerProxy.addDepend(mapCanvas);
-										mapCanvas.setTitle(title);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						} else if (action.getActionName().equals("newBarchart")) {
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {										
-										int vsId=(Integer)action.getAttributes().get("vs");
-										int vId=(Integer)action.getAttributes().get("v");
-										int wgtId=(Integer)action.getAttributes().get("wgt");												
-										SVarInterface varProxy=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
-										SVarInterface wgtProxy=wgtId<0 ? null : RemoteUtil.getSVarWrapper(getR().getVar(vsId, wgtId));										
-										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
-										String title=(String)action.getAttributes().get("title");
-										int gd=(Integer)action.getAttributes().get("gd");										
-										BarCanvas barCanvas=new BarCanvas(gd,new JFrame(),varProxy,markerProxy,wgtProxy);
-										createView(barCanvas.getComponent(), title);							
-										barCanvas.updateObjects();
-										markerProxy.addDepend(barCanvas);
-										barCanvas.setTitle(title);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						} else if (action.getActionName().equals("newHammock")) {							
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {
-										int vsId=(Integer)action.getAttributes().get("vs");
-										int[] vIds=(int[])action.getAttributes().get("v");
-										SVarInterface[] v=new SVarInterface[vIds.length];
-										for (int i=0; i<vIds.length; ++i) v[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, vIds[i]));										
-										SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
-										String title=(String)action.getAttributes().get("title");								
-										int gd=(Integer)action.getAttributes().get("gd");
-										HamCanvas mosaicCanvas=new HamCanvas(gd,new JFrame(),v,markerProxy);
-										createView(mosaicCanvas.getComponent(), title);										
-										mosaicCanvas.updateObjects();
-										markerProxy.addDepend(mosaicCanvas);							
-										mosaicCanvas.setTitle(title);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						} else if (action.getActionName().equals("newBoxplot")) {							
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {
-										
-										int vsId=(Integer)action.getAttributes().get("vs");
-										int[] iIds=(int[])action.getAttributes().get("i");
-										int icId=(Integer)action.getAttributes().get("ic");										
-										SVarInterface[] vl=new SVarInterface[iIds.length];
-										for (int i=0; i<iIds.length; ++i) vl[i]=RemoteUtil.getSVarWrapper(getR().getVar(vsId, iIds[i]));
-										
-										SVarInterface catVar=RemoteUtil.getSVarWrapper((icId<0)?null:getR().getVar(vsId, icId));
-										
-										System.out.println("-->catVar:"+catVar);
-										SMarkerInterface marker=RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());											
-										String title=(String)action.getAttributes().get("title");								
-										int gd=(Integer)action.getAttributes().get("gd");										
-										ParallelAxesCanvas bc=(catVar==null)?new ParallelAxesCanvas(gd,new JFrame(),vl,marker,ParallelAxesCanvas.TYPE_BOX):new ParallelAxesCanvas(gd,new JFrame(),vl[0],catVar,marker,ParallelAxesCanvas.TYPE_BOX);
-										createView(bc.getComponent(), title);										
-										bc.updateObjects();
-										marker.addDepend(bc);							
-										bc.setTitle(title);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						}
-						
-						
-						
-						
-						/*
-				        final SVarInterface[] vl=new SVarInterface[i.length];
-				        int j=0;
-				        while(j<i.length) { vl[j]=vs.at(i[j]); j++; }
-				        final ParallelAxesCanvas bc=(catVar==null)?new ParallelAxesCanvas(graphicsEngine,frdev.getFrame(),vl,vs.getMarker(),ParallelAxesCanvas.TYPE_BOX):new ParallelAxesCanvas(graphicsEngine,frdev.getFrame(),vl[0],catVar,vs.getMarker(),ParallelAxesCanvas.TYPE_BOX);
-				        */
-						
-					}
-				}
-			}
-		} catch (NotLoggedInException nle) {
-			noSession();
-			nle.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
 	}
 
@@ -1973,7 +1727,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 		return result;
 	}
-	
+
 	private JTextArea getOpenedLogViewerArea() {
 		LogView lv = getOpenedLogView();
 		if (lv != null)
@@ -2786,8 +2540,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 			public void actionPerformed(final ActionEvent ae) {
 				final DimensionsDialog ddialog = new DimensionsDialog(GDApplet.this);
 				ddialog.setVisible(true);
-				if (ddialog.getSpreadsheetDimension() != null) {					
-					NewWindow.create(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getWidth(), (int) ddialog.getSpreadsheetDimension().getHeight()), GDApplet.this), "Spreadsheet View");
+				if (ddialog.getSpreadsheetDimension() != null) {
+					NewWindow.create(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getWidth(), (int) ddialog
+							.getSpreadsheetDimension().getHeight()), GDApplet.this), "Spreadsheet View");
 				}
 			}
 
@@ -2801,14 +2556,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 			public void actionPerformed(final ActionEvent ae) {
 				new Thread(new Runnable() {
 					public void run() {
-											
+
 						final DimensionsDialog ddialog = new DimensionsDialog(GDApplet.this);
 						ddialog.setVisible(true);
-						if (ddialog.getSpreadsheetDimension() != null) {	
-							int id = getDynamicViewId();	
-							final CollaborativeSpreadsheetView lv = new CollaborativeSpreadsheetView(id, (int)ddialog.getSpreadsheetDimension().getHeight(), (int)ddialog.getSpreadsheetDimension().getWidth(), GDApplet.this);
-							((TabWindow) views[2].getWindowParent()).addTab(lv);							
-						}						
+						if (ddialog.getSpreadsheetDimension() != null) {
+							int id = getDynamicViewId();
+							final CollaborativeSpreadsheetView lv = new CollaborativeSpreadsheetView(id, (int) ddialog.getSpreadsheetDimension().getHeight(),
+									(int) ddialog.getSpreadsheetDimension().getWidth(), GDApplet.this);
+							((TabWindow) views[2].getWindowParent()).addTab(lv);
+						}
 					}
 				}).start();
 			}
@@ -2830,9 +2586,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							ddialog.setVisible(true);
 							if (ddialog.getId() != null) {
 
-								int id = getDynamicViewId();	
-								final CollaborativeSpreadsheetView lv = new CollaborativeSpreadsheetView(id,ddialog.getId() , GDApplet.this);
-								((TabWindow) views[2].getWindowParent()).addTab(lv);								
+								int id = getDynamicViewId();
+								final CollaborativeSpreadsheetView lv = new CollaborativeSpreadsheetView(id, ddialog.getId(), GDApplet.this);
+								((TabWindow) views[2].getWindowParent()).addTab(lv);
 
 							}
 						} catch (Exception e) {
@@ -2883,10 +2639,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
-							new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
-							new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
-							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
-							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
+							new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
+							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
+							new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+							new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(),
+							getConsoleLogger());
 
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
@@ -2951,10 +2708,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(GDApplet.this, newDevice), null,
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
-							new SnapshotDeviceSvgAction(GDApplet.this),new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
-							new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
-							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
-							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
+							new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
+							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
+							new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+							new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(),
+							getConsoleLogger());
 
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
@@ -3013,7 +2771,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} catch (Exception e) {
 							}
 						}
-						
+
 					});
 				} else {
 					getOpenedLogView().restoreFocus();
@@ -3146,7 +2904,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				return getR() != null;
 			}
 		});
-		
+
 		_actions.put("pdfview", new AbstractAction("New PDF Viewer") {
 			public void actionPerformed(final ActionEvent e) {
 
@@ -3302,7 +3060,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							SwingUtilities.invokeLater(new Runnable() {
 								public void run() {
 									try {
-										GetExprDialog dialog = new GetExprDialog(GDApplet.this,"  R Expression", _expressionSave);
+										GetExprDialog dialog = new GetExprDialog(GDApplet.this, "  R Expression", _expressionSave);
 										dialog.setVisible(true);
 										if (dialog.getExpr() != null) {
 											RObject robj = null;
@@ -3562,9 +3320,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 
-	
-
 	private void disposeDevices() {
+
+		try {
+			_rForConsole.removeRConsoleActionListener(_rConsoleActionListenerImpl);
+			UnicastRemoteObject.unexportObject(_rConsoleActionListenerImpl, false);
+			_rConsoleActionListenerImpl = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		try {
 			_rForConsole.removeRCollaborationListener(_collaborationListenerImpl);
@@ -3579,14 +3343,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 		for (int i = 0; i < deviceViews.size(); ++i)
 			deviceViews.elementAt(i).getPanel().stopThreads();
 
-		
-		Vector<CollaborativeSpreadsheetView> collaborativeSpreadsheetViews=getCollaborativeSpreadsheetViews();
-		for (int i=0; i<collaborativeSpreadsheetViews.size();++i) {
+		Vector<CollaborativeSpreadsheetView> collaborativeSpreadsheetViews = getCollaborativeSpreadsheetViews();
+		for (int i = 0; i < collaborativeSpreadsheetViews.size(); ++i) {
 			collaborativeSpreadsheetViews.elementAt(i).close();
 		}
-		
-		
-		
+
 		if (getR() instanceof HttpMarker) {
 			((HttpMarker) getR()).stopThreads();
 		} else {
@@ -3672,18 +3433,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 
-	
-
-	
-	
-
 	static JPanel newPanel(JTextArea a) {
 		JPanel result = new JPanel(new BorderLayout());
 		result.add(new JScrollPane(a), BorderLayout.CENTER);
 		return result;
 	}
-
-	
 
 	public static class PopupListener extends MouseAdapter {
 		private JPopupMenu popup;
@@ -3983,6 +3737,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return GroovyInterpreterSingleton.getInstance();
 	}
 
+	private String uid = null;
+
+	public String getUID() {
+		if (uid == null) {
+			uid = UUID.randomUUID().toString();
+		}
+		return uid;
+	}
+
 	class RCollaborationListenerImpl extends UnicastRemoteObject implements RCollaborationListener {
 		public RCollaborationListenerImpl() throws RemoteException {
 			super();
@@ -4007,8 +3770,237 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 	}
+
 	public String getUserName() {
 		return System.getProperty("user.name");
+	}
+
+	class RConsoleActionListenerImpl extends UnicastRemoteObject implements RConsoleActionListener {
+
+		public RConsoleActionListenerImpl() throws RemoteException {
+			super();
+		}
+
+		public void rConsoleActionPerformed(final RConsoleAction action) throws RemoteException {
+
+			System.out.println("console action:" + action);
+
+			if (getUID().equals(action.getAttributes().get("originatorUID"))) {
+				if (action.getActionName().equals("help")) {
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								getRLock().lock();
+								String topic = (String) action.getAttributes().get("topic");
+								String pack = (String) action.getAttributes().get("package");
+								String helpUri = _rForPopCmd.getRHelpFileUri(topic, pack);
+								if (helpUri == null) {
+									setHelpBrowserURL(_defaultHelpUrl);
+								} else {
+									setHelpBrowserURL(_helpServletUrl + helpUri);
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							} finally {
+								getRLock().unlock();
+							}
+						}
+					}).start();
+				} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							getConsoleLogger().print((String) action.getAttributes().get("command"), (String) action.getAttributes().get("result"));
+						}
+					});
+				} else if (action.getActionName().equals("newHistogram")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								int vsId = (Integer) action.getAttributes().get("vs");
+								int vId = (Integer) action.getAttributes().get("v");
+								SVarInterface varProxy = RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
+								SMarkerInterface markerProxy = RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());
+								String title = (String) action.getAttributes().get("title");
+								HistCanvas histCanvas = new HistCanvas((Integer) action.getAttributes().get("gd"), new JFrame(), varProxy, markerProxy);
+								createView(histCanvas.getComponent(), title);
+								histCanvas.updateObjects();
+								markerProxy.addDepend(histCanvas);
+								histCanvas.setTitle(title);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				} else if (action.getActionName().equals("newScatterplot")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								int vsId = (Integer) action.getAttributes().get("vs");
+								int v1Id = (Integer) action.getAttributes().get("v1");
+								int v2Id = (Integer) action.getAttributes().get("v2");
+								SVarInterface var1Proxy = RemoteUtil.getSVarWrapper(getR().getVar(vsId, v1Id));
+								SVarInterface var2Proxy = RemoteUtil.getSVarWrapper(getR().getVar(vsId, v2Id));
+								SMarkerInterface markerProxy = RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());
+								String title = (String) action.getAttributes().get("title");
+								int gd = (Integer) action.getAttributes().get("gd");
+								ScatterCanvas scatterCanvas = new ScatterCanvas(gd, new JFrame(), var1Proxy, var2Proxy, markerProxy);
+								createView(scatterCanvas.getComponent(), title);
+								scatterCanvas.updateObjects();
+								markerProxy.addDepend(scatterCanvas);
+								scatterCanvas.setTitle(title);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				} else if (action.getActionName().equals("newMosaic")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								int vsId = (Integer) action.getAttributes().get("vs");
+								int[] vIds = (int[]) action.getAttributes().get("v");
+								SVarInterface[] v = new SVarInterface[vIds.length];
+								for (int i = 0; i < vIds.length; ++i)
+									v[i] = RemoteUtil.getSVarWrapper(getR().getVar(vsId, vIds[i]));
+								SMarkerInterface markerProxy = RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());
+								String title = (String) action.getAttributes().get("title");
+								int gd = (Integer) action.getAttributes().get("gd");
+								MosaicCanvas mosaicCanvas = new MosaicCanvas(gd, new JFrame(), v, markerProxy);
+								createView(mosaicCanvas.getComponent(), title);
+								mosaicCanvas.updateObjects();
+								markerProxy.addDepend(mosaicCanvas);
+								mosaicCanvas.setTitle(title);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				} else if (action.getActionName().equals("newMap")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								int vsId = (Integer) action.getAttributes().get("vs");
+								int vId = (Integer) action.getAttributes().get("v");
+								SVarInterface var1Proxy = RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
+								SMarkerInterface markerProxy = RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());
+								String title = (String) action.getAttributes().get("title");
+								int gd = (Integer) action.getAttributes().get("gd");
+								MapCanvas mapCanvas = new MapCanvas(gd, new JFrame(), var1Proxy, markerProxy);
+								createView(mapCanvas.getComponent(), title);
+								mapCanvas.updateObjects();
+								markerProxy.addDepend(mapCanvas);
+								mapCanvas.setTitle(title);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				} else if (action.getActionName().equals("newBarchart")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								int vsId = (Integer) action.getAttributes().get("vs");
+								int vId = (Integer) action.getAttributes().get("v");
+								int wgtId = (Integer) action.getAttributes().get("wgt");
+								SVarInterface varProxy = RemoteUtil.getSVarWrapper(getR().getVar(vsId, vId));
+								SVarInterface wgtProxy = wgtId < 0 ? null : RemoteUtil.getSVarWrapper(getR().getVar(vsId, wgtId));
+								SMarkerInterface markerProxy = RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());
+								String title = (String) action.getAttributes().get("title");
+								int gd = (Integer) action.getAttributes().get("gd");
+								BarCanvas barCanvas = new BarCanvas(gd, new JFrame(), varProxy, markerProxy, wgtProxy);
+								createView(barCanvas.getComponent(), title);
+								barCanvas.updateObjects();
+								markerProxy.addDepend(barCanvas);
+								barCanvas.setTitle(title);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				} else if (action.getActionName().equals("newHammock")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								int vsId = (Integer) action.getAttributes().get("vs");
+								int[] vIds = (int[]) action.getAttributes().get("v");
+								SVarInterface[] v = new SVarInterface[vIds.length];
+								for (int i = 0; i < vIds.length; ++i)
+									v[i] = RemoteUtil.getSVarWrapper(getR().getVar(vsId, vIds[i]));
+								SMarkerInterface markerProxy = RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());
+								String title = (String) action.getAttributes().get("title");
+								int gd = (Integer) action.getAttributes().get("gd");
+								HamCanvas mosaicCanvas = new HamCanvas(gd, new JFrame(), v, markerProxy);
+								createView(mosaicCanvas.getComponent(), title);
+								mosaicCanvas.updateObjects();
+								markerProxy.addDepend(mosaicCanvas);
+								mosaicCanvas.setTitle(title);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				} else if (action.getActionName().equals("newBoxplot")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							try {
+
+								int vsId = (Integer) action.getAttributes().get("vs");
+								int[] iIds = (int[]) action.getAttributes().get("i");
+								int icId = (Integer) action.getAttributes().get("ic");
+								SVarInterface[] vl = new SVarInterface[iIds.length];
+								for (int i = 0; i < iIds.length; ++i)
+									vl[i] = RemoteUtil.getSVarWrapper(getR().getVar(vsId, iIds[i]));
+
+								SVarInterface catVar = RemoteUtil.getSVarWrapper((icId < 0) ? null : getR().getVar(vsId, icId));
+
+								System.out.println("-->catVar:" + catVar);
+								SMarkerInterface marker = RemoteUtil.getSMarkerWrapper(getR().getSet(vsId).getMarker());
+								String title = (String) action.getAttributes().get("title");
+								int gd = (Integer) action.getAttributes().get("gd");
+								ParallelAxesCanvas bc = (catVar == null) ? new ParallelAxesCanvas(gd, new JFrame(), vl, marker, ParallelAxesCanvas.TYPE_BOX)
+										: new ParallelAxesCanvas(gd, new JFrame(), vl[0], catVar, marker, ParallelAxesCanvas.TYPE_BOX);
+								createView(bc.getComponent(), title);
+								bc.updateObjects();
+								marker.addDepend(bc);
+								bc.setTitle(title);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				}
+			}
+
+			if (action.getActionName().equals("RESET_CONSOLE_LOG")) {
+				final JTextArea area = getOpenedLogViewerArea();
+				if (area != null) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							area.setText("");
+							area.repaint();
+						}
+					});
+				}
+			} else if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {
+				final JTextArea area = getOpenedLogViewerArea();
+				if (area != null) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							area.setText(area.getText() + action.getAttributes().get("log"));
+						}
+					});
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							area.setCaretPosition(area.getText().length());
+							area.repaint();
+						}
+					});
+
+				}
+			}
+
+		}
+
 	}
 
 }

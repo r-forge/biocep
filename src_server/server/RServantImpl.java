@@ -54,7 +54,8 @@ import remoting.GenericCallbackDevice;
 import remoting.RAction;
 import remoting.RCallBack;
 import remoting.RCollaborationListener;
-import remoting.RHelpListener;
+import remoting.RConsoleAction;
+import remoting.RConsoleActionListener;
 import remoting.RKit;
 import remoting.RNI;
 import remoting.RServices;
@@ -440,18 +441,26 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().hasRCollaborationListeners();
 	}
 	
-	public void addRHelpListener(RHelpListener helpListener) throws RemoteException {
-		DirectJNI.getInstance().getRServices().addRHelpListener(helpListener);
+	public void addRConsoleActionListener(RConsoleActionListener helpListener) throws RemoteException {
+		DirectJNI.getInstance().getRServices().addRConsoleActionListener(helpListener);
 	}	
 	
-	public void removeRHelpListener(RHelpListener helpListener) throws RemoteException {
-		DirectJNI.getInstance().getRServices().removeRHelpListener(helpListener);		
+	public void removeRConsoleActionListener(RConsoleActionListener helpListener) throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeRConsoleActionListener(helpListener);		
 	}
 	
-	public void removeAllRHelpListeners() throws RemoteException {
-		DirectJNI.getInstance().getRServices().removeAllRHelpListeners();		
+	public void removeAllRConsoleActionListeners() throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeAllRConsoleActionListeners();		
 	}
-		
+	
+	public void setOrginatorUID(String uid) throws RemoteException {
+		DirectJNI.getInstance().getRServices().setOrginatorUID(uid);			
+	}
+	
+	public String getOriginatorUID() throws RemoteException {		
+		return DirectJNI.getInstance().getRServices().getOriginatorUID();
+	}
+	
 	public void chat(String sourceSession, String message) throws RemoteException {
 		DirectJNI.getInstance().getRServices().chat(sourceSession, message);
 	}
@@ -464,7 +473,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
 		GenericCallbackDevice result=new GenericCallbackDeviceImpl(_genericCallbackDeviceHashMap);
 		DirectJNI.getInstance().getRServices().addRCallback(result);
-		DirectJNI.getInstance().getRServices().addRHelpListener(result);
+		DirectJNI.getInstance().getRServices().addRConsoleActionListener(result);
 		DirectJNI.getInstance().getRServices().addRCollaborationListener(result);
 		return result;
 	}
@@ -571,12 +580,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 				submitted = true;
 
-				RAction consoleLogAppend = new RAction("ASYNCHRONOUS_SUBMIT_LOG");
+				RConsoleAction consoleLogAppend = new RConsoleAction("ASYNCHRONOUS_SUBMIT_LOG");
 				HashMap<String, Object> attrs = new HashMap<String, Object>();
 				attrs.put("command", cmd);
 				attrs.put("result", result);
 				consoleLogAppend.setAttributes(attrs);
-				DirectJNI.getInstance().addAction(consoleLogAppend);
+				RListener.notifyRActionListeners(consoleLogAppend);
 			}
 		}).start();
 
@@ -684,10 +693,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	public boolean isProgressiveConsoleLogEnabled() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().isProgressiveConsoleLogEnabled();
-	}
-
-	public Vector<RAction> popRActions() throws java.rmi.RemoteException {
-		return DirectJNI.getInstance().getRServices().popRActions();
 	}
 
 	public boolean isBusy() throws RemoteException {
@@ -905,5 +910,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public SVarInterfaceRemote getVar(int setId, String name) throws RemoteException {
 		return Framework.getInstance().getSet(setId).byName(name).getRemote();
 	}
+	
+	
 		
 }

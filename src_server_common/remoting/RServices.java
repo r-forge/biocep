@@ -101,11 +101,13 @@ public interface RServices extends ManagedServant {
 	public void removeRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException;	
 	public void removeAllRCollaborationListeners() throws RemoteException;
 	public boolean hasRCollaborationListeners() throws RemoteException;
+		
+	public void addRConsoleActionListener(RConsoleActionListener ractionListener) throws RemoteException;	
+	public void removeRConsoleActionListener(RConsoleActionListener ractionListener) throws RemoteException;	
+	public void removeAllRConsoleActionListeners() throws RemoteException;
 	
-	
-	public void addRHelpListener(RHelpListener helpListener) throws RemoteException;	
-	public void removeRHelpListener(RHelpListener helpListener) throws RemoteException;	
-	public void removeAllRHelpListeners() throws RemoteException;	
+	public void setOrginatorUID(String uid) throws RemoteException;
+	public String getOriginatorUID() throws RemoteException;
 	
 	public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException;	
 	public GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException;
@@ -118,49 +120,32 @@ public interface RServices extends ManagedServant {
 	public void stop() throws RemoteException;
 
 	public GDDevice newDevice(int w, int h) throws java.rmi.RemoteException;
-	
 	public GDDevice newBroadcastedDevice(int w, int h) throws java.rmi.RemoteException;
-	
 	public GDDevice[] listDevices() throws java.rmi.RemoteException;
-
 	
 	public String[] getWorkingDirectoryFileNames() throws java.rmi.RemoteException;
-
 	public FileDescription[] getWorkingDirectoryFileDescriptions() throws java.rmi.RemoteException;
-
 	public FileDescription getWorkingDirectoryFileDescription(String fileName) throws java.rmi.RemoteException;
-
 	public void createWorkingDirectoryFile(String fileName) throws java.rmi.RemoteException;
-
 	public void removeWorkingDirectoryFile(String fileName) throws java.rmi.RemoteException;
-
 	public byte[] readWorkingDirectoryFileBlock(String fileName, long offset, int blocksize) throws java.rmi.RemoteException;
-
 	public void appendBlockToWorkingDirectoryFile(String fileName, byte[] block) throws java.rmi.RemoteException;
 
 	public String[] listDemos() throws java.rmi.RemoteException;
-
 	public StringBuffer getDemoSource(String demoName) throws java.rmi.RemoteException;
 
 	public void setProgressiveConsoleLogEnabled(boolean progressiveLog) throws java.rmi.RemoteException;
-
 	public boolean isProgressiveConsoleLogEnabled() throws java.rmi.RemoteException;
 
 	public byte[] getRHelpFile(String uri) throws java.rmi.RemoteException;
-
 	public String getRHelpFileUri(String topic, String pack) throws java.rmi.RemoteException;
 
-	public Vector<RAction> popRActions() throws java.rmi.RemoteException;
-	
 	public Vector<String> getSvg(String script, int width, int height) throws RemoteException;	
 	public byte[] getPdf(String script, int width, int height) throws RemoteException;	
 	
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
-
 	public void startHttpServer(int port) throws java.rmi.RemoteException;
-
 	public boolean isHttpServerStarted(int port) throws java.rmi.RemoteException;
-
 	public void stopHttpServer() throws java.rmi.RemoteException;
 			
 	public String pythonExec(String pythonCommand) throws RemoteException;	

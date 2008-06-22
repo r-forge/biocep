@@ -30,4 +30,6 @@ public interface RGui extends RKit {
 	public GroovyInterpreter getGroovyInterpreter() ;
 	
 	public String getUserName(); 
+	
+	public String getUID();
 }
