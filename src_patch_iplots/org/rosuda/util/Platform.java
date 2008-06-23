@@ -36,7 +36,13 @@ public class Platform {
         @return newly initailized platform object */
     public static Platform initPlatform(String classPrefix) {
         if (p!=null) return p; // prevent loops
-        if (Platform.screenRes==null) Platform.screenRes=Toolkit.getDefaultToolkit().getScreenSize();
+        if (Platform.screenRes==null) {
+        	try {
+        		Platform.screenRes=Toolkit.getDefaultToolkit().getScreenSize();
+        	} catch (Exception e) {
+        		Platform.screenRes=new Dimension(800,600);
+			}
+        }
         if (System.getProperty("java.vendor").indexOf("Apple")>-1) {
             isMac=true;
             try {

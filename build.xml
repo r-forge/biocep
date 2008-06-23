@@ -325,6 +325,7 @@
 		<if><not><isset property="apply.sandbox"/></not><then><property name="apply.sandbox" value=""/></then></if>
 		<if><not><isset property="attr.lsf.processid"/></not><then><property name="attr.lsf.processid" value=""/></then></if>
 		<if><not><isset property="node.manager.name"/></not><then><property name="node.manager.name" value="NODE_MANAGER"/></then></if>
+		<if><not><isset property="http.port"/></not><then><property name="http.port" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="uk.ac.ebi.microarray.pools.MainServer"
 			fork="true" spawn="${spawn}">
@@ -371,7 +372,7 @@
 			<env key="Path" path="${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg
-				value="-Djava.library.path=${JRI_LIB_PATH}"/>
+			value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			<jvmarg value="-Djava.rmi.server.codebase=${servant.codebase}"/>
 			<jvmarg value="-Dservantclass=${servantclass}"/>
 			<jvmarg value="-Dname=${name}"/>
@@ -384,6 +385,7 @@
 			<jvmarg value="-Dapply.sandbox=${apply.sandbox}"/>
 			<jvmarg value="-Dattr.lsf.processid=${attr.lsf.processid}"/>
 			<jvmarg value="-Dnode.manager.name=${node.manager.name}"/>
+			<jvmarg value="-Dhttp.port=${http.port}"/>
 			
 			<!-- REG MODE -->
 			<jvmarg value="-Dregistryhost=${registryhost}"/>
@@ -1407,7 +1409,7 @@
 			
 			<!-- tools begin -->
 		
-		
+			<!--
 		
 			<delete dir="bintools" failonerror="true"/>
 			<mkdir dir="bintools"/>
@@ -1503,6 +1505,7 @@
 					<fileset dir="binsrv"/>
 			</jar>
 				
+		-->
 		<!-- tools end -->
 		
 			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />		

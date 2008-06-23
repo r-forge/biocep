@@ -124,6 +124,19 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				//e.printStackTrace();
 			}
 		}
+		
+		if (System.getProperty("http.port")!=null && !System.getProperty("http.port").equals("")) {
+			try {
+				final int port= Integer.decode(System.getProperty("http.port"));
+				new Thread(new Runnable(){
+					public void run() {
+						try { startHttpServer(port); } catch (Exception e) {e.printStackTrace();}
+					}
+				}).start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
+		}
 
 	}
 
