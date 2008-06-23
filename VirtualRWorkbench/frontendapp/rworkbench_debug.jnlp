@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.5+" codebase="http://127.0.0.1:8080/rvirtual/" >
+<jnlp spec="1.5+" codebase="http://xen-ngs001.oerc.ox.ac.uk:8000/rvirtual/" >
 
 <information>
   <title>Virtual R Workbench</title>
@@ -22,6 +22,7 @@
   <jar href="appletlibs/commons-logging-1.1.1.jar"/>
   <jar href="appletlibs/log4j-1.2.15.jar"/>
   <jar href="appletlibs/idw-gpl.jar"/>
+  <jar href="appletlibs/PDFRenderer.jar"/>
   <jar href="appletlibs/jeditmodes.jar"/>
   <jar href="appletlibs/jedit.jar"/>
   <jar href="appletlibs/pf-joi-full.jar"/>
