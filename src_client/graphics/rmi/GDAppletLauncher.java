@@ -45,7 +45,7 @@ public class GDAppletLauncher {
 			if (System.getProperty("login") != null && !System.getProperty("login").equals("")) {
 				params.put("login", System.getProperty("login"));
 			} else {
-				params.put("login", System.getProperty("user.name"));
+				params.put("login", "guest");
 			}
 			params.put("save", System.getProperty("save"));
 			params.put("mode", System.getProperty("mode"));

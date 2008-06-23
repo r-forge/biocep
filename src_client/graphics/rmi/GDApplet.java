@@ -36,6 +36,7 @@ import graphics.rmi.spreadsheet.SelectIdDialog;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
 import groovy.GroovyInterpreter;
 import groovy.GroovyInterpreterSingleton;
+import http.BadLoginPasswordException;
 import http.ConnectionFailedException;
 import http.FileLoad;
 import http.HttpMarker;
@@ -765,10 +766,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 							return "No Node Manager Found, can not log on in <no pool> mode \n";
 						} catch (ConnectionFailedException cfe) {
 							return "Connection to HTTP Virtualization Server Failed \n";
+						} catch (BadLoginPasswordException e) {
+							return "Bad Login/Password \n";
 						} catch (TunnelingException te) {
 							return PoolUtils.getStackTraceAsString(te.getCause());
 						}
-
+						
 						catch (NoRmiRegistryAvailableException normie) {
 							return "No RMI Registry Available, can not log on\n";
 						} catch (NoDbRegistryAvailableException nodbe) {

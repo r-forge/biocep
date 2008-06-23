@@ -14,7 +14,6 @@ import java.util.*;
 import org.rosuda.ibase.Common;
 import org.rosuda.ibase.Dependent;
 import org.rosuda.ibase.NotifyMsg;
-import org.rosuda.ibase.SMarker;
 import org.rosuda.ibase.SMarkerInterface;
 import org.rosuda.ibase.SVarInterface;
 import org.rosuda.pograss.PoGraSS;
@@ -171,7 +170,7 @@ public class BaseCanvas extends PGSCanvas implements Dependent, MouseListener, M
     MenuItem MIhalphadown=null;
     protected MenuItem MItransHighl=null;
     
-    protected PopupMenu pop=new PopupMenu();
+    protected PopupMenu pop;
     
     protected int mouseX;
     protected int mouseY;
@@ -228,6 +227,7 @@ public class BaseCanvas extends PGSCanvas implements Dependent, MouseListener, M
     }
     public BaseCanvas(final int gd, final Frame f, final SMarkerInterface mark) {
 	super(gd,4); // 4 layers; 0=bg, 1=sel, 2=baseDrag, 3=pm
+	pop=new PopupMenu();
 	Global.forceAntiAliasing = true;
 	m=mark; setFrame(f);
 	ax=ay=null;
