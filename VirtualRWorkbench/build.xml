@@ -495,7 +495,7 @@
 						<fileset dir="" includes="RJB.jar"/>
 				  	
 				  	
-				  		<!--
+
 				  		
 				  	    <fileset dir="lib/desktop" includes="freemindbrowser.jar"/>
 				  	
@@ -558,13 +558,7 @@
 					  	<fileset dir="lib/svg" includes="xml-apis-ext.jar"/>
 					  	<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>
 					  	
-					  	-->
-					  	
-				  	
-					
-				  		
-				  	
-						<!-- <fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/> -->
+					  	<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/> 
 
 				  	
 				  </copy>
@@ -577,7 +571,7 @@
 				  	
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="RJB.jar"/>
 				  	
-				  	<!--
+
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="freemindbrowser.jar"/>
 				  	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-logging-1.1.1.jar"/>	
@@ -628,11 +622,9 @@
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="ganymed-ssh2.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="edtftpj.jar"/>			  		
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs"  includes="groovy-all-1.5.4.jar"/>
-				  	-->
 				  	
-				  	<!--
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
-					-->
+					
 					
 				
 				  </path>
