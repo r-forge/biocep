@@ -506,9 +506,13 @@ public class ServerManager {
 					}
 
 				} else {
-					JOptionPane
+					if (showProgress) {
+						JOptionPane
 							.showMessageDialog(null,
 									"R is not accessible from the command line\n please add R to your System path \nor set R_HOME to the root Directory of your local R installation\n");
+					} else {
+						System.out.println("R is not accessible from the command line\n please add R to your System path \nor set R_HOME to the root Directory of your local R installation");
+					}
 					System.exit(0);
 				}
 
