@@ -676,10 +676,11 @@ public class PoolUtils {
 
 	public static void unzip(InputStream is, String destination, NameFilter nameFilter, int bufferSize, boolean showProgress, String taskName,
 			int estimatedFilesNumber) {
-
-		final JTextArea area = new JTextArea();
-		final JProgressBar jpb = new JProgressBar(0, 100);
-		final JFrame f = new JFrame(taskName);
+		
+		final JTextArea area = showProgress ? new JTextArea() : null ;
+		final JProgressBar jpb = showProgress ? new JProgressBar(0, 100) : null;
+		final JFrame f = showProgress ? new JFrame(taskName) : null;
+		
 		if (showProgress) {
 			Runnable runnable = new Runnable() {
 				public void run() {
@@ -769,9 +770,9 @@ public class PoolUtils {
 		String fileName = location + jarName;
 		new File(location).mkdirs();
 
-		final JTextArea area = new JTextArea();
-		final JProgressBar jpb = new JProgressBar(0, 100);
-		final JFrame f = new JFrame("copying " + jarName + " ...");
+		final JTextArea area = ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) ? new JTextArea() : null ;
+		final JProgressBar jpb = ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) ? new JProgressBar(0, 100) : null ;
+		final JFrame f = ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) ? new JFrame("copying " + jarName + " ...") : null;
 
 		try {
 			URLConnection urlC = url.openConnection();
