@@ -14,9 +14,10 @@ public class GenericCallbackDeviceImpl extends UnicastRemoteObject implements Ge
 	private Vector<RAction> _rActions = new Vector<RAction>();	
 	private static int _genericCallbackDeviceCounter=0;
 	private String _id="GenericCallbackDevice_"+(_genericCallbackDeviceCounter++);
+	private static int _port=System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("") ? 2+Integer.decode(System.getProperty("rmi.port.start")) : 0;
 	
 	public GenericCallbackDeviceImpl(HashMap<String, GenericCallbackDevice> genericCallbackDeviceHashMap) throws RemoteException{
-		super();
+		super(_port);
 		_genericCallbackDeviceHashMap=genericCallbackDeviceHashMap;	
 		_genericCallbackDeviceHashMap.put(_id, this);
 	}

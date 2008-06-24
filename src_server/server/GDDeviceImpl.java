@@ -35,9 +35,10 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 
 	private static int _gdDeviceCounter=0;
 	private String _id="device_"+(_gdDeviceCounter++);
+	private static int _port=System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("") ? 1+Integer.decode(System.getProperty("rmi.port.start")) : 0;
 	
 	public GDDeviceImpl(int w, int h, boolean broadcasted, HashMap<Integer, GDDevice> deviceHashMap) throws RemoteException {
-		super();
+		super(_port);
 		_localGdDevice = new DirectJNI.GDDeviceLocal(w, h, broadcasted);
 		_deviceHashMap = deviceHashMap;
 		_deviceHashMap.put(_localGdDevice.getDeviceNumber(), this);
