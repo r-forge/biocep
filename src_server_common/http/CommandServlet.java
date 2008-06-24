@@ -200,7 +200,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								if (r == null) {
 									codeUrls = (URL[]) options.get("urls");
 									System.out.println("CODE URL->" + Arrays.toString(codeUrls));
-									r = ServerManager.createR(true, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry
+									r = ServerManager.createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry
 											.getLocalRmiRegistryPort(), 256, 256, privateName, false, codeUrls);
 								}
 

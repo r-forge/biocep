@@ -362,6 +362,7 @@
 				<pathelement path="lib/svg/batik-dom.jar"/>
 				<pathelement path="lib/svg/batik-awt-util.jar"/>
 				<pathelement path="lib/svg/batik-util.jar"/>
+				<pathelement path="lib/svg/batik-ext.jar"/>
 				
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				
@@ -1321,6 +1322,7 @@
 					<pathelement path="lib/svg/batik-dom.jar"/>
 					<pathelement path="lib/svg/batik-awt-util.jar"/>
 					<pathelement path="lib/svg/batik-util.jar"/>
+					<pathelement path="lib/svg/batik-ext.jar"/>
 					
 					<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				</classpath>
@@ -1387,6 +1389,8 @@
 			<unjar src="lib/svg/batik-dom.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-awt-util.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/batik-util.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="lib/svg/batik-ext.jar"  dest="binsrv" overwrite="true"/>
+				
 			<unjar src="lib/pool/commons-pool-1.3.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
 			
