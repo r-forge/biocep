@@ -326,6 +326,7 @@
 		<if><not><isset property="attr.lsf.processid"/></not><then><property name="attr.lsf.processid" value=""/></then></if>
 		<if><not><isset property="node.manager.name"/></not><then><property name="node.manager.name" value="NODE_MANAGER"/></then></if>
 		<if><not><isset property="http.port"/></not><then><property name="http.port" value=""/></then></if>
+		<if><not><isset property="rmi.port.start"/></not><then><property name="rmi.port.start" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="uk.ac.ebi.microarray.pools.MainServer"
 			fork="true" spawn="${spawn}">
@@ -386,6 +387,7 @@
 			<jvmarg value="-Dattr.lsf.processid=${attr.lsf.processid}"/>
 			<jvmarg value="-Dnode.manager.name=${node.manager.name}"/>
 			<jvmarg value="-Dhttp.port=${http.port}"/>
+			<jvmarg value="-Drmi.port.start=${rmi.port.start}"/>
 			
 			<!-- REG MODE -->
 			<jvmarg value="-Dregistryhost=${registryhost}"/>

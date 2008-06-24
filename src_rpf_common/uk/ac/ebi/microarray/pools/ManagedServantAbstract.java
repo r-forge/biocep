@@ -39,18 +39,12 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	private String _servantName;
 	private boolean _resetEnabled = true;
 
-	/**
-	 * Instantiates a managed servant and registers it a registry under a
-	 * concrete name. If such a servant already exists, will call die() on it to
-	 * try to avoid two servants with the same name.
-	 * 
-	 * @param name
-	 *            name under which to register the servant
-	 * @param registry
-	 *            in which registry to register the servant
-	 */
+	
 	public ManagedServantAbstract(String name, String prefix, Registry registry) throws RemoteException {
-		super();
+		this(name, prefix,registry,0);		
+	}
+	public ManagedServantAbstract(String name, String prefix, Registry registry, int port) throws RemoteException {
+		super(port);
 
 		try {
 

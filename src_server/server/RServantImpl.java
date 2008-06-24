@@ -88,6 +88,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	RServices _rCreationPb = new RServicesObject();
 	
+	private static int _port=System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("") ? Integer.decode(System.getProperty("rmi.port.start")) : 0; 
+	
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RServantImpl.class);
 
 	public String runR(ExecutionUnit eu) {
@@ -95,7 +97,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 
 	public RServantImpl(String name, String prefix, Registry registry) throws RemoteException {
-		super(name, prefix, registry);
+		super(name, prefix, registry,_port);
 		// --------------	
 		init();
 				
