@@ -426,7 +426,9 @@
 					<fileset dir="lib/svg" includes="batik-svggen.jar"/>
 					<fileset dir="lib/svg" includes="batik-dom.jar"/>
 				  	<fileset dir="lib/svg" includes="batik-util.jar"/>
-				  	<fileset dir="lib/svg" includes="batik-awt-util.jar"/>				  	
+				  	<fileset dir="lib/svg" includes="batik-awt-util.jar"/>	
+				  	<fileset dir="lib/svg" includes="batik-ext.jar"/>	
+				  	
 			  		<fileset dir="lib/desktop" includes="JRI.jar"/>			  	
 			  		<fileset dir="lib/jdbc" includes="derbyclient.jar"/>
 				  	
@@ -501,7 +503,6 @@
 				  	
 
 				  	
-				  		<!--	
 				  	    <fileset dir="lib/desktop" includes="freemindbrowser.jar"/>
 				  	
 						
@@ -528,6 +529,7 @@
 						<fileset dir="lib/svg" includes="batik-dom.jar"/>
 					  	<fileset dir="lib/svg" includes="batik-util.jar"/>
 					  	<fileset dir="lib/svg" includes="batik-awt-util.jar"/>
+				  		<fileset dir="lib/svg" includes="batik-ext.jar"/>
 					  	
 				  		<fileset dir="lib/desktop" includes="JRI.jar"/>
 				  		
@@ -549,7 +551,7 @@
 					  	<fileset dir="lib/svg" includes="batik-anim.jar"/>					  	
 					  	<fileset dir="lib/svg" includes="batik-bridge.jar"/>
 					  	<fileset dir="lib/svg" includes="batik-css.jar"/>					  	
-					  	<fileset dir="lib/svg" includes="batik-ext.jar"/>
+					  	
 					  	<fileset dir="lib/svg" includes="batik-extension.jar"/>
 					  	<fileset dir="lib/svg" includes="batik-gui-util.jar"/>
 					  	<fileset dir="lib/svg" includes="batik-gvt.jar"/>
@@ -566,7 +568,7 @@
 					  	
 					  	<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
 					  	
-					  	--> 
+					 
 
 				  	
 				  </copy>
@@ -580,7 +582,7 @@
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="RJB.jar"/>
 				  	
 
-				  	<!--
+
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="freemindbrowser.jar"/>
 				  	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="commons-logging-1.1.1.jar"/>	
@@ -634,7 +636,7 @@
 				  	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
 					
-					-->
+
 				
 				  </path>
 				</signjar>
