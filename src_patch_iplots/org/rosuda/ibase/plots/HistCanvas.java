@@ -351,7 +351,7 @@ public class HistCanvas extends BaseCanvas {
     public void paintPost(PoGraSS g) {
         if (crosshairs) {
             g.setColor(COL_OUTLINE);
-            if((orientation&1) == 0){ // no rotation or 180°
+            if((orientation&1) == 0){ // no rotation or 180
                 if (qx==ax.clip(qx) && qy==ay.clip(qy)) {
                     g.drawLine(ax.gBegin,qy,ax.gBegin+ax.gLen,qy);
                     g.drawLine(qx,ay.gBegin,qx,ay.gBegin+ay.gLen);

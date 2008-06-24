@@ -1,7 +1,7 @@
 /*
  * Outlier.java
  *
- * Created on 6. März 2006, 12:19
+ * Created on 6. Marz 2006, 12:19
  *
  */
 

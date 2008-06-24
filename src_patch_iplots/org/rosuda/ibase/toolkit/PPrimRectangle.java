@@ -37,7 +37,7 @@ public class PPrimRectangle extends PPrimBase {
     private int MINWIDTH=1;
 	
     protected int orientation=0;
-    private boolean useCanvasOrientation=true; // TODO: das ist nur vorübergehend
+    private boolean useCanvasOrientation=true; // TODO: das ist nur vorbergehend
     
     public PPrimRectangle() {
 		super();

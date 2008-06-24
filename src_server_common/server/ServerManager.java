@@ -706,7 +706,7 @@ public class ServerManager {
 			
 			if (keepAlive) {
 				try {
-					downloadBioceCore(PoolUtils.LOG_PRGRESS_TO_LOGGER);
+					//downloadBioceCore(PoolUtils.LOG_PRGRESS_TO_LOGGER);
 					cp=cp+System.getProperty("path.separator")+new File(root+"biocep-core.jar").getAbsolutePath();
 				} catch (Exception e) {
 					e.printStackTrace();
