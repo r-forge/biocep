@@ -25,13 +25,18 @@ import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.vsn.vsnFunction;
 import org.bioconductor.packages.vsn.Vsn;
 import remoting.RServices;
+import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class DirectRRmi {
 	public static void main(String[] args) throws Throwable {
-		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
+		
+		//final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
+		String stubHex="";
+		final RServices r = (RServices)PoolUtils.hexToStub(stubHex,DirectRRmi.class.getClassLoader());
+		
 		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));
 		RNumeric squareOf4 = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"))
 				.squareAsReference(new RNumeric(4));
