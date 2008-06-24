@@ -907,12 +907,14 @@ public class ServerManager {
 	public static void killSshProcess(String processId, String sshHostIp, String sshLogin, String sshPwd, boolean forcedKill) throws Exception {
 		SSHUtils.killSshProcess(processId, sshHostIp, sshLogin, sshPwd, forcedKill);
 	}
-
+	
 	public static String[] getRInfo(String rhome) {
 
 		File getInfoFile = new File(INSTALL_DIR + "getInfo.R");
 
 		File getInfoOutputFile = new File(INSTALL_DIR + "getInfo.Rout");
+		
+		try {getInfoOutputFile.delete();} catch (Exception e) {e.printStackTrace();}
 
 		String rversion = null;
 
@@ -1041,7 +1043,8 @@ public class ServerManager {
 
 			getInfoProc.waitFor();
 
-			if (getInfoOutputFile.exists() && getInfoOutputFile.lastModified() > getInfoFile.lastModified()) {
+			
+			if (getInfoOutputFile.exists()) {
 
 				BufferedReader br = new BufferedReader(new FileReader(getInfoOutputFile));
 
@@ -1066,6 +1069,8 @@ public class ServerManager {
 
 				}
 
+			} else {
+				System.out.println(getInfoOutputFile.toString() +" not found ");
 			}
 
 		} catch (Exception e) {
@@ -1074,10 +1079,10 @@ public class ServerManager {
 
 		}
 
-		if (rversion != null && rlibraypath != null) {
-
+		System.out.println("+rversion:"+rversion);
+		System.out.println("+rlibraypath:"+rlibraypath);
+		if ( rlibraypath != null) {
 			return new String[] { rlibraypath, rversion };
-
 		} else {
 
 			return null;
