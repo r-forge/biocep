@@ -461,7 +461,10 @@ public class ServerManager {
 			String root = INSTALL_DIR;
 			new File(root).mkdir();
 
-			String[] rinfo = getRInfo(null);
+			String[] rinfo = null;			
+			if (System.getenv("R_HOME")==null) rinfo=getRInfo(null);
+			else rinfo=getRInfo(System.getenv("R_HOME"));			
+			
 			System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
 
 			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : null;
@@ -930,6 +933,10 @@ public class ServerManager {
 			Vector<String> getInfoCommand = new Vector<String>();
 
 			if (rhome != null) {
+				if (!rhome.endsWith("/")) rhome=rhome+"/";
+				System.out.println("R_HOME is set to :"+rhome);
+				System.out.println("trying to execute :"+rhome + "bin/R");
+				
 				getInfoCommand.add(rhome + "bin/R");
 				getInfoCommand.add("CMD");
 				getInfoCommand.add("BATCH");
