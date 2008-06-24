@@ -635,7 +635,7 @@ public class LoginDialog extends JDialog {
 				});
 			}
 		}).start();
-		setSize(new Dimension(460, 440));
+		setSize(new Dimension(460+60, 440));
 		PoolUtils.locateInScreenCenter(this);
 
 	}

@@ -15,7 +15,9 @@
   <j2se version="1.5+"/>
   <property name="debug" value="false"/>  
   <property name="autologon" value="true"/>
-  <property name="mode" value="local"/>
+  <property name="mode" value="http"/>
+  <property name="url" value="http://xen-ngs001.oerc.ox.ac.uk:8000/rvirtual/cmd"/>
+  
   <jar href="appletlibs/RJB.jar"/>
   
   <jar href="appletlibs/commons-httpclient-3.1-rc1.jar"/>

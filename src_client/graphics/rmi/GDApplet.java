@@ -403,6 +403,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 			LoginDialog.servantName_str = getParameter("registryhost");
 		if (getParameter("registryport") != null && !getParameter("registryport").equals(""))
 			LoginDialog.servantName_str = getParameter("registryport");
+		if (getParameter("url") != null && !getParameter("url").equals(""))
+			LoginDialog.url_str = getParameter("url");
 
 		try {
 
