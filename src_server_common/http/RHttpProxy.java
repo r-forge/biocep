@@ -548,6 +548,13 @@ public class RHttpProxy {
 							
 							result = RHttpProxy.invoke(url, sessionId, "R", method.getName(), method.getParameterTypes(), args, httpClient);
 						}
+						
+						
+						 if (method.getName().equals("asynchronousConsoleSubmit")) {
+							 popActions();
+						 }
+						
+						
 						return result;
 
 					}
