@@ -371,7 +371,7 @@ public class LoginDialog extends JDialog {
 
 	}
 
-	public LoginDialog(Component c, int mode) {
+	public LoginDialog(Component c) {
 		super((Frame) null, true);
 
 		setTitle("Please Enter Your R Session Parameters");
@@ -397,21 +397,21 @@ public class LoginDialog extends JDialog {
 		((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		localModeButton = new JRadioButton("New R");
-		localModeButton.setSelected(mode == GDApplet.NEW_R_MODE);
+		localModeButton.setSelected(mode_int == GDApplet.NEW_R_MODE);
 		localModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();
 			}
 		});
 		httpModeButton = new JRadioButton("Http R");
-		httpModeButton.setSelected(mode == GDApplet.HTTP_MODE);
+		httpModeButton.setSelected(mode_int == GDApplet.HTTP_MODE);
 		httpModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();
 			}
 		});
 		rmiModeButton = new JRadioButton("Rmi R");
-		rmiModeButton.setSelected(mode == GDApplet.RMI_MODE);
+		rmiModeButton.setSelected(mode_int == GDApplet.RMI_MODE);
 		rmiModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();

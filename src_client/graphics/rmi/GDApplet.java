@@ -243,6 +243,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 		@Override
 		public void lock() {
 			super.lock();
+			
+			new Exception("lock").printStackTrace();
+			
 			try {
 				_currentDevice.setAsCurrentDevice();
 				_rForConsole.setOrginatorUID(getUID());
@@ -255,6 +258,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		@Override
 		public void unlock() {
 
+			new Exception("unlock").printStackTrace();
+			
 			if (isCollaborativeMode()) {
 				try {
 					synchronizeCollaborators();
@@ -275,7 +280,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		@Override
 		public void unlockNoBroadcast() {
+			new Exception("unlockNoBroadcast").printStackTrace();
 			super.unlock();
+			
 		}
 
 		public boolean isLocked() {
@@ -406,6 +413,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		if (getParameter("url") != null && !getParameter("url").equals(""))
 			LoginDialog.url_str = getParameter("url");
 
+		
+		
 		try {
 
 			_currentDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "active_device.png")));
@@ -467,7 +476,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 
 							if (showLoginDialog) {
-								LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane(), _mode);
+								LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane());
 								loginDialog.setVisible(true);
 								ident = loginDialog.getIndentification();
 							}
@@ -479,6 +488,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							if (getMode() == HTTP_MODE) {
 
+								_keepAlive=true;
+								
 								_commandServletUrl = ident.getUrl();
 								_helpServletUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
 								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
@@ -575,6 +586,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								} else {
 
+									_keepAlive = true;
 									if (ident.getRmiMode() == RMI_MODE_STUB_MODE) {
 										r = (RServices) PoolUtils.hexToStub(ident.getStub(), GDApplet.class.getClassLoader());
 									} else if (ident.getRmiMode() == RMI_MODE_REGISTRY_MODE) {
@@ -819,12 +831,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 								RHttpProxy.logOff(_commandServletUrl, _sessionId);
 							} else {
-
 								if (!getRLock().isLocked()) {
-									disposeDevices();
-									persistState();
+									disposeDevices();									
 								}
-
 							}
 
 							noSession();
@@ -1650,20 +1659,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 		LoginDialog.playDemo_bool = _demo;
 		LoginDialog.login_str = _login;
 
-		if (getParameter("autologon") == null || getParameter("autologon").equalsIgnoreCase("true")) {
-			new Thread(new Runnable() {
-				public void run() {
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							_consolePanel.play("logon", false);
-						}
-					});
-
-				}
-			}).start();
-
-		}
-
 		new Thread(new Runnable() {
 			public void run() {
 				while (true) {
@@ -1683,6 +1678,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}).start();
 
+		/*
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -1692,8 +1688,24 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}
 		}).start();
-
+		*/
+		restoreState();
 		_instance = this;
+		
+		if (getParameter("autologon") == null || getParameter("autologon").equalsIgnoreCase("true")) {
+			new Thread(new Runnable() {
+				public void run() {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_consolePanel.play("logon", false);
+						}
+					});
+
+				}
+			}).start();
+
+		}
+		
 		System.out.println("INIT ends");
 
 	}
@@ -1987,17 +1999,34 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void restoreState() {
+		
 		File settings = new File(GDApplet.SETTINGS_FILE);
 		if (settings.exists()) {
+			
+			System.out.println("--restoreState");
+			
 			try {
 				Properties props = new Properties();
 				props.loadFromXML(new FileInputStream(settings));
-				if (props.get("working.dir.root") != null) {
-					_rForConsole.consoleSubmit("setwd('" + props.get("working.dir.root") + "')");
+				
+				if (getR()!=null && !_keepAlive) {
+					
+					if (props.get("working.dir.root") != null) {
+						getR().consoleSubmit("setwd('" + props.get("working.dir.root") + "')");
+					}
+					
 				}
 
 				if (props.get("command.history") != null) {
-					_consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) props.get("command.history")));
+					_consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) props.get("command.history")));					
+				}
+				
+				if (props.get("mode") != null) {
+					LoginDialog.mode_int=Integer.decode((String)props.get("mode"));
+				}
+				
+				if (props.get("url") != null) {
+					LoginDialog.url_str=(String)props.get("url");
 				}
 
 			} catch (Exception e) {
@@ -2005,29 +2034,41 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 
-		if (_save) {
+		if (getR()!=null && !_keepAlive	&& _save) {			
 			try {
 				_rForConsole.consoleSubmit("load('.RData')");
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
+			}			
 		}
 	}
 
 	private void persistState() {
+		System.out.println("--persistState");
 		try {
-			PropertiesGenerator.main(new String[] { GDApplet.SETTINGS_FILE, "working.dir.root=" + ((RChar) _rForConsole.getObject("getwd()")).getValue()[0],
-					"command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()) });
+			Vector<String> generatorParams=new Vector<String>();
+			generatorParams.add(GDApplet.SETTINGS_FILE);
+			
+			if (getR() != null && !_keepAlive) {
+				generatorParams.add("working.dir.root=" + ((RChar) _rForConsole.getObject("getwd()")).getValue()[0]);
+			}
+			
+			generatorParams.add("command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()));
+			generatorParams.add("mode="+LoginDialog.mode_int);
+			generatorParams.add("url="+LoginDialog.url_str);
+			PropertiesGenerator.main((String[])generatorParams.toArray(new String[generatorParams.size()]));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (_save) {
+		
+		if (getR() != null && !_keepAlive && _save) {
 			try {
 				_rForConsole.consoleSubmit("save.image('.RData')");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		
 	}
 
 	@Override
@@ -2038,13 +2079,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (_mode == HTTP_MODE) {
 					disposeDevices();
 					RHttpProxy.logOff(_commandServletUrl, _sessionId);
-				} else {
-					persistState();
 				}
 			} catch (TunnelingException e) {
 				// e.printStackTrace();
 			}
 			noSession();
+		} else {
+			persistState();
 		}
 	}
 
@@ -3391,6 +3432,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	private void noSession() {
 
+		persistState();
+		
 		if (_rProcessId != null && !_keepAlive) {
 
 			try {
