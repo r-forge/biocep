@@ -44,7 +44,6 @@
 	<property name="ORACLE_JAR" value="${basedir}/lib/jdbc/ojdbc-14.jar"/>
 	<property name="MYSQL_JAR" value="${basedir}/lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>
 	<property name="DERBY_JAR" value="${basedir}/lib/jdbc/derbyclient.jar"/>
-	<property name="PSTOOLS_HOME" value="${basedir}/PsTools"/>
 	
 	<taskdef name="if" classpath="lib/beangenlibs/ant-contrib-1.0b3.jar"
 		classname="net.sf.antcontrib.logic.IfTask"/>
@@ -401,7 +400,6 @@
 			<jvmarg value="-Ddb.url=${db.url}"/>
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
-			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
 			<jvmarg value="-Dproperties.extension=${properties.extension}"/>
 			
 			<!-- LOG PARAMS -->
@@ -522,7 +520,6 @@
 			<jvmarg value="-Dkill=${kill}"/>
 			<jvmarg value="-Dunbindall=${unbindall}"/>
 			<jvmarg value="-Dinvoke=${invoke}"/>
-			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
 		</java>
 	</target>
 	
@@ -591,8 +588,6 @@
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
 			
-			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
-			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
 			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
@@ -635,7 +630,6 @@
 			<jvmarg value="-Ddb.url=${db.url}"/>
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
-			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
 			<jvmarg value="-Dnode.manager.name=${node.manager.name}"/>
 			<jvmarg value="-Dnode.name=${node.name}"/>
 			<jvmarg value="-Djob=${job}"/>
@@ -689,7 +683,6 @@
 			<jvmarg value="-Dpools.dbmode.user=${client.db.user}"/>
 			<jvmarg value="-Dpools.dbmode.password=${client.db.password}"/>
 			<jvmarg	value="-Dpools.dbmode.defaultpoolname=${client.defaultpoolname}"/>
-			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
 			<jvmarg value="-Durl=${url}"/>
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
@@ -796,7 +789,6 @@
 			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
 			<jvmarg value="-Dpreprocess.help=true"/>
 			<jvmarg value="-Dapply.sandbox=false"/>
-			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
 			
 			<jvmarg value="-Dmode=${mode}"/>
 			<jvmarg value="-Dautologon=true"/>
@@ -982,7 +974,6 @@
 			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
 			<jvmarg value="-Dpreprocess.help=true"/>
 			<jvmarg value="-Dapply.sandbox=false"/>
-			<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
 			
 			<jvmarg value="-Dmode=${mode}"/>
 			<jvmarg value="-Dautologon=true"/>
@@ -1101,7 +1092,6 @@
 				<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
 				<jvmarg value="-Dpreprocess.help=true"/>
 				<jvmarg value="-Dapply.sandbox=false"/>
-				<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>
 				
 				<jvmarg value="-Dmode=${mode}"/>
 				<jvmarg value="-Dautologon=true"/>
@@ -1273,6 +1263,7 @@
 					<include name="**/*.png"/>
 					<include name="**/*.gif"/>
 					<include name="**/*.html"/>
+					<include name="**/*.exe"/>
 				</fileset>				
 			</copy>
 		  </sequential>
@@ -1356,6 +1347,7 @@
 						<include name="**/*.png"/>
 						<include name="**/*.gif"/>
 						<include name="**/*.html"/>
+						<include name="**/*.exe"/>
 					</fileset>				
 				</copy>
 			  </sequential>
@@ -1560,6 +1552,7 @@
 								<include name="**/*.png"/>
 								<include name="**/*.gif"/>
 								<include name="**/*.html"/>
+								<include name="**/*.exe"/>
 							</fileset>				
 						</copy>
 					  </sequential>
@@ -1662,6 +1655,7 @@
 					<include name="**/*.gif"/>
 					<include name="**/*.html"/>
 					<include name="**/*.sql"/>
+					<include name="**/*.exe"/>
 				</fileset>				
 			</copy>
 		  </sequential>
@@ -1712,16 +1706,6 @@
 		<jar destfile="${RPF_JAR}">
 			<fileset dir="binrpf"/>
 		</jar>
-	</target>
-	
-	<target name="download.pstools">
-		<java classname="uk.ac.ebi.microarray.pools.MainPsToolsDownload" fork="true"
-			spawn="false">
-			<classpath>
-				<pathelement path="${RPF_JAR}"/>
-			</classpath>
-			<jvmarg value="-Dlocation=${PSTOOLS_HOME}"/>
-		</java>
 	</target>
 	
 	<target name="jaxwspack">		

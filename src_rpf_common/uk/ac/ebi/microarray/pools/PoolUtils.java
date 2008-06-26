@@ -41,6 +41,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.InetAddress;
@@ -313,66 +314,65 @@ public class PoolUtils {
 
 	public static String currentWinProcessID() throws Exception {
 
-		String pslistpath = System.getProperty("pstools.home") + "/pslist.exe";
-		if (!new File(pslistpath).exists()) {
-			String psToolsHome = System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
-			pslistpath = psToolsHome + "/pslist.exe";
-			if (!new File(pslistpath).exists()) {
-				new File(psToolsHome).mkdirs();
-				MainPsToolsDownload.main(new String[] { psToolsHome });
-			}
+		String pslistpath = System.getProperty("java.io.tmpdir") + "/rpf/WinTools/"+"ps.exe";
+		System.out.println(pslistpath);
+		File pslistFile=new File(pslistpath);
+		if (!pslistFile.exists()) {			
+			pslistFile.getParentFile().mkdirs();
+			InputStream is=PoolUtils.class.getResourceAsStream("/wintools/ps.exe");
+			RandomAccessFile raf=new RandomAccessFile(pslistFile,"rw");	raf.setLength(0);
+			int b;
+			while ((b=is.read())!=-1) raf.write((byte)b );
+			raf.close();			
 		}
-
-		String[] command = new String[] { pslistpath, "-t" };
+		String[] command = new String[] { pslistpath };
 		Runtime rt = Runtime.getRuntime();
 		final Process proc = rt.exec(command);
-
-		final Vector<String> pslistPrint = new Vector<String>();
-		final Vector<String> errorPrint = new Vector<String>();
-
+		final StringBuffer psPrint = new StringBuffer();
+		final StringBuffer psError = new StringBuffer();
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-					String line = null;
-					while ((line = br.readLine()) != null)
-						errorPrint.add(line);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						pslistPrint.add(line);
+					InputStream is=proc.getInputStream();
+					int b;
+					while ((b=is.read())!=-1) {
+						psPrint.append((char)b);						
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}).start();
-
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					InputStream is=proc.getErrorStream();
+					int b;
+					while ((b=is.read())!=-1) {
+						psError.append((char)b);						
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();		
+		
 		int exitVal = proc.waitFor();
-		/*
-		 * System.out.println(">"+exitVal+"<"); for (int i=0; i<pslistPrint.size();
-		 * ++i) System.out.println(">>"+pslistPrint.elementAt(i)+"<<");
-		 */
-
-		if (exitVal != 0)
-			throw new Exception("pslist exit code : " + exitVal);
+		if (exitVal != 0) throw new Exception("ps exit code : " + exitVal);
+		
+		
+		BufferedReader reader=new BufferedReader(new StringReader(psPrint.toString()));
+		String line;
 		int i = 0;
-		while (!pslistPrint.elementAt(i).trim().startsWith("pslist "))
+		while (!(line=reader.readLine()).startsWith("PID  PPID  THR PR NAME")) ++i;
+		++i;
+		while ((line=reader.readLine())!=null) {			
+			StringTokenizer st = new StringTokenizer(line, " ");
+			st.nextElement();String PPID=(String)st.nextElement();st.nextElement();st.nextElement();
+			if (line.endsWith("\\ps.exe")) return PPID;
 			++i;
-		// System.out.println(">>>>>>>>>>>"+pslistPrint.elementAt(i -
-		// 1)+"<<<<<<<<<<<<<");
-		StringTokenizer st = new StringTokenizer(pslistPrint.elementAt(i - 1), " ");
-		st.nextElement();
-		return (String) st.nextElement();
+		}
+		return null;
 	}
 
 	public static String currentProcessID() throws Exception {
@@ -383,6 +383,7 @@ public class PoolUtils {
 					return result;
 				}
 			} catch (Exception e) {
+				//e.printStackTrace();
 			}
 
 		}
@@ -1047,8 +1048,6 @@ public class PoolUtils {
 		return orderP(keys);
 	}
 
-	
-
 	public static void killLocalUnixProcess(String processId, boolean isKILLSIG) throws Exception {
 		String[] command = isKILLSIG ? new String[] { "kill", "-9", processId } : new String[] { "kill", processId };
 		Runtime rt = Runtime.getRuntime();
@@ -1094,50 +1093,43 @@ public class PoolUtils {
 	}
 
 	public static void killLocalWinProcess(String processId, boolean isKILLSIG) throws Exception {
-		// String[] command = isKILLSIG ? new String[] { "taskkill", "/F",
-		// "/PID", processId } : new String[] {"taskkill", "/PID", processId };
-
-		String pskillCommand = System.getProperty("pstools.home") + "/pskill.exe";
-		if (!new File(pskillCommand).exists()) {
-			String psToolsHome = System.getProperty("user.home") + "/RWorkbench/" + "PsTools";
-			pskillCommand = psToolsHome + "/pskill.exe";
-			if (!new File(pskillCommand).exists()) {
-				new File(psToolsHome).mkdirs();
-				MainPsToolsDownload.main(new String[] { psToolsHome });
-			}
+				
+		String killpath =System.getProperty("java.io.tmpdir") + "/rpf/WinTools/" + "kill.exe";
+		File killFile=new File(killpath);
+		if (!killFile.exists()) {			
+			killFile.getParentFile().mkdirs();
+			InputStream is=PoolUtils.class.getResourceAsStream("/wintools/kill.exe");
+			RandomAccessFile raf=new RandomAccessFile(killFile,"rw");	raf.setLength(0);
+			int b;
+			while ((b=is.read())!=-1) raf.write((byte)b );
+			raf.close();			
 		}
-		String[] command = new String[] { pskillCommand, processId };
-
+		String[] command = new String[] { killpath, processId };
 		Runtime rt = Runtime.getRuntime();
 		final Process proc = rt.exec(command);
-		final Vector<String> killPrint = new Vector<String>();
-		final Vector<String> errorPrint = new Vector<String>();
-
-		System.out.println("Kill command : " + Arrays.toString(command));
-
+		
+		final StringBuffer killPrint = new StringBuffer();
+		final StringBuffer errorPrint = new StringBuffer();
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						System.out.println(line);
-						errorPrint.add(line);
+					InputStream is=proc.getInputStream();
+					int b;
+					while ((b=is.read())!=-1) {
+						killPrint.append((char)b);						
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}).start();
-
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					String line = null;
-					while ((line = br.readLine()) != null) {
-						System.out.println(line);
-						killPrint.add(line);
+					InputStream is=proc.getErrorStream();
+					int b;
+					while ((b=is.read())!=-1) {
+						errorPrint.append((char)b);						
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1312,8 +1304,8 @@ public class PoolUtils {
 		return tempFile;
 	}
 
-	public static void main(String args[]) {
-		System.out.println(getParameters("a=52~/~b=6778~/~l"));
+	public static void main(String args[]) throws Exception {
+		System.out.println(currentWinProcessID());
 	}
 	
 }
