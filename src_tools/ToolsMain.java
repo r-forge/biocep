@@ -16,7 +16,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 import server.ServerManager;
-import uk.ac.ebi.microarray.pools.MainPsToolsDownload;
 import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 
@@ -196,11 +195,7 @@ public class ToolsMain {
 			if (missingLibs.size() > 0) {
 				System.out.println("The following packages probably couldn't be automatically installed\n" + missingLibs);
 			}
-
 		}
-
-		new File(root + "PsTools").mkdirs();
-		MainPsToolsDownload.main(new String[] { root + "PsTools" });
 
 		String jripath = ServerManager.getLibraryPath("rJava", rpath, rlibs) + "jri/";
 		System.out.println("jripath:" + jripath + "\n");
@@ -224,7 +219,6 @@ public class ToolsMain {
 		command.add("-classpath");
 		command.add((isWindowsOs() ? "\"" : "") + cp + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
-		command.add((isWindowsOs() ? "\"" : "") + "-Dpstools.home=" + root + "PsTools/" + (isWindowsOs() ? "\"" : ""));
 		
 		
 		

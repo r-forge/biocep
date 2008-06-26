@@ -242,10 +242,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private final ReentrantLock _protectR = new RGuiReentrantLock() {
 		@Override
 		public void lock() {
-			super.lock();
-			
-			new Exception("lock").printStackTrace();
-			
+			super.lock();			
 			try {
 				_currentDevice.setAsCurrentDevice();
 				_rForConsole.setOrginatorUID(getUID());
@@ -258,8 +255,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 		@Override
 		public void unlock() {
 
-			new Exception("unlock").printStackTrace();
-			
 			if (isCollaborativeMode()) {
 				try {
 					synchronizeCollaborators();
@@ -280,9 +275,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		@Override
 		public void unlockNoBroadcast() {
-			new Exception("unlockNoBroadcast").printStackTrace();
 			super.unlock();
-			
 		}
 
 		public boolean isLocked() {

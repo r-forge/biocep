@@ -6,6 +6,8 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
 
+import server.ServerManager;
+
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 
@@ -34,8 +36,8 @@ public class HttpServer {
         server.addConnector(connectorLocal);
 
         if (args.length==0) {
-        	cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rvirtual.war"), System.getProperty("user.home") + "/RWorkbench/", LOG_PRGRESS_TO_SYSTEM_OUT);
-        	cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), System.getProperty("user.home") + "/RWorkbench/", LOG_PRGRESS_TO_SYSTEM_OUT);
+        	cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rvirtual.war"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT);
+        	cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), ServerManager.INSTALL_DIR , LOG_PRGRESS_TO_SYSTEM_OUT);
         	args=new String[]{ System.getProperty("user.home") + "/RWorkbench/"+"rvirtual.war", 
         			           System.getProperty("user.home") + "/RWorkbench/"+"rws.war"};
         }

@@ -91,7 +91,6 @@
 					<arg value="pools.dbmode.user=${demo.db.user}"/>
 					<arg value="pools.dbmode.password=${demo.db.password}"/>					  					  
 					<arg value="pools.dbmode.defaultpoolname=R"/>					  
-					<arg value="pstools.home=${PSTOOLS_HOME}"/>
 					<arg value="pools.dbmode.killused=true"/>	
 				    <arg value="http.frontend.url=http://localhost:8080/frontendapp/cmd"/>
 					<arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>
