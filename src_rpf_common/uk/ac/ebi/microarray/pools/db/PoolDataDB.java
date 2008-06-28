@@ -17,12 +17,14 @@
  */
 package uk.ac.ebi.microarray.pools.db;
 
+import java.io.Serializable;
+
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
  */
-public class PoolDataDB {
+public class PoolDataDB implements Serializable{
 	private String _poolName;
 	private int _borrowTimeout;
 	private String[] _prefixes;
