@@ -2,9 +2,13 @@ package uk.ac.ebi.microarray.pools;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -20,6 +24,13 @@ public class SSHTunnelingProxy {
 	
 	
 	public static Object invoke(String sshHostIp, String sshLogin, String sshPwd, String homedir, String invokeCommand, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters) throws SSHTunnelingException {
+		String uid=UUID.randomUUID().toString();								
+		String fileIn=System.getProperty("java.io.tmpdir")+"/invoke"+uid+".in";
+		String fileOut=System.getProperty("java.io.tmpdir")+"/invoke"+uid+".out";
+
+		if (new File(fileIn).exists()) new File(fileIn).delete();
+		if (new File(fileOut).exists()) new File(fileOut).delete();
+		
 		Connection conn = null;
 		try {
 			
@@ -36,12 +47,11 @@ public class SSHTunnelingProxy {
 			invokationProps.put("methodName", methodName);
 			invokationProps.put("methodSignature", PoolUtils.objectToHex(methodSignature));
 			invokationProps.put("methodParameters", PoolUtils.objectToHex(methodParameters));
-			String uid=UUID.randomUUID().toString();			
-			String fileIn=System.getProperty("java.io.tmpdir")+"/invoke"+uid+".in";			
+			
+			
 			FileOutputStream fos=new FileOutputStream(fileIn);
 			invokationProps.storeToXML(fos, "");
 			fos.close();
-
 			new SCPClient(conn).put(fileIn, homedir);			
 			String cmd=PoolUtils.replaceAll(invokeCommand, "${file}", homedir+"/invoke"+uid+".in");			
 			System.out.println("cmd:"+cmd);
@@ -83,17 +93,19 @@ public class SSHTunnelingProxy {
 			}).start();
 
 			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
-
-			System.out.println("-------------");
-			System.out.println(buffer);
-			System.out.println("-------------");
 			
-			
+			PrintWriter pw=new PrintWriter(fileOut);
+			pw.println(buffer.toString());
+			pw.close();
+					
+			return null;
+			/*
 			Properties resultProps=new Properties();
-			resultProps.loadFromXML(new ByteArrayInputStream(buffer.toString().getBytes()));			
+			resultProps.loadFromXML(new FileInputStream(fileOut));			
 			Object result=PoolUtils.hexToObject(resultProps.getProperty("result"));			
 			if (result instanceof SSHTunnelingException) throw (SSHTunnelingException)result;
 			else return result;
+			*/
 			
 		} catch (SSHTunnelingException sshe) {
 			
@@ -110,6 +122,10 @@ public class SSHTunnelingProxy {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			if (new File(fileIn).exists()) new File(fileIn).delete();
+			if (new File(fileOut).exists()) new File(fileOut).delete();
+
 		}
 	}
 	
