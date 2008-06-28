@@ -1,9 +1,12 @@
 package uk.ac.ebi.microarray.pools;
 
 import static uk.ac.ebi.microarray.pools.PoolUtils.getDBType;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -72,7 +75,16 @@ public class SSHTunnelingWorker {
 			Properties invokationResult=new Properties();
 			invokationResult.put("result", PoolUtils.objectToHex(result));
 			String fileOut=fileIn.substring(0, fileIn.lastIndexOf("."))+".out";
-			invokationResult.storeToXML(new FileOutputStream(fileOut),"");
+			FileOutputStream fos=new FileOutputStream(fileOut);
+			invokationResult.storeToXML(fos,"");
+			fos.close();
+			
+			
+			System.out.println("->XML");
+			BufferedReader br=new BufferedReader(new FileReader(fileOut));
+			String line=null;
+			while ((line=br.readLine())!=null) System.out.println(line);
+			br.close();
 			
 			new File(fileIn).delete();
 			
