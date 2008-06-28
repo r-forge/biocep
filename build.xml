@@ -415,6 +415,10 @@
 		</java>
 		
 	</target>
+
+	
+	
+	
 	
 	<target name="derby.startup">
 		<if>
@@ -869,6 +873,123 @@
 			<jvmarg	value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			
 						
+			<!-- LOG PARAMS -->
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1,A2"/>
+			<jvmarg value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			<jvmarg	value="-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+		
+	</target>
+
+	
+	
+	
+	<target name="sshworker" depends="setWinAwareProps">
+		
+		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
+		<if><not><isset property="prefix"/></not><then><property name="prefix" value=""/></then></if>		
+		<if><not><isset property="name"/></not><then><property name="name" value=""/></then></if>
+		<if><not><isset property="autoname"/></not><then><property name="autoname" value=""/></then></if>
+		<if><not><isset property="node"/></not><then><property name="node" value=""/></then></if>				
+		<if><not><isset property="registryhost"/></not><then><property name="registryhost" value=""/></then></if>
+		<if><not><isset property="registryport"/></not><then><property name="registryport" value=""/></then></if>
+		<if><not><isset property="working.dir.root"/></not><then><property name="working.dir.root" value=""/></then></if>		
+		<if><not><isset property="properties.extension"/></not><then><property name="properties.extension" value=""/></then></if>
+		<if><not><isset property="listener.stub"/></not><then><property name="listener.stub" value=""/></then></if>
+		<if><not><isset property="private"/></not><then><property name="private" value=""/></then></if>		
+		<if><not><isset property="db.driver"/></not><then><property name="db.driver" value=""/></then></if>
+		<if><not><isset property="db.url"/></not><then><property name="db.url" value=""/></then></if>
+		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
+		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>		
+		<if><not><isset property="servant.classpath"/></not><then><property name="servant.classpath" value=""/></then></if>
+		<if><not><isset property="preprocess.help"/></not><then><property name="preprocess.help" value=""/></then></if>
+		<if><not><isset property="apply.sandbox"/></not><then><property name="apply.sandbox" value=""/></then></if>
+		<if><not><isset property="attr.lsf.processid"/></not><then><property name="attr.lsf.processid" value=""/></then></if>
+		<if><not><isset property="node.manager.name"/></not><then><property name="node.manager.name" value="NODE_MANAGER"/></then></if>
+		<if><not><isset property="http.port"/></not><then><property name="http.port" value=""/></then></if>
+		<if><not><isset property="rmi.port.start"/></not><then><property name="rmi.port.start" value=""/></then></if>
+		
+		<java maxmemory="256m" classname="uk.ac.ebi.microarray.pools.SSHTunnelingProxy"
+			fork="true" spawn="${spawn}">
+			
+			<classpath>
+				
+				
+				<pathelement path="${RPF_JAR}"/>
+				
+				<pathelement path="${ORACLE_JAR}"/>
+				<pathelement path="${MYSQL_JAR}"/>
+				<pathelement path="${DERBY_JAR}"/>
+								
+				<pathelement path="${JRI_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${HTMLPARSER_JAR}"/>
+				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${FTP_JAR}"/>		
+				
+				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
+				<pathelement path="lib/desktop/jsp-2.1.jar"/>
+				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
+				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
+				<pathelement path="lib/desktop/activation.jar"/>
+				<pathelement path="lib/desktop/mail.jar"/>					
+				<pathelement path="lib/desktop/jython.jar"/>
+				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
+				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>	
+				
+				<pathelement path="lib/svg/batik-svggen.jar"/>
+				<pathelement path="lib/svg/batik-dom.jar"/>
+				<pathelement path="lib/svg/batik-awt-util.jar"/>
+				<pathelement path="lib/svg/batik-util.jar"/>
+				<pathelement path="lib/svg/batik-ext.jar"/>
+				<pathelement path="lib/svg/batik-xml.jar"/>
+				
+				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
+				
+				
+				<pathelement path="${servant.classpath}"/>
+				
+			</classpath>
+			
+			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			<jvmarg
+			value="-Djava.library.path=${JRI_LIB_PATH}"/>
+			<jvmarg value="-Djava.rmi.server.codebase=${servant.codebase}"/>
+			<jvmarg value="-Dservantclass=${servantclass}"/>
+			<jvmarg value="-Dname=${name}"/>
+			<jvmarg value="-Dautoname=${autoname}"/>
+			<jvmarg value="-Dprefix=${prefix}"/>
+			<jvmarg value="-Dnode=${node}"/>
+			<jvmarg value="-Dlistener.stub=${listener.stub}"/>
+			<jvmarg value="-Dprivate=${private}"/>
+			<jvmarg value="-Dpreprocess.help=${preprocess.help}"/>
+			<jvmarg value="-Dapply.sandbox=${apply.sandbox}"/>
+			<jvmarg value="-Dattr.lsf.processid=${attr.lsf.processid}"/>
+			<jvmarg value="-Dnode.manager.name=${node.manager.name}"/>
+			<jvmarg value="-Dhttp.port=${http.port}"/>
+			<jvmarg value="-Drmi.port.start=${rmi.port.start}"/>
+			
+			<!-- REG MODE -->
+			<jvmarg value="-Dregistryhost=${registryhost}"/>
+			<jvmarg value="-Dregistryport=${registryport}"/>
+			<jvmarg value="-Dworking.dir.root=${working.dir.root}"/>
+			
+			<!-- DB MODE -->
+			<jvmarg value="-Ddb.driver=${db.driver}"/>
+			<jvmarg value="-Ddb.url=${db.url}"/>
+			<jvmarg value="-Ddb.user=${db.user}"/>
+			<jvmarg value="-Ddb.password=${db.password}"/>
+			<jvmarg value="-Dproperties.extension=${properties.extension}"/>
+			
 			<!-- LOG PARAMS -->
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1,A2"/>
