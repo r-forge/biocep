@@ -1,7 +1,7 @@
 package uk.ac.ebi.microarray.pools;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,7 +10,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Properties;
 import java.util.UUID;
-
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
@@ -23,6 +22,7 @@ public class SSHTunnelingProxy {
 	public static Object invoke(String sshHostIp, String sshLogin, String sshPwd, String homedir, String invokeCommand, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters) throws SSHTunnelingException {
 		Connection conn = null;
 		try {
+			
 			conn = new Connection(sshHostIp);
 			conn.connect();
 			boolean isAuthenticated = conn.authenticateWithPassword(sshLogin, sshPwd);
@@ -47,16 +47,18 @@ public class SSHTunnelingProxy {
 			System.out.println("cmd:"+cmd);
 			sess.execCommand( cmd );
 
-			
-			
 			final BufferedReader brOut = new BufferedReader(new InputStreamReader(new StreamGobbler(sess.getStdout())));
 			final BufferedReader brErr = new BufferedReader(new InputStreamReader(new StreamGobbler(sess.getStderr())));
+			final StringBuffer buffer=new StringBuffer();
 			new Thread(new Runnable() {
+				boolean startReadingAnswer=false;
 				public void run() {
 					try {
 						while (true) {
 							String line = brOut.readLine();
-							if (line == null) break;
+							if (line == null) break;							
+							if (startReadingAnswer) buffer.append(line+"\n");
+							if (line.equals("->XML")) startReadingAnswer=true;							
 							System.out.println(line);
 						}
 					} catch (Exception e) {
@@ -80,15 +82,10 @@ public class SSHTunnelingProxy {
 				}
 			}).start();
 
-			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
-			
-			
-			
-			
-			
+			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);			
 			Properties resultProps=new Properties();
-			resultProps.loadFromXML(new FileInputStream(System.getProperty("java.io.tmpdir")+"/invoke"+uid+".out"));
-			Object result=PoolUtils.hexToObject(resultProps.getProperty("result"));
+			resultProps.loadFromXML(new ByteArrayInputStream(buffer.toString().getBytes()));			
+			Object result=PoolUtils.hexToObject(resultProps.getProperty("result"));			
 			if (result instanceof SSHTunnelingException) throw (SSHTunnelingException)result;
 			else return result;
 			
