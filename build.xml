@@ -903,7 +903,7 @@
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value="DWEP"/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value="DWEP"/></then></if>		
 		
-		<java maxmemory="128m" classname="uk.ac.ebi.microarray.pools.SSHTunnelingProxy"
+		<java maxmemory="128m" classname="uk.ac.ebi.microarray.pools.SSHTunnelingWorker"
 			fork="true" spawn="${spawn}">
 			
 			<classpath>
