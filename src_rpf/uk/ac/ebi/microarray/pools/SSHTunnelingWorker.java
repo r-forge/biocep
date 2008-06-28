@@ -65,7 +65,7 @@ public class SSHTunnelingWorker {
 		} catch (SSHTunnelingException e) {
 			result = e;
 		} catch (Exception e) {
-			result = new SSHTunnelingException("", e);
+			result = new SSHTunnelingException(PoolUtils.getStackTraceAsString(e));
 		}
 
 		try {
