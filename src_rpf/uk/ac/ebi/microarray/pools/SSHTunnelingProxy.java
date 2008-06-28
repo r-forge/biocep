@@ -82,7 +82,13 @@ public class SSHTunnelingProxy {
 				}
 			}).start();
 
-			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);			
+			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
+
+			System.out.println("-------------");
+			System.out.println(buffer);
+			System.out.println("-------------");
+			
+			
 			Properties resultProps=new Properties();
 			resultProps.loadFromXML(new ByteArrayInputStream(buffer.toString().getBytes()));			
 			Object result=PoolUtils.hexToObject(resultProps.getProperty("result"));			
