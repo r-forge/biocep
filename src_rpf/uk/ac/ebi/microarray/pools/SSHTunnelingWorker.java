@@ -74,12 +74,12 @@ public class SSHTunnelingWorker {
 		}
 
 		try {
-			Properties invokationResult = new Properties();
-			invokationResult.put("result", PoolUtils.objectToHex(result));
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			invokationResult.storeToXML(baos, "");
 			System.out.println("->XML");
-			System.out.println(new String(baos.toByteArray()));
+			System.out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+			System.out.println("<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">");
+			System.out.println("<properties>");
+			System.out.println("<entry key=\"result\">"+PoolUtils.objectToHex(result)+"</entry>");
+			System.out.println("</properties>");			
 			new File(fileIn).delete();
 		} catch (Exception e) {
 			e.printStackTrace();
