@@ -78,6 +78,7 @@ public class SSHTunnelingWorker {
 			invokationResult.put("result", PoolUtils.objectToHex(result));
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			invokationResult.storeToXML(baos, "");
+			System.out.println(new String(baos.toByteArray()));
 			System.out.println("->XML");
 			BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
 			String line = null;	while ((line = br.readLine()) != null) System.out.println(line);
