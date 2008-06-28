@@ -404,13 +404,21 @@
 			
 			<!-- LOG PARAMS -->
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
-			<jvmarg value="-Dlog4j.rootCategory=INFO,A1,A2"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1,A2,A3"/>
+			
 			<jvmarg value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
 			<jvmarg	value="-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+			<jvmarg value="-Dlog4j.appender.A3=org.apache.log4j.FileAppender"/>
+			<jvmarg value="-Dlog4j.appender.A3.file=biocep.log"/>
+			<jvmarg	value="-Dlog4j.appender.A3.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A3.layout.ConversionPattern= [%-5p] - %m%n"/>			
+
 			
 		</java>
 		
