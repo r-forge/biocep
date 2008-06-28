@@ -1,20 +1,20 @@
 package uk.ac.ebi.microarray.pools;
 
+import static uk.ac.ebi.microarray.pools.PoolUtils.getDBType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.Properties;
+import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
+import uk.ac.ebi.microarray.pools.db.DBLayer;
 
 public class SSHTunnelingWorker {
 	
-	private static class Logger {
-		public String sayHello(String name) {
-			return "Hello"+" "+name+"!";
-		}
-	}
 	public static HashMap<String, Object> servantMap=new HashMap<String, Object>();
 	public static Object invoke(String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters) throws SSHTunnelingException {		
 		Object servant = servantMap.get(servantName);
@@ -39,8 +39,22 @@ public class SSHTunnelingWorker {
 	}
 
 	public static void main(String[] args) {
-		try {
-			servantMap.put("logger", new Logger());		
+		try {			
+			
+			final String dbdriver="org.apache.derby.jdbc.ClientDriver";
+			final String dburl="jdbc:derby://127.0.0.1:1527/DWEP;create=true";
+			final String dbuser="DWEP";
+			final String dbpassword="DWEP";		
+			
+			Class.forName(dbdriver);
+			DBLayer registry = DBLayer.getLayer(getDBType(dburl), new ConnectionProvider() {
+				public Connection newConnection() throws java.sql.SQLException {
+					return DriverManager.getConnection(dburl, dbuser, dbpassword);
+				};
+			});			
+			servantMap.put("derby", registry);		
+
+			
 			Properties invokationProps=new Properties();
 			String fileIn=args[0];
 			invokationProps.loadFromXML(new FileInputStream(fileIn));			

@@ -63,6 +63,7 @@ import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.TimeoutException;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
+import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
 import uk.ac.ebi.microarray.pools.db.PoolDataDB;
 import uk.ac.ebi.microarray.pools.gui.Symbol;
@@ -139,7 +140,7 @@ public class Supervisor {
 	private JTable _reportTable = null;
 	private int _periodMilliSec = 500;
 	private boolean _autoRefresh = true;
-	private DBLayer _registry = null;
+	private DBLayerInterface _registry = null;
 	private Vector<String> _selectedServants = new Vector<String>();
 	private Vector<String> _selectedPools = new Vector<String>();
 	Vector<String> _selectedNodes = new Vector<String>();

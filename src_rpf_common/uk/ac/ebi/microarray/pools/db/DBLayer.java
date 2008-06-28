@@ -57,7 +57,7 @@ import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
  */
-public abstract class DBLayer implements Registry {
+public abstract class DBLayer implements DBLayerInterface {
 
 	private Connection _connection;
 	private ConnectionProvider _connectionProvider;
