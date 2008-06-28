@@ -25,6 +25,7 @@ public class SSHTunnelingProxy {
 	
 	public static Object invoke(String sshHostIp, String sshLogin, String sshPwd, String homedir, String invokeCommand, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters) throws SSHTunnelingException {
 		String uid=UUID.randomUUID().toString();								
+		
 		String fileIn=System.getProperty("java.io.tmpdir")+"/invoke"+uid+".in";
 		String fileOut=System.getProperty("java.io.tmpdir")+"/invoke"+uid+".out";
 
@@ -66,9 +67,9 @@ public class SSHTunnelingProxy {
 					try {
 						while (true) {
 							String line = brOut.readLine();
-							if (line == null) break;							
-							if (startReadingAnswer) buffer.append(line+"\n");
-							if (line.equals("->XML")) startReadingAnswer=true;							
+							if (line == null) break;								
+							if (startReadingAnswer) buffer.append(line);
+							if (line.equals("->Result")) startReadingAnswer=true;							
 							System.out.println(line);
 						}
 					} catch (Exception e) {
@@ -82,9 +83,8 @@ public class SSHTunnelingProxy {
 					try {
 						while (true) {
 							String line = brErr.readLine();
-							if (line == null)
-								break;
-							System.out.println(line);
+							if (line == null) break;
+							System.out.println("ERROR:"+ line);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -94,18 +94,9 @@ public class SSHTunnelingProxy {
 
 			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
 			
-			PrintWriter pw=new PrintWriter(fileOut);
-			pw.println(buffer.toString());
-			pw.close();
-					
-			return null;
-			/*
-			Properties resultProps=new Properties();
-			resultProps.loadFromXML(new FileInputStream(fileOut));			
-			Object result=PoolUtils.hexToObject(resultProps.getProperty("result"));			
+			Object result=PoolUtils.hexToObject(buffer.toString());			
 			if (result instanceof SSHTunnelingException) throw (SSHTunnelingException)result;
-			else return result;
-			*/
+			else return result;			
 			
 		} catch (SSHTunnelingException sshe) {
 			

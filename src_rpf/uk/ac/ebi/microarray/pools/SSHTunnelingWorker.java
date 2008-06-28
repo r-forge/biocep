@@ -74,12 +74,8 @@ public class SSHTunnelingWorker {
 		}
 
 		try {
-			System.out.println("->XML");
-			System.out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-			System.out.println("<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">");
-			System.out.println("<properties>");
-			System.out.println("<entry key=\"result\">"+PoolUtils.objectToHex(result)+"</entry>");
-			System.out.println("</properties>");			
+			System.out.println("->Result");
+			System.out.println(PoolUtils.objectToHex(result));
 			new File(fileIn).delete();
 		} catch (Exception e) {
 			e.printStackTrace();
