@@ -94,19 +94,16 @@ public class SSHTunnelingProxy {
 
 			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
 			
-			Object result=PoolUtils.hexToObject(buffer.toString());			
+			Object result=PoolUtils.hexToObject(buffer.toString(), SSHTunnelingProxy.class.getClassLoader());
+			
 			if (result instanceof SSHTunnelingException) throw (SSHTunnelingException)result;
 			else return result;			
 			
-		} catch (SSHTunnelingException sshe) {
-			
-			throw sshe;
-			
-		} catch (Exception e) {
-			
+		} catch (SSHTunnelingException sshe) {			
+			throw sshe;			
+		} catch (Exception e) {			
 			e.printStackTrace();
-			throw new SSHTunnelingException("",e);
-			
+			throw new SSHTunnelingException(PoolUtils.getStackTraceAsString(e));			
 		} finally {
 			try {
 				conn.close();

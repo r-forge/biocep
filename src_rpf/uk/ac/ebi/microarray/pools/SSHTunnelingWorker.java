@@ -1,13 +1,8 @@
 package uk.ac.ebi.microarray.pools;
 
 import static uk.ac.ebi.microarray.pools.PoolUtils.getDBType;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
