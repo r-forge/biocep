@@ -17,10 +17,12 @@
  */
 package uk.ac.ebi.microarray.pools.db;
 
+import java.io.Serializable;
+
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
  */
-public class NodeDataDB {
+public class NodeDataDB implements Serializable{
 	private String _nodeName;
 	private String _hostIp;
 	private String _hostName;
