@@ -3,10 +3,13 @@ package uk.ac.ebi.microarray.pools;
 import static uk.ac.ebi.microarray.pools.PoolUtils.getDBType;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -56,7 +59,6 @@ public class SSHTunnelingWorker {
 				};
 			});			
 			servantMap.put("derby", registry);		
-
 			
 			Properties invokationProps=new Properties();
 			String fileIn=args[0];
@@ -72,22 +74,17 @@ public class SSHTunnelingWorker {
 				result=new SSHTunnelingException("",e);
 			}			
 			
+			
 			Properties invokationResult=new Properties();
 			invokationResult.put("result", PoolUtils.objectToHex(result));
-			String fileOut=fileIn.substring(0, fileIn.lastIndexOf("."))+".out";
-			FileOutputStream fos=new FileOutputStream(fileOut);
-			invokationResult.storeToXML(fos,"");
-			fos.close();
-			
-			
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			invokationResult.storeToXML(baos,"");						
 			System.out.println("->XML");
-			BufferedReader br=new BufferedReader(new FileReader(fileOut));
+			BufferedReader br=new BufferedReader(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
 			String line=null;
 			while ((line=br.readLine())!=null) System.out.println(line);
-			br.close();
-			
-			new File(fileIn).delete();
-			
+			br.close();			
+			new File(fileIn).delete();			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
