@@ -33,6 +33,8 @@ public class MainRServer {
 	private static ServantCreationListener servantCreationListener = null;
 
 	public static void main(String[] args) throws Exception {
+		
+		System.out.println("###2:naming.mode:"+System.getProperty("naming.mode"));
 
 		PoolUtils.initLog4J();
 
