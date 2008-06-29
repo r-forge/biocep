@@ -61,6 +61,7 @@ import javax.swing.table.TableCellRenderer;
 import uk.ac.ebi.microarray.pools.InitializingException;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.TimeoutException;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
@@ -504,7 +505,7 @@ public class Supervisor {
 
 		try {
 
-			_registry = (DBLayer) DBLayer.getRmiRegistry();
+			_registry = (DBLayer) ServerDefaults.getRmiRegistry();
 
 			_frame = new JFrame("Supervisor");
 			_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

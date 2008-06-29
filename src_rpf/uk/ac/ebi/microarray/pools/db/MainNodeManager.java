@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -46,7 +47,7 @@ public class MainNodeManager {
 			// key:PoolUtils.orderO(System.getProperties().keySet()))
 			// {System.out.println(key+" = "+System.getProperty((String)key));}
 
-			_registry = (DBLayer) DBLayer.getRmiRegistry();
+			_registry = (DBLayer) ServerDefaults.getRmiRegistry();
 			_nodeManagerName = System.getProperty("node.manager.name");
 			if (System.getProperty("node.name") != null && !System.getProperty("node.name").equals("")) {
 				_nodeManagerName += '_' + System.getProperty("node.name");

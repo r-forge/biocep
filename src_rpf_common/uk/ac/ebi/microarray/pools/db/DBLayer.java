@@ -30,10 +30,7 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -50,10 +47,7 @@ import uk.ac.ebi.microarray.pools.LookUpInterrupted;
 import uk.ac.ebi.microarray.pools.LookUpTimeout;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RPFSessionInfo;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -1199,31 +1193,6 @@ public abstract class DBLayer implements DBLayerInterface {
 
 	public void setConnectionProvider(ConnectionProvider connectionProvider) {
 		this._connectionProvider = connectionProvider;
-	}
-
-	public static Registry _registry = null;
-	public static Integer _lock = new Integer(0);
-
-	public static Registry getRmiRegistry() throws Exception {
-
-		if (_registry != null)
-			return _registry;
-		synchronized (_lock) {
-			if (_registry == null) {
-				if (ServerDefaults._namingMode.equals("db")) {						
-					Class.forName(ServerDefaults._dbDriver);
-					_registry = getLayer(PoolUtils.getDBType(ServerDefaults._dbUrl), new ConnectionProvider() {
-						public Connection newConnection() throws java.sql.SQLException {
-							return DriverManager.getConnection(ServerDefaults._dbUrl, ServerDefaults._dbUser, ServerDefaults._dbPassword);
-						};
-					});					
-				} else {
-					_registry = LocateRegistry.getRegistry(_registryHost, _registryPort);
-				}
-			}
-			return _registry;
-		}
-
 	}
 
 	public static DBLayer getLayer(String dbtype, Connection conn) throws Exception {

@@ -33,6 +33,7 @@ import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
 
@@ -82,7 +83,7 @@ public class SupervisorUtils {
 
 	public static void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
 
-		DBLayer dbLayer = (DBLayer) DBLayer.getRmiRegistry();
+		DBLayer dbLayer = (DBLayer) ServerDefaults.getRmiRegistry();
 		HashMap<String, Object> servantInfo = dbLayer.getTableData("SERVANTS", "NAME='" + servantName + "'").elementAt(0);
 
 		NodeDataDB nd = null;
@@ -262,8 +263,8 @@ public class SupervisorUtils {
 			public void run() {
 				try {
 
-					((DBLayer) DBLayer.getRmiRegistry()).incrementNodeProcessCounter(nodeName);
-					final NodeDataDB info = ((DBLayer) DBLayer.getRmiRegistry()).getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
+					((DBLayer) ServerDefaults.getRmiRegistry()).incrementNodeProcessCounter(nodeName);
+					final NodeDataDB info = ((DBLayer) ServerDefaults.getRmiRegistry()).getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
 					String command = info.getCreateServantCommand();
 
 					if (info.getHostName().equalsIgnoreCase("localhost") || info.getHostIp().equalsIgnoreCase("127.0.0.1")

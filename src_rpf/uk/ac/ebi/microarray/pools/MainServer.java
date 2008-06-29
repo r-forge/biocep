@@ -62,7 +62,7 @@ public class MainServer {
 			if (System.getProperty("node") != null && !System.getProperty("node").equalsIgnoreCase("")) {
 				NodeDataDB nodeData = null;
 				try {
-					rmiRegistry = DBLayer.getRmiRegistry();
+					rmiRegistry = ServerDefaults.getRmiRegistry();
 					nodeData = ((DBLayer) rmiRegistry).getNodeData("NODE_NAME='" + System.getProperty("node") + "'").elementAt(0);
 				} catch (Exception e) {
 					log.info("Couldn't retrieve Node Info for node <" + System.getProperty("node") + ">");
@@ -87,7 +87,7 @@ public class MainServer {
 			}
 
 			if (rmiRegistry == null)
-				rmiRegistry = DBLayer.getRmiRegistry();
+				rmiRegistry = ServerDefaults.getRmiRegistry();
 
 			System.out.println("### code base:" + System.getProperty("java.rmi.server.codebase"));
 
