@@ -53,6 +53,9 @@ public abstract class ServerDefaults {
 
 		_namingMode = System.getProperty("naming.mode") != null && !System.getProperty("naming.mode").equals("") ? System.getProperty("naming.mode") : DEFAULT_NAMING_MODE;
 		
+		System.out.println("----> naming mode :"+_namingMode);
+		
+		
 		_servantPoolPrefix = System.getProperty("prefix") != null && !System.getProperty("prefix").equals("") ? System.getProperty("prefix") : DEFAULT_PREFIX;
 
 		_registryHost = System.getProperty("registry.host") != null && !System.getProperty("registry.host").equals("") ? System.getProperty("registry.host")

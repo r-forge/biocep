@@ -32,8 +32,10 @@ public class Boot {
 						.invoke(null, args[1], Integer.decode(args[2]), 3, 3);
 			}
 
+			System.out.println("###1:naming.mode:"+System.getProperty("naming.mode"));
 			Class<?> mainClass = cl.loadClass("server.MainRServer");
 			mainClass.getMethod("main", new Class<?>[] { String[].class }).invoke(null, new Object[] { new String[] {} });
+			
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
