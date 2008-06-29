@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.HashMap;
@@ -39,17 +41,14 @@ public class SSHTunnelingWorker {
 	}
 
 	public static void init() throws Exception {
-		final String dbdriver = "org.apache.derby.jdbc.ClientDriver";
-		final String dburl = "jdbc:derby://127.0.0.1:1527/DWEP;create=true";
-		final String dbuser = "DWEP";
-		final String dbpassword = "DWEP";
-		Class.forName(dbdriver);
-		DBLayer registry = DBLayer.getLayer(getDBType(dburl), new ConnectionProvider() {
+		Class.forName(ServerDefaults._dbDriver);
+		DBLayer registry = DBLayer.getLayer(getDBType(ServerDefaults._dbUrl), new ConnectionProvider() {
 			public Connection newConnection() throws java.sql.SQLException {
-				return DriverManager.getConnection(dburl, dbuser, dbpassword);
+				return DriverManager.getConnection(ServerDefaults._dbUrl, ServerDefaults._dbUser, ServerDefaults._dbPassword);
 			};
 		});
-		servantMap.put("derby", registry);
+		servantMap.put("db", registry);
+		servantMap.put("registry", LocateRegistry.getRegistry(ServerDefaults._registryHost,ServerDefaults._registryPort));
 	}
 
 	public static void main(String[] args) {

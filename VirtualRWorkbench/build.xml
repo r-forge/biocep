@@ -22,8 +22,6 @@
 	
 	<import file="../build.xml"/>
 						
-			<property name="db.host" value="127.0.0.1" />
-			<property name="db.port" value="1527" />			
 			<property name="tomcat.host" value="127.0.0.1" />
 			<property name="tomcat.port" value="8080" />	
 			<property name="demo.scriptdir" value="${basedir}/VirtualRWorkbench/script" />		
@@ -33,11 +31,15 @@
 			<property name="demo.webservices.war.name" value="rws" />
 			<property name="demo.frontend.war.name" value="rvirtual" />							
 			<property name="demo.mapping.war.name" value="rmapping" />
-	
-			<property name="demo.db.driver" value="org.apache.derby.jdbc.ClientDriver"/>
-			<property name="demo.db.url" value="jdbc:derby://${db.host}:${db.port}/DWEP;create=true" />
+		
+			<property name="demo.naming.mode" value="db" />	
+			<property name="demo.db.type" value="derby" />
+			<property name="demo.db.host" value="127.0.0.1" />
+			<property name="demo.db.port" value="1527" />
+			<property name="demo.db.name" value="DWEP" />
 			<property name="demo.db.user" value="DWEP" />
 			<property name="demo.db.password" value="DWEP" />
+	
 			<property name="demo.client.src" value="${basedir}/VirtualRWorkbench/src" />
 			<property name="demo.client.bin" value="${basedir}/VirtualRWorkbench/src" />
 			<property name="demo.client.mainclass" value="MultiR" />
@@ -50,42 +52,63 @@
 			<property name="demo.mappingjar" value="${demo.generatedir}${demo.mapping.jar.name}.jar" />
 	
 			<target name="demodb">		
-				<antcall target="db">						
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
+				<antcall target="db">		
+					
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
 					<param name="db.password" value="${demo.db.password}" />	
+					
+					
 					<param name="db.initscript" value="${basedir}/VirtualRWorkbench/initscript.sql" />		
 				</antcall>			
 			</target>		
 			
 			<target name="demokill">		
-				<antcall target="killdb">						
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
+				<antcall target="killdb">	
+					
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
 					<param name="db.password" value="${demo.db.password}" />	
+						
 					<param name="db.initscript" value="${basedir}/VirtualRWorkbench/initscript.sql" />		
 				</antcall>			
 			</target>	
 	
 			<target name="demotop">
-				<antcall target="top">						
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
+				<antcall target="top">	
+					
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
-					<param name="db.password" value="${demo.db.password}" />
+					<param name="db.password" value="${demo.db.password}" />	
+						
 				</antcall>			
 			</target>	
 	
 			<target name="demonode">				
 				<if><not><isset property="node"/></not><then><property name="node" value=""/></then></if>
-				<antcall target="node">						
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
+				<antcall target="node">
+					
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
-					<param name="db.password" value="${demo.db.password}" />
-					<param name="db.password" value="${demo.db.password}" />
+					<param name="db.password" value="${demo.db.password}" />	
+					
+					
 					<param name="node.name" value="${node}" />
 				</antcall>			
 			</target>	
@@ -150,11 +173,16 @@
 					<!--<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR} file://${windows.root.slash}${demo.mappingjar}"/>-->
 					<param name="servant.codebase" value="http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/rmi/RJB.jar http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/rmi/mapping.jar"/>
 					<param name="servantclass" value="server.RServantImpl"/>											
-					<param name="node" value="${node}" />													
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
+					<param name="node" value="${node}" />
+					
+					
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
-					<param name="db.password" value="${demo.db.password}" />
+					<param name="db.password" value="${demo.db.password}" />	
 
 					<param name="working.dir.root" value="${basedir}/VirtualRWorkbench/wdir"/>
 					<param name="properties.extension" value="${basedir}/VirtualRWorkbench/cluster.properties"/>
@@ -197,11 +225,16 @@
 					<pathelement path="${demo.mappingjar}"/>							
 				</path>
 				
-				<antcall target="client">						
-					<param name="client.db.driver" value="${demo.db.driver}"/>
-					<param name="client.db.url" value="${demo.db.url}" />
+				<antcall target="client">		
+					
+					
+					<param name="client.db.type" value="${demo.db.type}"/>
+					<param name="client.db.host" value="${demo.db.host}" />
+					<param name="client.db.port" value="${demo.db.port}" />
+					<param name="client.db.name" value="${demo.db.name}" />					
 					<param name="client.db.user" value="${demo.db.user}" />
 					<param name="client.db.password" value="${demo.db.password}" />
+					
 					<param name="client.defaultpoolname" value="${demo.client.defaultpoolname}" />
 					<param name="client.path.id" value="demoVsnPoolpath" />			
 					<param name="client.mainclass" value="${demo.client.mainclass}" />
@@ -217,11 +250,15 @@
 										
 				</path>
 				
-				<antcall target="client">						
-					<param name="client.db.driver" value="${demo.db.driver}"/>
-					<param name="client.db.url" value="${demo.db.url}" />
+				<antcall target="client">		
+					
+					<param name="client.db.type" value="${demo.db.type}"/>
+					<param name="client.db.host" value="${demo.db.host}" />
+					<param name="client.db.port" value="${demo.db.port}" />
+					<param name="client.db.name" value="${demo.db.name}" />					
 					<param name="client.db.user" value="${demo.db.user}" />
 					<param name="client.db.password" value="${demo.db.password}" />
+					
 					<param name="client.defaultpoolname" value="${demo.client.defaultpoolname}" />
 					<param name="client.path.id" value="demoVsnPoolpath" />			
 					<param name="client.mainclass" value="LocalR" />
@@ -239,11 +276,15 @@
 					<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
 				</path>
 				
-				<antcall target="client">						
-					<param name="client.db.driver" value="${demo.db.driver}"/>
-					<param name="client.db.url" value="${demo.db.url}" />
+				<antcall target="client">			
+					
+					<param name="client.db.type" value="${demo.db.type}"/>
+					<param name="client.db.host" value="${demo.db.host}" />
+					<param name="client.db.port" value="${demo.db.port}" />
+					<param name="client.db.name" value="${demo.db.name}" />					
 					<param name="client.db.user" value="${demo.db.user}" />
 					<param name="client.db.password" value="${demo.db.password}" />
+					
 					<param name="client.defaultpoolname" value="${demo.client.defaultpoolname}" />
 					<param name="client.path.id" value="httpPath" />			
 					<param name="client.mainclass" value="HttpR" />
@@ -350,10 +391,14 @@
 					
 						<jvmarg value="-Dlocaltomcat.port=${localtomcat.port}" />
 					
-						<jvmarg value="-Ddb.driver=${demo.db.driver}"/>
-						<jvmarg value="-Ddb.url=${demo.db.url}" />
-						<jvmarg value="-Ddb.user=${demo.db.user}" />
-						<jvmarg value="-Ddb.password=${demo.db.password}" />
+					<jvmarg value="-Dnaming.mode=${demo.naming.mode}"/>
+					<jvmarg value="-Ddb.type=${demo.db.type}"/>
+					<jvmarg value="-Ddb.host=${demo.db.host}"/>
+					<jvmarg value="-Ddb.port=${demo.db.port}"/>
+					<jvmarg value="-Ddb.name=${demo.db.name}"/>			
+					<jvmarg value="-Ddb.user=${demo.db.user}"/>
+					<jvmarg value="-Ddb.password=${demo.db.password}"/>
+
 					
 						<jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 						<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
@@ -464,11 +509,18 @@
 							</classpath>					  
 					  		<arg value="VirtualRWorkbench/frontendapp/WEB-INF/classes/globals.properties"/>					  
 						    <arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB"/>
-						    <arg value="pools.dbmode.driver=${demo.db.driver}"/>
-						    <arg value="pools.dbmode.url=${demo.db.url}"/>
+				  			
+				  			
+						    <arg value="pools.dbmode.type=${demo.db.type}"/>
+						    <arg value="pools.dbmode.host=${demo.db.host}"/>
+				  			<arg value="pools.dbmode.port=${demo.db.port}"/>
+				  			<arg value="pools.dbmode.name=${demo.db.name}"/>	
 						    <arg value="pools.dbmode.user=${demo.db.user}"/>
 						    <arg value="pools.dbmode.password=${demo.db.password}"/>					  					  
-						    <arg value="pools.dbmode.defaultpoolname=R"/>					  
+						    	
+				  			<arg value="pools.dbmode.defaultpoolname=R"/>
+				  			
+				  			
 						    <arg value="pstools.home=${PSTOOLS_HOME}"/>
 						    <arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>	
 						    <arg value="node.manager.name=NODE_MANAGER"/>

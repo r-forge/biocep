@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.JFrame;
+
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.db.monitor.SupervisorUtils;
 
 /**
@@ -34,14 +36,11 @@ public class KillAllDB {
 	public static void main(String[] args) {
 		try {
 
-			final String dburl = System.getProperty("db.url");
-			final String user = System.getProperty("db.user");
-			final String password = System.getProperty("db.password");
-			Class.forName(System.getProperty("db.driver"));
+			Class.forName(ServerDefaults._dbDriver);
 
-			final DBLayer dbLayer = DBLayer.getLayer(getDBType(dburl), new ConnectionProvider() {
+			final DBLayer dbLayer = DBLayer.getLayer(getDBType(ServerDefaults._dbUrl), new ConnectionProvider() {
 				public Connection newConnection() throws SQLException {
-					return DriverManager.getConnection(dburl, user, password);
+					return DriverManager.getConnection(ServerDefaults._dbUrl, ServerDefaults._dbUser, ServerDefaults._dbPassword);
 				}
 			});
 

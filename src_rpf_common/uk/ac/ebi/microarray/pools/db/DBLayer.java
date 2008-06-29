@@ -50,6 +50,7 @@ import uk.ac.ebi.microarray.pools.LookUpInterrupted;
 import uk.ac.ebi.microarray.pools.LookUpTimeout;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RPFSessionInfo;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
 import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
@@ -1209,17 +1210,13 @@ public abstract class DBLayer implements DBLayerInterface {
 			return _registry;
 		synchronized (_lock) {
 			if (_registry == null) {
-				final String dburl = System.getProperty("db.url");
-				if (dburl != null && !dburl.equals("")) {
-					final String user = System.getProperty("db.user");
-					final String password = System.getProperty("db.password");
-					Class.forName(System.getProperty("db.driver"));
-					_registry = getLayer(PoolUtils.getDBType(dburl), new ConnectionProvider() {
+				if (ServerDefaults._namingMode.equals("db")) {						
+					Class.forName(ServerDefaults._dbDriver);
+					_registry = getLayer(PoolUtils.getDBType(ServerDefaults._dbUrl), new ConnectionProvider() {
 						public Connection newConnection() throws java.sql.SQLException {
-							return DriverManager.getConnection(dburl, user, password);
+							return DriverManager.getConnection(ServerDefaults._dbUrl, ServerDefaults._dbUser, ServerDefaults._dbPassword);
 						};
-
-					});
+					});					
 				} else {
 					_registry = LocateRegistry.getRegistry(_registryHost, _registryPort);
 				}

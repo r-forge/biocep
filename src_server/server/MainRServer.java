@@ -12,6 +12,7 @@ import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationListener;
 import uk.ac.ebi.microarray.pools.YesSecurityManager;
+import uk.ac.ebi.microarray.pools.db.DBLayer;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -50,8 +51,8 @@ public class MainRServer {
 			log.info("Instantiating " + _mainServantClassName + " with name " + servantName + " , prefix " + _servantPoolPrefix);
 
 			
-			if (rmiRegistry == null)
-				rmiRegistry = LocateRegistry.getRegistry(_registryHost, _registryPort);
+			if (rmiRegistry == null) rmiRegistry = DBLayer.getRmiRegistry();
+			
 			System.out.println("### code base:" + System.getProperty("java.rmi.server.codebase"));
 
 			mainServantClass = RServantImpl.class;

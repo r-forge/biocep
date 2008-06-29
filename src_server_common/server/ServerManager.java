@@ -18,6 +18,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -47,7 +48,17 @@ import ch.ethz.ssh2.StreamGobbler;
  */
 public class ServerManager {
 
+	public static void main(String[] args) throws Exception {
+		RServices r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
+			ServerManager.getNamingInfo(), 256,256, "", false, null);
+
+		System.out.println(r.consoleSubmit("print('a')"));
+		System.exit(0);
+	}
+
+	
 	public static String INSTALL_DIR = null;
+	
 	static {
 		if (System.getenv("BIOCEP_HOME") != null) {
 			INSTALL_DIR = System.getenv("BIOCEP_HOME");
@@ -91,16 +102,34 @@ public class ServerManager {
 	private static final String RVEREND = "R$VER$END";
 
 	public static TableModelRemoteImpl tmri;
+	
+	
+	public static String[] namingVars=new String[]{"registry.host", "registry.port","naming.mode","db.type","db.host","db.port","db.name","db.user","db.password"};
 
-	public static void main(String[] args) throws Exception {
-		System.exit(0);
-	}
 
 	private static JTextArea createRSshProgressArea;
 	private static JProgressBar createRSshProgressBar;
 	private static JFrame createRSshProgressFrame;
 
-	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
+	public static Properties getRegistryNamingInfo(String registryHost, int registryPort) {
+		Properties result=new Properties();
+		result.put("registry.host", registryHost);
+		result.put("registry.port", new Integer(registryPort).toString());
+		return result;
+	}
+	
+	public static Properties getNamingInfo() {
+		Properties result=new Properties();		
+		for (int i=0;i<namingVars.length;++i) {
+			String var=namingVars[i];
+			if (System.getProperty(var)!=null && !System.getProperty(var).equals("")) {
+				result.put(var,System.getProperty(var));
+			}					
+		}		
+		return result;
+	}
+	
+	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, int sshPort, String sshLogin, String sshPwd, String name, boolean showProgress,
 			URL[] codeUrls) throws BadSshHostException, BadSshLoginPwdException, Exception {
 
@@ -181,7 +210,7 @@ public class ServerManager {
 				sess = conn.openSession();
 
 				String command = "java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
-						+ codeServerPort + " " + rmiRegistryHostIp + " " + rmiRegistryPort + " " + memoryMinMegabytes + " " + memoryMaxMegabytes + " "
+						+ codeServerPort + " " + BootSsh.propertiesToString(namingInfo) + " " + "NULL" + " " + memoryMinMegabytes + " " + memoryMaxMegabytes + " "
 						+ "System.out" + " " + ((name == null || name.trim().equals("")) ? BootSsh.NO_NAME : name);
 
 				if (codeUrls != null && codeUrls.length > 0) {
@@ -270,7 +299,7 @@ public class ServerManager {
 	private static JProgressBar createRLocalProgressBar;
 	private static JFrame createRLocalProgressFrame;
 
-	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
+	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls) throws Exception {
 
 		if (showProgress) {
@@ -348,8 +377,10 @@ public class ServerManager {
 			command.add(new Boolean(keepAlive).toString());
 			command.add(codeServerHostIp);
 			command.add("" + codeServerPort);
-			command.add(rmiRegistryHostIp);
-			command.add("" + rmiRegistryPort);
+			
+			command.add(BootSsh.propertiesToString(namingInfo));
+			command.add("NULL");			
+			
 			command.add("" + memoryMinMegabytes);
 			command.add("" + memoryMaxMegabytes);
 			command.add(logFile);
@@ -360,9 +391,47 @@ public class ServerManager {
 					command.add(codeUrls[i].toString());
 				}
 			}
-
+			
+			System.out.println(";;command:"+command);
 			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), null);
+			
+			
+			
+			final Vector<String> installPrint = new Vector<String>();
+			final Vector<String> installErrorPrint = new Vector<String>();
 
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+						String line = null;
+						while ((line = br.readLine()) != null) {
+							System.out.println(line);
+							installErrorPrint.add(line);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+						String line = null;
+						while ((line = br.readLine()) != null) {
+							System.out.println(line);
+							installPrint.add(line);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();			
+			
+			
+			
 			while (!new File(logFile).exists()) {
 				try {
 					Thread.sleep(100);
@@ -419,11 +488,11 @@ public class ServerManager {
 	private static JFrame createRProgressFrame;
 
 	public static RServices createR(String name) throws Exception {
-		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), "127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort(), 256, 256, name,
+		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo("127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort()), 256, 256, name,
 				false, null);
 	}
 
-	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, String rmiRegistryHostIp, int rmiRegistryPort,
+	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls) throws Exception {
 
 		if (showProgress) {
@@ -735,9 +804,14 @@ public class ServerManager {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=false" + (isWindowsOs() ? "\"" : ""));
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + INSTALL_DIR + "wdir" + (isWindowsOs() ? "\"" : ""));
-
-				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryhost=" + rmiRegistryHostIp + (isWindowsOs() ? "\"" : ""));
-				command.add((isWindowsOs() ? "\"" : "") + "-Dregistryport=" + rmiRegistryPort + (isWindowsOs() ? "\"" : ""));
+				
+				
+				for (int i=0;i<namingVars.length;++i) {
+					String var=namingVars[i];
+					if (namingInfo.getProperty(var)!=null && !namingInfo.getProperty(var).equals("")) {
+						command.add((isWindowsOs() ? "\"" : "") + "-D"+var+"=" + namingInfo.get(var) + (isWindowsOs() ? "\"" : ""));
+					}					
+				}
 
 				/*
 				 * command.add((isWindowsOs() ? "\"" : "") +

@@ -36,6 +36,7 @@ import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantProvider;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.reg.ServantProxyPoolSingletonReg;
 import uk.ac.ebi.microarray.pools.TimeoutException;
 
@@ -71,18 +72,15 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 			}
 		} else {
 
-			String poolPrefix = System.getProperty("prefix") != null && !System.getProperty("prefix").equals("") ? System.getProperty("prefix")
-					: DEFAULT_PREFIX;
-
-			String registryHost = System.getProperty("registryhost") != null && !System.getProperty("registryhost").equals("") ? System
-					.getProperty("registryhost") : DEFAULT_REGISTRY_HOST;
-
-			int registryPort = System.getProperty("registryport") != null && !System.getProperty("registryport").equals("") ? Integer.decode(System
-					.getProperty("registryport")) : DEFAULT_REGISTRY_PORT;
-
+			
+			String poolPrefix = ServerDefaults._servantPoolPrefix;
+			String registryHost = ServerDefaults._registryHost;
+			int registryPort = ServerDefaults._registryPort;
+			
 			int timeOutMillisec = System.getProperty("timeout") != null && !System.getProperty("timeout").equals("") ? Integer.decode(System
 					.getProperty("timeout")) : DEFAULT_TIMEOUT;
 
+			
 			_defaultPoolName = "DEFAULT";
 			PoolData poolData = new PoolData(_defaultPoolName, timeOutMillisec, new Vector<PoolNode>());
 			poolData.getNodes().add(new PoolNode(poolPrefix, registryHost, registryPort));

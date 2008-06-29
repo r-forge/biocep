@@ -52,8 +52,8 @@ public class GDAppletLauncher {
 			params.put("lf", System.getProperty("lf"));
 			params.put("stub", System.getProperty("stub"));
 			params.put("name", System.getProperty("name"));
-			params.put("registryhost", System.getProperty("registryhost"));
-			params.put("registryport", System.getProperty("registryport"));
+			params.put("registry.host", System.getProperty("registry.host"));
+			params.put("registry.port", System.getProperty("registry.port"));
 			params.put("url", System.getProperty("url"));
 			
 			System.out.println("params=" + params);
