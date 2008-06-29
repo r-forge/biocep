@@ -62,10 +62,14 @@ public class CollaborativeSpreadsheetView extends DynamicView {
 		addListener(l);	
 		
 		try {
+			System.out.println ("---Step 1");
 			_spreadsheetModelRemote = rgui.getR().getSpreadsheetTableModelRemote(spreadsheetModelId);
+			System.out.println ("---Step 2");
 			final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(_spreadsheetModelRemote);
+			System.out.println ("---Step 3");
 			((JPanel) getComponent()).setLayout(new BorderLayout());
 			((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
+			System.out.println ("---Step 4");
 			getViewProperties().setTitle("Collaboratibe Spreadsheet View <" + spreadsheetModelId + ">");
 		} catch (Exception e) {
 			e.printStackTrace();
