@@ -34,9 +34,11 @@ public class MainRServer {
 
 	public static void main(String[] args) throws Exception {
 		
-		System.out.println("###2:naming.mode:"+System.getProperty("naming.mode"));
+		
 
 		PoolUtils.initLog4J();
+		
+		System.out.println("###2:naming.mode:"+System.getProperty("naming.mode"));
 
 		try {
 
