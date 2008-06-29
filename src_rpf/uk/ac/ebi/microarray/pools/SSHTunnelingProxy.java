@@ -94,7 +94,7 @@ public class SSHTunnelingProxy {
 			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
 			
 			while (startReadingAnswer[0]) {
-				try {Thread.sleep(50);} catch (Exception e) {}
+				try {Thread.sleep(10);} catch (Exception e) {}
 			}
 		
 			Object result=PoolUtils.hexToObject(buffer.toString(), SSHTunnelingProxy.class.getClassLoader());
