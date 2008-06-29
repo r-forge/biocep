@@ -860,7 +860,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} else {
 								result = _rForConsole.consoleSubmit(expression);
 								if (isCollaborativeMode())
-									_rForConsole.consolePrint(_sessionId, expression, (String) result);
+									_rForConsole.consolePrint(getUserName(), expression, (String) result);
 							}
 
 						} catch (NotLoggedInException nle) {
