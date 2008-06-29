@@ -81,12 +81,23 @@ import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
  */
 public class PoolUtils {
 
+	
+	public static final String DEFAULT_NAMING_MODE = "registry";
+	
 	public static final String DEFAULT_PREFIX = "RSERVANT_";
 	public static final String DEFAULT_REGISTRY_HOST = "localhost";
-	public static final int DEFAULT_REGISTRY_PORT = 1099;
+	public static final int    DEFAULT_REGISTRY_PORT = 1099;
+	
 	public static final int DEFAULT_MEMORY_MIN = 256;
 	public static final int DEFAULT_MEMORY_MAX = 256;
-
+		
+	public static final String DEFAULT_DB_TYPE = "derby";
+	public static final String DEFAULT_DB_HOST = "localhost";
+	public static final int    DEFAULT_DB_PORT = 1527;	
+	public static final String DEFAULT_DB_NAME = "DWEP";	
+	public static final String DEFAULT_DB_USER = "DWEP";
+	public static final String DEFAULT_DB_PASSWORD = "DWEP";
+	
 	public static final int DEFAULT_TIMEOUT = 40000;
 
 	public static final int PING_FAILURES_NBR_MAX = 1;
@@ -487,7 +498,7 @@ public class PoolUtils {
 		int p2 = jdbcUrl.indexOf(':', p1 + 1);
 		return jdbcUrl.substring(p1 + 1, p2);
 	}
-
+	
 	public static URL[] getURLS(String urlsStr) {
 		StringTokenizer st = new StringTokenizer(urlsStr, " ");
 		Vector<URL> result = new Vector<URL>();

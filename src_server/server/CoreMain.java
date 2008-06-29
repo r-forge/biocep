@@ -31,15 +31,24 @@ public class CoreMain {
 			if (System.getProperty("local")!=null && !System.getProperty("local").equals("")) local=new Boolean(System.getProperty("local"));
 			else local=PoolUtils.isWindowsOs(); 
 			if (local ) {
+				
+					
 					r = ServerManager.createRLocal(true, 
 							PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-							ServerDefaults._registryHost, ServerDefaults._registryPort , 
+							ServerManager.getNamingInfo() , 
 							ServerDefaults._memoryMin, ServerDefaults._memoryMax,System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]));
 					
+					
+					
 			} else {
+				
+				
 				r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
-						ServerDefaults._registryHost, ServerDefaults._registryPort , 
+						ServerManager.getNamingInfo(), 
 								ServerDefaults._memoryMin, ServerDefaults._memoryMax, System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]) );
+				
+				
+				
 			}
 			
 		} else {			

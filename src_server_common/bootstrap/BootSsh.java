@@ -1,9 +1,11 @@
 package bootstrap;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.URL;
@@ -12,6 +14,9 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
@@ -64,11 +69,10 @@ public class BootSsh {
 				Class<?> ServerLauncherClass = cl.loadClass("server.ServerManager");
 				Remote r = (Remote) ServerLauncherClass.getMethod(
 						"createR",
-						new Class<?>[] { boolean.class, String.class, int.class, String.class, int.class, int.class, int.class, String.class, boolean.class,
+						new Class<?>[] { boolean.class, String.class, int.class,  Properties.class,  int.class, int.class, String.class, boolean.class,
 								URL[].class }).invoke(
 						null,
-						new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), args[3],
-								Integer.decode(args[4]).intValue(), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), name, false,
+						new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), stringToProperties(args[3]), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), name, false,
 								(URL[]) codeUrls.toArray(new URL[0]) });
 
 				Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");
@@ -142,6 +146,40 @@ public class BootSsh {
 		}
 		String rslt = new String(out);
 		return rslt;
+	}
+	
+	
+	public static Properties stringToProperties(String parametersStr) {		
+		StringTokenizer st = new StringTokenizer(parametersStr, "~/~"); 
+		Properties result = new Properties();	
+		while (st.hasMoreElements()) {
+			try {
+				String element=(String)st.nextElement();
+				int p=element.indexOf('=');
+				if (p==-1) {
+					result.put(element,null);
+				}
+				else {
+					result.put(element.substring(0,p).trim(), element.substring(p+1, element.length()).trim());
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
+	
+	public static String propertiesToString(Properties props) {
+		String result="";
+		for (Object k:props.keySet()) {
+			result=result+k+"="+props.getProperty((String)k)+"~/~";
+		}
+		
+		if (result.length()>0) {
+			result=result.substring(0,result.length()-"~/~".length());
+		}
+	
+		return result;
 	}
 
 }

@@ -1,6 +1,5 @@
 <!--
  * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
- * Copyright (C) 2008  Imperial College London - Internet Center
  * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,10 +29,15 @@
 	<property name="demo.mappingjarname" value="mapping.jar" />		
 	<property name="demo.mappingjar" value="${demo.generatedir}${demo.mappingjarname}" />
 	
-	<property name="demo.db.driver" value="org.apache.derby.jdbc.ClientDriver"/>
-	<property name="demo.db.url" value="jdbc:derby://${db.host}:${db.port}/DWEP;create=true" />
+		
+	<property name="demo.naming.mode" value="db" />	
+	<property name="demo.db.type" value="derby" />
+	<property name="demo.db.host" value="127.0.0.1" />
+	<property name="demo.db.port" value="1527" />
+	<property name="demo.db.name" value="DWEP" />
 	<property name="demo.db.user" value="DWEP" />
 	<property name="demo.db.password" value="DWEP" />
+	
 	
 	<property name="demo.webservices.war.name" value="ws" />
 	<property name="demo.ws.kill.used.R" value="false"/>
@@ -48,29 +52,38 @@
 				
 	<target name="demodb">		
 		<antcall target="db">						
-			<param name="db.driver" value="${demo.db.driver}"/>
-			<param name="db.url" value="${demo.db.url}" />
-			<param name="db.user" value="${demo.db.user}" />
-			<param name="db.password" value="${demo.db.password}" />
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
+					<param name="db.user" value="${demo.db.user}" />
+					<param name="db.password" value="${demo.db.password}" />	
 			<param name="db.initscript" value="${basedir}/demos/demo5/initscript.sql" />			
 		</antcall>			
 	</target>		
 			
 	<target name="demotop">
 		<antcall target="top">						
-			<param name="db.driver" value="${demo.db.driver}"/>
-			<param name="db.url" value="${demo.db.url}" />
-			<param name="db.user" value="${demo.db.user}" />
-			<param name="db.password" value="${demo.db.password}" />			
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
+					<param name="db.user" value="${demo.db.user}" />
+					<param name="db.password" value="${demo.db.password}" />			
 		</antcall>			
 	</target>	
 	
 	<target name="demonode">
 		<antcall target="node">						
-			<param name="db.driver" value="${demo.db.driver}"/>
-			<param name="db.url" value="${demo.db.url}" />
-			<param name="db.user" value="${demo.db.user}" />
-			<param name="db.password" value="${demo.db.password}" />
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
+					<param name="db.user" value="${demo.db.user}" />
+					<param name="db.password" value="${demo.db.password}" />	
 		</antcall>			
 	</target>	
 	
@@ -124,10 +137,13 @@
 			<param name="servantclass" value="server.RServantImpl"/>
 			<param name="autoname" value="true" />
 			
-			<param name="db.driver" value="${demo.db.driver}"/>
-			<param name="db.url" value="${demo.db.url}" />
-			<param name="db.user" value="${demo.db.user}" />
-			<param name="db.password" value="${demo.db.password}" />	
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
+					<param name="db.user" value="${demo.db.user}" />
+					<param name="db.password" value="${demo.db.password}" />	
 			
 			<param name="working.dir.root" value="${basedir}/demos/demo5/wdir"/>		
 		</antcall>	

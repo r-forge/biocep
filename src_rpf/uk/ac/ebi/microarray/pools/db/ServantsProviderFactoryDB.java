@@ -48,12 +48,28 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 
 	public ServantsProviderFactoryDB() throws Exception {
 		super();
-
-		_driver = System.getProperty("pools.dbmode.driver");
-		_url = System.getProperty("pools.dbmode.url");
-		_user = System.getProperty("pools.dbmode.user");
-		_password = System.getProperty("pools.dbmode.password");
+		
+		String _DB_TYPE =  System.getProperty("pools.dbmode.type") != null && !System.getProperty("pools.dbmode.type").equals("") ? System.getProperty("pools.dbmode.type") : DEFAULT_DB_TYPE;
+		String _DB_HOST = System.getProperty("pools.dbmode.host") != null && !System.getProperty("pools.dbmode.host").equals("") ? System.getProperty("pools.dbmode.host") : DEFAULT_DB_HOST;
+		int    _DB_PORT = System.getProperty("pools.dbmode.port") != null && !System.getProperty("pools.dbmode.port").equals("") ? Integer.decode(System.getProperty("pools.dbmode.port")) : DEFAULT_DB_PORT;		
+		String _DB_NAME = System.getProperty("pools.dbmode.name") != null && !System.getProperty("pools.dbmode.name").equals("") ? System.getProperty("pools.dbmode.name") : DEFAULT_DB_NAME;	
+		
+		if (_DB_TYPE.equals("derby")) {
+			_url = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME+";create=true";
+			_driver="org.apache.derby.jdbc.ClientDriver";
+		} else if (_DB_TYPE.equals("mysql")) {			
+			_url = "jdbc:mysql://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME;			
+			_driver="org.gjt.mm.mysql.Driver";
+				
+		} else if (_DB_TYPE.equals("oracle")) {			
+			_url = "jdbc:oracle:thin:@"+_DB_HOST+":"+_DB_PORT+":"+_DB_NAME; 
+			_driver="oracle.jdbc.driver.OracleDriver";
+		}
+		
+		_user = System.getProperty("pools.dbmode.user") != null && !System.getProperty("pools.dbmode.user").equals("") ? System.getProperty("pools.dbmode.user") : DEFAULT_DB_USER;
+		_password = System.getProperty("pools.dbmode.password") != null && !System.getProperty("pools.dbmode.password").equals("") ? System.getProperty("pools.dbmode.password") : DEFAULT_DB_PASSWORD;			
 		_defaultPoolName = System.getProperty("pools.dbmode.defaultpoolname");
+		
 
 		{
 			Class.forName(_driver);

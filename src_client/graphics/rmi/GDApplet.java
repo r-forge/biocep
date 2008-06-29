@@ -399,10 +399,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 			LoginDialog.stub_str = getParameter("stub");
 		if (getParameter("name") != null && !getParameter("name").equals(""))
 			LoginDialog.servantName_str = getParameter("name");
-		if (getParameter("registryhost") != null && !getParameter("registryhost").equals(""))
-			LoginDialog.servantName_str = getParameter("registryhost");
-		if (getParameter("registryport") != null && !getParameter("registryport").equals(""))
-			LoginDialog.servantName_str = getParameter("registryport");
+		if (getParameter("registry.host") != null && !getParameter("registry.host").equals(""))
+			LoginDialog.servantName_str = getParameter("registry.host");
+		if (getParameter("registry.port") != null && !getParameter("registry.port").equals(""))
+			LoginDialog.servantName_str = getParameter("registry.port");
 		if (getParameter("url") != null && !getParameter("url").equals(""))
 			LoginDialog.url_str = getParameter("url");
 
@@ -542,23 +542,23 @@ public class GDApplet extends GDAppletBase implements RGui {
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-												PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident.getMemoryMax(),
+												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident.getMemoryMax(),
 												ident.getSshHostIp(), ident.getSshPort(), ident.getSshLogin(), ident.getSshPwd(), "", false, null);
 									} else {
 
 										if (PoolUtils.isWindowsOs()) {
 											if (_keepAlive) {
 												r = ServerManager.createRLocal(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident
+														ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
 																.getMemoryMax(), "", false, null);
 											} else {
 												r = ServerManager.createR(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-														PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident
+														ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
 																.getMemoryMax(), "", false, null);
 											}
 										} else {
 											r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-													PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort(), ident.getMemoryMin(), ident
+													ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
 															.getMemoryMax(), "", false, null);
 										}
 									}

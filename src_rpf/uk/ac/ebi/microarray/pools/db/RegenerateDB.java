@@ -21,6 +21,8 @@ import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 /**
@@ -28,17 +30,12 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.*;
  */
 public class RegenerateDB {
 	public static void main(String[] args) throws Exception {
-		final String dburl = System.getProperty("db.url");
-		final String user = System.getProperty("db.user");
-		final String password = System.getProperty("db.password");
-		System.out.println("DB url:" + dburl);
-		System.out.println("DB user:" + user);
-		System.out.println("DB password:" + password);
-		Class.forName(System.getProperty("db.driver"));
+	
+		Class.forName(ServerDefaults._dbDriver);
 
-		DBLayer dbLayer = DBLayer.getLayer(getDBType(dburl), new ConnectionProvider() {
+		DBLayer dbLayer = DBLayer.getLayer(getDBType(ServerDefaults._dbUrl), new ConnectionProvider() {
 			public Connection newConnection() throws SQLException {
-				return DriverManager.getConnection(dburl, user, password);
+				return DriverManager.getConnection(ServerDefaults._dbUrl, ServerDefaults._dbUser, ServerDefaults._dbPassword);
 			}
 		});
 

@@ -287,9 +287,14 @@ public class ToolsMain {
 			tempFile.delete();
 		
 	    String[] embedPropertiesNames=new String[] {
-			   "pools.provider.factory",
-			   "pools.dbmode.driver",
-			   "pools.dbmode.url",
+			   "pools.provider.factory",			   
+			   "regsitry.host",
+			   "regsitry.port",
+			   "naming.mode",
+			   "pools.dbmode.type",
+			   "pools.dbmode.host",
+			   "pools.dbmode.port",
+			   "pools.dbmode.name",
 			   "pools.dbmode.user",
 			   "pools.dbmode.password",
 			   "pools.dbmode.defaultpoolname",
@@ -300,6 +305,11 @@ public class ToolsMain {
 			   "http.frontend.url"};
 	   
 	   String[] embedPropertiesDefaultValues=new String[] {
+			   null,
+			   null,
+			   null,
+			   null,
+			   null,
 			   null,
 			   null,
 			   null,
