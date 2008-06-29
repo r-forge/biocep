@@ -63,9 +63,11 @@ public class SSHTunnelingProxy {
 					try {
 						while (true) {
 							String line = brOut.readLine();
-							if (line == null) break;								
+							if (line == null) break;							
+							
+							if (line.equals("->Result End")) startReadingAnswer=false;
 							if (startReadingAnswer) buffer.append(line);
-							if (line.equals("->Result")) startReadingAnswer=true;							
+							if (line.equals("->Result Start")) startReadingAnswer=true;							
 							System.out.println(line);
 						}
 					} catch (Exception e) {
