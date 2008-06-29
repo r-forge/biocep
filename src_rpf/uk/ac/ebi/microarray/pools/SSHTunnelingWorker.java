@@ -71,10 +71,26 @@ public class SSHTunnelingWorker {
 			String resultBuffer=PoolUtils.objectToHex(result);
 			System.out.println("result Buffer length:"+resultBuffer.length());
 			System.out.println("->Result Start");
+			
+			int b=300;
+			int d=resultBuffer.length()/b;
+			int m=resultBuffer.length()%b;
+			
+			for (int i=0; i<d;++i) {
+				System.out.println(resultBuffer.substring(i*b,i*(b+1)));
+			}
+			if (m>0) System.out.println(resultBuffer.substring(d*b,resultBuffer.length()));
+
+			
+			/*
 			for (int i=0; i<resultBuffer.length();++i) {
 				System.out.print(new String(new char[]{resultBuffer.charAt(i)}));
 				if (i>0 && i%300==0) System.out.println(); 
 			}
+			*/
+			
+			
+			
 			System.out.println();
 			System.out.println("->Result End");
 			System.out.flush();
