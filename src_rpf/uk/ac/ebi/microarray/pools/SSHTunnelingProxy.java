@@ -57,18 +57,19 @@ public class SSHTunnelingProxy {
 			final BufferedReader brOut = new BufferedReader(new InputStreamReader(new StreamGobbler(sess.getStdout())));
 			final BufferedReader brErr = new BufferedReader(new InputStreamReader(new StreamGobbler(sess.getStderr())));
 			final StringBuffer buffer=new StringBuffer();
+			final boolean[] startReadingAnswer=new boolean[]{false};
 			new Thread(new Runnable() {
-				boolean startReadingAnswer=false;
+				
 				public void run() {
 					try {
 						while (true) {
 							String line = brOut.readLine();
 							if (line == null) break;							
 							
-							if (line.equals("->Result End")) startReadingAnswer=false;
-							if (startReadingAnswer) buffer.append(line);
-							if (line.equals("->Result Start")) startReadingAnswer=true;							
-							System.out.println(line);
+							if (line.equals("->Result End")) startReadingAnswer[0]=false;
+							if (startReadingAnswer[0]) buffer.append(line.trim());
+							if (line.equals("->Result Start")) startReadingAnswer[0]=true;							
+							//System.out.println(line);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -92,6 +93,10 @@ public class SSHTunnelingProxy {
 
 			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
 			
+			while (startReadingAnswer[0]) {
+				try {Thread.sleep(50);} catch (Exception e) {}
+			}
+		
 			Object result=PoolUtils.hexToObject(buffer.toString(), SSHTunnelingProxy.class.getClassLoader());
 			
 			if (result instanceof SSHTunnelingException) throw (SSHTunnelingException)result;
