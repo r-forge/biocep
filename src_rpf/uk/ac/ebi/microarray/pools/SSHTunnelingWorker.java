@@ -75,6 +75,7 @@ public class SSHTunnelingWorker {
 				System.out.print(new String(new char[]{resultBuffer.charAt(i)}));
 				if (i>0 && i%300==0) System.out.println(); 
 			}
+			System.out.println();
 			System.out.println("->Result End");
 			System.out.flush();
 			new File(fileIn).delete();
