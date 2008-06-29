@@ -47,7 +47,6 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		super(port);
 
 		try {
-			log.info("###3:naming.mode:"+System.getProperty("naming.mode"));
 			registry.list();
 			log.info("ping registry:ok");
 		} catch (ConnectException ce) {

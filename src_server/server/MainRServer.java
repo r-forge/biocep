@@ -1,11 +1,9 @@
 package server;
 
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
-import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
+
 import static uk.ac.ebi.microarray.pools.ServerDefaults._servantPoolPrefix;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import org.apache.commons.logging.Log;
 import uk.ac.ebi.microarray.pools.ManagedServant;
@@ -34,11 +32,7 @@ public class MainRServer {
 
 	public static void main(String[] args) throws Exception {
 		
-		
-
 		PoolUtils.initLog4J();
-		
-		System.out.println("###2:naming.mode:"+System.getProperty("naming.mode"));
 
 		try {
 
