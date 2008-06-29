@@ -77,7 +77,7 @@ public class SSHTunnelingWorker {
 			int m=resultBuffer.length()%b;
 			
 			for (int i=0; i<d;++i) {
-				System.out.println(resultBuffer.substring(i*b,i*(b+1)));
+				System.out.println(resultBuffer.substring(i*b,i*b+b));
 			}
 			if (m>0) System.out.println(resultBuffer.substring(d*b,resultBuffer.length()));
 
