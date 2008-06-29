@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.HashMap;
@@ -48,7 +46,7 @@ public class SSHTunnelingWorker {
 			};
 		});
 		servantMap.put("db", registry);
-		servantMap.put("registry", LocateRegistry.getRegistry(ServerDefaults._registryHost,ServerDefaults._registryPort));
+		//servantMap.put("registry", LocateRegistry.getRegistry(ServerDefaults._registryHost,ServerDefaults._registryPort));
 	}
 
 	public static void main(String[] args) {
@@ -64,7 +62,7 @@ public class SSHTunnelingWorker {
 		} catch (SSHTunnelingException e) {
 			result = e;
 		} catch (Exception e) {
-			result = new SSHTunnelingException(e.getMessage());
+			result = new SSHTunnelingException(PoolUtils.getStackTraceAsString(e));
 		}
 
 		try {
