@@ -18,9 +18,18 @@
 package uk.ac.ebi.microarray.pools;
 
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
+
+import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
+import uk.ac.ebi.microarray.pools.db.DBLayer;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
+import static uk.ac.ebi.microarray.pools.ServerDefaults._registryHost;
+import static uk.ac.ebi.microarray.pools.ServerDefaults._registryPort;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -83,10 +92,34 @@ public abstract class ServerDefaults {
 	
 	public static boolean isRegistryAccessible() {
 		try {
-			LocateRegistry.getRegistry(_registryHost, _registryPort).list();
+			ServerDefaults.getRmiRegistry().list();
 			return true;
 		} catch (Exception e) {
 			return false;
 		}
 	}
+
+	public static Registry _registry = null;
+	public static Integer _lock = new Integer(0);
+	public static Registry getRmiRegistry() throws Exception {	
+		if (_registry != null)
+			return _registry;
+		synchronized (_lock) {
+			if (_registry == null) {
+				if (_namingMode.equals("db")) {						
+					Class.forName(_dbDriver);
+					_registry = DBLayer.getLayer(PoolUtils.getDBType(_dbUrl), new ConnectionProvider() {
+						public Connection newConnection() throws java.sql.SQLException {
+							return DriverManager.getConnection(_dbUrl, _dbUser, _dbPassword);
+						};
+					});					
+				} else {
+					_registry = LocateRegistry.getRegistry(_registryHost, _registryPort);
+				}
+			}
+			return _registry;
+		}
+	}
+
+	
 }
