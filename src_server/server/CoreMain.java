@@ -1,16 +1,31 @@
 package server;
 
 import java.net.URL;
+import java.util.Random;
 import java.util.Vector;
+
+import org.apache.commons.logging.Log;
+
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 public class CoreMain {
 
+	
+	private static final Log log = org.apache.commons.logging.LogFactory.getLog(CoreMain.class);
+	
 	public static void main(String[] args) throws Exception {
-				
+		PoolUtils.initLog4J();
 		
+		if (System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("")) {
+			int rmi_port_start=Integer.decode(System.getProperty("rmi.port.start"));
+			log.info("rmi.port.start #1:"+System.getProperty("rmi.port.start"));		
+			Random rnd=new Random(System.currentTimeMillis());
+			rmi_port_start=rmi_port_start+5*rnd.nextInt(50);
+			System.setProperty("rmi.port.start",""+rmi_port_start );			
+			log.info("rmi.port.start #2:"+System.getProperty("rmi.port.start"));
+		}
 		
 		Vector<URL> codeUrls=new Vector<URL>();		
 		if (args.length > 0) {

@@ -209,7 +209,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									if (r == null) {
 										
 										
-								        final String uid=UUID.randomUUID().toString();
+								        final String uid=(privateName != null && !privateName.equals("")) ? privateName : UUID.randomUUID().toString();
 								        new Thread(new Runnable(){
 								                public void run() {
 								                    try {
