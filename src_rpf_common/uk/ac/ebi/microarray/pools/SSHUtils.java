@@ -75,10 +75,10 @@ public class SSHUtils {
 	}
 	
 	
-	public static void execSsh(String command, String sshHostIp, String sshLogin, String sshPwd) throws Exception {
+	public static void execSsh(String command, String sshHostIp, int port, String sshLogin, String sshPwd) throws Exception {
 		Connection conn = null;
 		try {
-			conn = new Connection(sshHostIp);
+			conn = new Connection(sshHostIp, port);
 			conn.connect();
 			boolean isAuthenticated = conn.authenticateWithPassword(sshLogin, sshPwd);
 			if (isAuthenticated == false)
@@ -132,10 +132,10 @@ public class SSHUtils {
 		}
 	}
 	
-	public static void execSshBatch(String command, String uid, String prefix,  String sshHostIp, String sshLogin, String sshPwd, String remoteTargetDirectory) throws Exception {
+	public static String execSshBatch(String command, String uid, String prefix,  String sshHostIp, int port, String sshLogin, String sshPwd, String remoteTargetDirectory) throws Exception {
 		Connection conn = null;
 		try {
-			conn = new Connection(sshHostIp);
+			conn = new Connection(sshHostIp,port);
 			conn.connect();
 			boolean isAuthenticated = conn.authenticateWithPassword(sshLogin, sshPwd);
 			if (isAuthenticated == false)
@@ -157,12 +157,15 @@ public class SSHUtils {
 			
 			final BufferedReader brOut = new BufferedReader(new InputStreamReader(new StreamGobbler(sess.getStdout())));
 			final BufferedReader brErr = new BufferedReader(new InputStreamReader(new StreamGobbler(sess.getStderr())));
+			
+			final StringBuffer outputBuffer=new StringBuffer();
 			new Thread(new Runnable() {
 				public void run() {
 					try {
 						while (true) {
 							String line = brOut.readLine();
 							if (line == null) break;
+							outputBuffer.append(line.trim());
 							System.out.println(line);
 						}
 					} catch (Exception e) {
@@ -192,7 +195,7 @@ public class SSHUtils {
 			sess = conn.openSession();
 			sess.execCommand("rm "+remoteTargetDirectory+"/launcher_"+uid+".sh");
 			sess.close();
-			
+			return outputBuffer.toString();
 
 		} finally {
 			try {
