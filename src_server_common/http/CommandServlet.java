@@ -312,7 +312,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("LOGIN", login);
 					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
 					session.setAttribute("PROCESS_ID", r.getProcessId());
-					session.setAttribute("JOB_ID", r.getProcessId());
+					session.setAttribute("JOB_ID", r.getJobId());
 					
 					if (privateName != null)
 						session.setAttribute("PRIVATE_NAME", privateName);
