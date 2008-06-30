@@ -19,7 +19,7 @@ import ch.ethz.ssh2.StreamGobbler;
 public class SSHTunnelingProxy {
 	
 	
-	public static Object invoke(String sshHostIp, String sshLogin, String sshPwd, String homedir, String invokeCommand, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters) throws SSHTunnelingException {
+	public static Object invoke(String sshHostIp, int port, String sshLogin, String sshPwd, String homedir, String invokeCommand, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters) throws SSHTunnelingException {
 		String uid=UUID.randomUUID().toString();								
 		
 		String fileIn=System.getProperty("java.io.tmpdir")+"/invoke"+uid+".in";
@@ -31,7 +31,7 @@ public class SSHTunnelingProxy {
 		Connection conn = null;
 		try {
 			
-			conn = new Connection(sshHostIp);
+			conn = new Connection(sshHostIp,port);
 			conn.connect();
 			boolean isAuthenticated = conn.authenticateWithPassword(sshLogin, sshPwd);
 			if (isAuthenticated == false)
@@ -120,10 +120,10 @@ public class SSHTunnelingProxy {
 		}
 	}
 	
-	public static Object getDynamicProxy(final String sshHostIp,final String sshLogin,final String sshPwd,final String homedir,final String invokeCommand, final String servantName, Class<?>[] c) {
+	public static Object getDynamicProxy(final String sshHostIp,final int port, final String sshLogin,final String sshPwd,final String homedir,final String invokeCommand, final String servantName, Class<?>[] c) {
 		Object proxy = Proxy.newProxyInstance(SSHTunnelingProxy.class.getClassLoader(), c, new InvocationHandler() {
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				return SSHTunnelingProxy.invoke(sshHostIp,sshLogin, sshPwd,homedir,invokeCommand, servantName, method.getName(), method.getParameterTypes(), args);
+				return SSHTunnelingProxy.invoke(sshHostIp,port, sshLogin, sshPwd,homedir,invokeCommand, servantName, method.getName(), method.getParameterTypes(), args);
 			}
 		});
 		return proxy;

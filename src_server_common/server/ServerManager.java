@@ -1172,7 +1172,7 @@ public class ServerManager {
 	}
 
 	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {		
-		/*
+		
 		new Thread(new Runnable() {
 			int failureCounter = maxFailure;
 
@@ -1191,7 +1191,7 @@ public class ServerManager {
 				}
 			}
 		}).start();
-		*/
+		
 	}
 
 	synchronized public static void downloadBioceCore(int logInfo) throws Exception {
