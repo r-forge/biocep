@@ -247,5 +247,12 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	public boolean isBusy() throws RemoteException {
 		return false;
 	}
+	
+	public String getJobId() throws RemoteException {
+		return null;
+	}
+	
+	public void setJobId(String jobId) throws RemoteException {		
+	}
 
 }

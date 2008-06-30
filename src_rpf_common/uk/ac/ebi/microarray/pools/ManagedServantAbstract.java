@@ -38,6 +38,7 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 
 	private String _servantName;
 	private boolean _resetEnabled = true;
+	private String _jobId="";
 
 	
 	public ManagedServantAbstract(String name, String prefix, Registry registry) throws RemoteException {
@@ -259,6 +260,14 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		return true;
 	}
 
+	public String getJobId() throws RemoteException {	
+		return _jobId;
+	}
+	
+	public void setJobId(String jobId) throws RemoteException {
+		_jobId=jobId;		
+	}
+	
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 	}
 

@@ -502,6 +502,13 @@ public class RServicesObject implements RServices {
 	
 	public String getOriginatorUID() throws RemoteException {
 		return null;
-	} 
+	}
+	
+	public String getJobId() throws RemoteException {
+		return null;
+	}
+	
+	public void setJobId(String jobId) throws RemoteException {
+	}
 
 }

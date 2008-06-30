@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSessionListener;
 import remoting.RServices;
 import server.ServerManager;
 
+import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 
 /**
@@ -84,6 +85,7 @@ public class FreeResourcesListener implements HttpSessionListener {
 		boolean save = (Boolean) attributes.get("SAVE");
 		boolean namedAccessMode = (Boolean) attributes.get("NAMED_ACCESS_MODE");
 		String processId = (String) attributes.get("PROCESS_ID");
+		String jobId = (String) attributes.get("JOB_ID");
 		String privatename = (String) attributes.get("PRIVATE_NAME");
 
 		if (save) {
@@ -98,11 +100,22 @@ public class FreeResourcesListener implements HttpSessionListener {
 			if (nopool) {
 				
 				if (privatename==null || privatename.equals("")) {
-					try {
-						ServerManager.killLocalProcess(processId, true);
-					} catch (Exception e) {
-						e.printStackTrace();
+					
+					if (System.getProperty("submit.mode").equals("ssh")) {
+						try {
+							SSHUtils.execSsh( System.getProperty("submit.ssh.kill")+" "+jobId, System.getProperty("submit.ssh.host"), Integer.decode(System.getProperty("submit.ssh.port")) ,System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						
+					} else {
+						try {
+							ServerManager.killLocalProcess(processId, true);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
+					
 				}
 				/*
 				try {

@@ -530,6 +530,7 @@
 				  			<arg value="submit.ssh.prefix=qsub -V"/>
 				  			<arg value="submit.ssh.kill=qdel"/>
 				  			<arg value="submit.ssh.timeout=60000"/>
+				  			<arg value="submit.ssh.rmi.port.width="/>
 				  			
 						    <arg value="pstools.home=${PSTOOLS_HOME}"/>
 						    <arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>	

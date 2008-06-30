@@ -2,7 +2,6 @@ package server;
 
 import java.net.ServerSocket;
 import java.net.URL;
-import java.util.Random;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
@@ -21,14 +20,19 @@ public class CoreMain {
 		
 		if (System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("")) {
 			log.info("rmi.port.start #1:"+System.getProperty("rmi.port.start"));
-						
+			
+			int width=300;
+			if (System.getProperty("submit.ssh.rmi.port.width")!=null && !System.getProperty("submit.ssh.rmi.port.width").equals("")) {
+				width=Integer.decode(System.getProperty("submit.ssh.rmi.port.width"));
+			}			
+			
 			int rmi_port_start=Integer.decode(System.getProperty("rmi.port.start"));
 			Integer valid_port=null;
-			for (int i=0;i<(300/5);++i) {
+			for (int i=0;i<(width/RServantImpl.PORT_RANGE_WIDTH);++i) {
 				try {
-					ServerSocket s=new ServerSocket(rmi_port_start+i*5);
+					ServerSocket s=new ServerSocket(rmi_port_start+i*RServantImpl.PORT_RANGE_WIDTH);
 					s.close();
-					valid_port=rmi_port_start+i*5;
+					valid_port=rmi_port_start+i*RServantImpl.PORT_RANGE_WIDTH;
 					break;
 				} catch (Exception e) {
 				}
