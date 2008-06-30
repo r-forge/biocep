@@ -30,10 +30,10 @@ public class SSHTunnelingWorker {
 		Object result = null;
 		try {
 			result = m.invoke(servant, methodParameters);
-		} catch (InvocationTargetException e) {
-			throw new SSHTunnelingException("", e.getCause());
+		} catch (InvocationTargetException ite) {
+			throw new SSHTunnelingException(PoolUtils.getStackTraceAsString(ite.getCause()));
 		} catch (Exception e) {
-			throw new SSHTunnelingException("", e);
+			throw new SSHTunnelingException(PoolUtils.getStackTraceAsString(e));
 		}
 		return result;
 	}

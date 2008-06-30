@@ -520,6 +520,16 @@
 						    	
 				  			<arg value="pools.dbmode.defaultpoolname=R"/>
 				  			
+						    <arg value="submit.mode="/>
+				  			<arg value="submit.ssh.host=ngs.oerc.ox.ac.uk"/>
+				  			<arg value="submit.ssh.port=22"/>
+						    <arg value="submit.ssh.user="/>
+						    <arg value="submit.ssh.password="/>
+				  			<arg value="submit.ssh.biocep.home=/usr/local/Cluster-Apps/biocep/RWorkbench"/>
+				  			<arg value="submit.ssh.rmi.port.start="/>
+				  			<arg value="submit.ssh.prefix=qsub -V"/>
+				  			<arg value="submit.ssh.kill=qdel"/>
+				  			<arg value="submit.ssh.timeout=60000"/>
 				  			
 						    <arg value="pstools.home=${PSTOOLS_HOME}"/>
 						    <arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>	

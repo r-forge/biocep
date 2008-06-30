@@ -30,6 +30,7 @@ import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.Vector;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -53,8 +54,11 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RPFSessionInfo;
 import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
 import uk.ac.ebi.microarray.pools.RmiCallTimeout;
+import uk.ac.ebi.microarray.pools.SSHTunnelingProxy;
+import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 import uk.ac.ebi.microarray.pools.YesSecurityManager;
+import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 
 /**
  * @author Karim Chine k.chine@imperial.ac.uk
@@ -187,21 +191,83 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								r = (RServices) nm.createPrivateServant(nodeName);
 								 */
 
-								System.out.println("LocalHttpServer.getLocalHttpServerPort():" + LocalHttpServer.getLocalHttpServerPort());
-								System.out.println("LocalRmiRegistry.getLocalRmiRegistryPort():" + LocalHttpServer.getLocalHttpServerPort());
-								if (privateName != null && !privateName.equals("")) {
-									try {
-										r = (RServices) LocalRmiRegistry.getInstance().lookup(privateName);
-									} catch (Exception e) {
-										//e.printStackTrace();
+								
+								
+								if (System.getProperty("submit.mode").equals("ssh")) {
+							        DBLayerInterface dbLayer =(DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
+					        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
+					                "java -cp "+System.getProperty("submit.ssh.biocep.home")+"/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker ${file}",
+					                "db",new Class<?>[]{DBLayerInterface.class});
+									if (privateName != null && !privateName.equals("")) {
+										try {
+											r = (RServices)dbLayer.lookup(privateName);
+										} catch (Exception e) {
+											//e.printStackTrace();
+										}
 									}
-								}
+							        
+									if (r == null) {
+										
+										
+								        final String uid=UUID.randomUUID().toString();
+								        new Thread(new Runnable(){
+								                public void run() {
+								                    try {
+								                    	                    
+								                        String command="java -Dlog.file="+System.getProperty("submit.ssh.biocep.home")+"/log/${uid}.log"
+								                        				   +" -Drmi.port.start="+System.getProperty("submit.ssh.rmi.port.start")
+								                        				   +" -Dname=${uid}"
+								                        				   +" -Dnaming.mode=db"
+								                        				   +" -Ddb.host="+System.getProperty("submit.ssh.host")
+								                        				   +" -Dwait=true"
+								                        				   +" -jar "+System.getProperty("submit.ssh.biocep.home")+"/biocep-core.jar";
+								                        
+								                        String jobId=SSHUtils.execSshBatch(command, uid , System.getProperty("submit.ssh.prefix") ,  System.getProperty("submit.ssh.host"), Integer.decode(System.getProperty("submit.ssh.port")) ,System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home") );
+								                        System.out.println("jobId:"+jobId);
+								                        
+								                    } catch (Exception e) {
+								                        e.printStackTrace();
+								                    }
+								                }
+								            }).start();
 
-								if (r == null) {
-									codeUrls = (URL[]) options.get("urls");
-									System.out.println("CODE URL->" + Arrays.toString(codeUrls));
-									r = ServerManager.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-											.getLocalRmiRegistryPort()), 256, 256, privateName, false, codeUrls,null);
+								        long TIMEOUT=Long.decode(System.getProperty("submit.ssh.timeout"));
+								        long tStart=System.currentTimeMillis();
+								        while ((System.currentTimeMillis()-tStart)<TIMEOUT) {
+								            try {
+								                r=(RServices)dbLayer.lookup(uid);
+								            } catch (Exception e) {
+
+								            }
+								            if (r!=null) break;
+								            try {Thread.sleep(10);} catch (Exception e) {}
+								        }
+								        
+										if (r == null) {
+											result = new NoServantAvailableException();
+											break;
+										}	
+										
+									}
+									
+									
+								} else {
+									System.out.println("LocalHttpServer.getLocalHttpServerPort():" + LocalHttpServer.getLocalHttpServerPort());
+									System.out.println("LocalRmiRegistry.getLocalRmiRegistryPort():" + LocalHttpServer.getLocalHttpServerPort());
+									if (privateName != null && !privateName.equals("")) {
+										try {
+											r = (RServices) LocalRmiRegistry.getInstance().lookup(privateName);
+										} catch (Exception e) {
+											//e.printStackTrace();
+										}
+									}
+	
+									if (r == null) {
+										codeUrls = (URL[]) options.get("urls");
+										System.out.println("CODE URL->" + Arrays.toString(codeUrls));
+										r = ServerManager.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
+												.getLocalRmiRegistryPort()), 256, 256, privateName, false, codeUrls,null);
+									}
 								}
 
 							} else {
@@ -225,6 +291,10 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						r = _rkit.getR();
 					}
 
+					
+					
+					
+					
 					if (r == null) {
 						result = new NoServantAvailableException();
 						break;
