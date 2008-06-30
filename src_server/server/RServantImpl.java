@@ -70,6 +70,8 @@ import util.Utils;
  */
 public class RServantImpl extends ManagedServantAbstract implements RServices {
 
+	public static final int PORT_RANGE_WIDTH=5;
+	
 	private StringBuffer _log = new StringBuffer();
 
 	private HashMap<String, RPackage> _rim = null;

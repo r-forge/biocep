@@ -2782,6 +2782,14 @@ public class DirectJNI {
 
 			return null;
 		}
+		
+		
+		public String getJobId() throws RemoteException {
+			return null;
+		}
+		
+		public void setJobId(String jobId) throws RemoteException {
+		}
 
 		public String ping() throws RemoteException {
 

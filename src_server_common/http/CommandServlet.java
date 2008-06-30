@@ -210,6 +210,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 										
 										
 								        final String uid=(privateName != null && !privateName.equals("")) ? privateName : UUID.randomUUID().toString();
+								        final String[] jobIdHolder=new String[1];
 								        new Thread(new Runnable(){
 								                public void run() {
 								                    try {
@@ -222,8 +223,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								                        				   +" -Dwait=true"
 								                        				   +" -jar "+System.getProperty("submit.ssh.biocep.home")+"/biocep-core.jar";
 								                        
-								                        String jobId=SSHUtils.execSshBatch(command, uid , System.getProperty("submit.ssh.prefix") ,  System.getProperty("submit.ssh.host"), Integer.decode(System.getProperty("submit.ssh.port")) ,System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home") );
-								                        System.out.println("jobId:"+jobId);
+								                        jobIdHolder[0]=SSHUtils.execSshBatch(command, uid , System.getProperty("submit.ssh.prefix") ,  System.getProperty("submit.ssh.host"), Integer.decode(System.getProperty("submit.ssh.port")) ,System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home") );								                        
+								                        System.out.println("jobId:"+jobIdHolder[0]);
 								                        
 								                    } catch (Exception e) {
 								                        e.printStackTrace();
@@ -243,10 +244,14 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								            try {Thread.sleep(10);} catch (Exception e) {}
 								        }
 								        
-										if (r == null) {
-											result = new NoServantAvailableException();
-											break;
-										}	
+								        
+								        if (r!=null) {
+								        	try {
+								        		r.setJobId(jobIdHolder[0]);
+								        	} catch (Exception e) {
+								        		r=null;
+											}
+								        }
 										
 									}
 									
@@ -307,6 +312,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("LOGIN", login);
 					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
 					session.setAttribute("PROCESS_ID", r.getProcessId());
+					session.setAttribute("JOB_ID", r.getProcessId());
+					
 					if (privateName != null)
 						session.setAttribute("PRIVATE_NAME", privateName);
 
