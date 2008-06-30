@@ -50,7 +50,7 @@ public class ServerManager {
 
 	public static void main(String[] args) throws Exception {
 		RServices r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-			ServerManager.getNamingInfo(), 256,256, "", false, null);
+			ServerManager.getNamingInfo(), 256,256, "", false, null,null);
 
 		System.out.println(r.consoleSubmit("print('a')"));
 		System.exit(0);
@@ -132,7 +132,7 @@ public class ServerManager {
 	
 	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, int sshPort, String sshLogin, String sshPwd, String name, boolean showProgress,
-			URL[] codeUrls) throws BadSshHostException, BadSshLoginPwdException, Exception {
+			URL[] codeUrls, String logFile) throws BadSshHostException, BadSshLoginPwdException, Exception {
 
 		if (showProgress) {
 			createRSshProgressArea = new JTextArea();
@@ -301,7 +301,7 @@ public class ServerManager {
 	private static JFrame createRLocalProgressFrame;
 
 	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls, String log) throws Exception {
 
 		if (showProgress) {
 			createRLocalProgressArea = new JTextArea();
@@ -380,7 +380,7 @@ public class ServerManager {
 			command.add("" + codeServerPort);
 			
 			command.add(BootSsh.propertiesToString(namingInfo));
-			command.add("NULL");			
+			command.add(log);			
 			
 			command.add("" + memoryMinMegabytes);
 			command.add("" + memoryMaxMegabytes);
@@ -490,11 +490,11 @@ public class ServerManager {
 
 	public static RServices createR(String name) throws Exception {
 		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo("127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort()), 256, 256, name,
-				false, null);
+				false, null,null);
 	}
 
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls, String logFile) throws Exception {
 
 		if (showProgress) {
 			createRProgressArea = new JTextArea();
@@ -814,31 +814,23 @@ public class ServerManager {
 					}					
 				}
 
-				/*
-				 * command.add((isWindowsOs() ? "\"" : "") +
-				 * "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") + "-Dlog4j.rootCategory=DEBUG,A1,A2" +
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender" +
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout" +
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A1.layout.ConversionPattern=[%-5p] - %m%n" +
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender" +
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout" +
-				 * (isWindowsOs() ? "\"" : "")); command.add((isWindowsOs() ?
-				 * "\"" : "") +
-				 * "-Dlog4j.appender.A2.layout.ConversionPattern=[%-5p] - %m%n" +
-				 * (isWindowsOs() ? "\"" : ""));
-				 */
+				if (logFile!=null && !logFile.equals("")) {
+				    command.add((isWindowsOs() ? "\"" : "")  + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+ (isWindowsOs() ? "\"" : "")); 
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=DEBUG,A1,A2,A3" + (isWindowsOs() ? "\"" : "")); 
+				    
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender" +  (isWindowsOs() ? "\"" : "")); 
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : "")); 
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern=[%-5p] - %m%n" +  (isWindowsOs() ? "\"" : ""));
+				    
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender" + (isWindowsOs() ? "\"" : "")); 
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : "")); 
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
+					   
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3=org.apache.log4j.FileAppender" +  (isWindowsOs() ? "\"" : ""));
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.file="+logFile + (isWindowsOs() ? "\"" : ""));
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : "")); 
+				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.layout.ConversionPattern=[%-5p] - %m%n" +  (isWindowsOs() ? "\"" : ""));
+				} 
 
 				command.add("bootstrap.Boot");
 				command.add(new Boolean(keepAlive).toString());
@@ -1179,7 +1171,8 @@ public class ServerManager {
 		return true;
 	}
 
-	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {
+	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {		
+		/*
 		new Thread(new Runnable() {
 			int failureCounter = maxFailure;
 
@@ -1198,6 +1191,7 @@ public class ServerManager {
 				}
 			}
 		}).start();
+		*/
 	}
 
 	synchronized public static void downloadBioceCore(int logInfo) throws Exception {
