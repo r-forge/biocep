@@ -1,5 +1,6 @@
 package server;
 
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Random;
 import java.util.Vector;
@@ -19,11 +20,25 @@ public class CoreMain {
 		PoolUtils.initLog4J();
 		
 		if (System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("")) {
+			log.info("rmi.port.start #1:"+System.getProperty("rmi.port.start"));
+						
 			int rmi_port_start=Integer.decode(System.getProperty("rmi.port.start"));
-			log.info("rmi.port.start #1:"+System.getProperty("rmi.port.start"));		
-			Random rnd=new Random(System.currentTimeMillis());
-			rmi_port_start=rmi_port_start+5*rnd.nextInt(50);
-			System.setProperty("rmi.port.start",""+rmi_port_start );			
+			Integer valid_port=null;
+			for (int i=0;i<(300/5);++i) {
+				try {
+					ServerSocket s=new ServerSocket(rmi_port_start+i*5);
+					s.close();
+					valid_port=rmi_port_start+i*5;
+					break;
+				} catch (Exception e) {
+				}
+			}
+			if (valid_port==null) {
+				log.info("all available ports are taken, can't create server");
+				System.exit(0);
+			}
+			
+			System.setProperty("rmi.port.start",""+valid_port );			
 			log.info("rmi.port.start #2:"+System.getProperty("rmi.port.start"));
 		}
 		
