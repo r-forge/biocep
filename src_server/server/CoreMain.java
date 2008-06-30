@@ -57,6 +57,12 @@ public class CoreMain {
 			System.out.println("Can't Launch R Server, Rmi Registry is not accessible!!");
 		}
 		
+		if (true) {
+		while (true) {
+			try {Thread.sleep(100);}catch (Exception e) {}
+		}
+		}
+		
 		System.exit(0);
 	}
 
