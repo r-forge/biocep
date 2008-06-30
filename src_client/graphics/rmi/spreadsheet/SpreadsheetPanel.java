@@ -275,8 +275,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	private ListSelectionListener sl = new ListSelectionListener() {
 		public void valueChanged(ListSelectionEvent e) {
-			new Thread(new Runnable(){
-				public void run() {
+			
+			//new Thread(new Runnable(){ public void run() {
+					
 					copy.update();
 					cut.update();
 					sort.update();
@@ -289,8 +290,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 					fromR.update();
 					toR.update();
 					eval.update();
-				}
-			}).start();			
+			//}}).start();			
 		}
 	};
 
