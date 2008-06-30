@@ -315,6 +315,7 @@
 		<if><not><isset property="listener.stub"/></not><then><property name="listener.stub" value=""/></then></if>
 		<if><not><isset property="private"/></not><then><property name="private" value=""/></then></if>
 		
+		<if><not><isset property="log.file"/></not><then><property name="biocep.log" value=""/></then></if>
 		
 		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
@@ -434,7 +435,7 @@
 			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
 			
 			<jvmarg value="-Dlog4j.appender.A3=org.apache.log4j.FileAppender"/>
-			<jvmarg value="-Dlog4j.appender.A3.file=biocep.log"/>
+			<jvmarg value="-Dlog4j.appender.A3.file=${log.file}"/>
 			<jvmarg	value="-Dlog4j.appender.A3.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A3.layout.ConversionPattern= [%-5p] - %m%n"/>			
 
@@ -473,6 +474,14 @@
 			<arg value="${derby.port}"/>
 		</java>
 	</target>
+	
+	
+	<target name="demodb">		
+		<antcall target="db">					
+			<param name="naming.mode" value="db"/>
+			<param name="db.initscript" value="${basedir}/VirtualRWorkbench/initscript.sql" />		
+		</antcall>			
+	</target>	
 	
 	<target name="derby.shutdown">
 		<if>
@@ -1256,14 +1265,12 @@
 		</target>
 
 	
-	<target name="demoserver" depends="setWinAwareProps,compile">		
+	<target name="demoserver" depends="setWinAwareProps,compile">
 		<antcall target="server">
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
 			<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR}"/>						
 			<param name="servantclass" value="server.RServantImpl"/>
-			<param name="name" value="RSERVANT_1" />
-			<param name="working.dir.root" value="wdir"/>
-			
+			<param name="working.dir.root" value="wdir"/>			
 		</antcall>		
 	</target>
 	
@@ -1558,7 +1565,7 @@
 			<jar destfile="biocep-core.jar" manifest="MANIFEST.MF">
 				<fileset dir="binsrv"/>
 			</jar>
-			
+			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
 			
 			<!-- tools begin -->
 		
@@ -1661,7 +1668,11 @@
 		-->
 		<!-- tools end -->
 		
-			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />		
+		
+		<!-- biocep starts -->
+		
+		<!--
+					
 		
 			<unjar src="lib/desktop/jeditmodes.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/jedit.jar"  dest="binsrv" overwrite="true"/>
@@ -1723,6 +1734,8 @@
 					
 			<antcall target="sign.extra"/>
 		
+			-->
+			<!-- biocep ends -->		
 	</target>
 	
 	
