@@ -104,7 +104,8 @@ public class ServerManager {
 	public static TableModelRemoteImpl tmri;
 	
 	
-	public static String[] namingVars=new String[]{"registry.host", "registry.port","naming.mode","db.type","db.host","db.port","db.name","db.user","db.password"};
+	public static String[] namingVars=new String[]{
+		"registry.host", "registry.port","naming.mode","db.type","db.host","db.port","db.name","db.user","db.password", "rmi.port.start"};
 
 
 	private static JTextArea createRSshProgressArea;
