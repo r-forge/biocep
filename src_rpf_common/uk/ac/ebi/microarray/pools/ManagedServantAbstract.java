@@ -68,8 +68,8 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 				}
 			}
 		} else {
-			if (!name.startsWith(prefix))
-				throw new RemoteException("The server name must start with :" + prefix);
+			
+			//if (!name.startsWith(prefix)) throw new RemoteException("The server name must start with :" + prefix);
 			ManagedServant oldServant = null;
 
 			try {
