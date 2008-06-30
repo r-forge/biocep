@@ -10,6 +10,8 @@ public class CoreMain {
 
 	public static void main(String[] args) throws Exception {
 				
+		
+		
 		Vector<URL> codeUrls=new Vector<URL>();		
 		if (args.length > 0) {
 			for (int i=0;i<args.length;++i) {
@@ -36,7 +38,7 @@ public class CoreMain {
 					r = ServerManager.createRLocal(true, 
 							PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 							ServerManager.getNamingInfo() , 
-							ServerDefaults._memoryMin, ServerDefaults._memoryMax,System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]));
+							ServerDefaults._memoryMin, ServerDefaults._memoryMax,System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file"));
 					
 					
 					
@@ -45,7 +47,7 @@ public class CoreMain {
 				
 				r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
 						ServerManager.getNamingInfo(), 
-								ServerDefaults._memoryMin, ServerDefaults._memoryMax, System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]) );
+								ServerDefaults._memoryMin, ServerDefaults._memoryMax, System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file") );
 				
 				
 				

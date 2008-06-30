@@ -70,10 +70,10 @@ public class BootSsh {
 				Remote r = (Remote) ServerLauncherClass.getMethod(
 						"createR",
 						new Class<?>[] { boolean.class, String.class, int.class,  Properties.class,  int.class, int.class, String.class, boolean.class,
-								URL[].class }).invoke(
+								URL[].class, String.class }).invoke(
 						null,
 						new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), stringToProperties(args[3]), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), name, false,
-								(URL[]) codeUrls.toArray(new URL[0]) });
+								(URL[]) codeUrls.toArray(new URL[0]), args[4] });
 
 				Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");
 				String processId = (String) poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);

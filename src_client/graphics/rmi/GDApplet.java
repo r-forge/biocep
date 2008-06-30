@@ -543,23 +543,23 @@ public class GDApplet extends GDAppletBase implements RGui {
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident.getMemoryMax(),
-												ident.getSshHostIp(), ident.getSshPort(), ident.getSshLogin(), ident.getSshPwd(), "", false, null);
+												ident.getSshHostIp(), ident.getSshPort(), ident.getSshLogin(), ident.getSshPwd(), "", false, null,null);
 									} else {
 
 										if (PoolUtils.isWindowsOs()) {
 											if (_keepAlive) {
 												r = ServerManager.createRLocal(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
-																.getMemoryMax(), "", false, null);
+																.getMemoryMax(), "", false, null,null);
 											} else {
 												r = ServerManager.createR(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 														ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
-																.getMemoryMax(), "", false, null);
+																.getMemoryMax(), "", false, null,null);
 											}
 										} else {
 											r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 													ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
-															.getMemoryMax(), "", false, null);
+															.getMemoryMax(), "", false, null,null);
 										}
 									}
 
