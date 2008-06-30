@@ -4,7 +4,7 @@
 
 <information>
   <title>Virtual R Workbench</title>
-  <vendor>EMBL-EBI-Microarray Informatics</vendor>
+  <vendor>Karim Chine</vendor>
   <homepage href="" />
   <description/>
 </information>
