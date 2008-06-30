@@ -132,6 +132,77 @@ public class SSHUtils {
 		}
 	}
 	
+	public static void execSshBatch(String command, String uid, String prefix,  String sshHostIp, String sshLogin, String sshPwd, String remoteTargetDirectory) throws Exception {
+		Connection conn = null;
+		try {
+			conn = new Connection(sshHostIp);
+			conn.connect();
+			boolean isAuthenticated = conn.authenticateWithPassword(sshLogin, sshPwd);
+			if (isAuthenticated == false)
+				throw new IOException("Authentication failed.");
+
+			Session sess = null;
+
+			sess = conn.openSession();
+			new SCPClient(conn).put(PoolUtils.replaceAll(command, "${uid}", uid).getBytes(), "launcher_"+uid+".sh", remoteTargetDirectory);			
+			sess.close();
+			
+			sess = conn.openSession();		
+			sess.execCommand("chmod a+x "+remoteTargetDirectory+"/launcher_"+uid+".sh");
+			sess.close();
+			
+			sess = conn.openSession();			
+			sess.execCommand(prefix+" "+remoteTargetDirectory+"/launcher_"+uid+".sh");
+			
+			
+			final BufferedReader brOut = new BufferedReader(new InputStreamReader(new StreamGobbler(sess.getStdout())));
+			final BufferedReader brErr = new BufferedReader(new InputStreamReader(new StreamGobbler(sess.getStderr())));
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						while (true) {
+							String line = brOut.readLine();
+							if (line == null) break;
+							System.out.println(line);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						while (true) {
+							String line = brErr.readLine();
+							if (line == null)
+								break;
+							System.out.println(line);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+
+			sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
+			
+			sess.close();
+			sess = conn.openSession();
+			sess.execCommand("rm "+remoteTargetDirectory+"/launcher_"+uid+".sh");
+			sess.close();
+			
+
+		} finally {
+			try {
+				conn.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	
 	public static void putFileSsh(String localFile, String remoteTargetDirectory, String sshHostIp, String sshLogin, String sshPwd) throws Exception {
 		Connection conn = null;
