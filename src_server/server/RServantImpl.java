@@ -98,6 +98,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	public RServantImpl(String name, String prefix, Registry registry) throws RemoteException {
 		super(name, prefix, registry,_port);
+		
+		System.out.println("$$>rmi.port.start:"+_port);
 		// --------------	
 		init();
 				
