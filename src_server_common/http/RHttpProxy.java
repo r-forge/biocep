@@ -530,6 +530,9 @@ public class RHttpProxy {
 						else if (method.getName().equals("newSpreadsheetTableModelRemote")) {
 							SpreadsheetModelDevice d=newSpreadsheetModelDevice(url, sessionId, "", ((Integer)args[0]).toString(), ((Integer)args[1]).toString());
 							result=new SpreadsheetModelRemoteProxy(d);
+						} else if (method.getName().equals("getSpreadsheetTableModelRemote")) {
+							SpreadsheetModelDevice d=newSpreadsheetModelDevice(url, sessionId, (String)args[0], "","");
+							result=new SpreadsheetModelRemoteProxy(d);
 						}  
 						
 						
