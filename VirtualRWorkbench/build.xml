@@ -130,7 +130,7 @@
 					    <arg value="pools.dbmode.user=${demo.db.user}"/>
 					    <arg value="pools.dbmode.password=${demo.db.password}"/>					  					  
 					    <arg value="pools.dbmode.defaultpoolname=R"/>					  
-					    <arg value="pstools.home=${PSTOOLS_HOME}"/>
+
 					    <arg value="pools.dbmode.killused=${demo.ws.kill.used.R}"/>	
 						
 						<arg value="node.manager.name=NODE_MANAGER"/>
@@ -376,7 +376,7 @@
 						<jvmarg value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
 						<jvmarg value="-Dpreprocess.help=true"/>
 						<jvmarg value="-Dapply.sandbox=true"/>	
-						<jvmarg value="-Dpstools.home=${PSTOOLS_HOME}"/>	
+
 					
 						<jvmarg value="-Dmode=${mode}" />
 						<jvmarg value="-Dname=${name}" />
@@ -532,7 +532,7 @@
 				  			<arg value="submit.ssh.timeout=60000"/>
 				  			<arg value="submit.ssh.rmi.port.width="/>
 				  			
-						    <arg value="pstools.home=${PSTOOLS_HOME}"/>
+
 						    <arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>	
 						    <arg value="node.manager.name=NODE_MANAGER"/>
 						    <arg value="private.servant.node.name=${private.servants.node.name}"/>

@@ -298,7 +298,6 @@ public class ToolsMain {
 			   "pools.dbmode.user",
 			   "pools.dbmode.password",
 			   "pools.dbmode.defaultpoolname",
-			   "pstools.home",
 			   "pools.dbmode.killused",
 			   "node.manager.name",
 			   "private.servant.node.name",

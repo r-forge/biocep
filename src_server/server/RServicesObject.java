@@ -437,12 +437,12 @@ public class RServicesObject implements RServices {
 		
 	}
 
-	public void chat(String sourceSession, String message) throws RemoteException {
-
+	public void chat(String sourceUID, String user, String message) throws RemoteException {
+		
 	}
-
-	public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
-
+	
+	public void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException {
+		
 	}
 	
 	public GDDevice newBroadcastedDevice(int w, int h) throws RemoteException {

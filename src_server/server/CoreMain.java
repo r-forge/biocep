@@ -19,7 +19,6 @@ public class CoreMain {
 		PoolUtils.initLog4J();
 		
 		if (System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("")) {
-			log.info("rmi.port.start #1:"+System.getProperty("rmi.port.start"));
 			
 			int width=300;
 			if (System.getProperty("submit.ssh.rmi.port.width")!=null && !System.getProperty("submit.ssh.rmi.port.width").equals("")) {
@@ -43,7 +42,7 @@ public class CoreMain {
 			}
 			
 			System.setProperty("rmi.port.start",""+valid_port );			
-			log.info("rmi.port.start #2:"+System.getProperty("rmi.port.start"));
+			log.info("rmi.port.start:"+System.getProperty("rmi.port.start"));
 		}
 		
 		Vector<URL> codeUrls=new Vector<URL>();		
@@ -63,29 +62,11 @@ public class CoreMain {
 		RServices r=null;
 		
 		if (ServerDefaults.isRegistryAccessible()) {
-			boolean local;
-			if (System.getProperty("local")!=null && !System.getProperty("local").equals("")) local=new Boolean(System.getProperty("local"));
-			else local=PoolUtils.isWindowsOs(); 
-			if (local ) {
-				
-					
-					r = ServerManager.createRLocal(true, 
-							PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-							ServerManager.getNamingInfo() , 
-							ServerDefaults._memoryMin, ServerDefaults._memoryMax,System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file"));
-					
-					
-					
-			} else {
-				
-				
-				r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
-						ServerManager.getNamingInfo(), 
-								ServerDefaults._memoryMin, ServerDefaults._memoryMax, System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file") );
-				
-				
-				
-			}
+			
+			r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
+					ServerManager.getNamingInfo(), 
+							ServerDefaults._memoryMin, ServerDefaults._memoryMax, System.getProperty("name"), false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file") );
+
 			
 		} else {			
 			System.out.println("Can't Launch R Server, Rmi Registry is not accessible!!");

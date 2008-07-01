@@ -1488,7 +1488,9 @@
 		
 			<rmic classpath="binsrv" base="binsrv" classname="model.TableModelRemoteImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="model.TableModelListenerRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="model.SpreadsheetModelRemoteImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="model.SpreadsheetListenerRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="model.SpreadsheetModelDeviceImpl"/>
 				
 			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.SVarSetInterfaceRemoteImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.SVarInterfaceRemoteImpl"/>
@@ -1568,7 +1570,6 @@
 			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
 			
 			<!-- tools begin -->
-		
 			<!--
 		
 			<delete dir="bintools" failonerror="true"/>
@@ -1665,13 +1666,13 @@
 					<fileset dir="binsrv"/>
 			</jar>
 				
-		-->
+			-->
 		<!-- tools end -->
 		
 		
 		<!-- biocep starts -->
 		
-		<!--
+		
 					
 		
 			<unjar src="lib/desktop/jeditmodes.jar"  dest="binsrv" overwrite="true"/>
@@ -1734,7 +1735,7 @@
 					
 			<antcall target="sign.extra"/>
 		
-			-->
+			
 			<!-- biocep ends -->		
 	</target>
 	
@@ -1801,12 +1802,15 @@
 		
 		<rmic classpath="bin" base="bin" classname="model.TableModelRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="model.TableModelListenerRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="model.SpreadsheetModelRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="model.SpreadsheetListenerRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="model.SpreadsheetModelDeviceImpl"/>
 				
 		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.SVarSetInterfaceRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.SVarInterfaceRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.SMarkerInterfaceRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.DependentRemoteImpl"/>
+
 		
 		<rmic classpath="bin" base="bin" classname="uk.ac.ebi.microarray.pools.db.NodeManagerImpl"/>
 		

@@ -480,15 +480,14 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().getOriginatorUID();
 	}
 	
-	public void chat(String sourceSession, String message) throws RemoteException {
-		DirectJNI.getInstance().getRServices().chat(sourceSession, message);
+	public void chat(String sourceUID, String user, String message) throws RemoteException {
+		DirectJNI.getInstance().getRServices().chat(sourceUID, user, message);
 	}
 	
-	public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
-		System.out.println("[[[[[source:"+sourceSession+" [[[[[expression:"+expression +"[[[[[result:"+result);
-		DirectJNI.getInstance().getRServices().consolePrint(sourceSession, expression, result);
-	}	
-		
+	public void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException {
+		DirectJNI.getInstance().getRServices().consolePrint(sourceUID, user, expression, result);		
+	}
+			
 	public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
 		GenericCallbackDevice result=new GenericCallbackDeviceImpl(_genericCallbackDeviceHashMap);
 		DirectJNI.getInstance().getRServices().addRCallback(result);

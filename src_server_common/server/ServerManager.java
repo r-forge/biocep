@@ -293,200 +293,8 @@ public class ServerManager {
 				createRSshProgressFrame.setVisible(false);
 			}
 		}
-
 	}
-
-	private static JTextArea createRLocalProgressArea;
-	private static JProgressBar createRLocalProgressBar;
-	private static JFrame createRLocalProgressFrame;
-
-	public static RServices createRLocal(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls, String log) throws Exception {
-
-		if (showProgress) {
-			createRLocalProgressArea = new JTextArea();
-			createRLocalProgressBar = new JProgressBar(0, 100);
-			createRLocalProgressFrame = new JFrame("Create R Server on Local Host");
-
-			Runnable runnable = new Runnable() {
-				public void run() {
-					createRLocalProgressArea.setFocusable(false);
-					createRLocalProgressBar.setIndeterminate(true);
-					JPanel p = new JPanel(new BorderLayout());
-					p.add(createRLocalProgressBar, BorderLayout.SOUTH);
-					p.add(new JScrollPane(createRLocalProgressArea), BorderLayout.CENTER);
-					createRLocalProgressFrame.add(p);
-					createRLocalProgressFrame.pack();
-					createRLocalProgressFrame.setSize(300, 90);
-					createRLocalProgressFrame.setVisible(true);
-					createRLocalProgressFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-					PoolUtils.locateInScreenCenter(createRLocalProgressFrame);
-				}
-			};
-
-			if (SwingUtilities.isEventDispatchThread())
-				runnable.run();
-			else {
-				SwingUtilities.invokeLater(runnable);
-			}
-		}
-
-		try {
-			InputStream is = ServerManager.class.getResourceAsStream("/bootstrap/BootSsh.class");
-			byte[] buffer = new byte[is.available()];
-			try {
-				for (int i = 0; i < buffer.length; ++i) {
-					int b = is.read();
-					buffer[i] = (byte) b;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			String bootstrapDir = INSTALL_DIR + "classes/bootstrap";
-			new File(bootstrapDir).mkdirs();
-			RandomAccessFile raf = new RandomAccessFile(bootstrapDir + "/BootSsh.class", "rw");
-			raf.setLength(0);
-			raf.write(buffer);
-			raf.close();
-
-			String logFileDir = INSTALL_DIR + "log/";
-			new File(logFileDir).mkdirs();
-			String logFile = logFileDir + "log" + System.currentTimeMillis() + ".txt";
-			new File(logFile).delete();
-
-			Vector<String> command = new Vector<String>();
-			if (isWindowsOs()) {
-				String psToolsHome = INSTALL_DIR + "PsTools";
-				String psexecCommand = psToolsHome + "/psexec.exe";
-
-				if (!new File(psexecCommand).exists()) {
-					new File(psToolsHome).mkdirs();
-					downloadPsexec(psToolsHome);
-				}
-
-				command.add(psexecCommand);
-				command.add("-accepteula");
-				command.add("-d");
-
-			}
-
-			command.add((isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java" + (isWindowsOs() ? "\"" : ""));
-			command.add("-classpath");
-			command.add((isWindowsOs() ? "\"" : "") + INSTALL_DIR + "classes" + (isWindowsOs() ? "\"" : ""));
-			command.add("bootstrap.BootSsh");
-			command.add(new Boolean(keepAlive).toString());
-			command.add(codeServerHostIp);
-			command.add("" + codeServerPort);
-			
-			command.add(BootSsh.propertiesToString(namingInfo));
-			command.add(log);			
-			
-			command.add("" + memoryMinMegabytes);
-			command.add("" + memoryMaxMegabytes);
-			command.add(logFile);
-			command.add((name == null || name.trim().equals("")) ? BootSsh.NO_NAME : name);
-
-			if (codeUrls != null && codeUrls.length > 0) {
-				for (int i = 0; i < codeUrls.length; ++i) {
-					command.add(codeUrls[i].toString());
-				}
-			}
-			
-			System.out.println(";;command:"+command);
-			final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), null);
-			
-			
-			
-			final Vector<String> installPrint = new Vector<String>();
-			final Vector<String> installErrorPrint = new Vector<String>();
-
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-						String line = null;
-						while ((line = br.readLine()) != null) {
-							System.out.println(line);
-							installErrorPrint.add(line);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-						String line = null;
-						while ((line = br.readLine()) != null) {
-							System.out.println(line);
-							installPrint.add(line);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();			
-			
-			
-			
-			while (!new File(logFile).exists()) {
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
-				}
-			}
-			StringBuffer outPrint = new StringBuffer();
-			while (outPrint.indexOf(BootSsh.STUB_END_MARKER) == -1) {
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
-				}
-				outPrint = new StringBuffer();
-				BufferedReader br = new BufferedReader(new FileReader(logFile));
-				while (true) {
-					String line = br.readLine();
-					if (line == null)
-						break;
-					outPrint.append(line + "\n");
-				}
-				br.close();
-			}
-
-			new File(logFile).delete();
-
-			String processId = outPrint.substring(outPrint.indexOf(BootSsh.PROCESS_ID_BEGIN_MARKER) + BootSsh.PROCESS_ID_BEGIN_MARKER.length(), outPrint
-					.indexOf(BootSsh.PROCESS_ID_END_MARKER));
-			String rprocessId = outPrint.substring(outPrint.indexOf(BootSsh.R_PROCESS_ID_BEGIN_MARKER) + BootSsh.R_PROCESS_ID_BEGIN_MARKER.length(), outPrint
-					.indexOf(BootSsh.R_PROCESS_ID_END_MARKER));
-
-			System.out.println("(1) intermediate process id:" + processId);
-			System.out.println("(2) r process id:" + rprocessId);
-			// PoolUtils.killLocalWinProcess(processId, true);
-
-			int eIndex = outPrint.indexOf(BootSsh.STUB_END_MARKER);
-			if (eIndex != -1) {
-				int bIndex = outPrint.indexOf(BootSsh.STUB_BEGIN_MARKER);
-				String stub = outPrint.substring(bIndex + BootSsh.STUB_BEGIN_MARKER.length(), eIndex);
-				return (RServices) PoolUtils.hexToStub(stub, ServerManager.class.getClassLoader());
-			} else {
-				return null;
-			}
-
-		} finally {
-			if (showProgress) {
-				createRLocalProgressFrame.setVisible(false);
-			}
-		}
-
-	}
-
-	private static JTextArea createRProgressArea;
-	private static JProgressBar createRProgressBar;
-	private static JFrame createRProgressFrame;
+	
 
 	public static RServices createR(String name) throws Exception {
 		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo("127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort()), 256, 256, name,
@@ -496,24 +304,29 @@ public class ServerManager {
 	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String name, boolean showProgress, URL[] codeUrls, String logFile) throws Exception {
 
+		final JTextArea[] createRProgressArea=new JTextArea[1];
+		final JProgressBar[] createRProgressBar=new JProgressBar[1];
+		final JFrame[] createRProgressFrame=new JFrame[1];
+
+		
 		if (showProgress) {
-			createRProgressArea = new JTextArea();
-			createRProgressBar = new JProgressBar(0, 100);
-			createRProgressFrame = new JFrame("Create R Server on Local Host");
+			createRProgressArea[0] = new JTextArea();
+			createRProgressBar[0] = new JProgressBar(0, 100);
+			createRProgressFrame[0] = new JFrame("Create R Server on Local Host");
 
 			Runnable runnable = new Runnable() {
 				public void run() {
-					createRProgressArea.setFocusable(false);
-					createRProgressBar.setIndeterminate(true);
+					createRProgressArea[0].setFocusable(false);
+					createRProgressBar[0].setIndeterminate(true);
 					JPanel p = new JPanel(new BorderLayout());
-					p.add(createRProgressBar, BorderLayout.SOUTH);
-					p.add(new JScrollPane(createRProgressArea), BorderLayout.CENTER);
-					createRProgressFrame.add(p);
-					createRProgressFrame.pack();
-					createRProgressFrame.setSize(300, 90);
-					createRProgressFrame.setVisible(true);
-					createRProgressFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-					PoolUtils.locateInScreenCenter(createRProgressFrame);
+					p.add(createRProgressBar[0], BorderLayout.SOUTH);
+					p.add(new JScrollPane(createRProgressArea[0]), BorderLayout.CENTER);
+					createRProgressFrame[0].add(p);
+					createRProgressFrame[0].pack();
+					createRProgressFrame[0].setSize(300, 90);
+					createRProgressFrame[0].setVisible(true);
+					createRProgressFrame[0].setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+					PoolUtils.locateInScreenCenter(createRProgressFrame[0]);
 				}
 			};
 			if (SwingUtilities.isEventDispatchThread())
@@ -904,7 +717,7 @@ public class ServerManager {
 			}
 		} finally {
 			if (showProgress) {
-				createRProgressFrame.setVisible(false);
+				createRProgressFrame[0].setVisible(false);
 			}
 		}
 	}
@@ -1198,17 +1011,4 @@ public class ServerManager {
 		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/biocep-core.jar"), INSTALL_DIR, logInfo);
 	}
 
-	public static void downloadPsexec(String location) {
-		if (!location.endsWith("/") && !location.endsWith("\\"))
-			location += "/";
-
-		try {
-			if (isWindowsOs() && (!new File(location + "psexec.exe").exists())) {
-				unzip(new URL("http://download.sysinternals.com/Files/PsTools.zip").openConnection().getInputStream(), location, new EqualNameFilter(
-						"psexec.exe"), 1024 * 16, true, "Unzipping psTools..", 1);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }
