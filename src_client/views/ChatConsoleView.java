@@ -25,7 +25,7 @@ public class ChatConsoleView extends DynamicView {
 					public void run() {
 						try {
 							_rgui.getRLock().lock();
-							_rgui.getR().chat(_rgui.getUserName(), expression);
+							_rgui.getR().chat(_rgui.getUID(),_rgui.getUserName(), expression);
 						} catch (Exception e) {
 							e.printStackTrace();
 						} finally {

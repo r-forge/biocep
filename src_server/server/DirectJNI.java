@@ -2705,30 +2705,31 @@ public class DirectJNI {
 			return server.RListener.getOriginatorUID();
 		}
 
-		public void chat(String sourceSession, String message) throws RemoteException {
+		
+		public void chat(String sourceUID, String user, String message) throws RemoteException {
 			Vector<RCollaborationListener> removeList=new Vector<RCollaborationListener>();
 			for (int i = 0; i < _rCollaborationListeners.size(); ++i) {
 				try {
-					_rCollaborationListeners.elementAt(i).chat(sourceSession, message);
+					_rCollaborationListeners.elementAt(i).chat(sourceUID, user, message);
 				} catch (Exception e) {
 					removeList.add(_rCollaborationListeners.elementAt(i));
 				}
 			}
 			_rCollaborationListeners.removeAll(removeList);
 		}
-
-		public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
+		
+		public void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException {
 			Vector<RCollaborationListener> removeList=new Vector<RCollaborationListener>();
 			for (int i = 0; i < _rCollaborationListeners.size(); ++i) {
 				try {
-					_rCollaborationListeners.elementAt(i).consolePrint(sourceSession, expression, result);
+					_rCollaborationListeners.elementAt(i).consolePrint(sourceUID, user, expression, result);
 				} catch (Exception e) {
 					removeList.add(_rCollaborationListeners.elementAt(i));
 				}
 			}
 			_rCollaborationListeners.removeAll(removeList);
 		}
-
+		
 		public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
 			return null;
 		}

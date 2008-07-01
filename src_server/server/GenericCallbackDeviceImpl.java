@@ -44,21 +44,23 @@ public class GenericCallbackDeviceImpl extends UnicastRemoteObject implements Ge
 		_rActions.add(action);
 	}
 	
-	public void chat(String sourceSession, String message) {
+	public void chat(String sourceUID, String user, String message) throws RemoteException {
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
-		attributes.put("sourceSession", sourceSession);
+		attributes.put("sourceUID", sourceUID);
+		attributes.put("user", user);
 		attributes.put("message", message);	
 		RAction action = new RAction("chat", attributes);
-		_rActions.add(action);		
+		_rActions.add(action);
 	}
 	
-	public void consolePrint(String sourceSession, String expression, String result) {
+	public void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException {
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
-		attributes.put("sourceSession", sourceSession);
+		attributes.put("sourceUID", sourceUID);
+		attributes.put("user", user);		
 		attributes.put("expression", expression);
 		attributes.put("result", result);
 		RAction action = new RAction("consolePrint", attributes);
-		_rActions.add(action);
+		_rActions.add(action);		
 	}
 	
 	public String getId() throws RemoteException {

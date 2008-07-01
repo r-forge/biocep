@@ -297,7 +297,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			_consolePanel.print(message, null);
 			if (isCollaborativeMode()) {
 				try {
-					getR().consolePrint(_sessionId, message, null);
+					getR().consolePrint(getUID(),getUserName(),message, null);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -308,7 +308,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			_consolePanel.print(null, message);
 			if (isCollaborativeMode()) {
 				try {
-					getR().consolePrint(_sessionId, null, message);
+					getR().consolePrint(getUID(), getUserName(), null, message);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -319,7 +319,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			_consolePanel.print(expression, result);
 			if (isCollaborativeMode()) {
 				try {
-					getR().consolePrint(_sessionId, expression, result);
+					getR().consolePrint(getUID(), getUserName(), expression, result);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -545,22 +545,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident.getMemoryMax(),
 												ident.getSshHostIp(), ident.getSshPort(), ident.getSshLogin(), ident.getSshPwd(), "", false, null,null);
 									} else {
-
-										if (PoolUtils.isWindowsOs()) {
-											if (_keepAlive) {
-												r = ServerManager.createRLocal(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-														ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
-																.getMemoryMax(), "", false, null,null);
-											} else {
-												r = ServerManager.createR(_keepAlive, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-														ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
-																.getMemoryMax(), "", false, null,null);
-											}
-										} else {
-											r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-													ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
-															.getMemoryMax(), "", false, null,null);
-										}
+										
+										r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
+												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
+														.getMemoryMax(), "", false, null,null);
 									}
 
 									if (ident.isUseSsh()) {
@@ -860,7 +848,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} else {
 								result = _rForConsole.consoleSubmit(expression);
 								if (isCollaborativeMode())
-									_rForConsole.consolePrint(getUserName(), expression, (String) result);
+									_rForConsole.consolePrint(getUID(),getUserName(), expression, (String) result);
 							}
 
 						} catch (NotLoggedInException nle) {
@@ -3792,24 +3780,23 @@ public class GDApplet extends GDAppletBase implements RGui {
 			super();
 		}
 
-		public void chat(String sourceSession, String message) throws RemoteException {
-			if (_sessionId != null && !_sessionId.equals(sourceSession)) {
+		public void chat(String sourceUID, String user, String message) throws RemoteException {
+			if (!getUID().equals(sourceUID)) {
 				ChatConsoleView chatConsoleView = getOpenedChatConsoleView();
 				if (chatConsoleView == null) {
 					_actions.get("chatconsoleview").actionPerformed(null);
 					chatConsoleView = getOpenedChatConsoleView();
 				}
-
-				chatConsoleView.getConsolePanel().print("[" + sourceSession + "] - " + message, null);
-
+				chatConsoleView.getConsolePanel().print("[" + user + "] - " + message, null);
 			}
 		}
-
-		public void consolePrint(String sourceSession, String expression, String result) throws RemoteException {
-			if (_sessionId != null && !_sessionId.equals(sourceSession)) {
-				_consolePanel.print("[" + sourceSession + "] - " + expression, result);
+		
+		public void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException {
+			if (!getUID().equals(sourceUID)) {
+				_consolePanel.print("[" + user + "] - " + expression, result);
 			}
 		}
+		
 	}
 
 	public String getUserName() {

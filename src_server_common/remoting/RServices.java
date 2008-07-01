@@ -111,9 +111,10 @@ public interface RServices extends ManagedServant {
 	
 	public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException;	
 	public GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException;
+
 	
-	void chat(String sourceSession, String message) throws RemoteException;		
-	void consolePrint(String sourceSession, String expression, String result) throws RemoteException;	
+	void chat(String sourceUID,String user, String message) throws RemoteException;
+	void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException;
 	
 	public RNI getRNI() throws RemoteException;
 

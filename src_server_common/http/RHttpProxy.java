@@ -464,17 +464,19 @@ public class RHttpProxy {
 											rConsoleActionListeners.elementAt(j).rConsoleActionPerformed(consoleAction);
 										}
 									} else if (action.getActionName().equals("chat")) {										
-										String sourceSession= (String)action.getAttributes().get("sourceSession");
+										String sourceUID= (String)action.getAttributes().get("sourceUID");
+										String user= (String)action.getAttributes().get("user");
 										String message= (String)action.getAttributes().get("message");											
 										for (int j=0; j<rCollaborationListeners.size();++j) {
-											rCollaborationListeners.elementAt(j).chat(sourceSession, message);
+											rCollaborationListeners.elementAt(j).chat(sourceUID,user, message);
 										}
 									} else if (action.getActionName().equals("consolePrint")) {
-										String sourceSession= (String)action.getAttributes().get("sourceSession");
+										String sourceUID= (String)action.getAttributes().get("sourceUID");
+										String user= (String)action.getAttributes().get("user");
 										String expression= (String)action.getAttributes().get("expression");
 										String result= (String)action.getAttributes().get("result");
 										for (int j=0; j<rCollaborationListeners.size();++j) {
-											rCollaborationListeners.elementAt(j).consolePrint(sourceSession, expression, result);
+											rCollaborationListeners.elementAt(j).consolePrint(sourceUID,user, expression, result);
 										}
 									}
 								}
