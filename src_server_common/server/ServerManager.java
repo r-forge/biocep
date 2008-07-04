@@ -58,6 +58,8 @@ public class ServerManager {
 
 	
 	public static String INSTALL_DIR = null;
+	public static final String EMBEDDED_R="R-2.7.1";
+	public static final int ENTRIES_NUMBER=1238;
 	
 	static {
 		if (System.getenv("BIOCEP_HOME") != null) {
@@ -340,40 +342,45 @@ public class ServerManager {
 
 			new File(INSTALL_DIR).mkdir();
 
-			String[] rinfo = null;
-			if (System.getenv("R_HOME") == null)
-				rinfo = getRInfo(null);
-			else
-				rinfo = getRInfo(System.getenv("R_HOME"));
+			String rpath=null;
+			String rversion=null;						
+			
+			if (new File(INSTALL_DIR+"R/"+EMBEDDED_R).exists()){
+				rpath=INSTALL_DIR+"R/"+EMBEDDED_R;
+				rversion=EMBEDDED_R;				
+			} else {
+				String[] rinfo = null;
+				if (System.getenv("R_HOME") == null)
+					rinfo = getRInfo(null);
+				else
+					rinfo = getRInfo(System.getenv("R_HOME"));	
+				System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
+				rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : null;
+				rversion = (rinfo != null ? rinfo[1] : "");
+			}
 
-			System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
-
-			String rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : null;
-
-			System.out.println("rpath=" + rpath);
-			System.out.println("rversion=" + (rinfo != null ? rinfo[1] : ""));
-
+			System.out.println("rpath:"+rpath);
+			System.out.println("rversion:"+rversion);
 			if (rpath == null) {
 
 				if (isWindowsOs()) {	
 					
-					rpath = INSTALL_DIR + "R/R-2.6.2/";
-					if (!new File(rpath+"bin/R.dll").exists()) {
-						int n = JOptionPane.showConfirmDialog(null, "R is not accessible from the command line\nWould you like to use the Embedded R?", "",
-								JOptionPane.YES_NO_OPTION);
-						if (n == JOptionPane.OK_OPTION) {
-							String rZipFileName = null;
-							rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/R-2.6.2-Win.zip";
-							URL rUrl = new URL(rZipFileName);
-							InputStream is = rUrl.openConnection().getInputStream();
-							unzip(is, INSTALL_DIR + "R/", null, BUFFER_SIZE, true, "Unzipping R..", 3606);							
-						} else {
-							JOptionPane.showMessageDialog(null,
-									"please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
-							System.exit(0);
-						}
-					}					
-
+					rpath = INSTALL_DIR + "R/"+EMBEDDED_R;
+					
+					int n = JOptionPane.showConfirmDialog(null, "R is not accessible from the command line\nWould you like to use the Embedded R?", "",
+							JOptionPane.YES_NO_OPTION);
+					if (n == JOptionPane.OK_OPTION) {
+						String rZipFileName = null;
+						rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/"+EMBEDDED_R+".zip";
+						URL rUrl = new URL(rZipFileName);
+						InputStream is = rUrl.openConnection().getInputStream();
+						unzip(is, INSTALL_DIR + "R/", null, BUFFER_SIZE, true, "Unzipping R..", ENTRIES_NUMBER);							
+					} else {
+						JOptionPane.showMessageDialog(null,
+								"please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
+						System.exit(0);
+					}
+					
 				} else {
 					if (showProgress) {
 						JOptionPane
@@ -534,18 +541,6 @@ public class ServerManager {
 			raf.close();
 
 			// ---------------------------------------
-
-			if (isWindowsOs() && !new File(INSTALL_DIR + "VRWorkbench.bat").exists()) {
-				try {
-					String launcherFile = INSTALL_DIR + "VRWorkbench.bat";
-					FileWriter fw = new FileWriter(launcherFile);
-					PrintWriter pw = new PrintWriter(fw);
-					pw.println("javaws http://biocep-distrib.r-forge.r-project.org/rworkbench.jnlp");
-					fw.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
 
 			if (!isWindowsOs() && !new File(INSTALL_DIR + "VRWorkbench.sh").exists()) {
 				try {
