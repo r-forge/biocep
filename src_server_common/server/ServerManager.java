@@ -583,14 +583,15 @@ public class ServerManager {
 
 				String uid=null;				
 				
-				if (name!=null && !name.equals("") && name.contains("${uid}")) {
+				if (name!=null && !name.equals("") && name.contains("%{uid}")) {
 					if (uid==null) uid=UUID.randomUUID().toString();
-					name=PoolUtils.replaceAll(name, "${uid}", uid );
+					name=PoolUtils.replaceAll(name, "%{uid}", uid );
 				}
+								
 				
-				if (logFile!=null && !logFile.equals("") && logFile.contains("${uid}")) {
+				if (logFile!=null && !logFile.equals("") && logFile.contains("%{uid}")) {
 					if (uid==null) uid=UUID.randomUUID().toString();
-					logFile=PoolUtils.replaceAll(logFile, "${uid}", uid );
+					logFile=PoolUtils.replaceAll(logFile, "%{uid}", uid );
 				}
 				
 				Vector<String> command = new Vector<String>();
