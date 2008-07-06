@@ -219,9 +219,9 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								                public void run() {
 								                    try {
 								                    	                    
-								                        String command="java -Dlog.file="+System.getProperty("submit.ssh.biocep.home")+"/log/${uid}.log"
+								                        String command="java -Dlog.file="+System.getProperty("submit.ssh.biocep.home")+"/log/%{uid}.log"
 								                        				   +" -Drmi.port.start="+System.getProperty("submit.ssh.rmi.port.start")
-								                        				   +" -Dname=${uid}"
+								                        				   +" -Dname=%{uid}"
 								                        				   +" -Dnaming.mode=db"
 								                        				   +" -Ddb.host="+System.getProperty("submit.ssh.host")
 								                        				   +" -Dwait=true"

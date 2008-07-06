@@ -144,7 +144,7 @@ public class SSHUtils {
 			Session sess = null;
 
 			sess = conn.openSession();
-			new SCPClient(conn).put(PoolUtils.replaceAll(command, "${uid}", uid).getBytes(), "launcher_"+uid+".sh", remoteTargetDirectory);			
+			new SCPClient(conn).put(PoolUtils.replaceAll(command, "%{uid}", uid).getBytes(), "launcher_"+uid+".sh", remoteTargetDirectory);			
 			sess.close();
 			
 			sess = conn.openSession();		
