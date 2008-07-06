@@ -133,22 +133,27 @@ public class ServantProxyPoolSingletonDB {
 						}
 					};
 
-					Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-						public void run() {
-							synchronized (p) {
+					if (System.getProperty("pools.dbmode.shutdownhook.enabled") != null
+							&& System.getProperty("pools.dbmode.shutdownhook.enabled").equalsIgnoreCase("false")) {
 
-								final Vector<Object> bo = (Vector<Object>) borrowedObjects.clone();
+					} else {
+						Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+							public void run() {
+								synchronized (p) {
 
-								_shuttingDown = true;
-								try {
-									for (int i = 0; i < bo.size(); ++i)
-										p.returnObject(bo.elementAt(i));
-								} catch (Exception e) {
-									e.printStackTrace();
+									final Vector<Object> bo = (Vector<Object>) borrowedObjects.clone();
+
+									_shuttingDown = true;
+									try {
+										for (int i = 0; i < bo.size(); ++i)
+											p.returnObject(bo.elementAt(i));
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 								}
 							}
-						}
-					}));
+						}));
+					}
 
 					_pool.put(key, p);
 					p.setMaxIdle(0);
