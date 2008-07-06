@@ -1161,7 +1161,7 @@
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>								
 
-			<java maxmemory="1024m" classname="model.ModelServer"
+			<java maxmemory="1024m" classname="server.SendEmailMain"
 				fork="true" spawn="${spawn}">
 				<classpath>
 					
