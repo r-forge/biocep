@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -573,10 +574,25 @@ public class ServerManager {
 
 			CreationCallBack callBack = null;
 
+			
+			
+			
 			try {
 				callBack = new CreationCallBack(servantHolder, exceptionHolder);
 				String listenerStub = PoolUtils.stubToHex(callBack);
 
+				String uid=null;				
+				
+				if (name!=null && !name.equals("") && name.contains("${uid}")) {
+					if (uid==null) uid=UUID.randomUUID().toString();
+					name=PoolUtils.replaceAll(name, "${uid}", uid );
+				}
+				
+				if (logFile!=null && !logFile.equals("") && logFile.contains("${uid}")) {
+					if (uid==null) uid=UUID.randomUUID().toString();
+					logFile=PoolUtils.replaceAll(logFile, "${uid}", uid );
+				}
+				
 				Vector<String> command = new Vector<String>();
 
 				command.add(System.getProperty("java.home") + "/bin/java");

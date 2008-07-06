@@ -44,7 +44,7 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 	private String _user;
 	private String _password;
 	private String _defaultPoolName;
-	private DBLayer _dbLayer = null;
+	private DBLayerInterface _dbLayer = null;
 
 	public ServantsProviderFactoryDB() throws Exception {
 		super();

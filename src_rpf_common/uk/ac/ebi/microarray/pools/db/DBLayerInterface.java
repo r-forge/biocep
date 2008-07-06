@@ -37,5 +37,5 @@ public interface DBLayerInterface extends Registry {
 	public String getNameFromStub(Remote stub) throws RemoteException, AccessException;
 	public void unregisterAll() throws RemoteException, NotBoundException, AccessException;	
 	public void applyDBScript(InputStream scriptInputStream) throws RemoteException, NotBoundException, AccessException;	
-	public boolean canReconnect();
+	public boolean canReconnect();	
 }

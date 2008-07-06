@@ -168,7 +168,8 @@ public class MainNodeManager {
 												_registry.lookup(System.getProperty("node.manager.name") + '_' + nodeName);
 											} catch (NotBoundException nbe) {
 												NodeManager _manager = (NodeManager) _registry.lookup(System.getProperty("node.manager.name"));
-												_manager.createServant(nodeName);
+												ManagedServant ms=_manager.createServant(nodeName);
+												System.out.println(ms +"  successfully created");
 											}
 										}
 									}
@@ -178,7 +179,8 @@ public class MainNodeManager {
 										String nodeName = indexesQueue.poll();
 										if (nodeName != null && nodeName.equals(_nodeData.getNodeName())) {
 											NodeManager _manager = (NodeManager) _registry.lookup(_nodeManagerName);
-											_manager.createServant(nodeName);
+											ManagedServant ms=_manager.createServant(nodeName);
+											System.out.println(ms +"  successfully created");
 										}
 									}
 

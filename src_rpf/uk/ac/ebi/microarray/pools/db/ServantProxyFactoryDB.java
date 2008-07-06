@@ -35,11 +35,11 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 public class ServantProxyFactoryDB implements PoolableObjectFactory {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(ServantProxyFactoryDB.class);
 
-	DBLayer _dbLayer = null;
+	DBLayerInterface _dbLayer = null;
 	String _poolName = null;
 	PoolDataDB _poolData = null;
 
-	public ServantProxyFactoryDB(String poolName, DBLayer dbLayer) throws Exception {
+	public ServantProxyFactoryDB(String poolName, DBLayerInterface dbLayer) throws Exception {
 		super();
 		_poolName = poolName;
 		_dbLayer = dbLayer;
