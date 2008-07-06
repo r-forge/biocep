@@ -124,7 +124,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		try {
 			stmt = _connection.createStatement();
 			stmt
-					.execute("Insert into SERVANTS (NAME,STUB_HEX,IN_USE,PING_FAILURES,REGISTER_TIME,REGISTER_PROCESS_ID,REGISTER_HOST_NAME,REGISTER_HOST_IP,REGISTER_OS,CODEBASE) "
+					.execute("Insert into SERVANTS (NAME,STUB_HEX,IN_USE,PING_FAILURES,REGISTER_TIME,REGISTER_PROCESS_ID,REGISTER_HOST_NAME,REGISTER_HOST_IP,REGISTER_OS,CODEBASE,JOB_ID,NOTIFY_EMAIL,NOTIFIED) "
 							+ "values ('"
 							+ name
 							+ "','"
@@ -140,8 +140,8 @@ public abstract class DBLayer implements DBLayerInterface {
 							+ "','"
 							+ System.getProperty("os.name")
 							+ "',"
-							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "'")
-							+ ")");
+							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "',")
+							+ "NULL,"+ (System.getProperty("notify.email")==null? "NULL" : "'"+System.getProperty("notify.email")+"'") +",0)");
 		} catch (SQLException sqle) {
 			if (isConstraintViolationError(sqle))
 				throw new AlreadyBoundException();
@@ -327,7 +327,7 @@ public abstract class DBLayer implements DBLayerInterface {
 
 			stmt = _connection.createStatement();
 			stmt
-					.execute("Insert into SERVANTS (NAME,STUB_HEX,IN_USE,PING_FAILURES,REGISTER_TIME,REGISTER_PROCESS_ID,REGISTER_HOST_NAME,REGISTER_HOST_IP,REGISTER_OS,CODEBASE) "
+					.execute("Insert into SERVANTS (NAME,STUB_HEX,IN_USE,PING_FAILURES,REGISTER_TIME,REGISTER_PROCESS_ID,REGISTER_HOST_NAME,REGISTER_HOST_IP,REGISTER_OS,CODEBASE,JOB_ID,NOTIFY_EMAIL,NOTIFIED) "
 							+ "values ('"
 							+ name
 							+ "','"
@@ -343,8 +343,8 @@ public abstract class DBLayer implements DBLayerInterface {
 							+ "','"
 							+ System.getProperty("os.name")
 							+ "',"
-							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "'")
-							+ ")");
+							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "',")
+							+ "NULL,"+ (System.getProperty("notify.email")==null? "NULL" : "'"+System.getProperty("notify.email")+"'") +",0)");
 
 		} catch (SQLException sqle) {
 			throw new RemoteException("", (sqle));
@@ -1243,4 +1243,47 @@ public abstract class DBLayer implements DBLayerInterface {
 			return null;
 		}
 	}
+	
+	public void setJobID(String servantName, String jobID) throws RemoteException {
+		Statement stmt = null;
+		try {
+			stmt = _connection.createStatement();
+			stmt.execute("update SERVANTS SET JOB_ID='" + jobID + "' WHERE NAME='" + servantName + "'");
+			_connection.commit();
+		} catch (SQLException sqle) {
+			if (isNoConnectionError(sqle) && canReconnect()) {
+				setJobID(servantName, jobID);
+			} else {
+				throw new RemoteException("", (sqle));
+			}
+		} finally {
+			if (stmt != null)
+				try {
+					stmt.close();
+				} catch (Exception e) {
+					throw new RemoteException("", (e));
+				}
+		}	
+	}
+	
+	public void setNotified(String servantName, boolean notified) throws RemoteException {
+		Statement stmt = null;
+		try {
+			stmt = _connection.createStatement();
+			stmt.execute("update SERVANTS SET NOTIFIED=" + (notified?"1":"0") + " WHERE NAME='" + servantName + "'");
+			_connection.commit();
+		} catch (SQLException sqle) {
+			if (isNoConnectionError(sqle) && canReconnect()) {
+				setNotified(servantName, notified);
+			} else {
+				throw new RemoteException("", (sqle));
+			}
+		} finally {
+			if (stmt != null)
+				try {
+					stmt.close();
+				} catch (Exception e) {
+					throw new RemoteException("", (e));
+				}
+		}	}
 }

@@ -3,7 +3,11 @@ package server;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.activation.*;
+import remoting.RServices;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
+import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import java.util.Properties;
+
 public class SendEmailMain
 {
  
@@ -19,7 +23,7 @@ public class SendEmailMain
      public void sendMail(String mailServer, String from, String to,
                              String subject, String messageBody,
                              String[] attachments) throws
-MessagingException, AddressException
+                             MessagingException, AddressException
      {
          // Setup mail server
     	 
@@ -86,8 +90,13 @@ MessagingException, AddressException
          }
      }
  
-     public static void main(String[] args)
+     public static void main(String[] args) throws Exception
      {
+    	 
+    	 ((RServices)ServerDefaults.getRmiRegistry().lookup("RSERVANT_2")).setJobId("dd.ngs");
+    	 ((DBLayerInterface)ServerDefaults.getRmiRegistry()).setNotified("RSERVANT_2",true);
+    	 System.exit(0);
+    	 
          try
          {
         	 SendEmailMain client = new SendEmailMain();

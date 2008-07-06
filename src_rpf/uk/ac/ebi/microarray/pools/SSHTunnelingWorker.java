@@ -46,7 +46,7 @@ public class SSHTunnelingWorker {
 			};
 		});
 		servantMap.put("db", registry);
-		//servantMap.put("servant.provider", ServantProviderFactory.getFactory().getServantProvider());
+		servantMap.put("servant.provider", ServantProviderFactory.getFactory().getServantProvider());
 	}
 
 	public static void main(String[] args) {

@@ -36,6 +36,9 @@ public interface DBLayerInterface extends Registry {
 	public Vector<HashMap<String, Object>> getTableData(String tableName, String condition) throws RemoteException;
 	public String getNameFromStub(Remote stub) throws RemoteException, AccessException;
 	public void unregisterAll() throws RemoteException, NotBoundException, AccessException;	
-	public void applyDBScript(InputStream scriptInputStream) throws RemoteException, NotBoundException, AccessException;	
+	public void applyDBScript(InputStream scriptInputStream) throws RemoteException, NotBoundException, AccessException;
 	public boolean canReconnect();	
+	public void setJobID(String servantName, String jobID) throws RemoteException;
+	public void setNotified(String servantName, boolean notified) throws RemoteException;
+	
 }
