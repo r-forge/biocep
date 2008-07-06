@@ -50,7 +50,9 @@ public class SSHTunnelingProxy {
 			invokationProps.storeToXML(fos, "");
 			fos.close();
 			new SCPClient(conn).put(fileIn, homedir);			
-			String cmd=PoolUtils.replaceAll(invokeCommand, "${file}", homedir+"/invoke"+uid+".in");			
+			String cmd=PoolUtils.replaceAll(invokeCommand, "%{file}", homedir+"/invoke"+uid+".in");
+			cmd=PoolUtils.replaceAll(cmd, "%{install.dir}", homedir);
+			
 			System.out.println("cmd:"+cmd);
 			sess.execCommand( cmd );
 
@@ -123,6 +125,7 @@ public class SSHTunnelingProxy {
 	public static Object getDynamicProxy(final String sshHostIp,final int port, final String sshLogin,final String sshPwd,final String homedir,final String invokeCommand, final String servantName, Class<?>[] c) {
 		Object proxy = Proxy.newProxyInstance(SSHTunnelingProxy.class.getClassLoader(), c, new InvocationHandler() {
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				//new Exception().printStackTrace();
 				return SSHTunnelingProxy.invoke(sshHostIp,port, sshLogin, sshPwd,homedir,invokeCommand, servantName, method.getName(), method.getParameterTypes(), args);
 			}
 		});

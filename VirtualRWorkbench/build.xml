@@ -509,8 +509,6 @@
 							</classpath>					  
 					  		<arg value="VirtualRWorkbench/frontendapp/WEB-INF/classes/globals.properties"/>				
 				  			
-				  			
-				  			
 						    <arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB"/>
 						    <arg value="pools.dbmode.type=${demo.db.type}"/>
 						    <arg value="pools.dbmode.host=${demo.db.host}"/>
@@ -524,8 +522,6 @@
 				  			<arg value="pools.dbproxymode.class=uk.ac.ebi.microarray.pools.db.monitor.DefaultDBLayerProvider"/>
 				  			<arg value="pools.dbproxymode.defaultpoolname=R"/>
 				  			-->
-				  			
-				  			
 				  			
 						    <arg value="submit.mode="/>
 				  			<arg value="submit.ssh.host=ngs.oerc.ox.ac.uk"/>
