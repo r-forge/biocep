@@ -1153,7 +1153,7 @@
 			<if><not><isset property="registry.port"/></not><then><property name="registry.port" value=""/></then></if>
 		
 		
-		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
+		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value="db"/></then></if>
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>

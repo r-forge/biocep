@@ -29,7 +29,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 /**
- * @author Karim Chine   k.chine@imperial.ac.uk
+ * @author Karim Chine k.chine@imperial.ac.uk
  */
 public class ServantProxyPoolSingletonDB {
 	static java.util.Hashtable<String, GenericObjectPool> _pool = new Hashtable<String, GenericObjectPool>();
@@ -70,22 +70,27 @@ public class ServantProxyPoolSingletonDB {
 						}
 					};
 
-					Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-						public void run() {
-							synchronized (p) {
+					if (System.getProperty("pools.dbmode.shutdownhook.enabled") != null
+							&& System.getProperty("pools.dbmode.shutdownhook.enabled").equalsIgnoreCase("false")) {
 
-								final Vector<Object> bo = (Vector<Object>) borrowedObjects.clone();
+					} else {
+						Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+							public void run() {
+								synchronized (p) {
 
-								_shuttingDown = true;
-								try {
-									for (int i = 0; i < bo.size(); ++i)
-										p.returnObject(bo.elementAt(i));
-								} catch (Exception e) {
-									e.printStackTrace();
+									final Vector<Object> bo = (Vector<Object>) borrowedObjects.clone();
+
+									_shuttingDown = true;
+									try {
+										for (int i = 0; i < bo.size(); ++i)
+											p.returnObject(bo.elementAt(i));
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 								}
 							}
-						}
-					}));
+						}));
+					}
 
 					_pool.put(key, p);
 					p.setMaxIdle(0);
@@ -99,11 +104,10 @@ public class ServantProxyPoolSingletonDB {
 			return _pool.get(key);
 		}
 	}
-	
 
 	public static GenericObjectPool getInstance(String poolName, DBLayerInterface dbLayer) {
 		String key = poolName + "%" + dbLayer.toString();
-		
+
 		if (_pool.get(key) != null)
 			return _pool.get(key);
 		synchronized (lock) {
@@ -111,7 +115,7 @@ public class ServantProxyPoolSingletonDB {
 				Connection conn = null;
 				try {
 					final Vector<Object> borrowedObjects = new Vector<Object>();
-					
+
 					final GenericObjectPool p = new GenericObjectPool(new ServantProxyFactoryDB(poolName, dbLayer)) {
 						@Override
 						public synchronized Object borrowObject() throws Exception {
@@ -158,6 +162,5 @@ public class ServantProxyPoolSingletonDB {
 			return _pool.get(key);
 		}
 	}
-	
-	
+
 }

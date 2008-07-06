@@ -36,9 +36,10 @@ import org.apache.commons.logging.Log;
 public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemoteObject implements ManagedServant {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(ManagedServant.class);
 
-	private String _servantName;
+	protected String _servantName;
 	private boolean _resetEnabled = true;
-	private String _jobId="";
+	protected String _jobId="";
+	protected Registry _registry;
 
 	
 	public ManagedServantAbstract(String name, String prefix, Registry registry) throws RemoteException {
@@ -47,6 +48,7 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	public ManagedServantAbstract(String name, String prefix, Registry registry, int port) throws RemoteException {
 		super(port);
 
+		_registry=registry;
 		try {
 			registry.list();
 			log.info("ping registry:ok");

@@ -37,7 +37,6 @@ import mapping.RPackage;
 import mapping.ReferenceInterface;
 import model.SpreadsheetModelRemote;
 import model.SpreadsheetModelRemoteImpl;
-
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RObject;
 import org.mortbay.jetty.Server;
@@ -47,11 +46,9 @@ import org.rosuda.JRI.Rengine;
 import org.rosuda.ibase.SVarInterfaceRemote;
 import org.rosuda.ibase.SVarSetInterfaceRemote;
 import org.rosuda.iplots.Framework;
-
 import remoting.AssignInterface;
 import remoting.FileDescription;
 import remoting.GenericCallbackDevice;
-import remoting.RAction;
 import remoting.RCallBack;
 import remoting.RCollaborationListener;
 import remoting.RConsoleAction;
@@ -63,6 +60,7 @@ import uk.ac.ebi.microarray.pools.InitializingException;
 import uk.ac.ebi.microarray.pools.ManagedServantAbstract;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemotePanel;
+import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import util.Utils;
 
 /**
@@ -929,6 +927,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return Framework.getInstance().getSet(setId).byName(name).getRemote();
 	}
 	
+	public void setJobId(String jobId) throws RemoteException {
+		_jobId=jobId;
+		if (_registry instanceof DBLayerInterface) {
+			((DBLayerInterface)_registry).setJobID(_servantName, _jobId);
+		}		
+	}
 	
 		
 }
