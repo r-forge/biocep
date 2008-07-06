@@ -198,7 +198,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									
 							        DBLayerInterface dbLayer =(DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
 					        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
-					                "java -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
+					                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
 					                "db",new Class<?>[]{DBLayerInterface.class});
 									if (privateName != null && !privateName.equals("")) {
 										try {
