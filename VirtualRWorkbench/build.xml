@@ -507,18 +507,25 @@
 								<pathelement path="${LOGGING_JAR}"/>	
 								<pathelement path="${LOG4J_JAR}"/>
 							</classpath>					  
-					  		<arg value="VirtualRWorkbench/frontendapp/WEB-INF/classes/globals.properties"/>					  
+					  		<arg value="VirtualRWorkbench/frontendapp/WEB-INF/classes/globals.properties"/>				
+				  			
+				  			
+				  			
 						    <arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB"/>
-				  			
-				  			
 						    <arg value="pools.dbmode.type=${demo.db.type}"/>
 						    <arg value="pools.dbmode.host=${demo.db.host}"/>
 				  			<arg value="pools.dbmode.port=${demo.db.port}"/>
 				  			<arg value="pools.dbmode.name=${demo.db.name}"/>	
 						    <arg value="pools.dbmode.user=${demo.db.user}"/>
-						    <arg value="pools.dbmode.password=${demo.db.password}"/>					  					  
-						    	
-				  			<arg value="pools.dbmode.defaultpoolname=R"/>
+						    <arg value="pools.dbmode.password=${demo.db.password}"/>
+						    					  					  
+						    <!--
+				  			<arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDBProxy"/>
+				  			<arg value="pools.dbproxymode.class=uk.ac.ebi.microarray.pools.db.monitor.DefaultDBLayerProvider"/>
+				  			<arg value="pools.dbproxymode.defaultpoolname=R"/>
+				  			-->
+				  			
+				  			
 				  			
 						    <arg value="submit.mode="/>
 				  			<arg value="submit.ssh.host=ngs.oerc.ox.ac.uk"/>

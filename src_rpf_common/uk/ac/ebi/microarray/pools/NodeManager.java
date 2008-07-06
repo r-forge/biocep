@@ -25,7 +25,7 @@ import java.rmi.RemoteException;
 public interface NodeManager extends ManagedServant {
 	ManagedServant createPrivateServant(String nodeName) throws RemoteException;
 
-	void createServant(String nodeName) throws RemoteException;
+	ManagedServant createServant(String nodeName) throws RemoteException;
 
 	void kill(ManagedServant servant) throws RemoteException;
 

@@ -1243,5 +1243,4 @@ public abstract class DBLayer implements DBLayerInterface {
 			return null;
 		}
 	}
-
 }

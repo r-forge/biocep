@@ -37,7 +37,7 @@ import uk.ac.ebi.microarray.pools.db.monitor.SupervisorUtils;
  */
 public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager {
 	DBLayer _dbLayer;
-	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 3;
+	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 0;
 
 	public NodeManagerImpl(DBLayer dbLayer) throws RemoteException {
 		super();
@@ -60,8 +60,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 					.getHostIp());
 			long t1 = System.currentTimeMillis();
 			while (servantHolder[0] == null && exceptionHolder[0] == null) {
-				if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
-					throw new ServantCreationTimeout();
+				if (SERVANT_CREATION_TIMEOUT_MILLISEC>0 && (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)) throw new ServantCreationTimeout();
 				try {
 					Thread.sleep(100);
 				} catch (Exception e) {
@@ -82,8 +81,8 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		return servantHolder[0];
 	}
 
-	public void createServant(String nodeName) throws RemoteException {
-		create(_dbLayer, nodeName, false);
+	public ManagedServant createServant(String nodeName) throws RemoteException {
+		return create(_dbLayer, nodeName, false);
 	}
 
 	public void kill(ManagedServant servant) throws RemoteException {

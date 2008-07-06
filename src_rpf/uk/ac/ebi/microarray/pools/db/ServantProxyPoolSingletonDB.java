@@ -48,7 +48,7 @@ public class ServantProxyPoolSingletonDB {
 				try {
 					Class.forName(driver);
 					final Vector<Object> borrowedObjects = new Vector<Object>();
-					DBLayer dbLayer = DBLayer.getLayer(getDBType(url), new ConnectionProvider() {
+					DBLayerInterface dbLayer = DBLayer.getLayer(getDBType(url), new ConnectionProvider() {
 						public Connection newConnection() throws SQLException {
 							return DriverManager.getConnection(url, user, password);
 						}
@@ -99,4 +99,65 @@ public class ServantProxyPoolSingletonDB {
 			return _pool.get(key);
 		}
 	}
+	
+
+	public static GenericObjectPool getInstance(String poolName, DBLayerInterface dbLayer) {
+		String key = poolName + "%" + dbLayer.toString();
+		
+		if (_pool.get(key) != null)
+			return _pool.get(key);
+		synchronized (lock) {
+			if (_pool.get(key) == null) {
+				Connection conn = null;
+				try {
+					final Vector<Object> borrowedObjects = new Vector<Object>();
+					
+					final GenericObjectPool p = new GenericObjectPool(new ServantProxyFactoryDB(poolName, dbLayer)) {
+						@Override
+						public synchronized Object borrowObject() throws Exception {
+							if (_shuttingDown)
+								throw new NoSuchElementException();
+							Object result = super.borrowObject();
+							borrowedObjects.add(result);
+							return result;
+						}
+
+						@Override
+						public synchronized void returnObject(Object obj) throws Exception {
+							super.returnObject(obj);
+							borrowedObjects.remove(obj);
+						}
+					};
+
+					Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+						public void run() {
+							synchronized (p) {
+
+								final Vector<Object> bo = (Vector<Object>) borrowedObjects.clone();
+
+								_shuttingDown = true;
+								try {
+									for (int i = 0; i < bo.size(); ++i)
+										p.returnObject(bo.elementAt(i));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}
+					}));
+
+					_pool.put(key, p);
+					p.setMaxIdle(0);
+					p.setTestOnBorrow(true);
+					p.setTestOnReturn(true);
+				} catch (Exception e) {
+					throw new RuntimeException(getStackTraceAsString(e));
+				}
+
+			}
+			return _pool.get(key);
+		}
+	}
+	
+	
 }
