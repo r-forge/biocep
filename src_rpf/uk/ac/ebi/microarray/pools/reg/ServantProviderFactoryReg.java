@@ -188,6 +188,19 @@ public class ServantProviderFactoryReg extends ServantProviderFactory {
 					System.exit(0);
 				}
 			}
+			
+			public void returnServantProxy(String poolName, ManagedServant proxy) {
+				if (proxy == null)
+					return;
+				try {
+					PoolNode node = _borrowedServants.get(proxy);
+					_borrowedServants.remove(proxy);
+					ServantProxyPoolSingletonReg.getInstance(node.getRegistryHost(), node.getRegistryPort(), node.getServantPoolPrefix()).returnObject(proxy);
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(0);
+				}
+			}
 
 			public ManagedServant borrowServantProxy() throws TimeoutException {
 				return borrowServantProxy(_defaultPoolName);

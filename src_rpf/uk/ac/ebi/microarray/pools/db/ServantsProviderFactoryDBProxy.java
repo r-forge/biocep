@@ -17,7 +17,6 @@ public class ServantsProviderFactoryDBProxy extends ServantProviderFactory {
 
 	private final Log log = org.apache.commons.logging.LogFactory.getLog(ServantsProviderFactoryDBProxy.class);
 	private ServantProvider _servantProvider = null;
-	private Hashtable<ManagedServant, String> _borrowedServants = new Hashtable<ManagedServant, String>();
 	private HashMap<String, PoolDataDB> _poolHashMap = new HashMap<String, PoolDataDB>();
 	private String _defaultPoolName;
 	private DBLayerInterface _dbLayer = null;
@@ -69,7 +68,6 @@ public class ServantsProviderFactoryDBProxy extends ServantProviderFactory {
 
 				} while (true);
 
-				_borrowedServants.put(proxy, poolName);
 				return proxy;
 			}
 
@@ -81,8 +79,7 @@ public class ServantsProviderFactoryDBProxy extends ServantProviderFactory {
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
-				if (proxy != null)
-					_borrowedServants.put(proxy, poolName);
+
 				return proxy;
 			}
 
@@ -90,15 +87,26 @@ public class ServantsProviderFactoryDBProxy extends ServantProviderFactory {
 				if (proxy == null)
 					return;
 				try {
-					String poolName = _borrowedServants.get(proxy);
-					_borrowedServants.remove(proxy);
-					ServantProxyPoolSingletonDB.getInstance(poolName, _dbLayer).returnObject(proxy);
+
+					ServantProxyPoolSingletonDB.getInstance(_defaultPoolName, _dbLayer).returnObject(proxy);
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.exit(0);
 				}
 			}
 
+			public void returnServantProxy(String poolName, ManagedServant proxy) {
+				if (proxy == null)
+					return;
+				try {
+
+					ServantProxyPoolSingletonDB.getInstance(poolName, _dbLayer).returnObject(proxy);
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(0);
+				}
+			}
+			
 			public ManagedServant borrowServantProxy() throws TimeoutException {
 				return borrowServantProxy(_defaultPoolName);
 			}

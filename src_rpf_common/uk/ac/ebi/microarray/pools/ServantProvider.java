@@ -28,6 +28,8 @@ public interface ServantProvider {
 	public ManagedServant borrowServantProxyNoWait();
 
 	public void returnServantProxy(ManagedServant proxy);
+	
+	public void returnServantProxy(String poolName, ManagedServant proxy);
 
 	public String getDefaultPoolName();
 

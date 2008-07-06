@@ -7,14 +7,11 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.DEFAULT_DB_PORT;
 import static uk.ac.ebi.microarray.pools.PoolUtils.DEFAULT_DB_TYPE;
 import static uk.ac.ebi.microarray.pools.PoolUtils.DEFAULT_DB_USER;
 import static uk.ac.ebi.microarray.pools.PoolUtils.getDBType;
-
 import java.rmi.registry.Registry;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.NoSuchElementException;
-
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.ServantProvider;
 import uk.ac.ebi.microarray.pools.TimeoutException;
@@ -27,7 +24,6 @@ public class ServantProviderDB implements ServantProvider{
 	private String _password;
 	private String _defaultPoolName;
 	private DBLayerInterface _dbLayer = null;	
-	private Hashtable<ManagedServant, String> _borrowedServants = new Hashtable<ManagedServant, String>();
 	private HashMap<String, PoolDataDB> _poolHashMap = new HashMap<String, PoolDataDB>();
 	
 	public ServantProviderDB() throws Exception{
@@ -103,7 +99,6 @@ public class ServantProviderDB implements ServantProvider{
 
 		} while (true);
 
-		_borrowedServants.put(proxy, poolName);
 		return proxy;
 	}
 
@@ -115,8 +110,6 @@ public class ServantProviderDB implements ServantProvider{
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		if (proxy != null)
-			_borrowedServants.put(proxy, poolName);
 		return proxy;
 	}
 
@@ -124,14 +117,24 @@ public class ServantProviderDB implements ServantProvider{
 		if (proxy == null)
 			return;
 		try {
-			String poolName = _borrowedServants.get(proxy);
-			_borrowedServants.remove(proxy);
+			ServantProxyPoolSingletonDB.getInstance(_defaultPoolName, _driver, _url, _user, _password).returnObject(proxy);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+	
+	public void returnServantProxy(String poolName, ManagedServant proxy) {
+		if (proxy == null)
+			return;
+		try {
 			ServantProxyPoolSingletonDB.getInstance(poolName, _driver, _url, _user, _password).returnObject(proxy);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
 		}
 	}
+	
 
 	public ManagedServant borrowServantProxy() throws TimeoutException {
 		return borrowServantProxy(_defaultPoolName);
