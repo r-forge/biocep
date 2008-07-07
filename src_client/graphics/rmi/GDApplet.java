@@ -147,9 +147,7 @@ import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.rosuda.ibase.RemoteUtil;
 import org.rosuda.ibase.SMarkerInterface;
-import org.rosuda.ibase.SMarkerInterfaceRemote;
 import org.rosuda.ibase.SVarInterface;
-import org.rosuda.ibase.SVarInterfaceRemote;
 import org.rosuda.ibase.plots.BarCanvas;
 import org.rosuda.ibase.plots.HamCanvas;
 import org.rosuda.ibase.plots.HistCanvas;
@@ -157,9 +155,7 @@ import org.rosuda.ibase.plots.MapCanvas;
 import org.rosuda.ibase.plots.MosaicCanvas;
 import org.rosuda.ibase.plots.ParallelAxesCanvas;
 import org.rosuda.ibase.plots.ScatterCanvas;
-
 import remoting.FileDescription;
-import remoting.RAction;
 import remoting.RCollaborationListener;
 import remoting.RConsoleAction;
 import remoting.RConsoleActionListener;
@@ -238,6 +234,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public static RGui _instance;
 	private RCollaborationListenerImpl _collaborationListenerImpl;
 	private RConsoleActionListenerImpl _rConsoleActionListenerImpl;
+	
+	private boolean logonWithoutConfirmation=false;
 
 	private final ReentrantLock _protectR = new RGuiReentrantLock() {
 		@Override
@@ -405,8 +403,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 			LoginDialog.servantName_str = getParameter("registry.port");
 		if (getParameter("url") != null && !getParameter("url").equals(""))
 			LoginDialog.url_str = getParameter("url");
-
+		if (getParameter("privatename") != null && !getParameter("privatename").equals(""))
+			LoginDialog.privateName_str = getParameter("privatename");
 		
+		if (_mode==HTTP_MODE && getParameter("privatename") != null && !getParameter("privatename").equals("")) {
+			logonWithoutConfirmation=true;
+		}
 		
 		try {
 
@@ -453,23 +455,28 @@ public class GDApplet extends GDAppletBase implements RGui {
 							GDDevice d = null;
 
 							boolean showLoginDialog = true;
+							LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane());
+							
 							if (new File(GDApplet.NEW_R_STUB_FILE).exists()) {
 								int n = JOptionPane.showConfirmDialog(GDApplet.this, "Would you like to connect to the last created and kept alive R Server ?",
 										"", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null);
 								if (n == JOptionPane.OK_OPTION) {
-									showLoginDialog = false;
-
 									BufferedReader pr = new BufferedReader(new FileReader(GDApplet.NEW_R_STUB_FILE));
 									String stub = pr.readLine();
 									pr.close();
-
 									ident = new Identification(RMI_MODE, "", "", "", false, false, "", RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "",
 											"", stub, -1, -1, false, false, "", -1, "", "", false, false);
+									
+									showLoginDialog = false;
 								}
+							} else if (logonWithoutConfirmation){
+								loginDialog.okMethod();
+								ident=loginDialog.getIndentification();
+								showLoginDialog=false;
+								logonWithoutConfirmation=false;
 							}
 
-							if (showLoginDialog) {
-								LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane());
+							if (showLoginDialog) {								
 								loginDialog.setVisible(true);
 								ident = loginDialog.getIndentification();
 							}

@@ -640,7 +640,7 @@ public class LoginDialog extends JDialog {
 
 	}
 
-	private void okMethod() {
+	public void okMethod() {
 
 		if (localModeButton.isSelected())
 			mode_int = GDApplet.NEW_R_MODE;
