@@ -283,6 +283,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 							} else {
 
 								if (System.getProperty("submit.mode").equals("ssh")) {
+									
+									
 									ServantProvider servantProvider =(ServantProvider)SSHTunnelingProxy.getDynamicProxy(
 							        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
 							                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
