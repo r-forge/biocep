@@ -124,7 +124,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		try {
 			stmt = _connection.createStatement();
 			stmt
-					.execute("Insert into SERVANTS (NAME,STUB_HEX,IN_USE,PING_FAILURES,REGISTER_TIME,REGISTER_PROCESS_ID,REGISTER_HOST_NAME,REGISTER_HOST_IP,REGISTER_OS,CODEBASE,JOB_ID,NOTIFY_EMAIL,NOTIFIED) "
+					.execute("Insert into SERVANTS (NAME,STUB_HEX,IN_USE,PING_FAILURES,REGISTER_TIME,PROCESS_ID,HOST_NAME,HOST_IP,OS,CODEBASE,JOB_ID,JOB_NAME,NOTIFY_EMAIL,NOTIFIED) "
 							+ "values ('"
 							+ name
 							+ "','"
@@ -141,7 +141,9 @@ public abstract class DBLayer implements DBLayerInterface {
 							+ System.getProperty("os.name")
 							+ "',"
 							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "',")
-							+ "NULL,"+ (System.getProperty("notify.email")==null? "NULL" : "'"+System.getProperty("notify.email")+"'") +",0)");
+							+ (System.getProperty("job.id")==null? "NULL" : "'"+System.getProperty("job.id")+"'")+","
+							+ (System.getProperty("job.name")==null? "NULL" : "'"+System.getProperty("job.name")+"'")+","							
+							+ (System.getProperty("notify.email")==null? "NULL" : "'"+System.getProperty("notify.email")+"'") +",0)");
 		} catch (SQLException sqle) {
 			if (isConstraintViolationError(sqle))
 				throw new AlreadyBoundException();
@@ -327,7 +329,7 @@ public abstract class DBLayer implements DBLayerInterface {
 
 			stmt = _connection.createStatement();
 			stmt
-					.execute("Insert into SERVANTS (NAME,STUB_HEX,IN_USE,PING_FAILURES,REGISTER_TIME,REGISTER_PROCESS_ID,REGISTER_HOST_NAME,REGISTER_HOST_IP,REGISTER_OS,CODEBASE,JOB_ID,NOTIFY_EMAIL,NOTIFIED) "
+					.execute("Insert into SERVANTS (NAME,STUB_HEX,IN_USE,PING_FAILURES,REGISTER_TIME,PROCESS_ID,HOST_NAME,HOST_IP,OS,CODEBASE,JOB_ID,JOB_NAME,NOTIFY_EMAIL,NOTIFIED) "
 							+ "values ('"
 							+ name
 							+ "','"
@@ -344,7 +346,9 @@ public abstract class DBLayer implements DBLayerInterface {
 							+ System.getProperty("os.name")
 							+ "',"
 							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "',")
-							+ "NULL,"+ (System.getProperty("notify.email")==null? "NULL" : "'"+System.getProperty("notify.email")+"'") +",0)");
+							+ (System.getProperty("job.id")==null? "NULL" : "'"+System.getProperty("job.id")+"'")+","
+							+ (System.getProperty("job.name")==null? "NULL" : "'"+System.getProperty("job.name")+"'")+","							
+							+ (System.getProperty("notify.email")==null? "NULL" : "'"+System.getProperty("notify.email")+"'") +",0)");
 
 		} catch (SQLException sqle) {
 			throw new RemoteException("", (sqle));

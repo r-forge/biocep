@@ -108,7 +108,7 @@ public class ServerManager {
 	
 	
 	public static String[] namingVars=new String[]{
-		"registry.host", "registry.port","naming.mode","db.type","db.host","db.port","db.name","db.user","db.password", "rmi.port.start", "notify.email"};
+		"registry.host", "registry.port","naming.mode","db.type","db.host","db.port","db.name","db.user","db.password", "rmi.port.start", "job.id", "job.name", "notify.email"};
 
 
 	private static JTextArea createRSshProgressArea;
