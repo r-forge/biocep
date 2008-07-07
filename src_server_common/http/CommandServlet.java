@@ -56,6 +56,7 @@ import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
 import uk.ac.ebi.microarray.pools.RmiCallTimeout;
 import uk.ac.ebi.microarray.pools.SSHTunnelingProxy;
 import uk.ac.ebi.microarray.pools.SSHUtils;
+import uk.ac.ebi.microarray.pools.ServantProvider;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 import uk.ac.ebi.microarray.pools.YesSecurityManager;
 import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
@@ -198,7 +199,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									
 							        DBLayerInterface dbLayer =(DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
 					        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
-					                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
+					                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
 					                "db",new Class<?>[]{DBLayerInterface.class});
 									if (privateName != null && !privateName.equals("")) {
 										try {
@@ -281,18 +282,34 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 							} else {
 
-								ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
-
-								if (spFactory == null) {
-									result = new NoRegistryAvailableException();
-									break;
-								}
-
-								boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");
-								if (wait) {
-									r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+								if (System.getProperty("submit.mode").equals("ssh")) {
+									ServantProvider servantProvider =(ServantProvider)SSHTunnelingProxy.getDynamicProxy(
+							        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
+							                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
+							                "db",new Class<?>[]{ServantProvider.class});									
+									boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");
+									if (wait) {
+										r = (RServices) servantProvider.borrowServantProxy();
+									} else {
+										r = (RServices) servantProvider.borrowServantProxyNoWait();
+									}
+									
+									System.out.println("---> borrowed : "+r);
+									
 								} else {
-									r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
+									ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+	
+									if (spFactory == null) {
+										result = new NoRegistryAvailableException();
+										break;
+									}
+	
+									boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");
+									if (wait) {
+										r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+									} else {
+										r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
+									}
 								}
 							}
 						}

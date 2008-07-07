@@ -61,6 +61,7 @@ import javax.swing.table.TableCellRenderer;
 import uk.ac.ebi.microarray.pools.InitializingException;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.SSHTunnelingProxy;
 import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.TimeoutException;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
@@ -79,18 +80,16 @@ import javax.crypto.spec.*;
  */
 public class Supervisor {
 	private static final String[] servantTableColumns = new String[] { "NAME", "#POOL_NAME", "IN_USE", "PING_FAILURES", "NODE_NAME", "REGISTER_TIME",
-			"REGISTER_PROCESS_ID", "REGISTER_HOST_NAME", "REGISTER_HOST_IP", "REGISTER_OS", "BORROW_TIME", "BORROW_PROCESS_ID", "BORROW_HOST_NAME",
+			"PROCESS_ID", "HOST_NAME", "HOST_IP", "OS", "BORROW_TIME", "BORROW_PROCESS_ID", "BORROW_HOST_NAME",
 			"BORROW_HOST_IP", "RETURN_TIME", "RETURN_PROCESS_ID", "RETURN_HOST_NAME", "RETURN_HOST_IP", "BORROW_SESSION_INFO_HEX", "ATTRIBUTES_HEX",
-			"CODEBASE", "STUB_HEX"
+			"CODEBASE", "STUB_HEX", "JOB_ID", "JOB_NAME" , "NOTIFY_EMAIL", "NOTIFIED"
 
 	};
 
-	private static final String[] servantTableLabels = new String[] { "Servant Name", "Pool", "Used", "Ping F.", "Node Name", "Reg Time", "Reg Proc",
-			"Reg Host", "Reg IP", "Reg OS", "Borrow Time", "Borrow Proc", "Borrow Host", "Borrow IP",
-
+	private static final String[] servantTableLabels = new String[] { "Servant Name", "Pool", "Used", "Ping F.", "Node Name", "Reg Time", "Proc",
+			"Host", "IP", "OS", "Borrow Time", "Borrow Proc", "Borrow Host", "Borrow IP",
 			"Return Time", "Return Proc", "Return Host", "Return IP",
-
-			"Borrow Session Info", "Attributes", "Codebase", "Stub Hex" };
+			"Borrow Session Info", "Attributes", "Codebase", "Stub Hex", "Job Id","Job Name", "Notify Email", "Notified" };
 
 	private static final int[] servantTableWidths = new int[] { 160, // NAME
 			80, // POOL NAME
@@ -117,8 +116,11 @@ public class Supervisor {
 			300, // BORROW_SESSION_INFO_HEX
 			200, // ATTRIBUTES_HEX
 			200, // CODEBASE
-			300 // STUB_HEX
-
+			300, // STUB_HEX
+			100, // JOB_ID
+			100, // JOB_NAME
+			100, // NOTIFY_EMAIL 
+			100  // NOTIFIED
 	};
 
 	private static final String[] poolTableLabels = new String[] { "Pool Name", "Pool Prefixes", "Timeout" };
@@ -504,7 +506,7 @@ public class Supervisor {
 	public void run() throws Exception {
 
 		try {
-
+			
 			_registry = (DBLayer) ServerDefaults.getRmiRegistry();
 
 			_frame = new JFrame("Supervisor");
