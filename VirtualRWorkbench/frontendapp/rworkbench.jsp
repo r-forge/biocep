@@ -3,6 +3,18 @@
 <% java.net.URL thisUrl=new java.net.URL(request.getRequestURL().toString()); %>
 <jnlp spec="1.5+" codebase="<%="http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/"%>" >
 
+<% String autologon=request.getParameter("autologon")==null ? "true" : request.getParameter("autologon");  %>
+<% String nopool=request.getParameter("nopool")==null ? "true" : request.getParameter("nopool");  %>
+<% String save=request.getParameter("save")==null ? "false" : request.getParameter("save");  %>
+<% String wait=request.getParameter("wait")==null ? "false" : request.getParameter("wait");  %>
+<% String demo=request.getParameter("demo")==null ? "false" : request.getParameter("demo");  %>
+<% String lf=request.getParameter("lf")==null ? "0" : request.getParameter("lf");  %>
+<% String login=request.getParameter("login")==null ? "guest" : request.getParameter("login");  %>
+<% String mode=request.getParameter("mode")==null ? "http" : request.getParameter("mode");  %>
+<% String debug=request.getParameter("debug")==null ? "false" : request.getParameter("debug");  %>
+<% String url=request.getParameter("url")==null ? "http://xen-ngs001.oerc.ox.ac.uk:8000/rvirtual/cmd" : request.getParameter("url");  %>
+<% String privatename=request.getParameter("privatename")==null ? "" : request.getParameter("privatename");  %>
+
 <information>
   <title>Virtual R Workbench</title>
   <vendor>Karim Chine</vendor>
@@ -15,10 +27,18 @@
   </security>
 <resources>
   <j2se version="1.5+"/>
-  <property name="debug" value="false"/>  
-  <property name="autologon" value="true"/>
-  <property name="mode" value="http"/>
-  <property name="url" value="http://xen-ngs001.oerc.ox.ac.uk:8000/rvirtual/cmd"/>
+    
+  <property name="autologon" value="<%=autologon%>"/>
+  <property name="nopool" value="<%=nopool%>"/>
+  <property name="save" value="<%=save%>"/>
+  <property name="wait" value="<%=wait%>"/>
+  <property name="demo" value="<%=demo%>"/>
+  <property name="lf" value="<%=lf%>"/>
+  <property name="login" value="<%=login%>"/>
+  <property name="mode" value="<%=mode%>"/>
+  <property name="debug" value="<%=debug%>"/>
+  <property name="url" value="<%=url%>"/>
+  <property name="privatename" value="<%=privatename%>"/>
   
   <jar href="appletlibs/RJB.jar"/>
   
