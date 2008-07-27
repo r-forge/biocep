@@ -17,6 +17,8 @@
  */
 
 
+import graphics.pop.GDDevice;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -51,6 +53,14 @@ public class BridgeBasics {
 		
 	
 		final RServices rs = DirectJNI.getInstance().getRServices();
+		
+		GDDevice device=rs.newDevice(400 , 400);
+		rs.evaluate("plot(5)");
+		Vector<String> svg=device.getSVG();
+		for (int i=0; i<svg.size(); ++i) {
+			System.out.println(svg.elementAt(i));
+		}
+		
 		
 		
 		RChar s = (RChar) rs.call("paste", new RChar("str1"), new RChar("str2"), new RNamedArgument("sep", new RChar(

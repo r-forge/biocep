@@ -426,6 +426,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
+	public boolean symbolExists(String symbol) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().symbolExists(symbol);
+	}
 	
 	
 	

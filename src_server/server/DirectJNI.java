@@ -2651,6 +2651,34 @@ public class DirectJNI {
 				log.info(_lastStatus);
 			}
 		}
+		
+		public boolean symbolExists(final String symbol) throws RemoteException {
+			final Exception[] exceptionHolder = new Exception[1];
+			final Boolean[] objHolder = new Boolean[1];
+			
+			_lastStatus = runR(new server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						long id=e.rniEval(e.rniParse(symbol, 1), 0);
+						objHolder[0]=id>0;
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+			
+			return objHolder[0];
+		}
 
 		public void addRCallback(RCallBack callback) throws RemoteException {
 			server.RListener.addRCallback(callback);
@@ -3235,11 +3263,15 @@ public class DirectJNI {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			}
+		
+			boolean svgFunctionAvailable=symbolExists("svg");
+			boolean CairoFunctionAvailable=false;
+			if (!svgFunctionAvailable)  {
+				evaluate("library(Cairo)");
+				CairoFunctionAvailable=symbolExists("Cairo");
+			}
 
-			evaluate("library(Cairo)");
-			String loadStatus = getStatus();
-
-			if (!loadStatus.equals("")) {
+			if (!(svgFunctionAvailable || CairoFunctionAvailable)) {
 
 				DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
 				String svgNS = "http://www.w3.org/2000/svg";
@@ -3668,10 +3700,16 @@ public class DirectJNI {
 				throw new RemoteException("", e);
 			}
 
-			DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");
-			String loadStatus = DirectJNI.getInstance().getRServices().getStatus();
+			boolean svgFunctionAvailable=DirectJNI.getInstance().getRServices().symbolExists("svg");
+			boolean CairoFunctionAvailable=false;
+			if (!svgFunctionAvailable)  {
+				DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");
+				CairoFunctionAvailable=DirectJNI.getInstance().getRServices().symbolExists("Cairo");
+			}
 
-			if (!loadStatus.equals("")) {
+			System.out.println("svgFunctionAvailable:"+svgFunctionAvailable);
+			System.out.println("CairoFunctionAvailable:"+CairoFunctionAvailable);
+			if (!(svgFunctionAvailable || CairoFunctionAvailable)) {
 
 				DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
 				String svgNS = "http://www.w3.org/2000/svg";
@@ -3724,20 +3762,26 @@ public class DirectJNI {
 					throw new RemoteException("", e);
 				}
 			} else {
-
+			
+				String SvgDeviceName=null;
+				if (svgFunctionAvailable) SvgDeviceName="svg"; else SvgDeviceName="Cairo"; 
+				
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 
-				DirectJNI.getInstance().shutdownDevices("Cairo");
+				DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
 
-				final String createDeviceCommand = "CairoSVG(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
+				final String createDeviceCommand = SvgDeviceName + (SvgDeviceName.equals("svg")?"":"SVG") +"(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
 						+ new Double(10 * (getSize().width / getSize().height)) + ", height = " + 10
 						+ " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
+				
+				System.out.println("createDeviceCommand:"+createDeviceCommand);
 				DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
 				if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 					log.info(DirectJNI.getInstance().getRServices().getStatus());
+					System.out.println("Status:"+DirectJNI.getInstance().getRServices().getStatus());
 				}
 
-				int cairoDevice = DirectJNI.getInstance().getDevice("Cairo");
+				int cairoDevice = DirectJNI.getInstance().getDevice(SvgDeviceName);
 				DirectJNI.getInstance().getRServices().evaluate(
 						".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + cairoDevice + ");" + ".PrivateEnv$dev.set("
 								+ currentDevice + ");", 3);
@@ -3751,7 +3795,7 @@ public class DirectJNI {
 					Vector<String> result = null;
 					try {
 
-						DirectJNI.getInstance().shutdownDevices("Cairo");
+						DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
 
 						result = new Vector<String>();
 						BufferedReader br = new BufferedReader(new FileReader(tempFile));
@@ -3770,6 +3814,8 @@ public class DirectJNI {
 				} else {
 					return null;
 				}
+				
+				
 
 			}
 		}
