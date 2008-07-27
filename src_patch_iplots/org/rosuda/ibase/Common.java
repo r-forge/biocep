@@ -321,7 +321,8 @@ public class Common
 	    return cp.append(lc).toString();
 	i=1;
 	char mid=' ';
-	String ignore="aeiouAEIOU ._\t\n\räöüÄÖÜ";
+	//String ignore="aeiouAEIOU ._\t\n\räöüÄÖÜ";
+	String ignore="aeiouAEIOU ._\t\n\r���";
 	while (i<s.length()-1) {
 	    char c=s.charAt(i);
 	    if (ignore.indexOf(c)==-1) {
@@ -415,4 +416,5 @@ public class Common
 
     public static Color getHCLcolor(double hue) { return getHCLcolor(hue,35.0,85.0); }
     public static Color getHCLcolor(double hue, double chroma) { return getHCLcolor(hue,chroma,85.0); }
+
 };
