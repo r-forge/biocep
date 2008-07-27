@@ -321,8 +321,8 @@ public class Common
 	    return cp.append(lc).toString();
 	i=1;
 	char mid=' ';
-	//String ignore="aeiouAEIOU ._\t\n\räöüÄÖÜ";
-	String ignore="aeiouAEIOU ._\t\n\r���";
+	// !! removed umappable characters, to be reviewed
+	String ignore="aeiouAEIOU ._\t\n\r";
 	while (i<s.length()-1) {
 	    char c=s.charAt(i);
 	    if (ignore.indexOf(c)==-1) {
