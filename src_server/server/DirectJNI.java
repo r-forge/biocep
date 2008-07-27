@@ -3707,8 +3707,6 @@ public class DirectJNI {
 				CairoFunctionAvailable=DirectJNI.getInstance().getRServices().symbolExists("Cairo");
 			}
 
-			System.out.println("svgFunctionAvailable:"+svgFunctionAvailable);
-			System.out.println("CairoFunctionAvailable:"+CairoFunctionAvailable);
 			if (!(svgFunctionAvailable || CairoFunctionAvailable)) {
 
 				DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
