@@ -16,7 +16,7 @@ import javax.swing.SwingUtilities;
 import org.apache.batik.swing.JSVGCanvas;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class SnapshotDeviceSvgAction extends AbstractAction {
 	RGui _rgui;

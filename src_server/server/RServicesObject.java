@@ -23,7 +23,7 @@ import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.RemotePanel;
 
 /**
- * @author Karim Chine   k.chine@imperial.ac.uk
+ * @author Karim Chine   karim.chine@m4x.org
  */
 public class RServicesObject implements RServices {
 

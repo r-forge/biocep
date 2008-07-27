@@ -11,7 +11,7 @@ import remoting.AssignInterface;
 import remoting.RNI;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class AssignInterfaceImpl extends java.rmi.server.UnicastRemoteObject implements AssignInterface {
 	RServantImpl _rservantImpl = null;

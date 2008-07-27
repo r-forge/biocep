@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
- * Copyright (C) 2008  Imperial College London - Internet Center
  * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +30,7 @@ import org.apache.commons.logging.Log;
 
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemoteObject implements ManagedServant {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(ManagedServant.class);

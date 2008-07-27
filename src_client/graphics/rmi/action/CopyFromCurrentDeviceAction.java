@@ -8,7 +8,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class CopyFromCurrentDeviceAction extends AbstractAction implements LinkedToPanel {
 	private RGui _rgui;

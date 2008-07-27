@@ -10,7 +10,7 @@ import java.util.Vector;
 import org.rosuda.javaGD.GDObject;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class TempGDDevice implements GDDevice {
 

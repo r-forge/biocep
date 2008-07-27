@@ -14,7 +14,7 @@ import java.io.PrintWriter;
 import java.util.Vector;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class SaveDeviceAsSvgAction extends AbstractAction {
 

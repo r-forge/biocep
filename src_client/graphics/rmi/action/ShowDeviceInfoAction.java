@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 /**
- * @author Karim Chine   k.chine@imperial.ac.uk
+ * @author Karim Chine   karim.chine@m4x.org
  */
 public class ShowDeviceInfoAction extends AbstractAction {
 	private GDDevice _device;

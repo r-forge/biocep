@@ -4,7 +4,7 @@ import java.util.Vector;
 import remoting.RServices;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public interface RClustserInterface {
 	public Vector<RServices> createRs(int n, String nodeName) throws Exception;

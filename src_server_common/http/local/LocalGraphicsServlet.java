@@ -15,7 +15,7 @@ import server.Java2DUtils;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class LocalGraphicsServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
