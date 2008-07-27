@@ -38,6 +38,7 @@
 			<property name="demo.db.name" value="DWEP" />
 			<property name="demo.db.user" value="DWEP" />
 			<property name="demo.db.password" value="DWEP" />
+			<property name="demo.db.defaultpoolname" value="R"/>
 	
 			<property name="demo.client.src" value="${basedir}/VirtualRWorkbench/src" />
 			<property name="demo.client.bin" value="${basedir}/VirtualRWorkbench/src" />
@@ -515,7 +516,8 @@
 				  			<arg value="pools.dbmode.name=${demo.db.name}"/>	
 						    <arg value="pools.dbmode.user=${demo.db.user}"/>
 						    <arg value="pools.dbmode.password=${demo.db.password}"/>
-						    					  					  
+				  			<arg value="pools.dbmode.defaultpoolname=${demo.db.defaultpoolname}"/>
+				  			
 						    <!--
 				  			<arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDBProxy"/>
 				  			<arg value="pools.dbproxymode.class=uk.ac.ebi.microarray.pools.db.monitor.DefaultDBLayerProvider"/>

@@ -48,7 +48,12 @@ public class ServantProviderDB implements ServantProvider{
 		_user = System.getProperty("pools.dbmode.user") != null && !System.getProperty("pools.dbmode.user").equals("") ? System.getProperty("pools.dbmode.user") : DEFAULT_DB_USER;
 		_password = System.getProperty("pools.dbmode.password") != null && !System.getProperty("pools.dbmode.password").equals("") ? System.getProperty("pools.dbmode.password") : DEFAULT_DB_PASSWORD;			
 		_defaultPoolName = System.getProperty("pools.dbmode.defaultpoolname");
-		
+				
+		System.out.println("db type:"+_url); 
+		System.out.println("db driver:"+_driver);
+		System.out.println("db user:"+_user);
+		System.out.println("db password:"+_password);			
+		System.out.println("db default pool name:"+_defaultPoolName);
 
 		{
 			Class.forName(_driver);
