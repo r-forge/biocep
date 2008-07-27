@@ -21,6 +21,8 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Vector;
+
 import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -59,16 +61,6 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 			GDDevice device = null;
 			try {
 
-				boolean wait = false;
-				if (wait) {
-					r = (RServices) spFactory.getServantProvider().borrowServantProxy();
-				} else {
-					r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
-				}
-				if (r == null) {
-					result = new NoServantAvailableException();
-					break;
-				}
 				Integer width = null;
 				try {
 					width = Integer.decode(request.getParameter("width"));
@@ -90,11 +82,52 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					command = "hist(rnorm(100))";
 				}
 
+				String type = null;
+				try {
+					type = request.getParameter("type");
+				} catch (Exception e) {
+				}
+				
+				if (type == null)
+					type = "jpg";
+				
+				
+				Boolean wait = null;
+				try {
+					wait = new Boolean(request.getParameter("wait"));
+				} catch (Exception e) {
+				}
+				if (wait == null) wait = false;
+				
+				
+				if (wait) {
+					r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+				} else {
+					r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
+				}
+				
+				if (r == null) {
+					result = new NoServantAvailableException();
+					break;
+				}
+				
 				device = r.newDevice(width, height);
 				r.sourceFromBuffer(new StringBuffer(command));
-				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects());
-				response.setContentType("image/jpeg");
-				ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
+				
+				if (type.equals("svg")) {
+					response.setContentType("image/svg+xml");
+					Vector<String> svg=device.getSVG();
+					for (int i=0; i<svg.size(); ++i) {
+						response.getOutputStream().println(svg.elementAt(i));
+					}					
+				} else if (type.equals("pdf")) {					
+					response.setContentType("application/pdf");					
+					response.getOutputStream().write(device.getPdf());										
+				} else {
+					BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects());
+					response.setContentType("image/jpeg");
+					ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
+				}
 
 				return;
 
