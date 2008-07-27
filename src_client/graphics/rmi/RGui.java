@@ -10,7 +10,7 @@ import net.infonode.docking.View;
 import remoting.RKit;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public interface RGui extends RKit {
 	public ConsoleLogger getConsoleLogger();

@@ -13,7 +13,7 @@ import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class SSHUtils {
 

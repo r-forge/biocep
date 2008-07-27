@@ -11,7 +11,7 @@ import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 import uk.ac.ebi.microarray.pools.TimeoutException;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class ServantsProviderFactoryDBProxy extends ServantProviderFactory {
 

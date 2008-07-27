@@ -5,7 +5,7 @@ import java.rmi.RemoteException;
 import remoting.RNI;
 
 /**
- * @author Karim Chine   k.chine@imperial.ac.uk
+ * @author Karim Chine   karim.chine@m4x.org
  */
 public class RNIImpl extends java.rmi.server.UnicastRemoteObject implements RNI {
 

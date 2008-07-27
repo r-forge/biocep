@@ -20,7 +20,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class BootSsh {
 	public static final String STUB_BEGIN_MARKER = "#STUBBEGIN#";

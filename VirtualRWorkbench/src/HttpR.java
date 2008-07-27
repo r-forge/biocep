@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
- * Copyright (C) 2008  Imperial College London - Internet Center
  * Copyright (C) 2007 - 2008  Karim Chine
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import http.HttpMarker;
 import http.RHttpProxy;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class HttpR {
 
@@ -49,8 +49,14 @@ public class HttpR {
 		HashMap<String, Object> options = new HashMap<String, Object>();
 		options.put("privatename", "tata");
 		options.put("urls", new URL[]{new URL("http://127.0.0.1:8080/rws/mapping/classes/")});
-		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test", options);
+		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "guest", "guest", options);
 		final RServices r = RHttpProxy.getR(cmdUrl, sessionId,true);
+		byte[] pdf=r.getPdf("plot(rnorm(66))", 500, 500);
+		RandomAccessFile raf=new RandomAccessFile("c:/a0.pdf","rw");
+		raf.setLength(0);
+		raf.write(pdf);
+		raf.close();
+		
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 

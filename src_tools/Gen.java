@@ -48,7 +48,7 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 import util.Utils;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class Gen {
 

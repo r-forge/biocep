@@ -12,7 +12,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class SaveDeviceAsJpgAction extends AbstractAction {
 

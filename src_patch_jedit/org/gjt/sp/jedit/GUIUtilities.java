@@ -1,4 +1,4 @@
-// Class Patched by Karim Chine  k.chine@imperial.ac.uk to embed jEdit as a view of the Virtual R Workbench
+// Class Patched by Karim Chine  karim.chine@m4x.org to embed jEdit as a view of the Virtual R Workbench
 
 /*
  * GUIUtilities.java - Various GUI utility functions

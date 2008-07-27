@@ -12,7 +12,7 @@ import java.awt.Component;
 import java.io.RandomAccessFile;
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class SaveDeviceAsPdfAction extends AbstractAction {
 

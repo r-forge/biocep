@@ -13,7 +13,7 @@ import javax.swing.SwingUtilities;
 
 
 /**
- * @author Karim Chine k.chine@imperial.ac.uk
+ * @author Karim Chine karim.chine@m4x.org
  */
 public class SnapshotDevicePdfAction extends AbstractAction {
 	RGui _rgui;
