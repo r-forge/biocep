@@ -70,8 +70,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private boolean _stopResizeThread = false;
 	private Thread _popThread = null;
 	private Thread _resizeThread = null;
-	final private static double fx_MAX = 1000000;
-	final private static double fy_MAX = 1000000;
+	final private static double fx_MAX = 200;
+	final private static double fy_MAX = 200;
 	private double _w = Double.NaN;
 	private double _h = Double.NaN;
 	private double _x0 = Double.NaN;
