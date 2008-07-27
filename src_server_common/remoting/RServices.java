@@ -91,7 +91,9 @@ public interface RServices extends ManagedServant {
 	public String[] listPackages() throws RemoteException;
 
 	public RPackage getPackage(String packageName) throws RemoteException;
-		
+	
+	public boolean symbolExists(String symbol) throws RemoteException;	
+	
 	public void addRCallback(RCallBack callback) throws RemoteException;	
 	public void removeRCallback(RCallBack callback) throws RemoteException;	
 	public void removeAllRCallbacks() throws RemoteException;	
@@ -111,6 +113,7 @@ public interface RServices extends ManagedServant {
 	public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException;	
 	public GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException;
 
+	
 	
 	void chat(String sourceUID,String user, String message) throws RemoteException;
 	void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException;

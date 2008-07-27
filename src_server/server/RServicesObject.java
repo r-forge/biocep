@@ -510,5 +510,9 @@ public class RServicesObject implements RServices {
 	
 	public void setJobId(String jobId) throws RemoteException {
 	}
+	
+	public boolean symbolExists(String symbol) throws RemoteException {
+		return false;
+	}
 
 }
