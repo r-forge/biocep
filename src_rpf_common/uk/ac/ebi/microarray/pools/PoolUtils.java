@@ -309,6 +309,8 @@ public class PoolUtils {
 		if (System.getProperty("java.rmi.server.hostname")==null || System.getProperty("java.rmi.server.hostname").equals("")) {
 			if (publicIPUnavilable()) System.setProperty("java.rmi.server.hostname", getHostIp());
 		}
+		
+		System.out.println("&&&&&&&&&&&&&&&&&:"+System.getProperty("java.rmi.server.hostname"));
 	}
 
 	public static String bytesToHex(byte in[]) {
