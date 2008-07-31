@@ -310,6 +310,9 @@ public class PoolUtils {
 			if (publicIPUnavilable()) System.setProperty("java.rmi.server.hostname", getHostIp());
 		}
 		
+		System.out.println("&&&&&&&&&&&&&&&&&:"+publicIPUnavilable());
+		System.out.println("&&&&&&&&&&&&&&&&&:"+getIPAddressFromNetworkInterfaces());
+		System.out.println("&&&&&&&&&&&&&&&&&:"+getHostIp());		
 		System.out.println("&&&&&&&&&&&&&&&&&:"+System.getProperty("java.rmi.server.hostname"));
 	}
 
