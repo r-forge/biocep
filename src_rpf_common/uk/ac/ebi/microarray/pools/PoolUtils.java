@@ -176,6 +176,7 @@ public class PoolUtils {
 
 	public static boolean publicIPUnavilable() {
 		try {
+			System.out.println(":"+InetAddress.getLocalHost().getHostAddress());
 			return InetAddress.getLocalHost().getHostAddress().equals("127.0.0.1");
 		} catch (Exception e) {
 			e.printStackTrace();
