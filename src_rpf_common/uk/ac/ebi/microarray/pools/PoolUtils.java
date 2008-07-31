@@ -176,8 +176,7 @@ public class PoolUtils {
 
 	public static boolean publicIPUnavilable() {
 		try {
-			System.out.println(":"+InetAddress.getLocalHost().getHostAddress());
-			return InetAddress.getLocalHost().getHostAddress().equals("127.0.0.1");
+			return InetAddress.getLocalHost().getHostAddress().startsWith("127.0.0.");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return true;
@@ -309,12 +308,7 @@ public class PoolUtils {
 	public static void ensurePublicIPIsUsedForRMI() {
 		if (System.getProperty("java.rmi.server.hostname")==null || System.getProperty("java.rmi.server.hostname").equals("")) {
 			if (publicIPUnavilable()) System.setProperty("java.rmi.server.hostname", getHostIp());
-		}
-		
-		System.out.println("&&&&&&&&&&&&&&&&&:"+publicIPUnavilable());
-		System.out.println("&&&&&&&&&&&&&&&&&:"+getIPAddressFromNetworkInterfaces());
-		System.out.println("&&&&&&&&&&&&&&&&&:"+getHostIp());		
-		System.out.println("&&&&&&&&&&&&&&&&&:"+System.getProperty("java.rmi.server.hostname"));
+		}		
 	}
 
 	public static String bytesToHex(byte in[]) {
