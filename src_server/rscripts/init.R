@@ -1,7 +1,6 @@
 
 library(rJava);.jinit(classpath=NULL);
 library(JavaGD)
-library(iplots)
 
 .PrivateEnv<-new.env(parent = .GlobalEnv)
 library(TypeInfo)

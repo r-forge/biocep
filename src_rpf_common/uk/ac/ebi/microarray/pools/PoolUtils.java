@@ -45,6 +45,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.URLConnection;
 import java.rmi.NoSuchObjectException;
@@ -80,23 +81,22 @@ import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
  */
 public class PoolUtils {
 
-	
 	public static final String DEFAULT_NAMING_MODE = "registry";
-	
+
 	public static final String DEFAULT_PREFIX = "RSERVANT_";
 	public static final String DEFAULT_REGISTRY_HOST = "localhost";
-	public static final int    DEFAULT_REGISTRY_PORT = 1099;
-	
+	public static final int DEFAULT_REGISTRY_PORT = 1099;
+
 	public static final int DEFAULT_MEMORY_MIN = 256;
 	public static final int DEFAULT_MEMORY_MAX = 256;
-		
+
 	public static final String DEFAULT_DB_TYPE = "derby";
 	public static final String DEFAULT_DB_HOST = "localhost";
-	public static final int    DEFAULT_DB_PORT = 1527;	
-	public static final String DEFAULT_DB_NAME = "DWEP";	
+	public static final int DEFAULT_DB_PORT = 1527;
+	public static final String DEFAULT_DB_NAME = "DWEP";
 	public static final String DEFAULT_DB_USER = "DWEP";
 	public static final String DEFAULT_DB_PASSWORD = "DWEP";
-	
+
 	public static final int DEFAULT_TIMEOUT = 40000;
 
 	public static final int PING_FAILURES_NBR_MAX = 1;
@@ -118,10 +118,10 @@ public class PoolUtils {
 	private static boolean _propertiesInjected = false;
 	private static boolean _rmiSocketFactoryInitialized = false;
 
-	public static final int LOG_PRGRESS_TO_SYSTEM_OUT=1;
-	public static final int LOG_PRGRESS_TO_LOGGER=2;
-	public static final int LOG_PRGRESS_TO_DIALOG=4;
-	
+	public static final int LOG_PRGRESS_TO_SYSTEM_OUT = 1;
+	public static final int LOG_PRGRESS_TO_LOGGER = 2;
+	public static final int LOG_PRGRESS_TO_DIALOG = 4;
+
 	public static int BUFFER_SIZE = 1024 * 32;
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(PoolUtils.class);
@@ -137,11 +137,66 @@ public class PoolUtils {
 		return _hostName;
 	}
 
+	public final static boolean isValidIPAddress(String ipAddress) {
+		String[] parts = ipAddress.split("\\.");
+		if (parts.length != 4) {
+			return false;
+		}
+		for (String s : parts) {
+			int i = Integer.parseInt(s);
+			if ((i < 0) || (i > 255)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static String getIPAddressFromNetworkInterfaces() {
+		Vector<String> IPs = new Vector<String>();
+		try {
+			NetworkInterface iface = null;
+			for (Enumeration<?> ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements();) {
+				iface = (NetworkInterface) ifaces.nextElement();
+				InetAddress ia = null;
+				for (Enumeration<?> ips = iface.getInetAddresses(); ips.hasMoreElements();) {
+					ia = (InetAddress) ips.nextElement();
+					boolean matches = isValidIPAddress(ia.getHostAddress()) && !ia.getHostAddress().equals("127.0.0.1");
+					if (matches) {
+						IPs.add(ia.getHostAddress());
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (IPs.size() == 1)
+			return IPs.elementAt(0);
+		return null;
+	}
+
+	public static boolean publicIPUnavilable() {
+		try {
+			return InetAddress.getLocalHost().getHostAddress().equals("127.0.0.1");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return true;
+		}
+	}
+
 	public static String getHostIp() {
 		if (_hostIp == null) {
-			try {
-				_hostIp = InetAddress.getLocalHost().getHostAddress();
+			try {				
+				if (publicIPUnavilable()) {
+					String IPAddressFromNetworkInterfaces = getIPAddressFromNetworkInterfaces();
+					if (IPAddressFromNetworkInterfaces != null)
+						_hostIp = IPAddressFromNetworkInterfaces;
+					else
+						_hostIp = "127.0.0.1";
+				} else {
+					_hostIp = InetAddress.getLocalHost().getHostAddress();
+				}				
 			} catch (Exception e) {
+				e.printStackTrace();
 				_hostIp = UNKOWN;
 			}
 		}
@@ -249,6 +304,12 @@ public class PoolUtils {
 			}
 		}
 	}
+	
+	public static void ensurePublicIPIsUsedForRMI() {
+		if (System.getProperty("java.rmi.server.hostname")==null || System.getProperty("java.rmi.server.hostname").equals("")) {
+			if (publicIPUnavilable()) System.setProperty("java.rmi.server.hostname", getHostIp());
+		}
+	}
 
 	public static String bytesToHex(byte in[]) {
 		byte ch = 0x00;
@@ -324,16 +385,18 @@ public class PoolUtils {
 
 	public static String currentWinProcessID() throws Exception {
 
-		String pslistpath = System.getProperty("java.io.tmpdir") + "/rpf/WinTools/"+"ps.exe";
+		String pslistpath = System.getProperty("java.io.tmpdir") + "/rpf/WinTools/" + "ps.exe";
 		System.out.println(pslistpath);
-		File pslistFile=new File(pslistpath);
-		if (!pslistFile.exists()) {			
+		File pslistFile = new File(pslistpath);
+		if (!pslistFile.exists()) {
 			pslistFile.getParentFile().mkdirs();
-			InputStream is=PoolUtils.class.getResourceAsStream("/wintools/ps.exe");
-			RandomAccessFile raf=new RandomAccessFile(pslistFile,"rw");	raf.setLength(0);
+			InputStream is = PoolUtils.class.getResourceAsStream("/wintools/ps.exe");
+			RandomAccessFile raf = new RandomAccessFile(pslistFile, "rw");
+			raf.setLength(0);
 			int b;
-			while ((b=is.read())!=-1) raf.write((byte)b );
-			raf.close();			
+			while ((b = is.read()) != -1)
+				raf.write((byte) b);
+			raf.close();
 		}
 		String[] command = new String[] { pslistpath };
 		Runtime rt = Runtime.getRuntime();
@@ -343,10 +406,10 @@ public class PoolUtils {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					InputStream is=proc.getInputStream();
+					InputStream is = proc.getInputStream();
 					int b;
-					while ((b=is.read())!=-1) {
-						psPrint.append((char)b);						
+					while ((b = is.read()) != -1) {
+						psPrint.append((char) b);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -356,30 +419,35 @@ public class PoolUtils {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					InputStream is=proc.getErrorStream();
+					InputStream is = proc.getErrorStream();
 					int b;
-					while ((b=is.read())!=-1) {
-						psError.append((char)b);						
+					while ((b = is.read()) != -1) {
+						psError.append((char) b);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		}).start();		
-		
+		}).start();
+
 		int exitVal = proc.waitFor();
-		if (exitVal != 0) throw new Exception("ps exit code : " + exitVal);
-		
-		
-		BufferedReader reader=new BufferedReader(new StringReader(psPrint.toString()));
+		if (exitVal != 0)
+			throw new Exception("ps exit code : " + exitVal);
+
+		BufferedReader reader = new BufferedReader(new StringReader(psPrint.toString()));
 		String line;
 		int i = 0;
-		while (!(line=reader.readLine()).startsWith("PID  PPID  THR PR NAME")) ++i;
+		while (!(line = reader.readLine()).startsWith("PID  PPID  THR PR NAME"))
+			++i;
 		++i;
-		while ((line=reader.readLine())!=null) {			
+		while ((line = reader.readLine()) != null) {
 			StringTokenizer st = new StringTokenizer(line, " ");
-			st.nextElement();String PPID=(String)st.nextElement();st.nextElement();st.nextElement();
-			if (line.endsWith("\\ps.exe")) return PPID;
+			st.nextElement();
+			String PPID = (String) st.nextElement();
+			st.nextElement();
+			st.nextElement();
+			if (line.endsWith("\\ps.exe"))
+				return PPID;
 			++i;
 		}
 		return null;
@@ -393,7 +461,7 @@ public class PoolUtils {
 					return result;
 				}
 			} catch (Exception e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 			}
 
 		}
@@ -497,7 +565,7 @@ public class PoolUtils {
 		int p2 = jdbcUrl.indexOf(':', p1 + 1);
 		return jdbcUrl.substring(p1 + 1, p2);
 	}
-	
+
 	public static URL[] getURLS(String urlsStr) {
 		StringTokenizer st = new StringTokenizer(urlsStr, " ");
 		Vector<URL> result = new Vector<URL>();
@@ -511,18 +579,17 @@ public class PoolUtils {
 		return (URL[]) result.toArray(new URL[0]);
 	}
 
-	public static HashMap<String,String> getParameters(String parametersStr) {		
-		StringTokenizer st = new StringTokenizer(parametersStr, "~/~"); 
-		HashMap<String,String> result = new HashMap<String,String>();	
+	public static HashMap<String, String> getParameters(String parametersStr) {
+		StringTokenizer st = new StringTokenizer(parametersStr, "~/~");
+		HashMap<String, String> result = new HashMap<String, String>();
 		while (st.hasMoreElements()) {
 			try {
-				String element=(String)st.nextElement();
-				int p=element.indexOf('=');
-				if (p==-1) {
-					result.put(element,null);
-				}
-				else {
-					result.put(element.substring(0,p).trim(), element.substring(p+1, element.length()).trim());
+				String element = (String) st.nextElement();
+				int p = element.indexOf('=');
+				if (p == -1) {
+					result.put(element, null);
+				} else {
+					result.put(element.substring(0, p).trim(), element.substring(p + 1, element.length()).trim());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -530,7 +597,7 @@ public class PoolUtils {
 		}
 		return result;
 	}
-	
+
 	public static Point deriveLocation(Point origin, double radius) {
 		return new Point((int) ((origin.getX() - radius) + (Math.random() * 2 * radius)), (int) ((origin.getY() - radius) + (Math.random() * 2 * radius)));
 	}
@@ -687,11 +754,11 @@ public class PoolUtils {
 
 	public static void unzip(InputStream is, String destination, NameFilter nameFilter, int bufferSize, boolean showProgress, String taskName,
 			int estimatedFilesNumber) {
-		
-		final JTextArea area = showProgress ? new JTextArea() : null ;
+
+		final JTextArea area = showProgress ? new JTextArea() : null;
 		final JProgressBar jpb = showProgress ? new JProgressBar(0, 100) : null;
 		final JFrame f = showProgress ? new JFrame(taskName) : null;
-		
+
 		if (showProgress) {
 			Runnable runnable = new Runnable() {
 				public void run() {
@@ -781,9 +848,9 @@ public class PoolUtils {
 		String fileName = location + jarName;
 		new File(location).mkdirs();
 
-		final JTextArea area = ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) ? new JTextArea() : null ;
-		final JProgressBar jpb = ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) ? new JProgressBar(0, 100) : null ;
-		final JFrame f = ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) ? new JFrame("copying " + jarName + " ...") : null;
+		final JTextArea area = ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) ? new JTextArea() : null;
+		final JProgressBar jpb = ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) ? new JProgressBar(0, 100) : null;
+		final JFrame f = ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) ? new JFrame("copying " + jarName + " ...") : null;
 
 		try {
 			URLConnection urlC = url.openConnection();
@@ -793,7 +860,7 @@ public class PoolUtils {
 				return;
 			}
 
-			if ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) {
+			if ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) {
 
 				Runnable runnable = new Runnable() {
 					public void run() {
@@ -817,15 +884,14 @@ public class PoolUtils {
 				}
 			}
 
-			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT)!=0) {
+			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT) != 0) {
 				System.out.println("Downloading " + jarName + ":");
 				System.out.println("expected:==================================================\ndone    :");
-			} 
-			
-			if ((logInfo & LOG_PRGRESS_TO_LOGGER)!=0) {
+			}
+
+			if ((logInfo & LOG_PRGRESS_TO_LOGGER) != 0) {
 				log.info("Downloading " + jarName + ":");
 			}
-			
 
 			int jarSize = urlC.getContentLength();
 			int currentPercentage = 0;
@@ -840,20 +906,20 @@ public class PoolUtils {
 			int co = 0;
 			while ((co = is.read(data, 0, BUFFER_SIZE)) != -1) {
 				fos.write(data, 0, co);
-				count = count + co;				
-				int expected=(50*count / jarSize);
-				while (printcounter<expected) {
-					if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT)!=0) {
+				count = count + co;
+				int expected = (50 * count / jarSize);
+				while (printcounter < expected) {
+					if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT) != 0) {
 						System.out.print("=");
-					} 
-					if ((logInfo & LOG_PRGRESS_TO_LOGGER)!=0) {
-						log.info((int) (100 * count / jarSize)+"% done.");
-					}					
-					
+					}
+					if ((logInfo & LOG_PRGRESS_TO_LOGGER) != 0) {
+						log.info((int) (100 * count / jarSize) + "% done.");
+					}
+
 					++printcounter;
 				}
-										
-				if ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) {
+
+				if ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) {
 					final int p = (int) (100 * count / jarSize);
 					if (p > currentPercentage) {
 						currentPercentage = p;
@@ -878,44 +944,25 @@ public class PoolUtils {
 
 					}
 				}
-				
-				
+
 			}
 
 			/*
-			while ((oneChar = is.read()) != -1) {
-				fos.write(oneChar);
-				count++;
-
-				final int p = (int) (100 * count / jarSize);
-				if (p > currentPercentage) {
-					System.out.print(p+" % ");
-					currentPercentage = p;
-					if (showProgress) {							
-							final JTextArea fa = area;
-							final JProgressBar fjpb = jpb;
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									fjpb.setIndeterminate(false);
-									fjpb.setValue(p);
-									fa.setText("\n" + p + "%" + " Done ");
-								}
-							});
-			
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									fa.setCaretPosition(fa.getText().length());
-									fa.repaint();
-									fjpb.repaint();
-								}
-							});
-					} else {
-						if (p%2==0) System.out.print("=");
-					}
-				}
-
-			}
-			
+			 * while ((oneChar = is.read()) != -1) { fos.write(oneChar);
+			 * count++;
+			 * 
+			 * final int p = (int) (100 * count / jarSize); if (p >
+			 * currentPercentage) { System.out.print(p+" % "); currentPercentage =
+			 * p; if (showProgress) { final JTextArea fa = area; final
+			 * JProgressBar fjpb = jpb; SwingUtilities.invokeLater(new
+			 * Runnable() { public void run() { fjpb.setIndeterminate(false);
+			 * fjpb.setValue(p); fa.setText("\n" + p + "%" + " Done "); } });
+			 * 
+			 * SwingUtilities.invokeLater(new Runnable() { public void run() {
+			 * fa.setCaretPosition(fa.getText().length()); fa.repaint();
+			 * fjpb.repaint(); } }); } else { if (p%2==0) System.out.print("="); } }
+			 *  }
+			 * 
 			 */
 			is.close();
 			fos.close();
@@ -925,15 +972,15 @@ public class PoolUtils {
 		} catch (IOException e) {
 			System.err.println(e.toString());
 		} finally {
-			if ((logInfo & LOG_PRGRESS_TO_DIALOG)!=0) {
+			if ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) {
 				f.setVisible(false);
-			} 
-			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT)!=0) {
+			}
+			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT) != 0) {
 				System.out.println(" 100% of " + jarName + " has been downloaded \n");
-			} 
-			if ((logInfo & LOG_PRGRESS_TO_LOGGER)!=0) {
+			}
+			if ((logInfo & LOG_PRGRESS_TO_LOGGER) != 0) {
 				log.info(" 100% of " + jarName + " has been downloaded");
-			}					
+			}
 		}
 	}
 
@@ -1103,30 +1150,32 @@ public class PoolUtils {
 	}
 
 	public static void killLocalWinProcess(String processId, boolean isKILLSIG) throws Exception {
-				
-		String killpath =System.getProperty("java.io.tmpdir") + "/rpf/WinTools/" + "kill.exe";
-		File killFile=new File(killpath);
-		if (!killFile.exists()) {			
+
+		String killpath = System.getProperty("java.io.tmpdir") + "/rpf/WinTools/" + "kill.exe";
+		File killFile = new File(killpath);
+		if (!killFile.exists()) {
 			killFile.getParentFile().mkdirs();
-			InputStream is=PoolUtils.class.getResourceAsStream("/wintools/kill.exe");
-			RandomAccessFile raf=new RandomAccessFile(killFile,"rw");	raf.setLength(0);
+			InputStream is = PoolUtils.class.getResourceAsStream("/wintools/kill.exe");
+			RandomAccessFile raf = new RandomAccessFile(killFile, "rw");
+			raf.setLength(0);
 			int b;
-			while ((b=is.read())!=-1) raf.write((byte)b );
-			raf.close();			
+			while ((b = is.read()) != -1)
+				raf.write((byte) b);
+			raf.close();
 		}
 		String[] command = new String[] { killpath, processId };
 		Runtime rt = Runtime.getRuntime();
 		final Process proc = rt.exec(command);
-		
+
 		final StringBuffer killPrint = new StringBuffer();
 		final StringBuffer errorPrint = new StringBuffer();
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					InputStream is=proc.getInputStream();
+					InputStream is = proc.getInputStream();
 					int b;
-					while ((b=is.read())!=-1) {
-						killPrint.append((char)b);						
+					while ((b = is.read()) != -1) {
+						killPrint.append((char) b);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1136,10 +1185,10 @@ public class PoolUtils {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					InputStream is=proc.getErrorStream();
+					InputStream is = proc.getErrorStream();
 					int b;
-					while ((b=is.read())!=-1) {
-						errorPrint.append((char)b);						
+					while ((b = is.read()) != -1) {
+						errorPrint.append((char) b);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1203,7 +1252,7 @@ public class PoolUtils {
 	}
 
 	public static final Integer SET_SERVANT_STUB_DONE = new Integer(0);
-	public static final int SET_SERVANT_STUB_TIMEOUT_MILLISEC = 2000;
+	public static final int SET_SERVANT_STUB_TIMEOUT_MILLISEC = 30000;
 
 	public static int countLines(String fileName) throws Exception {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
@@ -1317,5 +1366,5 @@ public class PoolUtils {
 	public static void main(String args[]) throws Exception {
 		System.out.println(currentWinProcessID());
 	}
-	
+
 }

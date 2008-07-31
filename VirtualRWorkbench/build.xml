@@ -448,7 +448,7 @@
 			</target>
 
 	
-			<target name="webcompile" depends="compile">
+			<target name="webcompile" depends="compile,pdfviewer">
 				
 				  <copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib">
 				  	
@@ -478,8 +478,7 @@
 			  		<fileset dir="lib/desktop" includes="JRI.jar"/>			  	
 			  		<fileset dir="lib/jdbc" includes="derbyclient.jar"/>
 				  	
-					<fileset dir="" includes="RJB.jar"/>				  	
-				  	
+					<fileset dir="" includes="RJB.jar"/>				  					  	
 					<!--<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>-->							
 				  </copy>
 				
@@ -565,9 +564,8 @@
 				
 				  <copy todir="VirtualRWorkbench/frontendapp/appletlibs">
 				  	
-				  	
-						<fileset dir="" includes="RJB.jar"/>
-				  	
+						<fileset dir="" includes="RJB.jar"/>				  	
+				  		<fileset dir="" includes="pdfviewer.jar"/>
 				  	
 						<!--
 				  	

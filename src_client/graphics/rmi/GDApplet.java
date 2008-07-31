@@ -353,6 +353,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		super.init();
 
 		PoolUtils.initLog4J();
+		PoolUtils.initRmiSocketFactory();
 
 		System.setErr(System.out);
 		if (getParameter("debug") != null && getParameter("debug").equalsIgnoreCase("true")) {
