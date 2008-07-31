@@ -33,6 +33,7 @@ public class MainRServer {
 	public static void main(String[] args) throws Exception {
 		
 		PoolUtils.initLog4J();
+		PoolUtils.ensurePublicIPIsUsedForRMI();
 
 		try {
 
@@ -76,7 +77,6 @@ public class MainRServer {
 			if (servantCreationListener != null) {
 				PoolUtils.callBack(servantCreationListener, mservant, null);
 			}
-
 			
 			String sname = mservant.getServantName();
 			log.info("sname :::" + sname);
