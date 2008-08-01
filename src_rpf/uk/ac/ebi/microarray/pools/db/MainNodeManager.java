@@ -137,7 +137,7 @@ public class MainNodeManager {
 				String nodeIp = nodes.elementAt(i).getHostIp();
 				String nodePrefix = nodes.elementAt(i).getPoolPrefix();
 
-				Vector<HashMap<String, Object>> servants = _registry.getTableData("SERVANTS", "NODE_NAME='" + nodeName + "'" + " OR (REGISTER_HOST_IP='"
+				Vector<HashMap<String, Object>> servants = _registry.getTableData("SERVANTS", "NODE_NAME='" + nodeName + "'" + " OR (HOST_IP='"
 						+ nodeIp + "' AND NAME like '" + nodePrefix + "%')");
 
 				final int missing = nodes.elementAt(i).getServantNbrMin() - servants.size();
