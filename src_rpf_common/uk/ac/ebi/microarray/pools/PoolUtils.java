@@ -218,6 +218,12 @@ public class PoolUtils {
 		return _processId;
 	}
 
+	public static String getBiocepHome() {
+		String result=System.getenv("BIOCEP_HOME");
+		if (result==null) result=".";
+		return result;
+	}
+	
 	public static String getOs() {
 		return System.getProperty("os.name");
 	}

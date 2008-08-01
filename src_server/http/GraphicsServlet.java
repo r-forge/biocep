@@ -120,9 +120,14 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					for (int i=0; i<svg.size(); ++i) {
 						response.getOutputStream().println(svg.elementAt(i));
 					}					
-				} else if (type.equals("pdf")) {					
-					response.setContentType("application/pdf");					
-					response.getOutputStream().write(device.getPdf());										
+				} else if (type.equals("pdf")) {
+					
+					response.setContentType("application/pdf");
+					response.setHeader("Cache-Control","no-cache"); 
+					response.setHeader("Pragma","no-cache"); 
+					response.setDateHeader ("Expires", 0); 
+					response.getOutputStream().write(device.getPdf());
+					
 				} else {
 					BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects());
 					response.setContentType("image/jpeg");
