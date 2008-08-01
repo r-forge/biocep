@@ -57,8 +57,11 @@ import uk.ac.ebi.microarray.pools.SSHTunnelingProxy;
 import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.ServantProvider;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.YesSecurityManager;
+import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
+import uk.ac.ebi.microarray.pools.db.monitor.SupervisorUtils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -328,13 +331,20 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					}
 
 					session = request.getSession(true);
-					session.setAttribute("R", r);
+					session.setAttribute("TYPE", "RS");
+					session.setAttribute("R", r);		
 					session.setAttribute("NOPOOL", nopool);
 					session.setAttribute("SAVE", save);
 					session.setAttribute("LOGIN", login);
 					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
 					session.setAttribute("PROCESS_ID", r.getProcessId());
 					session.setAttribute("JOB_ID", r.getJobId());
+					
+					try {
+						session.setAttribute("REGISTRY", ServantProviderFactory.getFactory().getServantProvider().getRegistry());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					
 					if (privateName != null)
 						session.setAttribute("PRIVATE_NAME", privateName);
@@ -382,8 +392,24 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 					break;
 
+				} else if (command.equals("logondb")) {
+					
+					session = request.getSession(true);
+					session.setAttribute("TYPE", "DBS");
+					session.setAttribute("REGISTRY", (DBLayer) ServerDefaults.getRmiRegistry() );
+					session.setAttribute("SUPERVISOR", new SupervisorUtils() );
+					session.setAttribute("threads", new ThreadsHolder());
+					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session.getId(), session);
+					saveSessionAttributes(session);
+					
+					result = session.getId();
+
+					break;
+
+					
 				}
 
+				
 				session = request.getSession(false);
 				if (session == null) {
 					result = new NotLoggedInException();
@@ -392,18 +418,20 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 				if (command.equals("logoff")) {
 
-					if (_rkit != null) {
-						Enumeration<String> attributeNames = session.getAttributeNames();
-						while (attributeNames.hasMoreElements()) {
-							String aname = attributeNames.nextElement();
-							if (session.getAttribute(aname) instanceof GDDevice) {
-								try {
-									_rkit.getRLock().lock();
-									((GDDevice) session.getAttribute(aname)).dispose();
-								} catch (Exception e) {
-									e.printStackTrace();
-								} finally {
-									_rkit.getRLock().unlock();
+					if (session.getAttribute("TYPE").equals("RS")) {
+						if (_rkit != null) {
+							Enumeration<String> attributeNames = session.getAttributeNames();
+							while (attributeNames.hasMoreElements()) {
+								String aname = attributeNames.nextElement();
+								if (session.getAttribute(aname) instanceof GDDevice) {
+									try {
+										_rkit.getRLock().lock();
+										((GDDevice) session.getAttribute(aname)).dispose();
+									} catch (Exception e) {
+										e.printStackTrace();
+									} finally {
+										_rkit.getRLock().unlock();
+									}
 								}
 							}
 						}
@@ -422,7 +450,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 				final HttpSession currentSession = session;
 
 				if (command.equals("invoke")) {
-
+					
 					String servantName = (String) PoolUtils.hexToObject(request.getParameter("servantname"));
 					final Object servant = session.getAttribute(servantName);
 					if (servant == null) {

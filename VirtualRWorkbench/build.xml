@@ -516,6 +516,7 @@
 						    <arg value="pools.dbmode.user=${demo.db.user}"/>
 						    <arg value="pools.dbmode.password=${demo.db.password}"/>
 				  			<arg value="pools.dbmode.defaultpoolname=${demo.db.defaultpoolname}"/>
+				  			<arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>
 				  			
 						    <!--
 				  			<arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDBProxy"/>
@@ -534,9 +535,18 @@
 				  			<arg value="submit.ssh.kill=qdel"/>
 				  			<arg value="submit.ssh.timeout=60000"/>
 				  			<arg value="submit.ssh.rmi.port.width="/>
+				  							
 				  			
-
-						    <arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>	
+				  			<!-- for HTTPDB -->
+				  			<arg value="naming.mode=db"/>
+				  			<arg value="db.type=${demo.db.type}"/>
+				  			<arg value="db.host=${demo.db.host}"/>
+				  			<arg value="db.port=${demo.db.port}" />
+				  			<arg value="db.name=${demo.db.name}" />
+				  			<arg value="db.user=${demo.db.user}" />
+				  			<arg value="db.password=${demo.db.password}" />
+				  			
+														    	
 						    <arg value="node.manager.name=NODE_MANAGER"/>
 						    <arg value="private.servant.node.name=${private.servants.node.name}"/>
 						    <arg value="users.data.dir.root=${basedir}/VirtualRWorkbench/usersdata"/>  

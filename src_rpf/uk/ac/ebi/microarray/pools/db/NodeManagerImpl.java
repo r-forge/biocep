@@ -55,7 +55,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		CreationCallBack callBack = new CreationCallBack(servantHolder, exceptionHolder);
 		try {
 			String listenerStub = PoolUtils.stubToHex(callBack);
-			SupervisorUtils.launch(nodeName, "-Dprivate=" + new Boolean(isPrivate).toString() + " -Dlistener.stub=" + listenerStub, false, PoolUtils
+			new SupervisorUtils().launch(nodeName, "-Dprivate=" + new Boolean(isPrivate).toString() + " -Dlistener.stub=" + listenerStub, false, PoolUtils
 					.getHostIp());
 			long t1 = System.currentTimeMillis();
 			while (servantHolder[0] == null && exceptionHolder[0] == null) {
@@ -94,7 +94,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					SupervisorUtils.killProcess(servantName, true, null);
+					new SupervisorUtils().killProcess(servantName, true, null);
 					_dbLayer.unbind(servantName);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -107,7 +107,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					SupervisorUtils.killProcess(servantName, true, null);
+					new SupervisorUtils().killProcess(servantName, true, null);
 					_dbLayer.unbind(servantName);
 				} catch (Exception e) {
 					e.printStackTrace();

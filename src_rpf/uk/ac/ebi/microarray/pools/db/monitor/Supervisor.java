@@ -41,6 +41,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -60,13 +61,11 @@ import javax.swing.table.TableCellRenderer;
 import uk.ac.ebi.microarray.pools.InitializingException;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.SSHTunnelingProxy;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.TimeoutException;
-import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
 import uk.ac.ebi.microarray.pools.db.PoolDataDB;
+import uk.ac.ebi.microarray.pools.db.SupervisorInterface;
 import uk.ac.ebi.microarray.pools.gui.Symbol;
 import uk.ac.ebi.microarray.pools.gui.SymbolPopDialog;
 import uk.ac.ebi.microarray.pools.gui.SymbolPushDialog;
@@ -78,6 +77,12 @@ import javax.crypto.spec.*;
  * @author Karim Chine   karim.chine@m4x.org
  */
 public class Supervisor {
+	
+	public Supervisor(DBLayerInterface regsitry, SupervisorInterface supervisorInterface) {
+		_registry=regsitry;
+		_supervisorInterface=supervisorInterface;
+	}
+	
 	private static final String[] servantTableColumns = new String[] { "NAME", "#POOL_NAME", "IN_USE", "PING_FAILURES", "NODE_NAME", "REGISTER_TIME",
 			"PROCESS_ID", "HOST_NAME", "HOST_IP", "OS", "BORROW_TIME", "BORROW_PROCESS_ID", "BORROW_HOST_NAME",
 			"BORROW_HOST_IP", "RETURN_TIME", "RETURN_PROCESS_ID", "RETURN_HOST_NAME", "RETURN_HOST_IP", "BORROW_SESSION_INFO_HEX", "ATTRIBUTES_HEX",
@@ -146,11 +151,13 @@ public class Supervisor {
 	private Vector<String> _selectedServants = new Vector<String>();
 	private Vector<String> _selectedPools = new Vector<String>();
 	Vector<String> _selectedNodes = new Vector<String>();
-	private JFrame _frame;
+	static private JFrame _frame;
 	private boolean _disconnected = false;
 	private Color[] _colors = new Color[] { Color.red, Color.white };
 	private long _colorCounter = 0;
 	private JMenu _debugMenu;
+	private SupervisorInterface _supervisorInterface;
+	
 
 	public static String generateKey() {
 		try {
@@ -170,7 +177,22 @@ public class Supervisor {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					new Supervisor().run();
+	
+					
+					System.setProperty("dbhttp.url", "http://127.0.0.1:8080/rvirtual/cmd");
+					System.setProperty("dbhttp.login", "guest");
+					System.setProperty("dbhttp.password", "guest");
+					DBLayerInterface db=(DBLayerInterface)(((RegistryProvider)Supervisor.class.forName("http.DBHttpProxy").newInstance()).getRegistry());
+					
+					//_registry = (DBLayer) ServerDefaults.getRmiRegistry();
+
+					_frame = new JFrame("Supervisor");
+					_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					_frame.getContentPane().add(new Supervisor(db,new SupervisorUtils()).run());					
+					_frame.pack();
+					_frame.setVisible(true);
+					_frame.setPreferredSize(new Dimension(800, 700));
+										
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -502,15 +524,10 @@ public class Supervisor {
 		}
 	}
 
-	public void run() throws Exception {
+	public JPanel run() throws Exception {
 
 		try {
 			
-			_registry = (DBLayer) ServerDefaults.getRmiRegistry();
-
-			_frame = new JFrame("Supervisor");
-			_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 			_servantTable = new JTable();
 
 			_servantTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -747,7 +764,7 @@ public class Supervisor {
 
 			initActions();
 			_servantTable.addMouseListener(new ServantMousePopupListener());
-			_frame.setPreferredSize(new Dimension(800, 700));
+			
 
 			JScrollPane servantSP = new JScrollPane();
 			servantSP.addMouseListener(new ServantMousePopupListener());
@@ -874,11 +891,9 @@ public class Supervisor {
 			});
 			menuBar.add(monitorMenu);
 
-			_frame.getContentPane().add(menuBar, BorderLayout.NORTH);
-
-			_frame.getContentPane().add(mainPane, BorderLayout.CENTER);
-			_frame.pack();
-			_frame.setVisible(true);
+			
+			
+			
 
 			new Thread(new Runnable() {
 				public void run() {
@@ -907,6 +922,13 @@ public class Supervisor {
 					}
 				}
 			}));
+			
+			
+			JPanel contentPane=new JPanel(new BorderLayout());
+			contentPane.add(menuBar, BorderLayout.NORTH);
+			contentPane.add(mainPane, BorderLayout.CENTER);
+			return contentPane;
+			
 
 		} finally {
 
@@ -979,7 +1001,7 @@ public class Supervisor {
 							final HashMap<String, Object> row = rows[i];
 							System.out.println("Killing Process :" + row.get("NAME"));
 							try {
-								SupervisorUtils.killProcess((String) row.get("NAME"), false, _frame);
+								_supervisorInterface.killProcess((String) row.get("NAME"), false, _frame);
 								_registry.unbind((String) row.get("NAME"));
 							} catch (Exception ex) {
 								ex.printStackTrace();
@@ -1009,7 +1031,7 @@ public class Supervisor {
 							final HashMap<String, Object> row = rows[i];
 							System.out.println("Killing Process :" + row.get("NAME"));
 							try {
-								SupervisorUtils.killProcess((String) row.get("NAME"), true, _frame);
+								_supervisorInterface.killProcess((String) row.get("NAME"), true, _frame);
 								_registry.unbind((String) row.get("NAME"));
 
 							} catch (Exception ex) {
@@ -1542,7 +1564,7 @@ public class Supervisor {
 		actions.put("new_servant_without_log_console", new AbstractAction("New Servant") {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					SupervisorUtils.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", false, PoolUtils.getHostIp());
+					_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", false, PoolUtils.getHostIp());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -1557,7 +1579,7 @@ public class Supervisor {
 		actions.put("new_servant_with_log_console", new AbstractAction("New Servant (Log Console)") {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					SupervisorUtils.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", true, PoolUtils.getHostIp());
+					_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", true, PoolUtils.getHostIp());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}

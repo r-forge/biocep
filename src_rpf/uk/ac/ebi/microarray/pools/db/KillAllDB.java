@@ -56,7 +56,7 @@ public class KillAllDB {
 					public void run() {
 						try {
 							System.out.println("killing servant<" + servantName + "> host ip:" + hostIp + " process id:" + processId);
-							SupervisorUtils.killProcess(servantName, true, frame);
+							new SupervisorUtils().killProcess(servantName, true, frame);
 							dbLayer.unbind(servantName);
 						} catch (Exception e) {
 							e.printStackTrace();

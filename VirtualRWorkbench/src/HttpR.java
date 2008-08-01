@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,6 +31,8 @@ import org.bioconductor.packages.biobase.ExpressionSet;
 
 import remoting.RCallBack;
 import remoting.RServices;
+import uk.ac.ebi.microarray.pools.db.DBLayer;
+import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsoleDialog;
 import uk.ac.ebi.microarray.pools.db.monitor.ServantStatus;
 import graphics.pop.GDDevice;
@@ -44,6 +47,18 @@ public class HttpR {
 
 	public static void main(String[] args) throws Throwable {
 
+		{
+			final String cmdUrl = "http://127.0.0.1:8080/rvirtual/cmd";
+			HashMap<String, Object> options = new HashMap<String, Object>();
+			final String sessionId = RHttpProxy.logOnDB(cmdUrl, "", "guest", "guest", options);			
+			final DBLayerInterface db = (DBLayerInterface)RHttpProxy.getDynamicProxy(cmdUrl, sessionId, "REGISTRY", new Class<?>[]{DBLayerInterface.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));
+			System.out.println(Arrays.toString(db.list()));
+			System.exit(0);
+		}
+
+		
+		
+		
 		//final String cmdUrl = System.getProperty("url");
 		final String cmdUrl = "http://127.0.0.1:8080/rvirtual/cmd";
 		HashMap<String, Object> options = new HashMap<String, Object>();

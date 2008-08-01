@@ -46,16 +46,16 @@ public class FreeResourcesListener implements HttpSessionListener {
 		System.out.println("Session to destroy :" + sessionEvent.getSession().getId());
 
 		HashMap<String, HashMap<String, Object>> map = ((HashMap<String, HashMap<String, Object>>) sessionEvent.getSession().getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP"));
-		if (map == null)
-			return;
+		if (map == null)return;
 		HashMap<String, Object> attributes = map.get(sessionEvent.getSession().getId());
 
 		((HashMap<String, HttpSession>) sessionEvent.getSession().getServletContext().getAttribute("SESSIONS_MAP")).remove(sessionEvent.getSession().getId());
 		((HashMap<String, HttpSession>) sessionEvent.getSession().getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP")).remove(sessionEvent.getSession().getId());
 		
-		
-		
 		if (attributes == null)	return;
+		
+		if (!attributes.get("TYPE").equals("RS")) return;
+		
 		RServices rservices = (RServices) attributes.get("R");
 
 		if (rservices == null)

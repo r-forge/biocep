@@ -35,12 +35,13 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
+import uk.ac.ebi.microarray.pools.db.SupervisorInterface;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
-public class SupervisorUtils {
-	static class CancelException extends Exception {
+public class SupervisorUtils implements SupervisorInterface {
+	class CancelException extends Exception {
 	};
 
 	static class Identification {
@@ -55,7 +56,7 @@ public class SupervisorUtils {
 		}
 	}
 
-	static class LaunchInfo {
+	class LaunchInfo {
 		public String host;
 
 		public String user;
@@ -78,9 +79,9 @@ public class SupervisorUtils {
 		}
 	}
 
-	private static HashMap<String, Identification> identificationsCache = new HashMap<String, Identification>();
+	private HashMap<String, Identification> identificationsCache = new HashMap<String, Identification>();
 
-	public static void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
+	public void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
 
 		DBLayer dbLayer = (DBLayer) ServerDefaults.getRmiRegistry();
 		HashMap<String, Object> servantInfo = dbLayer.getTableData("SERVANTS", "NAME='" + servantName + "'").elementAt(0);
@@ -168,7 +169,7 @@ public class SupervisorUtils {
 		conn.close();
 	}
 
-	public static void launchLocalProcess(final boolean showConsole, String homeDir, String command, String prefix, boolean isForWindows) throws Exception {
+	public void launchLocalProcess(final boolean showConsole, String homeDir, String command, String prefix, boolean isForWindows) throws Exception {
 		System.out.println("launchLocalProcess");
 
 		Vector<String> cmd = new Vector<String>();
@@ -255,7 +256,7 @@ public class SupervisorUtils {
 
 	}
 
-	public static void launch(final String nodeName, final String options, final boolean showConsole, final String callerHostIp) throws Exception {
+	public void launch(final String nodeName, final String options, final boolean showConsole, final String callerHostIp) throws Exception {
 
 		new Thread(new Runnable() {
 			public void run() {
