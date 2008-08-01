@@ -55,8 +55,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		CreationCallBack callBack = new CreationCallBack(servantHolder, exceptionHolder);
 		try {
 			String listenerStub = PoolUtils.stubToHex(callBack);
-			new SupervisorUtils().launch(nodeName, "-Dprivate=" + new Boolean(isPrivate).toString() + " -Dlistener.stub=" + listenerStub, false, PoolUtils
-					.getHostIp());
+			new SupervisorUtils().launch(nodeName, "-Dprivate=" + new Boolean(isPrivate).toString() + " -Dlistener.stub=" + listenerStub, false);
 			long t1 = System.currentTimeMillis();
 			while (servantHolder[0] == null && exceptionHolder[0] == null) {
 				if (SERVANT_CREATION_TIMEOUT_MILLISEC>0 && (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)) throw new ServantCreationTimeout();

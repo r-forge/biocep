@@ -25,5 +25,5 @@ import java.awt.Frame;
 public interface SupervisorInterface {
 	public void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception;
 	public void launchLocalProcess(final boolean showConsole, String homeDir, String command, String prefix, boolean isForWindows) throws Exception;
-	public void launch(final String nodeName, final String options, final boolean showConsole, final String callerHostIp) throws Exception;
+	public void launch(final String nodeName, final String options, final boolean showConsole) throws Exception;
 }
