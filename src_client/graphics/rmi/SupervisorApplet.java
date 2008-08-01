@@ -20,13 +20,11 @@ public class SupervisorApplet extends JApplet {
 	public void init() {
 		super.init();
 		getContentPane().setLayout(new BorderLayout());
-		
 		try {
-			
 			HashMap<String, Object> options = new HashMap<String, Object>();
-			final String sessionId = RHttpProxy.logOnDB("http://127.0.0.1:8080/rvirtual/cmd", "", "guest", "guest", options);			
-			DBLayerInterface db = (DBLayerInterface)RHttpProxy.getDynamicProxy("http://127.0.0.1:8080/rvirtual/cmd", sessionId, "REGISTRY", new Class<?>[]{DBLayerInterface.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));
-			SupervisorInterface supervisorInterface=(SupervisorInterface)RHttpProxy.getDynamicProxy("http://127.0.0.1:8080/rvirtual/cmd", sessionId, "SUPERVISOR", new Class<?>[]{SupervisorInterface.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));			
+			final String sessionId = RHttpProxy.logOnDB(getParameter("url"), "", getParameter("login"), getParameter("password"), options);			
+			DBLayerInterface db = (DBLayerInterface)RHttpProxy.getDynamicProxy(getParameter("url"), sessionId, "REGISTRY", new Class<?>[]{DBLayerInterface.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));
+			SupervisorInterface supervisorInterface=(SupervisorInterface)RHttpProxy.getDynamicProxy(getParameter("url"), sessionId, "SUPERVISOR", new Class<?>[]{SupervisorInterface.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));			
 			getContentPane().add(new Supervisor(db,supervisorInterface).run());
 		} catch (Exception e) {
 			e.printStackTrace();
