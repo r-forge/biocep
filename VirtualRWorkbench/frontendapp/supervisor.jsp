@@ -20,7 +20,7 @@
 	type = "application/x-java-applet;version=1.5" 
 	scriptable = false 
 	pluginspage = "http://java.sun.com/products/plugin/index.html#download"
-	url = "<%="http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/"%>"
+	url = "<%="http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/cmd"%>"
 	login = "guest"
 	password = "guest"				
 	>	
@@ -32,7 +32,7 @@
 	 <param name="code" value="graphics.rmi.SupervisorApplet">
 	 <param name = "type" value = "application/x-java-applet;version=1.5">
 	 <param name = "scriptable" value = "false">
-	 <param name = "url" value = "<%="http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/"%>">
+	 <param name = "url" value = "<%="http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/cmd"%>">
 	 <param name = "login" value = "guest">
 	 <param name = "password" value = "guest">
    </object>
