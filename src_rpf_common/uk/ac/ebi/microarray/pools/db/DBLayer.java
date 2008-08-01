@@ -454,7 +454,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	}
 
 	public Vector<HashMap<String, Object>> listKillable(String nodeIp, String nodePrefix) throws RemoteException, AccessException {
-		return getTableData("SERVANTS", "PING_FAILURES>=" + PoolUtils.PING_FAILURES_NBR_MAX + " AND " + "REGISTER_HOST_IP='" + nodeIp + "' AND NAME like '"
+		return getTableData("SERVANTS", "PING_FAILURES>=" + PoolUtils.PING_FAILURES_NBR_MAX + " AND " + "HOST_IP='" + nodeIp + "' AND NAME like '"
 				+ nodePrefix + "%'");
 	}
 

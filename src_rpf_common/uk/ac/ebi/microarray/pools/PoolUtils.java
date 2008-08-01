@@ -137,7 +137,7 @@ public class PoolUtils {
 		return _hostName;
 	}
 
-	public final static boolean isValidIPAddress(String ipAddress) {
+	public static boolean isValidIPAddress(String ipAddress) {
 		String[] parts = ipAddress.split("\\.");
 		if (parts.length != 4) {
 			return false;
@@ -151,6 +151,10 @@ public class PoolUtils {
 		return true;
 	}
 
+	public static boolean isLoopBackIP(String ipAddress) {
+		return ipAddress.startsWith("127.");
+	}
+	
 	public static String getIPAddressFromNetworkInterfaces() {
 		Vector<String> IPs = new Vector<String>();
 		try {
@@ -160,7 +164,7 @@ public class PoolUtils {
 				InetAddress ia = null;
 				for (Enumeration<?> ips = iface.getInetAddresses(); ips.hasMoreElements();) {
 					ia = (InetAddress) ips.nextElement();
-					boolean matches = isValidIPAddress(ia.getHostAddress()) && !ia.getHostAddress().equals("127.0.0.1");
+					boolean matches = isValidIPAddress(ia.getHostAddress()) && !isLoopBackIP(ia.getHostAddress());
 					if (matches) {
 						IPs.add(ia.getHostAddress());
 					}

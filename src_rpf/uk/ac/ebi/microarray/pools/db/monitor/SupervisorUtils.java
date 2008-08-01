@@ -92,13 +92,12 @@ public class SupervisorUtils {
 			e.printStackTrace();
 		}
 
-		String hostIp = (String) servantInfo.get("REGISTER_HOST_IP");
-		String processId = (String) servantInfo.get("REGISTER_PROCESS_ID");
+		String hostIp = (String) servantInfo.get("HOST_IP");
+		String processId = (String) servantInfo.get("PROCESS_ID");
 		HashMap<String, Object> attributes = (HashMap<String, Object>) PoolUtils.hexToObject((String) servantInfo.get("ATTRIBUTES_HEX"));
 		System.out.println("attributes : " + attributes);
 
-		if (PoolUtils.getHostIp().equals(hostIp)) {
-
+		if ( PoolUtils.isLoopBackIP(hostIp) || PoolUtils.getHostIp().equals(hostIp) ) {
 			System.out.println("####>> Local Killl");
 			if (PoolUtils.isWindowsOs()) {
 				PoolUtils.killLocalWinProcess(processId, useKillCommand);
@@ -266,7 +265,7 @@ public class SupervisorUtils {
 					final NodeDataDB info = ((DBLayer) ServerDefaults.getRmiRegistry()).getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
 					String command = info.getCreateServantCommand();
 
-					if (info.getHostName().equalsIgnoreCase("localhost") || info.getHostIp().equalsIgnoreCase("127.0.0.1")
+					if (PoolUtils.isLoopBackIP(info.getHostIp())
 							|| info.getHostIp().equals(callerHostIp)) {
 
 						command = PoolUtils.replaceAll(command, "${OPTIONS}", options);

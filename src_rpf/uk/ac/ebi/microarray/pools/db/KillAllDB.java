@@ -49,8 +49,8 @@ public class KillAllDB {
 
 			for (int i = 0; i < servants.size(); ++i) {
 				final String servantName = (String) servants.elementAt(i).get("NAME");
-				final String hostIp = (String) servants.elementAt(i).get("REGISTER_HOST_IP");
-				final String processId = (String) servants.elementAt(i).get("REGISTER_PROCESS_ID");
+				final String hostIp = (String) servants.elementAt(i).get("HOST_IP");
+				final String processId = (String) servants.elementAt(i).get("PROCESS_ID");
 
 				new Thread(new Runnable() {
 					public void run() {

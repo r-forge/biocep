@@ -97,10 +97,10 @@ public class Supervisor {
 			100, // NODE_NAME
 
 			130, // REGISTER_TIME
-			100, // REGISTER_PROCESS_ID
-			100, // REGISTER_HOST_NAME
-			100, // REGISTER_HOST_IP
-			100, // REGISTER_OS
+			100, // PROCESS_ID
+			100, // HOST_NAME
+			100, // HOST_IP
+			100, // OS
 
 			130, // BORROW_TIME
 			100, // BORROW_PROCESS_ID
