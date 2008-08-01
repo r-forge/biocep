@@ -22,14 +22,13 @@
 	
 	<property environment="env"/>
 	
+	<!--
 	<property name="JRI_LIB_PATH" value="${env.R_HOME}/library/rJava/jri"/>
-	
-	<!-- 
-	<property name="JRI_LIB_PATH" value="${env.R_LIBS}/rJava/jri"/>
 	-->
+	 
+	<property name="JRI_LIB_PATH" value="${env.R_LIBS}/rJava/jri"/>
 	
-	
-	
+		
 	<property name="CORE_JAR" value="${basedir}/RJB.jar"/>
 	<property name="RPF_JAR" value="${basedir}/RPF.jar"/>
 	<property name="SRV_JAR" value="${basedir}/RSRV.jar"/>
@@ -596,8 +595,6 @@
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
 			
-			
-			
 			<jvmarg value="-Ddb.initscript=${db.initscript}"/>
 			<jvmarg value="-Dbiocep.home=${biocep.home}"/>			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
@@ -605,8 +602,6 @@
 			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
-			
-			
 			
 		</java>
 	</target>
