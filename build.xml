@@ -328,6 +328,8 @@
 		<if><not><isset property="registry.host"/></not><then><property name="registry.host" value=""/></then></if>
 		<if><not><isset property="registry.port"/></not><then><property name="registry.port" value=""/></then></if>
 		
+		<if><not><isset property="generic.class"/></not><then><property name="generic.class" value=""/></then></if>
+		
 		
 		
 		
@@ -419,6 +421,8 @@
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
+			
+			<jvmarg value="-Dgeneric.class=${generic.class}"/>
 			
 			<jvmarg value="-Dproperties.extension=${properties.extension}"/>
 			
