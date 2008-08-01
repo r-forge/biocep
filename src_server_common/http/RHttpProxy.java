@@ -574,4 +574,40 @@ public class RHttpProxy {
 		for (int i=0; i<32;++i) result+=HexDigits[rnd.nextInt(16)];
 		return result;
 	}
+	
+	
+	public static String logOnDB(String url, String sessionId, String login, String pwd, HashMap<String, Object> options) throws TunnelingException {
+
+		GetMethod getSession = null;
+		try {
+			Object result = null;
+			try {
+				getSession = new GetMethod(url + "?method=logondb&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd) + "&options="
+						+ PoolUtils.objectToHex(options));
+				if (sessionId != null && !sessionId.equals("")) {
+					getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					getSession.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
+				}
+				mainHttpClient.executeMethod(getSession);
+				result = new ObjectInputStream(getSession.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				e.printStackTrace();
+				throw new ConnectionFailedException();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new TunnelingException("Client Side", e);
+			}
+
+			if (result != null && result instanceof TunnelingException) {
+				throw (TunnelingException) result;
+			}
+			return (String) result;
+		} finally {
+			if (getSession != null) {
+				getSession.releaseConnection();
+			}
+		}
+	}
+
+	
 }
