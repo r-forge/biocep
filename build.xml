@@ -566,8 +566,6 @@
 	
 	<target name="db">
 		
-		<echo message="BIOCEP_HOME${env.BIOCEP_HOME}"> </echo>
-			
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
