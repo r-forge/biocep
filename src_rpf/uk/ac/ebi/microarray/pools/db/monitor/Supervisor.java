@@ -61,6 +61,7 @@ import javax.swing.table.TableCellRenderer;
 import uk.ac.ebi.microarray.pools.InitializingException;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.TimeoutException;
 import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
@@ -177,14 +178,8 @@ public class Supervisor {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-	
-					
-					System.setProperty("dbhttp.url", "http://127.0.0.1:8080/rvirtual/cmd");
-					System.setProperty("dbhttp.login", "guest");
-					System.setProperty("dbhttp.password", "guest");
-					DBLayerInterface db=(DBLayerInterface)(((RegistryProvider)Supervisor.class.forName("http.DBHttpProxy").newInstance()).getRegistry());
-					
-					//_registry = (DBLayer) ServerDefaults.getRmiRegistry();
+						
+					DBLayerInterface db = (DBLayerInterface) ServerDefaults.getRmiRegistry();
 
 					_frame = new JFrame("Supervisor");
 					_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -1564,7 +1559,7 @@ public class Supervisor {
 		actions.put("new_servant_without_log_console", new AbstractAction("New Servant") {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", false, PoolUtils.getHostIp());
+					_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", false);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -1579,7 +1574,7 @@ public class Supervisor {
 		actions.put("new_servant_with_log_console", new AbstractAction("New Servant (Log Console)") {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", true, PoolUtils.getHostIp());
+					_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", true);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}

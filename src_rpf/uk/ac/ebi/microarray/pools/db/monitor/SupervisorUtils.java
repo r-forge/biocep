@@ -256,7 +256,7 @@ public class SupervisorUtils implements SupervisorInterface {
 
 	}
 
-	public void launch(final String nodeName, final String options, final boolean showConsole, final String callerHostIp) throws Exception {
+	public void launch(final String nodeName, final String options, final boolean showConsole) throws Exception {
 
 		new Thread(new Runnable() {
 			public void run() {
@@ -266,8 +266,7 @@ public class SupervisorUtils implements SupervisorInterface {
 					final NodeDataDB info = ((DBLayer) ServerDefaults.getRmiRegistry()).getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
 					String command = info.getCreateServantCommand();
 
-					if (PoolUtils.isLoopBackIP(info.getHostIp())
-							|| info.getHostIp().equals(callerHostIp)) {
+					if (PoolUtils.isLoopBackIP(info.getHostIp()) || info.getHostIp().equals(PoolUtils.getHostIp())) {
 
 						command = PoolUtils.replaceAll(command, "${OPTIONS}", options);
 						command = PoolUtils.replaceAll(command, "${INSTALL_DIR}", new File(info.getInstallDir()).getCanonicalPath().replace('\\', '/'));
