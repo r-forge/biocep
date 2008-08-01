@@ -571,8 +571,7 @@
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
-		
-		
+		<if><not><isset property="env.BIOCEP_HOME"/></not><then><property name="biocep.home" value="."/></then><else><property name="biocep.home" value="${env.BIOCEP_HOME}"/></else></if>
 		<if><not><isset property="db.initscript"/></not><then><property name="db.initscript" value=""/></then></if>		
 
 		<java classname="uk.ac.ebi.microarray.pools.db.RegenerateDB" fork="true" newenvironment="">
@@ -599,7 +598,7 @@
 			
 			
 			<jvmarg value="-Ddb.initscript=${db.initscript}"/>
-			<jvmarg value="-Dbiocep.home=${env.BIOCEP_HOME}"/>			
+			<jvmarg value="-Dbiocep.home=${biocep.home}"/>			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
 			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
