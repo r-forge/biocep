@@ -1,3 +1,5 @@
+<% java.net.URL thisUrl=new java.net.URL(request.getRequestURL().toString()); %>
+
 <html>
 <head>
 
@@ -18,8 +20,9 @@
 	type = "application/x-java-applet;version=1.5" 
 	scriptable = false 
 	pluginspage = "http://java.sun.com/products/plugin/index.html#download"
-	url = "http://xen-ngs001.oerc.ox.ac.uk:8000/rvirtual/cmd"
-	login = "guest"		
+	url = "http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/cmd"
+	login = "guest"
+	password = "guest"				
 	>	
 	
 <!--<![endif]-->
@@ -29,8 +32,9 @@
 	 <param name="code" value="graphics.rmi.SupervisorApplet">
 	 <param name = "type" value = "application/x-java-applet;version=1.5">
 	 <param name = "scriptable" value = "false">
-	 <param name = "url" value = "http://xen-ngs001.oerc.ox.ac.uk:8000/rvirtual/cmd">
+	 <param name = "url" value = "http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/cmd">
 	 <param name = "login" value = "guest">
+	 <param name = "password" value = "guest">
    </object>
 <!--[if !IE]> close outer object -->
 		 
