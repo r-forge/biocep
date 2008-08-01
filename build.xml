@@ -28,6 +28,8 @@
 	<property name="JRI_LIB_PATH" value="${env.R_LIBS}/rJava/jri"/>
 	-->
 	
+	
+	
 	<property name="CORE_JAR" value="${basedir}/RJB.jar"/>
 	<property name="RPF_JAR" value="${basedir}/RPF.jar"/>
 	<property name="SRV_JAR" value="${basedir}/RSRV.jar"/>
@@ -564,7 +566,8 @@
 	
 	<target name="db">
 		
-		
+		<echo message="BIOCEP_HOME${env.BIOCEP_HOME}"> </echo>
+			
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>

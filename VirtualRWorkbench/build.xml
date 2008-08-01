@@ -62,7 +62,6 @@
 					<param name="db.user" value="${demo.db.user}" />
 					<param name="db.password" value="${demo.db.password}" />	
 					
-					
 					<param name="db.initscript" value="${basedir}/VirtualRWorkbench/initscript.sql" />		
 				</antcall>			
 			</target>		
