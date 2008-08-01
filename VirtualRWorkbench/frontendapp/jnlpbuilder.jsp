@@ -2,7 +2,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <% java.net.URL thisUrl=new java.net.URL(request.getRequestURL().toString()); %>
-
 <jnlp spec="1.5+" codebase="<%="http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/"%>" >
 
 
