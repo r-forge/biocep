@@ -575,7 +575,7 @@
 		
 		<if><not><isset property="db.initscript"/></not><then><property name="db.initscript" value=""/></then></if>		
 
-		<java classname="uk.ac.ebi.microarray.pools.db.RegenerateDB" fork="true">
+		<java classname="uk.ac.ebi.microarray.pools.db.RegenerateDB" fork="true" newenvironment="">
 			
 			<classpath>
 				<pathelement path="${CORE_JAR}"/>
@@ -599,11 +599,14 @@
 			
 			
 			<jvmarg value="-Ddb.initscript=${db.initscript}"/>
+			<jvmarg value="-Dbiocep.home=${env.BIOCEP_HOME}"/>			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
 			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+			
 			
 		</java>
 	</target>
