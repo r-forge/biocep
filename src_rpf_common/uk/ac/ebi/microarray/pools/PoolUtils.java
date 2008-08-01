@@ -180,7 +180,7 @@ public class PoolUtils {
 
 	public static boolean publicIPUnavilable() {
 		try {
-			return InetAddress.getLocalHost().getHostAddress().startsWith("127.0.");
+			return isLoopBackIP(InetAddress.getLocalHost().getHostAddress());
 		} catch (Exception e) {
 			e.printStackTrace();
 			return true;
