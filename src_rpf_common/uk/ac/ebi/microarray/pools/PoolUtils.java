@@ -219,8 +219,8 @@ public class PoolUtils {
 	}
 
 	public static String getBiocepHome() {
-		String result=System.getenv("BIOCEP_HOME");
-		if (result==null) result=".";
+		String result=System.getProperty("biocep.home");
+		if (result==null || result.equals("")) result=".";
 		return result;
 	}
 	
