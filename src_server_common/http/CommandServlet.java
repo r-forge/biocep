@@ -353,7 +353,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						session.setAttribute("CODEURLS", codeUrls);
 					}
 
-					session.setAttribute("threads", new ThreadsHolder());
+					session.setAttribute("THREADS", new ThreadsHolder());
 
 					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session.getId(), session);
 					saveSessionAttributes(session);
@@ -398,7 +398,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("TYPE", "DBS");
 					session.setAttribute("REGISTRY", (DBLayer) ServerDefaults.getRmiRegistry() );
 					session.setAttribute("SUPERVISOR", new SupervisorUtils() );
-					session.setAttribute("threads", new ThreadsHolder());
+					session.setAttribute("THREADS", new ThreadsHolder());
 					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session.getId(), session);
 					saveSessionAttributes(session);
 					
@@ -501,7 +501,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					};
 
 					Thread rmiThread = InterruptibleRMIThreadFactory.getInstance().newThread(rmiRunnable);
-					((ThreadsHolder) session.getAttribute("threads")).getThreads().add(rmiThread);
+					((ThreadsHolder) session.getAttribute("THREADS")).getThreads().add(rmiThread);
 					rmiThread.start();
 
 					long t1 = System.currentTimeMillis();
@@ -520,7 +520,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						}
 					}
 					try {
-						((ThreadsHolder) session.getAttribute("threads")).getThreads().remove(rmiThread);
+						((ThreadsHolder) session.getAttribute("THREADS")).getThreads().remove(rmiThread);
 					} catch (IllegalStateException e) {
 					}
 
@@ -539,7 +539,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 				}
 
 				if (command.equals("interrupt")) {
-					final Vector<Thread> tvec = (Vector<Thread>) ((ThreadsHolder) session.getAttribute("threads")).getThreads().clone();
+					final Vector<Thread> tvec = (Vector<Thread>) ((ThreadsHolder) session.getAttribute("THREADS")).getThreads().clone();
 					for (int i = 0; i < tvec.size(); ++i) {
 						try {
 							tvec.elementAt(i).interrupt();
@@ -548,7 +548,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						}
 					}
 					stop[0] = true;
-					((Vector<Thread>) ((ThreadsHolder) session.getAttribute("threads")).getThreads()).removeAllElements();
+					((Vector<Thread>) ((ThreadsHolder) session.getAttribute("THREADS")).getThreads()).removeAllElements();
 					result = null;
 					break;
 				} else if (command.equals("saveimage")) {

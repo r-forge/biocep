@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.ConnectException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
@@ -115,6 +116,9 @@ public class RHttpProxy {
 
 	public static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters,
 			HttpClient httpClient) throws TunnelingException {
+		
+		
+		System.out.println("methodName:"+methodName+"  methodParam:"+Arrays.toString(methodParameters));
 		PostMethod postPush = null;
 		try {
 			Object result = null;

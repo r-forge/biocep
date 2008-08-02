@@ -575,7 +575,8 @@
 				  	
 						<fileset dir="" includes="RJB.jar"/>				  	
 				  		<fileset dir="" includes="pdfviewer.jar"/>
-				  	
+
+				  	<!--
 				  	    <fileset dir="lib/desktop" includes="freemindbrowser.jar"/>
 				  	
 						
@@ -641,7 +642,7 @@
 					  	
 					  	
 					  	<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
-					  	
+					  	-->
 				  	
 				  </copy>
 			        	
@@ -655,7 +656,7 @@
 				  	
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="pdfviewer.jar"/>
 
-				
+					<!--				
 
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="freemindbrowser.jar"/>
 				  	
@@ -710,7 +711,9 @@
 				  	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
 					
-				
+					-->
+				  	
+				  	
 				  </path>
 				</signjar>
 				

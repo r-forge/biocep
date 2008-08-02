@@ -76,7 +76,8 @@ public abstract class DBLayer implements DBLayerInterface {
 		}
 	}
 
-	public void bind(String name, Remote obj) throws RemoteException, AlreadyBoundException, AccessException {
+	public void bind(String name, Remote obj, HashMap<String, Object> options) throws RemoteException, AlreadyBoundException, AccessException {
+	
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
@@ -131,19 +132,20 @@ public abstract class DBLayer implements DBLayerInterface {
 							+ "',0,0,"
 							+ sysdateFunctionName()
 							+ ",'"
-							+ getProcessId()
+							+ options.get("process.id")
 							+ "','"
-							+ getHostName()
+							+ options.get("host.name")
 							+ "','"
-							+ getHostIp()
+							+ options.get("host.ip")
 							+ "','"
-							+ System.getProperty("os.name")
+							+ options.get("os.name")
 							+ "',"
-							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "',")
-							+ (System.getProperty("job.id")==null? "NULL" : "'"+System.getProperty("job.id")+"'")+","
-							+ (System.getProperty("job.name")==null? "NULL" : "'"+System.getProperty("job.name")+"'")+","							
-							+ (System.getProperty("notify.email")==null? "NULL" : "'"+System.getProperty("notify.email")+"'") +",0)");
+							+ (options.get("java.rmi.server.codebase") == null ? "NULL" : "'" + options.get("java.rmi.server.codebase") + "',")
+							+ (options.get("job.id")==null? "NULL" : "'"+options.get("job.id")+"'")+","
+							+ (options.get("job.name")==null? "NULL" : "'"+options.get("job.name")+"'")+","							
+							+ (options.get("notify.email")==null? "NULL" : "'"+options.get("notify.email")+"'") +",0)");
 		} catch (SQLException sqle) {
+			sqle.printStackTrace();
 			if (isConstraintViolationError(sqle))
 				throw new AlreadyBoundException();
 			else
@@ -165,7 +167,18 @@ public abstract class DBLayer implements DBLayerInterface {
 				}
 		}
 	}
-
+	public void bind(String name, Remote obj) throws RemoteException, AlreadyBoundException, AccessException {
+		HashMap<String, Object> options=new HashMap<String, Object>();
+		options.put("process.id",getProcessId());
+		options.put("host.name",getHostName());
+		options.put("host.ip",getHostIp());
+		options.put("os.name",System.getProperty("os.name"));		
+		options.put("java.rmi.server.codebase",System.getProperty("java.rmi.server.codebase"));
+		options.put("job.id",System.getProperty("job.id"));
+		options.put("job.name",System.getProperty("job.name"));
+		options.put("notify.email",System.getProperty("notify.email"));
+		bind(name,obj,options);
+	}
 	public String[] list() throws RemoteException, AccessException {
 		Vector<String> result = new Vector<String>();
 		Statement stmt = null;
@@ -288,8 +301,7 @@ public abstract class DBLayer implements DBLayerInterface {
 				}
 		}
 	}
-
-	public void rebind(String name, Remote obj) throws RemoteException, AccessException {
+	public void rebind(String name, Remote obj, HashMap<String, Object> options) throws RemoteException, AccessException {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
@@ -336,18 +348,18 @@ public abstract class DBLayer implements DBLayerInterface {
 							+ "',0,0,"
 							+ sysdateFunctionName()
 							+ ",'"
-							+ getProcessId()
+							+ options.get("process.id")
 							+ "','"
-							+ getHostName()
+							+ options.get("host.name")
 							+ "','"
-							+ getHostIp()
+							+ options.get("host.ip")
 							+ "','"
-							+ System.getProperty("os.name")
+							+ options.get("os.name")
 							+ "',"
-							+ (System.getProperty("java.rmi.server.codebase") == null ? "NULL" : "'" + System.getProperty("java.rmi.server.codebase") + "',")
-							+ (System.getProperty("job.id")==null? "NULL" : "'"+System.getProperty("job.id")+"'")+","
-							+ (System.getProperty("job.name")==null? "NULL" : "'"+System.getProperty("job.name")+"'")+","							
-							+ (System.getProperty("notify.email")==null? "NULL" : "'"+System.getProperty("notify.email")+"'") +",0)");
+							+ (options.get("java.rmi.server.codebase") == null ? "NULL" : "'" + options.get("java.rmi.server.codebase") + "',")
+							+ (options.get("job.id")==null? "NULL" : "'"+options.get("job.id")+"'")+","
+							+ (options.get("job.name")==null? "NULL" : "'"+options.get("job.name")+"'")+","							
+							+ (options.get("notify.email")==null? "NULL" : "'"+options.get("notify.email")+"'") +",0)");
 
 		} catch (SQLException sqle) {
 			throw new RemoteException("", (sqle));
@@ -367,6 +379,22 @@ public abstract class DBLayer implements DBLayerInterface {
 					throw new RemoteException("", (e));
 				}
 		}
+	}
+	
+	public void rebind(String name, Remote obj) throws RemoteException, AccessException {
+		HashMap<String, Object> options=new HashMap<String, Object>();
+		options.put("process.id",getProcessId());
+		options.put("host.name",getHostName());
+		options.put("host.ip",getHostIp());
+		options.put("os.name",System.getProperty("os.name"));
+
+		options.put("java.rmi.server.codebase",System.getProperty("java.rmi.server.codebase"));
+		options.put("job.id",System.getProperty("job.id"));
+		options.put("job.name",System.getProperty("job.name"));
+		options.put("notify.email",System.getProperty("notify.email"));
+				
+
+		rebind(name,obj,options);
 	}
 
 	public void unbind(String name) throws RemoteException, NotBoundException, AccessException {
