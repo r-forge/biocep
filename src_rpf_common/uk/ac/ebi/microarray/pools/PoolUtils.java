@@ -219,7 +219,7 @@ public class PoolUtils {
 	}
 
 	public static String getBiocepHome() {
-		String result=System.getProperty("biocep.home");
+		String result=System.getProperty("biocep.src.home");
 		return result;
 	}
 	

@@ -31,7 +31,7 @@
 			</antcall>
 	</target>
 	
-	<target	name="demoserver" depends="setWinAwareProps">		
+	<target	name="demoserver" depends="initializeProperties">		
 		<antcall target="server">			
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>			
 			<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR} file://${windows.root.slash}${basedir}/demos/demo3/distrib/mapping.jar"/>

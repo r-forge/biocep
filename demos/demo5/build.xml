@@ -129,7 +129,7 @@
 		
 	</target>			
 	
-	<target	name="demoserver" depends="setWinAwareProps">		
+	<target	name="demoserver" depends="initializeProperties">		
 		<antcall target="server">			
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
 			<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR} file://${windows.root.slash}${demo.mappingjar}"/>			
@@ -149,7 +149,7 @@
 		</antcall>	
 	</target>
 
-	<target	name="demoweb" depends="setWinAwareProps">			
+	<target	name="demoweb" depends="initializeProperties">			
 									
 		<javac srcdir="demos/demo5/src" destdir="demos/demo5/src" debug="true" source="1.5" target="1.5">
 			<classpath>

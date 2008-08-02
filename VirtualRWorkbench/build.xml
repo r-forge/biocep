@@ -51,7 +51,7 @@
 		
 			<property name="demo.mappingjar" value="${demo.generatedir}${demo.mapping.jar.name}.jar" />
 	
-			<target name="demodb">		
+			<target name="demodb" depends="initializeProperties">		
 				<antcall target="db">		
 					
 					<param name="naming.mode" value="${demo.naming.mode}"/>
@@ -66,7 +66,7 @@
 				</antcall>			
 			</target>		
 			
-			<target name="demokill">		
+			<target name="demokill" depends="initializeProperties">		
 				<antcall target="killdb">	
 					
 					<param name="naming.mode" value="${demo.naming.mode}"/>
@@ -81,7 +81,7 @@
 				</antcall>			
 			</target>	
 	
-			<target name="demotop">
+			<target name="demotop" depends="initializeProperties">
 				<antcall target="top">	
 					
 					<param name="naming.mode" value="${demo.naming.mode}"/>
@@ -95,7 +95,7 @@
 				</antcall>			
 			</target>	
 	
-			<target name="demonode">				
+			<target name="demonode" depends="initializeProperties">				
 				<if><not><isset property="node"/></not><then><property name="node" value=""/></then></if>
 				<antcall target="node">
 					
@@ -112,7 +112,7 @@
 				</antcall>			
 			</target>	
 		
-			<target name="demogen">		
+			<target name="demogen" depends="initializeProperties">		
 					<mkdir dir="${demo.generatedir}" />
 				
 					 <java classname="uk.ac.ebi.microarray.pools.PropertiesGenerator" fork="true" >
@@ -162,7 +162,7 @@
 			</target>
 			
 	
-			<target name="demoserver" depends="setWinAwareProps">
+			<target name="demoserver" depends="initializeProperties">
 				<if><not><isset property="node"/></not><then><property name="node" value="N1"/></then></if>
 				<if><not><isset property="autoname"/></not><then><property name="autoname" value="true"/></then></if>
 				<if><not><isset property="apply.sandbox"/></not><then><property name="apply.sandbox" value="true"/></then></if>
@@ -193,7 +193,7 @@
 				</antcall>			
 			</target>
 		
-			<target name="simpleserver" depends="setWinAwareProps">
+			<target name="simpleserver" depends="initializeProperties">
 				<antcall target="demoserver">									
 					<param name="node" value="" />													
 					<param name="autoname" value="false"/>
@@ -203,7 +203,7 @@
 				</antcall>
 			</target>
 		
-			<target name="democompile">
+			<target name="democompile" depends="initializeProperties">
 				<javac srcdir="${demo.client.src}" destdir="${demo.client.bin}" debug="true" source="1.5" target="1.5" >
 					<classpath>
 						<pathelement path="${CORE_JAR}"/>				
@@ -217,7 +217,7 @@
 				</javac>	
 			</target>
 				
-			<target name="demorun" depends="democompile">
+			<target name="demorun" depends="initializeProperties,democompile">
 				
 				<path id="demoVsnPoolpath">
 					<pathelement location="${demo.client.bin}"/>			
@@ -241,7 +241,7 @@
 				</antcall>
 			</target>
 			
-			<target name="local" depends="democompile">
+			<target name="local" depends="initializeProperties,democompile">
 				
 				<path id="demoVsnPoolpath">
 					<pathelement location="${demo.client.bin}"/>			
@@ -265,7 +265,7 @@
 				</antcall>
 			</target>
 
-			<target name="demorun2" depends="democompile">
+			<target name="demorun2" depends="initializeProperties,democompile">
 				
 				<if><not><isset property="url"/></not><then><property name="url" value="http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/cmd"/></then></if>
 				<path id="httpPath">					
@@ -292,7 +292,7 @@
 				
 			</target>
 		
-			<target name="demoapplet" depends="compile,democompile,setWinAwareProps">
+			<target name="demoapplet" depends="initializeProperties,compile,democompile">
 			
 				<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
 				<if><not><isset property="lf"/></not><then><property name="lf" value="0"/></then></if>
@@ -440,14 +440,14 @@
 			    </sequential>
 			</macrodef>
 	
-			<target name="unsign" >
+			<target name="unsign" depends="initializeProperties">
 				  <unsignjar jar="lib/desktop/activation.jar"/>
 				  <unsignjar jar="lib/desktop/mail.jar"/>
 				  <unsignjar jar="lib/desktop/PDFRenderer.jar"/>
 			</target>
 
 	
-			<target name="webcompile" depends="compile,pdfviewer">
+			<target name="webcompile" depends="initializeProperties,compile,pdfviewer">
 				
 				  <copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib">
 				  	
@@ -723,7 +723,7 @@
 			</target>
 	
 	
-			<target name="democlean">
+			<target name="democlean" depends="initializeProperties">
 				<delete dir="${demo.generatedir}" failonerror="true"/>
 				<mkdir dir="${demo.generatedir}"/>
 				<delete>
@@ -745,7 +745,7 @@
 			</target>
 	
 	
-			<target name="demodeploy" >
+			<target name="demodeploy" depends="initializeProperties" >
 					
 				<antcall target="tomcat.shutdown">
 					<param name="spawn" value="true"/>
@@ -766,20 +766,20 @@
 																
 			</target>			
 	
-			<target name="derbyrun">
+			<target name="derbyrun" depends="initializeProperties">
 				<antcall target="derby.startup">					
 					<param name="derby.port" value="${db.port}"/>
 				</antcall>	
 			</target>
 	
-			<target name="derbystop">
+			<target name="derbystop" depends="initializeProperties">
 				<antcall target="derby.shutdown">
 					<param name="spawn" value="true"/>
 					<param name="derby.port" value="${db.port}"/>	
 				</antcall>
 			</target>
 				
-			<target name="all">
+			<target name="all" depends="initializeProperties">
 				
 				<antcall target="clean"/>				
 				<antcall target="compile"/>

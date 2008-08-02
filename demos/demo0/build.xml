@@ -21,7 +21,7 @@
 <project name="demo0" default="compile" basedir="../.." >	
 	<import file="../../build.xml"/>
 
-	<target name="demorun" depends="setWinAwareProps">
+	<target name="demorun" depends="initializeProperties">
 
 		<javac srcdir="demos/demo0/src" destdir="demos/demo0/src" source="1.5" target="1.5">
 			<classpath>
