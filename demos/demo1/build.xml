@@ -31,7 +31,7 @@
 		</antcall>
 	</target>
 		
-	<target name="demorun" depends="setWinAwareProps">	
+	<target name="demorun" depends="initializeProperties">	
 	
 		<javac srcdir="demos/demo1/src" destdir="demos/demo1/src" debug="true">
 			<classpath>
@@ -75,7 +75,7 @@
 	</target>
 	
 
-	<target name="demorun2" depends="setWinAwareProps">	
+	<target name="demorun2" depends="initializeProperties">	
 	
 		<javac srcdir="demos/demo1/src" destdir="demos/demo1/src" debug="true" source="1.5" target="1.5">
 			<classpath>

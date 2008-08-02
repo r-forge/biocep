@@ -32,7 +32,7 @@
 		</antcall>
 	</target>
 	
-	<target name="demoserver1" depends="setWinAwareProps">		
+	<target name="demoserver1" depends="initializeProperties">		
 		<antcall target="server">			
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
 			<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR} file://${windows.root.slash}${basedir}/demos/demo7/distrib/mapping.jar"/>
@@ -42,7 +42,7 @@
 		</antcall>		
 	</target>
 
-	<target name="demoserver2" depends="setWinAwareProps">		
+	<target name="demoserver2" depends="initializeProperties">		
 		<antcall target="server">
 			
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
@@ -54,7 +54,7 @@
 		</antcall>		
 	</target>
 
-	<target name="demoserver3" depends="setWinAwareProps">		
+	<target name="demoserver3" depends="initializeProperties">		
 		<antcall target="server">
 			
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>

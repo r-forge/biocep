@@ -20,7 +20,7 @@
 <project name="demo4" default="compile" basedir="../.." >	
 	<import file="../../build.xml"/>
 	
-	<target name="demoserver" depends="setWinAwareProps">
+	<target name="demoserver" depends="initializeProperties">
 		
 		<antcall target="server">			
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
