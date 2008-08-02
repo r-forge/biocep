@@ -37,7 +37,6 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
-import uk.ac.ebi.microarray.pools.PoolUtils.EqualNameFilter;
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
@@ -108,7 +107,23 @@ public class ServerManager {
 	
 	
 	public static String[] namingVars=new String[]{
-		"registry.host", "registry.port","naming.mode","db.type","db.host","db.port","db.name","db.user","db.password", "rmi.port.start", "job.id", "job.name", "notify.email"};
+		"registry.host", 
+		"registry.port",
+		"naming.mode",
+		"db.type",
+		"db.host",
+		"db.port",
+		"db.name",
+		"db.user",
+		"db.password",		
+		"generic.class",
+		"generic.urlregistry.url",
+		"generic.urlregistry.login",
+		"generic.urlregistry.password",
+		"rmi.port.start", 
+		"job.id", 
+		"job.name", 
+		"notify.email"};
 
 
 	private static JTextArea createRSshProgressArea;

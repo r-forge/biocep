@@ -328,10 +328,9 @@
 		<if><not><isset property="registry.host"/></not><then><property name="registry.host" value=""/></then></if>
 		<if><not><isset property="registry.port"/></not><then><property name="registry.port" value=""/></then></if>
 		
-		<if><not><isset property="generic.class"/></not><then><property name="generic.class" value=""/></then></if>
-		
-		
-		
+		<if><not><isset property="generic.urlregistry.url"/></not><then><property name="generic.urlregistry.url" value=""/></then></if>
+		<if><not><isset property="generic.urlregistry.login"/></not><then><property name="generic.urlregistry.login" value=""/></then></if>
+		<if><not><isset property="generic.urlregistry.password"/></not><then><property name="generic.urlregistry.password" value=""/></then></if>
 		
 		<if><not><isset property="servant.classpath"/></not><then><property name="servant.classpath" value=""/></then></if>
 		<if><not><isset property="preprocess.help"/></not><then><property name="preprocess.help" value=""/></then></if>
@@ -423,6 +422,9 @@
 			<jvmarg value="-Ddb.password=${db.password}"/>
 			
 			<jvmarg value="-Dgeneric.class=${generic.class}"/>
+			<jvmarg value="-Dgeneric.urlregistry.url=${generic.urlregistry.url}"/>
+			<jvmarg value="-Dgeneric.urlregistry.login=${generic.urlregistry.login}"/>
+			<jvmarg value="-Dgeneric.urlregistry.password=${generic.urlregistry.password}"/>
 			
 			<jvmarg value="-Dproperties.extension=${properties.extension}"/>
 			

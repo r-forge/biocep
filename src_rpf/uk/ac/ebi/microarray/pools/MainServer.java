@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
 
-import uk.ac.ebi.microarray.pools.db.DBLayer;
+import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import uk.ac.ebi.microarray.pools.db.NodeDataDB;
 import static uk.ac.ebi.microarray.pools.ServerDefaults.*;
 
@@ -64,7 +64,7 @@ public class MainServer {
 				NodeDataDB nodeData = null;
 				try {
 					rmiRegistry = ServerDefaults.getRmiRegistry();
-					nodeData = ((DBLayer) rmiRegistry).getNodeData("NODE_NAME='" + System.getProperty("node") + "'").elementAt(0);
+					nodeData = ((DBLayerInterface) rmiRegistry).getNodeData("NODE_NAME='" + System.getProperty("node") + "'").elementAt(0);
 				} catch (Exception e) {
 					log.info("Couldn't retrieve Node Info for node <" + System.getProperty("node") + ">");
 					e.printStackTrace();
@@ -123,17 +123,17 @@ public class MainServer {
 
 			String sname = mservant.getServantName();
 			log.info("sname :::" + sname);
-			if (rmiRegistry instanceof DBLayer) {
+			if (rmiRegistry instanceof DBLayerInterface) {
 				if (System.getProperty("node") != null && !System.getProperty("node").equalsIgnoreCase("")) {
-					((DBLayer) rmiRegistry).updateServantNodeName(sname, System.getProperty("node"));
+					((DBLayerInterface) rmiRegistry).updateServantNodeName(sname, System.getProperty("node"));
 				} else {
-					Vector<NodeDataDB> nodes = ((DBLayer) rmiRegistry).getNodeData("");
+					Vector<NodeDataDB> nodes = ((DBLayerInterface) rmiRegistry).getNodeData("");
 					for (int i = 0; i < nodes.size(); ++i) {
 						String nodeName = nodes.elementAt(i).getNodeName();
 						String nodeIp = nodes.elementAt(i).getHostIp();
 						String nodePrefix = nodes.elementAt(i).getPoolPrefix();
 						if (sname.startsWith(nodePrefix) && nodeIp.equals(PoolUtils.getHostIp())) {
-							((DBLayer) rmiRegistry).updateServantNodeName(sname, nodeName);
+							((DBLayerInterface) rmiRegistry).updateServantNodeName(sname, nodeName);
 							break;
 						}
 					}
@@ -148,7 +148,7 @@ public class MainServer {
 					}
 				}
 
-				((DBLayer) rmiRegistry).updateServantAttributes(sname, attributes);
+				((DBLayerInterface) rmiRegistry).updateServantAttributes(sname, attributes);
 			}
 			//log.info("*************************$$$$$$$$$$$$");
 			log.info("Servant " + sname + " instantiated successfully.");

@@ -64,7 +64,7 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 			while (true) {
 				newname = makeName(prefix, registry);
 				try {
-					registry.bind(newname, this);
+					registry.bind(newname,  java.rmi.server.RemoteObject.toStub(this));
 					break;
 				} catch (AlreadyBoundException e) {
 				}
@@ -90,7 +90,7 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 				}
 			}
 
-			registry.rebind(name, this);
+			registry.rebind(name,  java.rmi.server.RemoteObject.toStub(this) );
 		}
 
 		_servantName = name == null ? newname : name;

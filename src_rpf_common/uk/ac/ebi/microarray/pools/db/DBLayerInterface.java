@@ -1,6 +1,7 @@
 package uk.ac.ebi.microarray.pools.db;
 import java.io.InputStream;
 import java.rmi.AccessException;
+import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -40,5 +41,8 @@ public interface DBLayerInterface extends Registry {
 	public boolean canReconnect();	
 	public void setJobID(String servantName, String jobID) throws RemoteException;
 	public void setNotified(String servantName, boolean notified) throws RemoteException;
+	
+	public void bind(String name, Remote obj, HashMap<String, Object> options) throws RemoteException, AlreadyBoundException, AccessException ;
+	public void rebind(String name, Remote obj, HashMap<String, Object> options) throws RemoteException, AccessException; 
 	
 }
