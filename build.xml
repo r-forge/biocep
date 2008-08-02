@@ -19,40 +19,34 @@
  * @author Karim Chine karim.chine@m4x.org-->
 
 <project name="BioCep" default="compile" basedir=".">
-	
-	<property environment="env"/>
-	
-	<!--
-	<property name="JRI_LIB_PATH" value="${env.R_HOME}/library/rJava/jri"/>
-	-->
-	 
-	<property name="JRI_LIB_PATH" value="${env.R_LIBS}/rJava/jri"/>
-	
-		
-	<property name="CORE_JAR" value="${basedir}/RJB.jar"/>
-	<property name="RPF_JAR" value="${basedir}/RPF.jar"/>
-	<property name="SRV_JAR" value="${basedir}/RSRV.jar"/>
-	<property name="JRI_JAR" value="${basedir}/lib/desktop/JRI.jar"/>
-	<property name="LOGGING_JAR" value="${basedir}/lib/log/commons-logging-1.1.1.jar"/>
-	<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.15.jar"/>	
-	<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>
-	
-	<property name="SSH_JAR" value="${basedir}/lib/pool/ganymed-ssh2.jar"/>
-	<property name="FTP_JAR" value="${basedir}/lib/pool/edtftpj.jar"/>
-	
-	
-	<property name="ORACLE_JAR" value="${basedir}/lib/jdbc/ojdbc-14.jar"/>
-	<property name="MYSQL_JAR" value="${basedir}/lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>
-	<property name="DERBY_JAR" value="${basedir}/lib/jdbc/derbyclient.jar"/>
-	
-	<taskdef name="if" classpath="lib/beangenlibs/ant-contrib-1.0b3.jar"
-		classname="net.sf.antcontrib.logic.IfTask"/>
-	<taskdef name="for" classpath="lib/beangenlibs/ant-contrib-1.0b3.jar"
-			classname="net.sf.antcontrib.logic.ForTask"/>
 
-	<target name="setWinAwareProps">
-		<if>
-			<os family="windows"/>
+	
+	<taskdef name="if"  classpath="lib/beangenlibs/ant-contrib-1.0b3.jar" classname="net.sf.antcontrib.logic.IfTask"/>
+	<taskdef name="for" classpath="lib/beangenlibs/ant-contrib-1.0b3.jar" classname="net.sf.antcontrib.logic.ForTask"/>
+
+	<target name="initializeProperties">
+
+		<property environment="env"/>
+		
+		<if><not><isset property="env.R_LIBS"/></not>
+			<then><property name="JRI_LIB_PATH" value="${env.R_HOME}/library/rJava/jri"/></then>
+			<else><property name="JRI_LIB_PATH" value="${env.R_LIBS}/rJava/jri"/></else>
+		</if>
+		
+		<property name="CORE_JAR" value="${basedir}/RJB.jar"/>
+		<property name="RPF_JAR" value="${basedir}/RPF.jar"/>
+		<property name="SRV_JAR" value="${basedir}/RSRV.jar"/>
+		<property name="JRI_JAR" value="${basedir}/lib/desktop/JRI.jar"/>
+		<property name="LOGGING_JAR" value="${basedir}/lib/log/commons-logging-1.1.1.jar"/>
+		<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.15.jar"/>	
+		<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>	
+		<property name="SSH_JAR" value="${basedir}/lib/pool/ganymed-ssh2.jar"/>
+		<property name="FTP_JAR" value="${basedir}/lib/pool/edtftpj.jar"/>		
+		<property name="ORACLE_JAR" value="${basedir}/lib/jdbc/ojdbc-14.jar"/>
+		<property name="MYSQL_JAR" value="${basedir}/lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>
+		<property name="DERBY_JAR" value="${basedir}/lib/jdbc/derbyclient.jar"/>
+		
+		<if><os family="windows"/>
 			<then>
 				<property name="R_LIB_PATH" value="${env.R_HOME}/bin"/>
 				<property name="windows.root.slash" value="/"/>
@@ -62,9 +56,10 @@
 				<property name="windows.root.slash" value=""/>
 			</else>
 		</if>
+		
 	</target>
 	
-	<target name="gen" depends="compile,setWinAwareProps">
+	<target name="gen" depends="initializeProperties,compile">
 		
 		<if><not><isset property="file"/></not>	<then><property name="file" value=""/>	</then></if>
 		<if><not><isset property="dir"/></not><then><property name="dir" value=""/></then></if>
@@ -188,7 +183,7 @@
 	
 	
 	
-	<target name="dgen" depends="compile,setWinAwareProps">
+	<target name="dgen" depends="initializeProperties,compile">
 		
 		<if><not><isset property="file"/></not>	<then><property name="file" value=""/>	</then></if>
 		<if><not><isset property="dir"/></not><then><property name="dir" value=""/></then></if>
@@ -302,7 +297,7 @@
 	</target>
 
 	
-	<target name="server" depends="setWinAwareProps">
+	<target name="server" depends="initializeProperties">
 		
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
 		<if><not><isset property="prefix"/></not><then><property name="prefix" value=""/></then></if>		
@@ -454,7 +449,7 @@
 	
 	
 	
-	<target name="derby.startup">
+	<target name="derby.startup" depends="initializeProperties">
 		<if>
 			<not>
 				<isset property="derby.port"/>
@@ -482,14 +477,14 @@
 	</target>
 	
 	
-	<target name="demodb">		
+	<target name="demodb" depends="initializeProperties" >		
 		<antcall target="db">					
 			<param name="naming.mode" value="db"/>
 			<param name="db.initscript" value="${basedir}/VirtualRWorkbench/initscript.sql" />		
 		</antcall>			
 	</target>	
 	
-	<target name="derby.shutdown">
+	<target name="derby.shutdown"  depends="initializeProperties">
 		<if>
 			<not>
 				<isset property="derby.port"/>
@@ -516,7 +511,7 @@
 		</java>
 	</target>
 	
-	<target name="tomcat.startup">
+	<target name="tomcat.startup" depends="initializeProperties">
 		<if>
 			<not>
 				<isset property="spawn"/>
@@ -532,7 +527,7 @@
 		</java>
 	</target>
 	
-	<target name="tomcat.shutdown">
+	<target name="tomcat.shutdown" depends="initializeProperties">
 		<if>
 			<not>
 				<isset property="spawn"/>
@@ -548,7 +543,7 @@
 		</java>
 	</target>
 	
-	<target name="rmiregistry">
+	<target name="rmiregistry"  depends="initializeProperties" >
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
 		<if><not><isset property="port"/></not><then><property name="port" value="1099"/></then></if>
 		<if><not><isset property="kill"/></not><then><property name="kill" value=""/></then></if>
@@ -569,7 +564,7 @@
 		</java>
 	</target>
 	
-	<target name="db">
+	<target name="db"  depends="initializeProperties">
 		
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
@@ -577,7 +572,7 @@
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
-		<if><not><isset property="env.BIOCEP_HOME"/></not><then><property name="biocep.home" value="."/></then><else><property name="biocep.home" value="${env.BIOCEP_HOME}"/></else></if>
+		<if><not><isset property="env.BIOCEP_SRC_HOME"/></not><then><property name="biocep.src.home" value="."/></then><else><property name="biocep.src.home" value="${env.BIOCEP_SRC_HOME}"/></else></if>
 		<if><not><isset property="db.initscript"/></not><then><property name="db.initscript" value=""/></then></if>		
 
 		<java classname="uk.ac.ebi.microarray.pools.db.RegenerateDB" fork="true" newenvironment="">
@@ -602,7 +597,7 @@
 			<jvmarg value="-Ddb.password=${db.password}"/>
 			
 			<jvmarg value="-Ddb.initscript=${db.initscript}"/>
-			<jvmarg value="-Dbiocep.home=${biocep.home}"/>			
+			<jvmarg value="-Dbiocep.src.home=${biocep.src.home}"/>			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
 			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
@@ -612,7 +607,7 @@
 		</java>
 	</target>
 	
-	<target name="top">
+	<target name="top"  depends="initializeProperties">
 		
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
 		
@@ -661,7 +656,7 @@
 		</java>
 	</target>
 	
-	<target name="node">
+	<target name="node"  depends="initializeProperties">
 		
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
 		
@@ -719,7 +714,7 @@
 		</java>
 	</target>
 	
-	<target name="client">
+	<target name="client"  depends="initializeProperties">
 		
 		<if>
 			<not>
@@ -775,7 +770,7 @@
 		
 	</target>
 	
-	<target name="gui" depends="compile,setWinAwareProps">
+	<target name="gui" depends="initializeProperties,compile">
 		
 			
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
@@ -905,7 +900,7 @@
 
 	
 	
-	<target name="httpserver" depends="setWinAwareProps,compile">
+	<target name="httpserver" depends="initializeProperties,compile">
 		
 
 		
@@ -969,7 +964,7 @@
 		
 	</target>
 
-	<target name="sshworker" depends="setWinAwareProps,compile">
+	<target name="sshworker" depends="initializeProperties,compile">
 		
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
 		
@@ -1018,7 +1013,7 @@
 
 	
 	
-	<target name="s" depends="compile,setWinAwareProps">
+	<target name="s" depends="initializeProperties,compile">
 		
 			
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
@@ -1144,7 +1139,7 @@
 	</target>
 	
 
-	<target name="t" depends="compile,setWinAwareProps">
+	<target name="t" depends="initializeProperties,compile">
 			
 				
 			<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
@@ -1271,7 +1266,7 @@
 		</target>
 
 	
-	<target name="demoserver" depends="setWinAwareProps,compile">
+	<target name="demoserver" depends="initializeProperties,compile">
 		<antcall target="server">
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
 			<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR}"/>						
@@ -1281,7 +1276,7 @@
 	</target>
 	
 	
-	<target name="killdb">
+	<target name="killdb"  depends="initializeProperties" >
 		
 		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
@@ -1323,7 +1318,7 @@
 		</java>
 	</target>
 	
-	<target name="killall">
+	<target name="killall"  depends="initializeProperties" >
 		
 		<if><not><isset property="registry.host"/></not><then><property name="registry.host" value=""/></then></if>
 		<if><not><isset property="registry.port"/></not><then><property name="registry.port" value=""/></then></if>
@@ -1376,7 +1371,7 @@
 		</java>
 	</target>
 	
-	<target name="clean">
+	<target name="clean"  depends="initializeProperties" >
 		<delete dir="bin" failonerror="true"/>
 		<mkdir dir="bin"/>
 		
@@ -1401,7 +1396,7 @@
 		</delete>
 	</target>
 
-	<target name="srv">
+	<target name="srv"  depends="initializeProperties">
 		<echo message="${basedir}"/>
 		
 		<property 
@@ -1446,7 +1441,7 @@
 	</target>
 	
 	
-	<target name="distrib">
+	<target name="distrib"  depends="initializeProperties">
 		
 		
 			<delete dir="binsrv" failonerror="true"/>
@@ -1746,7 +1741,7 @@
 	</target>
 	
 	
-	<target name="sign.extra" >
+	<target name="sign.extra"  depends="initializeProperties" >
 	
 		<copy todir=".">
 			<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>			
@@ -1760,7 +1755,7 @@
 		
 	</target>
 	
-	<target name="pdfviewer">
+	<target name="pdfviewer"  depends="initializeProperties" >
 
 		<javac
 			srcdir="src_pdfviewer" destdir="binpdfviewer" debug="true" source="1.5" target="1.5">
@@ -1784,7 +1779,7 @@
 
 	</target>
 	
-	<target name="compile" depends="compile.rpf">
+	<target name="compile" depends="initializeProperties,compile.rpf">
 		
 		<echo message="${basedir}"/>
 		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_iplots:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>
@@ -1850,14 +1845,14 @@
 	
 	
 	
-	<target name="jeditmodes" >
+	<target name="jeditmodes"  depends="initializeProperties">
 		<jar destfile="lib/desktop/jeditmodes.jar">
 			<fileset dir="src_patch_jeditmodes"/>
 		</jar>				
 	</target>
 	
 	
-	<target name="compile.rpf">
+	<target name="compile.rpf" depends="initializeProperties">
 		
 		<javac srcdir="src_rpf_common:src_rpf" destdir="binrpf" debug="true" source="1.5"
 			target="1.5">
@@ -1886,7 +1881,7 @@
 		</jar>
 	</target>
 	
-	<target name="jaxwspack">		
+	<target name="jaxwspack"  depends="initializeProperties">		
 		<jar basedir="jaxws" destfile="jaxws-libs.jar" manifest="MANIFEST.MF" />		
 	</target>
 	
