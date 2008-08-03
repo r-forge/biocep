@@ -877,7 +877,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 				}
 			};
-			_consolePanel = new ConsolePanel(_submitInterface, new AbstractAction[] { _actions.get("logon"), _actions.get("logoff"), null,
+			_consolePanel = new ConsolePanel(_submitInterface,"Evaluate",true, new AbstractAction[] { _actions.get("logon"), _actions.get("logoff"), null,
 					_actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"), _actions.get("interrupteval"), null,
 					_actions.get("playdemo"), null, new AbstractAction("Show R Info") {
 

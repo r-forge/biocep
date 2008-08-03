@@ -74,7 +74,7 @@ public class DirectGraphics {
 				}
 				return result;
 			}
-		});
+		}, "Evaluate",true,null);
 
 		JFrame fconsole = new JFrame();
 		fconsole.getContentPane().setLayout(new BorderLayout());

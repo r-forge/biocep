@@ -17,36 +17,23 @@
 import graphics.rmi.JGDPanelPop;
 
 import java.awt.BorderLayout;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.rmi.Naming;
-import java.rmi.registry.Registry;
-import java.sql.Connection;
-import java.sql.DriverManager;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import org.bioconductor.packages.biobase.ExpressionSet;
-import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
-import org.bioconductor.packages.rservices.RNumeric;
-import org.bioconductor.packages.vsn.Vsn;
-import org.bioconductor.packages.vsn.vsnFunction;
-
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.RemotePanel;
-import uk.ac.ebi.microarray.pools.db.DBLayerDerby;
+import uk.ac.ebi.microarray.pools.YesSecurityManager;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsoleDialog;
 import uk.ac.ebi.microarray.pools.db.monitor.ServantStatus;
-import util.Utils;
+
 
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
 public class DirectGraphicsRmi {
 	public static void main(String[] args) throws Exception {
-
+		if (System.getSecurityManager() == null) {
+			System.setSecurityManager(new YesSecurityManager());
+		}
 		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
 
 		JPanel panel = new JGDPanelPop(r.newDevice(400, 500));

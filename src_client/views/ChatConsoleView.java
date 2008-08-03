@@ -36,7 +36,7 @@ public class ChatConsoleView extends DynamicView {
 
 				return "";
 			}
-		});
+		},"Message",true,null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 

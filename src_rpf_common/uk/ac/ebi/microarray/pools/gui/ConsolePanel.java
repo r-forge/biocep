@@ -31,24 +31,34 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -57,17 +67,14 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 	private static SimpleAttributeSet BOLD_BLACK = new SimpleAttributeSet();
 	private static SimpleAttributeSet BLACK = new SimpleAttributeSet();
-	private JTextPane _textArea = new JTextPane();
+	private JTextPane _logArea = new JTextPane();
 	private SubmitInterface _sInterface;
 	private AbstractAction[] _actions;
-	private JTextField _textField;
+	private JTextPane _commandInputField;
 	JScrollPane _scrollPane = null;
 	Vector<String> _commandsHistory = new Vector<String>();
 	int _commandsHistoryIndex = 0;
-
-	public ConsolePanel(SubmitInterface sInterface) {
-		this(sInterface, null);
-	}
+	private UndoManager um = new UndoManager();
 
 	public Vector<String> getCommandHistory() {
 		return _commandsHistory;
@@ -94,20 +101,21 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 			}
 		}).start();
 
-		_textField.setText("");
-		_textField.setEnabled(true);
-		_textField.requestFocus();
+		_commandInputField.setText("");
+		_commandInputField.setEnabled(true);
+		_commandInputField.requestFocus();
+		um = new UndoManager();
 
 	}
 
-	public void play(String command, boolean demo) {
+	public void play(final String command, boolean demo) {
 
 		if (!demo) {
-			_textField.setText(command);
+			_commandInputField.setText(command);
 		} else {
 			for (int i = 0; i <= command.length(); ++i) {
-				_textField.setText(command.substring(0, i));
-				_textField.setCaretPosition(_textField.getText().length());
+				_commandInputField.setText(command.substring(0, i));
+				_commandInputField.setCaretPosition(_commandInputField.getText().length());
 				// Toolkit.getDefaultToolkit().beep();
 				try {
 					Thread.sleep(30);
@@ -125,19 +133,19 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 					SwingUtilities.invokeAndWait(new Runnable() {
 						public void run() {
-							_textField.setEnabled(false);
+							_commandInputField.setEnabled(false);
 						}
 					});
 
-					_commandsHistory.add(_textField.getText());
+					_commandsHistory.add(command);
 					_commandsHistoryIndex = _commandsHistory.size();
-					final String cmd = _textField.getText();
-					log = _sInterface.submit(cmd);
 
-					if (log!=null) {
+					log = _sInterface.submit(command);
+
+					if (log != null) {
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								print(cmd, log);
+								print(command, log);
 							}
 						});
 					}
@@ -149,51 +157,219 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		}).start();
 	}
 
-	public ConsolePanel(SubmitInterface sInterface, AbstractAction[] actions) {
+	public ConsolePanel(SubmitInterface sInterface, String textFieldLabel, final boolean undoRedoEnabled, AbstractAction[] actions) {
 		_sInterface = sInterface;
 		_actions = actions;
 		StyleConstants.setForeground(BOLD_BLACK, Color.blue);
 		StyleConstants.setFontFamily(BOLD_BLACK, "Monospaced.plain");
-		StyleConstants.setFontSize(BOLD_BLACK, _textArea.getFont().getSize());
+		StyleConstants.setFontSize(BOLD_BLACK, _logArea.getFont().getSize());
 
 		StyleConstants.setForeground(BLACK, Color.black);
 		StyleConstants.setFontFamily(BLACK, "Monospaced.plain");
-		StyleConstants.setFontSize(BLACK, _textArea.getFont().getSize());
+		StyleConstants.setFontSize(BLACK, _logArea.getFont().getSize());
 
-		_textArea.setEditable(false);
-		_scrollPane = new JScrollPane(_textArea);
+		_logArea.setEditable(false);
+		_scrollPane = new JScrollPane(_logArea);
 		_scrollPane.setBorder(BorderFactory.createLineBorder(Color.blue, 2));
 
-		_textField = new JTextField();
+		_commandInputField = new JTextPane();
 
-		_textArea.setFont(new Font("Monospaced.plain", Font.PLAIN, _textArea.getFont().getSize()));
-		_textField.setFont(new Font("Monospaced.plain", Font.PLAIN, _textField.getFont().getSize()));
+		_logArea.setFont(new Font("Monospaced.plain", Font.PLAIN, _logArea.getFont().getSize()));
+		_commandInputField.setFont(new Font("Monospaced.plain", Font.PLAIN, _commandInputField.getFont().getSize()));
 
-		_textField.addKeyListener(new KeyListener() {
+				
+		
+		HashMap<String, Action> inputFiledActionsTable = new HashMap<String, Action>();
+		Action[] inputFieldActions = _commandInputField.getEditorKit().getActions();
+		for (int i = 0; i < inputFieldActions.length; ++i) {
+			inputFiledActionsTable.put((String) inputFieldActions[i].getValue(Action.NAME), inputFieldActions[i]);
+		}
+		final Action copyAction = inputFiledActionsTable.get(DefaultEditorKit.copyAction);
+		final Action pasteAction = inputFiledActionsTable.get(DefaultEditorKit.pasteAction);
+		final Action cutAction = inputFiledActionsTable.get(DefaultEditorKit.cutAction);
+
+		final Action insertBlankLine = new AbstractAction("Insert Blank Line    Ctrl-Enter") {
+			public void actionPerformed(ActionEvent e) {
+				String text = _commandInputField.getText();
+				int cartetPosition = _commandInputField.getCaretPosition();
+				_commandInputField.setText(text.substring(0, cartetPosition) + "\n" + text.substring(cartetPosition));
+				_commandInputField.setCaretPosition(cartetPosition + 1);
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		};
+
+		if (undoRedoEnabled) {
+			_commandInputField.getDocument().addUndoableEditListener(new UndoableEditListener() {
+				public void undoableEditHappened(UndoableEditEvent e) {
+					if (_commandInputField.getText().length()>200*10) {
+						e.getEdit().undo();
+						Toolkit.getDefaultToolkit().beep();
+					} else {
+						um.addEdit(e.getEdit());
+					}
+				}
+			});
+		}
+		
+		_commandInputField.addVetoableChangeListener(new VetoableChangeListener(){
+			public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
+				System.out.println(evt);
+				
+			}
+		});
+
+		_commandInputField.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				checkPopup(e);
+			}
+
+			public void mouseClicked(MouseEvent e) {
+				checkPopup(e);
+			}
+
+			public void mouseReleased(MouseEvent e) {
+				checkPopup(e);
+			}
+
+			private void checkPopup(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					JPopupMenu popupMenu = new JPopupMenu();
+
+					popupMenu.add(insertBlankLine);
+					popupMenu.addSeparator();         
+					popupMenu.add(new AbstractAction("Copy                 Ctrl-C") {
+						public void actionPerformed(ActionEvent e) {
+							copyAction.actionPerformed(e);
+						}
+
+						@Override
+						public boolean isEnabled() {
+							return copyAction.isEnabled();
+						}
+					});
+													  	
+					popupMenu.add(new AbstractAction("Paste                Ctrl-V") {
+						public void actionPerformed(ActionEvent e) {
+							pasteAction.actionPerformed(e);
+						}
+
+						@Override
+						public boolean isEnabled() {
+							return pasteAction.isEnabled();
+						}
+					});
+													  
+					popupMenu.add(new AbstractAction("Cut                    Ctrl-X") {
+						public void actionPerformed(ActionEvent e) {
+							cutAction.actionPerformed(e);
+						}
+
+						@Override
+						public boolean isEnabled() {
+							return cutAction.isEnabled();
+						}
+					});
+
+					
+												
+					if (undoRedoEnabled) {
+						
+						popupMenu.addSeparator();
+						
+						popupMenu.add(new AbstractAction("Undo                 Ctrl-Z") {
+							public void actionPerformed(ActionEvent e) {
+								try {
+									um.undo();
+								} catch (CannotUndoException ex) {
+									ex.printStackTrace();
+								}
+							}
+	
+							@Override
+							public boolean isEnabled() {
+								return um.canUndo();
+							}
+						});
+														  
+						popupMenu.add(new AbstractAction("Redo                 Ctrl-Y") {
+							public void actionPerformed(ActionEvent e) {
+								try {
+									um.redo();
+								} catch (CannotRedoException ex) {
+									ex.printStackTrace();
+								}
+							}
+	
+							@Override
+							public boolean isEnabled() {
+								return um.canRedo();
+							}
+						});
+					}
+
+					popupMenu.show(_commandInputField, e.getX(), e.getY());
+				}
+			}
+		});
+
+		_commandInputField.addKeyListener(new KeyListener() {
+
+			public int countCRBeforeCartet() {
+				int result = 0;
+				for (int i = 0; i < _commandInputField.getCaretPosition(); ++i)
+					if (_commandInputField.getText().charAt(i) == '\n')
+						++result;
+				return result;
+			}
+
+			public int countCRAfterCartet() {
+				int result = 0;
+				for (int i = _commandInputField.getCaretPosition(); i < _commandInputField.getText().length(); ++i)
+					if (_commandInputField.getText().charAt(i) == '\n')
+						++result;
+				return result;
+			}
+
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == 10) {
 
-					if (_textField.getText().trim().equals(""))
-						return;
+					if ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
+						insertBlankLine.actionPerformed(null);
+					} else {
+						if (_commandInputField.getText().trim().equals(""))
+							return;
+						play(_commandInputField.getText(), false);
+					}
+				}
+				if (e.getKeyCode() == 38) {
 
-					play(_textField.getText(), false);
-
-				} else {
-
-					if (e.getKeyCode() == 38) {
+					if (countCRBeforeCartet() == 0) {
 						if (_commandsHistoryIndex == 0)
 							return;
 						--_commandsHistoryIndex;
-						_textField.setText(_commandsHistory.elementAt(_commandsHistoryIndex));
+						_commandInputField.setText(_commandsHistory.elementAt(_commandsHistoryIndex));
+					}
 
-					} else if (e.getKeyCode() == 40) {
+				} else if (e.getKeyCode() == 40) {
+
+					if (countCRAfterCartet() == 0) {
 						if (_commandsHistoryIndex >= (_commandsHistory.size() - 1))
 							return;
 						++_commandsHistoryIndex;
-						_textField.setText(_commandsHistory.elementAt(_commandsHistoryIndex));
+						_commandInputField.setText(_commandsHistory.elementAt(_commandsHistoryIndex));
 					}
 
-				}
+				} else if (e.getKeyCode()==90 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
+					if (um.canUndo()) um.undo();
+					else Toolkit.getDefaultToolkit().beep();
+				} else if (e.getKeyCode()==89 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
+					if (um.canRedo()) um.redo();
+					else Toolkit.getDefaultToolkit().beep();					
+				} 
+
 			}
 
 			public void keyReleased(KeyEvent e) {
@@ -208,11 +384,11 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		add(_scrollPane, BorderLayout.CENTER);
 
 		JPanel bottomPanel = new JPanel(new BorderLayout());
-		bottomPanel.add(new JLabel("Evaluate : "), BorderLayout.WEST);
-		bottomPanel.add(_textField, BorderLayout.CENTER);
+		bottomPanel.add(new JLabel(textFieldLabel+" : "), BorderLayout.WEST);
+		bottomPanel.add(_commandInputField, BorderLayout.CENTER);
 		add(bottomPanel, BorderLayout.SOUTH);
 
-		_textArea.addMouseListener(new MouseAdapter() {
+		_logArea.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				checkPopup(e);
 			}
@@ -300,35 +476,35 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 					popupMenu.addSeparator();
 					popupMenu.add(new AbstractAction("Clean") {
 						public void actionPerformed(ActionEvent e) {
-							_textArea.setText("");
+							_logArea.setText("");
 						}
 
 						@Override
 						public boolean isEnabled() {
-							return !_textArea.getText().equals("");
+							return !_logArea.getText().equals("");
 						}
 					});
 
-					popupMenu.show(_textArea, e.getX(), e.getY());
+					popupMenu.show(_logArea, e.getX(), e.getY());
 				}
 			}
 		});
 
-		_textField.requestFocus();
+		_commandInputField.requestFocus();
 
 	}
 
 	protected void insertText(String text, AttributeSet set) {
 		try {
-			_textArea.getDocument().insertString(_textArea.getDocument().getLength(), text, set);
+			_logArea.getDocument().insertString(_logArea.getDocument().getLength(), text, set);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
 	}
 
 	protected void setEndSelection() {
-		_textArea.setSelectionStart(_textArea.getDocument().getLength());
-		_textArea.setSelectionEnd(_textArea.getDocument().getLength());
+		_logArea.setSelectionStart(_logArea.getDocument().getLength());
+		_logArea.setSelectionEnd(_logArea.getDocument().getLength());
 	}
 
 	public void lostOwnership(Clipboard clipboard, Transferable contents) {
@@ -337,6 +513,6 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 	public void setCursor(Cursor cursor) {
 		super.setCursor(cursor);
-		_textArea.setCursor(cursor);
+		_logArea.setCursor(cursor);
 	}
 }
