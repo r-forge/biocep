@@ -82,7 +82,7 @@ public class ConsoleDialog extends JFrame {
 				return log;
 
 			}
-		}));
+		},"Evaluate",true,null));
 
 		setSize(new Dimension(540, 430));
 

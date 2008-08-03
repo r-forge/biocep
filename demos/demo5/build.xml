@@ -50,7 +50,7 @@
 	</target>
 
 				
-	<target name="demodb">		
+	<target name="demodb" depends="initializeProperties">		
 		<antcall target="db">						
 					<param name="naming.mode" value="${demo.naming.mode}"/>
 					<param name="db.type" value="${demo.db.type}"/>
@@ -63,7 +63,7 @@
 		</antcall>			
 	</target>		
 			
-	<target name="demotop">
+	<target name="demotop" depends="initializeProperties">
 		<antcall target="top">						
 					<param name="naming.mode" value="${demo.naming.mode}"/>
 					<param name="db.type" value="${demo.db.type}"/>
@@ -75,7 +75,7 @@
 		</antcall>			
 	</target>	
 	
-	<target name="demonode">
+	<target name="demonode" depends="initializeProperties">
 		<antcall target="node">						
 					<param name="naming.mode" value="${demo.naming.mode}"/>
 					<param name="db.type" value="${demo.db.type}"/>
@@ -87,7 +87,7 @@
 		</antcall>			
 	</target>	
 	
-	<target name="demogen" depends="compile">		
+	<target name="demogen" depends="initializeProperties,compile">		
 			<mkdir dir="${demo.generatedir}" />
 		
 			<java classname="uk.ac.ebi.microarray.pools.PropertiesGenerator" fork="true" >
@@ -211,7 +211,7 @@
 		
 	</target>
 	
-	<target name="demodeploy" >
+	<target name="demodeploy" depends="initializeProperties">
 			
 		<antcall target="tomcat.shutdown">
 			<param name="spawn" value="true"/>

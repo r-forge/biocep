@@ -38,7 +38,7 @@ public class ClientPythonConsoleView extends DynamicView {
 					_rgui.getRLock().unlock();
 				}
 			}
-		});
+		}, "Python Expression", true, null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 

@@ -20,7 +20,7 @@
 <project name="demo1" default="compile" basedir="../.." >	
 	<import file="../../build.xml"/>
 			
-	<target name="demogen" depends="compile">
+	<target name="demogen" depends="initializeProperties,compile">
 		<mkdir dir="demos/demo1/distrib" />
 		<antcall target="gen">
 			<param name="dir" value="demos/demo1/script"/>

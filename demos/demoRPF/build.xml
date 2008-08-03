@@ -43,13 +43,13 @@
 			<property name="demo.client.mainclass" value="client.ComputePi" />
 			<property name="demo.client.defaultpoolname" value="R" />
 			
-			<target name="derbyrun">
+			<target name="derbyrun" depends="initializeProperties">
 				<antcall target="derby.startup">					
 					<param name="derby.port" value="${db.port}"/>
 				</antcall>	
 			</target>
 		
-			<target name="demodb">		
+			<target name="demodb" depends="initializeProperties">		
 				<antcall target="db">						
 					<param name="db.driver" value="${demo.db.driver}"/>
 					<param name="db.url" value="${demo.db.url}" />
@@ -59,7 +59,7 @@
 				</antcall>			
 			</target>		
 			
-			<target name="demotop">
+			<target name="demotop" depends="initializeProperties">
 				<antcall target="top">						
 					<param name="db.driver" value="${demo.db.driver}"/>
 					<param name="db.url" value="${demo.db.url}" />
@@ -68,7 +68,7 @@
 				</antcall>			
 			</target>	
 		
-			<target name="demonode">
+			<target name="demonode" depends="initializeProperties">
 				<antcall target="node">						
 					<param name="db.driver" value="${demo.db.driver}"/>
 					<param name="db.url" value="${demo.db.url}" />
@@ -77,7 +77,7 @@
 				</antcall>			
 			</target>	
 		
-			<target name="demoserver" depends="setWinAwareProps">		
+			<target name="demoserver" depends="initializeProperties">		
 				<antcall target="server">					
 					<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
 					<param name="servant.codebase" value="file://${windows.root.slash}${demo.server.jar}"/>
@@ -91,7 +91,7 @@
 				</antcall>			
 			</target>
 		
-			<target name="democompile">
+			<target name="democompile" depends="initializeProperties">
 				
 				<javac srcdir="${demo.server.src}" destdir="${demo.server.bin}" debug="true" source="1.5" target="1.5">
 					<classpath>			
@@ -122,7 +122,7 @@
 				
 			</target>
 				
-			<target name="demorun" depends="democompile">
+			<target name="demorun" depends="initializeProperties,democompile">
 				
 				<path id="demo.client.path">		
 					<pathelement path="${demo.client.jar}"/>							

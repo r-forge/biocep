@@ -33,7 +33,7 @@
 		</antcall>			
 	</target>
 	
-	<target name="demorun">		
+	<target name="demorun" depends="initializeProperties">		
 		
 		<javac srcdir="demos/demo6/src" destdir="demos/demo6/src" debug="true" source="1.5" target="1.5">
 			<classpath>

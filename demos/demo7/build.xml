@@ -21,7 +21,7 @@
 	
 	<import file="../../build.xml"/>
 	
-	<target name="demogen" depends="compile">						
+	<target name="demogen" depends="initializeProperties,compile">						
 		<mkdir dir="demos/demo7/distrib" />		
 		<antcall target="gen">
 			<param name="dir" value="demos/demo7/script"/>
@@ -67,7 +67,7 @@
 		</antcall>		
 	</target>
 				
-	<target name="demorun">
+	<target name="demorun" depends="initializeProperties">
 		
 		<javac srcdir="demos/demo7/src" destdir="demos/demo7/src" debug="true" source="1.5" target="1.5">
 			<classpath>
