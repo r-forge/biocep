@@ -196,7 +196,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 		boolean isIE=request.getHeader("User-Agent").toLowerCase().indexOf("msie")!=-1;
 
 		String resultBuffer=PoolUtils.bytesToHex(pdf);					
-		int b=300;
+		int b=1000;
 		int d=resultBuffer.length()/b;
 		int m=resultBuffer.length()%b;					
 		
