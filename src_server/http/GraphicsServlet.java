@@ -121,17 +121,28 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 				}
 				
 				
+				response.setDateHeader("Last-Modified ",System.currentTimeMillis());
 				if (type.equals("svg")) {					
-					response.setContentType("image/svg+xml");
+					
+					response.setContentType("image/svg+xml");					
 					Vector<String> svg=r.getSvg(command,400,400);
 					for (int i=0; i<svg.size(); ++i) {
 						response.getOutputStream().println(svg.elementAt(i));
-					}					
+					}		
+					response.getOutputStream().flush();
+					response.getOutputStream().close();
+					
 				} else if (type.equals("pdf")) {		
+					
 					response.setContentType("application/pdf");
-					response.getOutputStream().write(r.getPdf(command, 400,400));					
+					response.getOutputStream().write(r.getPdf(command, 400,400));
+					response.getOutputStream().flush();
+					response.getOutputStream().close();
+					
 				} else if (type.equals("pdfapplet")) {
+					
 					pdfAppletHtml(request, response, r.getPdf(command, 400,400));
+					
 				} else {
 					try {
 					device = r.newDevice(width, height);	
@@ -145,7 +156,9 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
-					}					
+					}
+					response.getOutputStream().flush();
+					response.getOutputStream().close();
 				}
 
 				return;
@@ -173,7 +186,8 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 		response.getWriter().println("<html><head></head><body>");
 		response.getWriter().println(log);
 		response.getWriter().println("</body></html>");
-		response.flushBuffer();
+		response.getWriter().flush();
+		response.getWriter().close();
 
 	}
 
@@ -220,7 +234,11 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 			}
 		}
 				
-		response.getWriter().println("</object><!--[if !IE]> close outer object --></object><!--<![endif]--></div></center></body></html>");							
+		response.getWriter().println("</object><!--[if !IE]> close outer object --></object><!--<![endif]--></div></center></body></html>");
+		response.getWriter().flush();
+		response.getWriter().close();
+		
+		
 	
 	}
 	
