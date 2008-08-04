@@ -79,8 +79,8 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					height = 400;
 
 				String command = request.getParameter("expression");
-				if (command == null) {					
-					command = "hist(rnorm(100))";					
+				if (command == null) {
+					command = "hist(rnorm(100))";
 				}
 
 				String type = null;
@@ -88,68 +88,65 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					type = request.getParameter("type");
 				} catch (Exception e) {
 				}
-				
+
 				if (type == null)
 					type = "jpg";
-				
-				
+
 				Boolean wait = null;
 				try {
 					wait = new Boolean(request.getParameter("wait"));
 				} catch (Exception e) {
 				}
-				if (wait == null) wait = false;
-				
-				
+				if (wait == null)
+					wait = false;
+
 				if (wait) {
 					r = (RServices) spFactory.getServantProvider().borrowServantProxy();
 				} else {
 					r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
 				}
-				
+
 				if (r == null) {
 					result = new NoServantAvailableException();
 					break;
 				}
-				
-				
-				if (request.getParameter("demo")!=null) {
+
+				if (request.getParameter("demo") != null) {
 					System.out.println(Arrays.toString(r.listDemos()));
-					String demoName=r.listDemos()[Integer.decode(request.getParameter("demo"))];					
-					command=r.getDemoSource(demoName).toString();
+					String demoName = r.listDemos()[Integer.decode(request.getParameter("demo"))];
+					command = r.getDemoSource(demoName).toString();
 					System.out.println(command);
 				}
-				
-				
-				response.setDateHeader("Last-Modified ",System.currentTimeMillis());
-				if (type.equals("svg")) {					
-					
-					response.setContentType("image/svg+xml");					
-					Vector<String> svg=r.getSvg(command,400,400);
-					for (int i=0; i<svg.size(); ++i) {
+
+				response.setDateHeader("Last-Modified ", System.currentTimeMillis());
+				if (type.equals("svg")) {
+					response.setContentType("image/svg+xml");
+					Vector<String> svg = r.getSvg(command, width, height);
+					for (int i = 0; i < svg.size(); ++i) {
 						response.getOutputStream().println(svg.elementAt(i));
-					}		
+					}
 					response.getOutputStream().flush();
 					response.getOutputStream().close();
-					
-				} else if (type.equals("pdf")) {		
-					
+
+				} else if (type.equals("pdf")) {
+
 					response.setContentType("application/pdf");
-					response.getOutputStream().write(r.getPdf(command, 400,400));
+					response.getOutputStream().write(r.getPdf(command, width, height));
 					response.getOutputStream().flush();
 					response.getOutputStream().close();
-					
+
 				} else if (type.equals("pdfapplet")) {
-					
-					pdfAppletHtml(request, response, r.getPdf(command, 400,400));
-					
+
+					pdfAppletHtml(request, response, r.getPdf(command, width, height));
+
 				} else {
 					try {
-					device = r.newDevice(width, height);	
-					r.sourceFromBuffer(new StringBuffer(command));
-					BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects());
-					response.setContentType("image/jpeg");
-					ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
+						device = r.newDevice(width, height);
+						r.sourceFromBuffer(new StringBuffer(command));
+						BufferedImage bufferedImage = Java2DUtils
+								.getBufferedImage(new Point(0, 0), new Dimension(width, height), device.popAllGraphicObjects());
+						response.setContentType("image/jpeg");
+						ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
 					} finally {
 						try {
 							device.dispose();
@@ -167,7 +164,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 				result = e;
 				break;
 			} finally {
-				
+
 				spFactory.getServantProvider().returnServantProxy(r);
 			}
 
@@ -191,33 +188,35 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 
 	}
 
-	private static void pdfAppletHtml(HttpServletRequest request, HttpServletResponse response, byte[] pdf)throws IOException {
+	private static void pdfAppletHtml(HttpServletRequest request, HttpServletResponse response, byte[] pdf) throws IOException {
 
-		boolean isIE=request.getHeader("User-Agent").toLowerCase().indexOf("msie")!=-1;
+		boolean isIE = request.getHeader("User-Agent").toLowerCase().indexOf("msie") != -1;
 
-		String resultBuffer=PoolUtils.bytesToHex(pdf);					
-		int b=1000;
-		int d=resultBuffer.length()/b;
-		int m=resultBuffer.length()%b;					
-		
-		
-		response.setContentType("text/html");					
-		response.getWriter().println("<html><head></head><body><center>");					
+		String resultBuffer = PoolUtils.bytesToHex(pdf);
+		int b = 1024*64;
+		int d = resultBuffer.length() / b;
+		int m = resultBuffer.length() % b;
+
+		response.setContentType("text/html");
+		response.getWriter().println("<html><head></head><body><center>");
 		response.getWriter().println("<!--[if !IE]> Firefox and others will use outer object -->");
-		response.getWriter().println("<object align=\"center\" 	height=99%  width=99% classid=\"java:applet.PDFViewer\" archive=\"appletlibs/PDFRenderer_unsigned.jar,appletlibs/pdfviewer_unsigned.jar\" type = \"application/x-java-applet;version=1.5\" pluginspage = \"http://java.sun.com/products/plugin/index.html#download\"");
+		response
+				.getWriter()
+				.println(
+						"<object align=\"center\" 	height=99%  width=99% classid=\"java:applet.PDFViewer\" archive=\"appletlibs/PDFRenderer_unsigned.jar,appletlibs/pdfviewer_unsigned.jar\" type = \"application/x-java-applet;version=1.5\" pluginspage = \"http://java.sun.com/products/plugin/index.html#download\"");
 		response.getWriter().println("	embedded = \"true\"");
-		
+
 		if (!isIE) {
-			response.getWriter().println("	pdfhex.block.number = \""+(m==0?d:d+1)+"\"");
-			for (int i=0; i<d;++i) {
-				response.getWriter().println("	pdfhex.block."+i+" = \""+resultBuffer.substring(i*b,i*b+b)+"\"");												
+			response.getWriter().println("	pdfhex.block.number = \"" + (m == 0 ? d : d + 1) + "\"");
+			for (int i = 0; i < d; ++i) {
+				response.getWriter().println("	pdfhex.block." + i + " = \"" + resultBuffer.substring(i * b, i * b + b) + "\"");
 			}
-			if (m>0) {
-				response.getWriter().println("	pdfhex.block."+d+" = \""+resultBuffer.substring(d*b,resultBuffer.length())+"\"");
+			if (m > 0) {
+				response.getWriter().println("	pdfhex.block." + d + " = \"" + resultBuffer.substring(d * b, resultBuffer.length()) + "\"");
 			}
 		}
-		 
-		response.getWriter().println("><!--<![endif]--><!-- MSIE (Microsoft Internet Explorer) will use inner object -->"); 
+
+		response.getWriter().println("><!--<![endif]--><!-- MSIE (Microsoft Internet Explorer) will use inner object -->");
 		response.getWriter().println("<object align=\"center\" height=99% width=99% classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\">");
 		response.getWriter().println("<param name=\"archive\" value=\"appletlibs/PDFRenderer_unsigned.jar,appletlibs/pdfviewer_unsigned.jar\">");
 		response.getWriter().println("<param name=\"code\" value=\"applet.PDFViewer\">");
@@ -225,23 +224,22 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 		response.getWriter().println("<param name = \"embedded\" value = \"true\">");
 
 		if (isIE) {
-			response.getWriter().println("<param name = \"pdfhex.block.number\" value = \""+(m==0?d:d+1)+"\">");
-			for (int i=0; i<d;++i) {
-				response.getWriter().println("<param name = \""+"pdfhex.block."+i+"\" value = \""+resultBuffer.substring(i*b,i*b+b)+"\">");												
+			response.getWriter().println("<param name = \"pdfhex.block.number\" value = \"" + (m == 0 ? d : d + 1) + "\">");
+			for (int i = 0; i < d; ++i) {
+				response.getWriter().println("<param name = \"" + "pdfhex.block." + i + "\" value = \"" + resultBuffer.substring(i * b, i * b + b) + "\">");
 			}
-			if (m>0) {
-				response.getWriter().println("<param name = \""+"pdfhex.block."+d+"\" value = \""+resultBuffer.substring(d*b,resultBuffer.length())+"\">");
+			if (m > 0) {
+				response.getWriter().println(
+						"<param name = \"" + "pdfhex.block." + d + "\" value = \"" + resultBuffer.substring(d * b, resultBuffer.length()) + "\">");
 			}
 		}
-				
+
 		response.getWriter().println("</object><!--[if !IE]> close outer object --></object><!--<![endif]--></div></center></body></html>");
 		response.getWriter().flush();
 		response.getWriter().close();
-		
-		
-	
+
 	}
-	
+
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
