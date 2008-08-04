@@ -15,34 +15,19 @@
  * limitations under the License.
  */
 
-import java.awt.BorderLayout;
-import java.awt.MenuBar;
-import java.awt.event.ActionListener;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Vector;
 
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-
-import org.rosuda.ibase.RemoteUtil;
-import org.rosuda.ibase.SMarkerInterface;
-import org.rosuda.ibase.SVarInterface;
-import org.rosuda.ibase.SVarInterfaceRemote;
+import org.bioconductor.packages.biobase.ExpressionSet;
+import org.bioconductor.packages.rGlobalEnv.Point;
+import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
+import org.bioconductor.packages.rservices.RNamedArgument;
+import org.bioconductor.packages.rservices.RNumeric;
+import org.bioconductor.packages.vsn.Vsn;
+import org.bioconductor.packages.vsn.vsnFunction;
 import org.rosuda.ibase.SVarInterfaceRemoteImpl;
-import org.rosuda.ibase.SVarSetInterface;
-import org.rosuda.ibase.plots.HistCanvas;
-import org.rosuda.ibase.plots.ScatterCanvas;
-import org.rosuda.ibase.toolkit.FrameDevice;
-import org.rosuda.ibase.toolkit.TFrame;
-import org.rosuda.iplots.Framework;
-
-import com.sun.codemodel.JLabel;
-
 import remoting.RServices;
 import server.DirectJNI;
 
@@ -52,88 +37,16 @@ import server.DirectJNI;
 public class DirectPackUsage {
 	private static SVarInterfaceRemoteImpl svarImpl;
 	public static void main(String args[]) throws Exception {
-
-		RServices rs = DirectJNI.getInstance().getRServices();
-
-
-		System.out.println(rs.consoleSubmit("s <- iset.new('iris',list(a=rnorm(1000), b=rnorm(1000)))"));
-		//System.out.println(rs.consoleSubmit("ihist(iris$Species)"));
-		//System.out.println(rs.consoleSubmit("iplot(iris$Species)"));
-		
-		
-	
-		SVarSetInterface set=org.rosuda.iplots.Framework.F.getCurrentSet();
-		SVarInterface var=set.byName("a");
-		SVarInterface var2=set.byName("b");
-		
-		
-				
-		SVarInterface varProxy=RemoteUtil.getSVarWrapper(var.getRemote());
-		SVarInterface varProxy2=RemoteUtil.getSVarWrapper(var2.getRemote());
-		SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(set.getMarker().getRemote());
-		
-		JFrame f=new JFrame("test");
-
-		
-		HistCanvas histCanvas=new HistCanvas(HistCanvas.SWINGGrDevID,new JFrame(),varProxy,markerProxy);				
-		//ScatterCanvas histCanvas=new ScatterCanvas(HistCanvas.SWINGGrDevID,new JFrame(),varProxy,varProxy2,markerProxy);
-		
-		
-		/*
-		MenuBar mb=histCanvas.getMenuBar();
-		JMenuBar jmb=new JMenuBar();
-		for (int i=0; i<mb.getMenuCount(); ++i) {
-			JMenu m=new JMenu(mb.getMenu(i).getLabel());
-			for (int j=0; j<mb.getMenu(i).getItemCount(); ++j) {
-				JMenuItem item=new JMenuItem(mb.getMenu(i).getItem(j).getLabel());				
-				ActionListener[] listeners=mb.getMenu(i).getItem(j).getActionListeners();
-				if (listeners.length>0){
-					item.addActionListener(listeners[0]);
-				}				
-				item.setActionCommand(mb.getMenu(i).getItem(j).getActionCommand());				
-				
-				m.add(item);
-			
-			}
-			jmb.add(m);
-		}
-		*/
-		
-		JPanel pa=new JPanel(new BorderLayout());
-		pa.add(histCanvas.getComponent(),BorderLayout.CENTER);
-		//pa.add(jmb,BorderLayout.NORTH);
-		f.add(pa);		
-		histCanvas.updateObjects();
-		markerProxy.addDepend(histCanvas);
-		f.pack();
-		f.setVisible(true);
-		f.setSize(400,400);
-	
-		
-		
-		/*
-		
-		System.exit(0);
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		System.setErr(new PrintStream(System.out));
 		DirectJNI.init();
-		RServices r = DirectJNI.getInstance().getRServices();
+		RServices r = DirectJNI.getInstance().getRServices();		
 		
-		r.evaluate("data(kidney)");
-		
-		//r.callAndGetObjectName(methodName, args)
-		
-		
-		System.exit(0);
-		
+		PrintWriter pw=new PrintWriter("J:/test.svg");
+		Vector<String> v=r.getSvg("plot(rnorm(100))", 400, 400);
+		for (int i= 0; i<v.size(); ++i) {
+			pw.println(v.elementAt(i));
+		}
+		pw.close();
 		
 		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));
 		rGlobalEnvFunction globalPack = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"));
@@ -156,11 +69,50 @@ public class DirectPackUsage {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		
-		System.exit(0);
-		*/
-	}
-
-
+		System.exit(0);	
+	}	
 }
+
+
+/*
+System.out.println(rs.consoleSubmit("s <- iset.new('iris',list(a=rnorm(1000), b=rnorm(1000)))"));
+//System.out.println(rs.consoleSubmit("ihist(iris$Species)"));
+//System.out.println(rs.consoleSubmit("iplot(iris$Species)"));
+SVarSetInterface set=org.rosuda.iplots.Framework.F.getCurrentSet();
+SVarInterface var=set.byName("a");
+SVarInterface var2=set.byName("b");
+SVarInterface varProxy=RemoteUtil.getSVarWrapper(var.getRemote());
+SVarInterface varProxy2=RemoteUtil.getSVarWrapper(var2.getRemote());
+SMarkerInterface markerProxy=RemoteUtil.getSMarkerWrapper(set.getMarker().getRemote());
+JFrame f=new JFrame("test");
+HistCanvas histCanvas=new HistCanvas(HistCanvas.SWINGGrDevID,new JFrame(),varProxy,markerProxy);				
+//ScatterCanvas histCanvas=new ScatterCanvas(HistCanvas.SWINGGrDevID,new JFrame(),varProxy,varProxy2,markerProxy);
+MenuBar mb=histCanvas.getMenuBar();
+JMenuBar jmb=new JMenuBar();
+for (int i=0; i<mb.getMenuCount(); ++i) {
+	JMenu m=new JMenu(mb.getMenu(i).getLabel());
+	for (int j=0; j<mb.getMenu(i).getItemCount(); ++j) {
+		JMenuItem item=new JMenuItem(mb.getMenu(i).getItem(j).getLabel());				
+		ActionListener[] listeners=mb.getMenu(i).getItem(j).getActionListeners();
+		if (listeners.length>0){
+			item.addActionListener(listeners[0]);
+		}				
+		item.setActionCommand(mb.getMenu(i).getItem(j).getActionCommand());				
+		
+		m.add(item);
+	
+	}
+	jmb.add(m);
+}
+JPanel pa=new JPanel(new BorderLayout());
+pa.add(histCanvas.getComponent(),BorderLayout.CENTER);
+//pa.add(jmb,BorderLayout.NORTH);
+f.add(pa);		
+histCanvas.updateObjects();
+markerProxy.addDepend(histCanvas);
+f.pack();
+f.setVisible(true);
+f.setSize(400,400);
+System.exit(0);
+*/
+

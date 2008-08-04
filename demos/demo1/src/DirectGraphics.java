@@ -22,8 +22,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import remoting.RServices;
 import server.DirectJNI;
-import uk.ac.ebi.microarray.pools.db.monitor.ConsoleDialog;
-import uk.ac.ebi.microarray.pools.db.monitor.ServantStatus;
 import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
 import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 
