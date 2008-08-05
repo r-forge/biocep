@@ -426,7 +426,9 @@ public class ServerManager {
 				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("R_HOME", rpath);
-				env.put("R_LIBS", rlibs + (System.getenv("R_LIBS") != null ? System.getProperty("path.separator") + System.getenv("R_LIBS") : ""));
+				String R_LIBS=rlibs+ System.getProperty("path.separator") + (System.getenv("R_LIBS") != null ? System.getProperty("path.separator") + System.getenv("R_LIBS") : "");
+				System.out.println("R_LIBS:"+R_LIBS);
+				env.put("R_LIBS", R_LIBS );
 				for (String k : env.keySet()) {
 					envVector.add(k + "=" + env.get(k));
 				}
