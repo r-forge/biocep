@@ -34,7 +34,7 @@ public class DirectGraphicsRmi {
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new YesSecurityManager());
 		}
-		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
+		final RServices r = ((RServices) Naming.lookup("toto"));
 
 		JPanel panel = new JGDPanelPop(r.newDevice(400, 500));
 		//RemotePanel panel=r.getPanel(450, 600);

@@ -27,7 +27,7 @@ import java.util.Properties;
 public class PropertiesGenerator {
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("args:"+Arrays.toString(args));
+		//System.out.println("args:"+Arrays.toString(args));
 		String fileName = args[0];
 		String[][] key_value = new String[args.length - 1][2];
 		for (int i = 1; i < args.length; ++i) {
