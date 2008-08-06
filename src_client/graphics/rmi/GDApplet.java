@@ -23,6 +23,7 @@ import graphics.rmi.action.CoupleToCurrentDeviceAction;
 import graphics.rmi.action.FitDeviceAction;
 import graphics.rmi.action.SaveDeviceAsJpgAction;
 import graphics.rmi.action.SaveDeviceAsPdfAction;
+import graphics.rmi.action.SaveDeviceAsPdfAppletAction;
 import graphics.rmi.action.SaveDeviceAsPngAction;
 import graphics.rmi.action.SaveDeviceAsSvgAction;
 import graphics.rmi.action.SetCurrentDeviceAction;
@@ -161,7 +162,6 @@ import remoting.RConsoleActionListener;
 import remoting.RServices;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
-import server.DirectJNI;
 import server.LocalHttpServer;
 import server.LocalRmiRegistry;
 import server.NoMappingAvailable;
@@ -674,7 +674,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									new FitDeviceAction(GDApplet.this, d), null, new SnapshotDeviceAction(GDApplet.this),
 									new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
 									new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this),
-									new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), null,
+									new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null,
 									new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, d), null,
 									new CoupleToCurrentDeviceAction(GDApplet.this)
 
@@ -714,7 +714,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this),
 										new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
 										new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
-										new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+										new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
 										new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) },
 										getRLock(), getConsoleLogger());
 
@@ -2675,7 +2675,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
 							new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
 							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
-							new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+							new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
 							new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(),
 							getConsoleLogger());
 
@@ -2744,7 +2744,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
 							new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
 							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
-							new SaveDeviceAsPdfAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+							new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
 							new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(),
 							getConsoleLogger());
 
