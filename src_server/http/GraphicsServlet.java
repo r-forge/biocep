@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -125,19 +126,15 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					for (int i = 0; i < svg.size(); ++i) {
 						response.getOutputStream().println(svg.elementAt(i));
 					}
-					response.getOutputStream().flush();
-					response.getOutputStream().close();
-
 				} else if (type.equals("pdf")) {
 
 					response.setContentType("application/pdf");
 					response.getOutputStream().write(r.getPdf(command, width, height));
-					response.getOutputStream().flush();
-					response.getOutputStream().close();
 
 				} else if (type.equals("pdfapplet")) {
-
-					pdfAppletHtml(request, response, r.getPdf(command, width, height));
+					response.setContentType("text/html");
+					boolean isIE=request.getHeader("User-Agent").toLowerCase().indexOf("msie") != -1;
+					pdfAppletHtml(response.getWriter(), r.getPdf(command, width, height), isIE, !isIE);
 
 				} else {
 					try {
@@ -154,8 +151,6 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 							ex.printStackTrace();
 						}
 					}
-					response.getOutputStream().flush();
-					response.getOutputStream().close();
 				}
 
 				return;
@@ -183,61 +178,47 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 		response.getWriter().println("<html><head></head><body>");
 		response.getWriter().println(log);
 		response.getWriter().println("</body></html>");
-		response.getWriter().flush();
-		response.getWriter().close();
-
 	}
 
-	private static void pdfAppletHtml(HttpServletRequest request, HttpServletResponse response, byte[] pdf) throws IOException {
-
-		boolean isIE = request.getHeader("User-Agent").toLowerCase().indexOf("msie") != -1;
+	public static void pdfAppletHtml(PrintWriter pw, byte[] pdf, boolean embedForIE, boolean embedForMozilla) throws IOException {
 
 		String resultBuffer = PoolUtils.bytesToHex(pdf);
 		int b = 1024*64;
 		int d = resultBuffer.length() / b;
 		int m = resultBuffer.length() % b;
+		
+		pw.println("<html><head></head><body><center>");
+		pw.println("<!--[if !IE]> Firefox and others will use outer object -->");
+		pw.println("<object align=\"center\" 	height=99%  width=99% classid=\"java:applet.PDFViewer\" archive=\"appletlibs/PDFRenderer_unsigned.jar,appletlibs/pdfviewer_unsigned.jar\" type = \"application/x-java-applet;version=1.5\" pluginspage = \"http://java.sun.com/products/plugin/index.html#download\"");
+		pw.println("	embedded = \"true\"");
 
-		response.setContentType("text/html");
-		response.getWriter().println("<html><head></head><body><center>");
-		response.getWriter().println("<!--[if !IE]> Firefox and others will use outer object -->");
-		response
-				.getWriter()
-				.println(
-						"<object align=\"center\" 	height=99%  width=99% classid=\"java:applet.PDFViewer\" archive=\"appletlibs/PDFRenderer_unsigned.jar,appletlibs/pdfviewer_unsigned.jar\" type = \"application/x-java-applet;version=1.5\" pluginspage = \"http://java.sun.com/products/plugin/index.html#download\"");
-		response.getWriter().println("	embedded = \"true\"");
-
-		if (!isIE) {
-			response.getWriter().println("	pdfhex.block.number = \"" + (m == 0 ? d : d + 1) + "\"");
+		if (embedForMozilla) {
+			pw.println("	pdfhex.block.number = \"" + (m == 0 ? d : d + 1) + "\"");
 			for (int i = 0; i < d; ++i) {
-				response.getWriter().println("	pdfhex.block." + i + " = \"" + resultBuffer.substring(i * b, i * b + b) + "\"");
+				pw.println("	pdfhex.block." + i + " = \"" + resultBuffer.substring(i * b, i * b + b) + "\"");
 			}
 			if (m > 0) {
-				response.getWriter().println("	pdfhex.block." + d + " = \"" + resultBuffer.substring(d * b, resultBuffer.length()) + "\"");
+				pw.println("	pdfhex.block." + d + " = \"" + resultBuffer.substring(d * b, resultBuffer.length()) + "\"");
 			}
 		}
+		pw.println("><!--<![endif]--><!-- MSIE (Microsoft Internet Explorer) will use inner object -->");
+		pw.println("<object align=\"center\" height=99% width=99% classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\">");
+		pw.println("<param name=\"archive\" value=\"appletlibs/PDFRenderer_unsigned.jar,appletlibs/pdfviewer_unsigned.jar\">");
+		pw.println("<param name=\"code\" value=\"applet.PDFViewer\">");
+		pw.println("<param name = \"type\" value = \"application/x-java-applet;version=1.5\">");
+		pw.println("<param name = \"embedded\" value = \"true\">");
 
-		response.getWriter().println("><!--<![endif]--><!-- MSIE (Microsoft Internet Explorer) will use inner object -->");
-		response.getWriter().println("<object align=\"center\" height=99% width=99% classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\">");
-		response.getWriter().println("<param name=\"archive\" value=\"appletlibs/PDFRenderer_unsigned.jar,appletlibs/pdfviewer_unsigned.jar\">");
-		response.getWriter().println("<param name=\"code\" value=\"applet.PDFViewer\">");
-		response.getWriter().println("<param name = \"type\" value = \"application/x-java-applet;version=1.5\">");
-		response.getWriter().println("<param name = \"embedded\" value = \"true\">");
-
-		if (isIE) {
-			response.getWriter().println("<param name = \"pdfhex.block.number\" value = \"" + (m == 0 ? d : d + 1) + "\">");
+		if (embedForIE) {
+			pw.println("<param name = \"pdfhex.block.number\" value = \"" + (m == 0 ? d : d + 1) + "\">");
 			for (int i = 0; i < d; ++i) {
-				response.getWriter().println("<param name = \"" + "pdfhex.block." + i + "\" value = \"" + resultBuffer.substring(i * b, i * b + b) + "\">");
+				pw.println("<param name = \"" + "pdfhex.block." + i + "\" value = \"" + resultBuffer.substring(i * b, i * b + b) + "\">");
 			}
 			if (m > 0) {
-				response.getWriter().println(
+				pw.println(
 						"<param name = \"" + "pdfhex.block." + d + "\" value = \"" + resultBuffer.substring(d * b, resultBuffer.length()) + "\">");
 			}
 		}
-
-		response.getWriter().println("</object><!--[if !IE]> close outer object --></object><!--<![endif]--></div></center></body></html>");
-		response.getWriter().flush();
-		response.getWriter().close();
-
+		pw.println("</object><!--[if !IE]> close outer object --></object><!--<![endif]--></div></center></body></html>");
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

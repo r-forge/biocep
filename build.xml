@@ -50,10 +50,15 @@
 			<then>
 				<property name="R_LIB_PATH" value="${env.R_HOME}/bin"/>
 				<property name="windows.root.slash" value="/"/>
+				<if><isset property="env.PATH"/>
+					<then><property name="SYSTEM_PATH" value="${env.PATH}"/></then>
+					<else><property name="SYSTEM_PATH" value="${env.Path}"/></else>
+				</if>						
 			</then>
 			<else>
 				<property name="R_LIB_PATH" value="${env.R_HOME}/lib"/>
 				<property name="windows.root.slash" value=""/>
+				<property name="SYSTEM_PATH" value="${env.PATH}"/>
 			</else>
 		</if>
 		
@@ -139,7 +144,7 @@
 
 			</classpath>
 			
-			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="PATH" path="${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg value="-Dfile=${file}"/>
 			<jvmarg value="-Ddir=${dir}"/>
@@ -379,7 +384,7 @@
 				
 			</classpath>
 			
-			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="PATH" path="${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg
 			value="-Djava.library.path=${JRI_LIB_PATH}"/>
@@ -862,7 +867,8 @@
 				
 			</classpath>
 			
-			<env key="Path" path="${R_LIB_PATH}"/>
+
+			<env key="PATH" path="${R_LIB_PATH}${path.separator}${SYSTEM_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
@@ -945,7 +951,7 @@
 				
 			</classpath>
 			
-			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="PATH" path="${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg	value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			
@@ -1100,7 +1106,7 @@
 				
 			</classpath>
 			
-			<env key="Path" path="${R_LIB_PATH}"/>
+			<env key="PATH" path="${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
@@ -1226,7 +1232,7 @@
 					
 				</classpath>
 				
-				<env key="Path" path="${R_LIB_PATH}"/>
+				<env key="PATH" path="${R_LIB_PATH}"/>
 				<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 				<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
 				<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
