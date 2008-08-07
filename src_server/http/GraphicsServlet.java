@@ -20,9 +20,15 @@ import graphics.pop.GDDevice;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
@@ -119,6 +125,27 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					System.out.println(command);
 				}
 
+				if (request.getParameter("url") != null) {
+					
+					System.out.println("url:"+request.getParameter("url"));
+					StringBuffer commandBuffer=new StringBuffer();
+					Enumeration<String> allParamnames=request.getParameterNames();
+					while (allParamnames.hasMoreElements()) {
+						String name=allParamnames.nextElement();
+						if (name.startsWith("input_")) {							
+							commandBuffer.append(name.substring("input_".length())+"='"+request.getParameter(name)+"'\n");
+						}
+					}
+									
+					URLConnection urlC = new URL(request.getParameter("url")).openConnection();
+					BufferedReader br=new BufferedReader(new InputStreamReader(urlC.getInputStream()));
+					String line=null;					
+					while((line=br.readLine())!=null) {commandBuffer.append(line);commandBuffer.append('\n');}
+					command=commandBuffer.toString();
+					System.out.println(command);
+				}
+				
+				
 				response.setDateHeader("Last-Modified ", System.currentTimeMillis());
 				if (type.equals("svg")) {
 					response.setContentType("image/svg+xml");
@@ -130,6 +157,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 
 					response.setContentType("application/pdf");
 					response.getOutputStream().write(r.getPdf(command, width, height));
+					System.out.println(r.getStatus());
 
 				} else if (type.equals("pdfapplet")) {
 					response.setContentType("text/html");
@@ -226,6 +254,17 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 	}
 
 	public void init(ServletConfig sConfig) throws ServletException {
+
+	}
+	
+	
+	static public void main(String[] args) throws Exception{
+		URLConnection urlC = new URL("http://www.biocep.net/kaleidoscope/index.html").openConnection();
+		BufferedReader br=new BufferedReader(new InputStreamReader(urlC.getInputStream()));
+		String line=null;
+		StringBuffer commandBuffer=new StringBuffer();
+		while((line=br.readLine())!=null) {commandBuffer.append(line);commandBuffer.append('\n');}
+		System.out.println(commandBuffer);
 
 	}
 
