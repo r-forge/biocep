@@ -18,6 +18,8 @@
 import graphics.pop.GDDevice;
 import graphics.rmi.JGDPanelPop;
 import java.awt.BorderLayout;
+import java.awt.Color;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import remoting.RServices;
@@ -72,7 +74,7 @@ public class DirectGraphics {
 				}
 				return result;
 			}
-		}, "Evaluate",true,null);
+		}, "Evaluate",Color.black,true,null);
 
 		JFrame fconsole = new JFrame();
 		fconsole.getContentPane().setLayout(new BorderLayout());

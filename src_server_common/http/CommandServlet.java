@@ -110,7 +110,10 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 			final String command = request.getParameter("method");
 			do {
 
-				if (command.equals("logon")) {
+				if (command.equals("ping")) {
+					result="pong";
+					break;					
+				} else  if (command.equals("logon")) {
 
 					session = request.getSession(false);
 					if (session != null) {
@@ -339,13 +342,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
 					session.setAttribute("PROCESS_ID", r.getProcessId());
 					session.setAttribute("JOB_ID", r.getJobId());
-					
-					try {
-						session.setAttribute("REGISTRY", ServantProviderFactory.getFactory().getServantProvider().getRegistry());
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					
+															
 					if (privateName != null)
 						session.setAttribute("PRIVATE_NAME", privateName);
 

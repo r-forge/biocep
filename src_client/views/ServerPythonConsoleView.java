@@ -3,6 +3,7 @@ package views;
 import graphics.rmi.RGui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.Icon;
 import javax.swing.JPanel;
@@ -34,7 +35,7 @@ public class ServerPythonConsoleView extends DynamicView {
 					_rgui.getRLock().unlock();
 				}
 			}
-		},"Python Expression", true, null);
+		},"Python Expression", Color.green, true, null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 
