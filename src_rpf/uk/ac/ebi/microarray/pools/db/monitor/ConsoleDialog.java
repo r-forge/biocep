@@ -17,6 +17,7 @@
 package uk.ac.ebi.microarray.pools.db.monitor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.rmi.RemoteException;
@@ -82,7 +83,7 @@ public class ConsoleDialog extends JFrame {
 				return log;
 
 			}
-		},"Evaluate",true,null));
+		},"Evaluate", Color.black,true,null));
 
 		setSize(new Dimension(540, 430));
 

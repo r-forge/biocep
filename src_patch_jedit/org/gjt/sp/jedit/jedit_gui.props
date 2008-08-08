@@ -57,7 +57,7 @@ startup=true
 #}}}
 
 #{{{ Tool bar
-view.toolbar=new-file open-file close-buffer save-as - save upload-r run-r run-pl run-gl - - run-p run-g - print page-setup - \
+view.toolbar=new-file open-file close-buffer - save-as save run-r - - upload-r - - run-pl run-gl - - run-p run-g - print page-setup - \
 	undo redo cut copy paste - find find-next - new-view unsplit \
 	split-horizontal split-vertical - buffer-options global-options 
 

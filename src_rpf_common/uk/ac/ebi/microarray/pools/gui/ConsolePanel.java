@@ -157,7 +157,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		}).start();
 	}
 
-	public ConsolePanel(SubmitInterface sInterface, String textFieldLabel, final boolean undoRedoEnabled, AbstractAction[] actions) {
+	public ConsolePanel(SubmitInterface sInterface, String textFieldLabel, Color textFieldColor, final boolean undoRedoEnabled, AbstractAction[] actions) {
 		_sInterface = sInterface;
 		_actions = actions;
 		StyleConstants.setForeground(BOLD_BLACK, Color.blue);
@@ -384,7 +384,11 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		add(_scrollPane, BorderLayout.CENTER);
 
 		JPanel bottomPanel = new JPanel(new BorderLayout());
-		bottomPanel.add(new JLabel(textFieldLabel+" : "), BorderLayout.WEST);
+		
+		JLabel label=new JLabel(textFieldLabel+" : ");
+		label.setForeground(textFieldColor);
+		
+		bottomPanel.add(label, BorderLayout.WEST);
 		bottomPanel.add(_commandInputField, BorderLayout.CENTER);
 		add(bottomPanel, BorderLayout.SOUTH);
 

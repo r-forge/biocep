@@ -4,6 +4,7 @@ import graphics.rmi.RGui;
 import graphics.rmi.RGuiReentrantLock;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.Icon;
 import javax.swing.JPanel;
@@ -36,7 +37,7 @@ public class ChatConsoleView extends DynamicView {
 
 				return "";
 			}
-		},"Message",true,null);
+		},"Message", Color.black,true,null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 

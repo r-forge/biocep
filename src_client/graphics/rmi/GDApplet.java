@@ -233,20 +233,21 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public static RGui _instance;
 	private RCollaborationListenerImpl _collaborationListenerImpl;
 	private RConsoleActionListenerImpl _rConsoleActionListenerImpl;
-	
-	private boolean logonWithoutConfirmation=false;
+
+	private boolean logonWithoutConfirmation = false;
 
 	private final ReentrantLock _protectR = new RGuiReentrantLock() {
 		@Override
 		public void lock() {
-			super.lock();			
+			super.lock();
 			try {
 				_currentDevice.setAsCurrentDevice();
 				_rForConsole.setOrginatorUID(getUID());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.
+			// WAIT_CURSOR));
 		}
 
 		@Override
@@ -266,7 +267,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			super.unlock();
 
-			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.
+			// DEFAULT_CURSOR));
 
 		}
 
@@ -294,7 +296,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			_consolePanel.print(message, null);
 			if (isCollaborativeMode()) {
 				try {
-					getR().consolePrint(getUID(),getUserName(),message, null);
+					getR().consolePrint(getUID(), getUserName(), message, null);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -405,11 +407,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 			LoginDialog.url_str = getParameter("url");
 		if (getParameter("privatename") != null && !getParameter("privatename").equals(""))
 			LoginDialog.privateName_str = getParameter("privatename");
-		
-		if (_mode==HTTP_MODE && getParameter("privatename") != null && !getParameter("privatename").equals("")) {
-			logonWithoutConfirmation=true;
+
+		if (_mode == HTTP_MODE && getParameter("privatename") != null && !getParameter("privatename").equals("")) {
+			logonWithoutConfirmation = true;
 		}
-		
+
 		try {
 
 			_currentDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "active_device.png")));
@@ -456,7 +458,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							boolean showLoginDialog = true;
 							LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane());
-							
+
 							if (new File(GDApplet.NEW_R_STUB_FILE).exists()) {
 								int n = JOptionPane.showConfirmDialog(GDApplet.this, "Would you like to connect to the last created and kept alive R Server ?",
 										"", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null);
@@ -466,17 +468,17 @@ public class GDApplet extends GDAppletBase implements RGui {
 									pr.close();
 									ident = new Identification(RMI_MODE, "", "", "", false, false, "", RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "",
 											"", stub, -1, -1, false, false, "", -1, "", "", false, false);
-									
+
 									showLoginDialog = false;
 								}
-							} else if (logonWithoutConfirmation){
+							} else if (logonWithoutConfirmation) {
 								loginDialog.okMethod();
-								ident=loginDialog.getIndentification();
-								showLoginDialog=false;
-								logonWithoutConfirmation=false;
+								ident = loginDialog.getIndentification();
+								showLoginDialog = false;
+								logonWithoutConfirmation = false;
 							}
 
-							if (showLoginDialog) {								
+							if (showLoginDialog) {
 								loginDialog.setVisible(true);
 								ident = loginDialog.getIndentification();
 							}
@@ -488,8 +490,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							if (getMode() == HTTP_MODE) {
 
-								_keepAlive=true;
-								
+								_keepAlive = true;
+
 								_commandServletUrl = ident.getUrl();
 								_helpServletUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
 								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
@@ -537,25 +539,26 @@ public class GDApplet extends GDAppletBase implements RGui {
 								if (getMode() == GDApplet.NEW_R_MODE) {
 
 									/*
-									  
-									  DirectJNI.init(); r =
-									  DirectJNI.getInstance().getRServices();
-									  if (false) throw new
-									  BadSshHostException(); if (false) throw
-									  new BadSshLoginPwdException(); _keepAlive =			  ident.isKeepAlive();
-									  
+									 * 
+									 * DirectJNI.init(); r =
+									 * DirectJNI.getInstance().getRServices();
+									 * if (false) throw new
+									 * BadSshHostException(); if (false) throw
+									 * new BadSshLoginPwdException(); _keepAlive
+									 * = ident.isKeepAlive();
 									 */
 
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
 										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident.getMemoryMax(),
-												ident.getSshHostIp(), ident.getSshPort(), ident.getSshLogin(), ident.getSshPwd(), "", false, null,null);
+												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident
+														.getMemoryMin(), ident.getMemoryMax(), ident.getSshHostIp(), ident.getSshPort(), ident.getSshLogin(),
+												ident.getSshPwd(), "", false, null, null);
 									} else {
-										
+
 										r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident
-														.getMemoryMax(), "", false, null,null);
+												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident
+														.getMemoryMin(), ident.getMemoryMax(), "", false, null, null);
 									}
 
 									if (ident.isUseSsh()) {
@@ -674,9 +677,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 									new FitDeviceAction(GDApplet.this, d), null, new SnapshotDeviceAction(GDApplet.this),
 									new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
 									new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this),
-									new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null,
-									new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, d), null,
-									new CoupleToCurrentDeviceAction(GDApplet.this)
+									new SaveDeviceAsSvgAction(GDApplet.this), new SaveDeviceAsPdfAction(GDApplet.this),
+									new SaveDeviceAsPdfAppletAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
+									new CopyToCurrentDeviceAction(GDApplet.this, d), null, new CoupleToCurrentDeviceAction(GDApplet.this)
 
 							}, getRLock(), getConsoleLogger());
 							_rootGraphicPanel.removeAll();
@@ -714,9 +717,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 										new SnapshotDeviceAction(GDApplet.this), new SnapshotDeviceSvgAction(GDApplet.this),
 										new SnapshotDevicePdfAction(GDApplet.this), null, new SaveDeviceAsPngAction(GDApplet.this),
 										new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
-										new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
-										new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) },
-										getRLock(), getConsoleLogger());
+										new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null,
+										new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
+										new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
 
 								rootComponent.removeAll();
 								rootComponent.setLayout(new BorderLayout());
@@ -773,7 +776,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						} catch (TunnelingException te) {
 							return PoolUtils.getStackTraceAsString(te.getCause());
 						}
-						
+
 						catch (NoRmiRegistryAvailableException normie) {
 							return "No RMI Registry Available, can not log on\n";
 						} catch (NoDbRegistryAvailableException nodbe) {
@@ -820,7 +823,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								RHttpProxy.logOff(_commandServletUrl, _sessionId);
 							} else {
 								if (!getRLock().isLocked()) {
-									disposeDevices();									
+									disposeDevices();
 								}
 							}
 
@@ -855,7 +858,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} else {
 								result = _rForConsole.consoleSubmit(expression);
 								if (isCollaborativeMode())
-									_rForConsole.consolePrint(getUID(),getUserName(), expression, (String) result);
+									_rForConsole.consolePrint(getUID(), getUserName(), expression, (String) result);
 							}
 
 						} catch (NotLoggedInException nle) {
@@ -877,9 +880,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 				}
 			};
-			_consolePanel = new ConsolePanel(_submitInterface,"Evaluate",true, new AbstractAction[] { _actions.get("logon"), _actions.get("logoff"), null,
-					_actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"), _actions.get("interrupteval"), null,
-					_actions.get("playdemo"), null, new AbstractAction("Show R Info") {
+			_consolePanel = new ConsolePanel(_submitInterface, "Evaluate", new Color(0x00, 0x80, 0x80), true, new AbstractAction[] { _actions.get("logon"),
+					_actions.get("logoff"), null, _actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"),
+					_actions.get("interrupteval"), null, _actions.get("playdemo"), null, new AbstractAction("Show R Info") {
 
 						public void actionPerformed(ActionEvent e) {
 							try {
@@ -987,7 +990,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					sessionMenu.add(_actions.get("saveimage"));
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("stopeval"));
-					sessionMenu.add(_actions.get("interrupteval"));
+					// sessionMenu.add(_actions.get("interrupteval"));
 
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("playdemo"));
@@ -998,7 +1001,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					sessionMenu.add(_actions.get("runhttpserverlocalhost"));
 					sessionMenu.add(_actions.get("stophttpserverlocalhost"));
 					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("serverlogview"));
+					// sessionMenu.add(_actions.get("serverlogview"));
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1666,20 +1669,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}).start();
 
-		/*
 		new Thread(new Runnable() {
 			public void run() {
-				try {
-					ServerManager.downloadBioceCore(0);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				loadJEditClasses();
 			}
 		}).start();
-		*/
+
+		/*
+		 * new Thread(new Runnable() { public void run() { try {
+		 * ServerManager.downloadBioceCore(0); } catch (Exception e) {
+		 * e.printStackTrace(); } } }).start();
+		 */
 		restoreState();
 		_instance = this;
-		
+
 		if (getParameter("autologon") == null || getParameter("autologon").equalsIgnoreCase("true")) {
 			new Thread(new Runnable() {
 				public void run() {
@@ -1693,9 +1696,43 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}).start();
 
 		}
-		
+
 		System.out.println("INIT ends");
 
+	}
+
+	private boolean firstCall = true;
+	private synchronized void loadJEditClasses() {
+		/*
+		try {
+			UIManager.setLookAndFeel(getLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		*/
+		if (firstCall) {
+			firstCall = false;
+			try {
+				ClassLoader cl = GDApplet.class.getClassLoader();
+				try {
+					File jEditDir = new File(System.getProperty("user.dir") + "/jEdit");
+					if (jEditDir.exists()) {
+						PoolUtils.deleteDirectory(jEditDir);
+					}
+					new File(System.getProperty("user.dir") + "/jEdit").mkdirs();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				System.setProperty("jedit.home", System.getProperty("user.dir") + "/jEdit");
+				System.setProperty("jedit.newwindow.class", "graphics.rmi.NewWindow");
+				System.setProperty("jedit.save.to.r.class", "graphics.rmi.SaveToR");
+				cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("main", new Class<?>[] { String[].class, RGui.class }).invoke(null,
+						new Object[] { new String[] { "-noserver", "-noplugins", "-nogui", "-nosettings" }, GDApplet.this });
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 
 	private GDHelpBrowser getOpenedBrowser() {
@@ -1780,6 +1817,17 @@ public class GDApplet extends GDAppletBase implements RGui {
 			DynamicView dv = iter.next();
 			if (dv instanceof ServerPythonConsoleView) {
 				return (ServerPythonConsoleView) dv;
+			}
+		}
+		return null;
+	}
+
+	private ServerGroovyConsoleView getOpenedServerGroovyConsoleView() {
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof ServerGroovyConsoleView) {
+				return (ServerGroovyConsoleView) dv;
 			}
 		}
 		return null;
@@ -1917,8 +1965,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 						if (l.equals("#SNAPSHOT")) {
 
 							/*
-							 * try { Thread.sleep(1400); } catch (Exception ex) { }
-							 * _actions.get("clone").actionPerformed(new
+							 * try { Thread.sleep(1400); } catch (Exception ex)
+							 * { } _actions.get("clone").actionPerformed(new
 							 * ActionEvent(_graphicPanel, 0, null));
 							 */
 
@@ -1987,34 +2035,34 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void restoreState() {
-		
+
 		File settings = new File(GDApplet.SETTINGS_FILE);
 		if (settings.exists()) {
-			
+
 			System.out.println("--restoreState");
-			
+
 			try {
 				Properties props = new Properties();
 				props.loadFromXML(new FileInputStream(settings));
-				
-				if (getR()!=null && !_keepAlive) {
-					
+
+				if (getR() != null && !_keepAlive) {
+
 					if (props.get("working.dir.root") != null) {
 						getR().consoleSubmit("setwd('" + props.get("working.dir.root") + "')");
 					}
-					
+
 				}
 
 				if (props.get("command.history") != null) {
-					_consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) props.get("command.history")));					
+					_consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) props.get("command.history")));
 				}
-				
+
 				if (props.get("mode") != null) {
-					LoginDialog.mode_int=Integer.decode((String)props.get("mode"));
+					LoginDialog.mode_int = Integer.decode((String) props.get("mode"));
 				}
-				
+
 				if (props.get("url") != null) {
-					LoginDialog.url_str=(String)props.get("url");
+					LoginDialog.url_str = (String) props.get("url");
 				}
 
 			} catch (Exception e) {
@@ -2022,33 +2070,33 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 
-		if (getR()!=null && !_keepAlive	&& _save) {			
+		if (getR() != null && !_keepAlive && _save) {
 			try {
 				_rForConsole.consoleSubmit("load('.RData')");
 			} catch (Exception e) {
 				e.printStackTrace();
-			}			
+			}
 		}
 	}
 
 	private void persistState() {
 		System.out.println("--persistState");
 		try {
-			Vector<String> generatorParams=new Vector<String>();
+			Vector<String> generatorParams = new Vector<String>();
 			generatorParams.add(GDApplet.SETTINGS_FILE);
-			
+
 			if (getR() != null && !_keepAlive) {
 				generatorParams.add("working.dir.root=" + ((RChar) _rForConsole.getObject("getwd()")).getValue()[0]);
 			}
-			
+
 			generatorParams.add("command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()));
-			generatorParams.add("mode="+LoginDialog.mode_int);
-			generatorParams.add("url="+LoginDialog.url_str);
-			PropertiesGenerator.main((String[])generatorParams.toArray(new String[generatorParams.size()]));
+			generatorParams.add("mode=" + LoginDialog.mode_int);
+			generatorParams.add("url=" + LoginDialog.url_str);
+			PropertiesGenerator.main((String[]) generatorParams.toArray(new String[generatorParams.size()]));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		if (getR() != null && !_keepAlive && _save) {
 			try {
 				_rForConsole.consoleSubmit("save.image('.RData')");
@@ -2056,7 +2104,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 	@Override
@@ -2523,38 +2571,17 @@ public class GDApplet extends GDAppletBase implements RGui {
 		});
 
 		_actions.put("editor", new AbstractAction("New Script Editor") {
-			private boolean firstCall = true;
 
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new Runnable() {
 					public void run() {
 						try {
-
 							try {
 								UIManager.setLookAndFeel(getLookAndFeelClassName());
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-
-							if (firstCall) {
-								firstCall = false;
-								ClassLoader cl = GDApplet.class.getClassLoader();
-								try {
-									File jEditDir = new File(System.getProperty("user.dir") + "/jEdit");
-									if (jEditDir.exists()) {
-										PoolUtils.deleteDirectory(jEditDir);
-									}
-									new File(System.getProperty("user.dir") + "/jEdit").mkdirs();
-								} catch (Exception ex) {
-									ex.printStackTrace();
-								}
-								System.setProperty("jedit.home", System.getProperty("user.dir") + "/jEdit");
-								System.setProperty("jedit.newwindow.class", "graphics.rmi.NewWindow");
-								System.setProperty("jedit.save.to.r.class", "graphics.rmi.SaveToR");
-								cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("main", new Class<?>[] { String[].class, RGui.class }).invoke(null,
-										new Object[] { new String[] { "-noserver", "-noplugins", "-nogui", "-nosettings" }, GDApplet.this });
-							}
-
+							loadJEditClasses();
 							GDApplet.class.getClassLoader().loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,
 									(Object[]) null);
 						} catch (Exception ex) {
@@ -2675,9 +2702,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
 							new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
 							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
-							new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
-							new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(),
-							getConsoleLogger());
+							new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null,
+							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
+							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
 
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
@@ -2744,9 +2771,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							new FitDeviceAction(GDApplet.this, newDevice), null, new SnapshotDeviceAction(GDApplet.this),
 							new SnapshotDeviceSvgAction(GDApplet.this), new SnapshotDevicePdfAction(GDApplet.this), null,
 							new SaveDeviceAsPngAction(GDApplet.this), new SaveDeviceAsJpgAction(GDApplet.this), new SaveDeviceAsSvgAction(GDApplet.this),
-							new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null, new CopyFromCurrentDeviceAction(GDApplet.this),
-							new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(),
-							getConsoleLogger());
+							new SaveDeviceAsPdfAction(GDApplet.this), new SaveDeviceAsPdfAppletAction(GDApplet.this), null,
+							new CopyFromCurrentDeviceAction(GDApplet.this), new CopyToCurrentDeviceAction(GDApplet.this, newDevice), null,
+							new CoupleToCurrentDeviceAction(GDApplet.this) }, getRLock(), getConsoleLogger());
 
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
@@ -3014,7 +3041,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		_actions.put("groovyconsole", new AbstractAction("Groovy Console") {
 			public void actionPerformed(final ActionEvent e) {
-				if (getOpenedServerPythonConsoleView() == null) {
+				if (getOpenedServerGroovyConsoleView() == null) {
 					int id = getDynamicViewId();
 
 					final ServerGroovyConsoleView lv = new ServerGroovyConsoleView("Groovy Console", null, id, GDApplet.this);
@@ -3038,7 +3065,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		_actions.put("clientgroovyconsole", new AbstractAction("Local Groovy Console") {
 			public void actionPerformed(final ActionEvent e) {
-				if (getOpenedServerPythonConsoleView() == null) {
+				if (getOpenedClientGroovyConsoleView() == null) {
 					int id = getDynamicViewId();
 
 					final ClientGroovyConsoleView lv = new ClientGroovyConsoleView("Local Groovy Console", null, id, GDApplet.this);
@@ -3421,7 +3448,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private void noSession() {
 
 		persistState();
-		
+
 		if (_rProcessId != null && !_keepAlive) {
 
 			try {
@@ -3797,13 +3824,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 				chatConsoleView.getConsolePanel().print("[" + user + "] - " + message, null);
 			}
 		}
-		
+
 		public void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException {
 			if (!getUID().equals(sourceUID)) {
 				_consolePanel.print("[" + user + "] - " + expression, result);
 			}
 		}
-		
+
 	}
 
 	public String getUserName() {

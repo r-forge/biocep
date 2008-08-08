@@ -3,6 +3,7 @@ package views;
 import graphics.rmi.RGui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.Icon;
 import javax.swing.JPanel;
@@ -33,7 +34,7 @@ public 	class ServerGroovyConsoleView extends DynamicView {
 					_rgui.getRLock().unlock();
 				}
 			}
-		}, "Groovy Expression", true, null);
+		}, "Groovy Expression", Color.magenta, true, null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 

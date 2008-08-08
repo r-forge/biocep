@@ -54,6 +54,24 @@ public class RHttpProxy {
 
 	public static String logOn(String url, String sessionId, String login, String pwd, HashMap<String, Object> options) throws TunnelingException {
 
+		GetMethod pingServer = null;
+		try {
+			Object result = null;
+			try {
+				pingServer = new GetMethod(url + "?method=ping");
+				mainHttpClient.executeMethod(pingServer);
+				result = new ObjectInputStream(pingServer.getResponseBodyAsStream()).readObject();
+				if (!result.equals("pong")) throw new ConnectionFailedException(); 
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new ConnectionFailedException();
+			}
+		} finally {
+			if (pingServer != null) {
+				pingServer.releaseConnection();
+			}
+		}
+		
 		GetMethod getSession = null;
 		try {
 			Object result = null;
@@ -117,8 +135,6 @@ public class RHttpProxy {
 	public static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters,
 			HttpClient httpClient) throws TunnelingException {
 		
-		
-		System.out.println("methodName:"+methodName+"  methodParam:"+Arrays.toString(methodParameters));
 		PostMethod postPush = null;
 		try {
 			Object result = null;

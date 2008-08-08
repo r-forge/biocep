@@ -369,6 +369,8 @@
 				<pathelement path="lib/desktop/jython.jar"/>
 				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>	
+
+				<pathelement path="lib/desktop/groovy-all-1.5.4.jar"/>
 				
 				<pathelement path="lib/svg/batik-svggen.jar"/>
 				<pathelement path="lib/svg/batik-dom.jar"/>
