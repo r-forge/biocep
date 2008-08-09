@@ -89,7 +89,7 @@ public class ToolsMain {
 		{
 			Map<String, String> osenv = System.getenv();
 			Map<String, String> env = new HashMap<String, String>(osenv);
-			env.put("PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
+			env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
 			env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 			env.put("R_HOME", rpath);
 			String R_LIBS = rlibs + System.getProperty("path.separator")
