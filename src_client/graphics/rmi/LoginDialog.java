@@ -30,7 +30,6 @@ import java.rmi.registry.Registry;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Vector;
-
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -45,9 +44,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
-
 import remoting.RServices;
-
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
@@ -166,14 +163,18 @@ public class LoginDialog extends JDialog {
 	}
 
 	public void recreateDynamicPanel() {
+		
 		dynamicPanel.removeAll();
 
+		
+		
 		if (localModeButton.isSelected()) {
 			dynamicPanel.setLayout(new GridLayout(1, 2));
 			JPanel p1 = new JPanel();
 			p1.setLayout(new GridLayout(0, 1));
 			JPanel p2 = new JPanel();
 			p2.setLayout(new GridLayout(0, 1));
+					
 			dynamicPanel.add(p1);
 			dynamicPanel.add(p2);
 
@@ -278,6 +279,7 @@ public class LoginDialog extends JDialog {
 
 		}
 
+		
 		dynamicPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		dynamicPanel.updateUI();
 		dynamicPanel.repaint();
@@ -376,7 +378,7 @@ public class LoginDialog extends JDialog {
 		setTitle("Please Enter Your R Session Parameters");
 
 		JPanel modePanel = new JPanel();
-		modePanel.setLayout(new GridLayout(1, 4));
+		modePanel.setLayout(new GridLayout(1, 3));
 
 		dynamicPanel = new JPanel();
 		rmiDynamicPanel = new JPanel();
@@ -385,7 +387,7 @@ public class LoginDialog extends JDialog {
 		buttonsPanel.setLayout(new GridLayout(1, 2));
 
 		JPanel topPanel = new JPanel(new BorderLayout());
-		topPanel.add(modePanel, BorderLayout.NORTH);
+		topPanel.add(modePanel, BorderLayout.CENTER);
 		topPanel.add(new JLabel(" "), BorderLayout.SOUTH);
 
 		getContentPane().setLayout(new BorderLayout());
@@ -395,21 +397,32 @@ public class LoginDialog extends JDialog {
 		getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
 		((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		localModeButton = new JRadioButton("New R");
+		localModeButton = new JRadioButton("Create New R Server");
+		//localModeButton.setForeground(new Color(0x00,0x80,0x80));
+		localModeButton.setFont(localModeButton.getFont().deriveFont((float)localModeButton.getFont().getSize()+1));
+		localModeButton.setFont(localModeButton.getFont().deriveFont(java.awt.Font.BOLD));
 		localModeButton.setSelected(mode_int == GDApplet.NEW_R_MODE);
 		localModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();
 			}
 		});
-		httpModeButton = new JRadioButton("Http R");
+		
+		httpModeButton = new JRadioButton("Connect to R via Http");
+		//httpModeButton.setForeground(new Color(0x00,0x80,0x80));
+		httpModeButton.setFont(httpModeButton.getFont().deriveFont((float)httpModeButton.getFont().getSize()+1));
+		httpModeButton.setFont(httpModeButton.getFont().deriveFont(java.awt.Font.BOLD));
 		httpModeButton.setSelected(mode_int == GDApplet.HTTP_MODE);
 		httpModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();
 			}
 		});
-		rmiModeButton = new JRadioButton("Rmi R");
+		
+		rmiModeButton = new JRadioButton("Connect to R via Rmi");
+		//rmiModeButton.setForeground(new Color(0x00,0x80,0x80));
+		rmiModeButton.setFont(rmiModeButton.getFont().deriveFont((float)rmiModeButton.getFont().getSize()+1));
+		rmiModeButton.setFont(rmiModeButton.getFont().deriveFont(java.awt.Font.BOLD));
 		rmiModeButton.setSelected(mode_int == GDApplet.RMI_MODE);
 		rmiModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -421,7 +434,6 @@ public class LoginDialog extends JDialog {
 		buttonGroup.add(localModeButton);
 		buttonGroup.add(httpModeButton);
 		buttonGroup.add(rmiModeButton);
-		modePanel.add(new JLabel("Connect to : "));
 		modePanel.add(localModeButton);
 		modePanel.add(httpModeButton);
 		modePanel.add(rmiModeButton);
@@ -511,17 +523,17 @@ public class LoginDialog extends JDialog {
 		_memoryMin = new JTextField(new Integer(memoryMin_int).toString());
 		_memoryMax = new JTextField(new Integer(memoryMax_int).toString());
 
-		_keepAlive = new JCheckBox("Keep Alive");
+		_keepAlive = new JCheckBox("Keep Alive After Log Off");
 		_keepAlive.setSelected(keepAlive_bool);
 
-		_useSsh = new JRadioButton("Remote Host via SSH");
+		_useSsh = new JRadioButton("On Remote Machine via SSH");
 		_useSsh.setSelected(useSsh_bool);
 		_useSsh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();
 			}
 		});
-		_useLocalHost = new JRadioButton("Local Host");
+		_useLocalHost = new JRadioButton("On My Machine");
 		_useLocalHost.setSelected(!useSsh_bool);
 		_useLocalHost.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -634,7 +646,7 @@ public class LoginDialog extends JDialog {
 				});
 			}
 		}).start();
-		setSize(new Dimension(460+60, 440));
+		setSize(new Dimension(460+60+120, 440));
 		PoolUtils.locateInScreenCenter(this);
 
 	}

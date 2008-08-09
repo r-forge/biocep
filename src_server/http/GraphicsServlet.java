@@ -22,7 +22,6 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -30,7 +29,6 @@ import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
-
 import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -247,6 +245,8 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 			}
 		}
 		pw.println("</object><!--[if !IE]> close outer object --></object><!--<![endif]--></div></center></body></html>");
+		pw.println("<!-- This applet was generated with Biocep : www.biocep.net , Biocep is a GPL Software , (C) 2007-2008 Karim Chine -->");
+		
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

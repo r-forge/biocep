@@ -842,7 +842,7 @@ public class PoolUtils {
 			}
 			zis.close();
 			if (showProgress) {
-				f.setVisible(false);
+				f.dispose();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -982,7 +982,7 @@ public class PoolUtils {
 			System.err.println(e.toString());
 		} finally {
 			if ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) {
-				f.setVisible(false);
+				f.dispose();
 			}
 			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT) != 0) {
 				System.out.println(" 100% of " + jarName + " has been downloaded \n");
