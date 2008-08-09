@@ -140,7 +140,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				e.printStackTrace();
 			}			
 		}
-
+		
 	}
 
 	public void init() throws RemoteException {

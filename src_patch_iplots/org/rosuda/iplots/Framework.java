@@ -62,7 +62,7 @@ public class Framework implements Dependent, ActionListener {
     int dtctr;
     
     /** when this flag is set to <code>true</code> then user-interaction is not desired. Most common use is to set this flag to <code>true</code> when <code>make check</code> is being run. */
-    static boolean noInteraction = false;
+    static boolean noInteraction = true;
 
     public int graphicsEngine = PlotComponent.AWTGrDevID; // default
     

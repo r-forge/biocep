@@ -165,6 +165,7 @@ import server.BadSshLoginPwdException;
 import server.LocalHttpServer;
 import server.LocalRmiRegistry;
 import server.NoMappingAvailable;
+import server.ServantCreationFailed;
 import server.ServerManager;
 import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -558,7 +559,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 										r = ServerManager.createR(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident
-														.getMemoryMin(), ident.getMemoryMax(), "", false, null, null);
+														.getMemoryMin(), ident.getMemoryMax(), "", true, null, null);
 									}
 
 									if (ident.isUseSsh()) {
@@ -791,6 +792,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 							return "Ping R Server Failed\n";
 						} catch (RBusyException rb_e) {
 							return "Connection Failed, R is Busy\n";
+						} catch (ServantCreationFailed scf) {
+							return "R Server Creation Failed\n";
 						} catch (RemoteException re) {
 							return PoolUtils.getStackTraceAsString(re.getCause());
 						} catch (Exception unknow) {
@@ -882,18 +885,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			};
 			_consolePanel = new ConsolePanel(_submitInterface, "Evaluate", new Color(0x00, 0x80, 0x80), true, new AbstractAction[] { _actions.get("logon"),
 					_actions.get("logoff"), null, _actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"),
-					_actions.get("interrupteval"), null, _actions.get("playdemo"), null, new AbstractAction("Show R Info") {
-
-						public void actionPerformed(ActionEvent e) {
-							try {
-								System.out.println("R is busy :" + _rForConsole.isBusy());
-							} catch (Exception ex) {
-
-							}
-
-						}
-
-					} });
+					_actions.get("interrupteval"), null, _actions.get("playdemo"), null});
 
 			JPanel workingDirPanel = new JPanel();
 			workingDirPanel.setLayout(new BorderLayout());
@@ -1001,7 +993,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					sessionMenu.add(_actions.get("runhttpserverlocalhost"));
 					sessionMenu.add(_actions.get("stophttpserverlocalhost"));
 					sessionMenu.addSeparator();
-					// sessionMenu.add(_actions.get("serverlogview"));
+					sessionMenu.add(_actions.get("showsessioninfo"));
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1702,14 +1694,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private boolean firstCall = true;
+
 	private synchronized void loadJEditClasses() {
 		/*
-		try {
-			UIManager.setLookAndFeel(getLookAndFeelClassName());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		*/
+		 * try { UIManager.setLookAndFeel(getLookAndFeelClassName()); } catch
+		 * (Exception e) { e.printStackTrace(); }
+		 */
 		if (firstCall) {
 			firstCall = false;
 			try {
@@ -1732,7 +1722,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 	private GDHelpBrowser getOpenedBrowser() {
@@ -3377,6 +3367,34 @@ public class GDApplet extends GDAppletBase implements RGui {
 			public boolean isEnabled() {
 				return getR() != null;
 			}
+		});
+
+		_actions.put("showsessioninfo", new AbstractAction("Show R Server Info") {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					String sessionMode = null;
+					if (getMode() == HTTP_MODE)
+						sessionMode = "CONNECT TO HTTP";
+					else if (getMode() == RMI_MODE)
+						sessionMode = "CONNECT TO RMI";
+					else if (getMode() == NEW_R_MODE)
+						sessionMode = "NEW R";
+					getConsoleLogger().printAsOutput("Session Mode :" + sessionMode+"\n");
+					getConsoleLogger().printAsOutput("Server Name :" + getR().getServantName()+"\n");
+					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getHostIp()+"\n");
+					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp()+"\n");
+					getConsoleLogger().printAsOutput("STUB :" + PoolUtils.stubToHex(getR())+"\n");
+
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+
 		});
 
 	}
