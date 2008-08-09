@@ -3264,7 +3264,8 @@ public class DirectJNI {
 				throw new RemoteException("", e);
 			}
 		
-			boolean svgFunctionAvailable=symbolExists("svg");
+			//boolean svgFunctionAvailable=symbolExists("svg");
+			boolean svgFunctionAvailable=false;
 			boolean CairoFunctionAvailable=false;
 			if (!svgFunctionAvailable)  {
 				evaluate("library(Cairo)");
@@ -3700,7 +3701,8 @@ public class DirectJNI {
 				throw new RemoteException("", e);
 			}
 
-			boolean svgFunctionAvailable=DirectJNI.getInstance().getRServices().symbolExists("svg");
+			//boolean svgFunctionAvailable=DirectJNI.getInstance().getRServices().symbolExists("svg");
+			boolean svgFunctionAvailable=false;
 			boolean CairoFunctionAvailable=false;
 			if (!svgFunctionAvailable)  {
 				DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");

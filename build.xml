@@ -1576,10 +1576,10 @@
 			<jar destfile="biocep-core.jar" manifest="MANIFEST.MF">
 				<fileset dir="binsrv"/>
 			</jar>
-			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
+			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
 			
 			<!-- tools begin -->
-			
+			<!--
 			
 			<delete dir="bintools" failonerror="true"/>
 			<mkdir dir="bintools"/>
@@ -1675,7 +1675,7 @@
 					<fileset dir="binsrv"/>
 			</jar>
 				
-			
+			-->
 		<!-- tools end -->
 		
 		
@@ -1740,7 +1740,7 @@
 			</manifest>		
 			
 			<jar basedir="binsrv" destfile="biocepunsigned.jar" manifest="MANIFEST.MF" />
-			<signjar jar="biocepunsigned.jar" signedjar="biocep.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />		
+			<signjar jar="biocepunsigned.jar" signedjar="biocep.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />		
 					
 			<antcall target="sign.extra"/>
 		
@@ -1754,12 +1754,12 @@
 		<copy todir=".">
 			<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>			
 		</copy>
-		<signjar jar="groovy-all-1.5.4.jar" signedjar="groovy-all-1.5.4.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
+		<signjar jar="groovy-all-1.5.4.jar" signedjar="groovy-all-1.5.4.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
 	
 		<copy todir=".">
 			<fileset dir="lib/desktop" includes="biocep-doc.jar"/>			
 		</copy>
-		<signjar jar="biocep-doc.jar" signedjar="biocep-doc.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" />
+		<signjar jar="biocep-doc.jar" signedjar="biocep-doc.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
 		
 	</target>
 	

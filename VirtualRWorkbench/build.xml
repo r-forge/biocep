@@ -563,8 +563,8 @@
 				</if>
 				
 				 <!--
-					 keytool -genkey -alias appletsigningkey -keyalg RSA -validity 1095 -keypass emblebi -keystore appletKeyStore.ks -storepass emblebi
-					 keytool -export -keystore appletKeyStore.ks -storepass emblebi -alias appletsigningkey -file appletsigningkey.cer
+					 keytool -genkey -alias appletsigningkey -keyalg RSA -validity 1095 -keypass cloudera -keystore appletKeyStore.ks -storepass cloudera
+					 keytool -export -keystore appletKeyStore.ks -storepass cloudera -alias appletsigningkey -file appletsigningkey.cer
 				 -->
 
 				
@@ -650,7 +650,7 @@
 				  </copy>
 			        	
 			        	
-				<signjar destDir="VirtualRWorkbench/frontendapp/appletlibs" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="emblebi" >
+				<signjar destDir="VirtualRWorkbench/frontendapp/appletlibs" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" >
 					
 				  <path>
 				  	

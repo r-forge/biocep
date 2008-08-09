@@ -885,7 +885,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			};
 			_consolePanel = new ConsolePanel(_submitInterface, "Evaluate", new Color(0x00, 0x80, 0x80), true, new AbstractAction[] { _actions.get("logon"),
 					_actions.get("logoff"), null, _actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"),
-					_actions.get("interrupteval"), null, _actions.get("playdemo"), null});
+					_actions.get("interrupteval"), null, _actions.get("playdemo"), null });
 
 			JPanel workingDirPanel = new JPanel();
 			workingDirPanel.setLayout(new BorderLayout());
@@ -1661,11 +1661,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}).start();
 
-		new Thread(new Runnable() {
-			public void run() {
-				loadJEditClasses();
-			}
-		}).start();
+		/*
+		 * new Thread(new Runnable() { public void run() { loadJEditClasses(); }
+		 * }).start();
+		 */
 
 		/*
 		 * new Thread(new Runnable() { public void run() { try {
@@ -3379,11 +3378,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 						sessionMode = "CONNECT TO RMI";
 					else if (getMode() == NEW_R_MODE)
 						sessionMode = "NEW R";
-					getConsoleLogger().printAsOutput("Session Mode :" + sessionMode+"\n");
-					getConsoleLogger().printAsOutput("Server Name :" + getR().getServantName()+"\n");
-					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getHostIp()+"\n");
-					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp()+"\n");
-					getConsoleLogger().printAsOutput("STUB :" + PoolUtils.stubToHex(getR())+"\n");
+					getConsoleLogger().printAsOutput("Session Mode :" + sessionMode + "\n");
+					getConsoleLogger().printAsOutput("Server Name :" + getR().getServantName() + "\n");
+					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getHostIp() + "\n");
+					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp() + "\n");
+					getConsoleLogger().printAsOutput("STUB :" + PoolUtils.stubToHex(getR()) + "\n");
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
