@@ -3,6 +3,7 @@ package server;
 import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
 import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -24,13 +25,18 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.Vector;
+
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+
 import model.TableModelRemoteImpl;
 import bootstrap.BootSsh;
 import remoting.RServices;
@@ -352,16 +358,30 @@ public class ServerManager {
 
 			Runnable runnable = new Runnable() {
 				public void run() {
-					createRProgressArea[0].setFocusable(false);
-					createRProgressBar[0].setIndeterminate(true);
+
+					createRProgressFrame[0].setUndecorated(true);
+					
 					JPanel p = new JPanel(new BorderLayout());
+					createRProgressArea[0].setForeground(Color.white);
+					createRProgressArea[0].setBackground(new Color(0x00,0x80,0x80));
+					createRProgressArea[0].setBorder(BorderFactory.createLineBorder(new Color(0x00,0x80,0x80),3));
+					createRProgressArea[0].setEditable(false);
+					p.setBorder(BorderFactory.createLineBorder(Color.black,3));
+					
+					createRProgressBar[0].setForeground(Color.white);
+					createRProgressBar[0].setBackground(new Color(0x00,0x80,0x80));
+					createRProgressBar[0].setIndeterminate(true);
+					                   
+					p.setBackground(new Color(0x00,0x80,0x80));
 					p.add(createRProgressBar[0], BorderLayout.SOUTH);
-					p.add(new JScrollPane(createRProgressArea[0]), BorderLayout.CENTER);
-					createRProgressFrame[0].add(p);
+					p.add(createRProgressArea[0], BorderLayout.CENTER);
+					createRProgressFrame[0].add(p);					
+										
 					createRProgressFrame[0].pack();
-					createRProgressFrame[0].setSize(600, 120);
+					createRProgressFrame[0].setSize(600, 64);
 					createRProgressFrame[0].setVisible(true);
 					createRProgressFrame[0].setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+					
 					PoolUtils.locateInScreenCenter(createRProgressFrame[0]);
 				}
 			};
@@ -374,7 +394,7 @@ public class ServerManager {
 
 		try {
 
-			progressLogger.logProgress("Inspecting Your R Installation..");
+			progressLogger.logProgress("Inspecting R installation..");
 			new File(INSTALL_DIR).mkdir();
 
 			String rpath=null;
@@ -430,7 +450,7 @@ public class ServerManager {
 
 			}
 			
-			progressLogger.logProgress("R Installation Inspection Done.");
+			progressLogger.logProgress("R installation inspection done.");
 
 			if (!rpath.endsWith("/") && !rpath.endsWith("\\"))
 				rpath += "/";
@@ -444,7 +464,7 @@ public class ServerManager {
 			{
 				Map<String, String> osenv = System.getenv();
 				Map<String, String> env = new HashMap<String, String>(osenv);
-				env.put("PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
+				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("R_HOME", rpath);
 				String R_LIBS=rlibs+ System.getProperty("path.separator") + (System.getenv("R_LIBS") != null ? System.getProperty("path.separator") + System.getenv("R_LIBS") : "");
@@ -474,7 +494,7 @@ public class ServerManager {
 				}
 			}
 
-			progressLogger.logProgress("Installing Missing Packages "+missingPackages+"..\n"+"This doesn't alter your R installation and may take several minutes");
+			progressLogger.logProgress("Installing missing packages "+missingPackages+"..\n"+"This doesn't alter your R installation and may take several minutes");
 			
 			if (installLibBatch.size() > 1) {
 
