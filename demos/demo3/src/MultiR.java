@@ -15,15 +15,11 @@
  * limitations under the License.
  */
 import org.bioconductor.packages.biobase.ExpressionSet;
-import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
 import org.bioconductor.packages.rservices.RNamedArgument;
-import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.vsn.Vsn;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 import uk.ac.ebi.microarray.pools.TimeoutException;
-
-import util.Utils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

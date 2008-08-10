@@ -36,10 +36,10 @@ public class DirectGraphics {
 		DirectJNI.init();
 		final RServices r = DirectJNI.getInstance().getRServices();
 
-		GDDevice d1 = r.newBroadcastedDevice(400, 500);
+		GDDevice d1 = r.newDevice(400, 500);
 		JPanel panel1 = new JGDPanelPop(d1);
 
-		GDDevice d2 = r.newBroadcastedDevice(400, 500);
+		GDDevice d2 = r.newDevice(400, 500);
 		JPanel panel2 = new JGDPanelPop(d2);
 
 		//RemotePanel panel=r.getPanel(450, 600);

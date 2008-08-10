@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.lang.reflect.Field;
+
 import java.rmi.Naming;
 import java.util.Arrays;
-
 import org.bioconductor.packages.biobase.ExpressionSet;
 import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
 import org.bioconductor.packages.rservices.RNamedArgument;
@@ -25,23 +24,13 @@ import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.vsn.vsnFunction;
 import org.bioconductor.packages.vsn.Vsn;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
 public class DirectRRmi {
 	public static void main(String[] args) throws Throwable {
-		
-		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
-		
-		Field[] fields=r.getClass().getDeclaredFields();
-		for (int i=0; i<fields.length; ++i) System.out.println(fields[i].getName());
-		
-		System.exit(0);
-		//String stubHex="";
-		//final RServices r = (RServices)PoolUtils.hexToStub(stubHex,DirectRRmi.class.getClassLoader());
-		
+		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));		
 		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));
 		RNumeric squareOf4 = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"))
 				.squareAsReference(new RNumeric(4));

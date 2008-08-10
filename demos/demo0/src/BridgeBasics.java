@@ -16,23 +16,9 @@
  * limitations under the License.
  */
 
-
-import graphics.pop.GDDevice;
-
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Vector;
-
 import org.apache.commons.logging.Log;
-import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RChar;
-import org.bioconductor.packages.rservices.RInteger;
-import org.bioconductor.packages.rservices.RLogical;
 import org.bioconductor.packages.rservices.RNamedArgument;
-import org.bioconductor.packages.rservices.RNumeric;
-import org.bioconductor.packages.rservices.RVector;
-
 import remoting.RServices;
 import server.DirectJNI;
 
@@ -43,25 +29,10 @@ public class BridgeBasics {
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(BridgeBasics.class);
 
-	
-	
-	
-
-
 
 	public static void main(String args[]) throws Exception {
-		
-	
-		final RServices rs = DirectJNI.getInstance().getRServices();
-		
-		GDDevice device=rs.newDevice(400 , 400);
-		rs.evaluate("plot(5)");
-		Vector<String> svg=device.getSVG();
-		for (int i=0; i<svg.size(); ++i) {
-			System.out.println(svg.elementAt(i));
-		}
-		
-		
+			
+		final RServices rs = DirectJNI.getInstance().getRServices();		
 		
 		RChar s = (RChar) rs.call("paste", new RChar("str1"), new RChar("str2"), new RNamedArgument("sep", new RChar(
 				"--")));

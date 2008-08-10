@@ -17,6 +17,7 @@
 package uk.ac.ebi.microarray.pools;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -64,6 +65,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -850,8 +853,9 @@ public class PoolUtils {
 
 	}
 
+	
 	public static void cacheJar(URL url, String location, int logInfo) {
-		String jarName = url.toString().substring(url.toString().lastIndexOf("/") + 1);
+		final String jarName = url.toString().substring(url.toString().lastIndexOf("/") + 1);
 		if (!location.endsWith("/") && !location.endsWith("\\"))
 			location += "/";
 		String fileName = location + jarName;
@@ -873,16 +877,32 @@ public class PoolUtils {
 
 				Runnable runnable = new Runnable() {
 					public void run() {
-						area.setFocusable(false);
+						try {
+						f.setUndecorated(true);
+						f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+						area.setEditable(false);
+						
+						area.setForeground(Color.white);
+						area.setBackground(new Color(0x00,0x80,0x80));
+						
 						jpb.setIndeterminate(true);
+						jpb.setForeground(Color.white);
+						jpb.setBackground(new Color(0x00,0x80,0x80));
+						
 						JPanel p = new JPanel(new BorderLayout());
+						p.setBorder(BorderFactory.createLineBorder(Color.black,3));
+						p.setBackground(new Color(0x00,0x80,0x80));
 						p.add(jpb, BorderLayout.SOUTH);
-						p.add(new JScrollPane(area), BorderLayout.CENTER);
+						p.add(area, BorderLayout.CENTER);
 						f.add(p);
 						f.pack();
-						f.setSize(300, 90);
+						f.setSize(300, 80);
 						locateInScreenCenter(f);
 						f.setVisible(true);
+						System.out.println("here");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
 				};
 
@@ -939,7 +959,7 @@ public class PoolUtils {
 							public void run() {
 								fjpb.setIndeterminate(false);
 								fjpb.setValue(p);
-								fa.setText("\n" + p + "%" + " Done. ");
+								fa.setText("Copying " + jarName + " ..."+"\n" + p + "%" + " Done. ");
 							}
 						});
 

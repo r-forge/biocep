@@ -562,6 +562,7 @@
 			spawn="${spawn}">
 			<classpath>
 				<pathelement path="${RPF_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
 			</classpath>
 			<jvmarg value="-Dport=${port}"/>
 			<jvmarg value="-Dshow=${show}"/>
@@ -1579,7 +1580,7 @@
 			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
 			
 			<!-- tools begin -->
-			<!--
+
 			
 			<delete dir="bintools" failonerror="true"/>
 			<mkdir dir="bintools"/>
@@ -1675,7 +1676,6 @@
 					<fileset dir="binsrv"/>
 			</jar>
 				
-			-->
 		<!-- tools end -->
 		
 		
