@@ -636,9 +636,11 @@ public class ServerManager {
 			
 			try {
 				
+				/*
 				if (keepAlive) {
 					try {downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_LOGGER | (showProgress ? PoolUtils.LOG_PRGRESS_TO_DIALOG : 0) );} catch (Exception e) {e.printStackTrace(); }
 				}
+				*/
 				
 				File[] extraJarFiles=new File(INSTALL_DIR).listFiles(new FilenameFilter(){
 					public boolean accept(File dir, String name) {

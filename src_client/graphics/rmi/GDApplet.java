@@ -994,6 +994,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					sessionMenu.add(_actions.get("stophttpserverlocalhost"));
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("showsessioninfo"));
+					sessionMenu.addSeparator();
+					sessionMenu.add(_actions.get("downloadcorejars"));
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1041,7 +1043,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					toolsMenu.add(_actions.get("logview"));
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("sourcebioclite"));
-					toolsMenu.add(_actions.get("installpackage"));
+					toolsMenu.add(_actions.get("installpackage"));					
+					
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1671,7 +1674,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		 * ServerManager.downloadBioceCore(0); } catch (Exception e) {
 		 * e.printStackTrace(); } } }).start();
 		 */
-		
+
 		restoreState();
 		_instance = this;
 
@@ -3344,6 +3347,30 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			public boolean isEnabled() {
 				return getR() != null;
+			}
+		});
+
+		_actions.put("downloadcorejars", new AbstractAction("Download Core Jars") {
+			public void actionPerformed(final ActionEvent e) {
+				new Thread(new Runnable(){
+					public void run() {
+						try {
+							ServerManager.downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_LOGGER | PoolUtils.LOG_PRGRESS_TO_DIALOG);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+						try {
+							ServerManager.downloadGroovy(PoolUtils.LOG_PRGRESS_TO_LOGGER | PoolUtils.LOG_PRGRESS_TO_DIALOG);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+				}).start();
+				
+			}
+
+			public boolean isEnabled() {
+				return true;
 			}
 		});
 
