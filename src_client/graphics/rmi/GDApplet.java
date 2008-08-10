@@ -1653,7 +1653,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					} finally {
 						try {
-							Thread.sleep(1000);
+							Thread.sleep(1500);
 						} catch (Exception e) {
 						}
 					}
@@ -1671,6 +1671,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		 * ServerManager.downloadBioceCore(0); } catch (Exception e) {
 		 * e.printStackTrace(); } } }).start();
 		 */
+		
 		restoreState();
 		_instance = this;
 
@@ -3380,7 +3381,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						sessionMode = "NEW R";
 					getConsoleLogger().printAsOutput("Session Mode :" + sessionMode + "\n");
 					getConsoleLogger().printAsOutput("Server Name :" + getR().getServantName() + "\n");
-					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getHostIp() + "\n");
+					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getProcessId() + "\n");
 					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp() + "\n");
 					getConsoleLogger().printAsOutput("STUB :" + PoolUtils.stubToHex(getR()) + "\n");
 

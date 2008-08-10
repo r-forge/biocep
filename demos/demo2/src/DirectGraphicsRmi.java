@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import graphics.rmi.JGDPanelPop;
-
 import java.awt.BorderLayout;
 import java.rmi.Naming;
 import javax.swing.JFrame;
@@ -25,7 +24,6 @@ import uk.ac.ebi.microarray.pools.YesSecurityManager;
 import uk.ac.ebi.microarray.pools.db.monitor.ConsoleDialog;
 import uk.ac.ebi.microarray.pools.db.monitor.ServantStatus;
 
-
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
@@ -34,7 +32,7 @@ public class DirectGraphicsRmi {
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new YesSecurityManager());
 		}
-		final RServices r = ((RServices) Naming.lookup("toto"));
+		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
 
 		JPanel panel = new JGDPanelPop(r.newDevice(400, 500));
 		//RemotePanel panel=r.getPanel(450, 600);

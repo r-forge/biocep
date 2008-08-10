@@ -20,14 +20,17 @@
 	<project name="demoRPF" default="compile" basedir="../.." >
 	
 			<import file="../../build.xml"/>
+
 		
-			<property name="db.host" value="127.0.0.1" />
-			<property name="db.port" value="1527" />	
-			<property name="demo.db.driver" value="org.apache.derby.jdbc.ClientDriver"/>
-			<property name="demo.db.url" value="jdbc:derby://${db.host}:${db.port}/DWEP;create=true" />
+		
+			<property name="demo.naming.mode" value="db" />	
+			<property name="demo.db.type" value="derby" />
+			<property name="demo.db.host" value="127.0.0.1" />
+			<property name="demo.db.port" value="1527" />
+			<property name="demo.db.name" value="DWEP" />
 			<property name="demo.db.user" value="DWEP" />
 			<property name="demo.db.password" value="DWEP" />
-
+		
 			<property name="demo.server.src" value="${basedir}/demos/demoRPF/src_shared:${basedir}/demos/demoRPF/src_server" />
 			<property name="demo.server.bin" value="${basedir}/demos/demoRPF/src_server" />			
 			<property name="demo.server.jar" value="${basedir}/demos/demoRPF/server.jar" />
@@ -45,51 +48,76 @@
 			
 			<target name="derbyrun" depends="initializeProperties">
 				<antcall target="derby.startup">					
-					<param name="derby.port" value="${db.port}"/>
+					<param name="derby.port" value="${demo.db.port}"/>
 				</antcall>	
 			</target>
 		
+		
 			<target name="demodb" depends="initializeProperties">		
-				<antcall target="db">						
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
+				<antcall target="db">							
+					<param name="naming.mode" value="${demo.naming.mode}"/>
+					<param name="db.type" value="${demo.db.type}"/>
+					<param name="db.host" value="${demo.db.host}"/>
+					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
-					<param name="db.password" value="${demo.db.password}" />		
-					<param name="db.initscript" value="${basedir}/demos/demoRPF/initscript.sql" />	
+					<param name="db.password" value="${demo.db.password}" />						
+					<param name="db.initscript" value="${basedir}/demos/demoRPF/initscript.sql" />		
 				</antcall>			
-			</target>		
+			</target>	
+		
 			
-			<target name="demotop" depends="initializeProperties">
-				<antcall target="top">						
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
-					<param name="db.user" value="${demo.db.user}" />
-					<param name="db.password" value="${demo.db.password}" />			
-				</antcall>			
-			</target>	
+		<target name="demotop" depends="initializeProperties">
+			<antcall target="top">	
+				
+				<param name="naming.mode" value="${demo.naming.mode}"/>
+				<param name="db.type" value="${demo.db.type}"/>
+				<param name="db.host" value="${demo.db.host}"/>
+				<param name="db.port" value="${demo.db.port}" />
+				<param name="db.name" value="${demo.db.name}" />
+				<param name="db.user" value="${demo.db.user}" />
+				<param name="db.password" value="${demo.db.password}" />	
+					
+			</antcall>			
+		</target>	
 		
-			<target name="demonode" depends="initializeProperties">
-				<antcall target="node">						
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
-					<param name="db.user" value="${demo.db.user}" />
-					<param name="db.password" value="${demo.db.password}" />
-				</antcall>			
-			</target>	
+		<target name="demonode" depends="initializeProperties">				
+			<if><not><isset property="node"/></not><then><property name="node" value=""/></then></if>
+			<antcall target="node">
+				<param name="naming.mode" value="${demo.naming.mode}"/>
+				<param name="db.type" value="${demo.db.type}"/>
+				<param name="db.host" value="${demo.db.host}"/>
+				<param name="db.port" value="${demo.db.port}" />
+				<param name="db.name" value="${demo.db.name}" />
+				<param name="db.user" value="${demo.db.user}" />
+				<param name="db.password" value="${demo.db.password}" />	
+				<param name="node.name" value="${node}" />
+			</antcall>			
+		</target>	
 		
-			<target name="demoserver" depends="initializeProperties">		
-				<antcall target="server">					
-					<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
-					<param name="servant.codebase" value="file://${windows.root.slash}${demo.server.jar}"/>
-					<param name="servantclass" value="${demo.server.servantclass}"/>						
-					<param name="autoname" value="true" />			
-					<param name="db.driver" value="${demo.db.driver}"/>
-					<param name="db.url" value="${demo.db.url}" />
-					<param name="db.user" value="${demo.db.user}" />
-					<param name="db.password" value="${demo.db.password}" />
-					<param name="working.dir.root" value="wdir"/>					
-				</antcall>			
-			</target>
+		
+		<target name="demoserver" depends="initializeProperties">
+				
+			<antcall target="server">									
+				<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
+				<param name="servant.codebase" value="file://${windows.root.slash}${demo.server.jar}"/>
+				<param name="servantclass" value="${demo.server.servantclass}"/>						
+				<param name="autoname" value="true" />													
+				
+				<param name="naming.mode" value="${demo.naming.mode}"/>
+				<param name="db.type" value="${demo.db.type}"/>
+				<param name="db.host" value="${demo.db.host}"/>
+				<param name="db.port" value="${demo.db.port}" />
+				<param name="db.name" value="${demo.db.name}" />
+				<param name="db.user" value="${demo.db.user}" />
+				<param name="db.password" value="${demo.db.password}" />	
+
+				<param name="working.dir.root" value="wdir"/>
+				
+						
+			</antcall>			
+		</target>
+		
 		
 			<target name="democompile" depends="initializeProperties">
 				
@@ -121,6 +149,7 @@
 				</jar>
 				
 			</target>
+		
 				
 			<target name="demorun" depends="initializeProperties,democompile">
 				
@@ -129,11 +158,15 @@
 				</path>
 				
 				<antcall target="client">						
-					<param name="client.db.driver" value="${demo.db.driver}"/>
-					<param name="client.db.url" value="${demo.db.url}" />
+					<param name="client.db.type" value="${demo.db.type}"/>					
+					<param name="client.db.host" value="${demo.db.host}" />
+					<param name="client.db.port" value="${demo.db.port}" />
+					<param name="client.db.name" value="${demo.db.name}" />
+					
 					<param name="client.db.user" value="${demo.db.user}" />
 					<param name="client.db.password" value="${demo.db.password}" />
 					<param name="client.defaultpoolname" value="${demo.client.defaultpoolname}" />
+					
 					<param name="client.path.id" value="demo.client.path" />			
 					<param name="clientjarurls" value="file:///${demo.client.jar}" />
 					<param name="client.mainclass" value="${demo.client.mainclass}" />

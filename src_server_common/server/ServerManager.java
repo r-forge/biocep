@@ -57,12 +57,15 @@ import ch.ethz.ssh2.StreamGobbler;
  */
 public class ServerManager {
 
-	public static void main_(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
+		downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_DIALOG );
+		/*
 		RServices r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
 			ServerManager.getNamingInfo(), 256,256, "", false, null,null);
 
 		System.out.println(r.consoleSubmit("print('a')"));
 		System.exit(0);
+		*/
 	}
 
 	
@@ -632,6 +635,11 @@ public class ServerManager {
 
 			
 			try {
+				
+				if (keepAlive) {
+					try {downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_LOGGER | (showProgress ? PoolUtils.LOG_PRGRESS_TO_DIALOG : 0) );} catch (Exception e) {e.printStackTrace(); }
+				}
+				
 				File[] extraJarFiles=new File(INSTALL_DIR).listFiles(new FilenameFilter(){
 					public boolean accept(File dir, String name) {
 						return name.endsWith(".jar");
