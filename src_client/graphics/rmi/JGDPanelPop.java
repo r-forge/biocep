@@ -104,7 +104,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 	private boolean _broadcasted;
 	
-	private int maxNbrGraphicPrimitives=3000;
+	private int maxNbrGraphicPrimitives=16000;
 
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions) throws RemoteException {
 		this(gdDevice, autoPop, autoResize, actions, null, null);

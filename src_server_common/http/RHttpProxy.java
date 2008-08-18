@@ -451,7 +451,7 @@ public class RHttpProxy {
 											popActions();
 											
 											try {
-												Thread.sleep(5);
+												Thread.sleep(10);
 											} catch (Exception e) {
 											}
 										}
@@ -469,7 +469,6 @@ public class RHttpProxy {
 						try {
 
 							Vector<RAction> ractions = genericCallBackDevice.popRActions(maxNbrRactionsOnPop);
-							System.out.println(ractions);
 							if (ractions != null) {
 
 								for (int i = 0; i < ractions.size(); ++i) {

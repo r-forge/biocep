@@ -174,6 +174,7 @@ import uk.ac.ebi.microarray.pools.SSHUtils;
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
+import uk.ac.ebi.microarray.pools.gui.InDialog;
 import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 import uk.ac.ebi.microarray.pools.gui.SymbolPopDialog;
 import uk.ac.ebi.microarray.pools.gui.SymbolPushDialog;
@@ -237,6 +238,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private RCollaborationListenerImpl _collaborationListenerImpl;
 	private RConsoleActionListenerImpl _rConsoleActionListenerImpl;
 
+	private String[] _demos;
+	
 	private boolean logonWithoutConfirmation = false;
 
 	private final ReentrantLock _protectR = new RGuiReentrantLock() {
@@ -747,6 +750,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 
 							_isGroovyEnabled = _rForConsole.isGroovyEnabled();
+							_demos = _rForConsole.listDemos();
 
 							_collaborationListenerImpl = new RCollaborationListenerImpl();
 							_rForConsole.addRCollaborationListener(_collaborationListenerImpl);
@@ -1357,11 +1361,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 					demoMenu.removeAll();
 					if (_sessionId != null) {
 						try {
-							final String[] demos = _rForConsole.listDemos();
 
-							for (int i = 0; i < demos.length; ++i) {
+							for (int i = 0; i < _demos.length; ++i) {
 								final int index = i;
-								demoMenu.add(new AbstractAction(PoolUtils.replaceAll(demos[i], "_", " ")) {
+								demoMenu.add(new AbstractAction(PoolUtils.replaceAll(_demos[i], "_", " ")) {
 									public void actionPerformed(ActionEvent e) {
 
 										if (getRLock().isLocked()) {
@@ -1369,9 +1372,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 										} else {
 											try {
 												getRLock().lock();
-												String log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(demos[index]));
+												String log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(_demos[index]));
 
-												getConsoleLogger().print("sourcing demo " + PoolUtils.replaceAll(demos[index], "_", " "), log);
+												getConsoleLogger().print("sourcing demo " + PoolUtils.replaceAll(_demos[index], "_", " "), log);
 
 											} catch (Exception ex) {
 												ex.printStackTrace();
@@ -1391,13 +1394,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							demoMenu.addSeparator();
 
-							for (int i = 0; i < demos.length; ++i) {
+							for (int i = 0; i < _demos.length; ++i) {
 								final int index = i;
-								demoMenu.add(new AbstractAction("Copy to Clipboard - " + PoolUtils.replaceAll(demos[i], "_", " ")) {
+								demoMenu.add(new AbstractAction("Copy to Clipboard - " + PoolUtils.replaceAll(_demos[i], "_", " ")) {
 									public void actionPerformed(ActionEvent e) {
 										try {
 
-											StringSelection stringSelection = new StringSelection(_rForConsole.getDemoSource(demos[index]).toString());
+											StringSelection stringSelection = new StringSelection(_rForConsole.getDemoSource(_demos[index]).toString());
 											Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 											clipboard.setContents(stringSelection, new ClipboardOwner() {
 												public void lostOwnership(Clipboard clipboard, Transferable contents) {
@@ -3933,8 +3936,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 				} else if (action.getActionName().equals("GET_USER_INPUT")) {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
-							try {
-								GetExprDialog dialog=new GetExprDialog(GDApplet.this,"R Waits For Your Input", new String[]{""});
+							try {								
+								InDialog dialog=new InDialog(null,"  R Console Input  ",new String[]{""});
 								dialog.setVisible(true);
 								if (dialog.getExpr()!=null)	getR().setUserInput(dialog.getExpr()); else getR().setUserInput("");
 							} catch (Exception e) {
