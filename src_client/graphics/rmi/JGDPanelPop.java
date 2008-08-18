@@ -103,6 +103,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private String _name = "";
 
 	private boolean _broadcasted;
+	
+	private int maxNbrGraphicPrimitives=3000;
 
 	public JGDPanelPop(GDDevice gdDevice, boolean autoPop, boolean autoResize, AbstractAction[] actions) throws RemoteException {
 		this(gdDevice, autoPop, autoResize, actions, null, null);
@@ -669,10 +671,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		_autoResize = autoResize;
 	}
 
+	
 	synchronized public void popNow() {
 
 		try {
-			Vector<GDObject> gdObjects = _gdDevice.popAllGraphicObjects();
+			Vector<GDObject> gdObjects = _gdDevice.popAllGraphicObjects(maxNbrGraphicPrimitives);
 			if (gdObjects != null && gdObjects.size() > 0) {
 
 				_l.addAll(gdObjects);

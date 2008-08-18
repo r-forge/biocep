@@ -237,12 +237,20 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		return _id;
 	}
 	
-	public Vector<RAction> popRActions() throws RemoteException {
-		if (_rActions.size() == 0)
-			return null;
+	public Vector<RAction> popRActions(int maxNbrRactions) throws RemoteException {
+		
+		if (_rActions.size() == 0)	return null;
 		Vector<RAction> result = (Vector<RAction>) _rActions.clone();
+		
+		if (maxNbrRactions!=-1 && result.size() > maxNbrRactions) {
+			int delta = result.size() - maxNbrRactions;
+			for (int i = 0; i < delta; ++i) {
+				result.remove(result.size() - 1);
+			}
+		}
 		for (int i = 0; i < result.size(); ++i)	_rActions.remove(0);
 		return result;
+		
 	}
 	
 	public void dispose() throws RemoteException {

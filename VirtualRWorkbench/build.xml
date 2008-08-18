@@ -573,13 +573,11 @@
 				  	
 				  <copy todir="VirtualRWorkbench/frontendapp/appletlibs">
 				  	
-						<fileset dir="" includes="RJB.jar"/>				  	
-				  		<fileset dir="" includes="pdfviewer.jar"/>
-
+						<fileset dir="" includes="RJB.jar"/>
 				  	
+				  	    <!--
+				  		<fileset dir="" includes="pdfviewer.jar"/>				  	
 				  	    <fileset dir="lib/desktop" includes="freemindbrowser.jar"/>
-				  	
-						
 						<fileset dir="lib/log" includes="commons-logging-1.1.1.jar"/>	
 						<fileset dir="lib/log" includes="log4j-1.2.15.jar"/>							
 						<fileset dir="lib/j2ee" includes="commons-codec-1.3.jar"/>
@@ -642,6 +640,7 @@
 					  	
 					  	
 					  	<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
+					  	-->
 				  	
 					  	
 				  	
@@ -655,6 +654,8 @@
 				  	
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="RJB.jar"/>
 				  	
+				  	
+				  	<!--
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="pdfviewer.jar"/>
 
 							
@@ -710,6 +711,8 @@
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs"  includes="groovy-all-1.5.4.jar"/>
 				  	
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
+					
+					-->
 				  	
 				  	
 				  </path>

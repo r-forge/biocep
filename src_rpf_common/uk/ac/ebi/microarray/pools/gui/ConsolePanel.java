@@ -339,8 +339,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 					if ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
 						insertBlankLine.actionPerformed(null);
 					} else {
-						if (_commandInputField.getText().trim().equals(""))
-							return;
+						//if (_commandInputField.getText().trim().equals(""))	return;
 						play(_commandInputField.getText(), false);
 					}
 				}

@@ -425,7 +425,8 @@ public class RHttpProxy {
 		}
 	}
 
-	public static RServices getR(final String url, final String sessionId, final boolean handleCallbacks) {
+
+	public static RServices getR(final String url, final String sessionId, final boolean handleCallbacks,final int maxNbrRactionsOnPop) {
 		final HttpClient httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
 
 		final Object proxy = Proxy.newProxyInstance(RHttpProxy.class.getClassLoader(), new Class<?>[] { RServices.class, HttpMarker.class },
@@ -467,7 +468,8 @@ public class RHttpProxy {
 					private synchronized void popActions() {
 						try {
 
-							Vector<RAction> ractions = genericCallBackDevice.popRActions();
+							Vector<RAction> ractions = genericCallBackDevice.popRActions(maxNbrRactionsOnPop);
+							System.out.println(ractions);
 							if (ractions != null) {
 
 								for (int i = 0; i < ractions.size(); ++i) {

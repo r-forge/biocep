@@ -32,7 +32,6 @@ import org.rosuda.javaGD.GDState;
  */
 public class GDContainerBag implements GDContainer {
 
-	private static final int MAX_NBR_EVENTS_ON_POP = 100000;
 	private Vector<GDObject> _actions = new Vector<GDObject>();
 	private Dimension _size = null;
 	private GDState _gs;
@@ -47,13 +46,13 @@ public class GDContainerBag implements GDContainer {
 		_gs.f = new Font(null, 0, 12);
 	}
 
-	synchronized public Vector<GDObject> popAllGraphicObjects() {
+	synchronized public Vector<GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) {
 		// System.out.println("popAllGraphicObjects");
 		if (_actions.size() == 0)
 			return null;
 		Vector<GDObject> result = (Vector<GDObject>) _actions.clone();
-		if (result.size() > MAX_NBR_EVENTS_ON_POP) {
-			int delta = result.size() - MAX_NBR_EVENTS_ON_POP;
+		if (maxNbrGraphicPrimitives!=1 && result.size() > maxNbrGraphicPrimitives) {
+			int delta = result.size() - maxNbrGraphicPrimitives;
 			for (int i = 0; i < delta; ++i) {
 				result.remove(result.size() - 1);
 			}

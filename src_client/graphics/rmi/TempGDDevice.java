@@ -47,7 +47,7 @@ public class TempGDDevice implements GDDevice {
 		return true;
 	}
 
-	public Vector<GDObject> popAllGraphicObjects() throws RemoteException {
+	public Vector<GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
 		return null;
 	}
 

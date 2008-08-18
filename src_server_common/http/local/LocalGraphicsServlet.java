@@ -62,7 +62,7 @@ public class LocalGraphicsServlet extends javax.servlet.http.HttpServlet impleme
 
 				device = _rgui.getR().newDevice(width, height);
 				_rgui.getR().sourceFromBuffer(new StringBuffer(command));				
-				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects()); 				
+				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects(-1)); 				
 				response.setContentType("image/jpeg");
 				ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
 				response.getOutputStream().flush();

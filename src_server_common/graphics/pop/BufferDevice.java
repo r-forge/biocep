@@ -45,7 +45,7 @@ public class BufferDevice implements GDDevice {
 		return _dim;
 	}
 
-	public Vector<GDObject> popAllGraphicObjects() throws RemoteException {
+	public Vector<GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
 		return _l;
 	}
 

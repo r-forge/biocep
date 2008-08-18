@@ -167,7 +167,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 						device = r.newDevice(width, height);
 						r.sourceFromBuffer(new StringBuffer(command));
 						BufferedImage bufferedImage = Java2DUtils
-								.getBufferedImage(new Point(0, 0), new Dimension(width, height), device.popAllGraphicObjects());
+								.getBufferedImage(new Point(0, 0), new Dimension(width, height), device.popAllGraphicObjects(-1));
 						response.setContentType("image/jpeg");
 						ImageIO.write(bufferedImage, "jpg", response.getOutputStream());
 					} finally {
