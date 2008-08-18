@@ -472,6 +472,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		DirectJNI.getInstance().getRServices().removeAllRConsoleActionListeners();		
 	}
 	
+	public void setUserInput(String userInput) throws RemoteException {
+		DirectJNI.getInstance().getRServices().setUserInput(userInput);		
+	}
+	
+	
+	
 	public void setOrginatorUID(String uid) throws RemoteException {
 		DirectJNI.getInstance().getRServices().setOrginatorUID(uid);			
 	}
