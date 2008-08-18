@@ -436,6 +436,11 @@ public class RServicesObject implements RServices {
 	public void removeAllRConsoleActionListeners() throws RemoteException {
 		
 	}
+	
+	public void setUserInput(String userInput) throws RemoteException {
+
+		
+	}
 
 	public void chat(String sourceUID, String user, String message) throws RemoteException {
 		

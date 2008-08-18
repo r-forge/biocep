@@ -752,6 +752,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 							_rConsoleActionListenerImpl = new RConsoleActionListenerImpl();
 							_rForConsole.addRConsoleActionListener(_rConsoleActionListenerImpl);
 
+							_rForConsole.setProgressiveConsoleLogEnabled(true);
+							
 							if (_demo) {
 								playDemo();
 								LoginDialog.playDemo_bool = false;
@@ -859,9 +861,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								result = null;
 
 							} else {
-								result = _rForConsole.consoleSubmit(expression);
-								if (isCollaborativeMode())
-									_rForConsole.consolePrint(getUID(), getUserName(), expression, (String) result);
+								getConsoleLogger().printAsInput(expression);
+								_rForConsole.consoleSubmit(expression);
+								result=null;
 							}
 
 						} catch (NotLoggedInException nle) {
@@ -2809,7 +2811,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (getOpenedLogView() == null) {
 
 					try {
-						_rForConsole.setProgressiveConsoleLogEnabled(true);
+						//getR().setProgressiveConsoleLogEnabled(true);
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
@@ -2821,7 +2823,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
 							try {
-								_rForConsole.setProgressiveConsoleLogEnabled(false);
+								//getR().setProgressiveConsoleLogEnabled(false);
 							} catch (Exception e) {
 							}
 						}
@@ -3410,7 +3412,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					getConsoleLogger().printAsOutput("Server Name :" + getR().getServantName() + "\n");
 					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getProcessId() + "\n");
 					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp() + "\n");
-					getConsoleLogger().printAsOutput("STUB :" + PoolUtils.stubToHex(getR()) + "\n");
+					getConsoleLogger().printAsOutput("STUB : \n" + PoolUtils.stubToHex(getR()) + "\n");
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -3725,6 +3727,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		try {
 			getRLock().lock();
 
+			
 			final String log = _rForConsole.consoleSubmit(cmd);
 
 			SwingUtilities.invokeLater(new Runnable() {
@@ -3872,10 +3875,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		public void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException {
 			if (!getUID().equals(sourceUID)) {
-				_consolePanel.print("[" + user + "] - " + expression, result);
-			}
+				_consolePanel.print(expression==null ? null : "[" + user + "] - " + expression, result); 
+			}			
 		}
-
+		
 	}
 
 	public String getUserName() {
@@ -3917,6 +3920,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							getConsoleLogger().print((String) action.getAttributes().get("command"), (String) action.getAttributes().get("result"));
+						}
+					});
+				} else if (action.getActionName().equals("GET_USER_INPUT")) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								GetExprDialog dialog=new GetExprDialog(GDApplet.this,"R Waits For Your Input", new String[]{""});
+								dialog.setVisible(true);
+								if (dialog.getExpr()!=null)	getR().setUserInput(dialog.getExpr()); else getR().setUserInput("");
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
 					});
 				} else if (action.getActionName().equals("newHistogram")) {
@@ -4104,6 +4119,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 					});
 
 				}
+				
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						_consolePanel.print(null, (String)action.getAttributes().get("log"));
+					}
+				});
+				
+				
 			}
 
 		}

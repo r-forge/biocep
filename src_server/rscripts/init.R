@@ -36,6 +36,12 @@ assign('notifyJavaListeners', function(parameters)  {
 	.jcall( obj="server/RListener" , "V" ,"notifyJavaListeners", parameters )	
 }, env=.PrivateEnv)
 
+
+assign('nop', function()  {
+	return(invisible(NULL))	
+}, env=.PrivateEnv)
+
+
 assign('dev.broadcast',  function () {
 	temp_dev_list<-.PrivateEnv$dev.list();
  	if (!is.null(temp_dev_list)) {
@@ -236,6 +242,7 @@ aaa <- function( exp )  {
 }
 
 q<-function (save = "default", status = 0, runLast = TRUE) {'quit not allowed in this context'}
+
 
 
 

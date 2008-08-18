@@ -21,7 +21,6 @@ import java.io.File;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -30,6 +29,9 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import model.SpreadsheetListenerRemote;
+
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RChar;
@@ -99,15 +101,19 @@ public abstract class RListener {
 		_ractionListeners.removeAllElements();
 	}
 
-	public static void notifyRActionListeners(RConsoleAction action) {
+	public static void notifyRActionListeners(final RConsoleAction action) {
 		action.getAttributes().put("originatorUID",getOriginatorUID());
+		Vector<RConsoleActionListener> ractionListenersToRemove=new Vector<RConsoleActionListener>();									
 		for (int i=0; i<_ractionListeners.size();++i) {
 			try {
 				_ractionListeners.elementAt(i).rConsoleActionPerformed(action);
 			} catch (Exception e) {
 				e.printStackTrace();
+				ractionListenersToRemove.add(_ractionListeners.elementAt(i));
 			}
 		}
+		_ractionListeners.removeAll(ractionListenersToRemove);
+
 	}
 	
 	private static RClustserInterface _rClusterInterface = new RClustserInterface() {

@@ -184,6 +184,7 @@ public class DirectJNI {
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(DirectJNI.class);
 	private boolean _progrssiveConsoleFeedbackEnabled = false;
 	private HashMap<String, byte[]> _resourceCache = new HashMap<String, byte[]>();
+	private String _userInput=null;
 
 	public static DirectJNI getInstance() {
 		if (_djni != null)
@@ -230,6 +231,7 @@ public class DirectJNI {
 
 					if (hasConsoleInput) {
 
+						
 						_runRlock.lock();
 						try {
 							_sharedExecutionUnit = new ExecutionUnit() {
@@ -241,7 +243,7 @@ public class DirectJNI {
 								}
 
 								public String getConsoleInput() {
-									return "print('" + TAIL_PATTERN + "')";
+									return ".PrivateEnv$nop()";
 								}
 							};
 
@@ -254,6 +256,7 @@ public class DirectJNI {
 						} finally {
 							_runRlock.unlock();
 						}
+						
 
 						if (scanResultHolder[0] == true) {
 
@@ -283,9 +286,18 @@ public class DirectJNI {
 								_runRlock.unlock();
 							}
 
+							if (_progrssiveConsoleFeedbackEnabled) {
+								RConsoleAction consoleLogAppend = new RConsoleAction("APPEND_CONSOLE_LOG");
+								HashMap<String, Object> attrs = new HashMap<String, Object>();
+								attrs.put("log", "incomplete function call\n");
+								consoleLogAppend.setAttributes(attrs);
+								RListener.notifyRActionListeners(consoleLogAppend);
+							}
+							
 							return "incomplete function call\n";
 						}
 
+						/*
 						int p;
 						while ((p = _sharedBuffer.indexOf(TAIL_PATTERN)) == -1) {
 
@@ -296,7 +308,9 @@ public class DirectJNI {
 							}
 						}
 						return _sharedBuffer.substring(0, p - 5);
-
+						*/
+						
+						return _sharedBuffer.toString();
 					} else {
 						return _sharedBuffer.toString();
 					}
@@ -347,7 +361,9 @@ public class DirectJNI {
 
 	private class RMainLoopCallbacksImpl implements RMainLoopCallbacks {
 
+		boolean busy=false;
 		public void rBusy(Rengine re, int which) {
+			busy=(which==1);
 		}
 
 		public String rChooseFile(Rengine re, int newFile) {
@@ -363,7 +379,14 @@ public class DirectJNI {
 
 		public String rReadConsole(Rengine re, String prompt, int addToHistory) {
 			String consoleInput = "\n";
-			if (_sharedExecutionUnit != null) {
+			if (busy) {
+				_userInput=null;			
+				RListener.notifyRActionListeners(new RConsoleAction("GET_USER_INPUT"));				
+				while (_userInput==null) {
+					try {Thread.sleep(100);} catch (Exception e) {};
+				}
+				consoleInput = _userInput+"\n";				
+			} else if (_sharedExecutionUnit != null) {
 				_runRlock.lock();
 				try {
 					if (_sharedExecutionUnit != null) {
@@ -2723,6 +2746,10 @@ public class DirectJNI {
 			server.RListener.removeAllRActionListeners();
 		}
 		
+		public void setUserInput(String userInput) throws RemoteException {
+			_userInput=userInput;			
+		}
+		
 		public void setOrginatorUID(String uid) throws RemoteException {
 			server.RListener.setOrginatorUID(uid);
 			
@@ -3608,7 +3635,7 @@ public class DirectJNI {
 					break;
 				}
 
-			System.out.println(DirectJNI.getInstance().getRServices().consoleSubmit(".PrivateEnv$dev.list()"));
+			//System.out.println(DirectJNI.getInstance().getRServices().consoleSubmit(".PrivateEnv$dev.list()"));
 
 			_localDeviceHashMap.put(gdBag.getDeviceNumber(), this);
 
@@ -3634,7 +3661,7 @@ public class DirectJNI {
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				System.out.println(DirectJNI.getInstance().getRServices().getStatus());
 			}
-			DirectJNI.getInstance().getRServices().consoleSubmit("1");
+			//DirectJNI.getInstance().getRServices().consoleSubmit("1");
 		};
 
 		public void dispose() throws RemoteException {
