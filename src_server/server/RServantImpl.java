@@ -90,6 +90,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	private static int _port=System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("") ? Integer.decode(System.getProperty("rmi.port.start")) : 0; 
 	
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RServantImpl.class);
+	
+	private boolean archiveLog=false;
 
 	public String runR(ExecutionUnit eu) {
 		return DirectJNI.getInstance().runR(eu);
@@ -280,36 +282,36 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	public RObject call(String methodName, Object... args) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().call(methodName, args);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public RObject callAndGetReference(String methodName, Object... args) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().callAndGetReference(methodName, args);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 	
 	public RObject callAndGetObjectName(String methodName, Object... args) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().callAndGetObjectName(methodName, args);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException {
 		DirectJNI.getInstance().getRServices().callAndAssign(varName, methodName, args);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 	
 	public Object callAndConvert(String methodName, Object... args) throws RemoteException {
 		Object result=DirectJNI.getInstance().getRServices().callAndConvert( methodName, args);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public void freeReference(RObject refObj) throws RemoteException {
 		DirectJNI.getInstance().getRServices().freeReference(refObj);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 
 	public RObject referenceToObject(RObject refObj) throws RemoteException {
@@ -317,7 +319,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		ReferenceInterface refObjCast = (ReferenceInterface) refObj;
 		if (refObjCast.getAssignInterface().equals(_assignInterface)) {
 			RObject result = DirectJNI.getInstance().getRServices().referenceToObject(refObj);
-			_log.append(DirectJNI.getInstance().getRServices().getStatus());
+			if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 			return result;
 		} else {
 			return refObjCast.extractRObject();
@@ -326,103 +328,103 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 	public RObject putAndGetReference(Object obj) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().putAndGetReference(obj);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public void putAndAssign(Object obj, String name) throws RemoteException {
 		DirectJNI.getInstance().getRServices().putAndAssign(obj, name);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 
 	public RObject getObject(String expression) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().getObject(expression);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public RObject getReference(String expression) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().getReference(expression);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 	
 	public Object getObjectConverted(String expression) throws RemoteException {
 		Object result = DirectJNI.getInstance().getRServices().getObjectConverted(expression);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 	
 	public RObject getObjectName(String expression) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().getObjectName(expression);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 	
 	
 	public RObject realizeObjectName(RObject objectName) throws RemoteException {
 		RObject result = DirectJNI.getInstance().getRServices().realizeObjectName(objectName);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 	
 	
 	public Object realizeObjectNameConverted(RObject objectName) throws RemoteException {
 		Object result = DirectJNI.getInstance().getRServices().realizeObjectNameConverted(objectName);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 	
 	public void freeAllReferences() throws RemoteException {
 		DirectJNI.getInstance().getRServices().freeAllReferences();
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		
 	}
 	
 	public Object convert(RObject obj) throws RemoteException {
 		Object result = DirectJNI.getInstance().getRServices().convert(obj);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public void assignReference(String varname, RObject refObj) throws RemoteException {
 		DirectJNI.getInstance().getRServices().assignReference(varname, refObj);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 	}
 
 	public String evaluate(String expression) throws RemoteException {
 		String result = DirectJNI.getInstance().getRServices().evaluate(expression);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public String evaluate(final String expression, final int n) throws RemoteException {
 		String result = DirectJNI.getInstance().getRServices().evaluate(expression, n);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public String sourceFromResource(String resource) throws RemoteException {
 		String result = DirectJNI.getInstance().getRServices().sourceFromResource(resource);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public String sourceFromBuffer(StringBuffer buffer) throws RemoteException {
 		String result = DirectJNI.getInstance().getRServices().sourceFromBuffer(buffer);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public String print(String expression) throws RemoteException {
 		String result = DirectJNI.getInstance().getRServices().print(expression);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 
 	public String printExpressions(String[] expressions) throws RemoteException {
 		String result = DirectJNI.getInstance().getRServices().printExpressions(expressions);
-		_log.append(DirectJNI.getInstance().getRServices().getStatus());
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
 

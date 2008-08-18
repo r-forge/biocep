@@ -1,8 +1,9 @@
-package graphics.rmi.dialogs;
+package uk.ac.ebi.microarray.pools.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -18,7 +19,7 @@ import javax.swing.JTextField;
 
 import uk.ac.ebi.microarray.pools.PoolUtils;
 
-public class GetExprDialog extends JDialog {
+public class InDialog extends JDialog {
 	String[] save;
 	String expr_str = null;
 
@@ -36,21 +37,32 @@ public class GetExprDialog extends JDialog {
 			return null;
 	}
 
-	public GetExprDialog(Component father, String label, String[] expr_save) {
+	public InDialog(Component father, String label, String[] expr_save) {
 		super(new JFrame(), true);
-		save = expr_save;
+		
+		
+		setUndecorated(true);
+		
+		JPanel p = ((JPanel) getContentPane());
+		p.setLayout(new BorderLayout());
+		p.setBorder(BorderFactory.createLineBorder(Color.black,3));
+		/*
+		createRProgressArea[0].setForeground(Color.white);
+		createRProgressArea[0].setBackground(new Color(0x00,0x80,0x80));
+		createRProgressArea[0].setBorder(BorderFactory.createLineBorder(new Color(0x00,0x80,0x80),3));
+		createRProgressArea[0].setEditable(false);		
+		createRProgressBar[0].setForeground(Color.white);
+		createRProgressBar[0].setBackground(new Color(0x00,0x80,0x80));
+		createRProgressBar[0].setIndeterminate(true);
+		*/
+		
 		setLocationRelativeTo(father);
-		getContentPane().setLayout(new GridLayout(1, 2));
-		((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-		JPanel p1 = new JPanel();
-		p1.setLayout(new GridLayout(0, 1));
-		getContentPane().add(p1);
-		JPanel p2 = new JPanel();
-		p2.setLayout(new GridLayout(0, 1));
-		getContentPane().add(p2);
-
-		p1.add(new JLabel(label));
+		
+		
+		save = expr_save;
+		
+		
+		p.add(new JLabel(label), BorderLayout.WEST);
 
 		exprs = new JTextField();
 		exprs.setText(save[0]);
@@ -59,9 +71,7 @@ public class GetExprDialog extends JDialog {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == 10) {
 					okMethod();
-				} else if (e.getKeyCode() == 27) {
-					cancelMethod();
-				}
+				} 
 			}
 
 			public void keyReleased(KeyEvent e) {
@@ -72,7 +82,7 @@ public class GetExprDialog extends JDialog {
 		};
 		exprs.addKeyListener(keyListener);
 
-		p2.add(exprs);
+		p.add(exprs, BorderLayout.CENTER );
 
 		JButton ok = new JButton("Ok");
 		ok.addActionListener(new ActionListener() {
@@ -81,18 +91,8 @@ public class GetExprDialog extends JDialog {
 			}
 		});
 
-		JButton cancel = new JButton("Cancel");
-		cancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				cancelMethod();
-			}
-		});
-
-		p1.add(ok);
-		p2.add(cancel);
-
-		setSize(new Dimension(320, 100));
-
+		p.add(ok,BorderLayout.EAST);
+		setSize(new Dimension(320, 38));
 		PoolUtils.locateInScreenCenter(this);
 
 	}
@@ -103,10 +103,6 @@ public class GetExprDialog extends JDialog {
 		_closedOnOK = true;
 		setVisible(false);
 	}
-
-	private void cancelMethod() {
-		_closedOnOK = false;
-		setVisible(false);
-	}
-
+	
+	
 }

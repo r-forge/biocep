@@ -497,7 +497,7 @@ public class ServerManager {
 				}
 			}
 
-			progressLogger.logProgress("Installing missing packages "+missingPackages+"..\n"+"This doesn't alter your R installation and may take several minutes");
+			progressLogger.logProgress("Installing missing packages "+missingPackages+"..\n"+"This doesn't alter your R installation and may take several minutes. It will be done only once");
 			
 			if (installLibBatch.size() > 1) {
 
