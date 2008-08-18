@@ -297,19 +297,6 @@ public class DirectJNI {
 							return "incomplete function call\n";
 						}
 
-						/*
-						int p;
-						while ((p = _sharedBuffer.indexOf(TAIL_PATTERN)) == -1) {
-
-							try {
-								Thread.sleep(10);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						return _sharedBuffer.substring(0, p - 5);
-						*/
-						
 						return _sharedBuffer.toString();
 					} else {
 						return _sharedBuffer.toString();
@@ -3317,7 +3304,7 @@ public class DirectJNI {
 						log.info(status);
 					}
 					
-					Vector<GDObject> g2dObjects = device.popAllGraphicObjects();
+					Vector<GDObject> g2dObjects = device.popAllGraphicObjects(-1);
 					Java2DUtils.paintAll(svgGenerator, new Point(0, 0), dSize, g2dObjects);
 				} catch (Exception e) {
 					throw new RemoteException("", e);
@@ -3647,8 +3634,8 @@ public class DirectJNI {
 				_localBroadcastedDevices.add(gdBag.getDeviceNumber());
 		}
 
-		public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects() throws RemoteException {
-			return gdBag.popAllGraphicObjects();
+		public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
+			return gdBag.popAllGraphicObjects(maxNbrGraphicPrimitives);
 		};
 
 		public boolean hasGraphicObjects() throws RemoteException {
@@ -3753,7 +3740,7 @@ public class DirectJNI {
 							".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + device.getDeviceNumber() + ");"
 									+ ".PrivateEnv$dev.set(" + currentDevice + ");", 3);
 
-					Java2DUtils.paintAll(svgGenerator, new Point(0, 0), dSize, device.popAllGraphicObjects());
+					Java2DUtils.paintAll(svgGenerator, new Point(0, 0), dSize, device.popAllGraphicObjects(-1));
 				} catch (Exception e) {
 					throw new RemoteException("", e);
 				} finally {

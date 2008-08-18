@@ -28,7 +28,7 @@ import org.rosuda.javaGD.GDObject;
  * @author Karim Chine karim.chine@m4x.org
  */
 public interface GDDevice extends Remote {
-	public Vector<GDObject> popAllGraphicObjects() throws RemoteException;
+	public Vector<GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException;
 
 	public boolean hasGraphicObjects() throws RemoteException;
 

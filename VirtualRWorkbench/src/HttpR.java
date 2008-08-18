@@ -65,7 +65,7 @@ public class HttpR {
 		options.put("privatename", "tata");
 		options.put("urls", new URL[]{new URL("http://127.0.0.1:8080/rws/mapping/classes/")});
 		final String sessionId = RHttpProxy.logOn(cmdUrl, "", "guest", "guest", options);
-		final RServices r = RHttpProxy.getR(cmdUrl, sessionId,true);
+		final RServices r = RHttpProxy.getR(cmdUrl, sessionId,true,50);
 		byte[] pdf=r.getPdf("plot(rnorm(66))", 500, 500);
 		RandomAccessFile raf=new RandomAccessFile("c:/a0.pdf","rw");
 		raf.setLength(0);

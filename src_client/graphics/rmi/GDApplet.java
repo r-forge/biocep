@@ -230,6 +230,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 	Identification ident = null;
 
 	Stack<GDDevice> s = null;
+	
+	int maxNbrRactionsOnPop=50;
 
 	public static RGui _instance;
 	private RCollaborationListenerImpl _collaborationListenerImpl;
@@ -520,9 +522,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 									JOptionPane.showMessageDialog(GDApplet.this, "The login <guest> is not allowed to have workspace persistency");
 								}
 
-								_rForConsole = RHttpProxy.getR(_commandServletUrl, _sessionId, true);
-								_rForPopCmd = RHttpProxy.getR(_commandServletUrl, _sessionId, false);
-								_rForFiles = RHttpProxy.getR(_commandServletUrl, _sessionId, false);
+								_rForConsole = RHttpProxy.getR(_commandServletUrl, _sessionId, true,  maxNbrRactionsOnPop);
+								_rForPopCmd = RHttpProxy.getR(_commandServletUrl, _sessionId, false, maxNbrRactionsOnPop);
+								_rForFiles = RHttpProxy.getR(_commandServletUrl, _sessionId, false, maxNbrRactionsOnPop);
 
 								if (new File(GDApplet.NEW_R_STUB_FILE).exists())
 									new File(GDApplet.NEW_R_STUB_FILE).delete();
@@ -851,6 +853,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 							getRLock().lock();
 
 							if (_rForConsole instanceof HttpMarker) {
+								getConsoleLogger().printAsInput(expression);
 								_rForConsole.asynchronousConsoleSubmit(expression);
 								while (_rForConsole.isBusy()) {
 									try {
@@ -3893,8 +3896,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		public void rConsoleActionPerformed(final RConsoleAction action) throws RemoteException {
 
-			System.out.println("console action:" + action);
-
 			if (getUID().equals(action.getAttributes().get("originatorUID"))) {
 				if (action.getActionName().equals("help")) {
 					new Thread(new Runnable() {
@@ -3917,11 +3918,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 						}
 					}).start();
 				} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
+					
+					
+					/*
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
-							getConsoleLogger().print((String) action.getAttributes().get("command"), (String) action.getAttributes().get("result"));
+							_consolePanel.print(null, (String) action.getAttributes().get("result"));
 						}
 					});
+					
+					*/
+					
+					
 				} else if (action.getActionName().equals("GET_USER_INPUT")) {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {

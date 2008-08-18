@@ -42,10 +42,11 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote , Htt
 		popThread.start();
 
 	}
+	
 
 	public synchronized void popActions() {
 		try {
-			Vector<RAction> ractions = _device.popRActions();
+			Vector<RAction> ractions = _device.popRActions(-1);
 			if (ractions != null) {
 				for (int i = 0; i < ractions.size(); ++i) {
 					final RAction action = ractions.elementAt(i);
