@@ -51,7 +51,7 @@ public class GDContainerBag implements GDContainer {
 		if (_actions.size() == 0)
 			return null;
 		Vector<GDObject> result = (Vector<GDObject>) _actions.clone();
-		if (maxNbrGraphicPrimitives!=1 && result.size() > maxNbrGraphicPrimitives) {
+		if (maxNbrGraphicPrimitives!=-1 && result.size() > maxNbrGraphicPrimitives) {
 			int delta = result.size() - maxNbrGraphicPrimitives;
 			for (int i = 0; i < delta; ++i) {
 				result.remove(result.size() - 1);
