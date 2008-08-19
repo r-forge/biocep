@@ -414,7 +414,7 @@ public class DirectJNI {
 		}
 
 		public void rShowMessage(Rengine re, String message) {
-			System.out.println(message);
+			appendText("Message From R :"+message);
 			
 		}
 
