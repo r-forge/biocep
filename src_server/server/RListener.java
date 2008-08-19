@@ -18,6 +18,7 @@ package server;
 
 import graphics.rmi.RClustserInterface;
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
@@ -270,7 +271,6 @@ public abstract class RListener {
 			pack = null;
 		attributes.put("topic", topic);
 		attributes.put("package", pack);
-		RAction action = new RAction("help",attributes);	
 		notifyRActionListeners(new RConsoleAction("help",attributes));
 		return null;
 	}
@@ -698,6 +698,29 @@ public abstract class RListener {
 			e.printStackTrace();
 			return new String[] { "NOK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
 		} 
+	}
+	
+	public static void pager(String fileName, String header, String title, String deleteFile) {
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		
+		byte[] buffer = null;
+		try {
+			RandomAccessFile raf = new RandomAccessFile(fileName, "r");
+			buffer = new byte[(int) raf.length()];
+			raf.readFully(buffer);
+			raf.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		attributes.put("fileName", new File(fileName).getName());
+		attributes.put("content", buffer);
+		attributes.put("header", header);
+		attributes.put("title", title);
+		attributes.put("deleteFile", new Boolean(deleteFile));
+			
+		notifyRActionListeners(new RConsoleAction("PAGER",attributes));
+		
 	}
 
 }

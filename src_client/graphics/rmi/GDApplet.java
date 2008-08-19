@@ -3945,6 +3945,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
+				} else if (action.getActionName().equals("PAGER")) {
+					
+					String fileName=(String)action.getAttributes().get("fileName");
+					byte[] content=(byte[])action.getAttributes().get("content");
+					String header=(String)action.getAttributes().get("header");
+					String title=(String)action.getAttributes().get("title");
+					boolean deleteFile=(Boolean)action.getAttributes().get("deleteFile");					
+					int id = getDynamicViewId();
+				
+					final PagerView lv = new PagerView(title, null, id, GDApplet.this, fileName, content, header, deleteFile );
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+
+					
 				} else if (action.getActionName().equals("newHistogram")) {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
@@ -4102,6 +4115,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 						}
 					});
 				}
+				
+				
 			}
 
 			if (action.getActionName().equals("RESET_CONSOLE_LOG")) {
