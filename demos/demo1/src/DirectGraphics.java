@@ -17,8 +17,6 @@
  */
 import graphics.pop.GDDevice;
 import graphics.rmi.JGDPanelPop;
-import graphics.rmi.dialogs.GetExprDialog;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 
@@ -35,19 +33,17 @@ import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 public class DirectGraphics {
 
 	public static void main(String[] args) throws Exception {
-
-		
-		
-		//DirectJNI.init();
+		DirectJNI.init();
 		final RServices r = DirectJNI.getInstance().getRServices();
-		
-		System.out.println(r.consoleSubmit("library()"));
-		
-		System.exit(0);
-		
+
 		GDDevice d1 = r.newDevice(400, 500);
 		JPanel panel1 = new JGDPanelPop(d1);
 
+		GDDevice d2 = r.newDevice(400, 500);
+		JPanel panel2 = new JGDPanelPop(d2);
+
+		//RemotePanel panel=r.getPanel(450, 600);
+		//panel.init();
 
 		JFrame f1 = new JFrame();
 		f1.getContentPane().setLayout(new BorderLayout());
@@ -57,9 +53,36 @@ public class DirectGraphics {
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f1.setVisible(true);
 
-		r.consoleSubmit("demo(graphics)");
-		
-		System.out.println(r.consoleSubmit("9+8"));
+		JFrame f2 = new JFrame();
+		f2.getContentPane().setLayout(new BorderLayout());
+		f2.getContentPane().add(panel2, BorderLayout.CENTER);
+		panel2.repaint();
+		f2.pack();
+		f2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f2.setVisible(true);
+
+		r.evaluate("hist(rnorm(451))", 1);
+
+		ConsolePanel console = new ConsolePanel(new SubmitInterface() {
+			public String submit(String expression) {
+				String result = null;
+
+				try {
+					result = r.consoleSubmit(expression);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return result;
+			}
+		}, "Evaluate",Color.black,true,null);
+
+		JFrame fconsole = new JFrame();
+		fconsole.getContentPane().setLayout(new BorderLayout());
+		fconsole.getContentPane().add(console, BorderLayout.CENTER);
+		fconsole.pack();
+		fconsole.setSize(400, 400);
+		fconsole.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		fconsole.setVisible(true);
 
 	}
 

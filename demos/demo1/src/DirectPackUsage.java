@@ -33,21 +33,9 @@ import server.DirectJNI;
 public class DirectPackUsage {
 	public static void main(String args[]) throws Exception {
 		System.setErr(new PrintStream(System.out));
-		//DirectJNI.init();
+		DirectJNI.init();
 		RServices r = DirectJNI.getInstance().getRServices();		
-		
-		
-		System.out.println("---------------");
-		System.out.println(r.consoleSubmit("demo(graphics)"));
-		
-		
-		System.out.println("---------------");
-		System.out.println(r.consoleSubmit("89+66"));
-		
-		
-		System.exit(0);
-		
-		
+	
 		
 		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));
 		rGlobalEnvFunction globalPack = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"));
