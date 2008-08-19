@@ -414,6 +414,8 @@ public class DirectJNI {
 		}
 
 		public void rShowMessage(Rengine re, String message) {
+			System.out.println(message);
+			
 		}
 
 		private void appendText(String t) {
