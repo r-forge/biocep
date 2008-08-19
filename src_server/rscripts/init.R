@@ -1,10 +1,9 @@
 
 library(rJava);.jinit(classpath=NULL);
 library(JavaGD)
-
-.PrivateEnv<-new.env(parent = .GlobalEnv)
 library(TypeInfo)
 
+.PrivateEnv<-new.env(parent = .GlobalEnv)
 assign('q', q , env=.PrivateEnv);
 assign('dir', dir , env=.PrivateEnv);
 assign('ls', ls , env=.PrivateEnv);
@@ -21,6 +20,13 @@ assign('graphics.off', graphics.off , env=.PrivateEnv);
 try(assign('win.graph', win.graph , env=.PrivateEnv),silent=TRUE);
 try(assign('x11', x11 , env=.PrivateEnv),silent=TRUE);
 try(assign('X11', X11 , env=.PrivateEnv),silent=TRUE);
+
+assign('javapager', function (file, header = rep("", nfiles), title = "R Information", 
+    delete.file = FALSE, pager = getOption("pager"), encoding = "") {    
+	.jcall("server/RListener",,"pager", as.character(file), as.character(header), as.character(title),  as.character(delete.file) )
+}, env=.PrivateEnv)
+
+options(pager=.PrivateEnv$javapager)
 
 load.lightpack <- function( s )  {
 	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"loadLightPack", s ); 

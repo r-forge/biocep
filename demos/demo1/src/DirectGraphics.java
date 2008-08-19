@@ -38,10 +38,13 @@ public class DirectGraphics {
 
 		
 		
-		DirectJNI.init();
+		//DirectJNI.init();
 		final RServices r = DirectJNI.getInstance().getRServices();
 		
-
+		System.out.println(r.consoleSubmit("library()"));
+		
+		System.exit(0);
+		
 		GDDevice d1 = r.newDevice(400, 500);
 		JPanel panel1 = new JGDPanelPop(d1);
 
