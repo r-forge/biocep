@@ -758,7 +758,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 							_rConsoleActionListenerImpl = new RConsoleActionListenerImpl();
 							_rForConsole.addRConsoleActionListener(_rConsoleActionListenerImpl);
 
-							_rForConsole.setProgressiveConsoleLogEnabled(true);
 							
 							if (_demo) {
 								playDemo();
@@ -1769,25 +1768,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 		return result;
-	}
-
-	private JTextArea getOpenedLogViewerArea() {
-		LogView lv = getOpenedLogView();
-		if (lv != null)
-			return lv.getArea();
-		else
-			return null;
-	}
-
-	private LogView getOpenedLogView() {
-		Iterator<DynamicView> iter = dynamicViews.values().iterator();
-		while (iter.hasNext()) {
-			DynamicView dv = iter.next();
-			if (dv instanceof LogView) {
-				return (LogView) dv;
-			}
-		}
-		return null;
 	}
 
 	private ChatConsoleView getOpenedChatConsoleView() {
@@ -2804,40 +2784,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 					re.printStackTrace();
 				}
 
-			}
-
-			@Override
-			public boolean isEnabled() {
-				return getR() != null;
-			}
-		});
-
-		_actions.put("logview", new AbstractAction("Console Log Viewer") {
-			public void actionPerformed(final ActionEvent e) {
-				if (getOpenedLogView() == null) {
-
-					try {
-						//getR().setProgressiveConsoleLogEnabled(true);
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-
-					int id = getDynamicViewId();
-					DockingWindow lv = new LogView("Console Log Viewer", null, id);
-					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					lv.addListener(new AbstractDockingWindowListener() {
-
-						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
-							try {
-								//getR().setProgressiveConsoleLogEnabled(false);
-							} catch (Exception e) {
-							}
-						}
-
-					});
-				} else {
-					getOpenedLogView().restoreFocus();
-				}
 			}
 
 			@Override
@@ -4118,42 +4064,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 				
 				
 			}
-
-			if (action.getActionName().equals("RESET_CONSOLE_LOG")) {
-				final JTextArea area = getOpenedLogViewerArea();
-				if (area != null) {
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							area.setText("");
-							area.repaint();
-						}
-					});
-				}
-			} else if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {
-				final JTextArea area = getOpenedLogViewerArea();
-				if (area != null) {
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							area.setText(area.getText() + action.getAttributes().get("log"));
-						}
-					});
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							area.setCaretPosition(area.getText().length());
-							area.repaint();
-						}
-					});
-
-				}
-				
+			
+			if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {				
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
 						_consolePanel.print(null, (String)action.getAttributes().get("log"));
 					}
 				});
-				
-				
-			}
+			} else if (action.getActionName().equals("APPEND_CONSOLE_CONTINUE")) {				
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						_consolePanel.print(null, (String)action.getAttributes().get("log")+"\n",ConsolePanel.RED);
+					}
+				});
+			} 
 
 		}
 
