@@ -492,6 +492,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 							if (ident == null)
 								return "Logon cancelled\n";
 
+							
+							persistState();
+
 							_mode = ident.getMode();
 
 							if (getMode() == HTTP_MODE) {
@@ -871,6 +874,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 								_rForConsole.consoleSubmit(expression);
 								result=null;
 							}
+							
+							//persistState();
 
 						} catch (NotLoggedInException nle) {
 							noSession();
@@ -2060,16 +2065,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
-	private void persistState() {
-		System.out.println("--persistState");
+	synchronized private void persistState() {
 		try {
 			Vector<String> generatorParams = new Vector<String>();
 			generatorParams.add(GDApplet.SETTINGS_FILE);
-
 			if (getR() != null && !_keepAlive) {
 				generatorParams.add("working.dir.root=" + ((RChar) _rForConsole.getObject("getwd()")).getValue()[0]);
 			}
-
 			generatorParams.add("command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()));
 			generatorParams.add("mode=" + LoginDialog.mode_int);
 			generatorParams.add("url=" + LoginDialog.url_str);
@@ -2077,15 +2079,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		if (getR() != null && !_keepAlive && _save) {
-			try {
-				_rForConsole.consoleSubmit("save.image('.RData')");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
 	@Override
@@ -2102,7 +2095,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 			noSession();
 		} else {
+			
 			persistState();
+			
+			if (getR() != null && !_keepAlive && _save) {
+				try {
+					_rForConsole.consoleSubmit("save.image('.RData')");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -2944,12 +2946,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					final ServerPythonConsoleView lv = new ServerPythonConsoleView("Python Console", null, id, GDApplet.this);
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
-
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
-							try {
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+							lv.getConsolePanel().stopLogThread();
 						}
 
 					});
@@ -2971,10 +2969,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
-							try {
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+							lv.getConsolePanel().stopLogThread();
 						}
 					});
 
@@ -2995,10 +2990,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
-							try {
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+							lv.getConsolePanel().stopLogThread();
 						}
 					});
 
@@ -3019,10 +3011,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					((TabWindow) views[2].getWindowParent()).addTab(lv);
 					lv.addListener(new AbstractDockingWindowListener() {
 						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
-							try {
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+							lv.getConsolePanel().stopLogThread();							
 						}
 					});
 
@@ -3447,6 +3436,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private void noSession() {
 
 		persistState();
+		
+		if (getR() != null && !_keepAlive && _save) {
+			try {
+				_rForConsole.consoleSubmit("save.image('.RData')");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}		
 
 		if (_rProcessId != null && !_keepAlive) {
 
@@ -4065,18 +4062,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 				
 			}
 			
-			if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {				
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						_consolePanel.print(null, (String)action.getAttributes().get("log"));
-					}
-				});
+			if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {
+				_consolePanel.print(null, (String)action.getAttributes().get("log"));			
 			} else if (action.getActionName().equals("APPEND_CONSOLE_CONTINUE")) {				
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						_consolePanel.print(null, (String)action.getAttributes().get("log")+"\n",ConsolePanel.RED);
-					}
-				});
+				_consolePanel.print(null, (String)action.getAttributes().get("log")+"\n",ConsolePanel.RED);								
 			} 
 
 		}
