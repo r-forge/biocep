@@ -38,7 +38,6 @@ import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Vector;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -75,8 +74,10 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	private JTextPane _commandInputField;
 	JScrollPane _scrollPane = null;
 	Vector<String> _commandsHistory = new Vector<String>();
-	int _commandsHistoryIndex = 0;
+	private int _commandsHistoryIndex = 0;
 	private UndoManager um = new UndoManager();
+	private boolean _stopLogThread=false;
+	
 
 	public Vector<String> getCommandHistory() {
 		return _commandsHistory;
@@ -86,27 +87,23 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		_commandsHistory = history;
 		_commandsHistoryIndex = _commandsHistory.size();
 	}
-
-	public void print(final String cmd, final String log, SimpleAttributeSet logAttributeSet) {
-		if (cmd != null)
-			insertText("> " + cmd + "\n", BOLD_BLACK);
-		if (log != null)
-			insertText(log, logAttributeSet);
-		new Thread(new Runnable() {
-			public void run() {
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						JScrollBar scrollBar = _scrollPane.getVerticalScrollBar();
-						scrollBar.setValue(scrollBar.getMaximum());
-					}
-				});
+	
+	private Vector<LogUnit> _logActions = new Vector<LogUnit>();	
+	synchronized public Vector<LogUnit> popAllLogActions(int maxNbrLogActions) {
+		if (_logActions.size() == 0) return null;
+		Vector<LogUnit> result = (Vector<LogUnit>)_logActions.clone();
+		if (maxNbrLogActions!=-1 && result.size() > maxNbrLogActions) {
+			int delta = result.size() - maxNbrLogActions;
+			for (int i = 0; i < delta; ++i) {
+				result.remove(result.size() - 1);
 			}
-		}).start();
-
-		_commandInputField.setText("");
-		_commandInputField.setEnabled(true);
-		_commandInputField.requestFocus();
-		um = new UndoManager();
+		}
+		for (int i = 0; i < result.size(); ++i)	_logActions.remove(0);
+		return result;
+	}
+	
+	public void print(final String cmd, final String log, SimpleAttributeSet logAttributeSet) {		
+		_logActions.add(new LogUnit(cmd,log,logAttributeSet));
 	}
 
 	public void print(final String cmd, final String log) {
@@ -135,12 +132,11 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 			public void run() {
 
 				try {
-
 					SwingUtilities.invokeAndWait(new Runnable() {
 						public void run() {
 							_commandInputField.setEnabled(false);
 						}
-					});
+					});					
 
 					_commandsHistory.add(command);
 					_commandsHistoryIndex = _commandsHistory.size();
@@ -157,6 +153,16 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
+				} finally {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_commandInputField.setText("");
+							_commandInputField.setEnabled(true);
+							_commandInputField.requestFocus();
+							um = new UndoManager();
+						}
+					});
+					
 				}
 			}
 		}).start();
@@ -507,6 +513,45 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		});
 
 		_commandInputField.requestFocus();
+		
+		new Thread(new Runnable(){
+			public void run() {
+				while(true) {
+					if (_stopLogThread) break;
+					if (_logActions.size()>0) {																
+						SwingUtilities.invokeLater(new Runnable(){
+							public void run() {
+								Vector<LogUnit> logActions=popAllLogActions(-1);
+								for (int i=0; i<logActions.size(); ++i) {
+									String cmd=logActions.elementAt(i).getCmd();
+									String log=logActions.elementAt(i).getLog();
+									SimpleAttributeSet logAttributeSet=logActions.elementAt(i).getLogAttributeSet();									
+									if (cmd != null)insertText("> " + cmd + "\n", BOLD_BLACK);
+									if (log != null)insertText(log, logAttributeSet); 											
+								}
+								
+								if (_logActions.size()==0){
+									new Thread(new Runnable() {								
+										public void run() {
+											SwingUtilities.invokeLater(new Runnable() {
+												public void run() {
+													JScrollBar scrollBar = _scrollPane.getVerticalScrollBar();
+													scrollBar.setValue(scrollBar.getMaximum());
+												}
+											});
+										}
+									}).start();	
+								}
+
+								
+								
+							};
+						});
+					}
+					try {Thread.sleep(50);} catch (Exception e) {}
+				}				
+			}
+		}).start();
 
 	}
 
@@ -530,5 +575,9 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	public void setCursor(Cursor cursor) {
 		super.setCursor(cursor);
 		_logArea.setCursor(cursor);
+	}
+	
+	public void stopLogThread() {
+		_stopLogThread=true;
 	}
 }

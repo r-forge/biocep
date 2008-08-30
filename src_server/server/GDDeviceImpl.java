@@ -17,7 +17,6 @@
 package server;
 
 import graphics.pop.GDDevice;
-
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.rmi.RemoteException;
