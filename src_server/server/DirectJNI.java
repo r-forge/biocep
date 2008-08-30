@@ -30,8 +30,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -182,9 +184,10 @@ public class DirectJNI {
 	private Vector<Long> _protectedExpReference = new Vector<Long>();
 	private static Vector<String> demosList = null;
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(DirectJNI.class);
-	private boolean _progrssiveConsoleFeedbackEnabled = false;
 	private HashMap<String, byte[]> _resourceCache = new HashMap<String, byte[]>();
-	private String _userInput=null;
+	private String _userInput = null;
+	private boolean _stopRequired = false;
+	private PrintStream _o = System.out;
 
 	public static DirectJNI getInstance() {
 		if (_djni != null)
@@ -204,20 +207,64 @@ public class DirectJNI {
 			_mainLock.lock();
 			try {
 				boolean hasConsoleInput = (eu.getConsoleInput() != null && !eu.getConsoleInput().equals(""));
-				PrintStream _o = System.out;
-				Boolean[] scanResultHolder = null;
+				String consoleLog = null;
 
-				if (hasConsoleInput) {
-					scanResultHolder = new Boolean[1];
-					scanResultHolder[0] = false;
-					System.setOut(new PrintStream(new ScanStream(_o, _continueStr.getBytes(), _promptStr.getBytes(), scanResultHolder)));
+				_runRlock.lock();
+				try {
+					_sharedExecutionUnit = eu;
+
+					try {
+						_availableCondition.await();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+				} finally {
+					_runRlock.unlock();
 				}
 
-				try {
+				consoleLog = _sharedBuffer.toString();
+
+				if (hasConsoleInput && consoleLog.trim().equals("")) {
+
+					System.setOut(new PrintStream(new OutputStream() {
+						public void write(final byte[] b) throws IOException {
+							_o.write(b);
+							if (new String(b).startsWith(_continueStr)) {
+								HashMap<String, Object> attrs = new HashMap<String, Object>();
+								attrs.put("log", _continueStr);
+								RListener.notifyRActionListeners(new RConsoleAction("APPEND_CONSOLE_CONTINUE", attrs));
+							}
+						}
+
+						public void write(final byte[] b, final int off, final int len) throws IOException {
+							_o.write(b, off, len);
+							if (new String(b, off, len).startsWith(_continueStr)) {
+								HashMap<String, Object> attrs = new HashMap<String, Object>();
+								attrs.put("log", _continueStr);
+								RListener.notifyRActionListeners(new RConsoleAction("APPEND_CONSOLE_CONTINUE", attrs));
+							}
+						}
+
+						public void write(final int b) throws IOException {
+							_o.write(b);
+						}
+					}));
 
 					_runRlock.lock();
 					try {
-						_sharedExecutionUnit = eu;
+						_sharedExecutionUnit = new ExecutionUnit() {
+							public void run(Rengine e) {
+							}
+
+							public boolean emptyConsoleBufferBefore() {
+								return false;
+							}
+
+							public String getConsoleInput() {
+								return " ";
+							}
+						};
 
 						try {
 							_availableCondition.await();
@@ -229,82 +276,12 @@ public class DirectJNI {
 						_runRlock.unlock();
 					}
 
-					if (hasConsoleInput) {
+					System.setOut(_o);
 
-						
-						_runRlock.lock();
-						try {
-							_sharedExecutionUnit = new ExecutionUnit() {
-								public void run(Rengine e) {
-								}
-
-								public boolean emptyConsoleBufferBefore() {
-									return false;
-								}
-
-								public String getConsoleInput() {
-									return ".PrivateEnv$nop()";
-								}
-							};
-
-							try {
-								_availableCondition.await();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-
-						} finally {
-							_runRlock.unlock();
-						}
-						
-
-						if (scanResultHolder[0] == true) {
-
-							_runRlock.lock();
-							try {
-								_sharedExecutionUnit = new ExecutionUnit() {
-									public void run(Rengine e) {
-										_rEngine.rniStop(1);
-									}
-
-									public boolean emptyConsoleBufferBefore() {
-										return false;
-									}
-
-									public String getConsoleInput() {
-										return null;
-									}
-								};
-
-								try {
-									_availableCondition.await();
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-
-							} finally {
-								_runRlock.unlock();
-							}
-
-							if (_progrssiveConsoleFeedbackEnabled) {
-								RConsoleAction consoleLogAppend = new RConsoleAction("APPEND_CONSOLE_LOG");
-								HashMap<String, Object> attrs = new HashMap<String, Object>();
-								attrs.put("log", "incomplete function call\n");
-								consoleLogAppend.setAttributes(attrs);
-								RListener.notifyRActionListeners(consoleLogAppend);
-							}
-							
-							return "incomplete function call\n";
-						}
-
-						return _sharedBuffer.toString();
-					} else {
-						return _sharedBuffer.toString();
-					}
-				} finally {
-					if (hasConsoleInput)
-						System.setOut(_o);
 				}
+
+				return "";
+
 			} finally {
 				_mainLock.unlock();
 			}
@@ -348,9 +325,10 @@ public class DirectJNI {
 
 	private class RMainLoopCallbacksImpl implements RMainLoopCallbacks {
 
-		boolean busy=false;
+		boolean busy = false;
+
 		public void rBusy(Rengine re, int which) {
-			busy=(which==1);
+			busy = (which == 1);
 		}
 
 		public String rChooseFile(Rengine re, int newFile) {
@@ -367,21 +345,28 @@ public class DirectJNI {
 		public String rReadConsole(Rengine re, String prompt, int addToHistory) {
 			String consoleInput = "\n";
 			if (busy) {
-				_userInput=null;			
-				RListener.notifyRActionListeners(new RConsoleAction("GET_USER_INPUT"));				
-				while (_userInput==null) {
-					try {Thread.sleep(100);} catch (Exception e) {};
+
+				_userInput = null;
+				RListener.notifyRActionListeners(new RConsoleAction("GET_USER_INPUT"));
+				_stopRequired = false;
+				while (_userInput == null) {
+					try {
+						if (_stopRequired)
+							break;
+						Thread.sleep(100);
+					} catch (Exception e) {
+					}
+					;
 				}
-				consoleInput = _userInput+"\n";				
+				consoleInput = _userInput + "\n";
+
 			} else if (_sharedExecutionUnit != null) {
+
 				_runRlock.lock();
 				try {
 					if (_sharedExecutionUnit != null) {
 						if (_sharedExecutionUnit.emptyConsoleBufferBefore())
 							_sharedBuffer.setLength(0);
-						if (_progrssiveConsoleFeedbackEnabled) {
-							RListener.notifyRActionListeners(new RConsoleAction("RESET_CONSOLE_LOG"));
-						}
 
 						_markerA = -1;
 						_sharedExecutionUnit.run(re);
@@ -414,19 +399,14 @@ public class DirectJNI {
 		}
 
 		public void rShowMessage(Rengine re, String message) {
-			appendText("Message From R :"+message);
-			
+			appendText("Message From R :" + message);
 		}
 
 		private void appendText(String t) {
 			_sharedBuffer.append(t);
-			if (_progrssiveConsoleFeedbackEnabled) {
-				RConsoleAction consoleLogAppend = new RConsoleAction("APPEND_CONSOLE_LOG");
-				HashMap<String, Object> attrs = new HashMap<String, Object>();
-				attrs.put("log", t);
-				consoleLogAppend.setAttributes(attrs);
-				RListener.notifyRActionListeners(consoleLogAppend);
-			}
+			HashMap<String, Object> attrs = new HashMap<String, Object>();
+			attrs.put("log", t);
+			RListener.notifyRActionListeners(new RConsoleAction("APPEND_CONSOLE_LOG", attrs));
 		}
 
 		public void rWriteConsole(Rengine re, String text) {
@@ -1763,7 +1743,7 @@ public class DirectJNI {
 
 	void shutdownDevices(String deviceType) throws RemoteException {
 		RInteger devices = (RInteger) getRServices().getObject(".PrivateEnv$dev.list()");
-		if (devices!=null) {
+		if (devices != null) {
 			for (int i = 0; i < devices.getValue().length; ++i) {
 				if (devices.getNames()[i].equals(deviceType)) {
 					getRServices().getObject(".PrivateEnv$dev.off(" + devices.getValue()[i] + ")");
@@ -2079,7 +2059,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						e.rniEval(e.rniParse(expression, n), 0);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2104,7 +2084,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						_lastStatus = DirectJNI.this.sourceFromResource(resource);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2129,7 +2109,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						_lastStatus = DirectJNI.this.sourceFromBuffer(buffer);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2184,7 +2164,7 @@ public class DirectJNI {
 						for (int i = 0; i < asString.length; ++i)
 							stringHolder[0] += asString[i];
 
-						//broadcast(e);
+						// broadcast(e);
 
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
@@ -2218,7 +2198,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(false, null, methodName, args);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2245,7 +2225,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						DirectJNI.this.call(false, varName, methodName, args);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2272,7 +2252,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(true, null, methodName, args);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2299,7 +2279,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(true, null, methodName, args);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2337,7 +2317,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(false, null, methodName, args);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2555,7 +2535,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, false);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2583,7 +2563,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, true);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2609,7 +2589,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, false);
-						//broadcast(e);
+						// broadcast(e);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2663,16 +2643,16 @@ public class DirectJNI {
 				log.info(_lastStatus);
 			}
 		}
-		
+
 		public boolean symbolExists(final String symbol) throws RemoteException {
 			final Exception[] exceptionHolder = new Exception[1];
 			final Boolean[] objHolder = new Boolean[1];
-			
+
 			_lastStatus = runR(new server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
-						long id=e.rniEval(e.rniParse(symbol, 1), 0);
-						objHolder[0]=id>0;
+						long id = e.rniEval(e.rniParse(symbol, 1), 0);
+						objHolder[0] = id > 0;
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -2688,7 +2668,7 @@ public class DirectJNI {
 			} else if (!_lastStatus.equals("")) {
 				log.info(_lastStatus);
 			}
-			
+
 			return objHolder[0];
 		}
 
@@ -2707,7 +2687,7 @@ public class DirectJNI {
 		Vector<RCollaborationListener> _rCollaborationListeners = new Vector<RCollaborationListener>();
 
 		public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
-			System.out.println("addRCollaborationListener");			
+			System.out.println("addRCollaborationListener");
 			_rCollaborationListeners.add(collaborationListener);
 		}
 
@@ -2718,9 +2698,9 @@ public class DirectJNI {
 		public void removeAllRCollaborationListeners() throws RemoteException {
 			_rCollaborationListeners.removeAllElements();
 		}
-		
+
 		public boolean hasRCollaborationListeners() throws RemoteException {
-			return _rCollaborationListeners.size()>0;
+			return _rCollaborationListeners.size() > 0;
 		}
 
 		public void addRConsoleActionListener(RConsoleActionListener helpListener) throws RemoteException {
@@ -2734,23 +2714,22 @@ public class DirectJNI {
 		public void removeAllRConsoleActionListeners() throws RemoteException {
 			server.RListener.removeAllRActionListeners();
 		}
-		
+
 		public void setUserInput(String userInput) throws RemoteException {
-			_userInput=userInput;			
+			_userInput = userInput;
 		}
-		
+
 		public void setOrginatorUID(String uid) throws RemoteException {
 			server.RListener.setOrginatorUID(uid);
-			
+
 		}
-		
+
 		public String getOriginatorUID() throws RemoteException {
 			return server.RListener.getOriginatorUID();
 		}
 
-		
 		public void chat(String sourceUID, String user, String message) throws RemoteException {
-			Vector<RCollaborationListener> removeList=new Vector<RCollaborationListener>();
+			Vector<RCollaborationListener> removeList = new Vector<RCollaborationListener>();
 			for (int i = 0; i < _rCollaborationListeners.size(); ++i) {
 				try {
 					_rCollaborationListeners.elementAt(i).chat(sourceUID, user, message);
@@ -2760,9 +2739,9 @@ public class DirectJNI {
 			}
 			_rCollaborationListeners.removeAll(removeList);
 		}
-		
+
 		public void consolePrint(String sourceUID, String user, String expression, String result) throws RemoteException {
-			Vector<RCollaborationListener> removeList=new Vector<RCollaborationListener>();
+			Vector<RCollaborationListener> removeList = new Vector<RCollaborationListener>();
 			for (int i = 0; i < _rCollaborationListeners.size(); ++i) {
 				try {
 					_rCollaborationListeners.elementAt(i).consolePrint(sourceUID, user, expression, result);
@@ -2772,7 +2751,7 @@ public class DirectJNI {
 			}
 			_rCollaborationListeners.removeAll(removeList);
 		}
-		
+
 		public GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
 			return null;
 		}
@@ -2780,7 +2759,7 @@ public class DirectJNI {
 		public GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException {
 			return null;
 		}
-		
+
 		public String[] listPackages() throws RemoteException {
 			return ((String[]) DirectJNI._packageNames.toArray(new String[0]));
 		}
@@ -2807,6 +2786,7 @@ public class DirectJNI {
 
 		public void stop() throws RemoteException {
 			_rEngine.rniStop(1);
+			_stopRequired = true;
 		}
 
 		public RNI getRNI() throws RemoteException {
@@ -2826,12 +2806,11 @@ public class DirectJNI {
 
 			return null;
 		}
-		
-		
+
 		public String getJobId() throws RemoteException {
 			return null;
 		}
-		
+
 		public void setJobId(String jobId) throws RemoteException {
 		}
 
@@ -2902,18 +2881,11 @@ public class DirectJNI {
 			}
 
 			/*
-			if (_localBroadcastedDevices.size() > 1) {
-				runR(new server.ExecutionUnit() {
-					public void run(Rengine e) {
-						try {
-							broadcast(e);
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					}
-				});
-			}
-			*/
+			 * if (_localBroadcastedDevices.size() > 1) { runR(new
+			 * server.ExecutionUnit() { public void run(Rengine e) { try {
+			 * broadcast(e); } catch (Exception ex) { ex.printStackTrace(); } }
+			 * }); }
+			 */
 
 			return clean(_lastStatus);
 
@@ -3228,14 +3200,6 @@ public class DirectJNI {
 			}
 		}
 
-		public void setProgressiveConsoleLogEnabled(boolean progressiveLog) throws RemoteException {
-			_progrssiveConsoleFeedbackEnabled = progressiveLog;
-		}
-
-		public boolean isProgressiveConsoleLogEnabled() throws RemoteException {
-			return _progrssiveConsoleFeedbackEnabled;
-		}
-
 		public String getProcessId() throws RemoteException {
 			return PoolUtils.getProcessId();
 		}
@@ -3268,9 +3232,8 @@ public class DirectJNI {
 		public Vector<String> getSvg(String script, int width, int height) throws RemoteException {
 
 			File tempFile = null;
-			String status="";
-			
-			
+			String status = "";
+
 			try {
 				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".svg").getCanonicalFile();
 				if (tempFile.exists())
@@ -3279,13 +3242,13 @@ public class DirectJNI {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			}
-		
-			//boolean svgFunctionAvailable=symbolExists("svg");
-			boolean svgFunctionAvailable=false;
-			boolean CairoFunctionAvailable=false;
-			if (!svgFunctionAvailable)  {
+
+			// boolean svgFunctionAvailable=symbolExists("svg");
+			boolean svgFunctionAvailable = false;
+			boolean CairoFunctionAvailable = false;
+			if (!svgFunctionAvailable) {
 				evaluate("library(Cairo)");
-				CairoFunctionAvailable=symbolExists("Cairo");
+				CairoFunctionAvailable = symbolExists("Cairo");
 			}
 
 			if (!(svgFunctionAvailable || CairoFunctionAvailable)) {
@@ -3299,13 +3262,13 @@ public class DirectJNI {
 				GDDevice device = null;
 				try {
 					device = newDevice(dSize.width, dSize.height);
-					
+
 					sourceFromBuffer(new StringBuffer(script));
-					status=getStatus();
-					if (!status.equals("")) {						
+					status = getStatus();
+					if (!status.equals("")) {
 						log.info(status);
 					}
-					
+
 					Vector<GDObject> g2dObjects = device.popAllGraphicObjects(-1);
 					Java2DUtils.paintAll(svgGenerator, new Point(0, 0), dSize, g2dObjects);
 				} catch (Exception e) {
@@ -3337,24 +3300,24 @@ public class DirectJNI {
 					String line = null;
 					while ((line = br.readLine()) != null)
 						result.add(line);
-					
-					_lastStatus=status;
+
+					_lastStatus = status;
 					return result;
 				} catch (Exception e) {
 					throw new RemoteException("", e);
 				}
 
 			} else {
-				String command = "CairoSVG(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-						+ new Double(10 * (width / height)) + ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);" ;
+				String command = "CairoSVG(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (width / height))
+						+ ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);";
 				evaluate(command);
 				if (!getStatus().equals("")) {
 					log.info(getStatus());
 				}
-				
+
 				sourceFromBuffer(new StringBuffer(script));
-				status=getStatus();
-				if (!status.equals("")) {						
+				status = getStatus();
+				if (!status.equals("")) {
 					log.info(status);
 				}
 
@@ -3377,7 +3340,7 @@ public class DirectJNI {
 						e.printStackTrace();
 						throw new RemoteException("", e);
 					}
-					_lastStatus=status;
+					_lastStatus = status;
 					return result;
 				} else {
 					return null;
@@ -3386,10 +3349,9 @@ public class DirectJNI {
 			}
 		}
 
-		
 		public byte[] getPdf(String script, int width, int height) throws RemoteException {
-			
-			String status="";
+
+			String status = "";
 			File tempFile = null;
 			try {
 				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".pdf").getCanonicalFile();
@@ -3404,19 +3366,18 @@ public class DirectJNI {
 			shutdownDevices("pdf");
 
 			final String createDeviceCommand = "pdf(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-					+ new Double(6 * (width / height)) + ", height = " + 6
-					+ " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
+					+ new Double(6 * (width / height)) + ", height = " + 6 + " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
 			evaluate(createDeviceCommand);
 			if (!getStatus().equals("")) {
 				log.info(getStatus());
 			}
-			
-			sourceFromBuffer(new StringBuffer(script));			
-			status=getStatus();
-			if (!status.equals("")) {						
+
+			sourceFromBuffer(new StringBuffer(script));
+			status = getStatus();
+			if (!status.equals("")) {
 				log.info(status);
-			}			
-			evaluate( ".PrivateEnv$dev.set("	+ currentDevice + ");", 1);
+			}
+			evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 			if (tempFile.exists()) {
 				byte[] result = null;
 				try {
@@ -3430,21 +3391,21 @@ public class DirectJNI {
 					e.printStackTrace();
 					throw new RemoteException("", e);
 				}
-				_lastStatus=status;
+				_lastStatus = status;
 				return result;
 			} else {
-				_lastStatus=status;
+				_lastStatus = status;
 				return null;
-			}			
+			}
 		}
-				
+
 		public String getPythonStatus() throws RemoteException {
 			return PythonInterpreterSingleton.getPythonStatus();
 
 		}
 
 		public String pythonExceFromResource(String resource) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported yet.");		
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		public String pythonExec(String pythonCommand) throws RemoteException {
@@ -3484,16 +3445,20 @@ public class DirectJNI {
 		}
 
 		public RObject pythonEval(String pythonCommand) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported yet.");		}
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
 		public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported yet.");		}
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
 		public RObject pythonGet(String name) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported yet.");		}
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
 		public Object pythonGetAndConvert(String name) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported yet.");		}
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
 		public void pythonSet(String name, Object Value) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported yet.");
@@ -3551,8 +3516,6 @@ public class DirectJNI {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
-		
-		
 		public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
@@ -3568,26 +3531,31 @@ public class DirectJNI {
 		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
-				
+
 		public int countSets() throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
+
 		public SVarSetInterfaceRemote getSet(int i) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
+
 		public SVarSetInterfaceRemote getCurrentSet() throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
+
 		public int curSetId() throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
+
 		public SVarInterfaceRemote getVar(int setId, int i) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
+
 		public SVarInterfaceRemote getVar(int setId, String name) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
-		
+
 	};
 
 	static private HashMap<Integer, GDDevice> _localDeviceHashMap = new HashMap<Integer, GDDevice>();
@@ -3624,7 +3592,8 @@ public class DirectJNI {
 					break;
 				}
 
-			//System.out.println(DirectJNI.getInstance().getRServices().consoleSubmit(".PrivateEnv$dev.list()"));
+			// System.out.println(DirectJNI.getInstance().getRServices().
+			// consoleSubmit(".PrivateEnv$dev.list()"));
 
 			_localDeviceHashMap.put(gdBag.getDeviceNumber(), this);
 
@@ -3650,7 +3619,7 @@ public class DirectJNI {
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				System.out.println(DirectJNI.getInstance().getRServices().getStatus());
 			}
-			//DirectJNI.getInstance().getRServices().consoleSubmit("1");
+			// DirectJNI.getInstance().getRServices().consoleSubmit("1");
 		};
 
 		public void dispose() throws RemoteException {
@@ -3717,12 +3686,14 @@ public class DirectJNI {
 				throw new RemoteException("", e);
 			}
 
-			//boolean svgFunctionAvailable=DirectJNI.getInstance().getRServices().symbolExists("svg");
-			boolean svgFunctionAvailable=false;
-			boolean CairoFunctionAvailable=false;
-			if (!svgFunctionAvailable)  {
+			// boolean
+			// svgFunctionAvailable=DirectJNI.getInstance().getRServices(
+			// ).symbolExists("svg");
+			boolean svgFunctionAvailable = false;
+			boolean CairoFunctionAvailable = false;
+			if (!svgFunctionAvailable) {
 				DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");
-				CairoFunctionAvailable=DirectJNI.getInstance().getRServices().symbolExists("Cairo");
+				CairoFunctionAvailable = DirectJNI.getInstance().getRServices().symbolExists("Cairo");
 			}
 
 			if (!(svgFunctionAvailable || CairoFunctionAvailable)) {
@@ -3778,23 +3749,26 @@ public class DirectJNI {
 					throw new RemoteException("", e);
 				}
 			} else {
-			
-				String SvgDeviceName=null;
-				if (svgFunctionAvailable) SvgDeviceName="svg"; else SvgDeviceName="Cairo"; 
-				
+
+				String SvgDeviceName = null;
+				if (svgFunctionAvailable)
+					SvgDeviceName = "svg";
+				else
+					SvgDeviceName = "Cairo";
+
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 
 				DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
 
-				final String createDeviceCommand = SvgDeviceName + (SvgDeviceName.equals("svg")?"":"SVG") +"(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-						+ new Double(10 * (getSize().width / getSize().height)) + ", height = " + 10
-						+ " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
-				
-				System.out.println("createDeviceCommand:"+createDeviceCommand);
+				final String createDeviceCommand = SvgDeviceName + (SvgDeviceName.equals("svg") ? "" : "SVG") + "(file = \""
+						+ tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (getSize().width / getSize().height))
+						+ ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
+
+				System.out.println("createDeviceCommand:" + createDeviceCommand);
 				DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
 				if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 					log.info(DirectJNI.getInstance().getRServices().getStatus());
-					System.out.println("Status:"+DirectJNI.getInstance().getRServices().getStatus());
+					System.out.println("Status:" + DirectJNI.getInstance().getRServices().getStatus());
 				}
 
 				int cairoDevice = DirectJNI.getInstance().getDevice(SvgDeviceName);
@@ -3830,8 +3804,6 @@ public class DirectJNI {
 				} else {
 					return null;
 				}
-				
-				
 
 			}
 		}
@@ -3918,20 +3890,21 @@ public class DirectJNI {
 		public String getId() throws RemoteException {
 			return null;
 		}
-		
+
 		public boolean isBroadcasted() throws RemoteException {
 			return _localBroadcastedDevices.contains(gdBag.getDeviceNumber());
 		}
-		
+
 		public void broadcast() throws RemoteException {
-			if (_localBroadcastedDevices.size() <= 1 || !_localBroadcastedDevices.contains(gdBag.getDeviceNumber()))return;
-			
+			if (_localBroadcastedDevices.size() <= 1 || !_localBroadcastedDevices.contains(gdBag.getDeviceNumber()))
+				return;
+
 			final Exception[] exceptionHolder = new Exception[1];
 			String lastStatus = DirectJNI.getInstance().runR(new server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 
-						int currentDevice = e.rniGetIntArray(e.rniEval(e.rniParse(".PrivateEnv$dev.cur()", 1), 0))[0];												
+						int currentDevice = e.rniGetIntArray(e.rniEval(e.rniParse(".PrivateEnv$dev.cur()", 1), 0))[0];
 						String code = ".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");";
 						for (Integer d : _localBroadcastedDevices) {
 							if (d != gdBag.getDeviceNumber()) {
@@ -3939,9 +3912,9 @@ public class DirectJNI {
 							}
 						}
 						code += ".PrivateEnv$dev.set(" + currentDevice + ");";
-						e.rniEval(e.rniParse(code, _localBroadcastedDevices.size()+1), 0);
-						
-						System.out.println("code ="+code);
+						e.rniEval(e.rniParse(code, _localBroadcastedDevices.size() + 1), 0);
+
+						System.out.println("code =" + code);
 
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
@@ -4142,7 +4115,8 @@ public class DirectJNI {
 						String nameWithoutPackage = className.substring(className.lastIndexOf('.') + 1);
 						if (nameWithoutPackage.indexOf("Factory") != -1 && c_.getMethod("setData", new Class[] { RObject.class }) != null) {
 							// if
-							// (DirectJNI._factoriesMapping.get(nameWithoutPackage)
+							//(DirectJNI._factoriesMapping.get(nameWithoutPackage
+							// )
 							// != null) throw new Exception("Factories Names
 							// Conflict : two " + nameWithoutPackage);
 							_factoriesMapping.put(nameWithoutPackage, className);

@@ -73,7 +73,8 @@ public class CoreMain {
 			System.out.println("Can't Launch R Server, Rmi Registry is not accessible!!");
 		}
 		
-		if (System.getProperty("wait")!=null && System.getProperty("wait").equalsIgnoreCase("true")) {
+		boolean wait= ( System.getProperty("wait")!=null && !System.getProperty("wait").equals("") ? new Boolean(System.getProperty("wait")) : true );
+		if (wait) {
 			while (true) {
 				try {Thread.sleep(100);}catch (Exception e) {}
 			}

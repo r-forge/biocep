@@ -37,6 +37,7 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RPFSessionInfo;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 import uk.ac.ebi.microarray.pools.TimeoutException;
+import uk.ac.ebi.microarray.pools.YesSecurityManager;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -79,7 +80,9 @@ public class ParallelizedMatrixProduct {
 		return result;
 	}
 
-	public static void main(String args[]) throws Exception {
+	public static void main(String args[]) throws Exception {		
+		System.setSecurityManager(new YesSecurityManager());
+		
 
 		double[][] matrix1 = new double[MATRIX_SIZE][MATRIX_SIZE];
 		double[][] matrix2 = new double[MATRIX_SIZE][MATRIX_SIZE];

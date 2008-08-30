@@ -712,15 +712,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().getDemoSource(demoName);
 	}
 
-	public void setProgressiveConsoleLogEnabled(boolean progressiveLog) throws RemoteException {
-		DirectJNI.getInstance().getRServices().setProgressiveConsoleLogEnabled(progressiveLog);
-
-	}
-
-	public boolean isProgressiveConsoleLogEnabled() throws RemoteException {
-		return DirectJNI.getInstance().getRServices().isProgressiveConsoleLogEnabled();
-	}
-
 	public boolean isBusy() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().isBusy();
 	}

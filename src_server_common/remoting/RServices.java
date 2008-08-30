@@ -22,13 +22,8 @@ import java.util.Vector;
 import mapping.RPackage;
 import model.SpreadsheetModelRemote;
 import org.bioconductor.packages.rservices.RObject;
-import org.rosuda.ibase.SVar;
-import org.rosuda.ibase.SVarInterface;
 import org.rosuda.ibase.SVarInterfaceRemote;
-import org.rosuda.ibase.SVarSet;
-import org.rosuda.ibase.SVarSetInterface;
 import org.rosuda.ibase.SVarSetInterfaceRemote;
-
 import uk.ac.ebi.microarray.pools.ManagedServant;
 
 /**
@@ -138,9 +133,6 @@ public interface RServices extends ManagedServant {
 
 	public String[] listDemos() throws java.rmi.RemoteException;
 	public StringBuffer getDemoSource(String demoName) throws java.rmi.RemoteException;
-
-	public void setProgressiveConsoleLogEnabled(boolean progressiveLog) throws java.rmi.RemoteException;
-	public boolean isProgressiveConsoleLogEnabled() throws java.rmi.RemoteException;
 
 	public byte[] getRHelpFile(String uri) throws java.rmi.RemoteException;
 	public String getRHelpFileUri(String topic, String pack) throws java.rmi.RemoteException;

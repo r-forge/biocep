@@ -65,8 +65,10 @@ import javax.swing.undo.UndoManager;
  */
 public class ConsolePanel extends JPanel implements ClipboardOwner {
 
-	private static SimpleAttributeSet BOLD_BLACK = new SimpleAttributeSet();
-	private static SimpleAttributeSet BLACK = new SimpleAttributeSet();
+	public static SimpleAttributeSet BOLD_BLACK = null;
+	public static SimpleAttributeSet BLACK = null;
+	public static SimpleAttributeSet RED = null;
+	
 	private JTextPane _logArea = new JTextPane();
 	private SubmitInterface _sInterface;
 	private AbstractAction[] _actions;
@@ -85,11 +87,11 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		_commandsHistoryIndex = _commandsHistory.size();
 	}
 
-	public void print(final String cmd, final String log) {
+	public void print(final String cmd, final String log, SimpleAttributeSet logAttributeSet) {
 		if (cmd != null)
 			insertText("> " + cmd + "\n", BOLD_BLACK);
 		if (log != null)
-			insertText(log, BLACK);
+			insertText(log, logAttributeSet);
 		new Thread(new Runnable() {
 			public void run() {
 				SwingUtilities.invokeLater(new Runnable() {
@@ -105,7 +107,10 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		_commandInputField.setEnabled(true);
 		_commandInputField.requestFocus();
 		um = new UndoManager();
+	}
 
+	public void print(final String cmd, final String log) {
+		print(cmd, log, BLACK);
 	}
 
 	public void play(final String command, boolean demo) {
@@ -160,13 +165,21 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	public ConsolePanel(SubmitInterface sInterface, String textFieldLabel, Color textFieldColor, final boolean undoRedoEnabled, AbstractAction[] actions) {
 		_sInterface = sInterface;
 		_actions = actions;
+		BOLD_BLACK=new SimpleAttributeSet();
 		StyleConstants.setForeground(BOLD_BLACK, Color.blue);
 		StyleConstants.setFontFamily(BOLD_BLACK, "Monospaced.plain");
 		StyleConstants.setFontSize(BOLD_BLACK, _logArea.getFont().getSize());
 
+		BLACK=new SimpleAttributeSet();
 		StyleConstants.setForeground(BLACK, Color.black);
 		StyleConstants.setFontFamily(BLACK, "Monospaced.plain");
 		StyleConstants.setFontSize(BLACK, _logArea.getFont().getSize());
+		
+		RED=new SimpleAttributeSet();
+		StyleConstants.setForeground(RED, Color.red);
+		StyleConstants.setFontFamily(RED, "Monospaced.plain");
+		StyleConstants.setFontSize(RED, _logArea.getFont().getSize());
+
 
 		_logArea.setEditable(false);
 		_scrollPane = new JScrollPane(_logArea);

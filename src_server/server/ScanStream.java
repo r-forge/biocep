@@ -19,6 +19,8 @@ package server;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import uk.ac.ebi.microarray.pools.PoolUtils;
+
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
@@ -72,5 +74,12 @@ public class ScanStream extends OutputStream {
 
 	public void write(final int b) throws IOException {
 		_o.write(b);
+	}
+	
+	public static void main(String[] args) {
+		byte[] b=PoolUtils.hexToBytes("2B202B20");
+		String str=new String(b,0,2);
+		System.out.println("str="+str);
+		
 	}
 }
