@@ -252,6 +252,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			updateConsoleIcon(_busyIcon);
 			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.
 			// WAIT_CURSOR));
 		}
@@ -270,7 +271,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 			if (_rForConsole instanceof HttpMarker) {
 				((HttpMarker) _rForConsole).popActions();
 			}
-
+			
+			updateConsoleIcon(null);
 			super.unlock();
 
 			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.
@@ -335,6 +337,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	private Icon _currentDeviceIcon = null;
 	private Icon _inactiveDeviceIcon = null;
+	
+	private Icon _connectedIcon = null;
+	private Icon _disconnectedIcon = null;
+	private Icon _busyIcon = null;
 
 	private boolean _isGroovyEnabled = false;
 
@@ -420,9 +426,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		try {
 
-			_currentDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "active_device.png")));
+			_currentDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "active_device.gif")));
 			_inactiveDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "inactive_device.png")));
-
+			_connectedIcon= new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "connected.gif")));
+			_disconnectedIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "disconnected.png")));
+			_busyIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "busy.gif")));
+			
 			initActions();
 
 			int lf = 0;
@@ -1660,6 +1669,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		new Thread(new Runnable() {
 			public void run() {
 				while (true) {
+					
+					updateConsoleIcon(null);		
 					try {
 						if (_sessionId != null) {
 							reload();
@@ -1668,7 +1679,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					} finally {
 						try {
-							Thread.sleep(1500);
+							Thread.sleep(1000);
 						} catch (Exception e) {
 						}
 					}
@@ -1709,6 +1720,30 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private boolean firstCall = true;
+	
+	private void updateConsoleIcon(final Icon icon) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {				
+					if (icon==null) {
+						if (getR()==null) {
+							views[0].getViewProperties().setIcon(_disconnectedIcon);
+						} else {
+							try {
+								if (_rForFiles.isBusy()) {
+									views[0].getViewProperties().setIcon(_busyIcon);	
+								} else {
+									views[0].getViewProperties().setIcon(_connectedIcon);
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}				
+					} else {
+						views[0].getViewProperties().setIcon(icon);
+					}
+			}
+		});
+	}
 
 	private synchronized void loadJEditClasses() {
 		/*
