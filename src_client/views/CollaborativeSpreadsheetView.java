@@ -25,7 +25,6 @@ public class CollaborativeSpreadsheetView extends DynamicView {
 	DockingWindowListener l=new AbstractDockingWindowListener(){			
 		@Override
 		public void windowClosed(DockingWindow arg0) {
-			System.out.println("********* CollaborativeSpreadsheetView Closed");
 			try {
 				if (_spreadsheetModelRemote instanceof HttpMarker) {												
 					((HttpMarker)_spreadsheetModelRemote).stopThreads();

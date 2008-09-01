@@ -102,6 +102,13 @@ public interface RServices extends ManagedServant {
 	public void removeRConsoleActionListener(RConsoleActionListener ractionListener) throws RemoteException;	
 	public void removeAllRConsoleActionListeners() throws RemoteException;
 	
+	
+	public void  registerUser(String sourceUID,String user) throws RemoteException;
+	public void  unregisterUser(String sourceUID) throws RemoteException;
+	public void  updateUserStatus(String sourceUID, UserStatus userStatus) throws RemoteException;
+	public UserStatus[] getUserStatusTable() throws RemoteException;
+
+	
 	public void setUserInput(String userInput) throws RemoteException;
 	
 	public void setOrginatorUID(String uid) throws RemoteException;

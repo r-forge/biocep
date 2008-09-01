@@ -130,6 +130,7 @@ import remoting.RConsoleAction;
 import remoting.RConsoleActionListener;
 import remoting.RNI;
 import remoting.RServices;
+import remoting.UserStatus;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.RemotePanel;
@@ -158,7 +159,6 @@ public class DirectJNI {
 	private static final String PROTECT_VAR_PREFIXE = "PROTECT_";
 	private static final String TEMP_DIR = System.getProperty("java.io.tmpdir");
 	private static final String ECHO_VAR_NAME = ".echo___";
-	private static final String TAIL_PATTERN = "###> End of R Log";
 	private static final Integer singletonLock = new Integer(0);
 	private static DirectJNI _djni = null;
 	private static String INSTANCE_NAME = "LOCAL_R";
@@ -188,8 +188,10 @@ public class DirectJNI {
 	private String _userInput = null;
 	private boolean _stopRequired = false;
 	private PrintStream _o = System.out;
-
+	private HashMap<String, UserStatus> _usersHash=new HashMap<String, UserStatus>();
+	
 	public static DirectJNI getInstance() {
+		
 		if (_djni != null)
 			return _djni;
 		synchronized (singletonLock) {
@@ -201,6 +203,7 @@ public class DirectJNI {
 	}
 
 	public String runR(ExecutionUnit eu) {
+		
 		if (Thread.currentThread() == _rEngine) {
 			throw new RuntimeException("runR called from within the R MainLoop Thread");
 		} else {
@@ -2715,6 +2718,30 @@ public class DirectJNI {
 			server.RListener.removeAllRActionListeners();
 		}
 
+		
+		public void  registerUser(String sourceUID,String user) throws RemoteException {
+			_usersHash.put(sourceUID, new UserStatus(sourceUID, user,false));
+			RListener.notifyRActionListeners(new RConsoleAction("UPDATE_USERS"));
+		}
+		
+		public void  unregisterUser(String sourceUID) throws RemoteException {
+			_usersHash.remove(sourceUID);
+			RListener.notifyRActionListeners(new RConsoleAction("UPDATE_USERS"));
+		}
+		
+		public void  updateUserStatus(String sourceUID, UserStatus userStatus) throws RemoteException {
+			_usersHash.put(sourceUID,userStatus);
+			RListener.notifyRActionListeners(new RConsoleAction("UPDATE_USERS"));
+		}
+		
+		public UserStatus[] getUserStatusTable() throws RemoteException {
+			UserStatus[] result=new UserStatus[_usersHash.values().size()];
+			int i=0; for (UserStatus us:_usersHash.values())result[i++]=us;
+			return result;
+		}
+
+		
+		
 		public void setUserInput(String userInput) throws RemoteException {
 			_userInput = userInput;
 		}

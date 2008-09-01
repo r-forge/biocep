@@ -36,12 +36,14 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import remoting.RServices;
@@ -84,11 +86,20 @@ public class LoginDialog extends JDialog {
 	public static Integer memoryMax_int = 256;
 
 	public static boolean keepAlive_bool = false;
+	
+	
 	public static boolean useSsh_bool = false;
+	
+	public static boolean defaultR_bool = true;
+	public static String defaultRBin_str = "";
+	
+	
 	public static String sshHost_str = "";
 	public static Integer sshPort_int = 22;	
 	public static String sshLogin_str = "";
 	public static String sshPwd_str = "";
+	
+	
 
 	public static boolean persistentWorkspace_bool = false;
 	public static boolean playDemo_bool = false;
@@ -133,6 +144,11 @@ public class LoginDialog extends JDialog {
 	private JCheckBox _keepAlive;
 
 	private JRadioButton _useSsh;
+	
+	public static JCheckBox _defaultR = new JCheckBox();
+	public static JTextField _defaultRBin = new JTextField();
+	public static JButton _defaultRBinBrowse = new JButton();
+	
 	private JRadioButton _useLocalHost;
 
 	private JTextField _sshHostIp;
@@ -156,7 +172,7 @@ public class LoginDialog extends JDialog {
 		if (_closedOnOK)
 			return new Identification(mode_int, url_str, login_str, pwd_str, nopool_bool, waitForResource_bool, privateName_str, rmiMode_int, rmiregistryIp_str,
 					rmiregistryPort_int, servantName_str, dbDriver_str, dbHostIp_str, dbHostPort_int, dbName_str, dbUser_str, dbPwd_str, dbServantName_str,
-					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, sshHost_str, sshPort_int, sshLogin_str, sshPwd_str, persistentWorkspace_bool,
+					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, defaultR_bool, defaultRBin_str, sshHost_str, sshPort_int, sshLogin_str, sshPwd_str, persistentWorkspace_bool,
 					playDemo_bool);
 		else
 			return null;
@@ -178,39 +194,51 @@ public class LoginDialog extends JDialog {
 			dynamicPanel.add(p1);
 			dynamicPanel.add(p2);
 
-			p1.add(_useLocalHost);
-			p2.add(new JLabel(""));
-			p1.add(_useSsh);
-			p2.add(new JLabel(""));
+			p1.add(_useLocalHost); p2.add(_useSsh);
+			
 			if (_useSsh.isSelected()) {
-				p1.add(new JLabel("  SSH Host"));
-				
+								
 				JPanel hostAndPortPanel=new JPanel(new GridLayout(1,0));
 				JPanel portPanel=new JPanel(new BorderLayout());				
 				portPanel.add(new JLabel("    port  "), BorderLayout.WEST);
-				portPanel.add(_sshPort, BorderLayout.CENTER);
-				
+				portPanel.add(_sshPort, BorderLayout.CENTER);				
 				hostAndPortPanel.add(_sshHostIp);
 				hostAndPortPanel.add(portPanel);
-				p2.add(hostAndPortPanel);
 				
+				p1.add(new JLabel(""));p2.add(new JLabel(""));
+				p1.add(new JLabel("  SSH Host"));p2.add(hostAndPortPanel);
+				p1.add(new JLabel("  SSH Login"));p2.add(_sshLogin);
+				p1.add(new JLabel("  SSH Pwd"));p2.add(_sshPwd);
+				p1.add(new JLabel("")); p2.add(new JLabel(""));
 				
-				p1.add(new JLabel("  SSH Login"));
-				p2.add(_sshLogin);
-				p1.add(new JLabel("  SSH Pwd"));
-				p2.add(_sshPwd);
+			} else {
+				
+				p1.add(new JLabel(""));p2.add(new JLabel(""));
+				
+				if (_defaultR.isSelected()) {
+					p1.add(_defaultR); p2.add(new JLabel(""));
+					p1.add(new JLabel("")); p2.add(new JLabel(""));
+				} else {
+				
+					JPanel defaultRPanel=new JPanel(new BorderLayout());
+					defaultRPanel.add(new JLabel("R Binary  "), BorderLayout.WEST);
+					defaultRPanel.add(_defaultRBin, BorderLayout.CENTER);
+					defaultRPanel.add(_defaultRBinBrowse, BorderLayout.EAST);
+					
+					p1.add(_defaultR); p2.add(defaultRPanel);
+					p1.add(new JLabel("")); p2.add(new JLabel(""));
+					
+				}
+				p1.add(new JLabel(""));p2.add(new JLabel(""));
+				p1.add(new JLabel(""));p2.add(new JLabel(""));
+				
 			}
-			p1.add(new JLabel(""));
-			p2.add(new JLabel(""));
+			
+			
+			
+			
 
-			if (!_useSsh.isSelected()) {
-				p1.add(new JLabel(""));
-				p2.add(new JLabel(""));
-				p1.add(new JLabel(""));
-				p2.add(new JLabel(""));
-				p1.add(new JLabel(""));
-				p2.add(new JLabel(""));
-			}
+			
 
 			p1.add(_keepAlive);
 			p2.add(new JLabel(""));
@@ -533,6 +561,27 @@ public class LoginDialog extends JDialog {
 				recreateDynamicPanel();
 			}
 		});
+		
+		_defaultR = new JCheckBox("Use Default R");
+		_defaultR.setSelected(defaultR_bool);
+		_defaultR.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				recreateDynamicPanel();
+			}
+		});
+		
+		_defaultRBin = new JTextField(defaultRBin_str);
+		_defaultRBinBrowse =new JButton("Browse");
+		_defaultRBinBrowse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser chooser=new JFileChooser(defaultRBin_str);
+				int returnVal = chooser.showOpenDialog(LoginDialog.this);			    
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+			       _defaultRBin.setText(chooser.getSelectedFile().getAbsolutePath());
+			    }
+			}
+		}); 
+		
 		_useLocalHost = new JRadioButton("On My Machine");
 		_useLocalHost.setSelected(!useSsh_bool);
 		_useLocalHost.addActionListener(new ActionListener() {
@@ -711,6 +760,10 @@ public class LoginDialog extends JDialog {
 
 		keepAlive_bool = _keepAlive.isSelected();
 		useSsh_bool = _useSsh.isSelected();
+		
+		defaultR_bool = _defaultR.isSelected();
+		defaultRBin_str = _defaultRBin.getText();
+		
 		sshHost_str = _sshHostIp.getText();
 		sshPort_int = Integer.decode(_sshPort.getText());
 		

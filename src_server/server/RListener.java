@@ -31,8 +31,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import model.SpreadsheetListenerRemote;
-
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RChar;
@@ -50,7 +48,6 @@ import org.python.core.PyInteger;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
 import python.PythonInterpreterSingleton;
-import remoting.RAction;
 import remoting.RCallBack;
 import remoting.RConsoleActionListener;
 import remoting.RConsoleAction;
@@ -114,7 +111,6 @@ public abstract class RListener {
 			}
 		}
 		_ractionListeners.removeAll(ractionListenersToRemove);
-
 	}
 	
 	private static RClustserInterface _rClusterInterface = new RClustserInterface() {

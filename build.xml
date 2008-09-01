@@ -842,8 +842,6 @@
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
 				<pathelement path="lib/desktop/PDFRenderer.jar"/>
 				
-				<pathelement path="lib/desktop/groovy-all-1.5.4.jar"/>
-				
 				
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
