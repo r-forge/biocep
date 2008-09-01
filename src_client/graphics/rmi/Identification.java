@@ -43,12 +43,18 @@ class Identification {
 	private String _dbPwd;
 	private String _dbServantName;
 
+
+
 	private String _stub;
 
 	private int _memoryMin;
 	private int _memoryMax;
 	private boolean _keepAlive;
 	private boolean _useSsh;
+	
+	private boolean _defaultR;
+	private String _defaultRBin;
+
 	private String _sshHostIp;
 	private Integer _sshPort;
 	private String _sshLogin;
@@ -63,7 +69,14 @@ class Identification {
 			Integer rmiregistryPort, String servantName, String dbDriver, String dbHostIp, Integer dbHostPort, String dbName, String dbUser, String dbPwd,
 			String dbServantName, String stub, int memoryMin, int memoryMax,
 
-			boolean keepAlive, boolean useSsh, String sshHostIp, int sshPort, String sshLogin, String sshPwd,
+			boolean keepAlive, 
+			
+			boolean useSsh, 
+			
+			boolean defaultR,
+			String defaultRBin,
+			
+			String sshHostIp, int sshPort, String sshLogin, String sshPwd,
 
 			boolean persistentWorkspace, boolean playDemo) {
 		this._mode = mode;
@@ -93,6 +106,11 @@ class Identification {
 		this._memoryMax = memoryMax;
 		this._keepAlive = keepAlive;
 		this._useSsh = useSsh;
+		
+		this._defaultR=defaultR;
+		if (!defaultR) this._defaultRBin=defaultRBin;
+		else this._defaultRBin=null;
+		
 		this._sshHostIp = sshHostIp;
 		this._sshPort = sshPort;
 		this._sshLogin = sshLogin;
@@ -197,6 +215,15 @@ class Identification {
 		return _useSsh;
 	}
 
+	
+	public boolean isDefaultR() {
+		return _defaultR;
+	}
+
+	public String getDefaultRBin() {
+		return _defaultRBin;
+	}
+	
 	public String getSshHostIp() {
 		return _sshHostIp;
 	}

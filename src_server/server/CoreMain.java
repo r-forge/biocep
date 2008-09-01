@@ -64,7 +64,7 @@ public class CoreMain {
 		if (ServerDefaults.isRegistryAccessible()) {
 			String name=System.getProperty("name");
 			
-			r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
+			r = ServerManager.createR(null, true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
 					ServerManager.getNamingInfo(), 
 							ServerDefaults._memoryMin, ServerDefaults._memoryMax,name , false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file") );
 

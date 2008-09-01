@@ -4,10 +4,16 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
+
+import server.ServerManager;
 
 public class GroovyInterpreterSingleton {
 
@@ -21,7 +27,21 @@ public class GroovyInterpreterSingleton {
 			if (_groovy == null) {
 				
 				try {
-					final Class<?> GroovyShellClass=GroovyInterpreterSingleton.class.getClassLoader().loadClass("groovy.lang.GroovyShell");
+					
+					File[] extraJarFiles=new File(ServerManager.INSTALL_DIR).listFiles(new FilenameFilter(){
+						public boolean accept(File dir, String name) {
+							return name.endsWith(".jar");
+						}
+					});
+					
+					Arrays.sort(extraJarFiles);
+					System.out.println("Insiders Extra Jars:"+Arrays.toString(extraJarFiles));
+					URL[] urls=new URL[extraJarFiles.length];
+					for (int i=0; i<extraJarFiles.length;++i) {
+						urls[i]=extraJarFiles[i].toURL();
+					}
+					
+					final Class<?> GroovyShellClass=new URLClassLoader(urls, GroovyInterpreterSingleton.class.getClassLoader()).loadClass("groovy.lang.GroovyShell");
 					final Object groovyShell=GroovyShellClass.newInstance();
 					_groovy = new GroovyInterpreter() {
 						    private String _status;

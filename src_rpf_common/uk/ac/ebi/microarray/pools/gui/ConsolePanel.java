@@ -67,7 +67,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	public static SimpleAttributeSet BOLD_BLACK = null;
 	public static SimpleAttributeSet BLACK = null;
 	public static SimpleAttributeSet RED = null;
-	
+
 	private JTextPane _logArea = new JTextPane();
 	private SubmitInterface _sInterface;
 	private AbstractAction[] _actions;
@@ -76,8 +76,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	Vector<String> _commandsHistory = new Vector<String>();
 	private int _commandsHistoryIndex = 0;
 	private UndoManager um = new UndoManager();
-	private boolean _stopLogThread=false;
-	
+	private boolean _stopLogThread = false;
 
 	public Vector<String> getCommandHistory() {
 		return _commandsHistory;
@@ -87,23 +86,26 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		_commandsHistory = history;
 		_commandsHistoryIndex = _commandsHistory.size();
 	}
-	
-	private Vector<LogUnit> _logActions = new Vector<LogUnit>();	
+
+	private Vector<LogUnit> _logActions = new Vector<LogUnit>();
+
 	synchronized public Vector<LogUnit> popAllLogActions(int maxNbrLogActions) {
-		if (_logActions.size() == 0) return null;
-		Vector<LogUnit> result = (Vector<LogUnit>)_logActions.clone();
-		if (maxNbrLogActions!=-1 && result.size() > maxNbrLogActions) {
+		if (_logActions.size() == 0)
+			return null;
+		Vector<LogUnit> result = (Vector<LogUnit>) _logActions.clone();
+		if (maxNbrLogActions != -1 && result.size() > maxNbrLogActions) {
 			int delta = result.size() - maxNbrLogActions;
 			for (int i = 0; i < delta; ++i) {
 				result.remove(result.size() - 1);
 			}
 		}
-		for (int i = 0; i < result.size(); ++i)	_logActions.remove(0);
+		for (int i = 0; i < result.size(); ++i)
+			_logActions.remove(0);
 		return result;
 	}
-	
-	public void print(final String cmd, final String log, SimpleAttributeSet logAttributeSet) {		
-		_logActions.add(new LogUnit(cmd,log,logAttributeSet));
+
+	public void print(final String cmd, final String log, SimpleAttributeSet logAttributeSet) {
+		_logActions.add(new LogUnit(cmd, log, logAttributeSet));
 	}
 
 	public void print(final String cmd, final String log) {
@@ -136,7 +138,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 						public void run() {
 							_commandInputField.setEnabled(false);
 						}
-					});					
+					});
 
 					_commandsHistory.add(command);
 					_commandsHistoryIndex = _commandsHistory.size();
@@ -162,7 +164,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 							um = new UndoManager();
 						}
 					});
-					
+
 				}
 			}
 		}).start();
@@ -171,21 +173,20 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	public ConsolePanel(SubmitInterface sInterface, String textFieldLabel, Color textFieldColor, final boolean undoRedoEnabled, AbstractAction[] actions) {
 		_sInterface = sInterface;
 		_actions = actions;
-		BOLD_BLACK=new SimpleAttributeSet();
+		BOLD_BLACK = new SimpleAttributeSet();
 		StyleConstants.setForeground(BOLD_BLACK, Color.blue);
 		StyleConstants.setFontFamily(BOLD_BLACK, "Monospaced.plain");
 		StyleConstants.setFontSize(BOLD_BLACK, _logArea.getFont().getSize());
 
-		BLACK=new SimpleAttributeSet();
+		BLACK = new SimpleAttributeSet();
 		StyleConstants.setForeground(BLACK, Color.black);
 		StyleConstants.setFontFamily(BLACK, "Monospaced.plain");
 		StyleConstants.setFontSize(BLACK, _logArea.getFont().getSize());
-		
-		RED=new SimpleAttributeSet();
+
+		RED = new SimpleAttributeSet();
 		StyleConstants.setForeground(RED, Color.red);
 		StyleConstants.setFontFamily(RED, "Monospaced.plain");
 		StyleConstants.setFontSize(RED, _logArea.getFont().getSize());
-
 
 		_logArea.setEditable(false);
 		_scrollPane = new JScrollPane(_logArea);
@@ -196,8 +197,6 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		_logArea.setFont(new Font("Monospaced.plain", Font.PLAIN, _logArea.getFont().getSize()));
 		_commandInputField.setFont(new Font("Monospaced.plain", Font.PLAIN, _commandInputField.getFont().getSize()));
 
-				
-		
 		HashMap<String, Action> inputFiledActionsTable = new HashMap<String, Action>();
 		Action[] inputFieldActions = _commandInputField.getEditorKit().getActions();
 		for (int i = 0; i < inputFieldActions.length; ++i) {
@@ -223,7 +222,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		if (undoRedoEnabled) {
 			_commandInputField.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				public void undoableEditHappened(UndoableEditEvent e) {
-					if (_commandInputField.getText().length()>200*10) {
+					if (_commandInputField.getText().length() > 200 * 10) {
 						e.getEdit().undo();
 						Toolkit.getDefaultToolkit().beep();
 					} else {
@@ -232,11 +231,11 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 				}
 			});
 		}
-		
-		_commandInputField.addVetoableChangeListener(new VetoableChangeListener(){
+
+		_commandInputField.addVetoableChangeListener(new VetoableChangeListener() {
 			public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
 				System.out.println(evt);
-				
+
 			}
 		});
 
@@ -258,7 +257,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 					JPopupMenu popupMenu = new JPopupMenu();
 
 					popupMenu.add(insertBlankLine);
-					popupMenu.addSeparator();         
+					popupMenu.addSeparator();
 					popupMenu.add(new AbstractAction("Copy                 Ctrl-C") {
 						public void actionPerformed(ActionEvent e) {
 							copyAction.actionPerformed(e);
@@ -269,7 +268,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 							return copyAction.isEnabled();
 						}
 					});
-													  	
+
 					popupMenu.add(new AbstractAction("Paste                Ctrl-V") {
 						public void actionPerformed(ActionEvent e) {
 							pasteAction.actionPerformed(e);
@@ -280,7 +279,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 							return pasteAction.isEnabled();
 						}
 					});
-													  
+
 					popupMenu.add(new AbstractAction("Cut                    Ctrl-X") {
 						public void actionPerformed(ActionEvent e) {
 							cutAction.actionPerformed(e);
@@ -292,12 +291,10 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 						}
 					});
 
-					
-												
 					if (undoRedoEnabled) {
-						
+
 						popupMenu.addSeparator();
-						
+
 						popupMenu.add(new AbstractAction("Undo                 Ctrl-Z") {
 							public void actionPerformed(ActionEvent e) {
 								try {
@@ -306,13 +303,13 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 									ex.printStackTrace();
 								}
 							}
-	
+
 							@Override
 							public boolean isEnabled() {
 								return um.canUndo();
 							}
 						});
-														  
+
 						popupMenu.add(new AbstractAction("Redo                 Ctrl-Y") {
 							public void actionPerformed(ActionEvent e) {
 								try {
@@ -321,7 +318,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 									ex.printStackTrace();
 								}
 							}
-	
+
 							@Override
 							public boolean isEnabled() {
 								return um.canRedo();
@@ -358,7 +355,8 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 					if ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
 						insertBlankLine.actionPerformed(null);
 					} else {
-						//if (_commandInputField.getText().trim().equals(""))	return;
+						// if (_commandInputField.getText().trim().equals(""))
+						// return;
 						play(_commandInputField.getText(), false);
 					}
 				}
@@ -380,13 +378,17 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 						_commandInputField.setText(_commandsHistory.elementAt(_commandsHistoryIndex));
 					}
 
-				} else if (e.getKeyCode()==90 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
-					if (um.canUndo()) um.undo();
-					else Toolkit.getDefaultToolkit().beep();
-				} else if (e.getKeyCode()==89 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
-					if (um.canRedo()) um.redo();
-					else Toolkit.getDefaultToolkit().beep();					
-				} 
+				} else if (e.getKeyCode() == 90 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
+					if (um.canUndo())
+						um.undo();
+					else
+						Toolkit.getDefaultToolkit().beep();
+				} else if (e.getKeyCode() == 89 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
+					if (um.canRedo())
+						um.redo();
+					else
+						Toolkit.getDefaultToolkit().beep();
+				}
 
 			}
 
@@ -402,10 +404,10 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		add(_scrollPane, BorderLayout.CENTER);
 
 		JPanel bottomPanel = new JPanel(new BorderLayout());
-		
-		JLabel label=new JLabel(textFieldLabel+" : ");
+
+		JLabel label = new JLabel(textFieldLabel + " : ");
 		label.setForeground(textFieldColor);
-		
+
 		bottomPanel.add(label, BorderLayout.WEST);
 		bottomPanel.add(_commandInputField, BorderLayout.CENTER);
 		add(bottomPanel, BorderLayout.SOUTH);
@@ -513,43 +515,50 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		});
 
 		_commandInputField.requestFocus();
-		
-		new Thread(new Runnable(){
+
+		new Thread(new Runnable() {
 			public void run() {
-				while(true) {
-					if (_stopLogThread) break;
-					if (_logActions.size()>0) {																
-						SwingUtilities.invokeLater(new Runnable(){
+				while (true) {
+					if (_stopLogThread)
+						break;
+					if (_logActions.size() > 0) {
+						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								Vector<LogUnit> logActions=popAllLogActions(-1);
-								for (int i=0; i<logActions.size(); ++i) {
-									String cmd=logActions.elementAt(i).getCmd();
-									String log=logActions.elementAt(i).getLog();
-									SimpleAttributeSet logAttributeSet=logActions.elementAt(i).getLogAttributeSet();									
-									if (cmd != null)insertText("> " + cmd + "\n", BOLD_BLACK);
-									if (log != null)insertText(log, logAttributeSet); 											
-								}
-								
-								if (_logActions.size()==0){
-									new Thread(new Runnable() {								
-										public void run() {
-											SwingUtilities.invokeLater(new Runnable() {
-												public void run() {
-													JScrollBar scrollBar = _scrollPane.getVerticalScrollBar();
-													scrollBar.setValue(scrollBar.getMaximum());
-												}
-											});
-										}
-									}).start();	
+								Vector<LogUnit> logActions = popAllLogActions(-1);
+								if (logActions != null) {
+									for (int i = 0; i < logActions.size(); ++i) {
+										String cmd = logActions.elementAt(i).getCmd();
+										String log = logActions.elementAt(i).getLog();
+										SimpleAttributeSet logAttributeSet = logActions.elementAt(i).getLogAttributeSet();
+										if (cmd != null)
+											insertText("> " + cmd + "\n", BOLD_BLACK);
+										if (log != null)
+											insertText(log, logAttributeSet);
+									}
+
+									if (_logActions.size() == 0) {
+										new Thread(new Runnable() {
+											public void run() {
+												SwingUtilities.invokeLater(new Runnable() {
+													public void run() {
+														JScrollBar scrollBar = _scrollPane.getVerticalScrollBar();
+														scrollBar.setValue(scrollBar.getMaximum());
+													}
+												});
+											}
+										}).start();
+									}
+
 								}
 
-								
-								
 							};
 						});
 					}
-					try {Thread.sleep(50);} catch (Exception e) {}
-				}				
+					try {
+						Thread.sleep(50);
+					} catch (Exception e) {
+					}
+				}
 			}
 		}).start();
 
@@ -576,8 +585,13 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		super.setCursor(cursor);
 		_logArea.setCursor(cursor);
 	}
-	
+
 	public void stopLogThread() {
-		_stopLogThread=true;
+		_stopLogThread = true;
 	}
+
+	public JTextPane getCommandInputField() {
+		return _commandInputField;
+	}
+
 }

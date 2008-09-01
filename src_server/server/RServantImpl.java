@@ -55,6 +55,7 @@ import remoting.RConsoleActionListener;
 import remoting.RKit;
 import remoting.RNI;
 import remoting.RServices;
+import remoting.UserStatus;
 import uk.ac.ebi.microarray.pools.InitializingException;
 import uk.ac.ebi.microarray.pools.ManagedServantAbstract;
 import uk.ac.ebi.microarray.pools.PoolUtils;
@@ -474,6 +475,23 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		DirectJNI.getInstance().getRServices().removeAllRConsoleActionListeners();		
 	}
 	
+	public void  registerUser(String sourceUID,String user) throws RemoteException {
+		DirectJNI.getInstance().getRServices().registerUser(sourceUID,user);
+	}
+	
+	public void  unregisterUser(String sourceUID) throws RemoteException {
+		DirectJNI.getInstance().getRServices().unregisterUser(sourceUID);
+	}
+	
+	public void  updateUserStatus(String sourceUID, UserStatus userStatus) throws RemoteException {
+		DirectJNI.getInstance().getRServices().updateUserStatus(sourceUID,userStatus);
+	}
+	
+	public UserStatus[] getUserStatusTable() throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getUserStatusTable();
+	}
+	
+	
 	public void setUserInput(String userInput) throws RemoteException {
 		DirectJNI.getInstance().getRServices().setUserInput(userInput);		
 	}
@@ -780,7 +798,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	synchronized public RServices cloneServer() throws RemoteException {
 		System.out.println("cloneServer");
 		try {
-			RServices w = ServerManager.createR(false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
+			RServices w = ServerManager.createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
 					.getLocalRmiRegistryPort()), 256, 256, "", false,null,null);
 			return w;
 		} catch (Exception e) {

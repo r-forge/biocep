@@ -18,6 +18,7 @@ import remoting.RCollaborationListener;
 import remoting.RConsoleActionListener;
 import remoting.RNI;
 import remoting.RServices;
+import remoting.UserStatus;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
 import uk.ac.ebi.microarray.pools.RemotePanel;
@@ -436,6 +437,22 @@ public class RServicesObject implements RServices {
 	public void removeAllRConsoleActionListeners() throws RemoteException {
 		
 	}
+
+	
+	public void  registerUser(String sourceUID,String user) throws RemoteException {
+		
+	}
+	
+	public void  unregisterUser(String sourceUID) throws RemoteException {
+		
+	}
+	public void  updateUserStatus(String sourceUID, UserStatus userStatus) throws RemoteException {
+		
+	}
+	public UserStatus[] getUserStatusTable() throws RemoteException {
+		return null;
+	}
+	
 	
 	public void setUserInput(String userInput) throws RemoteException {
 

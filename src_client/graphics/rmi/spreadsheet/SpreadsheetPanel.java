@@ -107,6 +107,7 @@ import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.YesSecurityManager;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 import static javax.swing.JOptionPane.*;
 
@@ -119,6 +120,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	public static void main(String[] args) throws Exception {
 
+		if (System.getSecurityManager() == null) {
+			System.setSecurityManager(new YesSecurityManager());
+		} 
 		// tmri=new SpreadsheetModelRemoteImpl(3,2, new HashMap<String,
 		// SpreadsheetModelRemoteImpl>());
 		// SpreadsheetModelRemote

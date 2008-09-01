@@ -52,14 +52,13 @@ import ch.ethz.ssh2.StreamGobbler;
 public class ServerManager {
 
 	public static void main(String[] args) throws Exception {
-		downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_DIALOG );
-		/*
-		RServices r = ServerManager.createR(true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-			ServerManager.getNamingInfo(), 256,256, "", false, null,null);
-
-		System.out.println(r.consoleSubmit("print('a')"));
+		
+		RServices r = ServerManager.createR("",true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
+				ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), 256,256, "", false, null,null);
+		System.out.println("1:"+r.consoleSubmit("print('a')"));
+		System.out.println("2:"+r.getStatus());
 		System.exit(0);
-		*/
+
 	}
 
 	
@@ -106,8 +105,8 @@ public class ServerManager {
 
 	public static long SERVANT_CREATION_TIMEOUT_MILLISEC = 60000 * 5;
 	public static int BUFFER_SIZE = 8192 * 5;
-	private static final String RLIBSTART = "R$LIB$START";
-	private static final String RLIBEND = "R$LIB$END";
+	private static final String RHOMESTART = "R$HOME$START";
+	private static final String RHOMEEND = "R$HOME$END";
 	private static final String RVERSTART = "R$VER$START";
 	private static final String RVEREND = "R$VER$END";
 
@@ -323,14 +322,14 @@ public class ServerManager {
 	
 
 	public static RServices createR(String name) throws Exception {
-		return createR(false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo("127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort()), 256, 256, name,
+		return createR(null, false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo("127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort()), 256, 256, name,
 				false, null,null);
 	}
 
 	private interface ProgessLoggerInterface {
 		void logProgress(String message);
 	}
-	public static RServices createR(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
+	public static RServices createR(String RBinPath, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile) throws Exception {
 
 		final JTextArea[] createRProgressArea=new JTextArea[1];
@@ -396,18 +395,31 @@ public class ServerManager {
 
 			String rpath=null;
 			String rversion=null;						
+			String[] rinfo = null;
 			
-			if (new File(INSTALL_DIR+"R/"+EMBEDDED_R).exists()){
+			if (RBinPath!=null && !RBinPath.equals("")) {
+				rinfo = getRInfo(RBinPath);
+				if (rinfo==null) {
+					throw new ServantCreationFailed();
+				}
+				rpath = rinfo[0];
+				rversion =rinfo[1];
+			} else if (new File(INSTALL_DIR+"R/"+EMBEDDED_R).exists()){
 				rpath=INSTALL_DIR+"R/"+EMBEDDED_R;
 				rversion=EMBEDDED_R;				
 			} else {
-				String[] rinfo = null;
-				if (System.getenv("R_HOME") == null)
+				
+				String rhome=System.getenv("R_HOME");
+				if (rhome == null) {
 					rinfo = getRInfo(null);
-				else
-					rinfo = getRInfo(System.getenv("R_HOME"));	
+				} else {
+					if (!rhome.endsWith("/")) {rhome = rhome + "/";}
+					System.out.println("R_HOME is set to :" + rhome);
+					rinfo = getRInfo(rhome+"bin/R");
+				}
+				
 				System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
-				rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : null;
+				rpath = rinfo != null ? rinfo[0] : null;
 				rversion = (rinfo != null ? rinfo[1] : "");
 			}
 
@@ -905,7 +917,7 @@ public class ServerManager {
 		SSHUtils.killSshProcess(processId, sshHostIp, sshLogin, sshPwd, forcedKill);
 	}
 
-	public static String[] getRInfo(String rhome) {
+	public static String[] getRInfo(String rbin) {
 
 		File getInfoFile = new File(INSTALL_DIR + "getInfo.R");
 
@@ -927,7 +939,7 @@ public class ServerManager {
 
 			PrintWriter pw = new PrintWriter(fw);
 
-			pw.println("paste('" + RLIBSTART + "',.Library, '" + RLIBEND + "',sep='%')");
+			pw.println("paste('" + RHOMESTART + "',R.home(), '" + RHOMEEND + "',sep='%')");
 
 			pw.println("paste('" + RVERSTART + "', R.version.string , '" + RVEREND + "', sep='%')");
 
@@ -935,13 +947,9 @@ public class ServerManager {
 
 			Vector<String> getInfoCommand = new Vector<String>();
 
-			if (rhome != null) {
-				if (!rhome.endsWith("/"))
-					rhome = rhome + "/";
-				System.out.println("R_HOME is set to :" + rhome);
-				System.out.println("trying to execute :" + rhome + "bin/R");
-
-				getInfoCommand.add(rhome + "bin/R");
+			if (rbin != null && !rbin.equals("")) {
+				System.out.println("trying to execute :" + rbin);
+				getInfoCommand.add(rbin);
 				getInfoCommand.add("CMD");
 				getInfoCommand.add("BATCH");
 				getInfoCommand.add("--no-save");
@@ -1055,10 +1063,10 @@ public class ServerManager {
 
 					// System.out.println(line);
 
-					if (line.contains(RLIBSTART + "%")) {
+					if (line.contains(RHOMESTART + "%")) {
 
-						rlibraypath = line.substring(line.indexOf(RLIBSTART + "%") + (RLIBSTART + "%").length(), (line.indexOf("%" + RLIBEND) > 0 ? line
-								.indexOf("%" + RLIBEND) : line.length()));
+						rlibraypath = line.substring(line.indexOf(RHOMESTART + "%") + (RHOMESTART + "%").length(), (line.indexOf("%" + RHOMEEND) > 0 ? line
+								.indexOf("%" + RHOMEEND) : line.length()));
 
 					}
 

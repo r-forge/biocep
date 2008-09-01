@@ -8,15 +8,19 @@ assign('q', q , env=.PrivateEnv);
 assign('dir', dir , env=.PrivateEnv);
 assign('ls', ls , env=.PrivateEnv);
 assign('objects', objects , env=.PrivateEnv);
+
 assign('help', help , env=.PrivateEnv);
+
 assign('setwd', setwd , env=.PrivateEnv);
 assign('getwd', getwd , env=.PrivateEnv);
+
 assign('dev.set', dev.set , env=.PrivateEnv);
 assign('dev.off', dev.off , env=.PrivateEnv);
 assign('dev.cur', dev.cur , env=.PrivateEnv);
 assign('dev.list', dev.list , env=.PrivateEnv);
 assign('dev.copy', dev.copy , env=.PrivateEnv);
 assign('graphics.off', graphics.off , env=.PrivateEnv);
+
 try(assign('win.graph', win.graph , env=.PrivateEnv),silent=TRUE);
 try(assign('x11', x11 , env=.PrivateEnv),silent=TRUE);
 try(assign('X11', X11 , env=.PrivateEnv),silent=TRUE);
@@ -162,14 +166,12 @@ setwd <- function( dir )  {
 	return(invisible(NULL)); 
 }
 
-win.graph<-function(width = 7, height = 7, pointsize = 12, restoreConsole = FALSE){'win.graph not allowed in this context'}
-x11<-function(width = 7, height = 7, pointsize = 12, restoreConsole = FALSE){'x11 not allowed in this context'}
-X11<-function(width = 7, height = 7, pointsize = 12, restoreConsole = FALSE){'X11 not allowed in this context'}
-dev.off<-function(which = dev.cur()){'dev.off not allowed in this context'}
-graphics.off<-function(){'graphics.off not allowed in this context'}
-dev.set<-function (which = dev.next()){'dev.set not allowed in this context'}
-
-
+#win.graph<-function(width = 7, height = 7, pointsize = 12, restoreConsole = FALSE){'win.graph not allowed in this context'}
+#x11<-function(width = 7, height = 7, pointsize = 12, restoreConsole = FALSE){'x11 not allowed in this context'}
+#X11<-function(width = 7, height = 7, pointsize = 12, restoreConsole = FALSE){'X11 not allowed in this context'}
+#graphics.off<-function(){'graphics.off not allowed in this context'}
+#dev.set<-function (which = dev.next()){'dev.set not allowed in this context'}
+#dev.off<-function(which = dev.cur()){'dev.off not allowed in this context'}
 
 setClusterPropertiesBiocep <- function( gprops )  {
 	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"setClusterProperties", gprops ); 
@@ -243,16 +245,4 @@ pythonEval <- function( exp )  {
 	}
 }
 
-aaa <- function( exp )  {  
-	return(invisible(NULL)); 
-}
-
 q<-function (save = "default", status = 0, runLast = TRUE) {'quit not allowed in this context'}
-
-
-
-
-
-
-
-
