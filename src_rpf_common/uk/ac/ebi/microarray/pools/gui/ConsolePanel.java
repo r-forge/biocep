@@ -348,11 +348,22 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 						++result;
 				return result;
 			}
+			
+			public int countCR() {
+				int result = 0;
+				for (int i = 0; i < _commandInputField.getText().length(); ++i)
+					if (_commandInputField.getText().charAt(i) == '\n')
+						++result;
+				return result;
+			}
 
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == 10) {
 
-					if ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
+					if ( (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK
+							|| (e.getModifiers() & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK
+					
+					) {
 						insertBlankLine.actionPerformed(null);
 					} else {
 						// if (_commandInputField.getText().trim().equals(""))
@@ -362,7 +373,8 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 				}
 				if (e.getKeyCode() == 38) {
 
-					if (countCRBeforeCartet() == 0) {
+					if (countCR() == 0 || ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK
+							|| (e.getModifiers() & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK )) {
 						if (_commandsHistoryIndex == 0)
 							return;
 						--_commandsHistoryIndex;
@@ -371,7 +383,8 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 				} else if (e.getKeyCode() == 40) {
 
-					if (countCRAfterCartet() == 0) {
+					if (countCR() == 0 || ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK
+							|| (e.getModifiers() & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK )) {
 						if (_commandsHistoryIndex >= (_commandsHistory.size() - 1))
 							return;
 						++_commandsHistoryIndex;
