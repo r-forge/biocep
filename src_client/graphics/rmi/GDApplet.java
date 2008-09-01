@@ -486,7 +486,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									String stub = pr.readLine();
 									pr.close();
 									ident = new Identification(RMI_MODE, "", "", "", false, false, "", RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "",
-											"", stub, -1, -1, false, false, true, "" ,  "", -1, "", "", false, false);
+											"", stub, -1, -1, false, false, true, "", "", -1, "", "", false, false);
 
 									showLoginDialog = false;
 								}
@@ -577,9 +577,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 												ident.getSshPwd(), "", false, null, null);
 									} else {
 
-										r = ServerManager.createR(ident.isDefaultR()?null:ident.getDefaultRBin(),ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident
-														.getMemoryMin(), ident.getMemoryMax(), "", true, null, null);
+										r = ServerManager.createR(ident.isDefaultR() ? null : ident.getDefaultRBin(), ident.isKeepAlive(), PoolUtils
+												.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils
+												.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident.getMemoryMax(), "",
+												true, null, null);
 									}
 
 									if (ident.isUseSsh()) {
@@ -852,14 +853,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 									disposeDevices();
 								}
 							}
-
-							noSession();
 							return "Logged Off\n";
 						} catch (NotLoggedInException nlie) {
 							return "Not Logged In\n";
 						} catch (TunnelingException te) {
 							te.printStackTrace();
 							return "Logoff Failed\n";
+						} finally {
+							noSession();
 						}
 					}
 
@@ -911,7 +912,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			};
 			_consolePanel = new ConsolePanel(_submitInterface, "Evaluate", new Color(0x00, 0x80, 0x80), true, new AbstractAction[] { _actions.get("logon"),
 					_actions.get("logoff"), null, _actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"),
-					_actions.get("interrupteval"), null, _actions.get("playdemo"), null });
+					_actions.get("interrupteval"), null, _actions.get("playdemo") });
 
 			_consolePanel.getCommandInputField().addKeyListener(new KeyListener() {
 
@@ -2114,14 +2115,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (props.get("url") != null) {
 					LoginDialog.url_str = (String) props.get("url");
 				}
-				
-				
+
 				if (props.get("default.r.bin") != null) {
 					LoginDialog.defaultRBin_str = (String) props.get("default.r.bin");
 				}
-				
+
 				if (props.get("default.r") != null) {
-					LoginDialog.defaultR_bool = new Boolean((String)props.get("default.r"));
+					LoginDialog.defaultR_bool = new Boolean((String) props.get("default.r"));
 				}
 
 			} catch (Exception e) {
@@ -2981,11 +2981,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					});
-					
-					new Thread(new Runnable(){
+
+					new Thread(new Runnable() {
 						public void run() {
-							updateUsers();							
-						}						
+							updateUsers();
+						}
 					}).start();
 				}
 			}
@@ -3510,7 +3510,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				if (getOpenedUsersView()!=null) getOpenedUsersView().close();
+				if (getOpenedUsersView() != null)
+					getOpenedUsersView().close();
 			}
 		});
 
@@ -3551,61 +3552,63 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void noSession() {
+		try {
+			persistState();
 
-		persistState();
-
-		if (getR() != null && !_keepAlive && _save) {
-			try {
-				_rForConsole.consoleSubmit("save.image('.RData')");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (_rProcessId != null && !_keepAlive) {
-
-			try {
-				_rForConsole.reset();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if (_sshParameters == null) {
+			if (getR() != null && !_keepAlive && _save) {
 				try {
-					if (PoolUtils.isWindowsOs()) {
-						PoolUtils.killLocalWinProcess(_rProcessId, true);
-					} else {
-						PoolUtils.killLocalUnixProcess(_rProcessId, true);
+					_rForConsole.consoleSubmit("save.image('.RData')");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (_rProcessId != null && !_keepAlive) {
+
+				try {
+					_rForConsole.reset();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (_sshParameters == null) {
+					try {
+						if (PoolUtils.isWindowsOs()) {
+							PoolUtils.killLocalWinProcess(_rProcessId, true);
+						} else {
+							PoolUtils.killLocalUnixProcess(_rProcessId, true);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
+				} else {
+					System.out.println("---> SSH Kill process ID:" + _rProcessId);
+					try {
+						SSHUtils.killSshProcess(_rProcessId, _sshParameters[0], _sshParameters[1], _sshParameters[2], true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
-			} else {
-				System.out.println("---> SSH Kill process ID:" + _rProcessId);
+			}
+
+			if (_virtualizationServer != null) {
 				try {
-					SSHUtils.killSshProcess(_rProcessId, _sshParameters[0], _sshParameters[1], _sshParameters[2], true);
+					_virtualizationServer.stop();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		}
+		} finally {
 
-		if (_virtualizationServer != null) {
-			try {
-				_virtualizationServer.stop();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			_sessionId = null;
+			_rForConsole = null;
+			_rForPopCmd = null;
+			_rForFiles = null;
+			_isBiocLiteSourced = false;
+			_keepAlive = null;
+			_sshParameters = null;
+			_rProcessId = null;
+			_virtualizationServer = null;
 		}
-
-		_sessionId = null;
-		_rForConsole = null;
-		_rForPopCmd = null;
-		_rForFiles = null;
-		_isBiocLiteSourced = false;
-		_keepAlive = null;
-		_sshParameters = null;
-		_rProcessId = null;
-		_virtualizationServer = null;
 
 	}
 
@@ -3907,7 +3910,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
-	
 	public static Component getComponentParent(Component comp, Class<?> clazz) {
 		for (;;) {
 			if (comp == null)

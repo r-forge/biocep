@@ -3,9 +3,7 @@ package server;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Vector;
-
 import org.apache.commons.logging.Log;
-
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServerDefaults;
@@ -73,7 +71,7 @@ public class CoreMain {
 			System.out.println("Can't Launch R Server, Rmi Registry is not accessible!!");
 		}
 		
-		boolean wait= ( System.getProperty("wait")!=null && !System.getProperty("wait").equals("") ? new Boolean(System.getProperty("wait")) : true );
+		boolean wait= System.getProperty("wait")==null || System.getProperty("wait").equals("") || new Boolean(System.getProperty("wait"));
 		if (wait) {
 			while (true) {
 				try {Thread.sleep(100);}catch (Exception e) {}
