@@ -251,5 +251,9 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	
 	public void setJobId(String jobId) throws RemoteException {		
 	}
+	
+	public String getStub() throws RemoteException {
+		return PoolUtils.stubToHex(this);
+	}
 
 }

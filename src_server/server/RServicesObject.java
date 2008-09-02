@@ -536,5 +536,10 @@ public class RServicesObject implements RServices {
 	public boolean symbolExists(String symbol) throws RemoteException {
 		return false;
 	}
+	
+	public String getStub() throws RemoteException {
+
+		return null;
+	}
 
 }
