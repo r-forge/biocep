@@ -43,11 +43,11 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 
@@ -82,8 +82,8 @@ public class LoginDialog extends JDialog {
 
 	public static String stub_str = "";
 
-	public static Integer memoryMin_int = 256;
-	public static Integer memoryMax_int = 256;
+	public static Integer memoryMin_int = ServerDefaults._memoryMin;
+	public static Integer memoryMax_int = ServerDefaults._memoryMax;
 
 	public static boolean keepAlive_bool = false;
 	
@@ -209,7 +209,7 @@ public class LoginDialog extends JDialog {
 				p1.add(new JLabel("  SSH Host"));p2.add(hostAndPortPanel);
 				p1.add(new JLabel("  SSH Login"));p2.add(_sshLogin);
 				p1.add(new JLabel("  SSH Pwd"));p2.add(_sshPwd);
-				p1.add(new JLabel("")); p2.add(new JLabel(""));
+				
 				
 			} else {
 				
@@ -230,7 +230,7 @@ public class LoginDialog extends JDialog {
 					
 				}
 				p1.add(new JLabel(""));p2.add(new JLabel(""));
-				p1.add(new JLabel(""));p2.add(new JLabel(""));
+				
 				
 			}
 			
@@ -238,18 +238,21 @@ public class LoginDialog extends JDialog {
 			
 			
 
-			
-
 			p1.add(_keepAlive);
 			p2.add(new JLabel(""));
-			p1.add(_persistentWorkspaceCheckBox);
-			p2.add(new JLabel(""));
-			p1.add(_playDemoBox);
-			p2.add(new JLabel(""));
+			
+			p1.add(new JLabel(""));p2.add(new JLabel(""));
+			
 			p1.add(new JLabel("  Memory Min (megabytes)"));
 			p2.add(_memoryMin);
 			p1.add(new JLabel("  Memory Max (megabytes)"));
 			p2.add(_memoryMax);
+						
+			p1.add(_persistentWorkspaceCheckBox);
+			p2.add(new JLabel(""));
+			p1.add(_playDemoBox);
+			p2.add(new JLabel(""));
+			
 
 		} else if (httpModeButton.isSelected()) {
 			dynamicPanel.setLayout(new GridLayout(1, 2));
@@ -274,22 +277,20 @@ public class LoginDialog extends JDialog {
 			p1.add(_nopoolCheckBox);
 			if (_nopoolCheckBox.isSelected()) {
 				JPanel pNamePanel=new JPanel(new BorderLayout());pNamePanel.add(_privateNameLabel,BorderLayout.WEST);pNamePanel.add(_privateName,BorderLayout.CENTER);
-				p2.add(pNamePanel);
-			} else {
-				p2.add(new JLabel(""));
-			}
-						
-			p1.add(new JLabel(""));
-			p2.add(new JLabel(""));
-			p1.add(new JLabel(""));
-			p2.add(new JLabel(""));
-			p1.add(_persistentWorkspaceCheckBox);
-			p2.add(new JLabel(""));
-			p1.add(_playDemoBox);
-			p2.add(new JLabel(""));
+				p2.add(pNamePanel);				
+				p1.add(new JLabel("  Memory Min (megabytes)"));	p2.add(_memoryMin);
+				p1.add(new JLabel("  Memory Max (megabytes)"));	p2.add(_memoryMax);			
 
-			p1.add(new JLabel(""));
-			p2.add(new JLabel(""));
+			} else {
+				p2.add(new JLabel(""));				
+				p1.add(new JLabel(""));	p2.add(new JLabel(""));
+				p1.add(new JLabel(""));	p2.add(new JLabel(""));
+			}
+			
+			
+			p1.add(new JLabel(""));	p2.add(new JLabel(""));
+			p1.add(_persistentWorkspaceCheckBox);p2.add(new JLabel(""));
+			p1.add(_playDemoBox);p2.add(new JLabel(""));			
 
 		} else {
 			dynamicPanel.setLayout(new BorderLayout());
@@ -478,7 +479,7 @@ public class LoginDialog extends JDialog {
 		
 		_waitForResourceBox = new JCheckBox("Wait Until R Resource Available", waitForResource_bool);
 		_privateName=new JTextField(privateName_str);
-		_privateNameLabel=new JLabel("   Private R Name   ");
+		_privateNameLabel=new JLabel(" Private R Name   ");
 		
 		
 

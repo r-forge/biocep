@@ -16,6 +16,8 @@
  */
 package http;
 
+import static uk.ac.ebi.microarray.pools.PoolUtils.DEFAULT_MEMORY_MAX;
+import static uk.ac.ebi.microarray.pools.PoolUtils.DEFAULT_MEMORY_MIN;
 import graphics.pop.GDDevice;
 
 import java.io.IOException;
@@ -145,8 +147,10 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					boolean save = options.keySet().contains("save") && ((String) options.get("save")).equalsIgnoreCase("true");
 					boolean namedAccessMode = login.contains("@@");
 					String privateName = (String) options.get("privatename");
-
-					System.out.println("privatename=<" + privateName + ">");
+					
+					int memoryMin = (Integer)options.get("memorymin");
+					int memoryMax = (Integer)options.get("memorymin");
+					
 
 					RServices r = null;
 					URL[] codeUrls = null;
@@ -281,7 +285,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 										codeUrls = (URL[]) options.get("urls");
 										System.out.println("CODE URL->" + Arrays.toString(codeUrls));
 										r = ServerManager.createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-												.getLocalRmiRegistryPort()), 256, 256, privateName, false, codeUrls,null);
+												.getLocalRmiRegistryPort()), memoryMin, memoryMax, privateName, false, codeUrls,null);
 									}
 								}
 

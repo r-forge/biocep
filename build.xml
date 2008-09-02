@@ -1588,7 +1588,7 @@
 			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
 			
 			<!-- tools begin -->
-<!--
+			<!--
 			
 			<delete dir="bintools" failonerror="true"/>
 			<mkdir dir="bintools"/>
@@ -1684,8 +1684,8 @@
 					<fileset dir="binsrv"/>
 			</jar>
 			
-				
-		-->		
+		-->				
+		
 		<!-- tools end -->
 		
 		

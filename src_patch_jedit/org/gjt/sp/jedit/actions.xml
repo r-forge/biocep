@@ -140,6 +140,7 @@
 
 <ACTION NAME="copy">
 	<CODE>
+	
 		Registers.copy(textArea,'$');
 	</CODE>
 </ACTION>
@@ -897,6 +898,16 @@
 <ACTION NAME="run-r">
 	<CODE>
 		jEdit.runR(buffer.getPath());
+	</CODE>
+	
+	<IS_SELECTED>
+		return jEdit.isRunREnabled();
+	</IS_SELECTED>
+</ACTION>	
+
+<ACTION NAME="run-r-selection">
+	<CODE>
+		jEdit.runRSelection(buffer.getPath());
 	</CODE>
 	
 	<IS_SELECTED>
