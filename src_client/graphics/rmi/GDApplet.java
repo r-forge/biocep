@@ -529,7 +529,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 								options.put("nopool", new Boolean(_nopool).toString());
 								options.put("privatename", ident.getPrivateName());
 								options.put("save", new Boolean(_save).toString());
-								options.put("wait", new Boolean(_wait).toString());
+								options.put("wait", new Boolean(_wait).toString());								
+								options.put("memorymin", ident.getMemoryMin());
+								options.put("memorymax", ident.getMemoryMax());
+								
 								_sessionId = RHttpProxy.logOn(_commandServletUrl, _sessionId, _login, pwd, options);
 
 								if (_sessionId.equals(oldSessionId)) {
@@ -912,7 +915,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			};
 			_consolePanel = new ConsolePanel(_submitInterface, "Evaluate", new Color(0x00, 0x80, 0x80), true, new AbstractAction[] { _actions.get("logon"),
 					_actions.get("logoff"), null, _actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"),
-					_actions.get("interrupteval"), null, _actions.get("playdemo") });
+					 null, _actions.get("playdemo") });
 
 			_consolePanel.getCommandInputField().addKeyListener(new KeyListener() {
 
@@ -1078,9 +1081,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					toolsMenu.add(_actions.get("clientpythonconsole"));
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("groovyconsole"));
-					toolsMenu.add(_actions.get("clientgroovyconsole"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("logview"));
+					toolsMenu.add(_actions.get("clientgroovyconsole"));					
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("sourcebioclite"));
 					toolsMenu.add(_actions.get("installpackage"));
@@ -2123,6 +2124,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (props.get("default.r") != null) {
 					LoginDialog.defaultR_bool = new Boolean((String) props.get("default.r"));
 				}
+				
+				
+				if (props.get("memorymin") != null) {
+					LoginDialog.memoryMin_int = Integer.decode((String) props.get("memorymin"));
+				}
+				
+				if (props.get("memorymax") != null) {
+					LoginDialog.memoryMax_int = Integer.decode((String) props.get("memorymax"));
+				}
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -2150,6 +2160,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 			generatorParams.add("url=" + LoginDialog.url_str);
 			generatorParams.add("default.r=" + LoginDialog.defaultR_bool);
 			generatorParams.add("default.r.bin=" + LoginDialog.defaultRBin_str);
+			generatorParams.add("memorymin=" + LoginDialog.memoryMin_int);
+			generatorParams.add("memorymax=" + LoginDialog.memoryMax_int);
 			PropertiesGenerator.main((String[]) generatorParams.toArray(new String[generatorParams.size()]));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -3247,7 +3259,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 							GetExprDialog dialog = new GetExprDialog(GDApplet.this, "  R package", _packageNameSave);
 							dialog.setVisible(true);
 							if (dialog.getExpr() != null) {
-								_actions.get("logview").actionPerformed(null);
 								final String cmd = "biocLite('" + dialog.getExpr() + "')";
 								safeConsoleSubmit(cmd);
 							}

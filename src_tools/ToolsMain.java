@@ -22,30 +22,47 @@ import static server.ServerManager.*;
 
 public class ToolsMain {
 
-	public static void runGen(URL[] codeUrls, HashMap<String, String> argMap) throws Exception {
+	public static void runGen(String RBinPath, URL[] codeUrls, HashMap<String, String> argMap) throws Exception {
 
 		int memoryMinMegabytes = ServerDefaults._memoryMin;
 		int memoryMaxMegabytes = ServerDefaults._memoryMax;
 
+		
 		new File(INSTALL_DIR).mkdir();
 
-		String rpath = null;
-		String rversion = null;
-
-		if (new File(INSTALL_DIR + "R/" + EMBEDDED_R).exists()) {
-			rpath = INSTALL_DIR + "R/" + EMBEDDED_R;
-			rversion = EMBEDDED_R;
+		String rpath=null;
+		String rversion=null;						
+		String[] rinfo = null;
+		
+		if (RBinPath!=null && !RBinPath.equals("")) {
+			rinfo = getRInfo(RBinPath);
+			if (rinfo==null) {
+				System.exit(0);
+			}
+			rpath = rinfo[0];
+			rversion =rinfo[1];
+		} else if (new File(INSTALL_DIR+"R/"+EMBEDDED_R).exists()){
+			rpath=INSTALL_DIR+"R/"+EMBEDDED_R;
+			rversion=EMBEDDED_R;				
 		} else {
-			String[] rinfo = null;
-			if (System.getenv("R_HOME") == null)
+			
+			String rhome=System.getenv("R_HOME");
+			if (rhome == null) {
 				rinfo = getRInfo(null);
-			else
-				rinfo = getRInfo(System.getenv("R_HOME"));
+			} else {
+				if (!rhome.endsWith("/")) {rhome = rhome + "/";}
+				System.out.println("R_HOME is set to :" + rhome);
+				rinfo = getRInfo(rhome+"bin/R");
+			}
+			
 			System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
-			rpath = rinfo != null ? rinfo[0].substring(0, rinfo[0].length() - "library".length()) : null;
+			rpath = rinfo != null ? rinfo[0] : null;
 			rversion = (rinfo != null ? rinfo[1] : "");
 		}
 
+		
+		
+		
 		System.out.println("rpath:" + rpath);
 		System.out.println("rversion:" + rversion);
 		if (rpath == null) {
@@ -368,7 +385,7 @@ public class ToolsMain {
 		codeUrls = (URL[]) v.toArray(new URL[0]);
 
 		System.out.println("jarfile:" + Arrays.toString(codeUrls));
-		runGen(codeUrls, argMap);
+		runGen(null,codeUrls, argMap);
 
 	}
 

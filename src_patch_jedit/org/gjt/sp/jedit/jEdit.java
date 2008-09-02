@@ -29,6 +29,11 @@ import com.microstar.xml.*;
 import graphics.rmi.RGui;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
@@ -438,51 +443,119 @@ public class jEdit {
 			return;
 		}
 
-		if (getActiveView().getBuffer().isDirty()) {
-			JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to R");
-		} else {
+		final View activeView = getActiveView();
+		if (activeView.getBuffer().isDirty()) {
+			activeView.getInputHandler().invokeAction("save");
+		}
+		if (_rgui.getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+			return;
+		}
 
-			if (_rgui.getRLock().isLocked()) {
-				JOptionPane.showMessageDialog(null, "R is busy");
-				return;
-			}
+		new Thread(new Runnable() {
+			FileReader freader = null;
 
-			new Thread(new Runnable() {
-				FileReader freader = null;
+			public void run() {
 
-				public void run() {
+				while (activeView.getBuffer().isDirty()) {
 					try {
-						_rgui.getRLock().lock();
-						freader = new FileReader(path);
-
-						StringBuffer sb = new StringBuffer();
-						BufferedReader br = new BufferedReader(freader);
-						String l = null;
-						while ((l = br.readLine()) != null)
-							sb.append(l + "\n");
-						final String rLog=_rgui.getR().sourceFromBuffer(sb);
-						SwingUtilities.invokeLater(new Runnable() {
-							public void run() {
-								_rgui.getConsoleLogger().printAsOutput("script sourced to R\n");
-								_rgui.getConsoleLogger().printAsOutput("R:\n" + rLog + "\n");
-							}
-						});
-
+						Thread.sleep(100);
 					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						_rgui.getRLock().unlock();
-						if (freader != null)
-							try {
-								freader.close();
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
 					}
 				}
-			}).start();
 
+				try {
+					_rgui.getRLock().lock();
+					freader = new FileReader(path);
+
+					StringBuffer sb = new StringBuffer();
+					BufferedReader br = new BufferedReader(freader);
+					String l = null;
+					while ((l = br.readLine()) != null)
+						sb.append(l + "\n");
+					final String rLog = _rgui.getR().sourceFromBuffer(sb);
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_rgui.getConsoleLogger().printAsOutput("script sourced to R\n");
+							// _rgui.getConsoleLogger().printAsOutput("R:\n" +
+							// rLog + "\n");
+						}
+					});
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					_rgui.getRLock().unlock();
+					if (freader != null)
+						try {
+							freader.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+				}
+			}
+		}).start();
+
+	}
+
+	public static void runRSelection(final String path) {
+
+		if (_rgui.getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
 		}
+
+		
+		
+		final View activeView = getActiveView();
+		final Clipboard clipboard = activeView.getToolkit().getSystemClipboard();
+		
+        StringSelection data = new StringSelection("");
+        clipboard.setContents(data, data);
+        
+		activeView.getInputHandler().invokeAction("copy");
+
+		if (_rgui.getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+			return;
+		}
+
+		new Thread(new Runnable() {
+			public void run() {
+
+				while (activeView.getBuffer().isPerformingIO() || activeView.getBuffer().isReadOnly()) {
+					try {
+						Thread.sleep(100);
+					} catch (Exception e) {
+					}
+				}
+				
+				try {
+					_rgui.getRLock().lock();
+
+					
+					Transferable clipData = clipboard.getContents(clipboard);
+					if (clipData != null) {
+							if (clipData.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+								String s = (String) (clipData.getTransferData(DataFlavor.stringFlavor));								
+								_rgui.getR().sourceFromBuffer(new StringBuffer(s));
+								SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										_rgui.getConsoleLogger().printAsOutput("selection sourced to R\n");
+									}
+								});
+							}
+					}
+
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					_rgui.getRLock().unlock();
+				}
+			}
+		}).start();
+
 	}
 
 	public static void runP(final String path) {
@@ -491,50 +564,58 @@ public class jEdit {
 			return;
 		}
 
-		if (getActiveView().getBuffer().isDirty()) {
-			JOptionPane.showMessageDialog(getActiveView(), "Please Save before sourcing to R");
-		} else {
+		final View activeView = getActiveView();
+		if (activeView.getBuffer().isDirty()) {
+			activeView.getInputHandler().invokeAction("save");
+		}
 
-			if (_rgui.getRLock().isLocked()) {
-				JOptionPane.showMessageDialog(null, "R is busy");
-				return;
-			}
+		if (_rgui.getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+			return;
+		}
 
-			new Thread(new Runnable() {
-				FileReader freader = null;
+		new Thread(new Runnable() {
+			FileReader freader = null;
 
-				public void run() {
+			public void run() {
+				while (activeView.getBuffer().isDirty()) {
 					try {
-						_rgui.getRLock().lock();
-
-						freader = new FileReader(path);
-						StringBuffer sb = new StringBuffer();
-						BufferedReader br = new BufferedReader(freader);
-						String l = null;
-						while ((l = br.readLine()) != null)
-							sb.append(l + "\n");
-						final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);
-						SwingUtilities.invokeLater(new Runnable() {
-							public void run() {
-								_rgui.getConsoleLogger().printAsInput("script executed by Python On Server\n");
-								_rgui.getConsoleLogger().printAsOutput("Python:\n" + pythonLog + "\n");
-							}
-						});
-
+						Thread.sleep(100);
 					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						_rgui.getRLock().unlock();
-						if (freader != null)
-							try {
-								freader.close();
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
 					}
 				}
-			}).start();
-		}
+
+				try {
+					_rgui.getRLock().lock();
+
+					freader = new FileReader(path);
+					StringBuffer sb = new StringBuffer();
+					BufferedReader br = new BufferedReader(freader);
+					String l = null;
+					while ((l = br.readLine()) != null)
+						sb.append(l + "\n");
+					final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_rgui.getConsoleLogger().printAsInput("script executed by Python On Server\n");
+							_rgui.getConsoleLogger().printAsOutput("Python:\n" + pythonLog + "\n");
+						}
+					});
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					_rgui.getRLock().unlock();
+					if (freader != null)
+						try {
+							freader.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+				}
+			}
+		}).start();
+
 	}
 
 	public static void runG(final String path) {
@@ -543,49 +624,68 @@ public class jEdit {
 			JOptionPane.showMessageDialog(null, "No R available");
 			return;
 		}
-		if (getActiveView().getBuffer().isDirty()) {
-			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Groovy");
-		} else {
 
-			if (_rgui.getRLock().isLocked()) {
-				JOptionPane.showMessageDialog(null, "R is busy");
+		final View activeView = getActiveView();
+		if (activeView.getBuffer().isDirty()) {
+			activeView.getInputHandler().invokeAction("save");
+		}
+
+		try {
+			if (!_rgui.getR().isGroovyEnabled()) {
+				JOptionPane.showMessageDialog(null, "Groovy Unavailable, Download Core Jars and Retry");
 				return;
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-			new Thread(new Runnable() {
-				public void run() {
-					FileReader freader = null;
+		if (_rgui.getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+			return;
+		}
+
+		new Thread(new Runnable() {
+			public void run() {
+
+				while (activeView.getBuffer().isDirty()) {
 					try {
-						_rgui.getRLock().lock();
-						freader = new FileReader(path);
-
-						StringBuffer sb = new StringBuffer();
-						BufferedReader br = new BufferedReader(freader);
-						String l = null;
-						while ((l = br.readLine()) != null)
-							sb.append(l + "\n");
-						final String groovyLog = _rgui.getR().groovyExecFromBuffer(sb);
-						SwingUtilities.invokeLater(new Runnable() {
-							public void run() {
-								_rgui.getConsoleLogger().printAsInput("script executed by Groovy on Server\n");
-								_rgui.getConsoleLogger().printAsOutput("Groovy:\n" + groovyLog + "\n");
-							}
-						});
-
+						Thread.sleep(100);
 					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						_rgui.getRLock().unlock();
-						if (freader != null)
-							try {
-								freader.close();
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
 					}
 				}
-			}).start();
-		}
+
+				FileReader freader = null;
+				try {
+					_rgui.getRLock().lock();
+					freader = new FileReader(path);
+
+					StringBuffer sb = new StringBuffer();
+					BufferedReader br = new BufferedReader(freader);
+					String l = null;
+					while ((l = br.readLine()) != null)
+						sb.append(l + "\n");
+					final String groovyLog = _rgui.getR().groovyExecFromBuffer(sb);
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_rgui.getConsoleLogger().printAsInput("script executed by Groovy on Server\n");
+							_rgui.getConsoleLogger().printAsOutput("Groovy:\n" + groovyLog + "\n");
+						}
+					});
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					_rgui.getRLock().unlock();
+					if (freader != null)
+						try {
+							freader.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+				}
+			}
+		}).start();
+
 	}
 
 	public static void runPL(final String path) {
@@ -594,49 +694,61 @@ public class jEdit {
 			return;
 		}
 
-		if (getActiveView().getBuffer().isDirty()) {
-			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Python");
-		} else {
+		if (true) {
+			JOptionPane.showMessageDialog(null, "Not Yet Available");
+			return;
+		}
 
-			if (_rgui.getRLock().isLocked()) {
-				JOptionPane.showMessageDialog(null, "R is busy");
-				return;
-			}
+		final View activeView = getActiveView();
+		if (activeView.getBuffer().isDirty()) {
+			activeView.getInputHandler().invokeAction("save");
+		}
 
-			new Thread(new Runnable() {
-				public void run() {
-					FileReader freader = null;
+		if (_rgui.getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+			return;
+		}
+
+		new Thread(new Runnable() {
+			public void run() {
+
+				while (activeView.getBuffer().isDirty()) {
 					try {
-						_rgui.getRLock().lock();
-						freader = new FileReader(path);
-						StringBuffer sb = new StringBuffer();
-						BufferedReader br = new BufferedReader(freader);
-						String l = null;
-						while ((l = br.readLine()) != null)
-							sb.append(l + "\n");
-						final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);
-						SwingUtilities.invokeLater(new Runnable() {
-							public void run() {
-								_rgui.getConsoleLogger().printAsInput("script executed by Python Locally\n");
-								_rgui.getConsoleLogger().printAsOutput("Python:\n" + pythonLog + "\n");
-							}
-						});
-
+						Thread.sleep(100);
 					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						_rgui.getRLock().unlock();
-						if (freader != null)
-							try {
-								freader.close();
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
 					}
 				}
-			}).start();
 
-		}
+				FileReader freader = null;
+				try {
+					_rgui.getRLock().lock();
+					freader = new FileReader(path);
+					StringBuffer sb = new StringBuffer();
+					BufferedReader br = new BufferedReader(freader);
+					String l = null;
+					while ((l = br.readLine()) != null)
+						sb.append(l + "\n");
+					final String pythonLog = _rgui.getR().pythonExecFromBuffer(sb);
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_rgui.getConsoleLogger().printAsInput("script executed by Python Locally\n");
+							_rgui.getConsoleLogger().printAsOutput("Python:\n" + pythonLog + "\n");
+						}
+					});
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					_rgui.getRLock().unlock();
+					if (freader != null)
+						try {
+							freader.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+				}
+			}
+		}).start();
 
 	}
 
@@ -664,76 +776,102 @@ public class jEdit {
 			return;
 		}
 
-		if (getActiveView().getBuffer().isDirty()) {
-			JOptionPane.showMessageDialog(getActiveView(), "Please Save before executing Groovy");
-		} else {
+		final View activeView = getActiveView();
+		if (activeView.getBuffer().isDirty()) {
+			activeView.getInputHandler().invokeAction("save");
+		}
 
-			if (_rgui.getRLock().isLocked()) {
-				JOptionPane.showMessageDialog(null, "R is busy");
-				return;
-			}
+		if (_rgui.getGroovyInterpreter() == null) {
+			JOptionPane.showMessageDialog(null, "Groovy Unavailable, Download Core Jars and retry");
+			return;
+		}
 
-			new Thread(new Runnable() {
-				public void run() {
-					File f = null;
-					FileReader freader = null;
+		if (_rgui.getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+			return;
+		}
+
+		new Thread(new Runnable() {
+			public void run() {
+
+				while (activeView.getBuffer().isDirty()) {
 					try {
-						_rgui.getRLock().lock();
-						freader = new FileReader(path);
-
-						StringBuffer sb = new StringBuffer();
-						BufferedReader br = new BufferedReader(freader);
-						String l = null;
-						while ((l = br.readLine()) != null)
-							sb.append(l + "\n");
-
-						final String groovyLog = _rgui.getGroovyInterpreter().execFromBuffer(sb);
-
-						SwingUtilities.invokeLater(new Runnable() {
-							public void run() {
-								_rgui.getConsoleLogger().printAsInput("script executed by Groovy Locally\n");
-								_rgui.getConsoleLogger().printAsOutput("Groovy:\n" + groovyLog + "\n");
-							}
-						});
-
+						Thread.sleep(100);
 					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						_rgui.getRLock().unlock();
-						if (f != null)
-							f.delete();
-						if (freader != null)
-							try {
-								freader.close();
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
 					}
 				}
-			}).start();
 
-		}
+				File f = null;
+				FileReader freader = null;
+				try {
+					_rgui.getRLock().lock();
+					freader = new FileReader(path);
+
+					StringBuffer sb = new StringBuffer();
+					BufferedReader br = new BufferedReader(freader);
+					String l = null;
+					while ((l = br.readLine()) != null)
+						sb.append(l + "\n");
+
+					final String groovyLog = _rgui.getGroovyInterpreter().execFromBuffer(sb);
+
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							_rgui.getConsoleLogger().printAsInput("script executed by Groovy Locally\n");
+							_rgui.getConsoleLogger().printAsOutput("Groovy:\n" + groovyLog + "\n");
+						}
+					});
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					_rgui.getRLock().unlock();
+					if (f != null)
+						f.delete();
+					if (freader != null)
+						try {
+							freader.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+				}
+			}
+		}).start();
 
 	}
 
 	public static void uploadR(final String path) {
-		
+
 		if (_rgui.getR() == null) {
 			JOptionPane.showMessageDialog(null, "No R available");
 			return;
 		}
-		
-		if (getActiveView().getBuffer().isDirty()) {
-			JOptionPane.showMessageDialog(getActiveView(), "Please Save before uploading to R");
-		} else {
-			try {
-				final String fileName = new File(path).getName();
-				_rgui.getR().createWorkingDirectoryFile(fileName);
-				_rgui.upload(new File(path), fileName);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+
+		final View activeView = getActiveView();
+		if (activeView.getBuffer().isDirty()) {
+			activeView.getInputHandler().invokeAction("save");
 		}
+
+		new Thread(new Runnable() {
+			public void run() {
+
+				while (activeView.getBuffer().isDirty()) {
+					try {
+						Thread.sleep(100);
+					} catch (Exception e) {
+					}
+				}
+
+				try {
+					final String fileName = new File(path).getName();
+					_rgui.getR().createWorkingDirectoryFile(fileName);
+					_rgui.upload(new File(path), fileName);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
 	}
 
 	public static boolean isRunREnabled() {
@@ -810,8 +948,8 @@ public class jEdit {
 	 * 
 	 * The elements of the <code>args</code> array are substituted into the
 	 * value of the property in place of strings of the form
-	 * <code>{<i>n</i>}</code>, where <code><i>n</i></code> is an index
-	 * in the array.
+	 * <code>{<i>n</i>}</code>, where <code><i>n</i></code> is an index in the
+	 * array.
 	 * <p>
 	 * 
 	 * You can find out more about this feature by reading the documentation for
@@ -913,10 +1051,9 @@ public class jEdit {
 	 * Returns the value of a font property. The family is stored in the
 	 * <code><i>name</i></code> property, the font size is stored in the
 	 * <code><i>name</i>size</code> property, and the font style is stored in
-	 * <code><i>name</i>style</code>. For example, if
-	 * <code><i>name</i></code> is <code>view.gutter.font</code>, the
-	 * properties will be named <code>view.gutter.font</code>,
-	 * <code>view.gutter.fontsize</code>, and
+	 * <code><i>name</i>style</code>. For example, if <code><i>name</i></code>
+	 * is <code>view.gutter.font</code>, the properties will be named
+	 * <code>view.gutter.font</code>, <code>view.gutter.fontsize</code>, and
 	 * <code>view.gutter.fontstyle</code>.
 	 * 
 	 * @param name
@@ -932,10 +1069,9 @@ public class jEdit {
 	 * Returns the value of a font property. The family is stored in the
 	 * <code><i>name</i></code> property, the font size is stored in the
 	 * <code><i>name</i>size</code> property, and the font style is stored in
-	 * <code><i>name</i>style</code>. For example, if
-	 * <code><i>name</i></code> is <code>view.gutter.font</code>, the
-	 * properties will be named <code>view.gutter.font</code>,
-	 * <code>view.gutter.fontsize</code>, and
+	 * <code><i>name</i>style</code>. For example, if <code><i>name</i></code>
+	 * is <code>view.gutter.font</code>, the properties will be named
+	 * <code>view.gutter.font</code>, <code>view.gutter.fontsize</code>, and
 	 * <code>view.gutter.fontstyle</code>.
 	 * 
 	 * @param name
@@ -1081,10 +1217,9 @@ public class jEdit {
 	 * Sets the value of a font property. The family is stored in the
 	 * <code><i>name</i></code> property, the font size is stored in the
 	 * <code><i>name</i>size</code> property, and the font style is stored in
-	 * <code><i>name</i>style</code>. For example, if
-	 * <code><i>name</i></code> is <code>view.gutter.font</code>, the
-	 * properties will be named <code>view.gutter.font</code>,
-	 * <code>view.gutter.fontsize</code>, and
+	 * <code><i>name</i>style</code>. For example, if <code><i>name</i></code>
+	 * is <code>view.gutter.font</code>, the properties will be named
+	 * <code>view.gutter.font</code>, <code>view.gutter.fontsize</code>, and
 	 * <code>view.gutter.fontstyle</code>.
 	 * 
 	 * @param name
@@ -1286,10 +1421,9 @@ public class jEdit {
 	 * <ul>
 	 * <li>Calling this at a time other than jEdit startup can have
 	 * unpredictable results if the plugin has not been updated for the jEdit
-	 * 4.2 plugin API.
-	 * <li>You must make sure yourself the plugin is not already loaded.
-	 * <li>After loading, you just make sure all the plugin's dependencies are
-	 * satisified before activating the plugin, using the
+	 * 4.2 plugin API. <li>You must make sure yourself the plugin is not already
+	 * loaded. <li>After loading, you just make sure all the plugin's
+	 * dependencies are satisified before activating the plugin, using the
 	 * {@link PluginJAR#checkDependencies()} method.
 	 * </ul>
 	 * 
@@ -3790,7 +3924,7 @@ public class jEdit {
 		for (int i = 0; i < actionSets.length; i++) {
 			actionSets[i].initKeyBindings();
 		}
-	} //}}}
+	} // }}}
 
-	//}}}
+	// }}}
 }

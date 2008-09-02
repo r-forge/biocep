@@ -57,7 +57,7 @@ startup=true
 #}}}
 
 #{{{ Tool bar
-view.toolbar=new-file open-file close-buffer - save-as save run-r - - upload-r - - run-pl run-gl - - run-p run-g - print page-setup - \
+view.toolbar=new-file open-file close-buffer - save-as save run-r run-r-selection - - upload-r - - run-gl - - run-p run-g - print page-setup - \
 	undo redo cut copy paste - find find-next - new-view unsplit \
 	split-horizontal split-vertical - buffer-options global-options 
 
@@ -65,7 +65,8 @@ new-file.icon=New.png
 open-file.icon=Open.png
 save-as.icon=SaveAs.png
 save.icon=Save.png
-run-r.icon=Run1.png
+run-r.icon=RunR.png
+run-r-selection.icon=RunRSelection.png
 run-p.icon=RunP.png
 run-g.icon=RunG.png
 
@@ -141,7 +142,8 @@ icons=AdjustWidth.png \
 	SaveAll.png \
 	SaveAs.png \
 	RunR.png \
-	UploadR.png \
+	RunRSelection.png \
+	UploadR.png \	
 	SingleResult.png \
 	SplitHorizontal.png \
 	SplitVertical.png \

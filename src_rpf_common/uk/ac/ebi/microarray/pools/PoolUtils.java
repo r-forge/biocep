@@ -915,7 +915,7 @@ public class PoolUtils {
 
 			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT) != 0) {
 				System.out.println("Downloading " + jarName + ":");
-				System.out.println("expected:==================================================\ndone    :");
+				System.out.print("expected:==================================================\ndone    :");
 			}
 
 			if ((logInfo & LOG_PRGRESS_TO_LOGGER) != 0) {

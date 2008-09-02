@@ -13,6 +13,9 @@ import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 
 public class HttpServer {
 
+	static String[] defaultArgs=new String[]{ ServerManager.INSTALL_DIR +"rvirtual.war", 
+			ServerManager.INSTALL_DIR+"rws.war"};
+	
 	public static void main(String[] args) throws Exception {
 		int port=8080;
 		try {
@@ -38,8 +41,7 @@ public class HttpServer {
         if (args.length==0) {
         	cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rvirtual.war"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT);
         	cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), ServerManager.INSTALL_DIR , LOG_PRGRESS_TO_SYSTEM_OUT);
-        	args=new String[]{ System.getProperty("user.home") + "/RWorkbench/"+"rvirtual.war", 
-        			           System.getProperty("user.home") + "/RWorkbench/"+"rws.war"};
+        	args=defaultArgs;
         }
                         
 		for (int i=0; i<args.length; ++i) {
@@ -69,7 +71,10 @@ public class HttpServer {
 		
 		System.out.println("--> Http Server Started sucessfully on port "+port);
 		System.out.println("--> From the Virtual R Workbench, in Http mode, connect via the following URL:"+ "http://"+getHostIp()+":"+port+"/rvirtual/cmd");
-		System.out.println("--> The SOAP-R WSDL :"+ "http://"+getHostIp()+":"+port+"/rws/rGlobalEnvFunction?wsdl");
+		
+		if (args==defaultArgs) {				
+			System.out.println("--> The SOAP-R WSDL :"+ "http://"+getHostIp()+":"+port+"/rws/rGlobalEnvFunction?wsdl");
+		}
 		
 	}
 }
