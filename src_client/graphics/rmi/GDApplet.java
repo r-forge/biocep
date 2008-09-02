@@ -3469,7 +3469,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					getConsoleLogger().printAsOutput("Server Name :" + getR().getServantName() + "\n");
 					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getProcessId() + "\n");
 					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp() + "\n");
-					getConsoleLogger().printAsOutput("STUB : \n" + PoolUtils.stubToHex(getR()) + "\n");
+					getConsoleLogger().printAsOutput("STUB : \n" + getR().getStub() + "\n");
 
 				} catch (Exception ex) {
 					ex.printStackTrace();

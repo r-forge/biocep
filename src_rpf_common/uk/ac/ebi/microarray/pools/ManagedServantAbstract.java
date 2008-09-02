@@ -280,8 +280,12 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		return false;
 	}
 
+	public String getStub() throws RemoteException {
+		return PoolUtils.stubToHex(this);
+	}	
+	
 	public String toString() {
 		return super.toString() + " " + _servantName;
-	}
+	}	
 
 }

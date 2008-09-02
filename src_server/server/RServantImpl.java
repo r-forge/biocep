@@ -953,5 +953,10 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		}		
 	}
 	
+
+	public String getStub() throws RemoteException {
+		return super.getStub();
+	}
+	
 		
 }

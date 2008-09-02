@@ -3582,6 +3582,10 @@ public class DirectJNI {
 		public SVarInterfaceRemote getVar(int setId, String name) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
+		
+		public String getStub() throws RemoteException {
+			throw new UnsupportedOperationException("Not supported at this layer.");
+		}
 
 	};
 

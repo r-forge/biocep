@@ -80,5 +80,7 @@ public interface ManagedServant extends java.rmi.Remote {
 	public void setJobId(String jobId) throws java.rmi.RemoteException;
 	
 	public ManagedServant cloneServer() throws java.rmi.RemoteException;
+	
+	public String getStub() throws java.rmi.RemoteException;
 
 }
