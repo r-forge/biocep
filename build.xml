@@ -39,14 +39,15 @@
 		<property name="JRI_JAR" value="${basedir}/lib/desktop/JRI.jar"/>
 		<property name="LOGGING_JAR" value="${basedir}/lib/log/commons-logging-1.1.1.jar"/>
 		<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.15.jar"/>	
-		<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>	
+		<property name="HTMLPARSER_JAR" value="chtmlparser.jar"/>	
 		<property name="SSH_JAR" value="${basedir}/lib/pool/ganymed-ssh2.jar"/>
 		<property name="FTP_JAR" value="${basedir}/lib/pool/edtftpj.jar"/>		
 		<property name="ORACLE_JAR" value="${basedir}/lib/jdbc/ojdbc-14.jar"/>
 		<property name="MYSQL_JAR" value="${basedir}/lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>
 		
-		<property name="DERBY_DB_JAR" value="C:/db-derby-10.4.1.3-bin/lib/derby.jar"/>
-		<property name="DERBY_NET_JAR" value="C:/db-derby-10.4.1.3-bin/lib/derbynet.jar"/>
+		<property name="DERBY_DB_JAR" value="${basedir}/lib/desktop/derby.jar"/>
+		<property name="DERBY_NET_JAR" value="${basedir}/lib/desktop/derbynet.jar"/>
+		
 		<property name="DERBY_JAR" value="${basedir}/lib/jdbc/derbyclient.jar"/>
 		
 		
