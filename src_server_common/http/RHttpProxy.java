@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.ConnectException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;

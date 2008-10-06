@@ -165,7 +165,7 @@
 			<target name="demoserver" depends="initializeProperties">
 				<if><not><isset property="node"/></not><then><property name="node" value="N1"/></then></if>
 				<if><not><isset property="autoname"/></not><then><property name="autoname" value="true"/></then></if>
-				<if><not><isset property="apply.sandbox"/></not><then><property name="apply.sandbox" value="true"/></then></if>
+				<if><not><isset property="apply.sandbox"/></not><then><property name="apply.sandbox" value="false"/></then></if>
 						
 				<antcall target="server">									
 					<param name="servant.classpath" value="${basedir}/lib/pool/commons-pool-1.3.jar${path.separator}${JRI_JAR}${path.separator}${CORE_JAR}${path.separator}${demo.generatedir}/mapping.jar"/>

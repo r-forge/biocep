@@ -283,7 +283,7 @@ public class DirectJNI {
 
 				}
 
-				return "";
+				return _sharedBuffer.toString();
 
 			} finally {
 				_mainLock.unlock();
@@ -2914,7 +2914,8 @@ public class DirectJNI {
 			 * }); }
 			 */
 
-			return clean(_lastStatus);
+			//return clean(_lastStatus);
+			return "";
 
 		}
 

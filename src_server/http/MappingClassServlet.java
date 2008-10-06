@@ -34,9 +34,15 @@ public class MappingClassServlet extends HttpServlet {
 	protected void doAny(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		if (_mappingClassLoader==null) {
+			
+			/*
 			String jar=getClass().getResource("/maps/rjbmaps.xml").toString();
 			jar=jar.substring("jar:".length(), jar.length()- "/maps/rjbmaps.xml".length()-1);
-			_mappingClassLoader=new URLClassLoader(new URL[]{new URL(jar)},null);			
+			System.out.println("--!->jar:"+jar);
+			_mappingClassLoader=new URLClassLoader(new URL[]{new URL(jar)},null);
+			*/			
+			
+			_mappingClassLoader=getClass().getClassLoader();
 		}
 		 
 		String url = req.getRequestURL().toString();
