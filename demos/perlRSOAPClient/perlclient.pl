@@ -8,19 +8,20 @@ use warnings;
 my $service = SOAP::Lite -> service('http://127.0.0.1:8080/rws/rGlobalEnvFunction?WSDL');
  
 my $session = $service->logOn(SOAP::Data->name("arg0" => ""),SOAP::Data->name("arg1" => "guest"), SOAP::Data->name("arg2" => "guest") 
-, SOAP::Data->name("arg3" => "nopool=false"), SOAP::Data->name("arg3" => "poolname=R") ) ;
+, SOAP::Data->name("arg3" => "privatename=titi") ) ;
  
-$service->consoleSubmit(SOAP::Data->name("arg0" => $session), SOAP::Data->name("arg1" => "x='test'"));
+$service->consoleSubmit(SOAP::Data->name("arg0" => $session), SOAP::Data->name("arg1" => "x='test';"));
 print "Status: ", $service->getStatus(SOAP::Data->name("arg0" => $session)), "\n";
-$service->consoleSubmit(SOAP::Data->name("arg0" => $session), SOAP::Data->name("arg1" => "setwd('C:/wtest')"));
-print "Status: ", $service->getStatus(SOAP::Data->name("arg0" => $session)), "\n";
-$service->consoleSubmit(SOAP::Data->name("arg0" => $session), SOAP::Data->name("arg1" => "save(x,file='tata')"));
-print "Status: ", $service->getStatus(SOAP::Data->name("arg0" => $session)), "\n";
+#$service->consoleSubmit(SOAP::Data->name("arg0" => $session), SOAP::Data->name("arg1" => "setwd('C:/wtest')"));
+#print "Status: ", $service->getStatus(SOAP::Data->name("arg0" => $session)), "\n";
+#$service->consoleSubmit(SOAP::Data->name("arg0" => $session), SOAP::Data->name("arg1" => "save(x,file='tata')"));
+#print "Status: ", $service->getStatus(SOAP::Data->name("arg0" => $session)), "\n";
+
+my $namedarg= SOAP::Data->name('arg2' => \SOAP::Data->value( SOAP::Data->name('name' => 'sep'), SOAP::Data->name('robject' => '***') )) 
+->attr( { 'xsi:type' => 'ns1:rNamedArgument' , 'xmlns' => '', 'xmlns:ns1'=>'http://rGlobalEnv.packages.bioconductor.org/'} );
 
 
-
-my $p=$service->callAndConvert(SOAP::Data->name("arg0" => $session), SOAP::Data->name("arg1" => "paste") , SOAP::Data->name("arg2" => "aaaa"), SOAP::Data->name("arg2" => "bbb") );
-   
+my $p=$service->callAndConvert(SOAP::Data->name("arg0" => $session), SOAP::Data->name("arg1" => "paste") , SOAP::Data->name("arg2" => "aaaa"), SOAP::Data->name("arg2" => "bbb"), $namedarg );
 print "paste result: ", $p;
 
 $service->logOff(SOAP::Data->name("arg0" => $session));
