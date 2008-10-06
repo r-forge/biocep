@@ -530,8 +530,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 								options.put("privatename", ident.getPrivateName());
 								options.put("save", new Boolean(_save).toString());
 								options.put("wait", new Boolean(_wait).toString());								
-								options.put("memorymin", ident.getMemoryMin());
-								options.put("memorymax", ident.getMemoryMax());
+								options.put("memorymin", new Integer(ident.getMemoryMin()).toString());
+								options.put("memorymax", new Integer(ident.getMemoryMax()).toString()  );
 								
 								_sessionId = RHttpProxy.logOn(_commandServletUrl, _sessionId, _login, pwd, options);
 

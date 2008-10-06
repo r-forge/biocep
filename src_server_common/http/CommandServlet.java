@@ -27,7 +27,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.ConnectException;
-import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -125,8 +124,16 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 					String login = (String) PoolUtils.hexToObject(request.getParameter("login"));
 					String pwd = (String) PoolUtils.hexToObject(request.getParameter("pwd"));
+					boolean namedAccessMode = login.contains("@@");
+					String sname = null;
+					if (namedAccessMode) {
+						sname=login.substring(login.indexOf("@@") + "@@".length());
+						login = login.substring(0, login.indexOf("@@"));
+					}
+					
 					System.out.println("login :" + login);
 					System.out.println("pwd :" + pwd);
+					
 					
 					if (_rkit == null &&  ( !login.equals(System.getProperty("login")) || !pwd.equals(System.getProperty("pwd"))  ) ) {
 						result = new BadLoginPasswordException();
@@ -145,11 +152,17 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					boolean nopool = !options.keySet().contains("nopool") || ((String) options.get("nopool")).equals("")
 							|| !((String) options.get("nopool")).equalsIgnoreCase("false");
 					boolean save = options.keySet().contains("save") && ((String) options.get("save")).equalsIgnoreCase("true");
-					boolean namedAccessMode = login.contains("@@");
+					
 					String privateName = (String) options.get("privatename");
 					
-					int memoryMin = (Integer)options.get("memorymin");
-					int memoryMax = (Integer)options.get("memorymin");
+					int memoryMin = DEFAULT_MEMORY_MIN; 
+					int memoryMax = DEFAULT_MEMORY_MAX;
+					try {
+						if (options.get("memorymin")!=null) memoryMin = Integer.decode((String)options.get("memorymin"));
+						if (options.get("memorymax")!=null) memoryMax = Integer.decode((String)options.get("memorymax"));
+					} catch (Exception e) {		
+						e.printStackTrace();
+					}
 					
 
 					RServices r = null;
@@ -158,19 +171,21 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					if (_rkit == null) {
 
 						if (namedAccessMode) {
-
-							ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
-
-							if (spFactory == null) {
-								result = new NoRegistryAvailableException();
-								break;
-							}
-
-							Registry registry = spFactory.getServantProvider().getRegistry();
-							String sname = login.substring(login.indexOf("@@") + "@@".length());
-							login = login.substring(0, login.indexOf("@@"));
+							
 							try {
-								r = (RServices) registry.lookup(sname);
+								if (System.getProperty("submit.mode").equals("ssh")) {
+									r = (RServices) ((DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
+							        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
+							                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
+							                "db",new Class<?>[]{DBLayerInterface.class})).lookup(sname);
+								} else {								
+									ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+									if (spFactory == null) {
+										result = new NoRegistryAvailableException();
+										break;
+									}
+									r = (RServices) spFactory.getServantProvider().getRegistry().lookup(sname);								
+								}
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -298,11 +313,12 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 							        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
 							                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
 							                "servant.provider",new Class<?>[]{ServantProvider.class});									
-									boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");
+									boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");									
+									String poolname=((String) options.get("poolname"));
 									if (wait) {
-										r = (RServices) servantProvider.borrowServantProxy();
+										r = (RServices)(poolname==null || poolname.trim().equals("") ? servantProvider.borrowServantProxy() : servantProvider.borrowServantProxy(poolname));
 									} else {
-										r = (RServices) servantProvider.borrowServantProxyNoWait();
+										r = (RServices)(poolname==null || poolname.trim().equals("") ? servantProvider.borrowServantProxyNoWait(): servantProvider.borrowServantProxyNoWait(poolname));
 									}
 									
 									System.out.println("---> borrowed : "+r);
@@ -316,10 +332,11 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									}
 	
 									boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");
+									String poolname=((String) options.get("poolname"));
 									if (wait) {
-										r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+										r = (RServices) (poolname==null || poolname.trim().equals("")? spFactory.getServantProvider().borrowServantProxy() : spFactory.getServantProvider().borrowServantProxy(poolname));
 									} else {
-										r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
+										r = (RServices) (poolname==null || poolname.trim().equals("")? spFactory.getServantProvider().borrowServantProxyNoWait(): spFactory.getServantProvider().borrowServantProxyNoWait(poolname));
 									}
 								}
 							}
@@ -338,6 +355,18 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					}
 
 					session = request.getSession(true);
+					
+					Integer sessionTimeOut=null;
+					try {
+						if (options.get("sessiontimeout")!=null) sessionTimeOut = Integer.decode((String)options.get("sessiontimeout"));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					if (sessionTimeOut!=null) {
+						session.setMaxInactiveInterval(sessionTimeOut);
+					}
+					
 					session.setAttribute("TYPE", "RS");
 					session.setAttribute("R", r);		
 					session.setAttribute("NOPOOL", nopool);
@@ -458,6 +487,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						throw new Exception("Bad Servant Name :" + servantName);
 					}
 					String methodName = (String) PoolUtils.hexToObject(request.getParameter("methodname"));
+					
+					
 
 					ClassLoader urlClassLoader = this.getClass().getClassLoader();
 					if (session.getAttribute("CODEURLS") != null) {

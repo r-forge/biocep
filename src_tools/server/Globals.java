@@ -16,8 +16,6 @@
  */
 package server;
 
-import http.RHttpProxy;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
@@ -25,9 +23,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
-
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RChar;
@@ -40,9 +35,6 @@ import org.bioconductor.packages.rservices.RList;
 import org.bioconductor.packages.rservices.RLogical;
 import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
-
-import remoting.RServices;
-
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import util.Utils;
 
