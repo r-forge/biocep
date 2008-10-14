@@ -192,5 +192,13 @@ public class AssignInterfaceImpl extends java.rmi.server.UnicastRemoteObject imp
 	public long setEnvData(long rObjectId, String slotsPath, HashMap<String, RObject> data) throws RemoteException {
 		return DirectJNI.getInstance().getDefaultAssignInterface().setEnvData(rObjectId, slotsPath, data);
 	}
+	
+	public String getS3ClassAttribute(long rObjectId, String slotsPath) throws RemoteException {
+		return DirectJNI.getInstance().getDefaultAssignInterface().getS3ClassAttribute(rObjectId, slotsPath);
+	}
+
+	public long setS3ClassAttribute(long rObjectId, String slotsPath, String classAttribute) throws RemoteException {
+		return DirectJNI.getInstance().getDefaultAssignInterface().setS3ClassAttribute(rObjectId, slotsPath, classAttribute);
+	}	
 
 }

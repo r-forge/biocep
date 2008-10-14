@@ -101,6 +101,8 @@ import org.bioconductor.packages.rservices.RNamedArgument;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RNumericRef;
 import org.bioconductor.packages.rservices.RObject;
+import org.bioconductor.packages.rservices.RS3;
+import org.bioconductor.packages.rservices.RS3Ref;
 import org.bioconductor.packages.rservices.RUnknown;
 import org.bioconductor.packages.rservices.RVector;
 import org.htmlparser.Node;
@@ -822,6 +824,14 @@ public class DirectJNI {
 					e.rniSetAttr(resultId, "names", e.rniPutStringArray(rlist.getNames()));
 				}
 			}
+			
+			if (obj instanceof RS3) {
+				String classAttribute=((RS3)obj).getClassAttribute();
+				if (classAttribute!=null) {
+					e.rniSetAttr(resultId, "class", e.rniPutString(classAttribute));
+				}
+			}
+			
 
 		} else if (obj instanceof RDataFrame) {
 
@@ -941,9 +951,15 @@ public class DirectJNI {
 
 	private String expressionClass(String expression) {
 		String cls = _rEngine.rniGetString(_rEngine.rniEval(_rEngine.rniParse("class(" + expression + ")", 1), 0));
-		if (cls.equals("NULL"))
-			throw new RuntimeException("NULL CLASS");
+		if (cls.equals("NULL"))	throw new RuntimeException("NULL CLASS");
 		return cls;
+	}
+	
+	private boolean isS3Class(String expression) {
+		boolean isObject= _rEngine.rniGetBoolArrayI(_rEngine.rniEval(_rEngine.rniParse("is.object(" + expression + ")", 1), 0))[0]==1;
+		if (!isObject) return false;
+		boolean isClass= _rEngine.rniGetBoolArrayI(_rEngine.rniEval(_rEngine.rniParse("isClass(class("+expression+"))", 1), 0))[0]==1;		
+		return !isClass;
 	}
 
 	private boolean isNull(String expression) {
@@ -974,14 +990,16 @@ public class DirectJNI {
 		RObject result = null;
 		String typeStr = null;
 		int rmode = e.rniExpType(expressionId);
-		boolean isVirtual = e.rniGetBoolArrayI(e.rniEval(e.rniParse("isVirtualClass(\"" + rclass + "\")", 1), 0))[0] == 1;
-		if (isVirtual && !rclass.equals("vector")) {
+		boolean isVirtual = e.rniGetBoolArrayI(e.rniEval(e.rniParse("isVirtualClass(\"" + rclass + "\")", 1), 0))[0] == 1;		
+		boolean isClass = e.rniGetBoolArrayI(e.rniEval(e.rniParse("isClass(\"" + rclass + "\")", 1), 0))[0] == 1;
+		
+		if (isClass && isVirtual) {
 
 			String unionrclass = e.rniGetString(e.rniEval(e.rniParse("class(" + expression + ")", 1), 0));
 			// log.info(">>> union r class=" + unionrclass );
 			RObject o = getObjectFrom(expression, unionrclass);
 
-			if (e.rniExpType(expressionId) != S4SXP) {
+			if (rmode != S4SXP) {
 				if (DirectJNI._s4BeansMapping.get(unionrclass) != null) {
 
 					o = (RObject) DirectJNI._mappingClassLoader.loadClass(DirectJNI._s4BeansMapping.get(unionrclass)).getConstructor(
@@ -1269,7 +1287,11 @@ public class DirectJNI {
 					String[] rowNames = e.rniGetStringArray(e.rniEval(e.rniParse("row.names(" + expression + ")", 1), 0));
 
 					result = new RDataFrame(rlist, rowNames);
+				} else {
+					boolean isObject = e.rniGetBoolArrayI(e.rniEval(e.rniParse("is.object(" + expression + ")", 1), 0))[0] == 1;
+					if (isObject && !isClass) result = new RS3(rlist.getValue(),rlist.getNames(),rclass);
 				}
+			
 
 				long commentId = e.rniGetAttr(expressionId, "comment");
 				if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
@@ -1522,7 +1544,7 @@ public class DirectJNI {
 		return result;
 	}
 
-	public String guessJavaClassRef(String rclass, int rtype) {
+	public String guessJavaClassRef(String rclass, int rtype, boolean isS3) {
 		String javaClassName = null;
 
 		if (DirectJNI._s4BeansMapping.get(rclass) != null) {
@@ -1606,7 +1628,10 @@ public class DirectJNI {
 					javaClassName = RListRef.class.getName();
 				else if (rclass.equals("data.frame"))
 					javaClassName = RDataFrameRef.class.getName();
-				else {
+				else if (isS3){
+					javaClassName = RS3Ref.class.getName();
+				} else {
+					
 					javaClassName = RListRef.class.getName();/* TODO */
 				}
 
@@ -1639,7 +1664,7 @@ public class DirectJNI {
 				result = getObjectFrom(resultvar);
 			} else {
 				String rclass = expressionClass(resultvar);
-				String javaClassName = guessJavaClassRef(rclass, resultType);
+				String javaClassName = guessJavaClassRef(rclass, resultType, isS3Class(expression));
 				Class<?> javaClass = DirectJNI._mappingClassLoader.loadClass(javaClassName);
 				protectSafe(resultId);
 				result = (RObject) javaClass.getConstructor(new Class[] { long.class, String.class }).newInstance(new Object[] { resultId, "" });
@@ -1668,8 +1693,8 @@ public class DirectJNI {
 		int symbolType = e.rniExpType(symbolId);
 		if (symbolType == NILSXP)
 			return false;
-		String rclass = expressionClass(symbol);
-		return guessJavaClassRef(rclass, symbolType) != null;
+		String rclass = expressionClass(symbol);		
+		return guessJavaClassRef(rclass, symbolType, isS3Class(symbol)) != null;
 	}
 
 	private String[] listExportableSymbols() {

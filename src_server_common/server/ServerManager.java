@@ -130,7 +130,8 @@ public class ServerManager {
 		"rmi.port.start", 
 		"job.id", 
 		"job.name", 
-		"notify.email"};
+		"notify.email",
+		"node"};
 
 
 	private static JTextArea createRSshProgressArea;
@@ -718,7 +719,7 @@ public class ServerManager {
 				
 				Vector<String> command = new Vector<String>();
 
-				command.add(System.getProperty("java.home") + "/bin/java");
+				command.add((isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java" + (isWindowsOs() ? "\"" : "") );
 
 				command.add((isWindowsOs() ? "\"" : "") + "-DXms" + memoryMinMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-DXmx" + memoryMaxMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
@@ -741,8 +742,9 @@ public class ServerManager {
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dservantclass=server.RServantImpl" + (isWindowsOs() ? "\"" : ""));
 
-				command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
-				if (name != null && !name.equals("")) {
+				if (name == null || name.equals("")) {
+					command.add((isWindowsOs() ? "\"" : "") + "-Dprivate=true" + (isWindowsOs() ? "\"" : ""));
+				} else {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dname=" + name + (isWindowsOs() ? "\"" : ""));
 				}
 
