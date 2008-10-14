@@ -1005,7 +1005,7 @@ public class PoolUtils {
 				f.dispose();
 			}
 			if ((logInfo & LOG_PRGRESS_TO_SYSTEM_OUT) != 0) {
-				System.out.println(" 100% of " + jarName + " has been downloaded \n");
+				System.out.println("\n 100% of " + jarName + " has been downloaded \n");
 			}
 			if ((logInfo & LOG_PRGRESS_TO_LOGGER) != 0) {
 				log.info(" 100% of " + jarName + " has been downloaded");

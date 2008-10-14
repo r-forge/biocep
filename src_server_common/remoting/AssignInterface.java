@@ -111,6 +111,11 @@ public interface AssignInterface extends Remote {
 
 	public long setListValue(long rObjectId, String slotsPath, RObject[] value) throws RemoteException;
 
+	// S3
+	public String getS3ClassAttribute(long rObjectId, String slotsPath) throws RemoteException;
+
+	public long setS3ClassAttribute(long rObjectId, String slotsPath, String classAttribute) throws RemoteException;
+
 	// Env
 	public HashMap getEnvData(long rObjectId, String slotsPath) throws RemoteException;
 
@@ -118,4 +123,6 @@ public interface AssignInterface extends Remote {
 
 	public long setEnvData(long rObjectId, String slotsPath, HashMap<String, RObject> data) throws RemoteException;
 
+	
+	
 }

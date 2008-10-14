@@ -131,6 +131,34 @@ public class RHttpProxy {
 		}
 	}
 
+	public static void logOffAndKill(String url, String sessionId) throws TunnelingException {
+		GetMethod getLogOut = null;
+		try {
+			Object result = null;
+			getLogOut = new GetMethod(url + "?method=logoff&kill=true");
+			if (sessionId != null && !sessionId.equals("")) {
+				getLogOut.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+				getLogOut.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
+			}
+			try {
+				mainHttpClient.executeMethod(getLogOut);
+				result = new ObjectInputStream(getLogOut.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
+			} catch (Exception e) {
+				throw new TunnelingException("", e);
+			}
+
+			if (result != null && result instanceof TunnelingException) {
+				throw (TunnelingException) result;
+			}
+
+		} finally {
+			if (getLogOut != null) {
+				getLogOut.releaseConnection();
+			}
+		}
+	}
 	public static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters,
 			HttpClient httpClient) throws TunnelingException {
 		

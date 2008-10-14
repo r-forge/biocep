@@ -325,6 +325,11 @@ public class Globals {
 									+ "}");
 
 					outputWriterWebservice
+					.println("\npublic void logOffAndKill(String session) throws Exception { "
+							+ "try {http.RHttpProxy.logOffAndKill(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
 							.println("\npublic void interrupt(String session) throws Exception { "
 									+ "try {http.RHttpProxy.interrupt(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
@@ -582,11 +587,11 @@ public class Globals {
 
 				outputWriterWebservice
 						.println("\npublic void _exportStandardTypesToWSDL(RObject robject, "
-								+ " RDataFrame rdataframe, RList rlist, REnvironment renvironment,"
+								+ " RDataFrame rdataframe, RList rlist, RS3 rs3, REnvironment renvironment,"
 								+ " RFactor rfactor, RUnknown runknown, RArray rarray, RMatrix rmatrix, RVector rvector, RNumeric rnumeric, RInteger rinteger,"
 								+ " RChar rchar, RComplex rcomplex, RLogical rlogical, RRaw rraw,"
 								+ " RNamedArgument rnamedargument, RObjectName robjectname,"
-								+ " RDataFrameObjectName rdataframeobjectname, RListObjectName rlistobjectname, REnvironmentObjectName renvironmentobjectname,"
+								+ " RDataFrameObjectName rdataframeobjectname, RListObjectName rlistobjectname, RS3ObjectName rs3objectname, REnvironmentObjectName renvironmentobjectname,"
 								+ " RFactorObjectName rfactorobjectname, RUnknownObjectName runknownobjectname, RArrayObjectName rarrayobjectname, RMatrixObjectName rmatrixobjectname, RNumericObjectName rnumericobjectname, RIntegerObjectName rintegerobjectname,"
 								+ " RCharObjectName rcharobjectname, RComplexObjectName rcomplexobjectname, RLogicalObjectName rlogicalobjectname, RRawObjectName rrawobjectname"
 

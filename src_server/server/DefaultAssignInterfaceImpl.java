@@ -1127,5 +1127,55 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public String getName() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getServantName();
 	}
+	
+	public String getS3ClassAttribute(final long rObjectId, final String slotsPath) throws RemoteException {
+		final String[] result = new String[1];
+		final Exception[] exceptionHolder = new Exception[1];
+		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+			public void run(Rengine e) {
+				try {
+					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
+					e.rniAssign(rootvar, rObjectId, 0);
+					String comment = null;
+					long commentId = e.rniEval(e.rniParse("class(" + rootvar + slotsPath + ")", 1), 0);
+					if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
+						comment = e.rniGetString(commentId);
+					}
+					result[0] = comment;
+					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 
+				} catch (Exception ex) {
+					exceptionHolder[0] = ex;
+				}
+			}
+		});
+
+		if (exceptionHolder[0] != null)
+			throw new RemoteException(Utils.getStackTraceAsString(exceptionHolder[0]));
+		return result[0];
+	}
+
+	public long setS3ClassAttribute(final long rObjectId, final String slotsPath, final String classAttribute) throws RemoteException {
+		final long[] result = new long[1];
+		final Exception[] exceptionHolder = new Exception[1];
+		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+			public void run(Rengine e) {
+				try {
+
+					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
+					e.rniAssign(rootvar, rObjectId, 0);
+					e.rniEval(e.rniParse("class(" + rootvar + slotsPath + ")<-" + (classAttribute == null ? "NULL" : "'" + classAttribute + "'"), 1), 0);
+					result[0] = e.rniEval(e.rniParse(rootvar, 1), 0);
+					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
+
+				} catch (Exception ex) {
+					exceptionHolder[0] = ex;
+				}
+			}
+		});
+		if (exceptionHolder[0] != null)
+			throw new RemoteException(Utils.getStackTraceAsString(exceptionHolder[0]));
+		return result[0];
+	}
+	
 }

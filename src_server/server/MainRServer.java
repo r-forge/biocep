@@ -1,108 +1,16 @@
 package server;
 
-
-import static uk.ac.ebi.microarray.pools.ServerDefaults._servantPoolPrefix;
-import java.lang.reflect.InvocationTargetException;
-import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
-import org.apache.commons.logging.Log;
-import uk.ac.ebi.microarray.pools.ManagedServant;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.ServantCreationListener;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
-import uk.ac.ebi.microarray.pools.YesSecurityManager;
+import uk.ac.ebi.microarray.pools.MainServer;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
 public class MainRServer {
 
-	private static String _mainServantClassName = System.getProperty("servantclass");
-
-	private static Class<?> mainServantClass = null;
-
-	private static Registry rmiRegistry = null;
-
-	private static String servantName = null;
-
-	private static final Log log = org.apache.commons.logging.LogFactory.getLog(MainRServer.class);
-
-	private static ManagedServant mservant = null;
-	private static ServantCreationListener servantCreationListener = null;
-
 	public static void main(String[] args) throws Exception {
-		
-		PoolUtils.initLog4J();
-		PoolUtils.ensurePublicIPIsUsedForRMI();
-
-		try {
-
-			if (System.getSecurityManager() == null) {
-				System.setSecurityManager(new YesSecurityManager());
-			}
-
-			if (System.getProperty("name") != null && !System.getProperty("name").equals("")) {
-				servantName = System.getProperty("name");
-			} else {
-				servantName = null;				
-			}
-
-			log.info("Instantiating " + _mainServantClassName + " with name " + servantName + " , prefix " + _servantPoolPrefix);
-
-			
-			if (rmiRegistry == null) rmiRegistry = ServerDefaults.getRmiRegistry();
-			
-			System.out.println("### code base:" + System.getProperty("java.rmi.server.codebase"));
-
-			mainServantClass = RServantImpl.class;
-			
-			boolean isPrivateServant = (System.getProperty("private") != null && System.getProperty("private").equalsIgnoreCase("true"));
-
-			String servantCreationListenerStub = System.getProperty("listener.stub");
-			if (servantCreationListenerStub != null && !servantCreationListenerStub.equals("")) {
-				servantCreationListener = (ServantCreationListener) PoolUtils.hexToObject(servantCreationListenerStub);
-			}
-
-			if (!isPrivateServant) {
-				mservant = (ManagedServant) mainServantClass.getConstructor(new Class[] { String.class, String.class, Registry.class }).newInstance(
-						new Object[] { servantName, _servantPoolPrefix, rmiRegistry });
-
-			} else {
-
-				mservant = (ManagedServant) mainServantClass.getConstructor(new Class[] { String.class, String.class, Registry.class }).newInstance(
-						new Object[] { servantName, (servantName==null || servantName.equals("") ? "PRIVATE_" : "") , rmiRegistry });
-
-			}
-
-			if (servantCreationListener != null) {
-				PoolUtils.callBack(servantCreationListener, mservant, null);
-			}
-			
-			String sname = mservant.getServantName();
-			log.info("sname :::" + sname);
-			log.info("Servant " + sname + " instantiated successfully.");
-
-		} catch (InvocationTargetException ite) {
-			ite.printStackTrace();
-			
-			if (servantCreationListener != null) {
-				PoolUtils.callBack(servantCreationListener, null, new RemoteException("", ite.getTargetException()));
-			}
-			throw new Exception(PoolUtils.getStackTraceAsString(ite.getTargetException()));
-
-		} catch (Exception e) {
-
-			log.info("----------------------");
-			log.info(PoolUtils.getStackTraceAsString(e));
-			e.printStackTrace();
-			log.error(e);
-
-			if (servantCreationListener != null) {
-				PoolUtils.callBack(servantCreationListener, null, new RemoteException("", e));
-			}
-
-			System.exit(1);
-		}
+		Class<?> servantClass=RServantImpl.class;
+		System.setProperty("servantclass", servantClass.getName());
+		MainServer.main(args);		
 	}
 
 }

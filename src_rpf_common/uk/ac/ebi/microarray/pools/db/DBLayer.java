@@ -69,18 +69,33 @@ public abstract class DBLayer implements DBLayerInterface {
 
 	public DBLayer(Connection connection) {
 		_connection = connection;
-		try {
-			_connection.setAutoCommit(false);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (_connection!=null) {
+			try {
+				_connection.setAutoCommit(false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
+	public void checkConnection() throws SQLException {
+		if (_connection==null && _connectionProvider!=null) {			
+			_connection=_connectionProvider.newConnection();
+			try {
+				_connection.setAutoCommit(false);				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println("Connection Created Successfully");
+		}
+	}
+	
 	public void bind(String name, Remote obj, HashMap<String, Object> options) throws RemoteException, AlreadyBoundException, AccessException {
 	
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			lock(stmt);
 			rset = stmt.executeQuery("select count(*) from SERVANTS where NAME='" + name + "'");
@@ -184,6 +199,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			rset = stmt.executeQuery("select NAME from SERVANTS");
 			while (rset.next()) {
@@ -218,6 +234,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			rset = stmt.executeQuery("select STUB_HEX,CODEBASE from SERVANTS where NAME='" + name + "'");
 			if (rset.next()) {
@@ -305,6 +322,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			lock(stmt);
 			rset = stmt.executeQuery("select count(*) from SERVANTS where NAME='" + name + "'");
@@ -402,6 +420,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			lock(stmt);
 			stmt.execute("DELETE FROM SERVANTS WHERE NAME='" + name + "'");
@@ -440,7 +459,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
-
+			checkConnection();
 			stmt = _connection.createStatement();
 
 			String stmtStr = "select NAME from SERVANTS where IN_USE=0 AND PING_FAILURES<" + PoolUtils.PING_FAILURES_NBR_MAX + " AND (NAME like '"
@@ -489,6 +508,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void lock() throws RemoteException, AccessException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			lock(stmt);
 		} catch (SQLException sqle) {
@@ -510,6 +530,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void unlock() throws RemoteException, AccessException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			unlock(stmt);
 		} catch (SQLException sqle) {
@@ -531,6 +552,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void reserve(String name) throws RemoteException, NotBoundException, AccessException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("UPDATE SERVANTS SET IN_USE=1, BORROW_TIME=" + sysdateFunctionName() + ",BORROW_HOST_NAME='" + getHostName() + "'"
 					+ ",BORROW_HOST_IP='" + getHostIp() + "'" + ",BORROW_PROCESS_ID='" + getProcessId() + "'" + ",BORROW_SESSION_INFO_HEX="
@@ -555,6 +577,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void unReserve(String name) throws RemoteException, NotBoundException, AccessException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("UPDATE SERVANTS SET IN_USE=0  " + ",RETURN_TIME=" + sysdateFunctionName() + ",RETURN_HOST_NAME='" + getHostName() + "'"
 					+ ",RETURN_HOST_IP='" + getHostIp() + "'" + ",RETURN_PROCESS_ID='" + getProcessId() + "'" + " WHERE NAME='" + name + "'");
@@ -577,6 +600,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void registerPingFailure(String name) throws RemoteException, NotBoundException, AccessException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("update SERVANTS SET PING_FAILURES=(PING_FAILURES+1) WHERE NAME='" + name + "'");
 		} catch (SQLException sqle) {
@@ -598,6 +622,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void incrementNodeProcessCounter(String nodeName) throws RemoteException, NotBoundException, AccessException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("update NODE_DATA set PROCESS_COUNTER=(PROCESS_COUNTER+1) WHERE NODE_NAME='" + nodeName + "'");
 			_connection.commit();
@@ -620,6 +645,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void updateServantNodeName(String servantName, String nodeName) throws RemoteException, NotBoundException, AccessException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("update SERVANTS SET NODE_NAME='" + nodeName + "' WHERE NAME='" + servantName + "'");
 			_connection.commit();
@@ -642,6 +668,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void updateServantAttributes(String servantName, HashMap<String, Object> attributes) throws RemoteException, NotBoundException, AccessException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("update SERVANTS SET ATTRIBUTES_HEX='" + PoolUtils.objectToHex(attributes) + "' WHERE NAME='" + servantName + "'");
 			_connection.commit();
@@ -682,6 +709,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			rset = stmt.executeQuery("select POOL_NAME,POOL_PREFIXES,TIMEOUT from POOL_DATA");
 			while (rset.next()) {
@@ -742,6 +770,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void addNode(NodeDataDB nodeData) throws RemoteException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt
 					.execute("INSERT INTO NODE_DATA(NODE_NAME, HOST_IP,HOST_NAME,LOGIN,PWD,INSTALL_DIR,CREATE_SERVANT_COMMAND, KILL_SERVANT_COMMAND ,OS,SERVANT_NBR_MIN,SERVANT_NBR_MAX,POOL_PREFIX, PROCESS_COUNTER) values ("
@@ -799,6 +828,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void addPool(PoolDataDB poolData) throws RemoteException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			String prefixes = "";
 			for (int i = 0; i < poolData.getPrefixes().length; ++i)
 				prefixes += poolData.getPrefixes()[i] + (i == poolData.getPrefixes().length - 1 ? "" : ",");
@@ -840,6 +870,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		}
 
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			String updateStr = "UPDATE NODE_DATA set " + " HOST_IP=" + "'" + ip + "'," + " HOST_NAME=" + "'" + host + "'," + " POOL_PREFIX=" + "'" + prefix
 					+ "'," + " LOGIN=" + "'" + nodeData.getLogin() + "'," + " PWD=" + "'"
@@ -871,6 +902,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void removeNode(String nodeName) throws RemoteException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			String deleteStr = "delete from NODE_DATA where NODE_NAME='" + nodeName + "'";
 			stmt.execute(deleteStr);
@@ -894,6 +926,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void removePool(String poolName) throws RemoteException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			String deleteStr = "delete from POOL_DATA where POOL_NAME='" + poolName + "'";
 			stmt.execute(deleteStr);
@@ -922,6 +955,7 @@ public abstract class DBLayer implements DBLayerInterface {
 			prefixes += poolData.getPrefixes()[i] + (i == poolData.getPrefixes().length - 1 ? "" : ",");
 
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			String updateStr = "UPDATE POOL_DATA set TIMEOUT=" + poolData.getBorrowTimeout() + "," + " POOL_PREFIXES='" + prefixes + "' where POOL_NAME='"
 					+ poolData.getPoolName() + "'";
@@ -949,6 +983,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void unlockServant(String servantName) throws RemoteException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("UPDATE SERVANTS SET IN_USE=0, PING_FAILURES=0" + ",BORROW_HOST_NAME=NULL" + ",BORROW_HOST_IP=NULL" + ",BORROW_PROCESS_ID=NULL"
 					+ ",BORROW_SESSION_INFO_HEX=NULL" + ",RETURN_TIME=" + sysdateFunctionName() + ",RETURN_HOST_NAME='" + getHostName() + "'"
@@ -979,6 +1014,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			rset = stmt.executeQuery("select * from " + tableName + (condition == null || condition.equals("") ? "" : " WHERE " + condition));
 			while (rset.next()) {
@@ -1024,6 +1060,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			rset = stmt.executeQuery("select NAME from SERVANTS where STUB_HEX='" + stub_hex + "'");
 			if (!rset.next())
@@ -1060,6 +1097,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			lock(stmt);
 			stmt.execute("UPDATE SERVANTS SET IN_USE=0  " + ",RETURN_TIME=" + sysdateFunctionName() + ",RETURN_HOST_NAME='" + getHostName() + "'"
@@ -1117,6 +1155,7 @@ public abstract class DBLayer implements DBLayerInterface {
 		Statement stmt = null;
 		ResultSet rset = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(scriptInputStream));
@@ -1232,7 +1271,9 @@ public abstract class DBLayer implements DBLayerInterface {
 	}
 
 	public static DBLayer getLayer(String dbtype, ConnectionProvider connProvider) throws Exception {
-		DBLayer result = getLayer(dbtype, connProvider.newConnection());
+		Connection c=null;
+		try {c=connProvider.newConnection();} catch (Exception e) {e.printStackTrace();}
+		DBLayer result = getLayer(dbtype, c);
 		result.setConnectionProvider(connProvider);
 		return result;
 	}
@@ -1278,6 +1319,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void setJobID(String servantName, String jobID) throws RemoteException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("update SERVANTS SET JOB_ID='" + jobID + "' WHERE NAME='" + servantName + "'");
 			_connection.commit();
@@ -1300,6 +1342,7 @@ public abstract class DBLayer implements DBLayerInterface {
 	public void setNotified(String servantName, boolean notified) throws RemoteException {
 		Statement stmt = null;
 		try {
+			checkConnection();
 			stmt = _connection.createStatement();
 			stmt.execute("update SERVANTS SET NOTIFIED=" + (notified?"1":"0") + " WHERE NAME='" + servantName + "'");
 			_connection.commit();

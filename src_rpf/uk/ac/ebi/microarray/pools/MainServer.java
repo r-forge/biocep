@@ -60,7 +60,8 @@ public class MainServer {
 				System.setSecurityManager(new YesSecurityManager());
 			}
 
-			if (System.getProperty("node") != null && !System.getProperty("node").equalsIgnoreCase("")) {
+			boolean isNodeProvided=System.getProperty("node") != null && !System.getProperty("node").equals("");
+			if (isNodeProvided) {
 				NodeDataDB nodeData = null;
 				try {
 					rmiRegistry = ServerDefaults.getRmiRegistry();
@@ -98,12 +99,13 @@ public class MainServer {
 
 			mainServantClass = cl.loadClass(_mainServantClassName);
 
-			boolean isPrivateServant = (System.getProperty("private") != null && System.getProperty("private").equalsIgnoreCase("true"));
+			boolean isPrivateServant = !isNodeProvided && ( (System.getProperty("private") != null && System.getProperty("private").equalsIgnoreCase("true")) );
 
 			String servantCreationListenerStub = System.getProperty("listener.stub");
 			if (servantCreationListenerStub != null && !servantCreationListenerStub.equals("")) {
 				servantCreationListener = (ServantCreationListener) PoolUtils.hexToObject(servantCreationListenerStub);
 			}
+
 
 			if (!isPrivateServant) {
 				mservant = (ManagedServant) mainServantClass.getConstructor(new Class[] { String.class, String.class, Registry.class }).newInstance(
