@@ -12,8 +12,9 @@
 <% String login=request.getParameter("login")==null ? "guest" : request.getParameter("login");  %>
 <% String mode=request.getParameter("mode")==null ? "http" : request.getParameter("mode");  %>
 <% String debug=request.getParameter("debug")==null ? "false" : request.getParameter("debug");  %>
-<% String url=request.getParameter("url")==null ? "http://xen-ngs001.oerc.ox.ac.uk:8000/rvirtual/cmd" : request.getParameter("url");  %>
+<% String url=request.getParameter("url")==null ?"http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/cmd" : request.getParameter("url");  %>
 <% String privatename=request.getParameter("privatename")==null ? "" : request.getParameter("privatename");  %>
+<% String noconfirmation=request.getParameter("noconfirmation")==null ? "" : request.getParameter("noconfirmation");  %>
 
 <information>
   <title>Virtual R Workbench</title>
@@ -39,6 +40,7 @@
   <property name="debug" value="<%=debug%>"/>
   <property name="url" value="<%=url%>"/>
   <property name="privatename" value="<%=privatename%>"/>
+  <property name="noconfirmation" value="<%=noconfirmation%>"/>
   
   <jar href="appletlibs/RJB.jar"/>
   

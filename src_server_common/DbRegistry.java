@@ -23,11 +23,9 @@ public class DbRegistry {
 	 */
 	public static void main(String[] args) throws Exception{
 		String port=new Integer(PoolUtils.DEFAULT_DB_PORT).toString();	
-		if (System.getProperty("port")!=null && !System.getProperty("port").equals("")) {
-			port=System.getProperty("port");
+		if (System.getProperty("db.port")!=null && !System.getProperty("db.port").equals("")) {
+			port=System.getProperty("db.port");
 		}
-		
-		System.setProperty("db.port",port);
 		
 		DbRegistryOff.main(new String[0]);
 		

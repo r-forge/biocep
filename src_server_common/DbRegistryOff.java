@@ -22,10 +22,10 @@ public class DbRegistryOff {
 		cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/derbynet.jar"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT);
 		
 		String port=new Integer(PoolUtils.DEFAULT_DB_PORT).toString();	
-		if (System.getProperty("port")!=null && !System.getProperty("port").equals("")) {
-			port=System.getProperty("port");
+		if (System.getProperty("db.port")!=null && !System.getProperty("db.port").equals("")) {
+			port=System.getProperty("db.port");
 		}
-		System.setProperty("db.port",port);
+		
 		Class.forName(ServerDefaults._dbDriver);
 		Connection c=null;	
 		try {
@@ -34,7 +34,7 @@ public class DbRegistryOff {
 			return;
 		} finally {
 			if (c!=null) {
-				c.close();
+				try {c.close();} catch (Exception e) {e.printStackTrace();}
 			}
 		}
 
