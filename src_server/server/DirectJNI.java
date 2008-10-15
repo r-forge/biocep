@@ -2837,7 +2837,7 @@ public class DirectJNI {
 		}
 
 		public void stop() throws RemoteException {
-			_rEngine.rniStop(1);
+			_rEngine.rniStop(0);
 			_stopRequired = true;
 		}
 
