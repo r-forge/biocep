@@ -175,10 +175,9 @@ public class SupervisorUtils implements SupervisorInterface {
 		Vector<String> cmd = new Vector<String>();
 		cmd.add(isForWindows ? "cmd" : "/bin/sh");
 		cmd.add(isForWindows ? "/c" : "-c");
-		if (isForWindows) {
-			StringTokenizer st = new StringTokenizer(command, " ");
-			while (st.hasMoreElements())
-				cmd.add(st.nextToken());
+		if (isForWindows) {			
+			Vector<String> tokens=tokenizeWindowsCommand(command);
+			for (int i=0;i<tokens.size();++i) cmd.add(tokens.elementAt(i));			
 		} else {
 			cmd.add(command);
 		}
@@ -374,5 +373,29 @@ public class SupervisorUtils implements SupervisorInterface {
 		}).start();
 
 	}
-
+	
+	public static Vector<String> tokenize(String command, String sep ) {
+		Vector<String> result=new Vector<String>();
+		StringTokenizer st = new StringTokenizer(command, sep);
+		while (st.hasMoreElements())
+			result.add(st.nextToken());
+		return result;
+	}
+	private static final String pattern="%-&sd+-";	
+	public static Vector<String> tokenizeWindowsCommand(String command) throws Exception {
+		String command_t="";
+		boolean changeSpaces=false;
+		for (int i=0; i<command.length();++i) {
+			if (command.charAt(i)=='\"') {
+				changeSpaces=!changeSpaces;
+			} else {
+				if (command.charAt(i)==' ' && changeSpaces) command_t+=pattern;
+				else command_t+=command.charAt(i);
+			}
+		}
+			
+		Vector<String> result=tokenize(command_t, " ");
+		for (int i=0; i<result.size(); ++i) result.setElementAt(PoolUtils.replaceAll( result.elementAt(i).trim(), pattern, " "),i);
+		return result;		
+	}
 }
