@@ -142,7 +142,6 @@ import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
-import org.bioconductor.packages.rservices.RChar;
 import org.bioconductor.packages.rservices.RObject;
 import org.gjt.sp.jedit.gui.FloatingWindowContainer;
 import org.mortbay.jetty.Server;
@@ -380,6 +379,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		System.out.println("INIT starts");
 
+
+		if (true) {
+
+			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
+			LocalRmiRegistry.getLocalRmiRegistryPort();
+		}
+
+		restoreState();
+		
 		if (getParameter("mode") == null) {
 			_mode = NEW_R_MODE;
 		} else {
@@ -392,25 +400,24 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 
-		if (true) {
-
-			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
-			LocalRmiRegistry.getLocalRmiRegistryPort();
-		}
-
-		if (getParameter("command_servlet_url") == null || getParameter("command_servlet_url").equals("")) {
+		
+		if (getParameter("url") == null || getParameter("url").equals("")) {
 			if (getWebAppUrl() != null) {
-				// _commandServletUrl = getWebAppUrl() + "cmd";
-				_commandServletUrl = "http://127.0.0.1:8080/rvirtual/cmd";
+				_commandServletUrl = getWebAppUrl() + "cmd";
+				System.out.println("1:"+_commandServletUrl);
 			} else {
 				_commandServletUrl = "http://127.0.0.1:8080/rvirtual/cmd";
+				System.out.println("2:"+_commandServletUrl);
 			}
 		} else {
-			_commandServletUrl = getParameter("command_servlet_url");
+			_commandServletUrl = getParameter("url");
+			System.out.println("3:"+_commandServletUrl);
 		}
 
+		
+		
 		LoginDialog.mode_int = _mode;
-		LoginDialog.url_str = _commandServletUrl;
+		LoginDialog.url_str = _commandServletUrl;		
 		if (getParameter("stub") != null && !getParameter("stub").equals(""))
 			LoginDialog.stub_str = getParameter("stub");
 		if (getParameter("name") != null && !getParameter("name").equals(""))
@@ -419,13 +426,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 			LoginDialog.servantName_str = getParameter("registry.host");
 		if (getParameter("registry.port") != null && !getParameter("registry.port").equals(""))
 			LoginDialog.servantName_str = getParameter("registry.port");
-		if (getParameter("url") != null && !getParameter("url").equals(""))
-			LoginDialog.url_str = getParameter("url");
 		if (getParameter("privatename") != null && !getParameter("privatename").equals(""))
 			LoginDialog.privateName_str = getParameter("privatename");
 
-		if (_mode == HTTP_MODE && getParameter("privatename") != null && !getParameter("privatename").equals("")) {
+		if (getParameter("noconfirmation") != null && getParameter("noconfirmation").equals("true")) {
 			logonWithoutConfirmation = true;
+			
+			System.out.println("------> NO Confirmation");
 		}
 
 		try {
@@ -502,10 +509,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 								ident = loginDialog.getIndentification();
 							}
 
+							//persistState();
+							
 							if (ident == null)
 								return "Logon cancelled\n";
-
-							persistState();
 
 							_mode = ident.getMode();
 
@@ -677,9 +684,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								_rForPopCmd = r;
 								_rForFiles = r;
 
-								_sessionId = RHttpProxy.FAKE_SESSION;
-
-								restoreState();
+								_sessionId = RHttpProxy.FAKE_SESSION;								
 
 							}
 
@@ -779,6 +784,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							_rForConsole.registerUser(getUID(), getUserName());
 
+							restoreState();
+							
 							if (_demo) {
 								playDemo();
 								LoginDialog.playDemo_bool = false;
@@ -1718,7 +1725,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		 * e.printStackTrace(); } } }).start();
 		 */
 
-		restoreState();
+
 		_instance = this;
 
 		if (getParameter("autologon") == null || getParameter("autologon").equalsIgnoreCase("true")) {
@@ -2097,16 +2104,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 				Properties props = new Properties();
 				props.loadFromXML(new FileInputStream(settings));
 
-				if (getR() != null && !_keepAlive) {
-
+				if (getMode()==NEW_R_MODE && getR() != null && !_keepAlive) {
 					if (props.get("working.dir.root") != null) {
 						getR().consoleSubmit("setwd('" + props.get("working.dir.root") + "')");
 					}
-
 				}
 
 				if (props.get("command.history") != null) {
-					_consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) props.get("command.history")));
+					if (_consolePanel!=null) _consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) props.get("command.history")));
 				}
 
 				if (props.get("mode") != null) {
@@ -2139,7 +2144,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}
 
-		if (getR() != null && !_keepAlive && _save) {
+		if (getMode()==NEW_R_MODE && getR() != null && !_keepAlive && _save) {
 			try {
 				_rForConsole.consoleSubmit("load('.RData')");
 			} catch (Exception e) {
@@ -2152,9 +2157,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 		try {
 			Vector<String> generatorParams = new Vector<String>();
 			generatorParams.add(GDApplet.SETTINGS_FILE);
-			if (getR() != null && !_keepAlive) {
-				generatorParams.add("working.dir.root=" + ((RChar) _rForConsole.getObject("getwd()")).getValue()[0]);
+			if (getR() != null) {				
+				generatorParams.add("working.dir.root=" + _rForConsole.getObjectConverted("getwd()"));
+				System.out.println("--working.dir.root="+ _rForConsole.getObjectConverted("getwd()"));				
 			}
+			
 			generatorParams.add("command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()));
 			generatorParams.add("mode=" + LoginDialog.mode_int);
 			generatorParams.add("url=" + LoginDialog.url_str);

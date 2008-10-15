@@ -45,6 +45,7 @@ import java.io.RandomAccessFile;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.InetAddress;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.URL;
@@ -63,6 +64,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -262,7 +264,7 @@ public class PoolUtils {
 		return randomIndexes;
 	}
 
-	private static void injectSystemProperties(InputStream is) {
+	private static void injectSystemProperties(InputStream is, boolean override) {
 		if (is != null) {
 			try {
 				Properties props = new Properties();
@@ -274,7 +276,8 @@ public class PoolUtils {
 				Enumeration<Object> keys = props.keys();
 				while (keys.hasMoreElements()) {
 					String key = (String) keys.nextElement();
-					System.setProperty(key, props.getProperty(key));
+					boolean setProp=override || System.getProperty(key)==null || System.getProperty(key).equals(""); 
+					if (setProp) System.setProperty(key, props.getProperty(key));
 				}
 
 			} catch (Exception e) {
@@ -287,13 +290,13 @@ public class PoolUtils {
 
 		if (onlyOnce && _propertiesInjected)
 			return;
-		injectSystemProperties(ServerDefaults.class.getResourceAsStream("/globals.properties"));
+		injectSystemProperties(ServerDefaults.class.getResourceAsStream("/globals.properties"), false);
 
 		if (System.getProperty("properties.extension") != null && !System.getProperty("properties.extension").equals("")) {
 
 			if (new File(System.getProperty("properties.extension")).exists()) {
 				try {
-					injectSystemProperties(new FileInputStream(System.getProperty("properties.extension")));
+					injectSystemProperties(new FileInputStream(System.getProperty("properties.extension")), true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -854,7 +857,8 @@ public class PoolUtils {
 	}
 
 	
-	public static void cacheJar(URL url, String location, int logInfo) {
+	private static final int RECONNECTION_RETRIAL_NBR=4;
+	public static void cacheJar(URL url, String location, int logInfo) throws Exception {
 		final String jarName = url.toString().substring(url.toString().lastIndexOf("/") + 1);
 		if (!location.endsWith("/") && !location.endsWith("\\"))
 			location += "/";
@@ -866,12 +870,27 @@ public class PoolUtils {
 		final JFrame f = ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) ? new JFrame("copying " + jarName + " ...") : null;
 
 		try {
-			URLConnection urlC = url.openConnection();
+			
+			URLConnection urlC = null;
+			Exception connectionException=null;
+			for (int i=0; i<RECONNECTION_RETRIAL_NBR; ++i) {
+				try {
+					urlC = url.openConnection();
+					connectionException=null;break;
+				} catch (Exception e) {
+					connectionException=e;
+				}
+			}
+			if (connectionException!=null) throw connectionException;
+			
 			InputStream is = url.openStream();
 			File file = new File(fileName);
-			if (file.exists() && file.length() == urlC.getContentLength() && file.lastModified() > urlC.getLastModified()) {
-				return;
-			}
+			
+			long urlLastModified=urlC.getLastModified();
+			boolean somethingToDo=!file.exists() 
+							||  file.lastModified() < urlLastModified
+							|| (file.length() != urlC.getContentLength() && !isValidJar(fileName)); 
+			if (!somethingToDo) return;
 
 			if ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) {
 
@@ -925,9 +944,12 @@ public class PoolUtils {
 			int jarSize = urlC.getContentLength();
 			int currentPercentage = 0;
 
+			
+			
+			
 			FileOutputStream fos = null;
-
 			fos = new FileOutputStream(fileName);
+			
 			int count = 0;
 			int printcounter = 0;
 
@@ -935,6 +957,7 @@ public class PoolUtils {
 			int co = 0;
 			while ((co = is.read(data, 0, BUFFER_SIZE)) != -1) {
 				fos.write(data, 0, co);
+				
 				count = count + co;
 				int expected = (50 * count / jarSize);
 				while (printcounter < expected) {
@@ -995,11 +1018,15 @@ public class PoolUtils {
 			 */
 			is.close();
 			fos.close();
+			
+			
 
 		} catch (MalformedURLException e) {
 			System.err.println(e.toString());
+			throw e;
 		} catch (IOException e) {
 			System.err.println(e.toString());
+			
 		} finally {
 			if ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) {
 				f.dispose();
@@ -1285,9 +1312,8 @@ public class PoolUtils {
 
 	public static int countLines(String fileName) throws Exception {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
-		String line = null;
 		int counter = 0;
-		while ((line = br.readLine()) != null)
+		while ((br.readLine()) != null)
 			++counter;
 		return counter;
 	}
@@ -1394,6 +1420,18 @@ public class PoolUtils {
 
 	public static void main(String args[]) throws Exception {
 		System.out.println(currentWinProcessID());
+	}
+	
+	public static boolean isValidJar(String jarFileName) {
+		try {
+			URL jarUrl = new URL("jar:" + new File(jarFileName).toURL() + "!/");
+			JarURLConnection jarConnection = (JarURLConnection) jarUrl.openConnection();
+			JarFile jarfile = jarConnection.getJarFile();
+			return true;
+		}  catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}		
 	}
 
 }

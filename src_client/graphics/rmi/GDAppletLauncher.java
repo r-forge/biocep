@@ -37,7 +37,7 @@ public class GDAppletLauncher {
 			final HashMap<String, String> params = new HashMap<String, String>();
 			
 			
-			params.put("command_servlet_url", System.getProperty("url"));
+			params.put("url", System.getProperty("url"));
 			params.put("autologon", System.getProperty("autologon"));
 			params.put("demo", System.getProperty("demo"));
 			params.put("debug", System.getProperty("debug"));
@@ -55,6 +55,7 @@ public class GDAppletLauncher {
 			params.put("registry.port", System.getProperty("registry.port"));
 			params.put("url", System.getProperty("url"));			
 			params.put("privatename", System.getProperty("privatename"));
+			params.put("noconfirmation", System.getProperty("noconfirmation"));
 			
 			
 			System.out.println("params=" + params);

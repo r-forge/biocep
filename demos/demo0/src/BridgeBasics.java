@@ -17,8 +17,9 @@
  */
 
 import org.apache.commons.logging.Log;
-import org.bioconductor.packages.rservices.RChar;
-import org.bioconductor.packages.rservices.RNamedArgument;
+import org.bioconductor.packages.rservices.RObjectName;
+import org.bioconductor.packages.rservices.RS3;
+
 import remoting.RServices;
 import server.DirectJNI;
 
@@ -34,9 +35,16 @@ public class BridgeBasics {
 			
 		final RServices rs = DirectJNI.getInstance().getRServices();		
 		
+		RS3 s3=(RS3)rs.getObject("packageDescription('stats')");
+		//System.out.println("s="+s3);
+		rs.putAndAssign(s3,"f");
+		rs.call("print",new RObjectName("f"));
+		//System.out.println("log=" + rs.getStatus());
+		/*
 		RChar s = (RChar) rs.call("paste", new RChar("str1"), new RChar("str2"), new RNamedArgument("sep", new RChar(
 				"--")));
 		System.out.println("s=" + s);
+		*/
 
 		System.exit(0);
 	}

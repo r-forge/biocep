@@ -42,8 +42,12 @@ public abstract class ServerDefaults {
 	public static int _memoryMax;
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(ServerDefaults.class);
-
+	
 	static {
+		init();
+	}
+	
+	public static void init()	{
 
 		_namingMode = System.getProperty("naming.mode") != null && !System.getProperty("naming.mode").equals("") ? System.getProperty("naming.mode") : DEFAULT_NAMING_MODE;
 		

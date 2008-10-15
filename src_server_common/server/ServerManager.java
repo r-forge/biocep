@@ -52,17 +52,8 @@ import ch.ethz.ssh2.StreamGobbler;
 public class ServerManager {
 
 	public static void main(String[] args) throws Exception {
-		
-		RServices r = ServerManager.createR("",true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-				ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), 256,256, "", false, null,null);
-		System.out.println("1:"+r.consoleSubmit("print('a')"));
-		System.out.println("2:"+r.getStatus());
-		System.exit(0);
-
+		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), INSTALL_DIR, PoolUtils.LOG_PRGRESS_TO_LOGGER | PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT);
 	}
-
-	
-
 	
 	public static String INSTALL_DIR = null;
 	public static final String EMBEDDED_R="R-2.7.1";

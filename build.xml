@@ -118,8 +118,8 @@
 				-->
 				
 				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
-				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
-				<pathelement path="${env.ANT_HOME}/lib/ant-launcher.jar"/>
+				<pathelement path="lib/ant/ant.jar"/>
+				<pathelement path="lib/ant/ant-launcher.jar"/>
 								
 				
 				<pathelement path="${JRI_JAR}"/>
@@ -243,8 +243,8 @@
 				
 				
 				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
-				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
-				<pathelement path="${env.ANT_HOME}/lib/ant-launcher.jar"/>
+				<pathelement path="lib/ant/ant.jar"/>
+				<pathelement path="lib/ant/ant-launcher.jar"/>
 				
 				
 				<pathelement path="${JRI_JAR}"/>
@@ -1582,13 +1582,13 @@
 			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
 			
 			
-			<!--
+			
 		
 			<jar destfile="biocep-core-tomcat.jar" >
 				<fileset dir="binsrv"/>
 			</jar>
 			
-			-->
+			
 			
 			<unjar src="lib/desktop/servlet-api-2.5-6.1.8.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/jsp-api-2.1.jar"  dest="binsrv" overwrite="true"/>
@@ -1603,12 +1603,12 @@
 				<fileset dir="binsrv"/>
 			</jar>
 		
-			<!--
+			
 			<signjar jar="biocep-core.jar" signedjar="biocep-core.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
-			-->
+			
 			
 			<!-- tools begin -->
-			<!--
+			
 			<delete dir="bintools" failonerror="true"/>
 			<mkdir dir="bintools"/>
 
@@ -1619,8 +1619,8 @@
 			destdir="bintools" debug="true" source="1.5" target="1.5">
 			<classpath>					
 				<pathelement location="binsrv"/>				
-				<pathelement path="${env.ANT_HOME}/lib/ant.jar"/>
-				<pathelement path="${env.ANT_HOME}/lib/ant-launcher.jar"/>
+				<pathelement path="lib/ant/ant.jar"/>
+				<pathelement path="lib/ant/ant-launcher.jar"/>
 				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
 				<pathelement path="lib/beangenlibs/ant-contrib-1.0b3.jar"/>
 				<pathelement path="lib/beangenlibs/geronimo-jms_1.1_spec-1.0.jar"/>
@@ -1658,8 +1658,8 @@
 		</for>
 		
 		
-		<unjar src="${env.ANT_HOME}/lib/ant-launcher.jar"  dest="bintools" overwrite="true"/>
-		<unjar src="${env.ANT_HOME}/lib/ant.jar"  dest="bintools" overwrite="true"/>
+		<unjar src="lib/ant/ant-launcher.jar"  dest="bintools" overwrite="true"/>
+		<unjar src="lib/ant/ant.jar"  dest="bintools" overwrite="true"/>
 		
 		<unjar src="${env.JAVA_HOME}/lib/tools.jar"  dest="bintools" overwrite="true"/>
 			
@@ -1703,14 +1703,13 @@
 					<fileset dir="binsrv"/>
 			</jar>
 			
-		-->
+		
 		<!-- tools end -->
 		
 		
 		<!-- biocep starts -->
 		
 		
-					<!--
 		
 			<unjar src="lib/desktop/jeditmodes.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/jedit.jar"  dest="binsrv" overwrite="true"/>
@@ -1772,7 +1771,7 @@
 					
 			<antcall target="sign.extra"/>
 		
-		-->
+		
 			
 			<!-- biocep ends -->		
 	</target>

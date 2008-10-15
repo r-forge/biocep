@@ -60,9 +60,9 @@ public class CoreMain {
 		RServices r=null;
 		
 		if (ServerDefaults.isRegistryAccessible()) {
-			String name=System.getProperty("name");
-			
-			r = ServerManager.createR(null, true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
+			String name=System.getProperty("name");			
+			String rbinary=System.getProperty("r.binary");			
+			r = ServerManager.createR(rbinary, true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
 					ServerManager.getNamingInfo(), 
 							ServerDefaults._memoryMin, ServerDefaults._memoryMax,name , false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file") );
 

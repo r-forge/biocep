@@ -1,3 +1,4 @@
+<% java.net.URL thisUrl=new java.net.URL(request.getRequestURL().toString()); %>
 <html>
 <head>
 
@@ -17,8 +18,9 @@
 <% String login=request.getParameter("login")==null ? "guest" : request.getParameter("login");  %>
 <% String mode=request.getParameter("mode")==null ? "http" : request.getParameter("mode");  %>
 <% String debug=request.getParameter("debug")==null ? "false" : request.getParameter("debug");  %>
-<% String url=request.getParameter("url")==null ? "http://xen-ngs001.oerc.ox.ac.uk:8000/rvirtual/cmd" : request.getParameter("url");  %>
+<% String url=request.getParameter("url")==null ? "http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/cmd" : request.getParameter("url");  %>
 <% String privatename=request.getParameter("privatename")==null ? "" : request.getParameter("privatename");  %>
+<% String noconfirmation=request.getParameter("noconfirmation")==null ? "" : request.getParameter("noconfirmation");  %>
 
 <body>
 <center><!--[if !IE]> Firefox and others will use outer object -->
@@ -30,6 +32,7 @@
 	autologon="<%=autologon%>" nopool="<%=nopool%>" save="<%=save%>"
 	wait="<%=wait%>" demo="<%=demo%>" lf="<%=lf%>" mode="<%=mode%>"
 	url="<%=url%>" debug="<%=debug%>" login="<%=login%>"
+	noconfirmation="<%=noconfirmation%>"
 	privatename="<%=privatename%>"> <!--<![endif]--> <!-- MSIE (Microsoft Internet Explorer) will use inner object -->
 	<object align="center" height=98% width=98%
 		classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93">
@@ -49,6 +52,7 @@
 		<param name="debug" value="<%=debug%>">
 		<param name="login" value="<%=login%>">
 		<param name="privatename" value="<%=privatename%>">
+		<param name="noconfirmation" value="<%=noconfirmation%>">
 
 	</object> <!--[if !IE]> close outer object --> </object> <!--<![endif]-->
 </div>

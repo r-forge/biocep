@@ -28,6 +28,8 @@ import java.util.Date;
  */
 public class MainRegistry {
 	static Registry registry;
+	
+	public static final String REGISTRY_MANAGER_NAME="REGMANAGER";
 
 	public static void main(String[] args) throws Exception {
 		if (System.getSecurityManager() == null) {
@@ -36,7 +38,7 @@ public class MainRegistry {
 
 		if (System.getProperty("kill") != null && System.getProperty("kill").equals("true")) {
 			registry = LocateRegistry.getRegistry(Integer.decode(System.getProperty("port")));
-			RegistryKiller rk = ((RegistryKiller) registry.lookup("REGMANAGER"));
+			RegistryKiller rk = ((RegistryKiller) registry.lookup(REGISTRY_MANAGER_NAME));
 			try {
 				rk.kill();
 			} catch (Exception e) {
@@ -44,7 +46,7 @@ public class MainRegistry {
 			}
 		} else if (System.getProperty("show") != null && System.getProperty("show").equals("true")) {
 			registry = LocateRegistry.getRegistry(Integer.decode(System.getProperty("port")));
-			String[] list = ((RegistryKiller) registry.lookup("REGMANAGER")).show();
+			String[] list = ((RegistryKiller) registry.lookup(REGISTRY_MANAGER_NAME)).show();
 			System.out.println("+Retrieved from remiregistry on " + new Date() + " : ");
 			for (int i = 0; i < list.length; ++i) {
 				System.out.println(list[i]);
@@ -52,7 +54,7 @@ public class MainRegistry {
 
 		} else if (System.getProperty("unbindall") != null && System.getProperty("unbindall").equals("true")) {
 			registry = LocateRegistry.getRegistry(Integer.decode(System.getProperty("port")));
-			RegistryKiller rk = ((RegistryKiller) registry.lookup("REGMANAGER"));
+			RegistryKiller rk = ((RegistryKiller) registry.lookup(REGISTRY_MANAGER_NAME));
 			try {
 				rk.unbindAll();
 			} catch (Exception e) {
@@ -60,10 +62,10 @@ public class MainRegistry {
 			}
 		} else if (System.getProperty("invoke") != null && !System.getProperty("invoke").equals("")) {
 			registry = LocateRegistry.getRegistry(Integer.decode(System.getProperty("port")));
-			RegistryKiller rk = ((RegistryKiller) registry.lookup("REGMANAGER"));
+			RegistryKiller rk = ((RegistryKiller) registry.lookup(REGISTRY_MANAGER_NAME));
 			String[] list = registry.list();
 			for (int i = 0; i < list.length; ++i) {
-				if (!list[i].equalsIgnoreCase("REGMANAGER")) {
+				if (!list[i].equalsIgnoreCase(REGISTRY_MANAGER_NAME)) {
 					try {
 						Remote r = registry.lookup(list[i]);
 						r.getClass().getMethod(System.getProperty("invoke")).invoke(r);
@@ -75,7 +77,7 @@ public class MainRegistry {
 		} else {
 			registry = LocateRegistry.createRegistry(Integer.decode(System.getProperty("port")));
 			System.out.println("rmiregistry process id : " + PoolUtils.getProcessId());
-			registry.rebind("REGMANAGER", new RegistryKillerImpl());
+			registry.rebind(REGISTRY_MANAGER_NAME, new RegistryKillerImpl());
 			while (true) {
 				Thread.sleep(100);
 			}
@@ -113,7 +115,7 @@ public class MainRegistry {
 			System.out.println("unbinding all");
 			String[] list = registry.list();
 			for (int i = 0; i < list.length; ++i) {
-				if (!list[i].equalsIgnoreCase("REGMANAGER")) {
+				if (!list[i].equalsIgnoreCase(REGISTRY_MANAGER_NAME)) {
 					try {
 						registry.unbind(list[i]);
 					} catch (Exception e) {
