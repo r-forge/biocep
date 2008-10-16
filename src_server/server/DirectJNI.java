@@ -425,7 +425,7 @@ public class DirectJNI {
 	}
 
 	private DirectJNI() {
-		_rEngine = new RengineWrapper(new String[] { "--no-save" }, true, new RMainLoopCallbacksImpl());
+		_rEngine = new RengineWrapper(new String[] { "--no-save", "--interactive" }, true, new RMainLoopCallbacksImpl());
 
 		if (!_rEngine.waitForR()) {
 			log.info("Cannot load R");
@@ -2837,8 +2837,8 @@ public class DirectJNI {
 		}
 
 		public void stop() throws RemoteException {
-			//_rEngine.rniStop(0);			
-			_rEngine.rniEval(_rEngine.rniParse("stop('test')", 1), 0);
+			_rEngine.rniStop(0);			
+			//_rEngine.rniEval(_rEngine.rniParse("stop('test')", 1), 0);
 			_stopRequired = true;
 		}
 
