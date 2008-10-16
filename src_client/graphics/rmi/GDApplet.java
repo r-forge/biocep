@@ -876,7 +876,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 					Object result = null;
 					if (getRLock().isLocked()) {
-						result = "R is busy, please retry\n";
+						Toolkit.getDefaultToolkit().beep(); 
+						result = "R is busy, please retry\n";						
 					} else {
 
 						try {
