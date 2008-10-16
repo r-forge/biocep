@@ -32,6 +32,8 @@ assign('javapager', function (file, header = rep("", nfiles), title = "R Informa
 
 options(pager=.PrivateEnv$javapager)
 
+options(error = quote(print('stop requested')))
+
 load.lightpack <- function( s )  {
 	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"loadLightPack", s ); 
 	if (result[1]=='OK') { eval(parse("", text=result[2])); } else { eval(parse("", text=result[2]));  }
