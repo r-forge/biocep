@@ -882,15 +882,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 						try {
 							getRLock().lock();
 
-							if (_rForConsole instanceof HttpMarker) {
+							
+							if (true || _rForConsole instanceof HttpMarker) {
 								getConsoleLogger().printAsInput(expression);
 								_rForConsole.asynchronousConsoleSubmit(expression);
+								/*	
 								while (_rForConsole.isBusy()) {
 									try {
 										Thread.sleep(20);
 									} catch (Exception e) {
 									}
 								}
+								*/
 								result = null;
 
 							} else {
