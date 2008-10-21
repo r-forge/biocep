@@ -425,7 +425,7 @@ public class DirectJNI {
 	}
 
 	private DirectJNI() {
-		_rEngine = new RengineWrapper(new String[] { "--no-save", "--interactive" }, true, new RMainLoopCallbacksImpl());
+		_rEngine = new RengineWrapper(new String[] { "--no-save" }, true, new RMainLoopCallbacksImpl());
 
 		if (!_rEngine.waitForR()) {
 			log.info("Cannot load R");
@@ -2836,9 +2836,16 @@ public class DirectJNI {
 			return _packs.get(packageName);
 		}
 
+		public String unsafeConsoleSubmit(String cmd) throws RemoteException {
+			return _rEngine.rniGetStringArray(_rEngine.rniEval(_rEngine.rniParse("as.character(" + cmd + ")", 1), 0))[0];
+		}
+		
 		public void stop() throws RemoteException {
-			_rEngine.rniStop(0);			
-			//_rEngine.rniEval(_rEngine.rniParse("stop('test')", 1), 0);
+			if (PoolUtils.isWindowsOs()) {
+				_rEngine.rniStop(0);
+			} else {
+				_rEngine.rniEval(_rEngine.rniParse("stop('stop required')", 1), 0);
+			}
 			_stopRequired = true;
 		}
 
