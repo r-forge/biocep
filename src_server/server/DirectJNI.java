@@ -826,9 +826,9 @@ public class DirectJNI {
 			}
 			
 			if (obj instanceof RS3) {
-				String classAttribute=((RS3)obj).getClassAttribute();
+				String[] classAttribute=((RS3)obj).getClassAttribute();
 				if (classAttribute!=null) {
-					e.rniSetAttr(resultId, "class", e.rniPutString(classAttribute));
+					e.rniSetAttr(resultId, "class", e.rniPutStringArray(classAttribute));
 				}
 			}
 			
@@ -1289,7 +1289,7 @@ public class DirectJNI {
 					result = new RDataFrame(rlist, rowNames);
 				} else {
 					boolean isObject = e.rniGetBoolArrayI(e.rniEval(e.rniParse("is.object(" + expression + ")", 1), 0))[0] == 1;
-					if (isObject && !isClass) result = new RS3(rlist.getValue(),rlist.getNames(),rclass);
+					if (isObject && !isClass) result = new RS3(rlist.getValue(),rlist.getNames(),e.rniGetStringArray(e.rniEval(e.rniParse("class(" + expression + ")", 1), 0)));
 				}
 			
 
@@ -2836,8 +2836,15 @@ public class DirectJNI {
 			return _packs.get(packageName);
 		}
 
-		public String unsafeConsoleSubmit(String cmd) throws RemoteException {
-			return _rEngine.rniGetStringArray(_rEngine.rniEval(_rEngine.rniParse("as.character(" + cmd + ")", 1), 0))[0];
+		public String unsafeGetObjectAsString(String cmd) throws RemoteException {
+			try {
+			Object result = DirectJNI.this.evalAndGetObject(cmd, false);
+			if (result==null) return ""; else {
+				return result.toString();
+			}
+			} catch (Exception e) {
+				throw new RemoteException("", e);
+			}
 		}
 		
 		public void stop() throws RemoteException {

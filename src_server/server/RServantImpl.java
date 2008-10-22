@@ -265,6 +265,10 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		log.info(message);
 	}
 
+	public String unsafeGetObjectAsString(String cmd) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().unsafeGetObjectAsString(cmd);
+	}
+	
 	public void stop() throws RemoteException {
 		DirectJNI.getInstance().getRServices().stop();
 	}

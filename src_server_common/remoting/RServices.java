@@ -124,6 +124,7 @@ public interface RServices extends ManagedServant {
 	
 	public RNI getRNI() throws RemoteException;
 
+	public String unsafeGetObjectAsString( String cmd ) throws RemoteException;
 	public void stop() throws RemoteException;
 
 	public GDDevice newDevice(int w, int h) throws java.rmi.RemoteException;

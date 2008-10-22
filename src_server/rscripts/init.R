@@ -1,7 +1,7 @@
 
 library(rJava);.jinit(classpath=NULL);
-library(JavaGD)
-library(TypeInfo)
+library(JavaGD);
+try(library(TypeInfo));
 
 .PrivateEnv<-new.env(parent = .GlobalEnv)
 assign('q', q , env=.PrivateEnv);
@@ -10,6 +10,7 @@ assign('ls', ls , env=.PrivateEnv);
 assign('objects', objects , env=.PrivateEnv);
 
 assign('help', help , env=.PrivateEnv);
+assign('q', q , env=.PrivateEnv);
 
 assign('setwd', setwd , env=.PrivateEnv);
 assign('getwd', getwd , env=.PrivateEnv);
@@ -84,6 +85,11 @@ help <- function (topic, offline = FALSE, package = NULL, lib.loc = NULL,
     
     'Help is being displayed..'
  	   
+}
+
+q <- function (save = "default", status = 0, runLast = TRUE) {
+	.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"q", as.character(save) , as.character(status) , as.character(runLast) );
+	return(invisible(NULL)); 
 }
 
 
@@ -244,5 +250,3 @@ pythonEval <- function( exp )  {
 		if (result[2]!="") {eval(parse("", text=result[2])) } else {return(invisible(NULL)); }
 	}
 }
-
-q<-function (save = "default", status = 0, runLast = TRUE) {'quit not allowed in this context'}

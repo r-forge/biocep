@@ -279,6 +279,10 @@ public class RServicesObject implements RServices {
 	public void startHttpServer(int port) throws RemoteException {
 	}
 
+	public String unsafeGetObjectAsString(String cmd) throws RemoteException {
+		return null;
+	}
+	
 	public void stop() throws RemoteException {
 	}
 

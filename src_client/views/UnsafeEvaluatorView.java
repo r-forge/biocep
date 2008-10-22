@@ -1,7 +1,6 @@
 package views;
 
 import graphics.rmi.RGui;
-import groovy.GroovyInterpreterSingleton;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,31 +12,23 @@ import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
 import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 
-public class ClientGroovyConsoleView extends DynamicView {
+public class UnsafeEvaluatorView extends DynamicView {
 	ConsolePanel _consolePanel;
 	RGui _rgui;
-	
-	public ClientGroovyConsoleView(String title, Icon icon, int id, RGui rgui) {
+
+	public UnsafeEvaluatorView(String title, Icon icon, int id, RGui rgui) {
 		super(title, icon, new JPanel(), id);
-		_rgui=rgui;
-		
+		_rgui = rgui;
 		((JPanel) getComponent()).setLayout(new BorderLayout());
 		_consolePanel = new ConsolePanel(new SubmitInterface() {
 			public String submit(final String expression) {
-				if (_rgui.getRLock().isLocked()) {
-					return "R is busy, please retry\n";
-				}
 				try {
-					_rgui.getRLock().lock();
-					final String log = GroovyInterpreterSingleton.getInstance().exec(expression);
-					return log+"\n";
+					return _rgui.getR().unsafeGetObjectAsString(expression)+"\n";
 				} catch (Exception e) {
-					return PoolUtils.getStackTraceAsString(e)+"\n";
-				} finally {
-					_rgui.getRLock().unlock();
+					return PoolUtils.getStackTraceAsString(e);
 				}
 			}
-		}, "Groovy Expression", Color.magenta, true, null);
+		}, "Python Expression", Color.green, true, null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 

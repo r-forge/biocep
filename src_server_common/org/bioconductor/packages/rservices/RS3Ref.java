@@ -150,7 +150,7 @@ public class RS3Ref extends RS3 implements mapping.ReferenceInterface, mapping.S
 	}
 
 	@Override
-	public String getClassAttribute() {
+	public String[] getClassAttribute() {
 		try {
 			return _assignInterface.getS3ClassAttribute(_rObjectIdHolder[0], _slotsPath);
 		} catch (Exception e) {
@@ -159,7 +159,7 @@ public class RS3Ref extends RS3 implements mapping.ReferenceInterface, mapping.S
 	}
 
 	@Override
-	public void setClassAttribute(String classAttribute) {
+	public void setClassAttribute(String[] classAttribute) {
 		try {
 			_rObjectIdHolder[0] = _assignInterface.setS3ClassAttribute(_rObjectIdHolder[0], _slotsPath, classAttribute);
 		} catch (Exception e) {

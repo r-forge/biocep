@@ -16,7 +16,11 @@
  * limitations under the License.
  */
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
+import org.bioconductor.packages.rservices.RChar;
+import org.bioconductor.packages.rservices.RNamedArgument;
 import org.bioconductor.packages.rservices.RObjectName;
 import org.bioconductor.packages.rservices.RS3;
 
@@ -34,18 +38,23 @@ public class BridgeBasics {
 	public static void main(String args[]) throws Exception {
 			
 		final RServices rs = DirectJNI.getInstance().getRServices();		
-		
-		RS3 s3=(RS3)rs.getObject("packageDescription('stats')");
-		//System.out.println("s="+s3);
-		rs.putAndAssign(s3,"f");
-		rs.call("print",new RObjectName("f"));
+				
+		RS3 s3=(RS3)rs.getReference("packageDescription('stats')");
+		System.out.println("s="+Arrays.toString(s3.getClassAttribute()));
+		s3.setClassAttribute(new String[] {s3.getClassAttribute()[0], "aaa"});
+		rs.assignReference("f",s3);
+		//rs.call("print",new RObjectName("f"));
 		//System.out.println("log=" + rs.getStatus());
-		/*
+		
+		rs.consoleSubmit("print(class(f))");
+		System.out.println("log=" + rs.getStatus());
+		
 		RChar s = (RChar) rs.call("paste", new RChar("str1"), new RChar("str2"), new RNamedArgument("sep", new RChar(
 				"--")));
 		System.out.println("s=" + s);
-		*/
-
+		
+		
 		System.exit(0);
+		
 	}
 }

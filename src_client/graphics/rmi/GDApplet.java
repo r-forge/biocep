@@ -174,6 +174,7 @@ import splash.SplashWindow;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.PropertiesGenerator;
 import uk.ac.ebi.microarray.pools.SSHUtils;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
@@ -211,16 +212,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private Vector<FileDescription> _workDirFiles = new Vector<FileDescription>();
 	private JTable _filesTable;
 	private boolean _nopool;
-	private boolean _save;
 	private boolean _wait;
-	private boolean _demo;
 	private String _login;
 	private Vector<String> _selectedFiles = new Vector<String>();
 	private HashMap<String, AbstractAction> _actions = new HashMap<String, AbstractAction>();
 	private JFileChooser _chooser = null;
 	private SubmitInterface _submitInterface = null;
 	private ConsolePanel _consolePanel = null;
-	private int _mode = HTTP_MODE;
+	private int _mode = -1;
 	private LookAndFeelInfo[] installedLFs = UIManager.getInstalledLookAndFeels();
 	private int _lf;
 	private boolean _isBiocLiteSourced = false;
@@ -346,7 +345,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private Icon _busyIcon = null;
 
 	private boolean _isGroovyEnabled = false;
-
+	
 	public GDApplet() throws HeadlessException {
 		super();
 	}
@@ -364,6 +363,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 		} else {
 			return null;
 		}
+	}
+	
+	private boolean isDesktopApplication() {		
+		return getParameter("desktopapplication")!=null && getParameter("desktopapplication").equalsIgnoreCase("true");
 	}
 
 	public void init() {
@@ -388,8 +391,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		restoreState();
 		
-		if (getParameter("mode") == null) {
-			_mode = NEW_R_MODE;
+		if (getParameter("mode") == null || getParameter("mode").equals("")) {
+			_mode=LoginDialog.mode_int;
 		} else {
 			if (getParameter("mode").equalsIgnoreCase("local")) {
 				_mode = NEW_R_MODE;
@@ -493,7 +496,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									String stub = pr.readLine();
 									pr.close();
 									ident = new Identification(RMI_MODE, "", "", "", false, false, "", RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "",
-											"", stub, -1, -1, false, false, true, "", "", -1, "", "", false, false);
+											"", stub, -1, -1, false, false, true, "", "", -1, "", "");
 
 									showLoginDialog = false;
 								}
@@ -509,7 +512,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								ident = loginDialog.getIndentification();
 							}
 
-							//persistState();
+							persistState();
 							
 							if (ident == null)
 								return "Logon cancelled\n";
@@ -527,15 +530,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 								_login = ident.getUser();
 								_nopool = ident.isNopool();
 								_wait = ident.isWaitForResource();
-								_save = ident.isPersistentWorkspace();
-								_demo = ident.isPlayDemo();
 								String pwd = ident.getPwd();
 
 								String oldSessionId = _sessionId;
 								HashMap<String, Object> options = new HashMap<String, Object>();
 								options.put("nopool", new Boolean(_nopool).toString());
 								options.put("privatename", ident.getPrivateName());
-								options.put("save", new Boolean(_save).toString());
 								options.put("wait", new Boolean(_wait).toString());								
 								options.put("memorymin", new Integer(ident.getMemoryMin()).toString());
 								options.put("memorymax", new Integer(ident.getMemoryMax()).toString()  );
@@ -546,9 +546,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 									return "Already logged on\n";
 								}
 
-								if (_save && "guest".equals(_login) && _mode == HTTP_MODE) {
-									JOptionPane.showMessageDialog(GDApplet.this, "The login <guest> is not allowed to have workspace persistency");
-								}
 
 								_rForConsole = RHttpProxy.getR(_commandServletUrl, _sessionId, true, maxNbrRactionsOnPop);
 								_rForPopCmd = RHttpProxy.getR(_commandServletUrl, _sessionId, false, maxNbrRactionsOnPop);
@@ -561,9 +558,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 								_helpServletUrl = "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/" + "rvirtual/helpme";
 								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
-
-								_save = ident.isPersistentWorkspace();
-								_demo = ident.isPlayDemo();
 
 								RServices r = null;
 
@@ -784,13 +778,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							_rForConsole.registerUser(getUID(), getUserName());
 
-							restoreState();
-							
-							if (_demo) {
-								playDemo();
-								LoginDialog.playDemo_bool = false;
-							}
-
 							if (_mode == HTTP_MODE) {
 								return "Logged on as " + _login + "\n";
 							} else {
@@ -929,6 +916,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					 null, _actions.get("playdemo") });
 
 			_consolePanel.getCommandInputField().addKeyListener(new KeyListener() {
+				
 
 				public void keyPressed(KeyEvent e) {
 				}
@@ -940,6 +928,14 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 
 			});
+			
+			try {
+				if (stateProperties.get("command.history")!=null) {
+					_consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) stateProperties.get("command.history")));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 			JPanel workingDirPanel = new JPanel();
 			workingDirPanel.setLayout(new BorderLayout());
@@ -1050,6 +1046,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 					sessionMenu.add(_actions.get("showsessioninfo"));
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("downloadcorejars"));
+					sessionMenu.addSeparator();
+					sessionMenu.add(_actions.get("quit"));
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1093,10 +1091,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("groovyconsole"));
 					toolsMenu.add(_actions.get("clientgroovyconsole"));					
+					toolsMenu.add(_actions.get("unsafeevaluator"));					
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("sourcebioclite"));
 					toolsMenu.add(_actions.get("installpackage"));
-
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1686,15 +1684,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 
 		_nopool = getParameter("nopool") == null || getParameter("nopool").equals("") || !getParameter("nopool").equalsIgnoreCase("false");
-		_save = (getParameter("save") != null && getParameter("save").equalsIgnoreCase("true"));
 		_wait = (getParameter("wait") != null && getParameter("wait").equalsIgnoreCase("true"));
-		_demo = (getParameter("demo") != null && getParameter("demo").equalsIgnoreCase("true"));
 		_login = getParameter("login");
 
-		LoginDialog.persistentWorkspace_bool = _save;
 		LoginDialog.nopool_bool = _nopool;
 		LoginDialog.waitForResource_bool = _wait;
-		LoginDialog.playDemo_bool = _demo;
 		LoginDialog.login_str = _login;
 
 		new Thread(new Runnable() {
@@ -1906,6 +1900,17 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 		return null;
 	}
+	
+	private UnsafeEvaluatorView getOpenedUnsafeEvaluatorView() {
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof UnsafeEvaluatorView) {
+				return (UnsafeEvaluatorView) dv;
+			}
+		}
+		return null;
+	}
 
 	private ClientGroovyConsoleView getOpenedClientGroovyConsoleView() {
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
@@ -2097,6 +2102,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 	}
 
+	private Properties stateProperties = new Properties();
+	
 	private void restoreState() {
 
 		File settings = new File(GDApplet.SETTINGS_FILE);
@@ -2105,49 +2112,128 @@ public class GDApplet extends GDAppletBase implements RGui {
 			System.out.println("--restoreState");
 
 			try {
-				Properties props = new Properties();
-				props.loadFromXML(new FileInputStream(settings));
+				
+				stateProperties.loadFromXML(new FileInputStream(settings));
 
 				if (getMode()==NEW_R_MODE && getR() != null && !_keepAlive) {
-					if (props.get("working.dir.root") != null) {
-						getR().consoleSubmit("setwd('" + props.get("working.dir.root") + "')");
+					if (stateProperties.get("working.dir.root") != null) {
+						getR().consoleSubmit("setwd('" + stateProperties.get("working.dir.root") + "')");
 					}
 				}
+				
+				
 
-				if (props.get("command.history") != null) {
-					if (_consolePanel!=null) _consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) props.get("command.history")));
+				if (stateProperties.get("command.history") != null) {
+					try {if (_consolePanel!=null) _consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) stateProperties.get("command.history")));} catch (Exception e) {e.printStackTrace();}
 				}
 
-				if (props.get("mode") != null) {
-					LoginDialog.mode_int = Integer.decode((String) props.get("mode"));
+				if (stateProperties.get("mode") != null) {
+					try {LoginDialog.mode_int = Integer.decode((String) stateProperties.get("mode"));} catch (Exception e) {e.printStackTrace();}
 				}
 
-				if (props.get("url") != null) {
-					LoginDialog.url_str = (String) props.get("url");
+				if (stateProperties.get("url") != null) {
+					try {LoginDialog.url_str = (String) stateProperties.get("url");} catch (Exception e) {e.printStackTrace();}
 				}
 
-				if (props.get("default.r.bin") != null) {
-					LoginDialog.defaultRBin_str = (String) props.get("default.r.bin");
+				if (stateProperties.get("default.r.bin") != null) {
+					try {LoginDialog.defaultRBin_str = (String) stateProperties.get("default.r.bin");} catch (Exception e) {e.printStackTrace();}
 				}
 
-				if (props.get("default.r") != null) {
-					LoginDialog.defaultR_bool = new Boolean((String) props.get("default.r"));
+				if (stateProperties.get("default.r") != null) {
+					try {LoginDialog.defaultR_bool = new Boolean((String) stateProperties.get("default.r"));} catch (Exception e) {e.printStackTrace();}
 				}
 				
 				
-				if (props.get("memorymin") != null) {
-					LoginDialog.memoryMin_int = Integer.decode((String) props.get("memorymin"));
+				if (stateProperties.get("memorymin") != null) {
+					try {LoginDialog.memoryMin_int = Integer.decode((String) stateProperties.get("memorymin"));} catch (Exception e) {e.printStackTrace();}
 				}
 				
-				if (props.get("memorymax") != null) {
-					LoginDialog.memoryMax_int = Integer.decode((String) props.get("memorymax"));
+				if (stateProperties.get("memorymax") != null) {
+					try {LoginDialog.memoryMax_int = Integer.decode((String) stateProperties.get("memorymax"));} catch (Exception e) {e.printStackTrace();}
 				}
+				
+				
+				if (stateProperties.get("privatename") != null) {
+					try {LoginDialog.privateName_str = (String) stateProperties.get("privatename");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("rmi.mode") != null) {
+					try {LoginDialog.rmiMode_int = Integer.decode((String) stateProperties.get("rmi.mode"));} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("registry.host") != null) {
+					try {LoginDialog.rmiregistryIp_str = (String) stateProperties.get("registry.host");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				
+				if (stateProperties.get("registry.port") != null) {
+					try {LoginDialog.rmiregistryPort_int = Integer.decode((String) stateProperties.get("registry.port"));} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				
+				if (stateProperties.get("registry.servant.name") != null) {
+					try {LoginDialog.servantName_str = (String) stateProperties.get("registry.servant.name");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("db.driver") != null) {
+					try {LoginDialog.dbDriver_str = (String) stateProperties.get("db.driver");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("db.host") != null) {
+					try {LoginDialog.dbHostIp_str = (String) stateProperties.get("db.host");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("db.port") != null) {
+					try {LoginDialog.dbHostPort_int = Integer.decode((String) stateProperties.get("db.port"));} catch (Exception e) {e.printStackTrace();}
+				}
+
+				
+				if (stateProperties.get("db.name") != null) {
+					try {LoginDialog.dbName_str = (String) stateProperties.get("db.name");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("db.user") != null) {
+					try {LoginDialog.dbUser_str = (String) stateProperties.get("db.user");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("db.servant.name") != null) {
+					try {LoginDialog.dbServantName_str = (String) stateProperties.get("db.servant.name");} catch (Exception e) {e.printStackTrace();}
+				}
+
+				if (stateProperties.get("stub") != null) {
+					try {LoginDialog.stub_str = (String) stateProperties.get("stub");} catch (Exception e) {e.printStackTrace();}
+				}
+
+				if (stateProperties.get("keepalive") != null) {
+					try {LoginDialog.keepAlive_bool = new Boolean((String) stateProperties.get("keepalive"));} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("usessh") != null) {
+					try {LoginDialog.useSsh_bool = new Boolean((String) stateProperties.get("usessh"));} catch (Exception e) {e.printStackTrace();}
+				}
+			
+
+				if (stateProperties.get("ssh.host") != null) {
+					try {LoginDialog.sshHost_str = (String) stateProperties.get("ssh.host");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("ssh.port") != null) {
+					try {LoginDialog.sshPort_int = Integer.decode((String) stateProperties.get("ssh.port"));} catch (Exception e) {e.printStackTrace();}
+				}
+
+								
+				if (stateProperties.get("ssh.login") != null) {
+					try {LoginDialog.sshLogin_str = (String) stateProperties.get("ssh.login");} catch (Exception e) {e.printStackTrace();}
+				}
+
+								
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
+		/*
 		if (getMode()==NEW_R_MODE && getR() != null && !_keepAlive && _save) {
 			try {
 				_rForConsole.consoleSubmit("load('.RData')");
@@ -2155,6 +2241,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				e.printStackTrace();
 			}
 		}
+		*/
 	}
 
 	synchronized private void persistState() {
@@ -2171,8 +2258,36 @@ public class GDApplet extends GDAppletBase implements RGui {
 			generatorParams.add("url=" + LoginDialog.url_str);
 			generatorParams.add("default.r=" + LoginDialog.defaultR_bool);
 			generatorParams.add("default.r.bin=" + LoginDialog.defaultRBin_str);
+			
+			generatorParams.add("default.r.bin=" + LoginDialog.defaultRBin_str);
+			generatorParams.add("default.r.bin=" + LoginDialog.defaultRBin_str);
+			
 			generatorParams.add("memorymin=" + LoginDialog.memoryMin_int);
 			generatorParams.add("memorymax=" + LoginDialog.memoryMax_int);
+			
+			generatorParams.add("privatename=" + LoginDialog.privateName_str);
+			generatorParams.add("rmi.mode=" + LoginDialog.rmiMode_int);
+			generatorParams.add("registry.host=" + LoginDialog.rmiregistryIp_str);
+			generatorParams.add("registry.port=" + LoginDialog.rmiregistryPort_int);
+			generatorParams.add("registry.servant.name=" + LoginDialog.servantName_str);
+			
+			
+			generatorParams.add("db.driver=" + LoginDialog.dbDriver_str);
+			generatorParams.add("db.host=" + LoginDialog.dbHostIp_str);
+			generatorParams.add("db.port=" + LoginDialog.dbHostPort_int);
+			generatorParams.add("db.name=" + LoginDialog.dbName_str);
+			generatorParams.add("db.user=" + LoginDialog.dbUser_str);
+			generatorParams.add("db.servant.name=" + LoginDialog.dbServantName_str);
+			
+			generatorParams.add("stub=" + LoginDialog.stub_str);
+			generatorParams.add("keepalive=" + LoginDialog.keepAlive_bool);
+			generatorParams.add("usessh=" + LoginDialog.useSsh_bool);
+
+			generatorParams.add("ssh.host=" + LoginDialog.sshHost_str);
+			generatorParams.add("ssh.port=" + LoginDialog.sshPort_int);
+			generatorParams.add("ssh.login=" + LoginDialog.sshLogin_str);
+			
+			
 			PropertiesGenerator.main((String[]) generatorParams.toArray(new String[generatorParams.size()]));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2196,6 +2311,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			persistState();
 
+			/*
 			if (getR() != null && !_keepAlive && _save) {
 				try {
 					_rForConsole.consoleSubmit("save.image('.RData')");
@@ -2203,6 +2319,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
+			*/
 		}
 	}
 
@@ -3150,6 +3267,27 @@ public class GDApplet extends GDAppletBase implements RGui {
 				return getR() != null && GroovyInterpreterSingleton.getInstance() != null;
 			}
 		});
+		
+		_actions.put("unsafeevaluator", new AbstractAction("Unsafe Evaluator") {
+			public void actionPerformed(final ActionEvent e) {
+				if (getOpenedUnsafeEvaluatorView() == null) {
+					int id = getDynamicViewId();
+
+					final UnsafeEvaluatorView lv = new UnsafeEvaluatorView("Unsafe Evaluator", null, id, GDApplet.this);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+					lv.addListener(new AbstractDockingWindowListener() {
+						public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+							lv.getConsolePanel().stopLogThread();
+						}
+					});
+
+				}
+			}
+
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
 
 		_actions.put("biocepmindmap", new AbstractAction("Biocep Mind Map & Doc") {
 			public void actionPerformed(final ActionEvent e) {
@@ -3254,6 +3392,25 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+		_actions.put("quit", new AbstractAction("Quit") {
+			public void actionPerformed(final ActionEvent e) {
+				
+				if (isDesktopApplication()) {
+					System.exit(0);
+				} else 	{
+					_consolePanel.play("logoff", false);
+				}
+			
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+		
+		
+		
 		_actions.put("installpackage", new AbstractAction("Install Package") {
 			public void actionPerformed(final ActionEvent e) {
 				new Thread(new Runnable() {
@@ -3577,6 +3734,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		try {
 			persistState();
 
+			/*
 			if (getR() != null && !_keepAlive && _save) {
 				try {
 					_rForConsole.consoleSubmit("save.image('.RData')");
@@ -3584,6 +3742,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
+			*/
 
 			if (_rProcessId != null && !_keepAlive) {
 
@@ -4030,6 +4189,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 							}
 						}
 					}).start();
+				} if (action.getActionName().equals("q")) {
+					_actions.get("quit").actionPerformed(null);
 				} else if (action.getActionName().equals("ASYNCHRONOUS_SUBMIT_LOG")) {
 
 					/*

@@ -99,12 +99,6 @@ public class LoginDialog extends JDialog {
 	public static String sshLogin_str = "";
 	public static String sshPwd_str = "";
 	
-	
-
-	public static boolean persistentWorkspace_bool = false;
-	public static boolean playDemo_bool = false;
-	
-
 
 	JRadioButton localModeButton;
 	JRadioButton httpModeButton;
@@ -156,10 +150,6 @@ public class LoginDialog extends JDialog {
 	private JTextField _sshLogin;
 	private JPasswordField _sshPwd;
 
-	private JCheckBox _persistentWorkspaceCheckBox;
-	private JCheckBox _playDemoBox;
-
-
 	private JButton _ok;
 	private JButton _cancel;
 
@@ -172,8 +162,7 @@ public class LoginDialog extends JDialog {
 		if (_closedOnOK)
 			return new Identification(mode_int, url_str, login_str, pwd_str, nopool_bool, waitForResource_bool, privateName_str, rmiMode_int, rmiregistryIp_str,
 					rmiregistryPort_int, servantName_str, dbDriver_str, dbHostIp_str, dbHostPort_int, dbName_str, dbUser_str, dbPwd_str, dbServantName_str,
-					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, defaultR_bool, defaultRBin_str, sshHost_str, sshPort_int, sshLogin_str, sshPwd_str, persistentWorkspace_bool,
-					playDemo_bool);
+					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, defaultR_bool, defaultRBin_str, sshHost_str, sshPort_int, sshLogin_str, sshPwd_str);
 		else
 			return null;
 	}
@@ -248,10 +237,8 @@ public class LoginDialog extends JDialog {
 			p1.add(new JLabel("  Memory Max (megabytes)"));
 			p2.add(_memoryMax);
 						
-			p1.add(_persistentWorkspaceCheckBox);
-			p2.add(new JLabel(""));
-			p1.add(_playDemoBox);
-			p2.add(new JLabel(""));
+			//p1.add(new JLabel(""));p2.add(new JLabel(""));
+			//p1.add(new JLabel(""));p2.add(new JLabel(""));
 			
 
 		} else if (httpModeButton.isSelected()) {
@@ -289,8 +276,9 @@ public class LoginDialog extends JDialog {
 			
 			
 			p1.add(new JLabel(""));	p2.add(new JLabel(""));
-			p1.add(_persistentWorkspaceCheckBox);p2.add(new JLabel(""));
-			p1.add(_playDemoBox);p2.add(new JLabel(""));			
+			
+			//p1.add(new JLabel(""));	p2.add(new JLabel(""));
+			//p1.add(new JLabel(""));	p2.add(new JLabel(""));
 
 		} else {
 			dynamicPanel.setLayout(new BorderLayout());
@@ -344,12 +332,12 @@ public class LoginDialog extends JDialog {
 			p2.add(new JLabel(""));
 			p1.add(new JLabel(""));
 			p2.add(new JLabel(""));
-			p1.add(_persistentWorkspaceCheckBox);
-			p2.add(new JLabel(""));
-			p1.add(_playDemoBox);
-			p2.add(new JLabel(""));
-			p1.add(new JLabel(""));
-			p2.add(new JLabel(""));
+			
+			p1.add(new JLabel(""));	p2.add(new JLabel(""));
+			
+			
+			//p1.add(new JLabel(""));p2.add(new JLabel(""));			
+			//p1.add(new JLabel(""));p2.add(new JLabel(""));
 
 		} else if (rmiModeDbModeButton.isSelected()) {
 
@@ -370,10 +358,9 @@ public class LoginDialog extends JDialog {
 			namePanel.add(_refresh, BorderLayout.EAST);
 			p1.add(new JLabel("  R Servant Name"));
 			p2.add(namePanel);
-			p1.add(_persistentWorkspaceCheckBox);
-			p2.add(new JLabel(""));
-			p1.add(_playDemoBox);
-			p2.add(new JLabel(""));
+			
+			//p1.add(new JLabel(""));p2.add(new JLabel(""));
+			//p1.add(new JLabel(""));p2.add(new JLabel(""));
 
 		} else {
 			p1.add(new JLabel(""));
@@ -384,14 +371,13 @@ public class LoginDialog extends JDialog {
 			p2.add(new JLabel(""));
 			p1.add(new JLabel(""));
 			p2.add(new JLabel(""));
-			p1.add(new JLabel(""));
+			p1.add(new JLabel(""));			
 			p2.add(new JLabel(""));
-			p1.add(_persistentWorkspaceCheckBox);
-			p2.add(new JLabel(""));
-			p1.add(_playDemoBox);
-			p2.add(new JLabel(""));
-			p1.add(new JLabel(""));
-			p2.add(new JLabel(""));
+			
+			p1.add(new JLabel(""));p2.add(new JLabel(""));
+			
+			//p1.add(new JLabel(""));p2.add(new JLabel(""));			
+			//p1.add(new JLabel(""));p2.add(new JLabel(""));
 
 		}
 
@@ -600,9 +586,6 @@ public class LoginDialog extends JDialog {
 		_sshLogin = new JTextField(sshLogin_str);
 		_sshPwd = new JPasswordField(sshPwd_str);
 
-		_persistentWorkspaceCheckBox = new JCheckBox("Persistent Workspace", persistentWorkspace_bool);
-		_playDemoBox = new JCheckBox("Play Demo", playDemo_bool);
-
 		KeyListener keyListener = new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == 10) {
@@ -638,9 +621,6 @@ public class LoginDialog extends JDialog {
 		_rmiregistryPort.addKeyListener(keyListener);
 		_servantName.addKeyListener(keyListener);
 		_stub.addKeyListener(keyListener);
-
-		_persistentWorkspaceCheckBox.addKeyListener(keyListener);
-		_playDemoBox.addKeyListener(keyListener);
 
 		_dbDriver.addKeyListener(keyListener);
 		_dbDriver.addKeyListener(keyListener);
@@ -696,13 +676,12 @@ public class LoginDialog extends JDialog {
 				});
 			}
 		}).start();
-		setSize(new Dimension(460+60+120, 440));
+		setSize(new Dimension(460+60+120, 386));
 		PoolUtils.locateInScreenCenter(this);
 
 	}
 
-	public void okMethod() {
-
+	private void persistState() {
 		if (localModeButton.isSelected())
 			mode_int = GDApplet.NEW_R_MODE;
 		else if (httpModeButton.isSelected())
@@ -770,15 +749,16 @@ public class LoginDialog extends JDialog {
 		
 		sshLogin_str = _sshLogin.getText();
 		sshPwd_str = _sshPwd.getText();
-
-		playDemo_bool = _playDemoBox.isSelected();
-		persistentWorkspace_bool = _persistentWorkspaceCheckBox.isSelected();
-
+	}
+	
+	public void okMethod() {
+		persistState();
 		_closedOnOK = true;
 		LoginDialog.this.setVisible(false);
 	}
 
 	private void cancelMethod() {
+		persistState();
 		_closedOnOK = false;
 		LoginDialog.this.setVisible(false);
 	}
@@ -874,25 +854,3 @@ public class LoginDialog extends JDialog {
 	}
 
 }
-
-/*
- * <!-- <property name="demo8.db.driver" value="oracle.jdbc.OracleDriver"/>
- * <property name="demo8.db.url"
- * value="jdbc:oracle:thin:@progression.ebi.ac.uk:1521:AEDWT" /> <property
- * name="demo8.db.user" value="DWEP" /> <property name="demo8.db.password"
- * value="DWEP" /> <property name="demo8.pslistpath" value="D:/wtool/pslist.exe" />
- * -->
- * 
- * <!-- <property name="demo8.db.driver" value="com.mysql.jdbc.Driver"/>
- * <property name="demo8.db.url" value="jdbc:mysql://172.22.68.47/DWEP" />
- * <property name="demo8.db.user" value="DWEP" /> <property
- * name="demo8.db.password" value="DWEP" /> <property name="demo8.pslistpath"
- * value="D:/wtool/pslist.exe" /> -->
- * 
- * <property name="demo8.db.driver" value="org.apache.derby.jdbc.ClientDriver"/>
- * <property name="demo8.db.url"
- * value="jdbc:derby://localhost:1527/DWEP;create=true" /> <property
- * name="demo8.db.user" value="DWEP" /> <property name="demo8.db.password"
- * value="DWEP" /> <property name="demo8.pslistpath" value="D:/wtool/pslist.exe" />
- * 
- */

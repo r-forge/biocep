@@ -803,7 +803,7 @@
 			
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
 		<if><not><isset property="lf"/></not><then><property name="lf" value="0"/></then></if>
-		<if><not><isset property="mode"/></not><then><property name="mode" value="local"/></then></if>
+		<if><not><isset property="mode"/></not><then><property name="mode" value=""/></then></if>
 		<if><not><isset property="stub"/></not><then><property name="stub" value=""/></then></if>				
 		<if><not><isset property="localtomcat.port"/></not><then><property name="localtomcat.port" value=""/></then></if>
 		<if><not><isset property="url"/></not><then><property name="url" value=""/></then></if>
