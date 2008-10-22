@@ -59,9 +59,6 @@ class Identification {
 	private Integer _sshPort;
 	private String _sshLogin;
 	private String _sshPwd;
-
-	private boolean _persistentWorkspace;
-	private boolean _playDemo;
 	
 	private String _privateName;
 
@@ -76,9 +73,7 @@ class Identification {
 			boolean defaultR,
 			String defaultRBin,
 			
-			String sshHostIp, int sshPort, String sshLogin, String sshPwd,
-
-			boolean persistentWorkspace, boolean playDemo) {
+			String sshHostIp, int sshPort, String sshLogin, String sshPwd) {
 		this._mode = mode;
 		this._url = url;
 		this._user = user;
@@ -115,8 +110,6 @@ class Identification {
 		this._sshPort = sshPort;
 		this._sshLogin = sshLogin;
 		this._sshPwd = sshPwd;
-		this._persistentWorkspace = persistentWorkspace;
-		this._playDemo = playDemo;
 	}
 
 	public int getMode() {
@@ -161,14 +154,6 @@ class Identification {
 
 	public int getMemoryMax() {
 		return _memoryMax;
-	}
-
-	public boolean isPersistentWorkspace() {
-		return _persistentWorkspace;
-	}
-
-	public boolean isPlayDemo() {
-		return _playDemo;
 	}
 
 	public int getRmiMode() {

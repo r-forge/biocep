@@ -325,6 +325,10 @@ public class PoolUtils {
 			if (publicIPUnavilable()) System.setProperty("java.rmi.server.hostname", getHostIp());
 		}		
 	}
+	
+	public static void noGui() {
+		System.setProperty("java.awt.headless", "true");
+	}
 
 	public static String bytesToHex(byte in[]) {
 		byte ch = 0x00;

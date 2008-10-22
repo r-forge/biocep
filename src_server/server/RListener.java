@@ -270,6 +270,15 @@ public abstract class RListener {
 		notifyRActionListeners(new RConsoleAction("help",attributes));
 		return null;
 	}
+	
+	public static String[] q( String save, String status, String runLast) {		
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		attributes.put("save", save);
+		attributes.put("status", status);
+		attributes.put("runLast", runLast);
+		notifyRActionListeners(new RConsoleAction("q",attributes));
+		return null;
+	}
 
 	private static Vector<String> list = null;
 

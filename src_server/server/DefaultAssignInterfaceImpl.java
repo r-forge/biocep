@@ -1128,18 +1128,18 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return DirectJNI.getInstance().getRServices().getServantName();
 	}
 	
-	public String getS3ClassAttribute(final long rObjectId, final String slotsPath) throws RemoteException {
-		final String[] result = new String[1];
+	public String[] getS3ClassAttribute(final long rObjectId, final String slotsPath) throws RemoteException {
+		final String[][] result = new String[1][];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					String comment = null;
+					String[] comment = null;
 					long commentId = e.rniEval(e.rniParse("class(" + rootvar + slotsPath + ")", 1), 0);
 					if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
-						comment = e.rniGetString(commentId);
+						comment = e.rniGetStringArray(commentId);
 					}
 					result[0] = comment;
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
@@ -1155,7 +1155,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		return result[0];
 	}
 
-	public long setS3ClassAttribute(final long rObjectId, final String slotsPath, final String classAttribute) throws RemoteException {
+	public long setS3ClassAttribute(final long rObjectId, final String slotsPath, final String[] classAttribute) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
 		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
@@ -1164,7 +1164,12 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					e.rniEval(e.rniParse("class(" + rootvar + slotsPath + ")<-" + (classAttribute == null ? "NULL" : "'" + classAttribute + "'"), 1), 0);
+					String ca="c(";
+					for (int i=0; i<classAttribute.length;++i) {
+						ca+="'"+classAttribute[i]+"'"+(i==classAttribute.length-1 ? "" : ",");
+					}
+					ca+=")";
+					e.rniEval(e.rniParse("class(" + rootvar + slotsPath + ")<-" + (classAttribute == null ? "NULL" : ca), 1), 0);
 					result[0] = e.rniEval(e.rniParse(rootvar, 1), 0);
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 

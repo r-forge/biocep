@@ -27,9 +27,9 @@ public 	class ServerGroovyConsoleView extends DynamicView {
 				try {
 					_rgui.getRLock().lock();
 					final String log = _rgui.getR().groovyExec(expression);
-					return log;
+					return log+"\n";
 				} catch (Exception e) {
-					return PoolUtils.getStackTraceAsString(e);
+					return PoolUtils.getStackTraceAsString(e)+"\n";
 				} finally {
 					_rgui.getRLock().unlock();
 				}

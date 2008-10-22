@@ -29,12 +29,12 @@ public class ClientPythonConsoleView extends DynamicView {
 					try {
 						python.PythonInterpreterSingleton.startLogCapture();
 						python.PythonInterpreterSingleton.getInstance().exec(expression);
-						return python.PythonInterpreterSingleton.getPythonStatus();
+						return python.PythonInterpreterSingleton.getPythonStatus()+"\n";
 					} catch (Exception e) {
-						return PoolUtils.getStackTraceAsString(e);
+						return PoolUtils.getStackTraceAsString(e)+"\n";
 					}
 				} catch (Exception e) {
-					return PoolUtils.getStackTraceAsString(e);
+					return PoolUtils.getStackTraceAsString(e)+"\n";
 				} finally {
 					_rgui.getRLock().unlock();
 				}

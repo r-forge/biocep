@@ -52,6 +52,7 @@ public class MainServer {
 
 		PoolUtils.initLog4J();
 		PoolUtils.ensurePublicIPIsUsedForRMI();
+		PoolUtils.noGui();
 		
 		
 		try {
