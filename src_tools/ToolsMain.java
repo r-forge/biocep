@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JOptionPane;
+
+import server.ServantCreationFailed;
 import server.ServerManager;
 import uk.ac.ebi.microarray.pools.ServerDefaults;
 import static server.ServerManager.*;
@@ -42,8 +44,15 @@ public class ToolsMain {
 			rpath = rinfo[0];
 			rversion =rinfo[1];
 		} else if (new File(INSTALL_DIR+"R/"+EMBEDDED_R).exists()){
-			rpath=INSTALL_DIR+"R/"+EMBEDDED_R;
-			rversion=EMBEDDED_R;				
+			
+			rinfo = getRInfo(INSTALL_DIR+"R/"+EMBEDDED_R+"/bin/R.exe");
+			if (rinfo==null) {
+				throw new ServantCreationFailed();
+			}
+			rpath = rinfo[0];
+			rversion =rinfo[1];
+			
+			
 		} else {
 			
 			String rhome=System.getenv("R_HOME");
@@ -69,7 +78,6 @@ public class ToolsMain {
 
 			if (isWindowsOs()) {
 
-				rpath = INSTALL_DIR + "R/" + EMBEDDED_R;
 
 				int n = JOptionPane.showConfirmDialog(null, "R is not accessible from the command line\nWould you like to use the Embedded R?", "",
 						JOptionPane.YES_NO_OPTION);
@@ -79,6 +87,14 @@ public class ToolsMain {
 					URL rUrl = new URL(rZipFileName);
 					InputStream is = rUrl.openConnection().getInputStream();
 					unzip(is, INSTALL_DIR + "R/", null, BUFFER_SIZE, true, "Unzipping R..", ENTRIES_NUMBER);
+					
+					rinfo = getRInfo(INSTALL_DIR+"R/"+EMBEDDED_R+"/bin/R.exe");
+					if (rinfo==null) {
+						throw new ServantCreationFailed();
+					}
+					rpath = rinfo[0];
+					rversion =rinfo[1];
+					
 				} else {
 					JOptionPane.showMessageDialog(null, "please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
 					System.exit(0);
@@ -96,11 +112,10 @@ public class ToolsMain {
 
 		if (!rpath.endsWith("/") && !rpath.endsWith("\\"))
 			rpath += "/";
-		// String rlibs = System.getenv("R_LIBS") != null ?
-		// System.getenv("R_LIBS") : (rinfo != null ? rinfo[0] : rpath+
-		// "library");
-		String rlibs = (INSTALL_DIR + "library").replace('\\', '/');
-		new File(rlibs).mkdir();
+		
+		
+		String rlibs = (INSTALL_DIR + "library/"+rversion.substring(0,rversion.lastIndexOf(' ')).replace(' ', '-')).replace('\\', '/');
+		new File(rlibs).mkdirs();
 
 		Vector<String> envVector = new Vector<String>();
 		{
@@ -133,11 +148,6 @@ public class ToolsMain {
 			if (!new File(rlibs + "/" + requiredPackages[i]).exists()) {
 				installLibBatch.add("biocLite('" + requiredPackages[i] + "',lib='" + rlibs + "')");
 			}
-			/*
-			 * if (getLibraryPath(requiredPackages[i], rpath, rlibs) == null) {
-			 * installLibBatch.add("biocLite('" + requiredPackages[i] +
-			 * "',lib='" + rlibs + "')"); }
-			 */
 		}
 
 		if (installLibBatch.size() > 1) {
@@ -157,8 +167,8 @@ public class ToolsMain {
 			installCommand.add("CMD");
 			installCommand.add("BATCH");
 			installCommand.add("--no-save");
-			installCommand.add(installPackagesFile.getAbsolutePath());
-			installCommand.add(installPackagesOutputFile.getAbsolutePath());
+			installCommand.add((isWindowsOs() ? "\"" : "")+installPackagesFile.getAbsolutePath()+(isWindowsOs() ? "\"" : ""));
+			installCommand.add((isWindowsOs() ? "\"" : "")+installPackagesOutputFile.getAbsolutePath()+(isWindowsOs() ? "\"" : ""));
 
 			System.out.println(installCommand);
 
@@ -211,10 +221,6 @@ public class ToolsMain {
 				if (!new File(rlibs + "/" + requiredPackages[i]).exists()) {
 					missingLibs.add(requiredPackages[i]);
 				}
-				/*
-				 * if (getLibraryPath(requiredPackages[i], rpath, rlibs) ==
-				 * null) { missingLibs.add(requiredPackages[i]); }
-				 */
 			}
 
 			if (missingLibs.size() > 0) {
@@ -385,7 +391,8 @@ public class ToolsMain {
 		codeUrls = (URL[]) v.toArray(new URL[0]);
 
 		System.out.println("jarfile:" + Arrays.toString(codeUrls));
-		runGen(null,codeUrls, argMap);
+		String rbinary=System.getProperty("r.binary");	
+		runGen(rbinary,codeUrls, argMap);
 
 	}
 

@@ -56,8 +56,8 @@ public class ServerManager {
 	}
 	
 	public static String INSTALL_DIR = null;
-	public static final String EMBEDDED_R="R-2.7.1";
-	public static final int ENTRIES_NUMBER=1238;
+	public static final String EMBEDDED_R="R-version-2.8.0";
+	public static final int ENTRIES_NUMBER=4832;
 	
 	static {
 		if (System.getenv("BIOCEP_HOME") != null) {
@@ -397,8 +397,14 @@ public class ServerManager {
 				rpath = rinfo[0];
 				rversion =rinfo[1];
 			} else if (new File(INSTALL_DIR+"R/"+EMBEDDED_R).exists()){
-				rpath=INSTALL_DIR+"R/"+EMBEDDED_R;
-				rversion=EMBEDDED_R;				
+				
+				rinfo = getRInfo(INSTALL_DIR+"R/"+EMBEDDED_R+"/bin/R.exe");
+				if (rinfo==null) {
+					throw new ServantCreationFailed();
+				}
+				rpath = rinfo[0];
+				rversion =rinfo[1];
+				
 			} else {
 				
 				String rhome=System.getenv("R_HOME");
@@ -422,7 +428,6 @@ public class ServerManager {
 				String noRCause=System.getenv("R_HOME") == null ? "R is not accessible from the command line" : "Your R_HOME is invalid";
 				if (isWindowsOs()) {	
 					
-					rpath = INSTALL_DIR + "R/"+EMBEDDED_R;
 					int n = JOptionPane.showConfirmDialog(null, noRCause+"\nWould you like to use the Embedded R?", "",
 							JOptionPane.YES_NO_OPTION);
 					if (n == JOptionPane.OK_OPTION) {
@@ -430,7 +435,15 @@ public class ServerManager {
 						rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/"+EMBEDDED_R+".zip";
 						URL rUrl = new URL(rZipFileName);
 						InputStream is = rUrl.openConnection().getInputStream();
-						unzip(is, INSTALL_DIR + "R/", null, BUFFER_SIZE, true, "Unzipping R..", ENTRIES_NUMBER);							
+						unzip(is, INSTALL_DIR + "R/", null, BUFFER_SIZE, true, "Unzipping R..", ENTRIES_NUMBER);
+						
+						rinfo = getRInfo(INSTALL_DIR+"R/"+EMBEDDED_R+"/bin/R.exe");
+						if (rinfo==null) {
+							throw new ServantCreationFailed();
+						}
+						rpath = rinfo[0];
+						rversion =rinfo[1];
+						
 					} else {
 						JOptionPane.showMessageDialog(null,
 								"please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
@@ -455,11 +468,10 @@ public class ServerManager {
 
 			if (!rpath.endsWith("/") && !rpath.endsWith("\\"))
 				rpath += "/";
-			// String rlibs = System.getenv("R_LIBS") != null ?
-			// System.getenv("R_LIBS") : (rinfo != null ? rinfo[0] : rpath+
-			// "library");
-			String rlibs = (INSTALL_DIR + "library").replace('\\', '/');
-			new File(rlibs).mkdir();
+			
+						
+			String rlibs = (INSTALL_DIR + "library/"+rversion.substring(0,rversion.lastIndexOf(' ')).replace(' ', '-')).replace('\\', '/');
+			new File(rlibs).mkdirs();
 
 			Vector<String> envVector = new Vector<String>();
 			{

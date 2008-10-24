@@ -2837,6 +2837,7 @@ public class DirectJNI {
 		}
 
 		public String unsafeGetObjectAsString(String cmd) throws RemoteException {
+			if (cmd.trim().equals("")) return "";
 			try {
 			Object result = DirectJNI.this.evalAndGetObject(cmd, false);
 			if (result==null) return ""; else {

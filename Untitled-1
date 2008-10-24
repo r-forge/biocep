@@ -1,1 +1,2 @@
-plot(pressure)
+x=100
+y=500
