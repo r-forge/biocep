@@ -39,8 +39,11 @@
 		<property name="JRI_JAR" value="${basedir}/lib/desktop/JRI.jar"/>
 		<property name="LOGGING_JAR" value="${basedir}/lib/log/commons-logging-1.1.1.jar"/>
 		<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.15.jar"/>	
-		<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>	
+		<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>			
+		
 		<property name="SSH_JAR" value="${basedir}/lib/pool/ganymed-ssh2.jar"/>
+		<property name="SSH_TUNNEL_JAR" value="${basedir}/lib/pool/jsch-0.1.40.jar"/>
+		
 		<property name="FTP_JAR" value="${basedir}/lib/pool/edtftpj.jar"/>		
 		<property name="ORACLE_JAR" value="${basedir}/lib/jdbc/ojdbc-14.jar"/>
 		<property name="MYSQL_JAR" value="${basedir}/lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>
@@ -127,6 +130,7 @@
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>				
@@ -252,6 +256,7 @@
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
@@ -363,6 +368,7 @@
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
@@ -614,6 +620,7 @@
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>
 			</classpath>
 			
@@ -634,6 +641,43 @@
 			
 		</java>
 	</target>
+
+	<target name="sshtunnel"  depends="initializeProperties">
+		
+		<if><not><isset property="host"/></not><then><property name="host" value=""/></then></if>
+		<if><not><isset property="user"/></not><then><property name="user" value=""/></then></if>
+		<if><not><isset property="password"/></not><then><property name="password" value=""/></then></if>
+		<if><not><isset property="port"/></not><then><property name="port" value=""/></then></if>		
+		<if><not><isset property="tunnel.local.port"/></not><then><property name="tunnel.local.port" value=""/></then></if>
+		<if><not><isset property="tunnel.remote.host"/></not><then><property name="tunnel.remote.host" value=""/></then></if>
+		<if><not><isset property="tunnel.remote.port"/></not><then><property name="tunnel.remote.port" value="."/></then><else><property name="biocep.src.home" value="${env.BIOCEP_SRC_HOME}"/></else></if>		
+
+		<java classname="SshTunnel" fork="true" newenvironment="">
+			
+			<classpath>
+				<pathelement path="${CORE_JAR}"/>
+				<pathelement path="${LOGGING_JAR}"/>
+				<pathelement path="${LOG4J_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
+			</classpath>
+			
+			<jvmarg value="-Dhost=${host}"/>
+			<jvmarg value="-Duser=${user}"/>
+			<jvmarg value="-Dpassword=${password}"/>
+			<jvmarg value="-Dport=${port}"/>			
+			<jvmarg value="-Dtunnel.local.port=${tunnel.local.port}"/>
+			<jvmarg value="-Dtunnel.remote.host=${tunnel.remote.host}"/>
+			<jvmarg value="-Dtunnel.remote.port=${tunnel.remote.port}"/>
+			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
+			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
+			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+		</java>
+	</target>
+	
+	
 	
 	<target name="top"  depends="initializeProperties">
 		
@@ -656,11 +700,14 @@
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
-				<pathelement path="${SSH_JAR}"/>		
+				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>
 				
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
+				<pathelement path="lib/pool/jsch-0.1.40.jar"/>
+				
 				
 				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
@@ -714,10 +761,13 @@
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>
 				
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
+				<pathelement path="lib/pool/jsch-0.1.40.jar"/>
+				
 			</classpath>
 			
 			<jvmarg value="-Dnaming.mode=db"/>
@@ -767,6 +817,7 @@
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>				
 				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>				
@@ -829,6 +880,7 @@
 				<pathelement path="${JRI_JAR}"/>				
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
@@ -949,6 +1001,7 @@
 				<pathelement path="${LOG4J_JAR}"/>
 				<pathelement path="${HTMLPARSER_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
 				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
@@ -1011,7 +1064,8 @@
 				<pathelement path="${DERBY_JAR}"/>								
 				<pathelement path="${LOGGING_JAR}"/>
 				<pathelement path="${LOG4J_JAR}"/>
-				<pathelement path="${SSH_JAR}"/>					
+				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>				
 			</classpath>
 			
@@ -1071,7 +1125,8 @@
 				<pathelement path="${CORE_JAR}"/>
 				<pathelement path="${JRI_JAR}"/>				
 				<pathelement path="${HTMLPARSER_JAR}"/>
-				<pathelement path="${SSH_JAR}"/>	
+				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>
 	
 				<pathelement path="lib/desktop/jeditmodes.jar"/>
@@ -1197,7 +1252,8 @@
 					<pathelement path="${CORE_JAR}"/>
 					<pathelement path="${JRI_JAR}"/>				
 					<pathelement path="${HTMLPARSER_JAR}"/>
-					<pathelement path="${SSH_JAR}"/>	
+					<pathelement path="${SSH_JAR}"/>
+					<pathelement path="${SSH_TUNNEL_JAR}"/>
 					<pathelement path="${FTP_JAR}"/>
 		
 					<pathelement path="lib/desktop/jeditmodes.jar"/>
@@ -1324,6 +1380,7 @@
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
 				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
+				<pathelement path="lib/pool/jsch-0.1.40.jar"/>				
 			</classpath>
 			
 			
@@ -1485,6 +1542,7 @@
 					<pathelement path="${LOG4J_JAR}"/>
 					<pathelement path="${HTMLPARSER_JAR}"/>
 					<pathelement path="${SSH_JAR}"/>
+					<pathelement path="${SSH_TUNNEL_JAR}"/>
 					<pathelement path="${FTP_JAR}"/>		
 					
 					<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
@@ -1560,6 +1618,7 @@
 			<unjar src="${LOG4J_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="${HTMLPARSER_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="${SSH_JAR}"  dest="binsrv" overwrite="true"/>
+			<unjar src="${SSH_TUNNEL_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="${FTP_JAR}"  dest="binsrv" overwrite="true"/>
 			
 				

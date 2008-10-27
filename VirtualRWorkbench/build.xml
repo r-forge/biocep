@@ -313,6 +313,7 @@
 											
 							<pathelement path="${HTMLPARSER_JAR}"/>							
 							<pathelement path="${SSH_JAR}"/>
+							<pathelement path="${SSH_TUNNEL_JAR}"/>
 							<pathelement path="${FTP_JAR}"/>
 							
 							<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
@@ -459,6 +460,7 @@
 					
 				  	<fileset dir="lib/pool" includes="commons-pool-1.3.jar"/>
 			  		<fileset dir="lib/pool" includes="ganymed-ssh2.jar"/>
+				  	<fileset dir="lib/pool" includes="jsch-0.1.40.jar"/>				  	
 			  		<fileset dir="lib/pool" includes="edtftpj.jar"/>
 					<fileset dir="lib/j2ee" includes="commons-httpclient-3.1-rc1.jar"/>						
 			  		<fileset dir="lib/desktop" includes="activation.jar"/>
@@ -576,7 +578,7 @@
 						<fileset dir="" includes="RJB.jar"/>
 				  		
 				  	    
-				  	<!--
+				  	
 				  		<fileset dir="" includes="pdfviewer.jar"/>				  	
 				  	    <fileset dir="lib/desktop" includes="freemindbrowser.jar"/>
 						<fileset dir="lib/log" includes="commons-logging-1.1.1.jar"/>	
@@ -584,6 +586,7 @@
 						<fileset dir="lib/j2ee" includes="commons-codec-1.3.jar"/>
 						<fileset dir="lib/j2ee" includes="htmlparser.jar"/>									
 				  		<fileset dir="lib/pool" includes="ganymed-ssh2.jar"/>
+				  		<fileset dir="lib/pool" includes="jsch-0.1.40.jar"/>				  	
 				  		<fileset dir="lib/pool" includes="edtftpj.jar"/>
 						<fileset dir="lib/j2ee" includes="commons-httpclient-3.1-rc1.jar"/>
 				  		<fileset dir="lib/desktop" includes="activation.jar"/>
@@ -639,10 +642,11 @@
 					  	<fileset dir="lib/desktop" includes="groovy-all-1.5.4.jar"/>
 					  	
 					  	
-					  	
+					  	<!--
 					  	<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
+					  	-->
 					  	
-				  	-->
+				  	
 					  	
 				  	
 				  </copy>
@@ -655,7 +659,7 @@
 				  	
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="RJB.jar"/>
 				  	
-				  	<!--
+				  	
 				  	
 				  	
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="pdfviewer.jar"/>
@@ -709,11 +713,12 @@
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="JRI.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="derbyclient.jar"/>
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="ganymed-ssh2.jar"/>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="jsch-0.1.40.jar"/>				  	
 			  		<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="edtftpj.jar"/>			  		
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs"  includes="groovy-all-1.5.4.jar"/>
 				  	
+				  	<!--
 					<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="mapping.jar"/>
-					
 					-->
 				  	
 				  	

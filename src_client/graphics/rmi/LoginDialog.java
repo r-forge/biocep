@@ -35,6 +35,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -92,14 +93,18 @@ public class LoginDialog extends JDialog {
 	
 	public static boolean defaultR_bool = true;
 	public static String defaultRBin_str = "";
-	
-	
+		
 	public static String sshHost_str = "";
 	public static Integer sshPort_int = 22;	
 	public static String sshLogin_str = "";
 	public static String sshPwd_str = "";
+			
+	public static boolean useSshTunnel_bool = false;	
+	public static String sshTunnelHost_str = "";
+	public static Integer sshTunnelPort_int = 22;	
+	public static String sshTunnelLogin_str = "";
+	public static String sshTunnelPwd_str = "";
 	
-
 	JRadioButton localModeButton;
 	JRadioButton httpModeButton;
 	JRadioButton rmiModeButton;
@@ -150,6 +155,14 @@ public class LoginDialog extends JDialog {
 	private JTextField _sshLogin;
 	private JPasswordField _sshPwd;
 
+	
+	private JCheckBox _useSshTunnel;
+	private JTextField _sshTunnelHostIp;
+	private JTextField _sshTunnelPort;
+	private JTextField _sshTunnelLogin;
+	private JPasswordField _sshTunnelPwd;
+
+	
 	private JButton _ok;
 	private JButton _cancel;
 
@@ -162,7 +175,14 @@ public class LoginDialog extends JDialog {
 		if (_closedOnOK)
 			return new Identification(mode_int, url_str, login_str, pwd_str, nopool_bool, waitForResource_bool, privateName_str, rmiMode_int, rmiregistryIp_str,
 					rmiregistryPort_int, servantName_str, dbDriver_str, dbHostIp_str, dbHostPort_int, dbName_str, dbUser_str, dbPwd_str, dbServantName_str,
-					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, defaultR_bool, defaultRBin_str, sshHost_str, sshPort_int, sshLogin_str, sshPwd_str);
+					stub_str, memoryMin_int, memoryMax_int, keepAlive_bool, useSsh_bool, defaultR_bool, defaultRBin_str, sshHost_str, sshPort_int, sshLogin_str, sshPwd_str, 
+					useSshTunnel_bool,			
+					sshTunnelHost_str,
+					sshTunnelPort_int,	
+					sshTunnelLogin_str,
+					sshTunnelPwd_str
+			
+			);
 		else
 			return null;
 	}
@@ -250,16 +270,14 @@ public class LoginDialog extends JDialog {
 			dynamicPanel.add(p1);
 			dynamicPanel.add(p2);
 
-			p1.add(new JLabel(""));
-			p2.add(new JLabel(""));
+			p1.add(new JLabel(""));	p2.add(new JLabel(""));
 			p1.add(new JLabel("  Url"));
 			p2.add(_url);
 			p1.add(new JLabel("  Login"));
 			p2.add(_login);
 			p1.add(new JLabel("  Password"));
 			p2.add(_pwd);
-			p1.add(new JLabel(""));
-			p2.add(new JLabel(""));
+			p1.add(new JLabel(""));	p2.add(new JLabel(""));
 			
 			p1.add(_nopoolCheckBox);
 			if (_nopoolCheckBox.isSelected()) {
@@ -275,7 +293,22 @@ public class LoginDialog extends JDialog {
 			}
 			
 			
-			p1.add(new JLabel(""));	p2.add(new JLabel(""));
+			p1.add(_useSshTunnel);
+			if (_useSshTunnel.isSelected()) {
+				p2.add(new JLabel(""));
+				p1.add(getInputPanel("  SSH Tunnel Host",_sshTunnelHostIp));
+				p2.add(getInputPanel("  Port",_sshTunnelPort));
+				p1.add(getInputPanel("  Login",_sshTunnelLogin));
+				p2.add(getInputPanel("  Pwd",_sshTunnelPwd));
+			} else {
+				p2.add(new JLabel(""));
+				p1.add(new JLabel(""));p2.add(new JLabel(""));
+				p1.add(new JLabel(""));p2.add(new JLabel(""));
+			}
+			
+			
+			
+			//p1.add(new JLabel(""));	p2.add(new JLabel(""));
 			
 			//p1.add(new JLabel(""));	p2.add(new JLabel(""));
 			//p1.add(new JLabel(""));	p2.add(new JLabel(""));
@@ -336,7 +369,7 @@ public class LoginDialog extends JDialog {
 			p1.add(new JLabel(""));	p2.add(new JLabel(""));
 			
 			
-			//p1.add(new JLabel(""));p2.add(new JLabel(""));			
+			p1.add(new JLabel(""));p2.add(new JLabel(""));			
 			//p1.add(new JLabel(""));p2.add(new JLabel(""));
 
 		} else if (rmiModeDbModeButton.isSelected()) {
@@ -359,7 +392,7 @@ public class LoginDialog extends JDialog {
 			p1.add(new JLabel("  R Servant Name"));
 			p2.add(namePanel);
 			
-			//p1.add(new JLabel(""));p2.add(new JLabel(""));
+			p1.add(new JLabel(""));p2.add(new JLabel(""));
 			//p1.add(new JLabel(""));p2.add(new JLabel(""));
 
 		} else {
@@ -376,7 +409,7 @@ public class LoginDialog extends JDialog {
 			
 			p1.add(new JLabel(""));p2.add(new JLabel(""));
 			
-			//p1.add(new JLabel(""));p2.add(new JLabel(""));			
+			p1.add(new JLabel(""));p2.add(new JLabel(""));			
 			//p1.add(new JLabel(""));p2.add(new JLabel(""));
 
 		}
@@ -585,7 +618,21 @@ public class LoginDialog extends JDialog {
 		_sshPort = new JTextField(sshPort_int.toString());
 		_sshLogin = new JTextField(sshLogin_str);
 		_sshPwd = new JPasswordField(sshPwd_str);
-
+		
+		_useSshTunnel = new JCheckBox("Use SSH Tunnel");
+		_useSshTunnel.setSelected(useSshTunnel_bool);
+		_useSshTunnel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				recreateDynamicPanel();
+			}
+		});
+		
+		_sshTunnelHostIp = new JTextField(sshTunnelHost_str);
+		_sshTunnelPort = new JTextField(sshTunnelPort_int.toString());
+		_sshTunnelLogin = new JTextField(sshTunnelLogin_str);
+		_sshTunnelPwd = new JPasswordField(sshTunnelPwd_str);
+		
+		
 		KeyListener keyListener = new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == 10) {
@@ -676,7 +723,7 @@ public class LoginDialog extends JDialog {
 				});
 			}
 		}).start();
-		setSize(new Dimension(460+60+120, 386));
+		setSize(new Dimension(460+60+120, 386+52));
 		PoolUtils.locateInScreenCenter(this);
 
 	}
@@ -745,10 +792,18 @@ public class LoginDialog extends JDialog {
 		defaultRBin_str = _defaultRBin.getText();
 		
 		sshHost_str = _sshHostIp.getText();
-		sshPort_int = Integer.decode(_sshPort.getText());
-		
+		sshPort_int = Integer.decode(_sshPort.getText());		
 		sshLogin_str = _sshLogin.getText();
 		sshPwd_str = _sshPwd.getText();
+		
+		
+		useSshTunnel_bool = _useSshTunnel.isSelected();
+		sshTunnelHost_str = _sshTunnelHostIp.getText();
+		sshTunnelPort_int = Integer.decode(_sshTunnelPort.getText());		
+		sshTunnelLogin_str = _sshTunnelLogin.getText();
+		sshTunnelPwd_str = _sshTunnelPwd.getText();
+		
+		
 	}
 	
 	public void okMethod() {
@@ -851,6 +906,13 @@ public class LoginDialog extends JDialog {
 				}
 			}
 		}).start();
+	}
+	
+	private static  JPanel getInputPanel(String label, JComponent comp) {
+		JPanel result=new JPanel(new BorderLayout());		
+		result.add(new JLabel(label),BorderLayout.WEST);
+		result.add(comp,BorderLayout.CENTER);
+		return result;
 	}
 
 }

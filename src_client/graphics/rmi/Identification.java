@@ -60,6 +60,12 @@ class Identification {
 	private String _sshLogin;
 	private String _sshPwd;
 	
+	private boolean _useSshTunnel;
+	private String _sshTunnelHostIp;
+	private Integer _sshTunnelPort;
+	private String _sshTunnelLogin;
+	private String _sshTunnelPwd;
+	
 	private String _privateName;
 
 	public Identification(int mode, String url, String user, String pwd, boolean nopool, boolean waitForResource, String privateName, int rmiMode, String rmiregistryIp,
@@ -73,7 +79,11 @@ class Identification {
 			boolean defaultR,
 			String defaultRBin,
 			
-			String sshHostIp, int sshPort, String sshLogin, String sshPwd) {
+			String sshHostIp, int sshPort, String sshLogin, String sshPwd,
+			
+			boolean useSshTunnel,	
+			String sshTunnelHostIp, int sshTunnelPort, String sshTunnelLogin, String sshTunnelPwd	
+		) {
 		this._mode = mode;
 		this._url = url;
 		this._user = user;
@@ -110,6 +120,13 @@ class Identification {
 		this._sshPort = sshPort;
 		this._sshLogin = sshLogin;
 		this._sshPwd = sshPwd;
+		
+		this._useSshTunnel = useSshTunnel;
+		this._sshTunnelHostIp = sshTunnelHostIp;
+		this._sshTunnelPort = sshTunnelPort;
+		this._sshTunnelLogin = sshTunnelLogin;
+		this._sshTunnelPwd = sshTunnelPwd;
+		
 	}
 
 	public int getMode() {
@@ -228,4 +245,26 @@ class Identification {
 	public String getPrivateName() {
 		return _privateName;
 	}
+	
+	
+	public boolean isUseSshTunnel() {
+		return _useSshTunnel;
+	}
+
+	public String getSshTunnelHostIp() {
+		return _sshTunnelHostIp;
+	}
+
+	public Integer getSshTunnelPort() {
+		return _sshTunnelPort;
+	}
+	
+	public String getSshTunnelLogin() {
+		return _sshTunnelLogin;
+	}
+
+	public String getSshTunnelPwd() {
+		return _sshTunnelPwd;
+	}
+	
 }
