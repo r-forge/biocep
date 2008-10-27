@@ -69,6 +69,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -160,6 +161,8 @@ import org.rosuda.ibase.plots.ParallelAxesCanvas;
 import org.rosuda.ibase.plots.ScatterCanvas;
 
 
+import ch.ethz.ssh2.StreamGobbler;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
@@ -173,11 +176,11 @@ import remoting.UserStatus;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
 import server.LocalHttpServer;
-import server.LocalRmiRegistry;
 import server.NoMappingAvailable;
 import server.ServantCreationFailed;
 import server.ServerManager;
 import splash.SplashWindow;
+import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.PropertiesGenerator;
 import uk.ac.ebi.microarray.pools.SSHUtils;
@@ -534,6 +537,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 									_commandServletUrl = ident.getUrl();
 								} else {
 								
+									ch.ethz.ssh2.Connection conn = null;
+									try {
+										conn = new ch.ethz.ssh2.Connection(ident.getSshTunnelHostIp(),ident.getSshTunnelPort());
+										conn.connect();
+										boolean isAuthenticated = conn.authenticateWithPassword(ident.getSshTunnelLogin(), ident.getSshTunnelPwd());
+										if (isAuthenticated == false) throw new BadSshLoginPwdException(); 										
+									}
+									catch (Exception e) {
+										throw new BadSshLoginPwdException(); 
+									} finally {
+										try {if (conn!=null) conn.close();}catch (Exception e) {e.printStackTrace();}
+									}
+									System.out.println("Ping SSH Succeeded");
+									
 									JSch jsch = new JSch();
 									Session session = jsch.getSession(ident.getSshTunnelLogin(), ident.getSshTunnelHostIp(), ident.getSshTunnelPort());
 									session.setPassword(ident.getSshTunnelPwd());

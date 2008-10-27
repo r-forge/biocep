@@ -21,6 +21,7 @@ import java.rmi.registry.Registry;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import org.apache.commons.logging.Log;
+
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import static uk.ac.ebi.microarray.pools.PoolUtils.*;
@@ -118,6 +119,8 @@ public abstract class ServerDefaults {
 					
 				} else if (_namingMode.equals("generic")){					
 					_registry = ((RegistryProvider)ServerDefaults.class.forName(System.getProperty("generic.class")).newInstance() ).getRegistry();					
+				} else if (_namingMode.equals("self")){
+					_registry = LocalRmiRegistry.getInstance();
 				} else {
 					_registry = LocateRegistry.getRegistry(_registryHost, _registryPort);
 				}

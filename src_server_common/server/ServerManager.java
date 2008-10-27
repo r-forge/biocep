@@ -35,6 +35,7 @@ import model.TableModelRemoteImpl;
 import bootstrap.BootSsh;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.CreationCallBack;
+import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
 import uk.ac.ebi.microarray.pools.ManagedServant;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemoteLogListener;
@@ -122,7 +123,8 @@ public class ServerManager {
 		"job.id", 
 		"job.name", 
 		"notify.email",
-		"node"};
+		"node",
+		"http.port"};
 
 
 	private static JTextArea createRSshProgressArea;
