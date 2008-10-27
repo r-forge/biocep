@@ -490,10 +490,15 @@ public class ServerManager {
 
 			String[] requiredPackages = null;
 
-			if (isWindowsOs()) {
-				requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo", "Cairo" };
+			
+			if (System.getenv("BIOCEP_USE_DEFAULT_LIBS") != null && System.getenv("BIOCEP_USE_DEFAULT_LIBS").equalsIgnoreCase("false")) {
+				requiredPackages = new String[0];
 			} else {
-				requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo" };
+				if (isWindowsOs()) {
+					requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo", "Cairo" };
+				} else {
+					requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo" };
+				}
 			}
 
 			Vector<String> installLibBatch = new Vector<String>();

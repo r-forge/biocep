@@ -76,6 +76,7 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
@@ -157,6 +158,12 @@ import org.rosuda.ibase.plots.MapCanvas;
 import org.rosuda.ibase.plots.MosaicCanvas;
 import org.rosuda.ibase.plots.ParallelAxesCanvas;
 import org.rosuda.ibase.plots.ScatterCanvas;
+
+
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UserInfo;
+
 import remoting.FileDescription;
 import remoting.RCollaborationListener;
 import remoting.RConsoleAction;
@@ -495,7 +502,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 									String stub = pr.readLine();
 									pr.close();
 									ident = new Identification(RMI_MODE, "", "", "", false, false, "", RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "",
-											"", stub, -1, -1, false, false, true, "", "", -1, "", "");
+											"", stub, -1, -1, false, false, true, "", "", -1, "", "",
+											
+									false, "", -1, "", "");
 
 									showLoginDialog = false;
 								}
@@ -520,9 +529,72 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							if (getMode() == HTTP_MODE) {
 
-								_keepAlive = true;
+								
+								if (!ident.isUseSshTunnel()) {
+									_commandServletUrl = ident.getUrl();
+								} else {
+								
+									JSch jsch = new JSch();
+									Session session = jsch.getSession(ident.getSshTunnelLogin(), ident.getSshTunnelHostIp(), ident.getSshTunnelPort());
+									session.setPassword(ident.getSshTunnelPwd());
+									UserInfo lui= new UserInfo() {
+										String passwd;
+										public String getPassword() {
+											return passwd;
+										}
 
-								_commandServletUrl = ident.getUrl();
+										public boolean promptYesNo(String str) {
+											return true;
+										}
+
+										public String getPassphrase() {
+											return null;
+										}
+
+										public boolean promptPassphrase(String message) {
+											return true;
+										}
+
+										public boolean promptPassword(String message) {
+											return true;
+										}
+
+										public void showMessage(String message) {
+										}
+									};
+
+									session.setUserInfo(lui);
+									session.connect();
+									
+									ServerSocket ss = new ServerSocket(0);
+									int tunnelLocalPort = ss.getLocalPort();
+									ss.close();
+									
+									URL httpModeUrl=null;
+									try {
+										httpModeUrl=new URL(ident.getUrl());
+									} catch (Exception e) {
+										e.printStackTrace();
+										throw new ConnectionFailedException();
+									}
+									
+									String tunnelRemoteHost=httpModeUrl.getHost();
+									int tunnelRemotePort=httpModeUrl.getPort();
+									if (tunnelRemotePort<=0) tunnelRemotePort=80;
+									
+									session.setPortForwardingL(tunnelLocalPort, tunnelRemoteHost, tunnelRemotePort);
+									
+									_commandServletUrl = "http://"+"127.0.0.1"+":"+tunnelLocalPort+ httpModeUrl.toURI().getPath();
+									System.out.println("_commandServletUrl:"+_commandServletUrl);									
+								
+								}
+								
+								
+								
+								
+								
+								
+								_keepAlive = true;
 								_helpServletUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
 								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
 
@@ -2225,6 +2297,25 @@ public class GDApplet extends GDAppletBase implements RGui {
 					try {LoginDialog.sshLogin_str = (String) stateProperties.get("ssh.login");} catch (Exception e) {e.printStackTrace();}
 				}
 
+				
+				if (stateProperties.get("usesshtunnel") != null) {
+					try {LoginDialog.useSshTunnel_bool = new Boolean((String) stateProperties.get("usesshtunnel"));} catch (Exception e) {e.printStackTrace();}
+				}
+			
+
+				if (stateProperties.get("ssh.tunnel.host") != null) {
+					try {LoginDialog.sshTunnelHost_str = (String) stateProperties.get("ssh.tunnel.host");} catch (Exception e) {e.printStackTrace();}
+				}
+				
+				if (stateProperties.get("ssh.tunnel.port") != null) {
+					try {LoginDialog.sshTunnelPort_int = Integer.decode((String) stateProperties.get("ssh.tunnel.port"));} catch (Exception e) {e.printStackTrace();}
+				}
+
+								
+				if (stateProperties.get("ssh.tunnel.login") != null) {
+					try {LoginDialog.sshTunnelLogin_str = (String) stateProperties.get("ssh.tunnel.login");} catch (Exception e) {e.printStackTrace();}
+				}
+				
 								
 
 			} catch (Exception e) {
@@ -2286,6 +2377,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 			generatorParams.add("ssh.port=" + LoginDialog.sshPort_int);
 			generatorParams.add("ssh.login=" + LoginDialog.sshLogin_str);
 			
+			generatorParams.add("usesshtunnel=" + LoginDialog.useSshTunnel_bool);
+			generatorParams.add("ssh.tunnel.host=" + LoginDialog.sshTunnelHost_str);
+			generatorParams.add("ssh.tunnel.port=" + LoginDialog.sshTunnelPort_int);
+			generatorParams.add("ssh.tunnel.login=" + LoginDialog.sshTunnelLogin_str);
+
 			
 			PropertiesGenerator.main((String[]) generatorParams.toArray(new String[generatorParams.size()]));
 		} catch (Exception e) {
@@ -4395,6 +4491,21 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		}
 
+	}
+	
+	public static void main(String[] args) throws Exception{
+		URL thisUrl=null;
+		try {
+			thisUrl=new URL("http://xen-ngs001.oerc.ox.ac.uk/rvirtual/cmd");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ConnectionFailedException();
+		}
+		
+		String tunnelRemoteHost=thisUrl.getHost();
+		int tunnelRemotePort=thisUrl.getPort();	
+		
+		System.out.println("http://"+thisUrl.getHost()+":"+thisUrl.getPort()+ thisUrl.toURI().getPath());
 	}
 
 }
