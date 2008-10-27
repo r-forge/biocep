@@ -57,6 +57,7 @@ import remoting.RNI;
 import remoting.RServices;
 import remoting.UserStatus;
 import uk.ac.ebi.microarray.pools.InitializingException;
+import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
 import uk.ac.ebi.microarray.pools.ManagedServantAbstract;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.RemotePanel;
@@ -741,8 +742,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	Server _virtualizationServer = null;
 
 	public void startHttpServer(final int port) throws RemoteException {
-		log.info(" 1 startHttpServer called");
-		System.out.println(" 2 startHttpServer called");
 		if (_virtualizationServer != null) {
 			throw new RemoteException("Server Already Running");
 		} else if (ServerManager.isPortInUse("127.0.0.1", port)) {
@@ -770,8 +769,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(rkit)), "/rvirtual/graphics/*");
 				root.addServlet(new ServletHolder(new http.CommandServlet(rkit)), "/rvirtual/cmd/*");
 				root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
-				System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
-				_virtualizationServer.start();
+				System.out.println("+ going to start virtualization http server port : " + port);
+				_virtualizationServer.start();				
+				System.out.println("HTTP R URL :"+"http://"+PoolUtils.getHostIp()+":"+port + "/rvirtual/cmd");
 
 			} catch (Exception e) {
 				log.info(PoolUtils.getStackTraceAsString(e));

@@ -1,4 +1,4 @@
-package server;
+package uk.ac.ebi.microarray.pools;
 
 import java.net.ServerSocket;
 import java.rmi.registry.LocateRegistry;

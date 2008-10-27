@@ -296,10 +296,10 @@ public class LoginDialog extends JDialog {
 			p1.add(_useSshTunnel);
 			if (_useSshTunnel.isSelected()) {
 				p2.add(new JLabel(""));
-				p1.add(getInputPanel("  SSH Tunnel Host",_sshTunnelHostIp));
-				p2.add(getInputPanel("  Port",_sshTunnelPort));
-				p1.add(getInputPanel("  Login",_sshTunnelLogin));
-				p2.add(getInputPanel("  Pwd",_sshTunnelPwd));
+				p1.add(getInputPanel("  SSH Tunnel Host   ",_sshTunnelHostIp));
+				p2.add(getInputPanel("  Port   ",_sshTunnelPort));
+				p1.add(getInputPanel("  Login   ",_sshTunnelLogin));
+				p2.add(getInputPanel("  Pwd   ",_sshTunnelPwd));
 			} else {
 				p2.add(new JLabel(""));
 				p1.add(new JLabel(""));p2.add(new JLabel(""));
@@ -686,7 +686,13 @@ public class LoginDialog extends JDialog {
 		_sshPort.addKeyListener(keyListener);
 		_sshLogin.addKeyListener(keyListener);
 		_sshPwd.addKeyListener(keyListener);
-
+		
+		_useSshTunnel.addKeyListener(keyListener);
+		_sshTunnelHostIp.addKeyListener(keyListener);
+		_sshTunnelPort.addKeyListener(keyListener);
+		_sshTunnelLogin.addKeyListener(keyListener);
+		_sshTunnelPwd.addKeyListener(keyListener);
+		
 		_ok = new JButton("Ok");
 		_ok.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

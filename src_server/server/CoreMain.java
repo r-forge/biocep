@@ -71,6 +71,19 @@ public class CoreMain {
 			System.out.println("Can't Launch R Server, Rmi Registry is not accessible!!");
 		}
 		
+		/*
+		int httpServerPort=-1;
+		try {
+			if (System.getProperty("http.port")!=null && !System.getProperty("http.port").equals("")) {
+				httpServerPort=Integer.decode(System.getProperty("http.port"));				
+			}			
+		} catch (Exception e) {}
+		if (httpServerPort!=-1) {
+			r.startHttpServer(httpServerPort);
+		}
+		*/
+		
+		
 		boolean wait= System.getProperty("wait")==null || System.getProperty("wait").equals("") || new Boolean(System.getProperty("wait"));
 		if (wait) {
 			while (true) {
