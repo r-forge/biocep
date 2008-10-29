@@ -771,7 +771,14 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				log.info("!! Request to run virtualization server on port " + port);
 				RKit rkit = new RKit() {
 					RServices _r = (RServices) UnicastRemoteObject.toStub(RServantImpl.this);
-					ReentrantLock _lock = new ReentrantLock();
+					ReentrantLock _lock = new ExtendedReentrantLock() {
+						public void rawLock() {
+							super.lock();
+						}
+						public void rawUnlock() {
+							super.unlock();
+						}
+					};
 
 					public RServices getR() {
 						return _r;

@@ -1,7 +1,6 @@
 package views;
 
 import graphics.rmi.RGui;
-import graphics.rmi.RGuiReentrantLock;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -9,6 +8,7 @@ import java.awt.Color;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
+import server.ExtendedReentrantLock;
 import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
 import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 
@@ -30,7 +30,7 @@ public class ChatConsoleView extends DynamicView {
 						} catch (Exception e) {
 							e.printStackTrace();
 						} finally {
-							((RGuiReentrantLock) _rgui.getRLock()).unlockNoBroadcast();
+							((ExtendedReentrantLock) _rgui.getRLock()).rawUnlock();
 						}
 					}
 				}).start();
