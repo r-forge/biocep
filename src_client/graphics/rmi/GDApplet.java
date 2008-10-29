@@ -3649,7 +3649,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("runhttpserverlocalhost", new AbstractAction("Run Http Relay On Local Host") {
+		_actions.put("runhttpserverlocalhost", new AbstractAction("Start HTTP Relay On Local Host") {
 			public void actionPerformed(final ActionEvent e) {
 				new Thread(new Runnable() {
 					public void run() {
@@ -3657,7 +3657,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						try {
 
 							while (true) {
-								GetExprDialog dialog = new GetExprDialog(GDApplet.this, " Run Http Virtualization Engine On Port : ", _httpPortSave);
+								GetExprDialog dialog = new GetExprDialog(GDApplet.this, " Run HTTP Relay On Port : ", _httpPortSave);
 								dialog.setVisible(true);
 								if (dialog.getExpr() != null) {
 									try {
@@ -3675,7 +3675,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 											_virtualizationServer.start();
 											
 											JTextArea a=new JTextArea();
-											a.setText("A Virtualization HTTP Engine is now running on port "
+											a.setText(" An HTTP Relay has been created on port "
 													+ port
 													+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
 													+ PoolUtils.getHostIp() + ":" + port + "/rvirtual/cmd");
@@ -3711,7 +3711,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("stophttpserverlocalhost", new AbstractAction("Stop Http Relay") {
+		_actions.put("stophttpserverlocalhost", new AbstractAction("Stop HTTP Relay") {
 			public void actionPerformed(final ActionEvent e) {
 				try {
 					_virtualizationServer.stop();
@@ -3726,13 +3726,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("runhttpserver", new AbstractAction("Run Http Virtualization Engine") {
+		_actions.put("runhttpserver", new AbstractAction("Create HTTP Listener on Server") {
 			public void actionPerformed(final ActionEvent ae) {
 				new Thread(new Runnable() {
 					public void run() {
 
 						while (true) {
-							GetExprDialog dialog = new GetExprDialog(GDApplet.this, " Run Http Virtualization Engine On Port : ", _httpPortSave);
+							GetExprDialog dialog = new GetExprDialog(GDApplet.this, " Create HTTP Listener on Port : ", _httpPortSave);
 							dialog.setVisible(true);
 							if (dialog.getExpr() != null) {
 								try {
@@ -3746,9 +3746,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 										_rForConsole.startHttpServer(port);
 										
 										JTextArea a=new JTextArea();
-										a.setText("A Virtualization HTTP Engine is now running on port "
+										a.setText(" An HTTP Listener has been created on port "
 												+ port
-												+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
+												+ "\n You can control the current R session via the Workench\n log on in HTTP mode to the following URL : http://"
 												+ _rForConsole.getHostIp() + ":" + port + "/rvirtual/cmd");
 										a.setEditable(false);
 										a.setBackground(new JLabel().getBackground());
@@ -3779,11 +3779,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("stophttpserver", new AbstractAction("Stop Http Server") {
+		_actions.put("stophttpserver", new AbstractAction("Remove HTTP Listener") {
 			public void actionPerformed(final ActionEvent e) {
 				try {
 					_rForConsole.stopHttpServer();
-					JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "The Virtualization HTTP Engine was stopped successfully", "",
+					JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "HTTP Listener Removed Successfully", "",
 							JOptionPane.INFORMATION_MESSAGE);
 				} catch (Exception ex) {
 					ex.printStackTrace();

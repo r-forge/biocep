@@ -91,7 +91,7 @@ public class GetExprDialog extends JDialog {
 		p1.add(ok);
 		p2.add(cancel);
 
-		setSize(new Dimension(320, 100));
+		setSize(new Dimension(410, 120));
 
 		PoolUtils.locateInScreenCenter(this);
 
