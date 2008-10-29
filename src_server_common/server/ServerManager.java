@@ -53,18 +53,19 @@ import ch.ethz.ssh2.StreamGobbler;
 public class ServerManager {
 
 	public static void main(String[] args) throws Exception {
-		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), INSTALL_DIR, PoolUtils.LOG_PRGRESS_TO_LOGGER | PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT);
+		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), INSTALL_DIR, PoolUtils.LOG_PRGRESS_TO_LOGGER
+				| PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT);
 	}
-	
+
 	public static String INSTALL_DIR = null;
-	public static final String EMBEDDED_R="R-version-2.8.0";
-	public static final int ENTRIES_NUMBER=4832;
-	
+	public static final String EMBEDDED_R = "R-version-2.8.0";
+	public static final int ENTRIES_NUMBER = 4832;
+
 	static {
 		if (System.getenv("BIOCEP_HOME") != null) {
 			INSTALL_DIR = System.getenv("BIOCEP_HOME");
-		} else if (new File(System.getProperty("user.dir")+"/biocep.txt").exists()){
-			INSTALL_DIR=System.getProperty("user.dir");
+		} else if (new File(System.getProperty("user.dir") + "/biocep.txt").exists()) {
+			INSTALL_DIR = System.getProperty("user.dir");
 		} else {
 			String codeUrl = ServerManager.class.getResource("/server/ServerManager.class").toString();
 			if (codeUrl.startsWith("jar:file:")) {
@@ -103,55 +104,36 @@ public class ServerManager {
 	private static final String RVEREND = "R$VER$END";
 
 	public static TableModelRemoteImpl tmri;
-	
-	
-	public static String[] namingVars=new String[]{
-		"registry.host", 
-		"registry.port",
-		"naming.mode",
-		"db.type",
-		"db.host",
-		"db.port",
-		"db.name",
-		"db.user",
-		"db.password",		
-		"generic.class",
-		"generic.urlregistry.url",
-		"generic.urlregistry.login",
-		"generic.urlregistry.password",
-		"rmi.port.start", 
-		"job.id", 
-		"job.name", 
-		"notify.email",
-		"node",
-		"http.port"};
 
+	public static String[] namingVars = new String[] { "registry.host", "registry.port", "naming.mode", "db.type", "db.host", "db.port", "db.name", "db.user",
+			"db.password", "generic.class", "generic.urlregistry.url", "generic.urlregistry.login", "generic.urlregistry.password", "rmi.port.start", "job.id",
+			"job.name", "notify.email", "node", "http.port" };
 
 	private static JTextArea createRSshProgressArea;
 	private static JProgressBar createRSshProgressBar;
 	private static JFrame createRSshProgressFrame;
 
 	public static Properties getRegistryNamingInfo(String registryHost, int registryPort) {
-		Properties result=new Properties();
+		Properties result = new Properties();
 		result.put("registry.host", registryHost);
 		result.put("registry.port", new Integer(registryPort).toString());
 		return result;
 	}
-	
+
 	public static Properties getNamingInfo() {
-		Properties result=new Properties();		
-		for (int i=0;i<namingVars.length;++i) {
-			String var=namingVars[i];
-			if (System.getProperty(var)!=null && !System.getProperty(var).equals("")) {
-				result.put(var,System.getProperty(var));
-			}					
-		}		
+		Properties result = new Properties();
+		for (int i = 0; i < namingVars.length; ++i) {
+			String var = namingVars[i];
+			if (System.getProperty(var) != null && !System.getProperty(var).equals("")) {
+				result.put(var, System.getProperty(var));
+			}
+		}
 		return result;
 	}
-	
-	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String sshHostIp, int sshPort, String sshLogin, String sshPwd, String name, boolean showProgress,
-			URL[] codeUrls, String logFile) throws BadSshHostException, BadSshLoginPwdException, Exception {
+
+	public static RServices createRSsh(boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo, int memoryMinMegabytes,
+			int memoryMaxMegabytes, String sshHostIp, int sshPort, String sshLogin, String sshPwd, String name, boolean showProgress, URL[] codeUrls,
+			String logFile) throws BadSshHostException, BadSshLoginPwdException, Exception {
 
 		if (showProgress) {
 			createRSshProgressArea = new JTextArea();
@@ -230,8 +212,8 @@ public class ServerManager {
 				sess = conn.openSession();
 
 				String command = "java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
-						+ codeServerPort + " " + BootSsh.propertiesToString(namingInfo) + " " + "NULL" + " " + memoryMinMegabytes + " " + memoryMaxMegabytes + " "
-						+ "System.out" + " " + ((name == null || name.trim().equals("")) ? BootSsh.NO_NAME : name);
+						+ codeServerPort + " " + BootSsh.propertiesToString(namingInfo) + " " + "NULL" + " " + memoryMinMegabytes + " " + memoryMaxMegabytes
+						+ " " + "System.out" + " " + ((name == null || name.trim().equals("")) ? BootSsh.NO_NAME : name);
 
 				if (codeUrls != null && codeUrls.length > 0) {
 					for (int i = 0; i < codeUrls.length; ++i) {
@@ -313,34 +295,36 @@ public class ServerManager {
 			}
 		}
 	}
-	
 
 	public static RServices createR(String name) throws Exception {
-		return createR(null, false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo("127.0.0.1", LocalRmiRegistry.getLocalRmiRegistryPort()), 256, 256, name,
-				false, null,null);
+		return createR(null, false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo("127.0.0.1", LocalRmiRegistry
+				.getLocalRmiRegistryPort()), 256, 256, name, false, null, null);
 	}
 
 	private interface ProgessLoggerInterface {
 		void logProgress(String message);
 	}
+
 	public static RServices createR(String RBinPath, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile) throws Exception {
 
-		final JTextArea[] createRProgressArea=new JTextArea[1];
-		final JProgressBar[] createRProgressBar=new JProgressBar[1];
-		final JFrame[] createRProgressFrame=new JFrame[1];
-		ProgessLoggerInterface progressLogger=new ProgessLoggerInterface() {
+		final JTextArea[] createRProgressArea = new JTextArea[1];
+		final JProgressBar[] createRProgressBar = new JProgressBar[1];
+		final JFrame[] createRProgressFrame = new JFrame[1];
+		ProgessLoggerInterface progressLogger = new ProgessLoggerInterface() {
 			public void logProgress(String message) {
-				
-				System.out.println(">>"+message);
+
+				System.out.println(">>" + message);
 				try {
-					if (showProgress) {createRProgressArea[0].setText(message);}
+					if (showProgress) {
+						createRProgressArea[0].setText(message);
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		};
-		
+
 		if (showProgress) {
 			createRProgressArea[0] = new JTextArea();
 			createRProgressBar[0] = new JProgressBar(0, 100);
@@ -350,28 +334,28 @@ public class ServerManager {
 				public void run() {
 
 					createRProgressFrame[0].setUndecorated(true);
-					
+
 					JPanel p = new JPanel(new BorderLayout());
 					createRProgressArea[0].setForeground(Color.white);
-					createRProgressArea[0].setBackground(new Color(0x00,0x80,0x80));
-					createRProgressArea[0].setBorder(BorderFactory.createLineBorder(new Color(0x00,0x80,0x80),3));
+					createRProgressArea[0].setBackground(new Color(0x00, 0x80, 0x80));
+					createRProgressArea[0].setBorder(BorderFactory.createLineBorder(new Color(0x00, 0x80, 0x80), 3));
 					createRProgressArea[0].setEditable(false);
-					p.setBorder(BorderFactory.createLineBorder(Color.black,3));
-					
+					p.setBorder(BorderFactory.createLineBorder(Color.black, 3));
+
 					createRProgressBar[0].setForeground(Color.white);
-					createRProgressBar[0].setBackground(new Color(0x00,0x80,0x80));
+					createRProgressBar[0].setBackground(new Color(0x00, 0x80, 0x80));
 					createRProgressBar[0].setIndeterminate(true);
-					                   
-					p.setBackground(new Color(0x00,0x80,0x80));
+
+					p.setBackground(new Color(0x00, 0x80, 0x80));
 					p.add(createRProgressBar[0], BorderLayout.SOUTH);
 					p.add(createRProgressArea[0], BorderLayout.CENTER);
-					createRProgressFrame[0].add(p);					
-										
+					createRProgressFrame[0].add(p);
+
 					createRProgressFrame[0].pack();
 					createRProgressFrame[0].setSize(600, 64);
 					createRProgressFrame[0].setVisible(true);
 					createRProgressFrame[0].setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-					
+
 					PoolUtils.locateInScreenCenter(createRProgressFrame[0]);
 				}
 			};
@@ -387,92 +371,90 @@ public class ServerManager {
 			progressLogger.logProgress("Inspecting R installation..");
 			new File(INSTALL_DIR).mkdir();
 
-			String rpath=null;
-			String rversion=null;						
+			String rpath = null;
+			String rversion = null;
 			String[] rinfo = null;
-			
-			if (RBinPath!=null && !RBinPath.equals("")) {
+
+			if (RBinPath != null && !RBinPath.equals("")) {
 				rinfo = getRInfo(RBinPath);
-				if (rinfo==null) {
+				if (rinfo == null) {
 					throw new ServantCreationFailed();
 				}
 				rpath = rinfo[0];
-				rversion =rinfo[1];
-			} else if (new File(INSTALL_DIR+"R/"+EMBEDDED_R).exists()){
-				
-				rinfo = getRInfo(INSTALL_DIR+"R/"+EMBEDDED_R+"/bin/R.exe");
-				if (rinfo==null) {
+				rversion = rinfo[1];
+			} else if (new File(INSTALL_DIR + "R/" + EMBEDDED_R).exists()) {
+
+				rinfo = getRInfo(INSTALL_DIR + "R/" + EMBEDDED_R + "/bin/R.exe");
+				if (rinfo == null) {
 					throw new ServantCreationFailed();
 				}
 				rpath = rinfo[0];
-				rversion =rinfo[1];
-				
+				rversion = rinfo[1];
+
 			} else {
-				
-				String rhome=System.getenv("R_HOME");
+
+				String rhome = System.getenv("R_HOME");
 				if (rhome == null) {
 					rinfo = getRInfo(null);
 				} else {
-					if (!rhome.endsWith("/")) {rhome = rhome + "/";}
+					if (!rhome.endsWith("/")) {
+						rhome = rhome + "/";
+					}
 					System.out.println("R_HOME is set to :" + rhome);
-					rinfo = getRInfo(rhome+"bin/R");
+					rinfo = getRInfo(rhome + "bin/R");
 				}
-				
+
 				System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
 				rpath = rinfo != null ? rinfo[0] : null;
 				rversion = (rinfo != null ? rinfo[1] : "");
 			}
 
-			System.out.println("rpath:"+rpath);
-			System.out.println("rversion:"+rversion);
+			System.out.println("rpath:" + rpath);
+			System.out.println("rversion:" + rversion);
 			if (rpath == null) {
 
-				String noRCause=System.getenv("R_HOME") == null ? "R is not accessible from the command line" : "Your R_HOME is invalid";
-				if (isWindowsOs()) {	
-					
-					int n = JOptionPane.showConfirmDialog(null, noRCause+"\nWould you like to use the Embedded R?", "",
-							JOptionPane.YES_NO_OPTION);
+				String noRCause = System.getenv("R_HOME") == null ? "R is not accessible from the command line" : "Your R_HOME is invalid";
+				if (isWindowsOs()) {
+
+					int n = JOptionPane.showConfirmDialog(null, noRCause + "\nWould you like to use the Embedded R?", "", JOptionPane.YES_NO_OPTION);
 					if (n == JOptionPane.OK_OPTION) {
 						String rZipFileName = null;
-						rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/"+EMBEDDED_R+".zip";
+						rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/" + EMBEDDED_R + ".zip";
 						URL rUrl = new URL(rZipFileName);
 						InputStream is = rUrl.openConnection().getInputStream();
 						unzip(is, INSTALL_DIR + "R/", null, BUFFER_SIZE, true, "Unzipping R..", ENTRIES_NUMBER);
-						
-						rinfo = getRInfo(INSTALL_DIR+"R/"+EMBEDDED_R+"/bin/R.exe");
-						if (rinfo==null) {
+
+						rinfo = getRInfo(INSTALL_DIR + "R/" + EMBEDDED_R + "/bin/R.exe");
+						if (rinfo == null) {
 							throw new ServantCreationFailed();
 						}
 						rpath = rinfo[0];
-						rversion =rinfo[1];
-						
+						rversion = rinfo[1];
+
 					} else {
 						JOptionPane.showMessageDialog(null,
 								"please add R to your System path or set R_HOME to the root Directory of your local R installation\n");
 						throw new ServantCreationFailed();
 					}
-					
+
 				} else {
 					if (showProgress) {
-						JOptionPane
-								.showMessageDialog(null,
-										noRCause+"\nplease add R to your System path \nor set R_HOME to the root Directory of your local R installation\n");
+						JOptionPane.showMessageDialog(null, noRCause
+								+ "\nplease add R to your System path \nor set R_HOME to the root Directory of your local R installation\n");
 					} else {
-						System.out
-								.println(noRCause+"\n please add R to your System path \nor set R_HOME to the root Directory of your local R installation");
+						System.out.println(noRCause + "\n please add R to your System path \nor set R_HOME to the root Directory of your local R installation");
 					}
 					throw new ServantCreationFailed();
 				}
 
 			}
-			
+
 			progressLogger.logProgress("R installation inspection done.");
 
 			if (!rpath.endsWith("/") && !rpath.endsWith("\\"))
 				rpath += "/";
-			
-						
-			String rlibs = (INSTALL_DIR + "library/"+rversion.substring(0,rversion.lastIndexOf(' ')).replace(' ', '-')).replace('\\', '/');
+
+			String rlibs = (INSTALL_DIR + "library/" + rversion.substring(0, rversion.lastIndexOf(' ')).replace(' ', '-')).replace('\\', '/');
 			new File(rlibs).mkdirs();
 
 			Vector<String> envVector = new Vector<String>();
@@ -482,9 +464,10 @@ public class ServerManager {
 				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("R_HOME", rpath);
-				String R_LIBS=rlibs+ System.getProperty("path.separator") + (System.getenv("R_LIBS") != null ? System.getProperty("path.separator") + System.getenv("R_LIBS") : "");
-				System.out.println("R_LIBS:"+R_LIBS);
-				env.put("R_LIBS", R_LIBS );
+				String R_LIBS = rlibs + System.getProperty("path.separator")
+						+ (System.getenv("R_LIBS") != null ? System.getProperty("path.separator") + System.getenv("R_LIBS") : "");
+				System.out.println("R_LIBS:" + R_LIBS);
+				env.put("R_LIBS", R_LIBS);
 				for (String k : env.keySet()) {
 					envVector.add(k + "=" + env.get(k));
 				}
@@ -492,8 +475,8 @@ public class ServerManager {
 
 			String[] requiredPackages = null;
 
-			
-			if (System.getenv("BIOCEP_USE_DEFAULT_LIBS") != null && System.getenv("BIOCEP_USE_DEFAULT_LIBS").equalsIgnoreCase("false")) {
+			if ((System.getenv("BIOCEP_USE_DEFAULT_LIBS") != null && System.getenv("BIOCEP_USE_DEFAULT_LIBS").equalsIgnoreCase("false"))
+					|| (System.getProperty("use.default.libs") != null && System.getProperty("use.default.libs").equalsIgnoreCase("false"))) {
 				requiredPackages = new String[0];
 			} else {
 				if (isWindowsOs()) {
@@ -506,7 +489,7 @@ public class ServerManager {
 			Vector<String> installLibBatch = new Vector<String>();
 			installLibBatch.add("source('http://bioconductor.org/biocLite.R')");
 
-			Vector<String> missingPackages=new  Vector<String>();
+			Vector<String> missingPackages = new Vector<String>();
 			for (int i = 0; i < requiredPackages.length; ++i) {
 				if (!new File(rlibs + "/" + requiredPackages[i]).exists()) {
 					installLibBatch.add("biocLite('" + requiredPackages[i] + "',lib='" + rlibs + "')");
@@ -514,8 +497,9 @@ public class ServerManager {
 				}
 			}
 
-			progressLogger.logProgress("Installing missing packages "+missingPackages+"..\n"+"This doesn't alter your R installation and may take several minutes. It will be done only once");
-			
+			progressLogger.logProgress("Installing missing packages " + missingPackages + "..\n"
+					+ "This doesn't alter your R installation and may take several minutes. It will be done only once");
+
 			if (installLibBatch.size() > 1) {
 
 				File installPackagesFile = new File(INSTALL_DIR + "installRequiredPackages.R");
@@ -601,7 +585,7 @@ public class ServerManager {
 			}
 
 			progressLogger.logProgress("All Required Packages Are Installed.");
-			
+
 			progressLogger.logProgress("Generating Bootstrap Classes..");
 			String bootstrap = (INSTALL_DIR + "classes/bootstrap").replace('\\', '/');
 			System.out.println(bootstrap);
@@ -622,20 +606,20 @@ public class ServerManager {
 			raf.write(buffer);
 			raf.close();
 			progressLogger.logProgress("Bootstrap Classes Generated.");
-			
+
 			// ---------------------------------------
 
 			if (!isWindowsOs() && !new File(INSTALL_DIR + "VRWorkbench.sh").exists()) {
 				try {
-					
+
 					progressLogger.logProgress("Generating Launcher Batch..");
-					
+
 					String launcherFile = INSTALL_DIR + "VRWorkbench.sh";
 					FileWriter fw = new FileWriter(launcherFile);
 					PrintWriter pw = new PrintWriter(fw);
 					pw.println("javaws http://biocep-distrib.r-forge.r-project.org/rworkbench.jnlp");
 					fw.close();
-					
+
 					progressLogger.logProgress("Launcher Batch generated..");
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -650,86 +634,85 @@ public class ServerManager {
 
 			String cp = INSTALL_DIR + "classes";
 
-			
 			try {
-				
+
 				/*
-				if (keepAlive) {
-					try {downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_LOGGER | (showProgress ? PoolUtils.LOG_PRGRESS_TO_DIALOG : 0) );} catch (Exception e) {e.printStackTrace(); }
-				}
-				*/
-				
-				File[] extraJarFiles=new File(INSTALL_DIR).listFiles(new FilenameFilter(){
+				 * if (keepAlive) { try
+				 * {downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_LOGGER |
+				 * (showProgress ? PoolUtils.LOG_PRGRESS_TO_DIALOG : 0) );}
+				 * catch (Exception e) {e.printStackTrace(); } }
+				 */
+
+				File[] extraJarFiles = new File(INSTALL_DIR).listFiles(new FilenameFilter() {
 					public boolean accept(File dir, String name) {
 						return name.endsWith(".jar");
 					}
 				});
-				
+
 				Arrays.sort(extraJarFiles);
-				System.out.println("Insiders Extra Jars:"+Arrays.toString(extraJarFiles));
-				for (int i=0; i<extraJarFiles.length;++i) {
+				System.out.println("Insiders Extra Jars:" + Arrays.toString(extraJarFiles));
+				for (int i = 0; i < extraJarFiles.length; ++i) {
 					cp = cp + System.getProperty("path.separator") + extraJarFiles[i];
 				}
-				
-				
-				if (System.getenv().get("BIOCEP_EXTRA_JARS_LOCATION")!=null) {
-					extraJarFiles=new File(System.getenv().get("BIOCEP_EXTRA_JARS_LOCATION")).listFiles(new FilenameFilter(){
+
+				if (System.getenv().get("BIOCEP_EXTRA_JARS_LOCATION") != null) {
+					extraJarFiles = new File(System.getenv().get("BIOCEP_EXTRA_JARS_LOCATION")).listFiles(new FilenameFilter() {
 						public boolean accept(File dir, String name) {
 							return name.endsWith(".jar");
 						}
 					});
-					
+
 					Arrays.sort(extraJarFiles);
-					System.out.println("Outsiders Extra Jars:"+Arrays.toString(extraJarFiles));
-					for (int i=0; i<extraJarFiles.length;++i) {
+					System.out.println("Outsiders Extra Jars:" + Arrays.toString(extraJarFiles));
+					for (int i = 0; i < extraJarFiles.length; ++i) {
 						cp = cp + System.getProperty("path.separator") + extraJarFiles[i];
-					}	
+					}
 				}
-				
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 			/*
-			if (new File(INSTALL_DIR + "biocep-core.jar").exists()) {
-				cp = cp + System.getProperty("path.separator") + new File(INSTALL_DIR + "biocep-core.jar").getAbsolutePath();
-			} else if (new File(INSTALL_DIR + "biocep.jar").exists()) {
-				cp = cp + System.getProperty("path.separator") + new File(INSTALL_DIR + "biocep.jar").getAbsolutePath();
-			}
-			if (new File(INSTALL_DIR + "groovy-all-1.5.4").exists()) {
-				cp = cp + System.getProperty("path.separator") + new File(INSTALL_DIR + "groovy-all-1.5.4").getAbsolutePath();
-			}
-			*/
-			
+			 * if (new File(INSTALL_DIR + "biocep-core.jar").exists()) { cp = cp
+			 * + System.getProperty("path.separator") + new File(INSTALL_DIR +
+			 * "biocep-core.jar").getAbsolutePath(); } else if (new
+			 * File(INSTALL_DIR + "biocep.jar").exists()) { cp = cp +
+			 * System.getProperty("path.separator") + new File(INSTALL_DIR +
+			 * "biocep.jar").getAbsolutePath(); } if (new File(INSTALL_DIR +
+			 * "groovy-all-1.5.4").exists()) { cp = cp +
+			 * System.getProperty("path.separator") + new File(INSTALL_DIR +
+			 * "groovy-all-1.5.4").getAbsolutePath(); }
+			 */
+
 			ManagedServant[] servantHolder = new ManagedServant[1];
 			RemoteException[] exceptionHolder = new RemoteException[1];
 
 			CreationCallBack callBack = null;
 
-			
 			progressLogger.logProgress("Creating R Server..");
-			
+
 			try {
 				callBack = new CreationCallBack(servantHolder, exceptionHolder);
 				String listenerStub = PoolUtils.stubToHex(callBack);
 
-				String uid=null;				
-				
-				if (name!=null && !name.equals("") && name.contains("%{uid}")) {
-					if (uid==null) uid=UUID.randomUUID().toString();
-					name=PoolUtils.replaceAll(name, "%{uid}", uid );
+				String uid = null;
+
+				if (name != null && !name.equals("") && name.contains("%{uid}")) {
+					if (uid == null)
+						uid = UUID.randomUUID().toString();
+					name = PoolUtils.replaceAll(name, "%{uid}", uid);
 				}
-								
-				
-				if (logFile!=null && !logFile.equals("") && logFile.contains("%{uid}")) {
-					if (uid==null) uid=UUID.randomUUID().toString();
-					logFile=PoolUtils.replaceAll(logFile, "%{uid}", uid );
+
+				if (logFile != null && !logFile.equals("") && logFile.contains("%{uid}")) {
+					if (uid == null)
+						uid = UUID.randomUUID().toString();
+					logFile = PoolUtils.replaceAll(logFile, "%{uid}", uid);
 				}
-				
+
 				Vector<String> command = new Vector<String>();
 
-				command.add((isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java" + (isWindowsOs() ? "\"" : "") );
+				command.add((isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java" + (isWindowsOs() ? "\"" : ""));
 
 				command.add((isWindowsOs() ? "\"" : "") + "-DXms" + memoryMinMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-DXmx" + memoryMaxMegabytes + "m" + (isWindowsOs() ? "\"" : ""));
@@ -764,32 +747,32 @@ public class ServerManager {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=false" + (isWindowsOs() ? "\"" : ""));
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + INSTALL_DIR + "wdir" + (isWindowsOs() ? "\"" : ""));
-				
-				
-				for (int i=0;i<namingVars.length;++i) {
-					String var=namingVars[i];
-					if (namingInfo.getProperty(var)!=null && !namingInfo.getProperty(var).equals("")) {
-						command.add((isWindowsOs() ? "\"" : "") + "-D"+var+"=" + namingInfo.get(var) + (isWindowsOs() ? "\"" : ""));
-					}					
+
+				for (int i = 0; i < namingVars.length; ++i) {
+					String var = namingVars[i];
+					if (namingInfo.getProperty(var) != null && !namingInfo.getProperty(var).equals("")) {
+						command.add((isWindowsOs() ? "\"" : "") + "-D" + var + "=" + namingInfo.get(var) + (isWindowsOs() ? "\"" : ""));
+					}
 				}
 
-				if (logFile!=null && !logFile.equals("")) {
-				    command.add((isWindowsOs() ? "\"" : "")  + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"+ (isWindowsOs() ? "\"" : "")); 
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=DEBUG,A1,A2,A3" + (isWindowsOs() ? "\"" : "")); 
-				    
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender" +  (isWindowsOs() ? "\"" : "")); 
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : "")); 
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern=[%-5p] - %m%n" +  (isWindowsOs() ? "\"" : ""));
-				    
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender" + (isWindowsOs() ? "\"" : "")); 
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : "")); 
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
-					   
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3=org.apache.log4j.FileAppender" +  (isWindowsOs() ? "\"" : ""));
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.file="+logFile + (isWindowsOs() ? "\"" : ""));
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : "")); 
-				    command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.layout.ConversionPattern=[%-5p] - %m%n" +  (isWindowsOs() ? "\"" : ""));
-				} 
+				if (logFile != null && !logFile.equals("")) {
+					command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"
+							+ (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.rootCategory=DEBUG,A1,A2,A3" + (isWindowsOs() ? "\"" : ""));
+
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender" + (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
+
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender" + (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
+
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3=org.apache.log4j.FileAppender" + (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.file=" + logFile + (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
+				}
 
 				command.add("bootstrap.Boot");
 				command.add(new Boolean(keepAlive).toString());
@@ -856,7 +839,7 @@ public class ServerManager {
 				}
 
 				progressLogger.logProgress("R Server Created.");
-				
+
 				return (RServices) servantHolder[0];
 			} finally {
 				if (callBack != null) {
@@ -866,7 +849,7 @@ public class ServerManager {
 		} finally {
 			if (showProgress) {
 				createRProgressFrame[0].dispose();
-			}			
+			}
 		}
 	}
 
@@ -1128,8 +1111,8 @@ public class ServerManager {
 		return true;
 	}
 
-	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {		
-		
+	public static void startPortInUseDogwatcher(final String hostIp, final int port, final int periodicitySec, final int maxFailure) {
+
 		new Thread(new Runnable() {
 			int failureCounter = maxFailure;
 
@@ -1148,16 +1131,15 @@ public class ServerManager {
 				}
 			}
 		}).start();
-		
+
 	}
 
 	synchronized public static void downloadBiocepCore(int logInfo) throws Exception {
 		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/biocep-core.jar"), INSTALL_DIR, logInfo);
 	}
-	
+
 	synchronized public static void downloadGroovy(int logInfo) throws Exception {
 		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/groovy-all-1.5.4.jar"), INSTALL_DIR, logInfo);
 	}
-	
 
 }
