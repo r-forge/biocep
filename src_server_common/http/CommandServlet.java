@@ -47,6 +47,7 @@ import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 import remoting.GenericCallbackDevice;
 import remoting.RKit;
 import remoting.RServices;
+import server.ExtendedReentrantLock;
 import server.LocalHttpServer;
 import server.ServerManager;
 import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
@@ -402,10 +403,9 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						UserUtils.loadWorkspace((String) session.getAttribute("LOGIN"), r);
 					}
 
-					if (selfish || sessionVector.size() == 1) {
+					if (selfish || !r.hasRCollaborationListeners()) {
 						try {
-							if (_rkit != null)
-								_rkit.getRLock().lock();
+							if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawLock();
 
 							GDDevice[] devices = r.listDevices();
 							for (int i = 0; i < devices.length; ++i) {
@@ -415,8 +415,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 							}
 
 						} finally {
-							if (_rkit != null)
-								_rkit.getRLock().unlock();
+							if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawUnlock();
 						}
 					}
 
@@ -512,8 +511,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					Runnable rmiRunnable = new Runnable() {
 						public void run() {
 							try {
-								if (_rkit != null)
-									_rkit.getRLock().lock();
+								if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawLock();
 								resultHolder[0] = m.invoke(servant, methodParams);
 								if (resultHolder[0] == null)
 									resultHolder[0] = RMICALL_DONE;
@@ -532,8 +530,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									resultHolder[0] = e;
 								}
 							} finally {
-								if (_rkit != null)
-									_rkit.getRLock().unlock();
+								if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawUnlock();
 							}
 						}
 					};
@@ -599,8 +596,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					break;
 				} else if (command.equals("newdevice")) {
 					try {
-						if (_rkit != null)
-							_rkit.getRLock().lock();
+						if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawLock();
 						boolean broadcasted = new Boolean(request.getParameter("broadcasted"));
 						GDDevice deviceProxy = null;
 						if (broadcasted) {
@@ -618,13 +614,11 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						result = deviceName;
 						break;
 					} finally {
-						if (_rkit != null)
-							_rkit.getRLock().unlock();
+						if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawUnlock();
 					}
 				} else if (command.equals("listdevices")) {
 					try {
-						if (_rkit != null)
-							_rkit.getRLock().lock();
+						if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawLock();
 
 						result = new Vector<String>();
 						for (Enumeration<String> e = session.getAttributeNames(); e.hasMoreElements();) {
@@ -637,13 +631,11 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						break;
 
 					} finally {
-						if (_rkit != null)
-							_rkit.getRLock().unlock();
+						if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawUnlock();
 					}
 				} else if (command.equals("newgenericcallbackdevice")) {
 					try {
-						if (_rkit != null)
-							_rkit.getRLock().lock();
+						if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawLock();
 						GenericCallbackDevice genericCallBackDevice = ((RServices) session.getAttribute("R")).newGenericCallbackDevice();
 						String genericCallBackDeviceName = genericCallBackDevice.getId();
 						session.setAttribute(genericCallBackDeviceName, genericCallBackDevice);
@@ -653,8 +645,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 						break;
 					} finally {
-						if (_rkit != null)
-							_rkit.getRLock().unlock();
+						if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawUnlock();
 					}
 				} else if (command.equals("newspreadsheetmodeldevice")) {
 						

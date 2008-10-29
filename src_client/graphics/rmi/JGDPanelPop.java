@@ -46,6 +46,8 @@ import javax.swing.SwingUtilities;
 import org.rosuda.javaGD.GDObject;
 import org.rosuda.javaGD.GDState;
 
+import server.ExtendedReentrantLock;
+
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
@@ -651,7 +653,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 					ex.printStackTrace();
 				} finally {
 					if (_protectR != null)
-						((RGuiReentrantLock)_protectR).unlockNoBroadcast();
+						((ExtendedReentrantLock)_protectR).rawUnlock();
 				}
 
 				SwingUtilities.invokeLater(new Runnable() {
@@ -800,7 +802,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			});
 		} finally {
 			if (_protectR != null)
-				((RGuiReentrantLock)_protectR).unlockNoBroadcast();
+				((ExtendedReentrantLock)_protectR).rawUnlock();
 		}
 
 		if (!_autoPop)

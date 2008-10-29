@@ -68,15 +68,27 @@ public class FreeResourcesListener implements HttpSessionListener {
 
 		r_sessions.remove(sessionEvent.getSession());
 		
-		if (r_sessions.size()>0 && !(Boolean) attributes.get("SELFISH")) {
-			System.out.println("attributes:"+attributes);	
-			for (String a:attributes.keySet()) {
-				if (a.startsWith("device_")) {
-					try {
-						System.out.println("disposing device :"+a);
-						((GDDevice)attributes.get(a)).dispose();
-					} catch (Exception e) {
-						e.printStackTrace();
+		
+		if (!(Boolean) attributes.get("SELFISH")) {
+			boolean removeDevices=false;
+			
+			try {
+				 removeDevices=!rservices.hasRCollaborationListeners();
+				 //removeDevices=r_sessions.size()>0;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			if (removeDevices) {
+				System.out.println("attributes:"+attributes);	
+				for (String a:attributes.keySet()) {
+					if (a.startsWith("device_")) {
+						try {
+							System.out.println("disposing device :"+a);
+							((GDDevice)attributes.get(a)).dispose();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}

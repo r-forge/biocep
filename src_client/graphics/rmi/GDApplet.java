@@ -174,6 +174,7 @@ import remoting.RServices;
 import remoting.UserStatus;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
+import server.ExtendedReentrantLock;
 import server.LocalHttpServer;
 import server.NoMappingAvailable;
 import server.ServantCreationFailed;
@@ -254,7 +255,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	private boolean logonWithoutConfirmation = false;
 
-	private final ReentrantLock _protectR = new RGuiReentrantLock() {
+	private final ReentrantLock _protectR = new ExtendedReentrantLock() {
+		
+		
 		@Override
 		public void lock() {
 			super.lock();
@@ -289,14 +292,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			// _consolePanel.setCursor(Cursor.getPredefinedCursor(Cursor.
 			// DEFAULT_CURSOR));
-
 		}
 
 		@Override
-		public void unlockNoBroadcast() {
+		public void rawUnlock() {
 			super.unlock();
 		}
-
+		
+		@Override
+		public void rawLock() {
+			super.lock();			
+		}
+		
 		public boolean isLocked() {
 			try {
 				if (_rForConsole.isBusy()) {
@@ -4157,7 +4164,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
-					((RGuiReentrantLock) getRLock()).unlockNoBroadcast();
+					((ExtendedReentrantLock) getRLock()).rawUnlock();
 				}
 			}
 		}).start();
