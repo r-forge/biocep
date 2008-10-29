@@ -69,7 +69,6 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -116,6 +115,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -159,13 +159,9 @@ import org.rosuda.ibase.plots.MapCanvas;
 import org.rosuda.ibase.plots.MosaicCanvas;
 import org.rosuda.ibase.plots.ParallelAxesCanvas;
 import org.rosuda.ibase.plots.ScatterCanvas;
-
-import ch.ethz.ssh2.StreamGobbler;
-
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
-
 import remoting.FileDescription;
 import remoting.RCollaborationListener;
 import remoting.RConsoleAction;
@@ -2460,9 +2456,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 		try {
 			Vector<String> generatorParams = new Vector<String>();
 			generatorParams.add(GDApplet.SETTINGS_FILE);
-			if (getR() != null) {
-				generatorParams.add("working.dir.root=" + _rForConsole.getObjectConverted("getwd()"));
-				System.out.println("--working.dir.root=" + _rForConsole.getObjectConverted("getwd()"));
+			if (getMode() == NEW_R_MODE && getR() != null && !_keepAlive) {
+				generatorParams.add("working.dir.root=" + getR().getObjectConverted("getwd()"));
+				System.out.println("--working.dir.root=" + getR().getObjectConverted("getwd()"));
 			}
 
 			generatorParams.add("command.history=" + PoolUtils.objectToHex(_consolePanel.getCommandHistory()));
@@ -3653,7 +3649,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("runhttpserverlocalhost", new AbstractAction("Run Http Virtualization Engine On Local Host") {
+		_actions.put("runhttpserverlocalhost", new AbstractAction("Run Http Relay On Local Host") {
 			public void actionPerformed(final ActionEvent e) {
 				new Thread(new Runnable() {
 					public void run() {
@@ -3677,14 +3673,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 											root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
 											System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
 											_virtualizationServer.start();
-
+											
+											JTextArea a=new JTextArea();
+											a.setText("A Virtualization HTTP Engine is now running on port "
+													+ port
+													+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
+													+ PoolUtils.getHostIp() + ":" + port + "/rvirtual/cmd");
+											a.setEditable(false);
+											a.setBackground(new JLabel().getBackground());
+											
 											JOptionPane
 													.showMessageDialog(
-															GDApplet.this.getContentPane(),
-															"A Virtualization HTTP Engine is now running on port "
-																	+ port
-																	+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
-																	+ PoolUtils.getHostIp() + ":" + port + "/rvirtual/cmd", "", JOptionPane.INFORMATION_MESSAGE);
+															GDApplet.this.getContentPane(), a, "", JOptionPane.INFORMATION_MESSAGE);
+											
 											break;
 
 										}
@@ -3710,7 +3711,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("stophttpserverlocalhost", new AbstractAction("Stop Http Server On Local Host") {
+		_actions.put("stophttpserverlocalhost", new AbstractAction("Stop Http Relay") {
 			public void actionPerformed(final ActionEvent e) {
 				try {
 					_virtualizationServer.stop();
@@ -3740,14 +3741,22 @@ public class GDApplet extends GDAppletBase implements RGui {
 										JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
 									} else {
 
+										
+										
 										_rForConsole.startHttpServer(port);
+										
+										JTextArea a=new JTextArea();
+										a.setText("A Virtualization HTTP Engine is now running on port "
+												+ port
+												+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
+												+ _rForConsole.getHostIp() + ":" + port + "/rvirtual/cmd");
+										a.setEditable(false);
+										a.setBackground(new JLabel().getBackground());
+										
 										JOptionPane
 												.showMessageDialog(
-														GDApplet.this.getContentPane(),
-														"A Virtualization HTTP Engine is now running on port "
-																+ port
-																+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
-																+ _rForConsole.getHostIp() + ":" + port + "/rvirtual/cmd", "", JOptionPane.INFORMATION_MESSAGE);
+														GDApplet.this.getContentPane(),a
+														, "", JOptionPane.INFORMATION_MESSAGE);
 
 										break;
 									}
@@ -4651,20 +4660,4 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 
 	}
-
-	public static void main(String[] args) throws Exception {
-		URL thisUrl = null;
-		try {
-			thisUrl = new URL("http://xen-ngs001.oerc.ox.ac.uk/rvirtual/cmd");
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ConnectionFailedException();
-		}
-
-		String tunnelRemoteHost = thisUrl.getHost();
-		int tunnelRemotePort = thisUrl.getPort();
-
-		System.out.println("http://" + thisUrl.getHost() + ":" + thisUrl.getPort() + thisUrl.toURI().getPath());
-	}
-
 }

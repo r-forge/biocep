@@ -185,6 +185,7 @@ public class RHttpProxy {
 				throw new TunnelingException("Client Side", e);
 			}
 			if (result != null && result instanceof TunnelingException) {
+				new Exception().printStackTrace();
 				throw (TunnelingException) result;
 			}
 			return result;
