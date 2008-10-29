@@ -152,6 +152,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					boolean nopool = !options.keySet().contains("nopool") || ((String) options.get("nopool")).equals("")
 							|| !((String) options.get("nopool")).equalsIgnoreCase("false");
 					boolean save = options.keySet().contains("save") && ((String) options.get("save")).equalsIgnoreCase("true");
+					boolean selfish=options.keySet().contains("selfish") && ((String) options.get("selfish")).equalsIgnoreCase("true");
 					
 					String privateName = (String) options.get("privatename");
 					
@@ -375,6 +376,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					session.setAttribute("NAMED_ACCESS_MODE", namedAccessMode);
 					session.setAttribute("PROCESS_ID", r.getProcessId());
 					session.setAttribute("JOB_ID", r.getJobId());
+					session.setAttribute("SELFISH", selfish);
 															
 					if (privateName != null)
 						session.setAttribute("PRIVATE_NAME", privateName);
@@ -400,7 +402,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						UserUtils.loadWorkspace((String) session.getAttribute("LOGIN"), r);
 					}
 
-					if (sessionVector.size() == 1) {
+					if (selfish || sessionVector.size() == 1) {
 						try {
 							if (_rkit != null)
 								_rkit.getRLock().lock();
@@ -450,6 +452,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 					if (session.getAttribute("TYPE").equals("RS")) {
 						if (_rkit != null) {
+							/*
 							Enumeration<String> attributeNames = session.getAttributeNames();
 							while (attributeNames.hasMoreElements()) {
 								String aname = attributeNames.nextElement();
@@ -464,11 +467,14 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									}
 								}
 							}
+							*/
 						}
 					}
 
 					try {
+						System.out.println("+before session.invalidate");
 						session.invalidate();
+						System.out.println("+after session.invalidate");
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}

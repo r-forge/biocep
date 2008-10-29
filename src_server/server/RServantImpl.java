@@ -20,11 +20,16 @@ import graphics.pop.GDDevice;
 import graphics.rmi.GraphicNotifier;
 import graphics.rmi.JGDPanel;
 import graphics.rmi.RClustserInterface;
+import http.FreeResourcesListener;
+
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.Callable;
@@ -32,15 +37,29 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionContext;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
 import mapping.RPackage;
 import mapping.ReferenceInterface;
 import model.SpreadsheetModelRemote;
 import model.SpreadsheetModelRemoteImpl;
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RObject;
+import org.mortbay.component.Container;
+import org.mortbay.component.Container.Relationship;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.SessionManager;
+import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.HashSessionManager;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.SessionHandler;
 import org.rosuda.JRI.Rengine;
 import org.rosuda.ibase.SVarInterfaceRemote;
 import org.rosuda.ibase.SVarSetInterfaceRemote;
@@ -765,7 +784,39 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 
 				_virtualizationServer = new Server(port);
 				_virtualizationServer.setStopAtShutdown(true);
-				Context root = new Context(_virtualizationServer, "/", Context.SESSIONS);
+				Context root = new Context(_virtualizationServer, "/", Context.SESSIONS|Context.NO_SECURITY);
+				
+				final HttpSessionListener sessionListener=new FreeResourcesListener();				
+				root.getSessionHandler().setSessionManager(new HashSessionManager(){
+					@Override
+					protected void addSession(org.mortbay.jetty.servlet.AbstractSessionManager.Session session, boolean arg1) {
+						super.addSession(session, arg1);
+						sessionListener.sessionCreated(new HttpSessionEvent(session.getSession()));
+					}
+					
+					@Override
+					protected void addSession(org.mortbay.jetty.servlet.AbstractSessionManager.Session session) {
+						super.addSession(session);
+					}
+					
+					@Override
+					public void removeSession(HttpSession session, boolean invalidate) {
+						super.removeSession(session, invalidate);
+						sessionListener.sessionDestroyed(new HttpSessionEvent(session));
+					}
+					
+					@Override
+					public void removeSession(org.mortbay.jetty.servlet.AbstractSessionManager.Session session, boolean arg1) {
+						super.removeSession(session, arg1);
+						sessionListener.sessionDestroyed(new HttpSessionEvent(session));
+					}
+					
+					@Override
+					protected void removeSession(String clusterId) {
+						super.removeSession(clusterId);
+					}
+				});
+				
 				root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(rkit)), "/rvirtual/graphics/*");
 				root.addServlet(new ServletHolder(new http.CommandServlet(rkit)), "/rvirtual/cmd/*");
 				root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");

@@ -871,6 +871,8 @@
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
+		
+		<if><not><isset property="selfish"/></not><then><property name="selfish" value=""/></then></if>
 
 		<java maxmemory="1024m" classname="graphics.rmi.GDAppletLauncher"
 			fork="true" spawn="${spawn}">
@@ -947,6 +949,8 @@
 			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
 			<jvmarg value="-Dpreprocess.help=true"/>
 			<jvmarg value="-Dapply.sandbox=false"/>
+			
+			<jvmarg value="-Dselfish=${selfish}"/>
 			
 			<jvmarg value="-Dmode=${mode}"/>
 			<jvmarg value="-Dautologon=true"/>

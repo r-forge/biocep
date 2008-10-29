@@ -57,6 +57,7 @@ public class GDAppletLauncher {
 			params.put("privatename", System.getProperty("privatename"));
 			params.put("noconfirmation", System.getProperty("noconfirmation"));
 			params.put("desktopapplication", "true");
+			params.put("selfish", System.getProperty("selfish"));
 			
 			System.out.println("params=" + params);
 			final GDApplet gDApplet = new GDApplet(params);
