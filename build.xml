@@ -33,26 +33,26 @@
 			<else><property name="JRI_LIB_PATH" value="${env.R_LIBS}/rJava/jri"/></else>
 		</if>
 		
-		<property name="CORE_JAR" value="${basedir}/RJB.jar"/>
-		<property name="RPF_JAR" value="${basedir}/RPF.jar"/>
-		<property name="SRV_JAR" value="${basedir}/RSRV.jar"/>
-		<property name="JRI_JAR" value="${basedir}/lib/desktop/JRI.jar"/>
-		<property name="LOGGING_JAR" value="${basedir}/lib/log/commons-logging-1.1.1.jar"/>
-		<property name="LOG4J_JAR" value="${basedir}/lib/log/log4j-1.2.15.jar"/>	
-		<property name="HTMLPARSER_JAR" value="${basedir}/lib/j2ee/htmlparser.jar"/>			
+		<property name="CORE_JAR" value="RJB.jar"/>
+		<property name="RPF_JAR" value="RPF.jar"/>
+		<property name="SRV_JAR" value="RSRV.jar"/>
+		<property name="JRI_JAR" value="lib/desktop/JRI.jar"/>
+		<property name="LOGGING_JAR" value="lib/log/commons-logging-1.1.1.jar"/>
+		<property name="LOG4J_JAR" value="lib/log/log4j-1.2.15.jar"/>	
+		<property name="HTMLPARSER_JAR" value="lib/j2ee/htmlparser.jar"/>					
+		<property name="SSH_JAR" value="lib/pool/ganymed-ssh2.jar"/>
+		<property name="SSH_TUNNEL_JAR" value="lib/pool/jsch-0.1.40.jar"/>		
+		<property name="FTP_JAR" value="lib/pool/edtftpj.jar"/>		
+		<property name="ORACLE_JAR" value="lib/jdbc/ojdbc-14.jar"/>
+		<property name="MYSQL_JAR" value="lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>		
+		<property name="DERBY_DB_JAR" value="lib/desktop/derby.jar"/>		
+		<property name="DERBY_NET_JAR" value="lib/desktop/derbynet.jar"/>		
+		<property name="DERBY_JAR" value="lib/jdbc/derbyclient.jar"/>
 		
-		<property name="SSH_JAR" value="${basedir}/lib/pool/ganymed-ssh2.jar"/>
-		<property name="SSH_TUNNEL_JAR" value="${basedir}/lib/pool/jsch-0.1.40.jar"/>
-		
-		<property name="FTP_JAR" value="${basedir}/lib/pool/edtftpj.jar"/>		
-		<property name="ORACLE_JAR" value="${basedir}/lib/jdbc/ojdbc-14.jar"/>
-		<property name="MYSQL_JAR" value="${basedir}/lib/jdbc/mysql-connector-java-5.1.0-bin.jar"/>
-		
-		<property name="DERBY_DB_JAR" value="${basedir}/lib/desktop/derby.jar"/>
-		<property name="DERBY_NET_JAR" value="${basedir}/lib/desktop/derbynet.jar"/>
-		
-		<property name="DERBY_JAR" value="${basedir}/lib/jdbc/derbyclient.jar"/>
-		
+		<property name="JETTY_JAR" value="lib/desktop/jetty-6.1.11.jar"/>
+		<property name="JETTY_UTIL_JAR" value="lib/desktop/jetty-util-6.1.11.jar"/>
+		<property name="JETTY_CLIENT_JAR" value="lib/desktop/jetty-client-6.1.11.jar"/>
+		<property name="JETTY_SERVLET_API_JAR" value="lib/desktop/servlet-api-2.5-6.1.11.jar"/>
 		
 		
 		<if><os family="windows"/>
@@ -133,12 +133,15 @@
 				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
-				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>				
+				
 				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
 				<pathelement path="lib/desktop/jsp-2.1.jar"/>
 								
-				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
-				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
+				<pathelement path="${JETTY_JAR}"/>
+				<pathelement path="${JETTY_UTIL_JAR}"/>
+				<pathelement path="${JETTY_CLIENT_JAR}"/>
+				<pathelement path="${JETTY_SERVLET_API_JAR}"/>
+				
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>					
 				<pathelement path="lib/desktop/jython.jar"/>
@@ -259,11 +262,16 @@
 				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
-				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
 				<pathelement path="lib/desktop/jsp-2.1.jar"/>
-				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
-				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
+				
+				
+				<pathelement path="${JETTY_JAR}"/>
+				<pathelement path="${JETTY_UTIL_JAR}"/>
+				<pathelement path="${JETTY_CLIENT_JAR}"/>
+				<pathelement path="${JETTY_SERVLET_API_JAR}"/>
+				
+				
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>					
 				<pathelement path="lib/desktop/jython.jar"/>
@@ -371,11 +379,16 @@
 				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
-				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
 				<pathelement path="lib/desktop/jsp-2.1.jar"/>
-				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
-				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
+				
+				
+				<pathelement path="${JETTY_JAR}"/>
+				<pathelement path="${JETTY_UTIL_JAR}"/>
+				<pathelement path="${JETTY_CLIENT_JAR}"/>
+				<pathelement path="${JETTY_SERVLET_API_JAR}"/>				
+				
+				
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>					
 				<pathelement path="lib/desktop/jython.jar"/>
@@ -702,13 +715,8 @@
 				<pathelement path="${DERBY_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${SSH_TUNNEL_JAR}"/>
-				<pathelement path="${FTP_JAR}"/>
-				
-				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
-				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
-				<pathelement path="lib/pool/jsch-0.1.40.jar"/>
-				
-				
+				<pathelement path="${FTP_JAR}"/>				
+				<pathelement path="lib/pool/commons-pool-1.3.jar"/>								
 				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
 			</classpath>
@@ -762,12 +770,9 @@
 				<pathelement path="${DERBY_JAR}"/>
 				<pathelement path="${SSH_JAR}"/>
 				<pathelement path="${SSH_TUNNEL_JAR}"/>
-				<pathelement path="${FTP_JAR}"/>
-				
+				<pathelement path="${FTP_JAR}"/>				
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
-				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
-				<pathelement path="lib/pool/jsch-0.1.40.jar"/>
-				
+								
 			</classpath>
 			
 			<jvmarg value="-Dnaming.mode=db"/>
@@ -885,11 +890,14 @@
 				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>
 				
-				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
 				<pathelement path="lib/desktop/jsp-2.1.jar"/>
-				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
-				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+								
+				<pathelement path="${JETTY_JAR}"/>
+				<pathelement path="${JETTY_UTIL_JAR}"/>
+				<pathelement path="${JETTY_CLIENT_JAR}"/>
+				<pathelement path="${JETTY_SERVLET_API_JAR}"/>
+				
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>
 				<pathelement path="lib/desktop/jython.jar"/>
@@ -1008,11 +1016,14 @@
 				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>		
 				
-				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
 				<pathelement path="lib/desktop/jsp-2.1.jar"/>
-				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
-				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
+				
+				<pathelement path="${JETTY_JAR}"/>
+				<pathelement path="${JETTY_UTIL_JAR}"/>
+				<pathelement path="${JETTY_CLIENT_JAR}"/>
+				<pathelement path="${JETTY_SERVLET_API_JAR}"/>
+				
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>					
 				<pathelement path="lib/desktop/jython.jar"/>
@@ -1140,11 +1151,15 @@
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
 				<pathelement path="lib/desktop/PDFRenderer.jar"/>
 				
-				<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 				<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
 				<pathelement path="lib/desktop/jsp-2.1.jar"/>
-				<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
-				<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+				
+				<pathelement path="${JETTY_JAR}"/>
+				<pathelement path="${JETTY_UTIL_JAR}"/>
+				<pathelement path="${JETTY_CLIENT_JAR}"/>
+				<pathelement path="${JETTY_SERVLET_API_JAR}"/>
+				
+				
 				<pathelement path="lib/desktop/activation.jar"/>
 				<pathelement path="lib/desktop/mail.jar"/>
 				<pathelement path="lib/desktop/jython.jar"/>
@@ -1267,11 +1282,16 @@
 					<pathelement path="lib/desktop/idw-gpl.jar"/>
 					<pathelement path="lib/desktop/PDFRenderer.jar"/>
 					
-					<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
 					<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
 					<pathelement path="lib/desktop/jsp-2.1.jar"/>
-					<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
-					<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>
+					
+					
+					<pathelement path="${JETTY_JAR}"/>
+					<pathelement path="${JETTY_UTIL_JAR}"/>
+					<pathelement path="${JETTY_CLIENT_JAR}"/>
+					<pathelement path="${JETTY_SERVLET_API_JAR}"/>
+					
+					
 					<pathelement path="lib/desktop/activation.jar"/>
 					<pathelement path="lib/desktop/mail.jar"/>
 					<pathelement path="lib/desktop/jython.jar"/>
@@ -1383,8 +1403,8 @@
 				<pathelement path="${ORACLE_JAR}"/>
 				<pathelement path="${MYSQL_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
-				<pathelement path="lib/pool/ganymed-ssh2.jar"/>
-				<pathelement path="lib/pool/jsch-0.1.40.jar"/>				
+				<pathelement path="${SSH_JAR}"/>
+				<pathelement path="${SSH_TUNNEL_JAR}"/>				
 			</classpath>
 			
 			
@@ -1549,11 +1569,15 @@
 					<pathelement path="${SSH_TUNNEL_JAR}"/>
 					<pathelement path="${FTP_JAR}"/>		
 					
-					<pathelement path="lib/desktop/servlet-api-2.5-6.1.8.jar"/>
+
 					<pathelement path="lib/desktop/jsp-api-2.1.jar"/>
 					<pathelement path="lib/desktop/jsp-2.1.jar"/>
-					<pathelement path="lib/desktop/jetty-6.1.8.jar"/>
-					<pathelement path="lib/desktop/jetty-util-6.1.8.jar"/>					
+					
+					<pathelement path="${JETTY_JAR}"/>
+					<pathelement path="${JETTY_UTIL_JAR}"/>
+					<pathelement path="${JETTY_CLIENT_JAR}"/>
+					<pathelement path="${JETTY_SERVLET_API_JAR}"/>					
+					
 					<pathelement path="lib/desktop/activation.jar"/>
 					<pathelement path="lib/desktop/mail.jar"/>					
 					<pathelement path="lib/desktop/jython.jar"/>
@@ -1624,10 +1648,12 @@
 			<unjar src="${SSH_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="${SSH_TUNNEL_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="${FTP_JAR}"  dest="binsrv" overwrite="true"/>
-			
-				
-			<unjar src="lib/desktop/jetty-6.1.8.jar"  dest="binsrv" overwrite="true"/>
-			<unjar src="lib/desktop/jetty-util-6.1.8.jar"  dest="binsrv" overwrite="true"/>
+					
+			<unjar src="${JETTY_JAR}"  dest="binsrv" overwrite="true"/>
+			<unjar src="${JETTY_UTIL_JAR}"  dest="binsrv" overwrite="true"/>
+			<unjar src="${JETTY_CLIENT_JAR}"  dest="binsrv" overwrite="true"/>
+		
+		
 			<unjar src="lib/desktop/activation.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/mail.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/jython.jar"  dest="binsrv" overwrite="true"/>
@@ -1653,7 +1679,7 @@
 			
 			
 			
-			<unjar src="lib/desktop/servlet-api-2.5-6.1.8.jar"  dest="binsrv" overwrite="true"/>
+			<unjar src="${JETTY_SERVLET_API_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/jsp-api-2.1.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/jsp-2.1.jar"  dest="binsrv" overwrite="true"/>
 						
