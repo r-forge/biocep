@@ -471,9 +471,9 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					}
 
 					try {
-						System.out.println("+before session.invalidate");
+
 						session.invalidate();
-						System.out.println("+after session.invalidate");
+
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
