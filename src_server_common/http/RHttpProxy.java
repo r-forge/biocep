@@ -657,5 +657,42 @@ public class RHttpProxy {
 		}
 	}
 
+	/*
+	public void main(String[] args) {
+		
+		org.mortbay.jetty.clien
+		HttpClient client = new HttpClient();
+		client.setConnectorType(HttpClien.CONNECTOR_SELECT_CHANNEL);
+		try
+		{
+		  client.start();
+		}
+		catch (Exception e)
+		{
+		  throw new ServletException(e);
+		}
+
+		// create the exchange object, which lets you define where you want to go
+		// and what you want to do once you get a response
+		ContentExchange exchange = new ContentExchange()
+		{
+		  // define the callback method to process the response when you get it back
+		  protected void onResponseComplete() throws IOException
+		  {
+		    super.onResponseComplete();
+		    String responseContent = this.getResponseContent();
+
+		    // do something with the response content
+		    ...
+		  }
+		};
+
+		exchange.setMethod("GET");
+		exchange.setURL("http://www.example.com/");
+
+		// start the exchange
+		client.send(exchange);	
+	}
+	*/
 	
 }
