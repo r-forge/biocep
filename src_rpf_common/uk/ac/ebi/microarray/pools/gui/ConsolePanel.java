@@ -373,8 +373,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 				}
 				if (e.getKeyCode() == 38) {
 
-					if (countCR() == 0 || ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK
-							|| (e.getModifiers() & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK )) {
+					if (countCR() == 0 || ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK)) {
 						if (_commandsHistoryIndex == 0)
 							return;
 						--_commandsHistoryIndex;
@@ -383,8 +382,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 				} else if (e.getKeyCode() == 40) {
 
-					if (countCR() == 0 || ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK
-							|| (e.getModifiers() & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK )) {
+					if (countCR() == 0 || ((e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK)) {
 						if (_commandsHistoryIndex >= (_commandsHistory.size() - 1))
 							return;
 						++_commandsHistoryIndex;

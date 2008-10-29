@@ -39,11 +39,11 @@ import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 public class FreeResourcesListener implements HttpSessionListener {
 
 	public void sessionCreated(HttpSessionEvent sessionEvent) {
-		System.out.println("Session created :" + sessionEvent.getSession().getId());
+		System.out.println(" % Session created :" + sessionEvent.getSession().getId());
 	}
 
 	public void sessionDestroyed(HttpSessionEvent sessionEvent) {
-		System.out.println("Session to destroy :" + sessionEvent.getSession().getId());
+		System.out.println(" % Session to destroy :" + sessionEvent.getSession().getId());
 
 		HashMap<String, HashMap<String, Object>> map = ((HashMap<String, HashMap<String, Object>>) sessionEvent.getSession().getServletContext().getAttribute("SESSIONS_ATTRIBUTES_MAP"));
 		if (map == null)return;
@@ -68,7 +68,7 @@ public class FreeResourcesListener implements HttpSessionListener {
 
 		r_sessions.remove(sessionEvent.getSession());
 		
-		if (r_sessions.size()>0) {
+		if (r_sessions.size()>0 && !(Boolean) attributes.get("SELFISH")) {
 			System.out.println("attributes:"+attributes);	
 			for (String a:attributes.keySet()) {
 				if (a.startsWith("device_")) {
