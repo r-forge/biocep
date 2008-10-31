@@ -460,8 +460,12 @@ public class ServerManager {
 			Vector<String> envVector = new Vector<String>();
 			{
 				Map<String, String> osenv = System.getenv();
+				String OS_PATH=osenv.get("PATH");
+				if (OS_PATH==null) OS_PATH=osenv.get("Path");
+				if (OS_PATH==null) OS_PATH="";
+				
 				Map<String, String> env = new HashMap<String, String>(osenv);
-				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
+				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib") + System.getProperty("path.separator")+ OS_PATH);
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("R_HOME", rpath);
 				String R_LIBS = rlibs + System.getProperty("path.separator")
@@ -471,6 +475,7 @@ public class ServerManager {
 				for (String k : env.keySet()) {
 					envVector.add(k + "=" + env.get(k));
 				}
+				System.out.println("envVector:"+envVector);
 			}
 
 			String[] requiredPackages = null;

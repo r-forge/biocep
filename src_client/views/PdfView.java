@@ -4,6 +4,7 @@ import graphics.rmi.PDFPanel;
 import graphics.rmi.RGui;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -32,16 +33,29 @@ public class PdfView extends DynamicView {
 	private RGui _rgui;
 	private JTextPane _area;
 	private JScrollPane _scrollPane;
-	private PDFPanel _svgCanvas = new PDFPanel();
+	private PDFPanel _pdfCanvas = new PDFPanel();
 	JPanel bottompanel;
 
 	private void showPopup(MouseEvent e) {
 		JPopupMenu popupMenu = new JPopupMenu();
+		
+		popupMenu.add(new AbstractAction("Zoom In") {
+			public void actionPerformed(ActionEvent e) {									    
+					_pdfCanvas.setPreferredSize(new Dimension(_pdfCanvas.getWidth()*2,_pdfCanvas.getHeight()*2 ));
+					_pdfCanvas.revalidate();
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+		
+		
 		popupMenu.add(new AbstractAction("Get Pdf From Current Device") {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					byte[] buffer = _rgui.getCurrentDevice().getPdf();
-					_svgCanvas.setPDFContent(buffer);
+					_pdfCanvas.setPDFContent(buffer);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -53,9 +67,9 @@ public class PdfView extends DynamicView {
 		popupMenu.add(new AbstractAction("Load Pdf From File") {
 			public void actionPerformed(ActionEvent e) {
 				final JFileChooser chooser = new JFileChooser();
-				int returnVal = chooser.showOpenDialog(_svgCanvas);
+				int returnVal = chooser.showOpenDialog(_pdfCanvas);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					_svgCanvas.setPDFContent(chooser.getSelectedFile());
+					_pdfCanvas.setPDFContent(chooser.getSelectedFile());
 				}
 			}
 
@@ -73,7 +87,7 @@ public class PdfView extends DynamicView {
 					new Thread(new Runnable() {
 						public void run() {
 							try {
-								_svgCanvas.savePDFContent(chooser.getSelectedFile());
+								_pdfCanvas.savePDFContent(chooser.getSelectedFile());
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -87,7 +101,7 @@ public class PdfView extends DynamicView {
 			}
 		});
 
-		popupMenu.show(_svgCanvas, e.getX(), e.getY());
+		popupMenu.show(_pdfCanvas, e.getX(), e.getY());
 
 	}
 
@@ -163,7 +177,7 @@ public class PdfView extends DynamicView {
 			};
 		});
 
-		_svgCanvas.addMouseListener(new MouseListener() {
+		_pdfCanvas.addMouseListener(new MouseListener() {
 			public void mouseEntered(MouseEvent e) {
 			}
 
@@ -223,7 +237,7 @@ public class PdfView extends DynamicView {
 									JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
 								}
 
-								_svgCanvas.setPDFContent(result);
+								_pdfCanvas.setPDFContent(result);
 							} catch (Exception e) {
 								e.printStackTrace();
 							} finally {
@@ -261,7 +275,7 @@ public class PdfView extends DynamicView {
 
 		bottompanel = new JPanel(new BorderLayout());
 		bottompanel.setBackground(Color.white);
-		bottompanel.add(_svgCanvas, BorderLayout.CENTER);
+		bottompanel.add(new JScrollPane(_pdfCanvas), BorderLayout.CENTER);
 		final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, bottompanel);
 		splitPane.setDividerSize(3);
 
@@ -290,6 +304,6 @@ public class PdfView extends DynamicView {
 	}
 
 	PagePanel getSvgCanvas() {
-		return _svgCanvas;
+		return _pdfCanvas;
 	}
 }
