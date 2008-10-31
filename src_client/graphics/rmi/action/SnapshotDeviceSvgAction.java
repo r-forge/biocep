@@ -39,7 +39,7 @@ public class SnapshotDeviceSvgAction extends AbstractAction {
 
 					JGDPanelPop panel = (JGDPanelPop) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 
-					Vector<String> result = panel.getGdDevice().getSVG();
+					Vector<String> result = panel.getGdDevice().getSVGAsText();
 					final String tempFile = System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg";
 					PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
 					for (int i = 0; i < result.size(); ++i)

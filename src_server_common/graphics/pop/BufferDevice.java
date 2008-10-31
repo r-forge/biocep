@@ -77,10 +77,18 @@ public class BufferDevice implements GDDevice {
 		return null;
 	}
 
-	public Vector<String> getSVG() throws RemoteException {
+	public Vector<String> getSVGAsText() throws RemoteException {
 		return null;
 	}
 
+	public Vector<String> getSVGAsBytes() throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getSVG() throws RemoteException {
+		return null;
+	}
+	
 	public byte[] getBmp() throws RemoteException {
 		return null;
 	}

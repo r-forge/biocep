@@ -57,7 +57,11 @@ public class TempGDDevice implements GDDevice {
 	public void setAsCurrentDevice() throws RemoteException {
 	}
 
-	public Vector<String> getSVG() throws RemoteException {
+	public byte[] getSVG() throws RemoteException {
+		return null;
+	}
+	
+	public Vector<String> getSVGAsText() throws RemoteException {
 		return null;
 	}
 
