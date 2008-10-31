@@ -45,6 +45,7 @@ import http.NoRegistryAvailableException;
 import http.NoServantAvailableException;
 import http.NotLoggedInException;
 import http.RHttpProxy;
+import http.RResponse;
 import http.TunnelingException;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -63,6 +64,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.XMLEncoder;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,7 +119,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -144,6 +147,8 @@ import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
+
+import org.bioconductor.packages.rservices.RInteger;
 import org.bioconductor.packages.rservices.RObject;
 import org.gjt.sp.jedit.gui.FloatingWindowContainer;
 import org.mortbay.jetty.Server;
@@ -235,6 +240,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	private String _rProcessId = null;
 	Server _virtualizationServer = null;
+	Server _pluginServer = null;
+	int _pluginServerPort = -1;
+	
 	Identification ident = null;
 
 	Stack<GDDevice> s = null;
@@ -2881,7 +2889,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("about", new AbstractAction("About Virtualized R") {
+		_actions.put("about", new AbstractAction("About Virtual R") {
 			public void actionPerformed(ActionEvent e) {
 				new SplashWindow(new JFrame(), Toolkit.getDefaultToolkit().createImage(GDAppletLauncher.class.getResource("/splash/splashscreen.png")))
 						.setVisible(true);
@@ -3826,6 +3834,27 @@ public class GDApplet extends GDAppletBase implements RGui {
 				String[] viewDetail = pdialog.getPluginViewDetail();
 				if (viewDetail != null) {
 					try {
+						
+						if (_pluginServer==null) {
+							ServerSocket ss = new ServerSocket(0);
+							_pluginServerPort = ss.getLocalPort();
+							ss.close();													
+							_pluginServer = new Server(_pluginServerPort);
+							Context root = new Context(_pluginServer, "/", Context.SESSIONS);
+							root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(GDApplet.this)), "/rvirtual/graphics/*");
+							root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this)), "/rvirtual/cmd/*");
+							root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
+							_pluginServer.start();
+						}
+			
+						String _pluginServerUrl="http://"+ PoolUtils.getHostIp() + ":" + _pluginServerPort + "/rvirtual/cmd";
+						HashMap<String, Object> options=new HashMap<String, Object>();
+						String pluginSessionId=RHttpProxy.logOn(_pluginServerUrl, "", "guest", "guest", options);
+						RServices pluginR=RHttpProxy.getR(_pluginServerUrl, pluginSessionId, true, 100);
+						pluginR.consoleSubmit("print('"+new Date()+"')");
+						RHttpProxy.logOff(_pluginServerUrl, pluginSessionId);
+						
+						
 						URLClassLoader cl = new URLClassLoader(new URL[] { new File(viewDetail[0]).toURL() }, GDApplet.class.getClassLoader());
 						Class<?> c_ = cl.loadClass(viewDetail[1]);
 						JPanel panel = (JPanel) c_.getConstructor(RGui.class).newInstance(GDApplet.this);
@@ -4659,5 +4688,22 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		}
 
+	}
+	
+	
+	
+	
+	static public void main(String[] args) throws Exception {
+		
+		RResponse rresponse=new RResponse( new int[]{8,9,6,3} , "bbb" );					
+	    XMLEncoder e = new XMLEncoder(new BufferedOutputStream(System.out));
+	    /*
+	    e.setPersistenceDelegate(RResponse.class,
+                new DefaultPersistenceDelegate(
+                    new String[]{ "status",
+                                  "value"}) );
+		*/
+	    e.writeObject(rresponse);
+	    e.close();
 	}
 }

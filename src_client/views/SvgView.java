@@ -47,7 +47,7 @@ public class SvgView extends DynamicView {
 			public void actionPerformed(ActionEvent e) {
 
 				try {
-					Vector<String> svgbuffer = _rgui.getCurrentDevice().getSVG();
+					Vector<String> svgbuffer = _rgui.getCurrentDevice().getSVGAsText();
 					tempFile = new File(System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg");
 
 					PrintWriter pw = new PrintWriter(new FileWriter(tempFile));

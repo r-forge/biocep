@@ -39,7 +39,7 @@ public class SaveDeviceAsSvgAction extends AbstractAction {
 						_rgui.getRLock().lock();
 						JGDPanelPop panel = (JGDPanelPop) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 
-						Vector<String> result = panel.getGdDevice().getSVG();
+						Vector<String> result = panel.getGdDevice().getSVGAsText();
 						PrintWriter pw = new PrintWriter(new FileWriter(chooser.getSelectedFile()));
 						for (int i = 0; i < result.size(); ++i)
 							pw.println(result.elementAt(i));

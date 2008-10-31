@@ -3747,7 +3747,14 @@ public class DirectJNI {
 
 		}
 
-		synchronized public Vector<String> getSVG() throws RemoteException {
+		synchronized public byte[] getSVG() throws RemoteException {
+			Vector<String> result=getSVGAsText();
+			StringBuffer sb=new StringBuffer();
+			for (int i=0; i<result.size();++i) sb.append(result.elementAt(i));
+			return sb.toString().getBytes();
+		}
+		
+		synchronized public Vector<String> getSVGAsText() throws RemoteException {
 
 			File tempFile = null;
 			try {

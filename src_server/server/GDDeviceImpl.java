@@ -111,8 +111,11 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 		return _localGdDevice.getRealPoints(points);
 	}
 
-	public Vector<String> getSVG() throws RemoteException {
+	public byte[] getSVG() throws RemoteException {
 		return _localGdDevice.getSVG();
+	}
+	public Vector<String> getSVGAsText() throws RemoteException {
+		return _localGdDevice.getSVGAsText();
 	}
 
 	public byte[] getBmp() throws RemoteException {

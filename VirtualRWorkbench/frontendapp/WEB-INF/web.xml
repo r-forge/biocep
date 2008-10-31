@@ -47,6 +47,14 @@
 		<servlet-class>http.GraphicsServlet</servlet-class>
 	</servlet>
 	
+	<servlet>
+		<description>
+		</description>
+		<display-name>RESTServlet</display-name>
+		<servlet-name>RESTServlet</servlet-name>
+		<servlet-class>http.RESTServlet</servlet-class>
+	</servlet>
+	
 	
 	<servlet>
 		<servlet-name>jnlpbuilder</servlet-name>
@@ -81,6 +89,11 @@
 	<servlet-mapping>
 		<servlet-name>GraphicsServlet</servlet-name>
 		<url-pattern>/graphics</url-pattern>		
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>RESTServlet</servlet-name>
+		<url-pattern>/rest</url-pattern>		
 	</servlet-mapping>
 		
 	<servlet-mapping>

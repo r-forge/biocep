@@ -453,7 +453,7 @@
 
 	
 			<target name="webcompile" depends="initializeProperties,compile,pdfviewer">
-				
+				<!--
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="${LOGGING_JAR}"/>	
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="${LOG4J_JAR}"/>
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/j2ee/commons-codec-1.3.jar"/>
@@ -479,7 +479,9 @@
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/svg/batik-xml.jar"/>		
 				
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/desktop/JRI.jar"/>			  	
-				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/jdbc/derbyclient.jar"/>				  	
+				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/jdbc/derbyclient.jar"/>		
+				-->
+				
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="${CORE_JAR}"/>				  					  	
 			<!--<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="VirtualRWorkbench/distrib/mapping.jar"/>-->							
 				
@@ -572,7 +574,9 @@
 				  		<copy file="pdfviewer.jar" tofile="VirtualRWorkbench/frontendapp/appletlibs/pdfviewer_unsigned.jar"/>
 				  		<copy file="lib/desktop/PDFRenderer.jar" tofile="VirtualRWorkbench/frontendapp/appletlibs/PDFRenderer_unsigned.jar"/>
 				  	
-						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="${CORE_JAR}"/>				  
+						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="${CORE_JAR}"/>
+				
+						<!--
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="pdfviewer.jar"/>				  	
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/freemindbrowser.jar"/>
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="${LOGGING_JAR}"/>	
@@ -625,18 +629,23 @@
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/svg/xml-apis.jar"/>
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/svg/xml-apis-ext.jar"/>
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/groovy-all-1.5.4.jar"/>
+						
+						-->
 					  						  	
 					  	<!--
 					  	<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="VirtualRWorkbench/distrib/mapping.jar"/>
 					  	-->
-			        	
-				<signjar destDir="VirtualRWorkbench/frontendapp/appletlibs" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" >
-					
-				  <path>				  	
-				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="*.jar"/>				  					  					  	
-				  </path>
-					
+
+				
+
+									
+				<signjar destDir="VirtualRWorkbench/frontendapp/appletlibs" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" >					
+				  <path>
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="${CORE_JAR}"/>
+				  	<!--<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="*.jar"/>-->				  					  					  	
+				  </path>					
 				</signjar>
+				
 				
 								
 				<jar basedir="VirtualRWorkbench/frontendapp" destfile="VirtualRWorkbench/${demo.frontend.war.name}.war" />
