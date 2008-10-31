@@ -413,7 +413,7 @@
 				
 			</classpath>
 			
-			<env key="PATH" path="${R_LIB_PATH}"/>
+			<env key="PATH" path="${env.Path}${path.separator}${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg
 			value="-Djava.library.path=${JRI_LIB_PATH}"/>
@@ -882,7 +882,7 @@
 		<if><not><isset property="selfish"/></not><then><property name="selfish" value=""/></then></if>
 		<if><not><isset property="use.default.libs"/></not><then><property name="use.default.libs" value=""/></then></if>
 
-		<java maxmemory="1024m" classname="graphics.rmi.GDAppletLauncher"
+		<java  maxmemory="1024m" classname="graphics.rmi.GDAppletLauncher"
 			fork="true" spawn="${spawn}">
 			<classpath>
 				
