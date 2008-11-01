@@ -1,14 +1,2 @@
-import javax.swing.JOptionPane;
-n=JOptionPane.showInputDialog(null, 100);
-n=Integer.decode(n);
-client.R.getInstance().putAndAssign(n,"n")
-if (n%2==0) {
-<R>
-  hist(rnorm(n))
-</R>
-} else {
-<R>	
-  plot(rnorm(n))
-</R>  
-}
+plot(rnorm(1000))
 

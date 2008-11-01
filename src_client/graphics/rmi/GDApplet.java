@@ -1760,7 +1760,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			});
 
-			NewWindow._applet = this;
 			getContentPane().setLayout(new BorderLayout());
 			getContentPane().add(menuBar, BorderLayout.NORTH);
 			JPanel mainPanel = new JPanel();
@@ -1876,17 +1875,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 			try {
 				ClassLoader cl = GDApplet.class.getClassLoader();
 				try {
-					File jEditDir = new File(System.getProperty("user.dir") + "/jEdit");
-					if (jEditDir.exists()) {
-						PoolUtils.deleteDirectory(jEditDir);
-					}
-					new File(System.getProperty("user.dir") + "/jEdit").mkdirs();
+					File jEditDir = new File(ServerManager.INSTALL_DIR + "/jEdit");
+					if (!jEditDir.exists()) {
+						new File(ServerManager.INSTALL_DIR + "/jEdit").mkdirs();	
+					}							
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
-				System.setProperty("jedit.home", System.getProperty("user.dir") + "/jEdit");
-				System.setProperty("jedit.newwindow.class", "graphics.rmi.NewWindow");
-				System.setProperty("jedit.save.to.r.class", "graphics.rmi.SaveToR");
+				System.setProperty("jedit.home", ServerManager.INSTALL_DIR + "/jEdit");
+				
 				cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("main", new Class<?>[] { String[].class, RGui.class }).invoke(null,
 						new Object[] { new String[] { "-noserver", "-noplugins", "-nogui", "-nosettings" }, GDApplet.this });
 			} catch (Exception e) {
@@ -3015,7 +3012,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				final DimensionsDialog ddialog = new DimensionsDialog(GDApplet.this);
 				ddialog.setVisible(true);
 				if (ddialog.getSpreadsheetDimension() != null) {
-					NewWindow.create(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getHeight(), (int) ddialog
+					createView(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getHeight(), (int) ddialog
 							.getSpreadsheetDimension().getWidth()), GDApplet.this), "Spreadsheet View");
 				}
 			}

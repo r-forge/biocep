@@ -119,9 +119,14 @@ public class ToolsMain {
 
 		Vector<String> envVector = new Vector<String>();
 		{
+			
+			
 			Map<String, String> osenv = System.getenv();
 			Map<String, String> env = new HashMap<String, String>(osenv);
-			env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib"));
+			String OS_PATH=osenv.get("PATH");
+			if (OS_PATH==null) OS_PATH=osenv.get("Path");
+			if (OS_PATH==null) OS_PATH="";
+			env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib") + System.getProperty("path.separator")+ OS_PATH);
 			env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 			env.put("R_HOME", rpath);
 			String R_LIBS = rlibs + System.getProperty("path.separator")
@@ -135,10 +140,15 @@ public class ToolsMain {
 
 		String[] requiredPackages = null;
 
-		if (isWindowsOs()) {
-			requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo", "Cairo" };
+		if ((System.getenv("BIOCEP_USE_DEFAULT_LIBS") != null && System.getenv("BIOCEP_USE_DEFAULT_LIBS").equalsIgnoreCase("false"))
+				|| (System.getProperty("use.default.libs") != null && System.getProperty("use.default.libs").equalsIgnoreCase("true"))) {
+			requiredPackages = new String[0];
 		} else {
-			requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo" };
+			if (isWindowsOs()) {
+				requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo", "Cairo" };
+			} else {
+				requiredPackages = new String[] { "rJava", "JavaGD", "iplots", "TypeInfo" };
+			}
 		}
 
 		Vector<String> installLibBatch = new Vector<String>();
