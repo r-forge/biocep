@@ -43,7 +43,7 @@ public  class DimensionsDialog extends JDialog {
 	public DimensionsDialog(Component c) {
 		super((Frame) null, true);
 
-		setTitle("Sprreadsheet Size");
+		setTitle("Spreadsheet Size");
 		setLocationRelativeTo(c);
 
 		getContentPane().setLayout(new GridLayout(1, 2));

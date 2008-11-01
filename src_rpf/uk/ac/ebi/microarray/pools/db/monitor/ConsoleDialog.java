@@ -35,7 +35,12 @@ import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
 public class ConsoleDialog extends JFrame {
 
 	private ServantStatus _servantStatus;
+	private ConsolePanel cp;
 
+	public ConsolePanel getCP() {
+		return cp;
+	}
+	
 	public ConsoleDialog(Frame aFrame, final ManagedServant servant, ServantStatus servantStatus) {
 
 		_servantStatus = servantStatus;
@@ -49,7 +54,7 @@ public class ConsoleDialog extends JFrame {
 		setLocationRelativeTo(aFrame);
 		setLocation(PoolUtils.deriveLocation(getLocation(), 50));
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new ConsolePanel(new SubmitInterface() {
+		cp=new ConsolePanel(new SubmitInterface() {
 			public String submit(String cmd) {
 
 				if (!_servantStatus.isLocked()) {
@@ -83,7 +88,8 @@ public class ConsoleDialog extends JFrame {
 				return log;
 
 			}
-		},"Evaluate", Color.black,true,null));
+		},"Evaluate", Color.black,true,null);
+		getContentPane().add(cp);
 
 		setSize(new Dimension(540, 430));
 

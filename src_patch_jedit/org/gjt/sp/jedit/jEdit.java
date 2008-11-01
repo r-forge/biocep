@@ -2473,21 +2473,12 @@ public class jEdit {
 		}
 	}
 
-	static Method newWindowMethod = null;
-
 	public static void newWindow(View view) {
 		TaggedPanel f = new TaggedPanel();
 		f.setLayout(new BorderLayout());
 		f.add(view.getContentPane(), BorderLayout.CENTER);
 		f.setProperty("view", view);
-		try {
-			if (newWindowMethod == null)
-				newWindowMethod = jEdit.class.getClassLoader().loadClass(System.getProperty("jedit.newwindow.class")).getMethod("create", Component.class,
-						String.class);
-			newWindowMethod.invoke(null, f, "Edit View");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		_rgui.createView(f, "Edit View");
 	}
 
 	// {{{ newView() method

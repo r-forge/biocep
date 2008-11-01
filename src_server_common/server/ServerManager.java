@@ -481,7 +481,7 @@ public class ServerManager {
 			String[] requiredPackages = null;
 
 			if ((System.getenv("BIOCEP_USE_DEFAULT_LIBS") != null && System.getenv("BIOCEP_USE_DEFAULT_LIBS").equalsIgnoreCase("false"))
-					|| (System.getProperty("use.default.libs") != null && System.getProperty("use.default.libs").equalsIgnoreCase("false"))) {
+					|| (System.getProperty("use.default.libs") != null && System.getProperty("use.default.libs").equalsIgnoreCase("true"))) {
 				requiredPackages = new String[0];
 			} else {
 				if (isWindowsOs()) {
