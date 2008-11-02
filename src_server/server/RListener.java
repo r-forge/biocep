@@ -17,14 +17,18 @@
 package server;
 
 import graphics.rmi.RClustserInterface;
+import http.RHttpProxy;
+
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
 import java.rmi.registry.Registry;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -55,6 +59,7 @@ import remoting.RServices;
 import uk.ac.ebi.microarray.pools.NodeManager;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.ServantProviderFactory;
+import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -376,7 +381,11 @@ public abstract class RListener {
 		if (cluster == null)
 			return new String[] { "NOK", "Invalid cluster" };
 		try {
-			_rClusterInterface.releaseRs(cluster.getWorkers(), cluster.getWorkers().size(), cluster.getNodeName());
+			
+			
+			//_rClusterInterface.releaseRs(cluster.getWorkers(), cluster.getWorkers().size(), cluster.getNodeName());
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -560,7 +569,8 @@ public abstract class RListener {
 				return new String[] { "NOK", "Invalid cluster" };
 			for (int i = 0; i < cluster.getWorkers().size(); ++i) {
 				RServices r = cluster.getWorkers().elementAt(i);
-				String s = r.consoleSubmit(expression);
+				r.consoleSubmit(expression);
+				String s = r.getStatus();
 				System.out.println("** submitted :" + expression + " to " + r.getServantName());
 				if (s != null && !s.trim().equals(""))
 					feedback.append("worker<" + r.getServantName() + ">:\n" + s + "\n");
@@ -617,9 +627,44 @@ public abstract class RListener {
 		}
 	}
 
+	public static class RLink {
+		private String _name;
+		private RServices r;
+		private Exception creationException;
+
+		public RLink(String name, RServices r) {
+			_name = name;
+			this.r = r;
+		}
+
+		public String getName() {
+			return _name;
+		}
+
+		public RServices getR() {
+			return r;
+		}
+		
+		public void setR(RServices r) {
+			this.r=r;
+		}
+
+		public Exception getCreationException() {
+			return creationException;
+		}
+
+		public void setCreationException(Exception creationException) {
+			this.creationException = creationException;
+		}
+	}
+
+	
 	private static long CLUSTER_COUNTER = 0;
 	private static HashMap<String, Cluster> _clustersHash = new HashMap<String, Cluster>();
-
+		
+	private static long RLINK_COUNTER = 0;
+	private static HashMap<String, RLink> _rlinkHash = new HashMap<String, RLink>();
+	
 	public static String convertToPrintCommand(String s) {
 		if (s.length() == 0)
 			return "";
@@ -726,6 +771,346 @@ public abstract class RListener {
 			
 		notifyRActionListeners(new RConsoleAction("PAGER",attributes));
 		
+	}
+
+	
+	public static String[] makeRLink(String mode, String params) {
+		return makeRLink(mode, new String[]{params});
+	}
+	
+	
+	public static String[] makeRLink(final String mode,final String[] params) {		
+		try {
+			final String rlinkName = "RLINK_" + (RLINK_COUNTER++);
+			_rlinkHash.put(rlinkName, new RLink(rlinkName,null));
+
+			new Thread(new Runnable(){
+				public void run() {
+					try {
+						
+						//_rlinkHash.get(rlinkName).setR(ServerManager.createR(rlinkName));
+
+						Properties props = new Properties();
+						if (params!=null && params.length>0){
+							for (int i=0; i<params.length; i++) {
+								String element=params[i];
+								int p=element.indexOf('=');
+								if (p==-1) {
+									props.put(element.toLowerCase(),"");
+								}
+								else {
+									props.put(element.substring(0,p).trim().toLowerCase(), element.substring(p+1, element.length()).trim());
+								}
+							}
+						}
+						
+						RServices r=null;
+						if (mode.equalsIgnoreCase("self")) {
+							r=DirectJNI.getInstance().getRServices();
+						} else if (mode.equalsIgnoreCase("new")) {
+							r=ServerManager.createR(rlinkName);
+						} else if (mode.equalsIgnoreCase("rmi")) {
+							
+							try {
+								if (props.getProperty("stub")!=null) {
+									r=(RServices)PoolUtils.hexToStub(props.getProperty("stub"), RListener.class.getClassLoader());
+								} else {
+									r=(RServices)ServerDefaults.getRmiRegistry().lookup(props.getProperty("name"));
+								}
+																
+							} catch (Exception e) {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Creation Failed\nuse show.rlink to see creation error"));
+								_rlinkHash.get(rlinkName).setCreationException(e);
+							}
+							
+						} else if (mode.equalsIgnoreCase("http")) {
+							
+							try {
+							HashMap<String, Object> options = new HashMap<String, Object>();
+							if (props.getProperty("privatename")!=null) {
+								options.put("privatename", props.getProperty("privatename"));	
+							}							
+							if (props.getProperty("memorymin")!=null) {
+								options.put("memorymin", props.getProperty("memorymin"));	
+							}
+							if (props.getProperty("memorymax")!=null) {
+								options.put("memorymax", props.getProperty("memorymax"));	
+							}
+
+								final String sessionId = RHttpProxy.logOn(props.getProperty("url"), "", props.getProperty("login")==null ?"guest":props.getProperty("login"), props.getProperty("password")==null ? "guest" : props.getProperty("password"), options);
+								r = RHttpProxy.getR(props.getProperty("url"), sessionId, true, 30);
+							
+							
+								r=(RServices)ServerDefaults.getRmiRegistry().lookup(props.getProperty("name"));								
+							} catch (Exception e) {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Creation Failed\nuse show.rlink to see creation error"));
+								_rlinkHash.get(rlinkName).setCreationException(e);
+							}
+							
+							
+						}
+						
+						_rlinkHash.get(rlinkName).setR(r);
+						
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Creation Succeeded\nuse show.rlink to get creation details"));
+						} catch (Exception e) {
+							e.printStackTrace();							
+						}
+						
+					} catch (Exception ex) {
+						
+						_rlinkHash.get(rlinkName).setCreationException(ex);
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Creation Failed!\n"+PoolUtils.getStackTraceAsString(ex)));
+						} catch (Exception e) {
+							e.printStackTrace();							
+						}
+					}
+					
+				}
+			}).start();
+			
+			return new String[] { "OK" , rlinkName };
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand("couldn't create rlink") };
+		}
+	}
+	
+	public static String[] RLinkConsole(final String rlinkName, final String command) {		
+		try {
+			
+
+			new Thread(new Runnable(){
+				public void run() {
+					
+					try {
+						
+						
+						if (_rlinkHash.get(rlinkName)==null) {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:"+rlinkName));
+							return; 
+						}
+						
+						RServices r=_rlinkHash.get(rlinkName).getR();
+						Exception creationException=_rlinkHash.get(rlinkName).getCreationException();
+						
+						if (r==null) {
+							if (creationException==null) {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
+								return;
+							} else {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"+PoolUtils.getStackTraceAsString(creationException)));
+								return;
+							}
+						}
+
+						r.consoleSubmit(command);
+						
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Command submitted to RLink ["+rlinkName+"]\n"+r.getStatus()));
+						} catch (Exception e) {
+							e.printStackTrace();							
+						}
+						
+					} catch (Exception ex) {
+						
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
+						} catch (Exception e) {
+							e.printStackTrace();							
+						}
+					}
+					
+				}
+			}).start();
+			
+			return new String[] { "OK" , convertToPrintCommand("RLink Console Submit in background..") };
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+	
+
+	public static String[] RLinkGet(final String rlinkName, final String expression, final String ato) {		
+		try {
+			
+
+			new Thread(new Runnable(){
+				public void run() {
+					
+					try {
+						
+						
+						if (_rlinkHash.get(rlinkName)==null) {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:"+rlinkName));
+							return; 
+						}
+						
+						RServices r=_rlinkHash.get(rlinkName).getR();
+						Exception creationException=_rlinkHash.get(rlinkName).getCreationException();
+						
+						if (r==null) {
+							if (creationException==null) {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
+								return;
+							} else {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"+PoolUtils.getStackTraceAsString(creationException)));
+								return;
+							}
+						}
+
+						RObject robj=r.getObject(expression);
+						
+						try {							
+							DirectJNI.getInstance().getRServices().putAndAssign(robj, ato);
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(ato + " Has been assigned a value from RLink ["+rlinkName+"]\n"+r.getStatus()));
+						} catch (Exception e) {
+							e.printStackTrace();							
+						}
+						
+					} catch (Exception ex) {
+						
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
+						} catch (Exception e) {
+							e.printStackTrace();							
+						}
+					}
+					
+				}
+			}).start();
+			
+			return new String[] { "OK" , convertToPrintCommand("RLink Get in background..") };
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+
+
+	
+	public static String[] RLinkPut(final String rlinkName, final String expression, final String ato) {		
+		try {
+			
+
+			new Thread(new Runnable(){
+				public void run() {
+					
+					try {
+						
+						
+						if (_rlinkHash.get(rlinkName)==null) {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:"+rlinkName));
+							return; 
+						}
+						
+						RServices r=_rlinkHash.get(rlinkName).getR();
+						Exception creationException=_rlinkHash.get(rlinkName).getCreationException();
+						
+						if (r==null) {
+							if (creationException==null) {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
+								return;
+							} else {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"+PoolUtils.getStackTraceAsString(creationException)));
+								return;
+							}
+						}
+
+
+						
+						try {							
+							RObject robj=DirectJNI.getInstance().getRServices().getObject(expression);
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Retrieve <"+expression+"> from R Session\n"+DirectJNI.getInstance().getRServices().getStatus()));
+							r.putAndAssign(robj, ato);
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Value assigned to "+ato + " on RLink ["+rlinkName+"]\n"+" has been assigned a value\n")+r.getStatus());
+						} catch (Exception e) {
+							e.printStackTrace();							
+						}
+						
+					} catch (Exception ex) {
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
+						} catch (Exception e) {
+							e.printStackTrace();							
+						}
+					}
+					
+				}
+			}).start();
+			
+			return new String[] { "OK" , convertToPrintCommand("RLink Put in background..") };
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+
+	
+	public static String[] RLinkShow(String rlinkName) {
+		try {		
+			if (_rlinkHash.get(rlinkName)==null) {
+				return new String[] { "NOK", convertToPrintCommand("couldn't find rlink") };
+			}
+			return new String[] { "OK" , convertToPrintCommand("Name:"+rlinkName+"\nR:"+ _rlinkHash.get(rlinkName).getR()+ "\nCreation Exception:"+_rlinkHash.get(rlinkName).getCreationException())};
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand("couldn't create rlink") };
+		}
+	}
+
+
+	public static String[] RLinkRelease(String rlinkName) {
+		try {		
+			_rlinkHash.remove(rlinkName);
+			return new String[] { "OK" , "" };
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+
+	
+	public static String[] RLinkList() {
+		String result="";for (String k:_rlinkHash.keySet()) result+=k+"\n";
+		try {					
+			return new String[] { "OK" , convertToPrintCommand(result)};
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+	
+	public static String[] RLinkRegistryList() {
+		try {
+			String[] names=ServerDefaults.getRmiRegistry().list();		
+			return new String[] { "OK" , convertToPrintCommand(Arrays.toString(names))};
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+
+
+	
+	public static String[] makeRLinkCluster(String[] rlinks) {
+		Vector<RServices> workers = new Vector<RServices>();
+		for (int i=0; i<rlinks.length; ++i) workers.add(_rlinkHash.get(rlinks[i]).getR());
+		try {
+			String clusterName = "CL_" + (CLUSTER_COUNTER++);
+			_clustersHash.put(clusterName, new Cluster(clusterName, workers, ""));
+			return new String[] { "OK", clusterName };
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand("couldn't create cluster") };
+		}
 	}
 
 }

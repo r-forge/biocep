@@ -5,6 +5,7 @@ import graphics.rmi.RGui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -14,6 +15,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
@@ -33,24 +36,36 @@ public class PdfView extends DynamicView {
 	private RGui _rgui;
 	private JTextPane _area;
 	private JScrollPane _scrollPane;
+	private JScrollPane _pdfCanvasScrollPane;
 	private PDFPanel _pdfCanvas = new PDFPanel();
+
+	private double _ratioX = 1;
+	private double _ratioY = 1;
+
+	private JTextField ratioX;
+	private JTextField ratioY;
+	private JLabel ratioYLabel;
+	private JCheckBox coupled;
+	private JButton refreshButton;
+
 	JPanel bottompanel;
+	JPanel controlPanel;
 
 	private void showPopup(MouseEvent e) {
 		JPopupMenu popupMenu = new JPopupMenu();
-		
-		popupMenu.add(new AbstractAction("Zoom In") {
-			public void actionPerformed(ActionEvent e) {									    
-					_pdfCanvas.setPreferredSize(new Dimension(_pdfCanvas.getWidth()*2,_pdfCanvas.getHeight()*2 ));
-					_pdfCanvas.revalidate();
+
+		popupMenu.add(new AbstractAction("Fit To Panel") {
+			public void actionPerformed(ActionEvent e) {
+				ratioX.setText("1");
+				if (!coupled.isSelected()) ratioX.setText("1");
+				resetPdfCanvasSize();
 			}
 
 			public boolean isEnabled() {
 				return true;
 			}
 		});
-		
-		
+
 		popupMenu.add(new AbstractAction("Get Pdf From Current Device") {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -113,13 +128,13 @@ public class PdfView extends DynamicView {
 				new Thread(new Runnable() {
 					public void run() {
 						try {
-						
+
 							SwingUtilities.invokeLater(new Runnable() {
 								public void run() {
 									_area.setEnabled(false);
 								}
 							});
-							
+
 							document.processChangedLines(0, document.getLength());
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -130,7 +145,7 @@ public class PdfView extends DynamicView {
 								}
 							});
 						}
-						
+
 					}
 				}).start();
 			}
@@ -237,7 +252,29 @@ public class PdfView extends DynamicView {
 									JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
 								}
 
+								
+								
+								final double xPos=(double)_pdfCanvasScrollPane.getHorizontalScrollBar().getValue()/(double)_pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum();
+								final double yPos=(double)_pdfCanvasScrollPane.getVerticalScrollBar().getValue()/(double)_pdfCanvasScrollPane.getVerticalScrollBar().getMaximum();
+								
+								resetPdfCanvasSize();
 								_pdfCanvas.setPDFContent(result);
+								
+								new Thread(new Runnable(){
+									public void run() {
+										SwingUtilities.invokeLater(new Runnable(){
+											public void run() {
+												_pdfCanvasScrollPane.getHorizontalScrollBar().setValue((int)(xPos*_pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum()));
+												_pdfCanvasScrollPane.getVerticalScrollBar().setValue((int)(yPos*_pdfCanvasScrollPane.getVerticalScrollBar().getMaximum()));
+												_pdfCanvasScrollPane.revalidate();
+											}
+										});
+										
+										
+									}
+								}).start();
+								
+								
 							} catch (Exception e) {
 								e.printStackTrace();
 							} finally {
@@ -273,10 +310,83 @@ public class PdfView extends DynamicView {
 		topeast.setBorder(BorderFactory.createLineBorder(Color.white, 2));
 		topeast.setBackground(Color.white);
 
+		_pdfCanvasScrollPane = new JScrollPane(_pdfCanvas);
 		bottompanel = new JPanel(new BorderLayout());
 		bottompanel.setBackground(Color.white);
-		bottompanel.add(new JScrollPane(_pdfCanvas), BorderLayout.CENTER);
-		final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, bottompanel);
+		bottompanel.add(_pdfCanvasScrollPane, BorderLayout.CENTER);
+
+		controlPanel = new JPanel(new BorderLayout());
+		controlPanel.setLayout(new GridLayout(1, 2));
+		controlPanel.setBackground(Color.white);
+		JPanel p1 = new JPanel();
+		p1.setLayout(new GridLayout(0, 1));
+		JPanel p2 = new JPanel();
+		p2.setLayout(new GridLayout(0, 1));
+		controlPanel.add(p1);
+		controlPanel.add(p2);
+
+		ratioX = new JTextField(new Double(_ratioX).toString());
+		ratioY = new JTextField(new Double(_ratioY).toString());
+		ratioYLabel = new JLabel("Y Ratio");
+		coupled = new JCheckBox("Coupled");
+		coupled.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (coupled.isSelected()) {
+					ratioY.setText("");
+					ratioY.setEnabled(false);
+					ratioYLabel.setEnabled(false);
+				} else {
+					_ratioY=_ratioX;					
+					ratioY.setText(new Double(_ratioY).toString());
+					ratioY.setEnabled(true);
+					ratioYLabel.setEnabled(true);
+				}				
+			}
+		});
+		
+		coupled.setSelected(true);
+		
+		refreshButton = new JButton("Refresh");
+		refreshButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				final double xPos=(double)_pdfCanvasScrollPane.getHorizontalScrollBar().getValue()/(double)_pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum();
+				final double yPos=(double)_pdfCanvasScrollPane.getVerticalScrollBar().getValue()/(double)_pdfCanvasScrollPane.getVerticalScrollBar().getMaximum();
+				
+				resetPdfCanvasSize();
+				
+				new Thread(new Runnable(){
+					public void run() {
+						SwingUtilities.invokeLater(new Runnable(){
+							public void run() {
+								_pdfCanvasScrollPane.getHorizontalScrollBar().setValue((int)(xPos*_pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum()));
+								_pdfCanvasScrollPane.getVerticalScrollBar().setValue((int)(yPos*_pdfCanvasScrollPane.getVerticalScrollBar().getMaximum()));
+								_pdfCanvasScrollPane.revalidate();
+							}
+						});
+						
+						
+					}
+				}).start();
+
+
+			}
+		});
+
+		p1.add(new JLabel("Zoom Ratio")); p2.add(ratioX);
+		//p1.add(ratioYLabel); p2.add(ratioY);
+		//p1.add(coupled);p2.add(new JLabel(""));
+		p1.add(new JLabel(""));p2.add(new JLabel(""));
+		p1.add(new JLabel(""));	p2.add(refreshButton);
+
+		JPanel leftWrapper = new JPanel(new BorderLayout());
+		leftWrapper.add(controlPanel, BorderLayout.NORTH);
+
+		JPanel pb = new JPanel(new BorderLayout());
+		pb.add(leftWrapper, BorderLayout.WEST);
+		pb.add(bottompanel, BorderLayout.CENTER);
+
+		final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, pb);
 		splitPane.setDividerSize(3);
 
 		((JPanel) getComponent()).setLayout(new BorderLayout());
@@ -288,6 +398,8 @@ public class PdfView extends DynamicView {
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
 						splitPane.setDividerLocation((int) 60);
+						_pdfCanvas.setPreferredSize(new Dimension(bottompanel.getWidth() - 10, bottompanel.getHeight() - 10));
+						_pdfCanvas.revalidate();
 					}
 				});
 			}
@@ -301,6 +413,26 @@ public class PdfView extends DynamicView {
 
 	public JScrollPane getScrollPane() {
 		return _scrollPane;
+	}
+
+	private void resetPdfCanvasSize() {
+		try {
+			_ratioX = new Double(ratioX.getText());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		if (coupled.isSelected()) {
+			_ratioY = _ratioX;
+		} else {
+			try {
+				_ratioY = new Double(ratioY.getText());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		_pdfCanvas.setPreferredSize(new Dimension((int) (bottompanel.getWidth() * _ratioX) - 10, (int) (bottompanel.getHeight() * _ratioY) - 10));
+		_pdfCanvas.revalidate();
 	}
 
 	PagePanel getSvgCanvas() {
