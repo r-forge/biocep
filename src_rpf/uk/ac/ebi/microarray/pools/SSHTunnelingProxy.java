@@ -100,7 +100,7 @@ public class SSHTunnelingProxy {
 			}
 		
 			Object result=PoolUtils.hexToObject(buffer.toString(), SSHTunnelingProxy.class.getClassLoader());
-			System.out.println("-->result : "+result);
+			
 			if (result instanceof SSHTunnelingException) throw (SSHTunnelingException)result;
 			else return result;			
 			
