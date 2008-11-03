@@ -589,7 +589,7 @@ public class RHttpProxy {
 							popThread.join();
 							try {
 								// IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-								genericCallBackDevice.dispose();
+								//genericCallBackDevice.dispose();
 							} catch (Exception e) {
 								e.printStackTrace();
 							}

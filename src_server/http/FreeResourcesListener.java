@@ -25,7 +25,10 @@ import java.util.Vector;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+
+import remoting.GenericCallbackDevice;
 import remoting.RServices;
+import server.GenericCallbackDeviceImpl;
 import server.ServerManager;
 
 import uk.ac.ebi.microarray.pools.SSHTunnelingProxy;
@@ -68,17 +71,30 @@ public class FreeResourcesListener implements HttpSessionListener {
 
 		r_sessions.remove(sessionEvent.getSession());
 		
+		System.out.println("attributes:"+attributes);	
+		for (String a:attributes.keySet()) {
+			if (a.startsWith(GenericCallbackDeviceImpl.GenericCallbackDeviceIdPrefix)) {
+				try {
+					System.out.println("disposing device :"+a);
+					((GenericCallbackDevice)attributes.get(a)).dispose();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		
 		if (!(Boolean) attributes.get("SELFISH")) {
 			boolean removeDevices=false;
 			
 			try {
-				 removeDevices=!rservices.hasRCollaborationListeners();
+				 removeDevices=rservices.hasRCollaborationListeners();
 				 //removeDevices=r_sessions.size()>0;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
+			
+			System.out.println("----> remove devices :"+removeDevices);
 			if (removeDevices) {
 				System.out.println("attributes:"+attributes);	
 				for (String a:attributes.keySet()) {
