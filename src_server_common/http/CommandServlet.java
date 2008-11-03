@@ -403,6 +403,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						UserUtils.loadWorkspace((String) session.getAttribute("LOGIN"), r);
 					}
 
+					System.out.println("---> Has Collaboration Listeners:"+r.hasRCollaborationListeners());
 					if (selfish || !r.hasRCollaborationListeners()) {
 						try {
 							if (_rkit != null) ((ExtendedReentrantLock)_rkit.getRLock()).rawLock();

@@ -10,11 +10,11 @@ import remoting.RConsoleAction;
 
 public class GenericCallbackDeviceImpl extends UnicastRemoteObject implements GenericCallbackDevice {
 	
-	
+	public static final String GenericCallbackDeviceIdPrefix="GenericCallbackDevice_";
 	private HashMap<String, GenericCallbackDevice> _genericCallbackDeviceHashMap;
 	private Vector<RAction> _rActions = new Vector<RAction>();	
 	private static int _genericCallbackDeviceCounter=0;
-	private String _id="GenericCallbackDevice_"+(_genericCallbackDeviceCounter++);
+	private String _id=GenericCallbackDeviceIdPrefix+(_genericCallbackDeviceCounter++);
 	private static int _port=System.getProperty("rmi.port.start")!=null && !System.getProperty("rmi.port.start").equals("") ? 2+Integer.decode(System.getProperty("rmi.port.start")) : 0;
 	
 	public GenericCallbackDeviceImpl(HashMap<String, GenericCallbackDevice> genericCallbackDeviceHashMap) throws RemoteException{
@@ -69,6 +69,16 @@ public class GenericCallbackDeviceImpl extends UnicastRemoteObject implements Ge
 	}
 	
 	public void dispose() throws RemoteException {
+		
+		System.out.println("!!!! Disposing Device "+_id);
+		try {
+			DirectJNI.getInstance().getRServices().removeRCallback(this);
+			DirectJNI.getInstance().getRServices().removeRConsoleActionListener(this);
+			DirectJNI.getInstance().getRServices().removeRCollaborationListener(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		final String id = _id;
 		new Thread(new Runnable() {
 			public void run() {
