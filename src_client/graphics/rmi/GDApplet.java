@@ -1,19 +1,23 @@
 /*
- * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
- * Copyright (C) 2007 - 2008  Karim Chine
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Biocep: R-based Platform for Computational e-Science.
+ *  
+ * Copyright (C) 2007-2009 Karim Chine - karim.chine@m4x.org
+ *  
+ * Copyright (C) 2007 EMBL-EBI-Microarray Informatics
+ *  
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */ 
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
@@ -64,7 +68,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.beans.DefaultPersistenceDelegate;
 import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -73,6 +76,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -82,7 +86,6 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.net.ServerSocket;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -147,10 +150,7 @@ import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
 import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
-
-import org.bioconductor.packages.rservices.RInteger;
 import org.bioconductor.packages.rservices.RObject;
-import org.gjt.sp.jedit.gui.FloatingWindowContainer;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -185,6 +185,7 @@ import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.PropertiesGenerator;
 import uk.ac.ebi.microarray.pools.SSHUtils;
+import uk.ac.ebi.microarray.pools.YesSecurityManager;
 import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
 import uk.ac.ebi.microarray.pools.db.DBLayer;
 import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
@@ -196,6 +197,7 @@ import util.Utils;
 import views.*;
 import static graphics.rmi.JGDPanelPop.*;
 import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
+import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -242,12 +244,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 	Server _virtualizationServer = null;
 	Server _pluginServer = null;
 	int _pluginServerPort = -1;
-	
+
 	Identification ident = null;
 
 	Stack<GDDevice> s = null;
-	
-	boolean _selfish=false;
+
+	boolean _selfish = false;
 
 	int maxNbrRactionsOnPop = 50;
 
@@ -260,8 +262,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private boolean logonWithoutConfirmation = false;
 
 	private final ReentrantLock _protectR = new ExtendedReentrantLock() {
-		
-		
+
 		@Override
 		public void lock() {
 			super.lock();
@@ -302,12 +303,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 		public void rawUnlock() {
 			super.unlock();
 		}
-		
+
 		@Override
 		public void rawLock() {
-			super.lock();			
+			super.lock();
 		}
-		
+
 		public boolean isLocked() {
 			try {
 				if (_rForConsole.isBusy()) {
@@ -390,6 +391,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return getParameter("desktopapplication") != null && getParameter("desktopapplication").equalsIgnoreCase("true");
 	}
 
+	File pluginsDir;
+
 	public void init() {
 		super.init();
 
@@ -402,6 +405,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 
 		System.out.println("INIT starts");
+
+		pluginsDir = new File(new File(ServerManager.INSTALL_DIR).getAbsoluteFile() + "/plugins");
+		if (!pluginsDir.exists())
+			pluginsDir.mkdirs();
+
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					refreshPluginViewsHash();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 
 		if (true) {
 
@@ -455,11 +472,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 			logonWithoutConfirmation = true;
 			System.out.println("------> NO Confirmation");
 		}
-		
+
 		if (getParameter("selfish") != null && getParameter("selfish").equals("true")) {
 			_selfish = true;
 		}
-
 
 		try {
 
@@ -511,15 +527,31 @@ public class GDApplet extends GDAppletBase implements RGui {
 							boolean showLoginDialog = true;
 							LoginDialog loginDialog = new LoginDialog(GDApplet.this.getContentPane());
 
+							String aliveStub = null;
+
 							if (new File(GDApplet.NEW_R_STUB_FILE).exists()) {
+								BufferedReader pr = new BufferedReader(new FileReader(GDApplet.NEW_R_STUB_FILE));
+								aliveStub = pr.readLine();
+								pr.close();
+								try {
+									PoolUtils.ping((RServices) PoolUtils.hexToStub(aliveStub, GDApplet.class.getClassLoader()), 1000);
+								} catch (Exception e) {
+									e.printStackTrace();
+									try {
+										new File(GDApplet.NEW_R_STUB_FILE).delete();
+									} catch (Exception ex) {
+									}
+									aliveStub = null;
+								}
+							}
+
+							if (aliveStub != null) {
 								int n = JOptionPane.showConfirmDialog(GDApplet.this, "Would you like to connect to the last created and kept alive R Server ?",
 										"", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null);
 								if (n == JOptionPane.OK_OPTION) {
-									BufferedReader pr = new BufferedReader(new FileReader(GDApplet.NEW_R_STUB_FILE));
-									String stub = pr.readLine();
-									pr.close();
+
 									ident = new Identification(RMI_MODE, "", "", "", false, false, "", RMI_MODE_STUB_MODE, "", -1, "", "", "", -1, "", "", "",
-											"", stub, -1, -1, false, false, true, "", "", -1, "", "",
+											"", aliveStub, -1, -1, false, false, true, "", "", -1, "", "",
 
 											false, "", -1, "", "");
 
@@ -642,7 +674,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 								options.put("wait", new Boolean(_wait).toString());
 								options.put("memorymin", new Integer(ident.getMemoryMin()).toString());
 								options.put("memorymax", new Integer(ident.getMemoryMax()).toString());
-								if (_selfish) options.put("selfish", "true");
+								if (_selfish)
+									options.put("selfish", "true");
 
 								_sessionId = RHttpProxy.logOn(_commandServletUrl, _sessionId, _login, pwd, options);
 
@@ -1227,7 +1260,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 						}
 
 						public boolean isEnabled() {
-							return _sessionId != null;
+							return getR() != null;
 						}
 					});
 					graphicsMenu.addSeparator();
@@ -1525,7 +1558,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 									}
 
 									public boolean isEnabled() {
-										return _sessionId != null && !getRLock().isLocked();
+										return getR() != null;
 									}
 								});
 
@@ -1553,7 +1586,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 									@Override
 									public boolean isEnabled() {
-										return _sessionId != null;
+										return getR() != null;
 									}
 								});
 
@@ -1577,7 +1610,61 @@ public class GDApplet extends GDAppletBase implements RGui {
 			pluginsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
 					pluginsMenu.removeAll();
-					pluginsMenu.add(_actions.get("showpluginview"));
+					if (pluginViewsHash.keySet().size() > 0) {
+						for (String p : pluginViewsHash.keySet()) {
+
+							JMenu viewsMenu = new JMenu(p);
+							for (PluginViewDescriptor pvd : pluginViewsHash.get(p)) {
+
+								final PluginViewDescriptor pvdFinal = pvd;
+								viewsMenu.add(new AbstractAction(pvd.getName()) {
+									public void actionPerformed(ActionEvent e) {
+										System.setSecurityManager(new YesSecurityManager());
+										try {
+											Class<?> c_ = pvdFinal.getPluginClassLoader().loadClass(pvdFinal.getClassName());
+											Object o_ = c_.getConstructor(RGui.class).newInstance(GDApplet.this);
+											if (JPanel.class.isAssignableFrom(c_)) {
+												View v = createView((JPanel) o_, pvdFinal.getName());
+											}
+										} catch (Exception ex) {
+											ex.printStackTrace();
+										}
+									}
+								});
+							}
+							pluginsMenu.add(viewsMenu);
+						}
+						pluginsMenu.addSeparator();
+					}
+
+					pluginsMenu.add(new AbstractAction("Refresh") {
+						public void actionPerformed(ActionEvent e) {
+							new Thread(new Runnable() {
+								public void run() {
+									try {
+										refreshPluginViewsHash();
+									} catch (Exception ex) {
+										ex.printStackTrace();
+									}
+								}
+
+							}).start();
+
+						}
+					});
+
+					pluginsMenu.addSeparator();
+					pluginsMenu.add(_actions.get("installpluginjarfile"));
+					pluginsMenu.add(_actions.get("installpluginjarurl"));
+					pluginsMenu.add(_actions.get("installpluginzipfile"));
+					pluginsMenu.add(_actions.get("installpluginzipurl"));
+
+					pluginsMenu.addSeparator();
+					pluginsMenu.add(_actions.get("openpluginviewjarfile"));
+					pluginsMenu.add(_actions.get("openpluginviewjarurl"));
+					pluginsMenu.add(_actions.get("openpluginviewclasses"));
+					pluginsMenu.addSeparator();
+					pluginsMenu.add(_actions.get("browsepluginsrepository"));
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -1877,13 +1964,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 				try {
 					File jEditDir = new File(ServerManager.INSTALL_DIR + "/jEdit");
 					if (!jEditDir.exists()) {
-						new File(ServerManager.INSTALL_DIR + "/jEdit").mkdirs();	
-					}							
+						new File(ServerManager.INSTALL_DIR + "/jEdit").mkdirs();
+					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 				System.setProperty("jedit.home", ServerManager.INSTALL_DIR + "/jEdit");
-				
+
 				cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("main", new Class<?>[] { String[].class, RGui.class }).invoke(null,
 						new Object[] { new String[] { "-noserver", "-noplugins", "-nogui", "-nosettings" }, GDApplet.this });
 			} catch (Exception e) {
@@ -2164,7 +2251,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 			e.printStackTrace();
 			++failureCounter;
 			System.out.println("///// failure counter :" + failureCounter);
-			if (failureCounter == 1) manageServerFailure();
+			if (failureCounter == 1)
+				manageServerFailure();
 		}
 
 		Vector<FileDescription> temp = new Vector<FileDescription>();
@@ -2747,7 +2835,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return getR() != null && !getRLock().isLocked();
+				return getR() != null;
 			}
 		});
 
@@ -2794,7 +2882,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return getR() != null && !getRLock().isLocked();
+				return getR() != null;
 			}
 		});
 
@@ -2927,7 +3015,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			@Override
 			public boolean isEnabled() {
-				return getR() != null && !getRLock().isLocked();
+				return getR() != null;
 			}
 		});
 
@@ -3678,19 +3766,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 											root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
 											System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
 											_virtualizationServer.start();
-											
-											JTextArea a=new JTextArea();
-											a.setText(" An HTTP Relay has been created on port "
-													+ port
-													+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
-													+ PoolUtils.getHostIp() + ":" + port + "/rvirtual/cmd");
+
+											JTextArea a = new JTextArea();
+											a
+													.setText(" An HTTP Relay has been created on port "
+															+ port
+															+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
+															+ PoolUtils.getHostIp() + ":" + port + "/rvirtual/cmd");
 											a.setEditable(false);
 											a.setBackground(new JLabel().getBackground());
-											
-											JOptionPane
-													.showMessageDialog(
-															GDApplet.this.getContentPane(), a, "", JOptionPane.INFORMATION_MESSAGE);
-											
+
+											JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), a, "", JOptionPane.INFORMATION_MESSAGE);
+
 											break;
 
 										}
@@ -3746,22 +3833,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 										JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "Port already in use", "", JOptionPane.ERROR_MESSAGE);
 									} else {
 
-										
-										
 										_rForConsole.startHttpServer(port);
-										
-										JTextArea a=new JTextArea();
-										a.setText(" An HTTP Listener has been created on port "
-												+ port
-												+ "\n You can control the current R session via the Workench\n log on in HTTP mode to the following URL : http://"
-												+ _rForConsole.getHostIp() + ":" + port + "/rvirtual/cmd");
+
+										JTextArea a = new JTextArea();
+										a
+												.setText(" An HTTP Listener has been created on port "
+														+ port
+														+ "\n You can control the current R session via the Workench\n log on in HTTP mode to the following URL : http://"
+														+ _rForConsole.getHostIp() + ":" + port + "/rvirtual/cmd");
 										a.setEditable(false);
 										a.setBackground(new JLabel().getBackground());
-										
-										JOptionPane
-												.showMessageDialog(
-														GDApplet.this.getContentPane(),a
-														, "", JOptionPane.INFORMATION_MESSAGE);
+
+										JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), a, "", JOptionPane.INFORMATION_MESSAGE);
 
 										break;
 									}
@@ -3788,8 +3871,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			public void actionPerformed(final ActionEvent e) {
 				try {
 					_rForConsole.stopHttpServer();
-					JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "HTTP Listener Removed Successfully", "",
-							JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(GDApplet.this.getContentPane(), "HTTP Listener Removed Successfully", "", JOptionPane.INFORMATION_MESSAGE);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -3824,38 +3906,288 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+		_actions.put("installpluginjarfile", new AbstractAction("Install Plugin From Jar File") {
+			public void actionPerformed(final ActionEvent e) {
+
+				final JFileChooser chooser = new JFileChooser("Install Plugin From Jar File");
+				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				chooser.setMultiSelectionEnabled(true);
+				int returnVal = chooser.showOpenDialog(GDApplet.this);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+					final File[] files = chooser.getSelectedFiles();
+					
+					new Thread(new Runnable() {
+						public void run() {
+							for (int i = 0; i < files.length; ++i) {
+
+								try {
+
+									PoolUtils.cacheJar(files[i].toURI().toURL(), pluginsDir.getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, true);
+									JOptionPane.showMessageDialog(GDApplet.this, "Plugin " + files[i].getName().substring(0, files[i].getName().lastIndexOf('.'))
+											+ " Installed Successfully");
+								} catch (Exception ex) {
+									ex.printStackTrace();
+								}
+								
+								try {
+									refreshPluginViewsHash();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+
+							}
+							
+						}
+					}).start();
+
+				}
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
+
+		
+		_actions.put("installpluginjarurl", new AbstractAction("Install Plugin From Jar URL") {
+			public void actionPerformed(final ActionEvent e) {
+
+				final String jarUrl = JOptionPane.showInputDialog("Please enter Jar URL");
+				if (jarUrl != null) {
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								PoolUtils.cacheJar(new URL(jarUrl), pluginsDir.getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, true);
+								JOptionPane.showMessageDialog(GDApplet.this, "Plugin Installed Successfully");
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+							
+							try {
+								refreshPluginViewsHash();
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+							
+						}
+					}).start();
+
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
+		_actions.put("installpluginzipfile", new AbstractAction("Install Plugin From Zip File") {
+			public void actionPerformed(final ActionEvent e) {
+
+				final JFileChooser chooser = new JFileChooser("Install Plugin From Zip File");
+				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				chooser.setMultiSelectionEnabled(true);
+				int returnVal = chooser.showOpenDialog(GDApplet.this);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+					final File[] files = chooser.getSelectedFiles();
+					new Thread(new Runnable() {
+						public void run() {
+
+							for (int i = 0; i < files.length; ++i) {
+
+								try {
+									File pf = new File(pluginsDir.getAbsolutePath() + "/" + files[i].getName().substring(0,files[i].getName().lastIndexOf('.')) );
+									if (pf.exists()) {
+										PoolUtils.deleteDirectory(pf);
+									}
+									//pf.mkdirs();
+
+									URL rUrl = files[i].toURI().toURL();
+									InputStream is = rUrl.openConnection().getInputStream();
+									unzip(is,pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+
+									JOptionPane.showMessageDialog(null, "Plugin "+ files[i].getName().substring(0, files[i].getName().lastIndexOf('.')) + " Installed Successfully");
+								} catch (Exception ex) {
+									ex.printStackTrace();
+								}
+							}
+
+							try {
+								refreshPluginViewsHash();
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+
+						}
+					}).start();
+
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
+		_actions.put("installpluginzipurl", new AbstractAction("Install Plugin From Zip URL") {
+			public void actionPerformed(final ActionEvent e) {
+
+				final String jarUrl = JOptionPane.showInputDialog("Please enter Zip URL");
+				if (jarUrl != null) {
+
+					new Thread(new Runnable() {
+						public void run() {
+
+								try {
+									
+									String pluginname=jarUrl.substring(jarUrl.lastIndexOf("/") + 1, jarUrl.lastIndexOf("."));
+									
+									File pf = new File(pluginsDir.getAbsolutePath() + "/" + pluginname );
+									if (pf.exists()) {
+										PoolUtils.deleteDirectory(pf);
+									}
+									//pf.mkdirs();
+									
+
+									URL rUrl = new URL(jarUrl);
+									InputStream is = rUrl.openConnection().getInputStream();
+									unzip(is,pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+
+									JOptionPane.showMessageDialog(null, "Plugin "+ pluginname + " Installed Successfully");
+								} catch (Exception ex) {
+									ex.printStackTrace();
+								}
+						
+
+							try {
+								refreshPluginViewsHash();
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+
+						}
+					}).start();
+
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+		
+
+		
+		_actions.put("openpluginviewjarfile", new AbstractAction("Open Plugin View From Jar File") {
+			public void actionPerformed(final ActionEvent e) {
+
+				OpenPluginViewDialog pdialog = new OpenPluginViewDialog(GDApplet.this, OpenPluginViewDialog.JAR_MODE, false);
+				pdialog.setVisible(true);
+				PluginViewDescriptor pvd = pdialog.getPluginViewDetail();
+				if (pvd != null) {
+
+					System.setSecurityManager(new YesSecurityManager());
+					try {
+						Class<?> c_ = pvd.getPluginClassLoader().loadClass(pvd.getClassName());
+						Object o_ = c_.getConstructor(RGui.class).newInstance(GDApplet.this);
+						if (JPanel.class.isAssignableFrom(c_)) {
+							View v = createView((JPanel) o_, pvd.getName());
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
+		_actions.put("openpluginviewjarurl", new AbstractAction("Open Plugin View From Jar URL") {
+			public void actionPerformed(final ActionEvent e) {
+
+				OpenPluginViewDialog pdialog = new OpenPluginViewDialog(GDApplet.this, OpenPluginViewDialog.URL_MODE, false);
+				pdialog.setVisible(true);
+				PluginViewDescriptor pvd = pdialog.getPluginViewDetail();
+				if (pvd != null) {
+
+					System.setSecurityManager(new YesSecurityManager());
+					try {
+						Class<?> c_ = pvd.getPluginClassLoader().loadClass(pvd.getClassName());
+						Object o_ = c_.getConstructor(RGui.class).newInstance(GDApplet.this);
+						if (JPanel.class.isAssignableFrom(c_)) {
+							View v = createView((JPanel) o_, pvd.getName());
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
+		_actions.put("openpluginviewclasses", new AbstractAction("Open Plugin View From Classes Directory") {
+			public void actionPerformed(final ActionEvent e) {
+
+				OpenPluginViewDialog pdialog = new OpenPluginViewDialog(GDApplet.this, OpenPluginViewDialog.CLASSES_MODE, false);
+				pdialog.setVisible(true);
+				PluginViewDescriptor pvd = pdialog.getPluginViewDetail();
+				if (pvd != null) {
+
+					System.setSecurityManager(new YesSecurityManager());
+					try {
+						Class<?> c_ = pvd.getPluginClassLoader().loadClass(pvd.getClassName());
+						Object o_ = c_.getConstructor(RGui.class).newInstance(GDApplet.this);
+						if (JPanel.class.isAssignableFrom(c_)) {
+							View v = createView((JPanel) o_, pvd.getName());
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
+		_actions.put("browsepluginsrepository", new AbstractAction("Browse Plugins Repository") {
+			public void actionPerformed(final ActionEvent e) {
+				JOptionPane.showMessageDialog(GDApplet.this, "Not Yet Implemented");
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+
 		_actions.put("showpluginview", new AbstractAction("Open Plugin View") {
 			public void actionPerformed(final ActionEvent e) {
-				PluginDialog pdialog = new PluginDialog(GDApplet.this);
+				OpenPluginViewDialog pdialog = new OpenPluginViewDialog(GDApplet.this, OpenPluginViewDialog.JAR_MODE, false);
 				pdialog.setVisible(true);
-				String[] viewDetail = pdialog.getPluginViewDetail();
-				if (viewDetail != null) {
+				PluginViewDescriptor pvd = pdialog.getPluginViewDetail();
+				if (pvd != null) {
+
+					System.setSecurityManager(new YesSecurityManager());
 					try {
-						
-						if (_pluginServer==null) {
-							ServerSocket ss = new ServerSocket(0);
-							_pluginServerPort = ss.getLocalPort();
-							ss.close();													
-							_pluginServer = new Server(_pluginServerPort);
-							Context root = new Context(_pluginServer, "/", Context.SESSIONS);
-							root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(GDApplet.this)), "/rvirtual/graphics/*");
-							root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this)), "/rvirtual/cmd/*");
-							root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
-							_pluginServer.start();
+						Class<?> c_ = pvd.getPluginClassLoader().loadClass(pvd.getClassName());
+						Object o_ = c_.getConstructor(RGui.class).newInstance(GDApplet.this);
+						if (JPanel.class.isAssignableFrom(c_)) {
+							View v = createView((JPanel) o_, pvd.getName());
 						}
-			
-						String _pluginServerUrl="http://"+ PoolUtils.getHostIp() + ":" + _pluginServerPort + "/rvirtual/cmd";
-						HashMap<String, Object> options=new HashMap<String, Object>();
-						String pluginSessionId=RHttpProxy.logOn(_pluginServerUrl, "", "guest", "guest", options);
-						RServices pluginR=RHttpProxy.getR(_pluginServerUrl, pluginSessionId, true, 100);
-						pluginR.consoleSubmit("print('"+new Date()+"')");
-						RHttpProxy.logOff(_pluginServerUrl, pluginSessionId);
-						
-						
-						URLClassLoader cl = new URLClassLoader(new URL[] { new File(viewDetail[0]).toURL() }, GDApplet.class.getClassLoader());
-						Class<?> c_ = cl.loadClass(viewDetail[1]);
-						JPanel panel = (JPanel) c_.getConstructor(RGui.class).newInstance(GDApplet.this);
-						createView(panel, "plugin view");
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
@@ -3950,7 +4282,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
 		}
 
 	}
@@ -4066,7 +4397,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 					e.printStackTrace();
 				}
 			}
-		} finally {			
+		} finally {
 			_sessionId = null;
 			_rForConsole = null;
 			_rForPopCmd = null;
@@ -4207,7 +4538,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	public boolean isCollaborativeMode() {
-		// return _mode == HTTP_MODE;
 		return true;
 	}
 
@@ -4392,11 +4722,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 			if (clazz.isAssignableFrom(comp.getClass()))
 				return comp;
-			else if (comp instanceof JPopupMenu)
+			else if (comp instanceof JPopupMenu) {
 				comp = ((JPopupMenu) comp).getInvoker();
-			else if (comp instanceof FloatingWindowContainer) {
-				comp = ((FloatingWindowContainer) comp).getDockableWindowManager();
-			} else
+			}
+
+			// cut dependency on jEdit
+			/*
+			 * else if (comp instanceof FloatingWindowContainer) { comp =
+			 * ((FloatingWindowContainer) comp).getDockableWindowManager(); }
+			 */else
 				comp = comp.getParent();
 		}
 		return null;
@@ -4686,21 +5020,81 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 
 	}
-	
-	
-	
-	
+
+	HashMap<String, Vector<PluginViewDescriptor>> pluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
+
+	public void refreshPluginViewsHash() throws Exception {
+		HashMap<String, Vector<PluginViewDescriptor>> tempPluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
+		if (!new File(ServerManager.INSTALL_DIR + "/plugins").exists())
+			return;
+		File[] list = new File(ServerManager.INSTALL_DIR + "/plugins").listFiles();
+		for (int i = 0; i < list.length; ++i) {
+			Vector<PluginViewDescriptor> views = null;
+			if (list[i].isDirectory())
+				views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath() + "/");
+			else
+				views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath());
+			if (views.size() > 0) {
+				tempPluginViewsHash.put(views.elementAt(0).getPluginName(), views);
+			}
+		}
+		pluginViewsHash = tempPluginViewsHash;
+	}
+
 	static public void main(String[] args) throws Exception {
-		
-		RResponse rresponse=new RResponse( new int[]{8,9,6,3} , "bbb" );					
-	    XMLEncoder e = new XMLEncoder(new BufferedOutputStream(System.out));
-	    /*
-	    e.setPersistenceDelegate(RResponse.class,
-                new DefaultPersistenceDelegate(
-                    new String[]{ "status",
-                                  "value"}) );
-		*/
-	    e.writeObject(rresponse);
-	    e.close();
+
+		RResponse rresponse = new RResponse(new int[] { 8, 9, 6, 3 }, "bbb");
+		XMLEncoder e = new XMLEncoder(new BufferedOutputStream(System.out));
+		/*
+		 * e.setPersistenceDelegate(RResponse.class, new
+		 * DefaultPersistenceDelegate( new String[]{ "status", "value"}) );
+		 */
+		e.writeObject(rresponse);
+		e.close();
 	}
 }
+
+/*
+ * if (_pluginServer==null) { ServerSocket ss = new ServerSocket(0);
+ * _pluginServerPort = ss.getLocalPort(); ss.close(); _pluginServer = new
+ * Server(_pluginServerPort); Context root = new Context(_pluginServer, "/",
+ * Context.SESSIONS); final HttpSessionListener sessionListener=new
+ * FreeResourcesListener(); root.getSessionHandler().setSessionManager(new
+ * HashSessionManager(){
+ * 
+ * @Override protected void addSession(org.mortbay.jetty.
+ * servlet.AbstractSessionManager.Session session, boolean arg1) {
+ * super.addSession(session, arg1); sessionListener.sessionCreated(new
+ * HttpSessionEvent(session.getSession())); }
+ * 
+ * @Override protected void addSession(org.mortbay.jetty.
+ * servlet.AbstractSessionManager.Session session) { super.addSession(session);
+ * }
+ * 
+ * @Override public void removeSession(HttpSession session, boolean invalidate)
+ * { super.removeSession(session, invalidate);
+ * sessionListener.sessionDestroyed(new HttpSessionEvent(session)); }
+ * 
+ * @Override public void removeSession(org.mortbay.jetty.
+ * servlet.AbstractSessionManager.Session session, boolean arg1) {
+ * super.removeSession(session, arg1); sessionListener.sessionDestroyed(new
+ * HttpSessionEvent(session)); }
+ * 
+ * @Override protected void removeSession(String clusterId) {
+ * super.removeSession(clusterId); } }); root.addServlet(new ServletHolder(new
+ * http.local.LocalGraphicsServlet(GDApplet.this)), "/rvirtual/graphics/*");
+ * root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this)),
+ * "/rvirtual/cmd/*"); root.addServlet(new ServletHolder(new
+ * http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
+ * _pluginServer.start(); }
+ * 
+ * String _pluginServerUrl="http://"+ PoolUtils.getHostIp() + ":" +
+ * _pluginServerPort + "/rvirtual/cmd"; HashMap<String, Object> options=new
+ * HashMap<String, Object>(); String
+ * pluginSessionId=RHttpProxy.logOn(_pluginServerUrl, "", "guest", "guest",
+ * options);
+ * 
+ * 
+ * cl.loadClass("graphics.rmi.RKitBridge").getConstructor
+ * (String.class).newInstance(_pluginServerUrl)
+ */

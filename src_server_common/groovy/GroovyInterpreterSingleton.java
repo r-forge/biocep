@@ -38,7 +38,7 @@ public class GroovyInterpreterSingleton {
 					System.out.println("Insiders Extra Jars:"+Arrays.toString(extraJarFiles));
 					URL[] urls=new URL[extraJarFiles.length];
 					for (int i=0; i<extraJarFiles.length;++i) {
-						urls[i]=extraJarFiles[i].toURL();
+						urls[i]=extraJarFiles[i].toURI().toURL();
 					}
 					
 					final Class<?> GroovyShellClass=new URLClassLoader(urls, GroovyInterpreterSingleton.class.getClassLoader()).loadClass("groovy.lang.GroovyShell");

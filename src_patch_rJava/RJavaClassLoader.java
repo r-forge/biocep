@@ -117,7 +117,7 @@ public class RJavaClassLoader extends URLClassLoader {
 		if (e.getName().equals(fn)) {
 		    ins.close();
 		    try {
-			return new URL("jar:"+(new UnixFile(jar)).toURL().toString()+"!"+fn);
+			return new URL("jar:"+(new UnixFile(jar)).toURI().toURL().toString()+"!"+fn);
 		    } catch (Exception ex) {
 		    }
 		    break;
@@ -247,7 +247,7 @@ public class RJavaClassLoader extends URLClassLoader {
 		    UnixFile res_f = new UnixFile(cp.getPath()+"/"+name);
 		    if (res_f.isFile()) {
 			if (verbose) System.out.println(" - find as a file: "+res_f);
-			return res_f.toURL();
+			return res_f.toURI().toURL();
 		    }
 		}
 	    } catch (Exception iox) {
@@ -264,7 +264,7 @@ public class RJavaClassLoader extends URLClassLoader {
     public void addClassPath(String cp) {
 	if (useSystem) {
 	    try {
-		addURL((new UnixFile(cp)).toURL());
+		addURL((new UnixFile(cp)).toURI().toURL());
 		//return; // we need to add it anyway
 	    } catch (Exception ufe) {
 	    }

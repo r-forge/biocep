@@ -40,9 +40,9 @@ public class HttpServer {
         server.addConnector(connectorLocal);
 
         if (rhttpEnabled) {
-        	cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rvirtual.war"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT);
+        	cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rvirtual.war"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT, false);
         	if (rsoapEnabled) {
-        		cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), ServerManager.INSTALL_DIR , LOG_PRGRESS_TO_SYSTEM_OUT);
+        		cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), ServerManager.INSTALL_DIR , LOG_PRGRESS_TO_SYSTEM_OUT, false);
         		args=new String[]{ ServerManager.INSTALL_DIR +"rvirtual.war", 
             			ServerManager.INSTALL_DIR+"rws.war"};
         	} else {

@@ -1,3 +1,21 @@
+/*
+ * Biocep: R-based Platform for Computational e-Science.
+ *
+ * Copyright (C) 2007-2009 Karim Chine - karim.chine@m4x.org
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package views;
 
 import graphics.rmi.RGui;
@@ -20,12 +38,12 @@ public class PagerView extends DynamicView {
 		JEditorPane pane = null;
 		try {
 			File f=new File(System.getProperty("java.io.tmpdir")+"/"+file);
-			System.out.println(f.toURL());
+			System.out.println(f.toURI().toURL());
 			RandomAccessFile raf=new RandomAccessFile(f, "rw");
 			raf.setLength(0);
 			raf.write(content);
 			raf.close();			
-			pane=new JEditorPane(f.toURL());
+			pane=new JEditorPane(f.toURI().toURL());
 			pane.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
 			pane.setEditable(false);
