@@ -18,8 +18,8 @@ import uk.ac.ebi.microarray.pools.ServerDefaults;
 public class DbRegistryOff {
 	public static void main(String[] args) throws Exception{
 
-		cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/derby.jar"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT);
-		cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/derbynet.jar"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT);
+		cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/derby.jar"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT, false);
+		cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/derbynet.jar"), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT, false);
 		
 		String port=new Integer(PoolUtils.DEFAULT_DB_PORT).toString();	
 		if (System.getProperty("db.port")!=null && !System.getProperty("db.port").equals("")) {

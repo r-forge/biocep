@@ -1,19 +1,23 @@
 /*
- * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
- * Copyright (C) 2007 - 2008  Karim Chine
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Biocep: R-based Platform for Computational e-Science.
+ *  
+ * Copyright (C) 2007-2009 Karim Chine - karim.chine@m4x.org
+ *  
+ * Copyright (C) 2007 EMBL-EBI-Microarray Informatics
+ *  
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */ 
 package uk.ac.ebi.microarray.pools;
 
 import java.awt.BorderLayout;
@@ -635,7 +639,7 @@ public class PoolUtils {
 		return (path.delete());
 	}
 
-	public static void ping(final ManagedServant servant) throws RemoteException {
+	public static void ping(final ManagedServant servant, long pingTimeOut) throws RemoteException {
 
 		final Object[] resultHolder = new Object[1];
 		Runnable pingRunnable = new Runnable() {
@@ -659,7 +663,7 @@ public class PoolUtils {
 
 		long t1 = System.currentTimeMillis();
 		while (resultHolder[0] == null) {
-			if ((System.currentTimeMillis() - t1) > PING_TIMEOUT_MILLISEC) {
+			if ((System.currentTimeMillis() - t1) > pingTimeOut) {
 				pingThread.interrupt();
 				resultHolder[0] = new PingTimeout();
 				break;
@@ -676,7 +680,11 @@ public class PoolUtils {
 
 	}
 
-	public static void reset(final ManagedServant servant) throws RemoteException {
+	public static void ping(final ManagedServant servant) throws RemoteException {
+		ping(servant,PING_TIMEOUT_MILLISEC);
+	}
+	
+	public static void reset(final ManagedServant servant,long resetTimeOut) throws RemoteException {
 		final Object[] resultHolder = new Object[1];
 		Runnable resetRunnable = new Runnable() {
 			public void run() {
@@ -699,7 +707,7 @@ public class PoolUtils {
 
 		long t1 = System.currentTimeMillis();
 		while (resultHolder[0] == null) {
-			if ((System.currentTimeMillis() - t1) > RESET_TIMEOUT_MILLISEC) {
+			if ((System.currentTimeMillis() - t1) > resetTimeOut) {
 				resetThread.interrupt();
 				resultHolder[0] = new ResetTimeout();
 				break;
@@ -714,8 +722,12 @@ public class PoolUtils {
 			throw (RemoteException) resultHolder[0];
 		}
 	}
+	
+	public static void reset(final ManagedServant servant) throws RemoteException {
+		reset(servant,RESET_TIMEOUT_MILLISEC);
+	}
 
-	public static void die(final ManagedServant servant) throws RemoteException {
+	public static void die(final ManagedServant servant,long dieTimeOut) throws RemoteException {
 		final Object[] resultHolder = new Object[1];
 		Runnable dieRunnable = new Runnable() {
 			public void run() {
@@ -740,7 +752,7 @@ public class PoolUtils {
 
 		long t1 = System.currentTimeMillis();
 		while (resultHolder[0] == null) {
-			if ((System.currentTimeMillis() - t1) > DIE_TIMEOUT_MILLISEC) {
+			if ((System.currentTimeMillis() - t1) > dieTimeOut) {
 				dieThread.interrupt();
 				resultHolder[0] = new DieTimeout();
 				break;
@@ -754,6 +766,10 @@ public class PoolUtils {
 		if (resultHolder[0] instanceof Throwable) {
 			throw (RemoteException) resultHolder[0];
 		}
+	}
+	
+	public static void die(final ManagedServant servant) throws RemoteException {
+		die(servant,DIE_TIMEOUT_MILLISEC);
 	}
 
 	public static String replaceAll(String input, String replaceWhat, String replaceWith) throws Exception {
@@ -774,6 +790,9 @@ public class PoolUtils {
 	public static void unzip(InputStream is, String destination, NameFilter nameFilter, int bufferSize, boolean showProgress, String taskName,
 			int estimatedFilesNumber) {
 
+		destination.replace('\\', '/');
+		if (!destination.endsWith("/")) destination=destination+"/";
+		
 		final JTextArea area = showProgress ? new JTextArea() : null;
 		final JProgressBar jpb = showProgress ? new JProgressBar(0, 100) : null;
 		final JFrame f = showProgress ? new JFrame(taskName) : null;
@@ -862,7 +881,7 @@ public class PoolUtils {
 
 	
 	private static final int RECONNECTION_RETRIAL_NBR=4;
-	public static void cacheJar(URL url, String location, int logInfo) throws Exception {
+	public static void cacheJar(URL url, String location, int logInfo, boolean forced) throws Exception {
 		final String jarName = url.toString().substring(url.toString().lastIndexOf("/") + 1);
 		if (!location.endsWith("/") && !location.endsWith("\\"))
 			location += "/";
@@ -891,10 +910,12 @@ public class PoolUtils {
 			File file = new File(fileName);
 			
 			long urlLastModified=urlC.getLastModified();
-			boolean somethingToDo=!file.exists() 
-							||  file.lastModified() < urlLastModified
-							|| (file.length() != urlC.getContentLength() && !isValidJar(fileName)); 
-			if (!somethingToDo) return;
+			if (!forced) {
+				boolean somethingToDo=!file.exists() 
+								||  file.lastModified() < urlLastModified
+								|| (file.length() != urlC.getContentLength() && !isValidJar(fileName)); 
+				if (!somethingToDo) return;
+			}
 
 			if ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) {
 
@@ -1428,7 +1449,7 @@ public class PoolUtils {
 	
 	public static boolean isValidJar(String jarFileName) {
 		try {
-			URL jarUrl = new URL("jar:" + new File(jarFileName).toURL() + "!/");
+			URL jarUrl = new URL("jar:" + new File(jarFileName).toURI().toURL() + "!/");
 			JarURLConnection jarConnection = (JarURLConnection) jarUrl.openConnection();
 			JarFile jarfile = jarConnection.getJarFile();
 			return true;
