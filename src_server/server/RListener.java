@@ -20,11 +20,8 @@
  */
 package server;
 
-import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import graphics.rmi.RClustserInterface;
-import graphics.rmi.spreadsheet.SpreadsheetPanel;
 import http.RHttpProxy;
-
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.net.JarURLConnection;
@@ -40,15 +37,11 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import javax.swing.JOptionPane;
-
 import model.ExportInfo;
 import model.ImportInfo;
 import model.SpreadsheetModelRemote;
 import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.SpreadsheetTableModelClipboardInterface;
-
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RArray;
 import org.bioconductor.packages.rservices.RChar;

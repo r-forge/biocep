@@ -1151,8 +1151,6 @@
 				<pathelement path="${SSH_TUNNEL_JAR}"/>
 				<pathelement path="${FTP_JAR}"/>
 	
-				<pathelement path="lib/desktop/jeditmodes.jar"/>
-				<pathelement path="lib/desktop/jedit.jar"/>
 				<pathelement path="lib/desktop/OpenXLS.jar"/>
 				<pathelement path="lib/desktop/pf-joi-full.jar"/>
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
@@ -1282,8 +1280,6 @@
 					<pathelement path="${SSH_TUNNEL_JAR}"/>
 					<pathelement path="${FTP_JAR}"/>
 		
-					<pathelement path="lib/desktop/jeditmodes.jar"/>
-					<pathelement path="lib/desktop/jedit.jar"/>
 					<pathelement path="lib/desktop/OpenXLS.jar"/>
 					<pathelement path="lib/desktop/pf-joi-full.jar"/>
 					<pathelement path="lib/desktop/idw-gpl.jar"/>
@@ -1807,11 +1803,7 @@
 		
 		<!-- biocep starts -->
 		
-		
-		
-			<unjar src="lib/desktop/jeditmodes.jar"  dest="binsrv" overwrite="true"/>
-			<unjar src="lib/desktop/jedit.jar"  dest="binsrv" overwrite="true"/>
-		
+			
 			<unjar src="lib/desktop/OpenXLS.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/pf-joi-full.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/idw-gpl.jar"  dest="binsrv" overwrite="true"/>
@@ -1882,7 +1874,6 @@
 			<delete dir="binjedit" failonerror="true"/>
 			<mkdir dir="binjedit"/>
 
-			<unjar src="lib/desktop/jeditmodes.jar"  dest="binjedit" overwrite="true"/>
 			<unjar src="lib/desktop/jedit.jar"  dest="binjedit" overwrite="true"/>
 					
 			<javac srcdir="src_patch_jedit" destdir="binjedit" debug="true" source="1.5" target="1.5">
@@ -1893,33 +1884,21 @@
 				</classpath>
 			</javac>
 			
-		<!--
-				<copy todir="binjedit">				
-					<fileset dir="src_patch_jeditmodes">
-					<include name="**/*"/>											
-					</fileset>				
-				</copy>
+			<copy todir="binjedit">				
+				<fileset dir="src_patch_jeditmodes">
+				<include name="**/*"/>											
+				</fileset>				
+			</copy>
 
--->				
-							<copy todir="binjedit">				
-								<fileset dir="src_patch_jedit">
-									<include name="**/*.props"/>
-									<include name="**/*.properties"/>
-									<include name="**/*.R"/>
-									<include name="**/*.r"/>
-									<include name="**/*.png"/>
-									<include name="**/*.gif"/>
-									<include name="**/*.html"/>
-									<include name="**/*.exe"/>
-									<include name="**/*.jar"/>
-								</fileset>				
-							</copy>
+			<copy todir="binjedit">				
+				<fileset dir="src_patch_jedit">
+					<include name="**/*" />
+					<exclude name="**/*.java" />
+				</fileset>				
+			</copy>
 		
-
-		
-			
-				<jar basedir="binjedit" destfile="basiceditorunsigned.jar" />
-				<signjar jar="basiceditorunsigned.jar" signedjar="src_client/plugins/basiceditor.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
+			<jar basedir="binjedit" destfile="basiceditorunsigned.jar" />
+			<signjar jar="basiceditorunsigned.jar" signedjar="src_client/plugins/basiceditor.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
 	
 	</target>
 	
@@ -2040,15 +2019,7 @@
 		</jar>
 		
 	</target>
-	
-	
-	
-	<target name="jeditmodes"  depends="initializeProperties">
-		<jar destfile="lib/desktop/jeditmodes.jar">
-			<fileset dir="src_patch_jeditmodes"/>
-		</jar>				
-	</target>
-	
+
 	
 	<target name="compile.rpf" depends="initializeProperties">
 		

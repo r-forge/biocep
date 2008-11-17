@@ -261,6 +261,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private String[] _demos;
 
 	private boolean logonWithoutConfirmation = false;
+	
+	private ClassLoader jeditcl = null; 
+	
+	private static int LOCAL_SPREADSHEET_COUNTER=0;
 
 	private final ReentrantLock _protectR = new ExtendedReentrantLock() {
 
@@ -431,7 +435,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 			LocalRmiRegistry.getLocalRmiRegistryPort();
 		}
 
+		try {
+			jeditcl=new URLClassLoader(new URL[]{new URL("http://127.0.0.1:"+LocalHttpServer.getLocalHttpServerPort()+"/classes/plugins/basiceditor.jar")}, GDApplet.class.getClassLoader());
 			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		restoreState();
 
@@ -1993,8 +2002,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			try {
 				System.setSecurityManager(new YesSecurityManager());
 				
-				ClassLoader cl = new URLClassLoader(new URL[]{new URL("http://127.0.0.1:"+LocalHttpServer.getLocalHttpServerPort()+"/classes/plugins/basiceditor.jar")}, GDApplet.class.getClassLoader());
-				//ClassLoader cl = new URLClassLoader(new URL[]{new File("E:/workspace/distrib/www/appletlibs/biocep.jar").toURI().toURL()});
+			
 				try {
 					File jEditDir = new File(ServerManager.INSTALL_DIR + "/jEdit");
 					if (!jEditDir.exists()) {
@@ -2005,7 +2013,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 				System.setProperty("jedit.home", ServerManager.INSTALL_DIR + "/jEdit");
 
-				cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("main", new Class<?>[] { String[].class, RGui.class }).invoke(null,
+				jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("main", new Class<?>[] { String[].class, RGui.class }).invoke(null,
 						new Object[] { new String[] { "-noserver", "-noplugins", "-nogui", "-nosettings" }, GDApplet.this });
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -3117,11 +3125,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								e.printStackTrace();
 							}
 							loadJEditClasses();
-							
-							ClassLoader cl = new URLClassLoader(new URL[]{new URL("http://127.0.0.1:"+LocalHttpServer.getLocalHttpServerPort()+"/classes/plugins/basiceditor.jar")}, GDApplet.class.getClassLoader());							
-							//ClassLoader cl = new URLClassLoader(new URL[]{new File("E:/workspace/distrib/www/appletlibs/biocep.jar").toURI().toURL()});
-							cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,
-									(Object[]) null);
+							jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,	(Object[]) null);
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
@@ -3141,7 +3145,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				ddialog.setVisible(true);
 				if (ddialog.getSpreadsheetDimension() != null) {
 					createView(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getHeight(), (int) ddialog
-							.getSpreadsheetDimension().getWidth()), GDApplet.this), "Spreadsheet View");
+							.getSpreadsheetDimension().getWidth()), GDApplet.this), "Local Spreadsheet  ("+(++LOCAL_SPREADSHEET_COUNTER)+")");
 				}
 			}
 

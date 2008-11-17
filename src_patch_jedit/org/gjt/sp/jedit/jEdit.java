@@ -499,6 +499,9 @@ public class jEdit {
 	}
 
 	public static void runRSelection(final String path) {
+		
+		
+		
 
 		if (_rgui.getR() == null) {
 			JOptionPane.showMessageDialog(null, "No R available");
@@ -943,9 +946,10 @@ public class jEdit {
 	 *            The property
 	 */
 	public static final String getProperty(String name) {
-		System.out.println("getPropertyname:"+name);
-		System.out.println("propMgr:"+propMgr);
-		if (propMgr==null) return null;
+		//System.out.println("getPropertyname:"+name);
+		//System.out.println("propMgr:"+propMgr);
+		//if (propMgr==null) return null;
+		
 		return propMgr.getProperty(name);
 	} // }}}
 
@@ -2498,12 +2502,13 @@ public class jEdit {
 		}
 	}
 
+	private static int BASICEDITOR_COUNTER=0;
 	public static void newWindow(View view) {
 		TaggedPanel f = new TaggedPanel();
 		f.setLayout(new BorderLayout());
 		f.add(view.getContentPane(), BorderLayout.CENTER);
 		f.setProperty("view", view);
-		_rgui.createView(f, "Edit View");
+		_rgui.createView(f, "Edit View ("+(++BASICEDITOR_COUNTER)+")");
 	}
 
 	// {{{ newView() method
@@ -3287,17 +3292,12 @@ public class jEdit {
 	 * Load system properties.
 	 */
 	private static void initSystemProperties() {
-		propMgr = new PropertyManager();
 
+		propMgr = new PropertyManager();
 		try {
-			
-			System.out.println(jEdit.class.getResource("/org/gjt/sp/jedit/jedit.props"));
-			System.out.println(jEdit.class.getResource("/org/gjt/sp/jedit/jedit_gui.props"));
-			System.out.println(jEdit.class.getResource("/org/gjt/sp/jedit/jedit_keys.props"));
 			propMgr.loadSystemProps(jEdit.class.getResourceAsStream("/org/gjt/sp/jedit/jedit.props"));
 			propMgr.loadSystemProps(jEdit.class.getResourceAsStream("/org/gjt/sp/jedit/jedit_gui.props"));
 			propMgr.loadSystemProps(jEdit.class.getResourceAsStream("/org/gjt/sp/jedit/jedit_keys.props"));
-			System.out.println(propMgr.getProperties());
 		} catch (Exception e) {
 			Log.log(Log.ERROR, jEdit.class, "Error while loading system properties!");
 			Log.log(Log.ERROR, jEdit.class, "One of the following property files could not be loaded:\n" + "- jedit.props\n" + "- jedit_gui.props\n"
@@ -3348,9 +3348,13 @@ public class jEdit {
 
 	// {{{ initResources() method
 	private static void initResources() {
+		System.out.println("////"+jEdit.class.getResource("actions.xml"));
+		
 		builtInActionSet = new ActionSet(null, null, null, jEdit.class.getResource("actions.xml"));
 		builtInActionSet.setLabel(getProperty("action-set.jEdit"));
 		builtInActionSet.load();
+		
+		System.out.println( Arrays.toString(builtInActionSet.getActionNames()));
 
 		actionContext.addActionSet(builtInActionSet);
 
