@@ -342,8 +342,6 @@
 							<pathelement path="lib/desktop/PDFRenderer.jar"/>
 							
 							<pathelement path="lib/desktop/pf-joi-full.jar"/>
-							<pathelement path="lib/desktop/jeditmodes.jar"/>
-							<pathelement path="lib/desktop/jedit.jar"/>
 							<pathelement path="lib/desktop/OpenXLS.jar"/>
 							
 							<pathelement path="${demo.mappingjar}"/>
@@ -614,8 +612,6 @@
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/jdbc/derbyclient.jar"/>
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/idw-gpl.jar"/>
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/PDFRenderer.jar"/>										  		
-						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/jedit.jar"/>				  		
-						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/jeditmodes.jar"/>
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/pf-joi-full.jar"/>
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/OpenXLS.jar"/>						
 						<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="lib/desktop/swing-layout-1.0.3.jar"/>					  		

@@ -50,8 +50,6 @@
   <jar href="appletlibs/log4j-1.2.15.jar"/>
   <jar href="appletlibs/idw-gpl.jar"/>
   <jar href="appletlibs/PDFRenderer.jar"/>
-  <jar href="appletlibs/jeditmodes.jar"/>
-  <jar href="appletlibs/jedit.jar"/>
   <jar href="appletlibs/pf-joi-full.jar"/>
   <jar href="appletlibs/OpenXLS.jar"/>
   <jar href="appletlibs/JRI.jar"/>     
