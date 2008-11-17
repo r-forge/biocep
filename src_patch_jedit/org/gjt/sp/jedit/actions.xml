@@ -915,6 +915,17 @@
 	</IS_SELECTED>
 </ACTION>	
 
+<ACTION NAME="paste-console">
+	<CODE>
+		jEdit.pasteConsole(buffer.getPath());
+	</CODE>
+	
+	<IS_SELECTED>
+		return jEdit.isRunREnabled();
+	</IS_SELECTED>
+</ACTION>	
+
+
 <ACTION NAME="run-p">
 	<CODE>
 		jEdit.runP(buffer.getPath());

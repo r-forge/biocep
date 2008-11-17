@@ -20,7 +20,9 @@
  */
 package server;
 
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import graphics.rmi.RClustserInterface;
+import graphics.rmi.spreadsheet.SpreadsheetPanel;
 import http.RHttpProxy;
 
 import java.io.File;
@@ -38,6 +40,14 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import javax.swing.JOptionPane;
+
+import model.ExportInfo;
+import model.ImportInfo;
+import model.SpreadsheetModelRemote;
+import net.java.dev.jspreadsheet.CellRange;
+import net.java.dev.jspreadsheet.SpreadsheetTableModelClipboardInterface;
 
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RArray;
@@ -1116,5 +1126,97 @@ public abstract class RListener {
 			return new String[] { "NOK", convertToPrintCommand("couldn't create cluster") };
 		}
 	}
+	
+	
+	public static String[] spreadsheetPut(String location, String name) {
+		try {		
+			System.out.println("name=<"+name+">");
+			
+			int ssNbr=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();			
+			if (ssNbr==0) {
+				return new String[] { "NOK", convertToPrintCommand("Tere are no Spreadsheets on Server : \nCreate one first via: Collaboration/New Collaborative Spreadsheet\n") };			
+			}
+			if (name.equals("")) {
+				if (ssNbr==1) {						
+					name=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
+				} else {
+					String[] ssNames=new String[ssNbr]; 
+					int i=0;for (String s:DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet()) ssNames[i++]=s;
+					return new String[] { "NOK", convertToPrintCommand("Tere are "+ssNbr+" Spreadsheets on Server : \n"+Arrays.toString(ssNames)+"\nChoose one via name='Spreadsheet Name'\n") };
+				}
+			}
+			
+			SpreadsheetModelRemote model=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
+			if (model==null) return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
+			
+			int startRow=0;
+			int startCol=0;
+			try {
+			startCol=ImportInfo.getCol(location);
+			startRow=ImportInfo.getRow(location);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new String[] { "NOK", convertToPrintCommand("Bad Cell Location") };
+			}
+			
+			String trstring=ImportInfo.getImportInfo(DirectJNI.getInstance().getObjectFrom(".PrivateEnv$spreadsheet.put.value")).getTabString();
+			model.paste(startRow, startCol, trstring);
+			return new String[] { "OK" };
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+	
+	public static String[] spreadsheetGet(  String range, String type, String name) {
+		try {		
+			
+			System.out.println("name=<"+name+">");
+			
+			int ssNbr=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();			
+			if (ssNbr==0) {
+				return new String[] { "NOK", convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Collaboration/New Collaborative Spreadsheet\n") };			
+			}
+			if (name.equals("")) {
+				if (ssNbr==1) {						
+					name=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
+				} else {
+					String[] ssNames=new String[ssNbr]; 
+					int i=0;for (String s:DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet()) ssNames[i++]=s;
+					return new String[] { "NOK", convertToPrintCommand("Tere are "+ssNbr+" Spreadsheets on Server : \n"+Arrays.toString(ssNames)+"\nChoose one via name='Spreadsheet Name'\n") };
+				}
+			}
+			
+			SpreadsheetModelRemote model=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
+			if (model==null) return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
 
+			CellRange cellrange=null;
+			try {
+				cellrange=ImportInfo.getRange(range);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new String[] { "NOK", convertToPrintCommand("Bad Cell Range") };
+			}
+
+			int dataType=-1;
+			for (int i=0; i<ImportInfo.R_TYPES_NAMES.length;++i) {
+				if (ImportInfo.R_TYPES_NAMES[i].equals(type)) {dataType=i;break;}
+			}
+			if (dataType==-1) {
+				return new String[] { "NOK", convertToPrintCommand("Bad Data Type, allowed types: "+Arrays.toString(ImportInfo.R_TYPES_NAMES)) };
+			}
+			
+			ExportInfo info=ExportInfo.getExportInfo(cellrange, dataType, (SpreadsheetTableModelClipboardInterface)model);
+			DirectJNI.getInstance().putObjectAndAssignName(info.getRObject(), "spreadsheet.get.result", true);
+			System.out.println("--->" + PoolUtils.replaceAll(info.getConversionCommand(), "${VAR}", ".PrivateEnv$spreadsheet.get.result"));
+			DirectJNI.getInstance().evaluate(PoolUtils.replaceAll(info.getConversionCommand(), "${VAR}", ".PrivateEnv$spreadsheet.get.result"), info.getCommandsNbr());
+			
+			return new String[] { "OK" };
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+
+	
 }

@@ -17,9 +17,11 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */   
+ */
 package graphics.rmi.spreadsheet;
 
+import model.ExportInfo;
+import model.ImportInfo;
 import model.ModelUtils;
 import model.AbstractSpreadsheetModel;
 import model.SpreadsheetListener;
@@ -62,7 +64,6 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.registry.LocateRegistry;
-import java.util.HashSet;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.imageio.ImageIO;
@@ -83,8 +84,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.JViewport;
@@ -98,17 +101,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import org.bioconductor.packages.rservices.RChar;
-import org.bioconductor.packages.rservices.RComplex;
-import org.bioconductor.packages.rservices.RDataFrame;
-import org.bioconductor.packages.rservices.RFactor;
-import org.bioconductor.packages.rservices.RInteger;
-import org.bioconductor.packages.rservices.RList;
-import org.bioconductor.packages.rservices.RLogical;
-import org.bioconductor.packages.rservices.RMatrix;
-import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
-import org.bioconductor.packages.rservices.RVector;
 import remoting.RServices;
 import uk.ac.ebi.microarray.pools.PoolUtils;
 import uk.ac.ebi.microarray.pools.YesSecurityManager;
@@ -126,7 +119,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new YesSecurityManager());
-		} 
+		}
 		// tmri=new SpreadsheetModelRemoteImpl(3,2, new HashMap<String,
 		// SpreadsheetModelRemoteImpl>());
 		// SpreadsheetModelRemote
@@ -135,14 +128,14 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		final RServices r = (RServices) LocateRegistry.getRegistry().lookup("RSERVANT_1");
 
 		r.consoleSubmit("toto<-mean");
-		
+
 		SpreadsheetModelRemote modelRemote = r.newSpreadsheetTableModelRemote(300, 10);
 		AbstractSpreadsheetModel abstractTableModel1 = ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
 		AbstractSpreadsheetModel abstractTableModel2 = ModelUtils.getSpreadsheetTableModelWrapper(modelRemote);
 
 		/*
-		 * final String cmdUrl = "http://127.0.0.1:8080/rvirtual/cmd"; HashMap<String,
-		 * Object> options = new HashMap<String, Object>();
+		 * final String cmdUrl = "http://127.0.0.1:8080/rvirtual/cmd";
+		 * HashMap<String, Object> options = new HashMap<String, Object>();
 		 * options.put("privatename", "tata"); options.put("urls", new URL[] {
 		 * new URL("http://127.0.0.1:8080/rws/mapping/classes/") }); final
 		 * String sessionId = RHttpProxy.logOn(cmdUrl, "", "test", "test",
@@ -165,28 +158,25 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		// AbstractSpreadsheetModel abstractTableModel2 =
 		// ModelUtils.getSpreadsheetTableModelWrapper(new
 		// SpreadsheetModelRemoteProxy(d2));
-		
-		
 		RGui rgui = new RGui() {
-			
-			ReentrantLock _lock=new ReentrantLock(){
+
+			ReentrantLock _lock = new ReentrantLock() {
 				@Override
 				public void lock() {
 					super.lock();
 				}
-				
+
 				@Override
 				public void unlock() {
 					super.unlock();
 				}
-				
+
 				@Override
 				public boolean isLocked() {
 					return super.isLocked();
 				}
 			};
-			
-			
+
 			public ConsoleLogger getConsoleLogger() {
 				return null;
 			}
@@ -226,10 +216,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public void upload(File localFile, String fileName) throws Exception {
 
 			}
+
 			public String getUserName() {
 				return null;
 			}
-			
+
 			public String getUID() {
 				return null;
 			}
@@ -249,15 +240,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		f2.setVisible(true);
 
 	}
-
-	public static final int R_NUMERIC = 0;
-	public static final int R_CHARACTER = 1;
-	public static final int R_INTEGER = 2;
-	public static final int R_LOGICAL = 3;
-	public static final int R_COMPLEX = 4;
-	public static final int R_FACTOR = 5;
-	public static final int R_DATAFRAME = 6;
-	public static final String[] R_TYPES_NAMES = { "numeric", "character", "integer", "logical", "complex", "factor", "data frame" };
 
 	private JSpreadsheet ss;
 	private CopyAction copy = new CopyAction();
@@ -279,25 +261,26 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	private FindAction find = new FindAction();
 	private FindNextAction findNext = new FindNextAction();
 	private RGui _rgui = null;
+	private JTextField rangeTextField;
 
 	private ListSelectionListener sl = new ListSelectionListener() {
 		public void valueChanged(ListSelectionEvent e) {
-			
-			//new Thread(new Runnable(){ public void run() {
-					
-					copy.update();
-					cut.update();
-					sort.update();
-					insertColumn.update();
-					removeColumn.update();
-					insertRow.update();
-					removeRow.update();
-					fill.update();
-					clear.update();
-					fromR.update();
-					toR.update();
-					eval.update();
-			//}}).start();			
+
+			// new Thread(new Runnable(){ public void run() {
+
+			copy.update();
+			cut.update();
+			sort.update();
+			insertColumn.update();
+			removeColumn.update();
+			insertRow.update();
+			removeRow.update();
+			fill.update();
+			clear.update();
+			fromR.update();
+			toR.update();
+			eval.update();
+			// }}).start();
 		}
 	};
 
@@ -308,6 +291,22 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	private ListSelectionListener selectionListener;
 
+	private void updateSelectionRangeField() {
+		if (ss.getSelectedRange() != null) {
+			String rect = Formula.getCellString(ss.getSelectedRange().getStartRow(), ss.getSelectedRange().getStartCol()) + ":"
+					+ Formula.getCellString(ss.getSelectedRange().getEndRow(), ss.getSelectedRange().getEndCol());
+			if (ss.getSelectedRange().getStartCol() == ss.getSelectedRange().getEndCol()
+					&& ss.getSelectedRange().getStartRow() == ss.getSelectedRange().getEndRow()) {
+				rangeTextField.setText(rect.substring(rect.indexOf(':') + 1));
+			} else {
+				rangeTextField.setText(rect);
+			}
+
+		} else {
+			rangeTextField.setText("");
+		}		
+	}
+	
 	public SpreadsheetPanel(final AbstractTableModel m, RGui rgui) {
 		super();
 		_rgui = rgui;
@@ -318,6 +317,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				if (m instanceof AbstractSpreadsheetModel) {
 					((AbstractSpreadsheetModel) m).setSpreadsheetSelection(ss.getId(), ss.getSelectedRange());
 				}
+				updateSelectionRangeField();
 			}
 		};
 
@@ -363,6 +363,8 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 								ss.getTable().getSelectionModel().addListSelectionListener(selectionListener);
 								ss.getTable().getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
 							}
+							
+							updateSelectionRangeField();
 						}
 					});
 
@@ -438,8 +440,8 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				public void insertColumn(final int insertNum, final int startCol) {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
-							long t1=System.currentTimeMillis();
-							System.out.println("SpreadsheetPanel.insertColumn t1="+t1);
+							long t1 = System.currentTimeMillis();
+							System.out.println("SpreadsheetPanel.insertColumn t1=" + t1);
 							int lastCol = ss.getTable().getColumnCount() - 1;
 							TableColumnModel tm = ss.getTable().getColumnModel();
 							TableColumn column = tm.getColumn(startCol);
@@ -457,8 +459,8 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 								newcol.setHeaderValue(Node.translateColumn(curCol));
 								tm.addColumn(newcol);
 							}
-							long t2=System.currentTimeMillis();
-							System.out.println("SpreadsheetPanel.insertColumn t2="+t2+" -> "+(t2-t1));
+							long t2 = System.currentTimeMillis();
+							System.out.println("SpreadsheetPanel.insertColumn t2=" + t2 + " -> " + (t2 - t1));
 						}
 					});
 				}
@@ -516,6 +518,29 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		JPanel main = new JPanel(new BorderLayout());
 		main.add(ss, BorderLayout.CENTER);
 		main.add(new ToolBarEdit(), BorderLayout.NORTH);
+
+		rangeTextField = new JTextField();
+		rangeTextField.setEditable(false);
+		rangeTextField.setEditable(false);
+		rangeTextField.setPreferredSize(new Dimension(70, rangeTextField.getHeight()));
+
+		JButton rangeCopy = new JButton("C");
+		rangeCopy.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				StringSelection stringSelection = new StringSelection(rangeTextField.getText());
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clipboard.setContents(stringSelection, SpreadsheetPanel.this);
+			}
+		});
+
+		JPanel twinPanel = new JPanel(new BorderLayout());
+		twinPanel.add(rangeTextField, BorderLayout.WEST);
+		twinPanel.add(rangeCopy, BorderLayout.EAST);
+
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		bottomPanel.add(twinPanel, BorderLayout.EAST);
+
+		main.add(bottomPanel, BorderLayout.SOUTH);
 
 		setLayout(new BorderLayout());
 		add(new ToolBarColRow(), BorderLayout.NORTH);
@@ -684,6 +709,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		ClearAction() {
 			super("Clear");
 			putValue(Action.SMALL_ICON, getIcon("Clear.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Clear");
 			setEnabled(false);
 		}
 
@@ -701,6 +727,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			super("Copy");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("Copy.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Copy");
 			setEnabled(false);
 		}
 
@@ -718,10 +745,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			super("Eval");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('R', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("RunR.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Evaluate R expression on cells selection");
 			setEnabled(false);
 		}
 
 		public void actionPerformed(ActionEvent e) {
+
+
 			if (!isEnabled())
 				return;
 			EvalDialog evalDialog = new EvalDialog();
@@ -730,8 +760,12 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 				try {
 					CellRange range = ss.getSelectedRange();
-					String[] conversionCommandHolder = new String[1];
-					RObject robj = getRObject(range, evalDialog.getEvalInfo().getDataType(), conversionCommandHolder);
+
+					ExportInfo exportInfo = ExportInfo.getExportInfo(range, evalDialog.getEvalInfo().getDataType(),
+							(SpreadsheetTableModelClipboardInterface) ss.getTable().getModel());
+					RObject robj = exportInfo.getRObject();
+					String[] conversionCommandHolder = new String[] { exportInfo.getConversionCommand() };
+
 					if (robj == null)
 						return;
 
@@ -791,7 +825,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	}
 
 	String rToClipboard(String expr, boolean restToRStore) {
-		StringBuffer sb = new StringBuffer();
 
 		try {
 			_rgui.getRLock().lock();
@@ -801,363 +834,31 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				return null;
 			}
 
-			int nrow = 0;
-			int ncol = 0;
-			int dtype = 0;
-			String converter = null;
-
-			if (robj instanceof RNumeric) {
-				RNumeric rnum = (RNumeric) robj;
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rnum.getIndexNA() != null)
-					for (int i = 0; i < rnum.getIndexNA().length; ++i)
-						NASet.add(rnum.getIndexNA()[i]);
-				for (int i = 0; i < rnum.length(); ++i) {
-					if (NASet.contains(i)) {
-						sb.append("");
-					} else {
-						sb.append(rnum.getValue()[i]);
-					}
-					sb.append("\n");
-				}
-
-				nrow = rnum.length();
-				ncol = 1;
-				dtype = R_NUMERIC;
-
-			} else if (robj instanceof RInteger) {
-				RInteger rint = (RInteger) robj;
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rint.getIndexNA() != null)
-					for (int i = 0; i < rint.getIndexNA().length; ++i)
-						NASet.add(rint.getIndexNA()[i]);
-
-				for (int i = 0; i < rint.length(); ++i) {
-					if (NASet.contains(i)) {
-						sb.append("");
-					} else {
-						sb.append(rint.getValue()[i]);
-					}
-					sb.append("\n");
-				}
-				nrow = rint.length();
-				ncol = 1;
-				dtype = R_INTEGER;
-			} else if (robj instanceof RLogical) {
-				RLogical rlogical = (RLogical) robj;
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rlogical.getIndexNA() != null)
-					for (int i = 0; i < rlogical.getIndexNA().length; ++i)
-						NASet.add(rlogical.getIndexNA()[i]);
-				for (int i = 0; i < rlogical.length(); ++i) {
-					if (NASet.contains(i)) {
-						sb.append("");
-					} else {
-						sb.append(rlogical.getValue()[i]);
-					}
-					sb.append("\n");
-				}
-				nrow = rlogical.length();
-				ncol = 1;
-				dtype = R_LOGICAL;
-
-			} else if (robj instanceof RChar) {
-				RChar rchar = (RChar) robj;
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rchar.getIndexNA() != null)
-					for (int i = 0; i < rchar.getIndexNA().length; ++i)
-						NASet.add(rchar.getIndexNA()[i]);
-				for (int i = 0; i < rchar.length(); ++i) {
-					if (NASet.contains(i)) {
-						sb.append("");
-					} else {
-						sb.append(rchar.getValue()[i]);
-					}
-					sb.append("\n");
-				}
-				nrow = rchar.length();
-				ncol = 1;
-				dtype = R_CHARACTER;
-			} else if (robj instanceof RFactor) {
-				String[] data = ((RFactor) robj).asData();
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				for (int i = 0; i < data.length; ++i) {
-					if (data[i].equals("NA")) {
-						sb.append("");
-					} else {
-						sb.append(data[i]);
-					}
-					sb.append("\n");
-				}
-				nrow = data.length;
-				ncol = 1;
-				dtype = R_FACTOR;
-			} else if (robj instanceof RComplex) {
-				RComplex rcomplex = (RComplex) robj;
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rcomplex.getIndexNA() != null)
-					for (int i = 0; i < rcomplex.getIndexNA().length; ++i)
-						NASet.add(rcomplex.getIndexNA()[i]);
-				for (int i = 0; i < rcomplex.length(); ++i) {
-					if (NASet.contains(i)) {
-						sb.append("");
-					} else {
-						sb.append(rcomplex.getReal()[i] + "+" + rcomplex.getImaginary()[i] + "i");
-					}
-					sb.append("\n");
-				}
-				nrow = rcomplex.length();
-				ncol = 1;
-				dtype = R_COMPLEX;
-			} else if (robj instanceof RMatrix && ((RMatrix) robj).getValue() instanceof RNumeric) {
-				int[] dims = ((RMatrix) robj).getDim();
-				RNumeric rnum = (RNumeric) ((RMatrix) robj).getValue();
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rnum.getIndexNA() != null)
-					for (int i = 0; i < rnum.getIndexNA().length; ++i)
-						NASet.add(rnum.getIndexNA()[i]);
-				for (int i = 0; i < dims[0]; ++i) {
-					for (int j = 0; j < dims[1]; ++j) {
-						int offset = j * dims[0] + i;
-						if (NASet.contains(offset)) {
-							sb.append("");
-						} else {
-							sb.append(rnum.getValue()[offset]);
-						}
-						if (j == (dims[1] - 1)) {
-						} else
-							sb.append('\t');
-					}
-					sb.append('\n');
-				}
-				nrow = dims[0];
-				ncol = dims[1];
-				dtype = R_NUMERIC;
-			} else if (robj instanceof RMatrix && ((RMatrix) robj).getValue() instanceof RInteger) {
-				int[] dims = ((RMatrix) robj).getDim();
-				RInteger rint = (RInteger) ((RMatrix) robj).getValue();
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rint.getIndexNA() != null)
-					for (int i = 0; i < rint.getIndexNA().length; ++i)
-						NASet.add(rint.getIndexNA()[i]);
-				for (int i = 0; i < dims[0]; ++i) {
-					for (int j = 0; j < dims[1]; ++j) {
-						int offset = j * dims[0] + i;
-						if (NASet.contains(offset)) {
-							sb.append("");
-						} else {
-							sb.append(rint.getValue()[offset]);
-						}
-						if (j == (dims[1] - 1)) {
-						} else
-							sb.append('\t');
-					}
-					sb.append('\n');
-				}
-				nrow = dims[0];
-				ncol = dims[1];
-				dtype = R_INTEGER;
-			} else if (robj instanceof RMatrix && ((RMatrix) robj).getValue() instanceof RChar) {
-				int[] dims = ((RMatrix) robj).getDim();
-				RChar rchar = (RChar) ((RMatrix) robj).getValue();
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rchar.getIndexNA() != null)
-					for (int i = 0; i < rchar.getIndexNA().length; ++i)
-						NASet.add(rchar.getIndexNA()[i]);
-				for (int i = 0; i < dims[0]; ++i) {
-					for (int j = 0; j < dims[1]; ++j) {
-						int offset = j * dims[0] + i;
-						if (NASet.contains(offset)) {
-							sb.append("");
-						} else {
-							sb.append(rchar.getValue()[offset]);
-						}
-						if (j == (dims[1] - 1)) {
-						} else
-							sb.append('\t');
-					}
-					sb.append('\n');
-				}
-				nrow = dims[0];
-				ncol = dims[1];
-				dtype = R_CHARACTER;
-			} else if (robj instanceof RMatrix && ((RMatrix) robj).getValue() instanceof RLogical) {
-				int[] dims = ((RMatrix) robj).getDim();
-				RLogical rlogical = (RLogical) ((RMatrix) robj).getValue();
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rlogical.getIndexNA() != null)
-					for (int i = 0; i < rlogical.getIndexNA().length; ++i)
-						NASet.add(rlogical.getIndexNA()[i]);
-				for (int i = 0; i < dims[0]; ++i) {
-					for (int j = 0; j < dims[1]; ++j) {
-						int offset = j * dims[0] + i;
-						if (NASet.contains(offset)) {
-							sb.append("");
-						} else {
-							sb.append(rlogical.getValue()[offset]);
-						}
-						if (j == (dims[1] - 1)) {
-						} else
-							sb.append('\t');
-					}
-					sb.append('\n');
-				}
-				nrow = dims[0];
-				ncol = dims[1];
-				dtype = R_LOGICAL;
-			} else if (robj instanceof RMatrix && ((RMatrix) robj).getValue() instanceof RComplex) {
-				int[] dims = ((RMatrix) robj).getDim();
-				RComplex rcomplex = (RComplex) ((RMatrix) robj).getValue();
-				HashSet<Integer> NASet = new HashSet<Integer>();
-				if (rcomplex.getIndexNA() != null)
-					for (int i = 0; i < rcomplex.getIndexNA().length; ++i)
-						NASet.add(rcomplex.getIndexNA()[i]);
-				for (int i = 0; i < dims[0]; ++i) {
-					for (int j = 0; j < dims[1]; ++j) {
-						int offset = j * dims[0] + i;
-						if (NASet.contains(offset)) {
-							sb.append("");
-						} else {
-							sb.append(rcomplex.getReal()[offset] + "+" + rcomplex.getImaginary()[offset] + "i");
-						}
-						if (j == (dims[1] - 1)) {
-						} else
-							sb.append('\t');
-					}
-					sb.append('\n');
-				}
-				nrow = dims[0];
-				ncol = dims[1];
-				dtype = R_COMPLEX;
-			} else if (robj instanceof RDataFrame) {
-
-				System.out.println(robj);
-
-				RList list = ((RDataFrame) robj).getData();
-				sb.append("\t");
-				for (int i = 0; i < list.getValue().length; ++i) {
-					if (list.getNames() != null) {
-
-						sb.append("'" + list.getNames()[i] + "'");
-						sb.append(" ");
-
-						Class<?> elementClass = list.getValue()[i].getClass();
-						if (elementClass == RNumeric.class) {
-							sb.append("(numeric)");
-						} else if (elementClass == RInteger.class) {
-							sb.append("(integer)");
-						} else if (elementClass == RChar.class) {
-							sb.append("(character)");
-						} else if (elementClass == RLogical.class) {
-							sb.append("(logical)");
-						} else if (elementClass == RComplex.class) {
-							sb.append("(complex)");
-						} else if (elementClass == RFactor.class) {
-							sb.append("(factor)");
-						}
-
-						if (i == (list.getValue().length - 1)) {
-
-						} else {
-							sb.append("\t");
-						}
-
-					}
-				}
-				sb.append("\n");
-
-				int nrow0 = -1;
-				RObject robj0 = list.getValue()[0];
-
-				if (robj0 instanceof RNumeric) {
-					nrow0 = ((RNumeric) robj0).getValue().length;
-				} else if (robj0 instanceof RInteger) {
-					nrow0 = ((RInteger) robj0).getValue().length;
-				} else if (robj0 instanceof RChar) {
-					nrow0 = ((RChar) robj0).getValue().length;
-				} else if (robj0 instanceof RLogical) {
-					nrow0 = ((RLogical) robj0).getValue().length;
-				} else if (robj0 instanceof RComplex) {
-					nrow0 = ((RComplex) robj0).getReal().length;
-				} else if (robj0 instanceof RFactor) {
-					nrow0 = ((RFactor) robj0).asData().length;
-				}
-
-				String[] rownames = ((RDataFrame) robj).getRowNames();
-				HashSet<Integer>[] NASet = new HashSet[list.getValue().length];
-				for (int i = 0; i < list.getValue().length; ++i) {
-					NASet[i] = new HashSet<Integer>();
-
-					int[] indexNA = null;
-					try {
-						indexNA = (int[]) list.getValue()[i].getClass().getMethod("getIndexNA").invoke(list.getValue()[i]);
-					} catch (Exception e) {
-					}
-
-					if (indexNA != null)
-						for (int j = 0; j < indexNA.length; ++j)
-							NASet[i].add(indexNA[j]);
-				}
-
-				for (int i = 0; i < nrow0; ++i) {
-					sb.append("'" + rownames[i] + "'" + "\t");
-					for (int j = 0; j < list.getValue().length; ++j) {
-
-						if (NASet[j].contains(i)) {
-							sb.append("");
-						} else {
-							if (list.getValue()[j] instanceof RFactor) {
-								sb.append(((RFactor) list.getValue()[j]).asData()[i]);
-							} else {
-								RVector v = (RVector) list.getValue()[j];
-								if (v instanceof RNumeric) {
-									sb.append(((RNumeric) v).getValue()[i]);
-								} else if (v instanceof RInteger) {
-									sb.append(((RInteger) v).getValue()[i]);
-								} else if (v instanceof RChar) {
-									sb.append(((RChar) v).getValue()[i]);
-								} else if (v instanceof RLogical) {
-									sb.append(((RLogical) v).getValue()[i]);
-								} else if (v instanceof RComplex) {
-									sb.append(((RComplex) v).getReal()[i] + "+" + ((RComplex) v).getImaginary()[i] + "i");
-								}
-							}
-						}
-
-						if (j == (list.getValue().length - 1)) {
-						} else {
-							sb.append("\t");
-						}
-					}
-
-					sb.append("\n");
-				}
-
-				nrow = nrow0 + 1;
-				ncol = list.getValue().length + 1;
-
-				dtype = R_DATAFRAME;
-			}
+			ImportInfo info = ImportInfo.getImportInfo(robj);
 
 			int r0 = ss.getSelectedRange().getStartRow();
 			int c0 = ss.getSelectedRange().getStartCol();
-			int r1 = Math.min(ss.getRowCount(), r0 + nrow - 1);
-			int c1 = Math.min(ss.getColumnCount(), c0 + ncol - 1);
+			int r1 = Math.min(ss.getRowCount(), r0 + info.getNrow() - 1);
+			int c1 = Math.min(ss.getColumnCount(), c0 + info.getNcol() - 1);
 
 			if (restToRStore) {
 				toRDataStore.setAssignTo(expr);
 				toRDataStore.setCellRange(Formula.getCellString(r0, c0) + ":" + Formula.getCellString(r1, c1));
-				toRDataStore.setDatatype(dtype);
-				if (converter != null) {
-					toRDataStore.setPostAssignCommand(toRDataStore.getAssignTo() + "<-" + converter + "(" + toRDataStore.getAssignTo() + ");");
-					if (robj instanceof RMatrix) {
-						toRDataStore.setPostAssignCommand(toRDataStore.getPostAssignCommand() + "dim(" + toRDataStore.getAssignTo() + ")<-c("
-								+ ((RMatrix) robj).getDim()[0] + "," + ((RMatrix) robj).getDim()[1] + ")");
-					}
-				}
+				toRDataStore.setDatatype(info.getDtype());
+				/*
+				 * if (converter != null) {
+				 * toRDataStore.setPostAssignCommand(toRDataStore.getAssignTo()
+				 * + "<-" + converter + "(" + toRDataStore.getAssignTo() +
+				 * ");"); if (robj instanceof RMatrix) {
+				 * toRDataStore.setPostAssignCommand
+				 * (toRDataStore.getPostAssignCommand() + "dim(" +
+				 * toRDataStore.getAssignTo() + ")<-c(" + ((RMatrix)
+				 * robj).getDim()[0] + "," + ((RMatrix) robj).getDim()[1] +
+				 * ")"); } }
+				 */
 			}
 
-			return sb.toString();
+			return info.getTabString();
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -1173,6 +874,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			super("Paste R Data");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("FromR.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Paste R Expression into Cells");
 			setEnabled(true);
 		}
 
@@ -1207,31 +909,6 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	}
 
-	private static int getCol(String c) throws Exception {
-		int i = 0;
-		while (Character.isLetter(c.charAt(i)))
-			++i;
-		return Node.translateColumn(c.substring(0, i));
-	}
-
-	private static int getRow(String c) throws Exception {
-		int i = 0;
-		while (Character.isLetter(c.charAt(i)))
-			++i;
-		return Node.translateRow(c.substring(i));
-	}
-
-	public static CellRange getRange(String s) throws Exception {
-		try {
-			int idx = s.indexOf(":");
-			String c1 = s.substring(0, idx);
-			String c2 = s.substring(idx + 1);
-			return new CellRange(getRow(c1), getRow(c2), getCol(c1), getCol(c2));
-		} catch (Exception e) {
-			throw new Exception("Bad Cell Range");
-		}
-	}
-
 	private int getMessageType(String message) {
 		if (message.toUpperCase().contains("ERROR"))
 			return ERROR_MESSAGE;
@@ -1241,227 +918,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			return INFORMATION_MESSAGE;
 	}
 
-	RObject getRObject(CellRange range, int dataType, String[] conversionCommandHolder) {
-		SpreadsheetTableModelClipboardInterface model = ((SpreadsheetTableModelClipboardInterface) ss.getTable().getModel());
-		conversionCommandHolder[0] = "";
-		RObject result = null;
-		if (dataType != R_DATAFRAME && range.getWidth() == 1) {
-			result = new RChar();
-			String[] value = new String[range.getHeight()];
-			Vector<Integer> na = new Vector<Integer>();
-			for (int i = range.getStartRow(); i <= range.getEndRow(); i++) {
-				if (model.isEmptyCell(i, range.getStartCol())) {
-					na.add(i - range.getStartRow());
-				} else {
-					value[i - range.getStartRow()] = model.getCellAt(i, range.getStartCol()).getValue().toString();
-				}
-			}
-
-			int[] naTab = new int[na.size()];
-			for (int k = 0; k < na.size(); ++k)
-				naTab[k] = na.elementAt(k);
-			((RChar) result).setIndexNA(naTab);
-			((RChar) result).setValue(value);
-
-			switch (dataType) {
-			case R_NUMERIC:
-				conversionCommandHolder[0] = "${VAR}" + "=as.numeric(" + "${VAR}" + ");";
-				break;
-			case R_CHARACTER:
-				conversionCommandHolder[0] = "";
-				break;
-			case R_INTEGER:
-				conversionCommandHolder[0] = "${VAR}" + "=as.integer(" + "${VAR}" + ");";
-				break;
-			case R_LOGICAL:
-				for (int i = 0; i < value.length; ++i) {
-					if (value[i] != null) {
-						if (value[i].equals("true") || value[i].equals("TRUE")) {
-							((RChar) result).getValue()[i] = "1";
-						} else if (value[i].equals("false") || value[i].equals("FALSE")) {
-							((RChar) result).getValue()[i] = "0";
-						}
-					}
-				}
-				conversionCommandHolder[0] = "${VAR}" + "=as.logical(as.numeric(" + "${VAR}" + "));";
-				break;
-			case R_COMPLEX:
-				conversionCommandHolder[0] = "${VAR}" + "=as.complex(" + "${VAR}" + ");";
-				break;
-			case R_FACTOR:
-				conversionCommandHolder[0] = "${VAR}" + "=as.factor(" + "${VAR}" + ");";
-				break;
-			default:
-				break;
-			}
-
-		} else if (dataType != R_DATAFRAME && range.getWidth() > 1) {
-			result = new RMatrix();
-			int[] dims = new int[] { range.getHeight(), range.getWidth() };
-			String[] value = new String[range.getHeight() * range.getWidth()];
-			Vector<Integer> na = new Vector<Integer>();
-			for (int i = range.getStartRow(); i <= range.getEndRow(); i++) {
-				for (int j = range.getStartCol(); j <= range.getEndCol(); ++j) {
-					int offset = (j - range.getStartCol()) * dims[0] + (i - range.getStartRow());
-					if (model.isEmptyCell(i, j)) {
-						na.add(offset);
-					} else {
-						value[offset] = model.getCellAt(i, j).getValue().toString();
-					}
-				}
-			}
-			int[] naTab = new int[na.size()];
-			for (int k = 0; k < na.size(); ++k)
-				naTab[k] = na.elementAt(k);
-			((RMatrix) result).setValue(new RChar(value, naTab, null));
-			((RMatrix) result).setDim(dims);
-
-			switch (dataType) {
-			case R_NUMERIC:
-				conversionCommandHolder[0] = "${VAR}" + "=as.numeric(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
-				break;
-			case R_CHARACTER:
-				conversionCommandHolder[0] = "";
-				break;
-			case R_INTEGER:
-				conversionCommandHolder[0] = "${VAR}" + "=as.integer(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
-				break;
-			case R_LOGICAL:
-				for (int i = 0; i < value.length; ++i) {
-					if (value[i] != null) {
-						if (value[i].equals("true") || value[i].equals("TRUE")) {
-							((RChar) ((RMatrix) result).getValue()).getValue()[i] = "1";
-						} else if (value[i].equals("false") || value[i].equals("FALSE")) {
-							((RChar) ((RMatrix) result).getValue()).getValue()[i] = "0";
-						}
-					}
-				}
-				conversionCommandHolder[0] = "${VAR}" + "=as.logical(as.numeric(" + "${VAR}" + "));" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
-				break;
-			case R_COMPLEX:
-				conversionCommandHolder[0] = "${VAR}" + "=as.complex(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
-				break;
-			case R_FACTOR:
-				conversionCommandHolder[0] = "${VAR}" + "=as.factor(" + "${VAR}" + ");" + "dim(${VAR})<-c(" + dims[0] + "," + dims[1] + ");";
-				break;
-			default:
-				break;
-			}
-
-		} else if (dataType == R_DATAFRAME) {
-			String[] rownames = new String[range.getHeight() - 1];
-			for (int i = range.getStartRow() + 1; i <= range.getEndRow(); ++i) {
-				String name = model.getCellAt(i, range.getStartCol()).getValue().toString();
-				if (name.startsWith("'") && name.endsWith("'")) {
-					name = name.substring(1, name.length() - 1);
-				}
-				rownames[i - (range.getStartRow() + 1)] = name;
-			}
-			String[] colnames = new String[range.getWidth() - 1];
-			String[] classnames = new String[range.getWidth() - 1];
-
-			for (int j = range.getStartCol() + 1; j <= range.getEndCol(); ++j) {
-
-				String name = model.getCellAt(range.getStartRow(), j).getValue().toString().trim();
-				if (name.endsWith("(numeric)")) {
-					classnames[j - (range.getStartCol() + 1)] = "numeric";
-					name = name.substring(0, name.indexOf("(numeric)")).trim();
-				} else if (name.endsWith("(logical)")) {
-					classnames[j - (range.getStartCol() + 1)] = "logical";
-					name = name.substring(0, name.indexOf("(logical)")).trim();
-				} else if (name.endsWith("(integer)")) {
-					classnames[j - (range.getStartCol() + 1)] = "integer";
-					name = name.substring(0, name.indexOf("(integer)")).trim();
-				} else if (name.endsWith("(complex)")) {
-					classnames[j - (range.getStartCol() + 1)] = "complex";
-					name = name.substring(0, name.indexOf("(complex)")).trim();
-				} else if (name.endsWith("(factor)")) {
-					classnames[j - (range.getStartCol() + 1)] = "factor";
-					name = name.substring(0, name.indexOf("(factor)")).trim();
-				} else if (name.endsWith("(character)")) {
-					classnames[j - (range.getStartCol() + 1)] = "character";
-					name = name.substring(0, name.indexOf("(character)")).trim();
-				} else {
-					classnames[j - (range.getStartCol() + 1)] = "character";
-					name = name.trim();
-				}
-
-				if (name.startsWith("'") && name.endsWith("'")) {
-					name = name.substring(1, name.length() - 1);
-				}
-
-				colnames[j - (range.getStartCol() + 1)] = name;
-			}
-
-			for (int j = 0; j < colnames.length; ++j) {
-				if (colnames[j].equals("")) {
-					JOptionPane.showMessageDialog(SpreadsheetPanel.this, "the data frame columns must be titeled", "Invalid Data", JOptionPane.ERROR_MESSAGE);
-					return null;
-				}
-			}
-
-			Vector<String> rowNamesVector = new Vector<String>();
-			for (int i = 0; i < rownames.length; ++i) {
-				if (rowNamesVector.contains(rownames[i])) {
-					JOptionPane.showMessageDialog(SpreadsheetPanel.this, "the data frame row names must be unique", "Invalid Data", JOptionPane.ERROR_MESSAGE);
-					return null;
-				} else {
-
-					rowNamesVector.add(rownames[i]);
-				}
-			}
-
-			RObject[] elements = new RObject[range.getWidth() - 1];
-
-			for (int j = range.getStartCol() + 1; j <= range.getEndCol(); ++j) {
-				String[] value = new String[range.getHeight() - 1];
-				Vector<Integer> na = new Vector<Integer>();
-				for (int i = range.getStartRow() + 1; i <= range.getEndRow(); i++) {
-					if (model.isEmptyCell(i, j)) {
-						na.add(i - (range.getStartRow() + 1));
-					} else {
-						value[i - (range.getStartRow() + 1)] = model.getCellAt(i, j).getValue().toString();
-					}
-				}
-				int[] naTab = new int[na.size()];
-				for (int k = 0; k < na.size(); ++k)
-					naTab[k] = na.elementAt(k);
-				elements[j - (range.getStartCol() + 1)] = new RChar(value, naTab, null);
-			}
-
-			for (int i = 0; i < colnames.length; ++i) {
-				if (!classnames[i].equals("character")) {
-					if (classnames[i].equals("logical")) {
-						for (int l = 0; l < rownames.length; l++) {
-							String lstr = ((RChar) elements[i]).getValue()[l];
-							if (lstr != null) {
-								if (lstr.equals("false") || lstr.equals("FALSE")) {
-									((RChar) elements[i]).getValue()[l] = "0";
-								} else if (lstr.equals("true") || lstr.equals("TRUE")) {
-									((RChar) elements[i]).getValue()[l] = "1";
-								}
-							}
-						}
-						conversionCommandHolder[0] += "${VAR}$" + colnames[i] + "=as.logical(as.numeric(" + "${VAR}$" + colnames[i] + "));";
-					} else {
-						conversionCommandHolder[0] += "${VAR}$" + colnames[i] + "=as." + classnames[i] + "(" + "${VAR}$" + colnames[i] + ");";
-					}
-
-				}
-			}
-
-			result = new RDataFrame(new RList(elements, colnames), rownames);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
 	private class ToRAction extends AbstractAction implements ClipboardOwner {
 		ToRAction() {
 			super("Export Region To R");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('C', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("ToR.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Export Cell Region To R");
+			
 			setEnabled(true);
 		}
 
@@ -1475,10 +938,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			ToRData toRData = toRDialog.getToRData();
 			if (toRData != null) {
 				try {
-					CellRange range = getRange(toRData.getCellRange());
-					String[] conversionCommandHolder = new String[1];
+					CellRange range = ImportInfo.getRange(toRData.getCellRange());
 
-					RObject result = getRObject(range, toRData.getDatatype(), conversionCommandHolder);
+					ExportInfo exportInfo = ExportInfo.getExportInfo(range, toRData.getDatatype(), (SpreadsheetTableModelClipboardInterface) ss.getTable()
+							.getModel());
+					RObject result = exportInfo.getRObject();
+					String[] conversionCommandHolder = new String[] { exportInfo.getConversionCommand() };
+
 					if (result == null)
 						return;
 					String tempVarName = "TEMP_____";
@@ -1556,6 +1022,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			super("Cut");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('X', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("Cut.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Cut");
 			setEnabled(false);
 		}
 
@@ -1583,6 +1050,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			add(find);
 			add(findNext);
 			add(fill);
+			
+			
+			
 			// add(newView);
 		}
 	}
@@ -1619,6 +1089,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		FillAction() {
 			super("Fill...");
 			putValue(Action.SMALL_ICON, getIcon("Fill.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Fill Cells");
 			setEnabled(false);
 		}
 
@@ -1635,6 +1106,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		FindAction() {
 			super("Find...");
 			putValue(Action.SMALL_ICON, getIcon("Find.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Find");
 			setEnabled(true);
 		}
 
@@ -1647,6 +1119,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		FindNextAction() {
 			super("Find Next");
 			putValue(Action.SMALL_ICON, getIcon("FindAgain.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Find Next");
 			setEnabled(false);
 		}
 
@@ -1663,6 +1136,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		InsertColumnAction() {
 			super("Insert Column");
 			putValue(Action.SMALL_ICON, getIcon("insertcolumn.gif"));
+			putValue(Action.SHORT_DESCRIPTION, "Insert Column");
 			setEnabled(false);
 		}
 
@@ -1679,6 +1153,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		InsertRowAction() {
 			super("Insert Row");
 			putValue(Action.SMALL_ICON, getIcon("insertrow.gif"));
+			putValue(Action.SHORT_DESCRIPTION, "Insert Row");
 			setEnabled(false);
 		}
 
@@ -1696,6 +1171,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			super("Paste");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('V', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("Paste.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Paste");
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -1708,6 +1184,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			super("Redo");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('Y', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("Redo.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Redo");
 			setEnabled(false);
 		}
 
@@ -1726,6 +1203,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		RemoveColumnAction() {
 			super("Remove Column");
 			putValue(Action.SMALL_ICON, getIcon("deletecolumn.gif"));
+			putValue(Action.SHORT_DESCRIPTION, "Remove Column");
 			setEnabled(false);
 		}
 
@@ -1742,6 +1220,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		RemoveRowAction() {
 			super("Remove Row");
 			putValue(Action.SMALL_ICON, getIcon("deleterow.gif"));
+			putValue(Action.SHORT_DESCRIPTION, "Remove Row");
 			setEnabled(false);
 		}
 
@@ -1759,6 +1238,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			super("Select All");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('A', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("SelectAll.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Select All");
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -1772,6 +1252,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		SortColumnAction() {
 			super("Sort Column...");
 			putValue(Action.SMALL_ICON, getIcon("sort.gif"));
+			putValue(Action.SHORT_DESCRIPTION, "Sort Column");
 			setEnabled(false);
 		}
 
@@ -1789,6 +1270,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			super("Undo");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('Z', InputEvent.CTRL_MASK));
 			putValue(Action.SMALL_ICON, getIcon("Undo.png"));
+			putValue(Action.SHORT_DESCRIPTION, "Undo");
 			setEnabled(false);
 		}
 
@@ -2240,7 +1722,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			});
 
 			update();
-			dataType = new JComboBox(R_TYPES_NAMES);
+			dataType = new JComboBox(ImportInfo.R_TYPES_NAMES);
 			dataType.setSelectedIndex(toRDataStore.getDatatype());
 			assignTo = new JTextField(toRDataStore.getAssignTo());
 			postAssignCommand = new JTextField(toRDataStore.getPostAssignCommand());
@@ -2351,7 +1833,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		int dataType_int = 0;
 
 		private boolean _closedOnOK = false;
-		final JTextField exprs;
+		final JTextArea exprs;
 		private JComboBox dataType;
 
 		public EvalInfo getEvalInfo() {
@@ -2381,10 +1863,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			p1.add(new JLabel("  R Expression "));
 			p1.add(new JLabel("  Selected Cells Data Type"));
 
-			exprs = new JTextField();
+			exprs = new JTextArea();
 			exprs.setText(eval_save);
 
-			dataType = new JComboBox(R_TYPES_NAMES);
+			dataType = new JComboBox(ImportInfo.R_TYPES_NAMES);
 			dataType.setSelectedIndex(dataType_save);
 
 			KeyListener keyListener = new KeyListener() {
@@ -2402,9 +1884,9 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				public void keyTyped(KeyEvent e) {
 				}
 			};
-			exprs.addKeyListener(keyListener);
+			// exprs.addKeyListener(keyListener);
 
-			p2.add(exprs);
+			p2.add(new JScrollPane(exprs));
 			p2.add(dataType);
 
 			JButton ok = new JButton("Ok");
@@ -2424,7 +1906,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			p1.add(ok);
 			p2.add(cancel);
 
-			setSize(new Dimension(540, 140));
+			setSize(new Dimension(540, 160));
 			PoolUtils.locateInScreenCenter(this);
 
 			setTitle("Evaluate an R expression ( you can refer to the selected cells with %% )");

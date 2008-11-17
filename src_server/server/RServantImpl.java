@@ -965,27 +965,21 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public String getGroovyStatus() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getGroovyStatus();
 	}
-	
-	HashMap<String, SpreadsheetModelRemoteImpl> _spreadsheetTableModelRemoteHashMap=new HashMap<String, SpreadsheetModelRemoteImpl>();
 
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
-		return new SpreadsheetModelRemoteImpl(rowCount, colCount, _spreadsheetTableModelRemoteHashMap);
+		return DirectJNI.getInstance().getRServices().newSpreadsheetTableModelRemote(rowCount, colCount);
 	}	
 	
 	public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
-		return _spreadsheetTableModelRemoteHashMap.get(Id);
+		return DirectJNI.getInstance().getRServices().getSpreadsheetTableModelRemote(Id);
 	}
 
 	public SpreadsheetModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
-		SpreadsheetModelRemote[] result=new SpreadsheetModelRemote[_spreadsheetTableModelRemoteHashMap.size()];
-		int i=0;for (SpreadsheetModelRemote v:_spreadsheetTableModelRemoteHashMap.values()) result[i++]=v;
-		return result;
+		return DirectJNI.getInstance().getRServices().listSpreadsheetTableModelRemote();
 	}
 
 	public String[] listSpreadsheetTableModelRemoteId() throws RemoteException {
-		String[] result=new String[_spreadsheetTableModelRemoteHashMap.size()];
-		int i=0;for (String k:_spreadsheetTableModelRemoteHashMap.keySet()) result[i++]=k;
-		return result;
+		return DirectJNI.getInstance().getRServices().listSpreadsheetTableModelRemoteId();
 	}
 			
 	public int countSets() throws RemoteException {

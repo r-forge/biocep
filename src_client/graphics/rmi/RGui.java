@@ -50,4 +50,5 @@ public interface RGui extends RKit {
 	public String getUserName(); 
 	
 	public String getUID();
+	
 }

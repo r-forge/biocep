@@ -40,7 +40,6 @@ public interface SpreadsheetModelRemote extends TableModelRemote {
 	 public void undo() throws RemoteException;	 	
 	 public void redo() throws RemoteException;
 	 
-	 
 	 public Cell getCellAt(int aRow, int aColumn) throws RemoteException;
 	 public String toString(CellRange range, boolean byValue, char delim) throws RemoteException;	 
 	 public CellPoint look(CellPoint begin, Object goal, boolean matchCase, boolean matchCell) throws RemoteException;
@@ -71,5 +70,7 @@ public interface SpreadsheetModelRemote extends TableModelRemote {
 	 public SpreadsheetModelDevice[] listSpreadsheetModelDevice() throws RemoteException;
 	 
 	 public HashMap<Integer, Object> getRangeHashMap(CellRange range) throws RemoteException;
+	 
+	 public void paste(int startRow, int startCol, String trstring) throws RemoteException;
 		 
 }

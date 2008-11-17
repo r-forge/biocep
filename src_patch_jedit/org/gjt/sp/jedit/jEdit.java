@@ -558,6 +558,28 @@ public class jEdit {
 
 	}
 
+	
+	
+	public static void pasteConsole(final String path) {
+
+		if (_rgui.getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
+		
+		final View activeView = getActiveView();
+		final Clipboard clipboard = activeView.getToolkit().getSystemClipboard();
+		
+        StringSelection data = new StringSelection("");
+        clipboard.setContents(data, data);
+        
+		activeView.getInputHandler().invokeAction("copy");
+		
+		_rgui.getConsoleLogger().pasteToConsoleEditor();
+
+	}
+	
+	
 	public static void runP(final String path) {
 		if (_rgui.getR() == null) {
 			JOptionPane.showMessageDialog(null, "No R available");
@@ -921,6 +943,9 @@ public class jEdit {
 	 *            The property
 	 */
 	public static final String getProperty(String name) {
+		System.out.println("getPropertyname:"+name);
+		System.out.println("propMgr:"+propMgr);
+		if (propMgr==null) return null;
 		return propMgr.getProperty(name);
 	} // }}}
 
@@ -3265,9 +3290,14 @@ public class jEdit {
 		propMgr = new PropertyManager();
 
 		try {
+			
+			System.out.println(jEdit.class.getResource("/org/gjt/sp/jedit/jedit.props"));
+			System.out.println(jEdit.class.getResource("/org/gjt/sp/jedit/jedit_gui.props"));
+			System.out.println(jEdit.class.getResource("/org/gjt/sp/jedit/jedit_keys.props"));
 			propMgr.loadSystemProps(jEdit.class.getResourceAsStream("/org/gjt/sp/jedit/jedit.props"));
 			propMgr.loadSystemProps(jEdit.class.getResourceAsStream("/org/gjt/sp/jedit/jedit_gui.props"));
 			propMgr.loadSystemProps(jEdit.class.getResourceAsStream("/org/gjt/sp/jedit/jedit_keys.props"));
+			System.out.println(propMgr.getProperties());
 		} catch (Exception e) {
 			Log.log(Log.ERROR, jEdit.class, "Error while loading system properties!");
 			Log.log(Log.ERROR, jEdit.class, "One of the following property files could not be loaded:\n" + "- jedit.props\n" + "- jedit_gui.props\n"

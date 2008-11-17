@@ -915,9 +915,7 @@
 				<pathelement path="lib/desktop/biocep-doc.jar"/>
 				
 
-	
-				<pathelement path="lib/desktop/jeditmodes.jar"/>
-				<pathelement path="lib/desktop/jedit.jar"/>
+
 				<pathelement path="lib/desktop/OpenXLS.jar"/>
 				<pathelement path="lib/desktop/pf-joi-full.jar"/>
 				<pathelement path="lib/desktop/idw-gpl.jar"/>
@@ -1518,7 +1516,7 @@
 		
 		<property 
 			name="src_srv_target" 
-			value="src_rpf_common:src_client:src_server_common:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi"/>
+			value="src_rpf_common:src_client:src_server_common:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD:src_patch_jspreadsheet:src_patch_joi"/>
 		
 		<javac
 			srcdir="${src_srv_target}"
@@ -1544,6 +1542,7 @@
 					<include name="**/*.gif"/>
 					<include name="**/*.html"/>
 					<include name="**/*.exe"/>
+					<include name="**/*.jar"/>
 				</fileset>				
 			</copy>
 		  </sequential>
@@ -1636,6 +1635,7 @@
 						<include name="**/*.gif"/>
 						<include name="**/*.html"/>
 						<include name="**/*.exe"/>
+						<include name="**/*.jar"/>
 						<include name="**/*.sql"/>
 					</fileset>				
 				</copy>
@@ -1811,6 +1811,7 @@
 		
 			<unjar src="lib/desktop/jeditmodes.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/jedit.jar"  dest="binsrv" overwrite="true"/>
+		
 			<unjar src="lib/desktop/OpenXLS.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/pf-joi-full.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/idw-gpl.jar"  dest="binsrv" overwrite="true"/>
@@ -1833,7 +1834,7 @@
 			<unjar src="lib/svg/xml-apis.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/xml-apis-ext.jar"  dest="binsrv" overwrite="true"/>		
 		
-			<property 	name="src_client_target" value="src_client:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>		
+			<property 	name="src_client_target" value="src_client:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>		
 			<javac srcdir="${src_client_target}"
 				destdir="binsrv" debug="true" source="1.5" target="1.5">
 				<classpath>
@@ -1854,6 +1855,7 @@
 								<include name="**/*.gif"/>
 								<include name="**/*.html"/>
 								<include name="**/*.exe"/>
+								<include name="**/*.jar"/>
 							</fileset>				
 						</copy>
 					  </sequential>
@@ -1873,6 +1875,54 @@
 			
 			<!-- biocep ends -->		
 	</target>
+	
+	
+	<target name="basiceditor" depends="compile">
+		
+			<delete dir="binjedit" failonerror="true"/>
+			<mkdir dir="binjedit"/>
+
+			<unjar src="lib/desktop/jeditmodes.jar"  dest="binjedit" overwrite="true"/>
+			<unjar src="lib/desktop/jedit.jar"  dest="binjedit" overwrite="true"/>
+					
+			<javac srcdir="src_patch_jedit" destdir="binjedit" debug="true" source="1.5" target="1.5">
+				<classpath>
+					<pathelement path="${CORE_JAR}"/>
+					<pathelement path="lib/desktop/idw-gpl.jar"/>
+					<pathelement path="lib/desktop/jedit.jar"/>
+				</classpath>
+			</javac>
+			
+		<!--
+				<copy todir="binjedit">				
+					<fileset dir="src_patch_jeditmodes">
+					<include name="**/*"/>											
+					</fileset>				
+				</copy>
+
+-->				
+							<copy todir="binjedit">				
+								<fileset dir="src_patch_jedit">
+									<include name="**/*.props"/>
+									<include name="**/*.properties"/>
+									<include name="**/*.R"/>
+									<include name="**/*.r"/>
+									<include name="**/*.png"/>
+									<include name="**/*.gif"/>
+									<include name="**/*.html"/>
+									<include name="**/*.exe"/>
+									<include name="**/*.jar"/>
+								</fileset>				
+							</copy>
+		
+
+		
+			
+				<jar basedir="binjedit" destfile="basiceditorunsigned.jar" />
+				<signjar jar="basiceditorunsigned.jar" signedjar="src_client/plugins/basiceditor.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
+	
+	</target>
+	
 	
 	
 	<target name="sign.extra"  depends="initializeProperties" >
@@ -1923,10 +1973,13 @@
 
 	</target>
 	
-	<target name="compile" depends="initializeProperties,compile.rpf">
+	
+	
+	
+	<target name="compile" depends="initializeProperties">
 		
 		<echo message="${basedir}"/>
-		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_iplots:src_patch_jedit:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>
+		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_iplots:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>
 		
 		<javac
 			srcdir="${src_compile_target}"
@@ -1972,6 +2025,8 @@
 					<include name="**/*.html"/>
 					<include name="**/*.sql"/>
 					<include name="**/*.exe"/>
+					<include name="**/*.jar"/>
+					
 				</fileset>				
 			</copy>
 		  </sequential>

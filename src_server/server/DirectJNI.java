@@ -77,6 +77,8 @@ import mapping.RPackage;
 import mapping.ReferenceInterface;
 import mapping.StandardReference;
 import model.SpreadsheetModelRemote;
+import model.SpreadsheetModelRemoteImpl;
+
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.logging.Log;
@@ -195,6 +197,8 @@ public class DirectJNI {
 	private boolean _stopRequired = false;
 	private PrintStream _o = System.out;
 	private HashMap<String, UserStatus> _usersHash=new HashMap<String, UserStatus>();
+	private HashMap<String, SpreadsheetModelRemoteImpl> _spreadsheetTableModelRemoteHashMap=new HashMap<String, SpreadsheetModelRemoteImpl>();
+	
 	
 	public static DirectJNI getInstance() {
 		
@@ -987,6 +991,12 @@ public class DirectJNI {
 		_rEngine.rniAssign(name, resultId, (privateEnv ? _privateEnvExp : 0));
 	}
 
+	// public for internal use only (RListener)	
+	public  void evaluate(String expression, int n) throws  Exception {
+		_rEngine.rniEval(_rEngine.rniParse(expression, n), 0);
+	}
+		
+		
 	private RObject getObjectFrom(String expression, String rclass) throws NoMappingAvailable, Exception {
 		// log.info(".... quering for =" + expression + " rclass="+rclass);
 		Rengine e = _rEngine;
@@ -3589,22 +3599,26 @@ public class DirectJNI {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
+			return new SpreadsheetModelRemoteImpl(rowCount, colCount, _spreadsheetTableModelRemoteHashMap);
+		}	
+		
 		public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported at this layer.");
+			return _spreadsheetTableModelRemoteHashMap.get(Id);
 		}
 
 		public SpreadsheetModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException {
-			throw new UnsupportedOperationException("Not supported at this layer.");
+			SpreadsheetModelRemote[] result=new SpreadsheetModelRemote[_spreadsheetTableModelRemoteHashMap.size()];
+			int i=0;for (SpreadsheetModelRemote v:_spreadsheetTableModelRemoteHashMap.values()) result[i++]=v;
+			return result;
 		}
 
 		public String[] listSpreadsheetTableModelRemoteId() throws RemoteException {
-			throw new UnsupportedOperationException("Not supported at this layer.");
+			String[] result=new String[_spreadsheetTableModelRemoteHashMap.size()];
+			int i=0;for (String k:_spreadsheetTableModelRemoteHashMap.keySet()) result[i++]=k;
+			return result;
 		}
-
-		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported at this layer.");
-		}
-
+				
 		public int countSets() throws RemoteException {
 			throw new UnsupportedOperationException("Not supported at this layer.");
 		}
@@ -4250,6 +4264,10 @@ public class DirectJNI {
 				sb.append((char) tab[i]);
 		}
 		return sb.toString();
+	}
+
+	public HashMap<String, SpreadsheetModelRemoteImpl> getSpreadsheetTableModelRemoteHashMap() {
+		return _spreadsheetTableModelRemoteHashMap;
 	}
 
 }

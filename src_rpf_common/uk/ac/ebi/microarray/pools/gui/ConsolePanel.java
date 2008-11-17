@@ -174,6 +174,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		}).start();
 	}
 
+	HashMap<String, Action> inputFiledActionsTable = new HashMap<String, Action>();
 	public ConsolePanel(SubmitInterface sInterface, String textFieldLabel, Color textFieldColor, final boolean undoRedoEnabled, AbstractAction[] actions) {
 		_sInterface = sInterface;
 		_actions = actions;
@@ -201,7 +202,6 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		_logArea.setFont(new Font("Monospaced.plain", Font.PLAIN, _logArea.getFont().getSize()));
 		_commandInputField.setFont(new Font("Monospaced.plain", Font.PLAIN, _commandInputField.getFont().getSize()));
 
-		HashMap<String, Action> inputFiledActionsTable = new HashMap<String, Action>();
 		Action[] inputFieldActions = _commandInputField.getEditorKit().getActions();
 		for (int i = 0; i < inputFieldActions.length; ++i) {
 			inputFiledActionsTable.put((String) inputFieldActions[i].getValue(Action.NAME), inputFieldActions[i]);
@@ -607,6 +607,10 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 	public JTextPane getCommandInputField() {
 		return _commandInputField;
+	}
+	
+	public void pasteToConsoleEditor() {
+		inputFiledActionsTable.get(DefaultEditorKit.pasteAction).actionPerformed(null);		
 	}
 
 }
