@@ -18,6 +18,7 @@
  */
 package model;
 
+
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.rmi.RemoteException;
@@ -39,6 +40,7 @@ import net.java.dev.jspreadsheet.Node;
 import net.java.dev.jspreadsheet.ParserException;
 import net.java.dev.jspreadsheet.SpreadsheetClipboard;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
+import net.java.dev.jspreadsheet.SpreadsheetTableModel;
 import net.java.dev.jspreadsheet.SpreadsheetTableModelClipboardInterface;
 import net.java.dev.jspreadsheet.SpreadsheetTableModelInterface;
 
@@ -66,34 +68,37 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			updateRedoAction();
 		}
 	};
-	
+
 	public SpreadsheetModelRemoteImpl(int rowCount, int colCount, HashMap<String, SpreadsheetModelRemoteImpl> map) throws RemoteException {
-		super(new SpreadsheetDefaultTableModel(rowCount, colCount));		
-		this.map=map;
+		super(new SpreadsheetDefaultTableModel(rowCount, colCount));
+		this.map = map;
 		init();
-		if (map!=null) map.put(getSpreadsheetModelId(),this);
+		if (map != null)
+			map.put(getSpreadsheetModelId(), this);
 	}
 
 	public SpreadsheetModelRemoteImpl(Object[] columnName, int rowCount) throws RemoteException {
-		super(columnName, rowCount);		
-		this.map=map;		
+		super(columnName, rowCount);
+		this.map = map;
 		init();
-		if (map!=null) map.put(getSpreadsheetModelId(),this);
+		if (map != null)
+			map.put(getSpreadsheetModelId(), this);
 	}
 
 	public SpreadsheetModelRemoteImpl(Object[][] data, Object[] columnName) throws RemoteException {
-		super(data, columnName);				
-		this.map=map;
+		super(data, columnName);
+		this.map = map;
 		init();
-		if (map!=null) map.put(getSpreadsheetModelId(),this);
+		if (map != null)
+			map.put(getSpreadsheetModelId(), this);
 	}
-	
+
 	private void init() {
 		for (int row = 0; row < m.getRowCount(); row++)
 			for (int col = 0; col < m.getColumnCount(); col++)
 				m.setValueAt(new Cell(""), row, col);
-		history=new History(this);
-		history.addUndoableEditListener(um);		
+		history = new History(this);
+		history.addUndoableEditListener(um);
 		Formula.registerFunctions();
 	}
 
@@ -620,125 +625,124 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		history.add(new CellRange(point, point));
 		doSetValueAt(aValue, aRow, aColumn);
 	}
-	
+
 	private void fireDiscardRowCount() {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).discardRowCount();
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
-	
-	
+
 	private void fireDiscardColumnCount() {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).discardColumnCount();
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
-	
+
 	private void fireDiscardCell(int aRow, int aColumn) {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).discardCacheCell(aRow, aColumn);
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 
 	private void fireDiscardRange(CellRange range) {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).discardCacheRange(range);
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
-	}	
-	
+	}
+
 	private void fireDiscard() {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).discardCache();
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
-	}	
-	
+	}
+
 	private void fireRemoveCols(int removeNum) {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).removeColumns(removeNum);
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
-	
+
 	private void fireInsertCols(int insertNum, int startCol) {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).insertColumn(insertNum, startCol);
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
 
 	private void fireRemoveRows(int removeNum) {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).removeRows(removeNum);
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
-	
+
 	private void fireInsertRows(int insertNum, int startRow) {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).insertRow(insertNum, startRow);
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
-	}	
-	
+	}
+
 	/**
 	 * This method should be called with a cell is set as a formula cell
 	 * (although it does nothing if it is not a formula). When a formula is
@@ -800,7 +804,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            column coordinate of cell
 	 */
 	public void doSetValueAt(Object aValue, int aRow, int aColumn) {
-		
+
 		if (aValue == null) {
 			aValue = "";
 		}
@@ -880,9 +884,9 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 *            same number of new columns as range has
 	 */
 	public void insertColumn(CellRange insertRange) {
-		long t1=System.currentTimeMillis();
-		System.out.println("SpreadsheetModelRemoteImpl.insertColumn t1="+t1);
-		
+		long t1 = System.currentTimeMillis();
+		System.out.println("SpreadsheetModelRemoteImpl.insertColumn t1=" + t1);
+
 		fireDiscardColumnCount();
 		fireDiscard();
 		/*
@@ -909,35 +913,32 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		CellRange range = new CellRange(0, lastRow, Math.max(col, 0), lastCol);
 		SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
 
-
-
 		// add the new columns to the end
 		for (int i = 0; i < insertNum; i++) {
 			int curCol = lastCol + i + 1;
 			addColumn();
 		}
 
-		fireInsertCols(insertNum,col);
-		
-		
+		fireInsertCols(insertNum, col);
+
 		// shift relevant columns left
 		scrap.paste(this, new CellPoint(0, col + insertNum));
 
 		recalculateAll();
 
 		// set selection
-				
-		CellRange selectionRange=new CellRange(0, 0, col, col);
-		fireSetSelection(null,selectionRange);
-		//return selectionRange;
-		
+
+		CellRange selectionRange = new CellRange(0, 0, col, col);
+		fireSetSelection(null, selectionRange);
+		// return selectionRange;
+
 		// sharp.setBaseColumnWidth();
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
-		
-		long t2=System.currentTimeMillis();
-		System.out.println("SpreadsheetModelRemoteImpl.insertColumn t2="+t2+" -> "+(t2-t1));
-		
+
+		long t2 = System.currentTimeMillis();
+		System.out.println("SpreadsheetModelRemoteImpl.insertColumn t2=" + t2 + " -> " + (t2 - t1));
+
 	}
 
 	/**
@@ -977,16 +978,16 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			addRow();
 		}
 
-		fireInsertRows(insertNum,row);
-		
+		fireInsertRows(insertNum, row);
+
 		// shift old rows down
 		scrap.paste(this, new CellPoint(row + insertNum, 0));
 
 		recalculateAll();
 
-		CellRange selectionRange=new CellRange(row, row, 0, 0);
-		fireSetSelection(null,selectionRange);
-		//return selectionRange;
+		CellRange selectionRange = new CellRange(row, row, 0, 0);
+		fireSetSelection(null, selectionRange);
+		// return selectionRange;
 
 	}
 
@@ -1167,9 +1168,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			// delete old column
 			removeColumn();
 		}
-		
+
 		fireRemoveCols(removeNum);
-		
 
 		// shift clipboard elements right
 		scrap.paste(this, new CellPoint(0, col));
@@ -1179,10 +1179,10 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 
 		// set selection
 
-		CellRange selectionRange=new CellRange(0, 0, col, col);
-		fireSetSelection(null,selectionRange);
-		//return selectionRange;
-		
+		CellRange selectionRange = new CellRange(0, 0, col, col);
+		fireSetSelection(null, selectionRange);
+		// return selectionRange;
+
 		// fireTableStructureChanged();
 		// sharp.setBaseColumnWidth();
 	}
@@ -1228,43 +1228,43 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 */
 	public void removeRow(CellRange deletionRange) {
 
-			fireDiscardRowCount();
-			fireDiscard();
-			
-			/*
-			 * since the insertion point is given by a selected cell there will
-			 * never be an out of bounds error
-			 */
-			clearRange(deletionRange);
+		fireDiscardRowCount();
+		fireDiscard();
 
-			/* first row to delete */
-			int row = deletionRange.getStartRow();
+		/*
+		 * since the insertion point is given by a selected cell there will
+		 * never be an out of bounds error
+		 */
+		clearRange(deletionRange);
 
-			/* number of rows to delete including the first */
-			int removeNum = deletionRange.getHeight();
+		/* first row to delete */
+		int row = deletionRange.getStartRow();
 
-			// coordinates of last cell in spreadsheet
-			int lastRow = m.getRowCount() - 1;
-			int lastCol = m.getColumnCount() - 1;
+		/* number of rows to delete including the first */
+		int removeNum = deletionRange.getHeight();
 
-			// everything lower than rows to remove must be copied to be shifted
-			CellRange range = new CellRange(row + removeNum, lastRow, 0, lastCol);
-			SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
+		// coordinates of last cell in spreadsheet
+		int lastRow = m.getRowCount() - 1;
+		int lastCol = m.getColumnCount() - 1;
 
-			for (int i = 0; i < removeNum; i++) {
-				((SpreadsheetDefaultTableModel) m).removeRow(m.getRowCount() - 1);
-			}
-			
-			fireRemoveRows(removeNum);
+		// everything lower than rows to remove must be copied to be shifted
+		CellRange range = new CellRange(row + removeNum, lastRow, 0, lastCol);
+		SpreadsheetClipboard scrap = new SpreadsheetClipboard(this, range, true);
 
-			// shift relevent rows up
-			scrap.paste(this, new CellPoint(row, 0));
+		for (int i = 0; i < removeNum; i++) {
+			((SpreadsheetDefaultTableModel) m).removeRow(m.getRowCount() - 1);
+		}
 
-			recalculateAll();
-			
-			CellRange selectionRange=new CellRange(row, row, 0, 0);
-			fireSetSelection(null,selectionRange);
-			//return selectionRange;			
+		fireRemoveRows(removeNum);
+
+		// shift relevent rows up
+		scrap.paste(this, new CellPoint(row, 0));
+
+		recalculateAll();
+
+		CellRange selectionRange = new CellRange(row, row, 0, 0);
+		fireSetSelection(null, selectionRange);
+		// return selectionRange;
 
 	}
 
@@ -1436,7 +1436,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			// make sure JTable refreshes it
 			fireDiscardCell(point.getRow(), point.getCol());
 			m.fireTableCellUpdated(point.getRow(), point.getCol());
-			
+
 		}
 
 		// make sure to tell JTable things have changed
@@ -1711,28 +1711,28 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 */
 	private void addColumn() {
 
-			((SpreadsheetDefaultTableModel) m).getColumnIdentifiers().addElement(null);
+		((SpreadsheetDefaultTableModel) m).getColumnIdentifiers().addElement(null);
 
-			/* Initialize the new column */
-			Iterator it = ((SpreadsheetDefaultTableModel) m).getDataVector().iterator();
+		/* Initialize the new column */
+		Iterator it = ((SpreadsheetDefaultTableModel) m).getDataVector().iterator();
 
-			// Give column the appropriate label
-			if (it.hasNext()) {
-				Cell temp = new Cell(Node.translateColumn(m.getColumnCount() - 1));
-				((Vector) it.next()).addElement(temp);
-			}
+		// Give column the appropriate label
+		if (it.hasNext()) {
+			Cell temp = new Cell(Node.translateColumn(m.getColumnCount() - 1));
+			((Vector) it.next()).addElement(temp);
+		}
 
-			// initialize cells
-			while (it.hasNext()) {
-				((Vector) it.next()).addElement(new Cell(""));
-			}
+		// initialize cells
+		while (it.hasNext()) {
+			((Vector) it.next()).addElement(new Cell(""));
+		}
 
-			// Generate notification
+		// Generate notification
 
-			/*
-			 * newColumnsAdded(new TableModelEvent(this, 0, getRowCount() - 1,
-			 * getColumnCount() - 1, TableModelEvent.INSERT));
-			 */
+		/*
+		 * newColumnsAdded(new TableModelEvent(this, 0, getRowCount() - 1,
+		 * getColumnCount() - 1, TableModelEvent.INSERT));
+		 */
 	}
 
 	/**
@@ -1740,16 +1740,16 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	 */
 	private void addRow() {
 
-			// create a new row with appropriate label
-			Vector rowData = new Vector();
-			rowData.add(0, new Cell(new Integer(m.getRowCount() + 1)));
+		// create a new row with appropriate label
+		Vector rowData = new Vector();
+		rowData.add(0, new Cell(new Integer(m.getRowCount() + 1)));
 
-			// add it to the table
-			((SpreadsheetDefaultTableModel) m).addRow(rowData);
+		// add it to the table
+		((SpreadsheetDefaultTableModel) m).addRow(rowData);
 
-			for (int i = 1; i < m.getColumnCount(); i++) {
-				m.setValueAt(new Cell(""), m.getRowCount() - 1, i);
-			}
+		for (int i = 1; i < m.getColumnCount(); i++) {
+			m.setValueAt(new Cell(""), m.getRowCount() - 1, i);
+		}
 	}
 
 	/**
@@ -1825,30 +1825,30 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	}
 
 	private void removeColumn() {
-		
-			int lastRow = m.getRowCount() - 1;
-			int lastCol = m.getColumnCount() - 1;
 
-			// remove the data from cells to delete to maintain references
-			clearRange(new CellRange(0, lastRow, lastCol, lastCol));
+		int lastRow = m.getRowCount() - 1;
+		int lastCol = m.getColumnCount() - 1;
 
-			Iterator it = ((SpreadsheetDefaultTableModel) m).getDataVector().iterator();
-			while (it.hasNext()) {
-				/*
-				 * Since deleting B makes C the new B, the reference lists in
-				 * cells of old "B" should not change. So, we only shift the
-				 * data in cells right and deleted the last columns.
-				 */
-				Vector temp = (Vector) it.next();
-				temp.removeElementAt(m.getColumnCount() - 1);
-			}
+		// remove the data from cells to delete to maintain references
+		clearRange(new CellRange(0, lastRow, lastCol, lastCol));
 
-			// update inherited field from DefaultTableModel
-			Vector columnIdentifiers = ((SpreadsheetDefaultTableModel) m).getColumnIdentifiers();
-			columnIdentifiers.removeElementAt(columnIdentifiers.size() - 1);
+		Iterator it = ((SpreadsheetDefaultTableModel) m).getDataVector().iterator();
+		while (it.hasNext()) {
+			/*
+			 * Since deleting B makes C the new B, the reference lists in cells
+			 * of old "B" should not change. So, we only shift the data in cells
+			 * right and deleted the last columns.
+			 */
+			Vector temp = (Vector) it.next();
+			temp.removeElementAt(m.getColumnCount() - 1);
+		}
 
-			// Notification is generated within the GUI
-		
+		// update inherited field from DefaultTableModel
+		Vector columnIdentifiers = ((SpreadsheetDefaultTableModel) m).getColumnIdentifiers();
+		columnIdentifiers.removeElementAt(columnIdentifiers.size() - 1);
+
+		// Notification is generated within the GUI
+
 	}
 
 	/**
@@ -1879,155 +1879,184 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		}
 	}
 
-	
-	
 	public void historyAdd(CellRange range) {
 		history.add(range);
 	}
+
 	public void historyAdd(SpreadsheetClipboard clip) {
 		history.add(clip);
 	}
+
 	public void historyAdd(CellRange range, int type) {
-		history.add(range,type);
+		history.add(range, type);
 	}
-	
+
 	public void undo() {
 		um.undo();
 	}
-	
+
 	public boolean canUndo() {
 		return um.canUndo();
 	}
-	
+
 	public boolean canRedo() {
 		return um.canRedo();
 	}
-	
+
 	public void redo() {
 		um.redo();
 	}
-	
+
 	public RServices getR() {
 		return DirectJNI.getInstance().getRServices();
 	}
-		
+
 	private void updateUndoAction() {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).updateUndoAction();
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
-	
+
 	private void updateRedoAction() {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).updateRedoAction();
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
-	
-	public void fireSetSelection(String origin,CellRange sel) {
-		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove=new Vector<SpreadsheetListenerRemote>();	
-		for (int i=0; i<_spreadsheetListeners.size(); ++i) {
+
+	public void fireSetSelection(String origin, CellRange sel) {
+		Vector<SpreadsheetListenerRemote> spreadsheetListenersToRemove = new Vector<SpreadsheetListenerRemote>();
+		for (int i = 0; i < _spreadsheetListeners.size(); ++i) {
 			try {
 				_spreadsheetListeners.elementAt(i).setSelection(origin, sel);
 			} catch (Exception e) {
 				e.printStackTrace();
 				spreadsheetListenersToRemove.add(_spreadsheetListeners.elementAt(i));
-			}	
+			}
 		}
 		_spreadsheetListeners.removeAll(spreadsheetListenersToRemove);
 	}
-	
-	public void setSpreadsheetSelection(String origin,CellRange sel) throws RemoteException {		
-		fireSetSelection(origin,sel);		
+
+	public void setSpreadsheetSelection(String origin, CellRange sel) throws RemoteException {
+		fireSetSelection(origin, sel);
 	}
-	
-	Vector<SpreadsheetListenerRemote> _spreadsheetListeners=new Vector<SpreadsheetListenerRemote>();
-	
-	
-	
-	public void addSpreadsheetListener(SpreadsheetListenerRemote l){
+
+	Vector<SpreadsheetListenerRemote> _spreadsheetListeners = new Vector<SpreadsheetListenerRemote>();
+
+	public void addSpreadsheetListener(SpreadsheetListenerRemote l) {
 		_spreadsheetListeners.add(l);
-		
+
 	}
-	public void removeSpreadsheetListener(SpreadsheetListenerRemote l){
-		_spreadsheetListeners.remove(l);		
+
+	public void removeSpreadsheetListener(SpreadsheetListenerRemote l) {
+		_spreadsheetListeners.remove(l);
 	}
-	
-	public void removeAllSpreadsheetListeners(){
-		_spreadsheetListeners.removeAllElements();		
+
+	public void removeAllSpreadsheetListeners() {
+		_spreadsheetListeners.removeAllElements();
 	}
-	
-	
-	
+
 	public void addSpreadsheetListener(SpreadsheetListener l) {
-		throw new RuntimeException("Shouldn't be called");		
+		throw new RuntimeException("Shouldn't be called");
 	}
-	
+
 	public void removeSpreadsheetListener(SpreadsheetListener l) {
 		throw new RuntimeException("Shouldn't be called");
 	}
-	
-	
 
 	public void addTableModelListener(TableModelListenerRemote l) {
 		// TODO Auto-generated method stub
 		super.addTableModelListener(l);
 	}
-	
+
 	@Override
 	public int findColumn(String columnName) {
 		// TODO Auto-generated method stub
 		return super.findColumn(columnName);
 	}
-	
-	private static int spreadsheetTableModelRemoteCounter=0;
-	private String _id="SS_"+(spreadsheetTableModelRemoteCounter++);
-	
+
+	private static int spreadsheetTableModelRemoteCounter = 0;
+	private String _id = "SS_" + (spreadsheetTableModelRemoteCounter++);
+
 	public String getSpreadsheetModelId() throws RemoteException {
 		return _id;
 	}
-	
+
 	public void dispose() throws RemoteException {
 
 	}
-	
-	private HashMap<String, SpreadsheetModelDevice> _spreadsheetDeviceHashMap=new HashMap<String, SpreadsheetModelDevice>();
+
+	private HashMap<String, SpreadsheetModelDevice> _spreadsheetDeviceHashMap = new HashMap<String, SpreadsheetModelDevice>();
+
 	public SpreadsheetModelDevice newSpreadsheetModelDevice() throws RemoteException {
-		SpreadsheetModelDeviceImpl result=new SpreadsheetModelDeviceImpl((SpreadsheetModelRemote)java.rmi.server.RemoteObject.toStub(this),_spreadsheetDeviceHashMap);
-		addSpreadsheetListener((SpreadsheetListenerRemote)java.rmi.server.RemoteObject.toStub(result));
-		addTableModelListener((TableModelListenerRemote)java.rmi.server.RemoteObject.toStub(result));		
+		SpreadsheetModelDeviceImpl result = new SpreadsheetModelDeviceImpl((SpreadsheetModelRemote) java.rmi.server.RemoteObject.toStub(this),
+				_spreadsheetDeviceHashMap);
+		addSpreadsheetListener((SpreadsheetListenerRemote) java.rmi.server.RemoteObject.toStub(result));
+		addTableModelListener((TableModelListenerRemote) java.rmi.server.RemoteObject.toStub(result));
 		return result;
 	}
-	
+
 	public SpreadsheetModelDevice[] listSpreadsheetModelDevice() throws RemoteException {
-		SpreadsheetModelDevice[] result=new SpreadsheetModelDevice[_spreadsheetDeviceHashMap.size()];
-		int i=0; for (SpreadsheetModelDevice d:_spreadsheetDeviceHashMap.values()) result[i++]=d; 
+		SpreadsheetModelDevice[] result = new SpreadsheetModelDevice[_spreadsheetDeviceHashMap.size()];
+		int i = 0;
+		for (SpreadsheetModelDevice d : _spreadsheetDeviceHashMap.values())
+			result[i++] = d;
 		return result;
 	}
-	
+
 	public HashMap<Integer, Object> getRangeHashMap(CellRange range) throws RemoteException {
-		int endRow=Math.min(range.getEndRow(), getRowCount()-1);
-		int endCol=Math.min(range.getEndCol(), getColumnCount()-1);
-		HashMap<Integer, Object> result=new HashMap<Integer, Object>();		
-		for (int l=range.getStartRow(); l<=endRow;++l) {
-			for (int k=range.getStartCol(); k<=endCol; ++k) {
-				result.put(l*65536+k, getValueAt(l,k));								
+		int endRow = Math.min(range.getEndRow(), getRowCount() - 1);
+		int endCol = Math.min(range.getEndCol(), getColumnCount() - 1);
+		HashMap<Integer, Object> result = new HashMap<Integer, Object>();
+		for (int l = range.getStartRow(); l <= endRow; ++l) {
+			for (int k = range.getStartCol(); k <= endCol; ++k) {
+				result.put(l * 65536 + k, getValueAt(l, k));
 			}
 		}
 		return result;
+	}
+
+
+	public void paste(int startRow, int startCol, String trstring) throws RemoteException {
+		CellPoint copyPoint = new CellPoint(0, 0);
+
+		int rowOff = startRow - copyPoint.getRow();
+		int colOff = startCol - copyPoint.getCol();
+
+		try {
+			CellPoint size = SpreadsheetTableModel.getSize(trstring, '\t');
+			/*
+			 * if ( (startRow + size.getRow()) > getRowCount() || startCol +
+			 * size.getCol()>getColumnCount()) {
+			 * Toolkit.getDefaultToolkit().beep(); }
+			 */
+
+			int endRow = Math.min(getRowCount() - 1, (startRow + size.getRow()) - 1);
+			int endCol = Math.min(getColumnCount() - 1, (startCol + size.getCol()) - 1);
+
+			CellRange affectedRange = new CellRange(startRow, endRow, startCol, endCol);
+
+			// add to history
+			historyAdd(affectedRange);
+			fromString(trstring, '\t', rowOff, colOff, affectedRange);
+			fireSetSelection(null, affectedRange);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }

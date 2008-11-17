@@ -86,6 +86,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -356,6 +357,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}
 		}
+		
+		public void pasteToConsoleEditor() {
+			_consolePanel.pasteToConsoleEditor();			
+		}
 
 	};
 
@@ -426,6 +431,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 			LocalRmiRegistry.getLocalRmiRegistryPort();
 		}
 
+			
+		
 		restoreState();
 
 		if (getParameter("mode") == null || getParameter("mode").equals("")) {
@@ -1206,35 +1213,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(filesMenu);
 
-			final JMenu toolsMenu = new JMenu("Tools");
-			toolsMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					toolsMenu.removeAll();
-					toolsMenu.add(_actions.get("editor"));
-					toolsMenu.add(_actions.get("spreadsheet"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("svgview"));
-					toolsMenu.add(_actions.get("pdfview"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("pythonconsole"));
-					toolsMenu.add(_actions.get("clientpythonconsole"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("groovyconsole"));
-					toolsMenu.add(_actions.get("clientgroovyconsole"));
-					toolsMenu.add(_actions.get("unsafeevaluator"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("sourcebioclite"));
-					toolsMenu.add(_actions.get("installpackage"));
-				}
-
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(toolsMenu);
-
+						
 			final JMenu graphicsMenu = new JMenu("Graphics");
 			graphicsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -1456,14 +1435,66 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(graphicsMenu);
 
+			
+			final JMenu spreadsheetMenu = new JMenu("Spreadsheet");
+			spreadsheetMenu.addMenuListener(new MenuListener() {
+				public void menuSelected(MenuEvent e) {
+					spreadsheetMenu.removeAll();
+					spreadsheetMenu.add(_actions.get("spreadsheet"));
+					spreadsheetMenu.addSeparator();
+					spreadsheetMenu.add(_actions.get("newserversidespreadsheet"));
+					spreadsheetMenu.add(_actions.get("connecttoserversidespreadsheet"));
+				}
+
+				public void menuCanceled(MenuEvent e) {
+				}
+
+				public void menuDeselected(MenuEvent e) {
+				}
+			});
+			menuBar.add(spreadsheetMenu);
+			
+			
+			
+			final JMenu toolsMenu = new JMenu("Tools");
+			toolsMenu.addMenuListener(new MenuListener() {
+				public void menuSelected(MenuEvent e) {
+					toolsMenu.removeAll();
+					toolsMenu.add(_actions.get("editor"));
+					toolsMenu.addSeparator();
+					toolsMenu.add(_actions.get("svgview"));
+					toolsMenu.add(_actions.get("pdfview"));
+					toolsMenu.addSeparator();
+					toolsMenu.add(_actions.get("pythonconsole"));
+					toolsMenu.add(_actions.get("clientpythonconsole"));
+					toolsMenu.addSeparator();
+					toolsMenu.add(_actions.get("groovyconsole"));
+					toolsMenu.add(_actions.get("clientgroovyconsole"));
+					toolsMenu.add(_actions.get("unsafeevaluator"));
+					toolsMenu.addSeparator();
+					toolsMenu.add(_actions.get("sourcebioclite"));
+					toolsMenu.add(_actions.get("installpackage"));
+				}
+
+				public void menuCanceled(MenuEvent e) {
+				}
+
+				public void menuDeselected(MenuEvent e) {
+				}
+			});
+			menuBar.add(toolsMenu);
+			
+			
 			final JMenu collaborationMenu = new JMenu("Collaboration");
 			collaborationMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
 					collaborationMenu.removeAll();
 					collaborationMenu.add(_actions.get("createbroadcasteddevice"));
 					collaborationMenu.add(_actions.get("chatconsoleview"));
+					collaborationMenu.addSeparator();
 					collaborationMenu.add(_actions.get("newcollaborativespreadsheet"));
 					collaborationMenu.add(_actions.get("connecttocollaborativespreadsheet"));
+					collaborationMenu.addSeparator();
 					collaborationMenu.add(_actions.get("usersview"));
 				}
 
@@ -1960,7 +1991,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 		if (firstCall) {
 			firstCall = false;
 			try {
-				ClassLoader cl = GDApplet.class.getClassLoader();
+				System.setSecurityManager(new YesSecurityManager());
+				
+				ClassLoader cl = new URLClassLoader(new URL[]{new URL("http://127.0.0.1:"+LocalHttpServer.getLocalHttpServerPort()+"/classes/plugins/basiceditor.jar")}, GDApplet.class.getClassLoader());
+				//ClassLoader cl = new URLClassLoader(new URL[]{new File("E:/workspace/distrib/www/appletlibs/biocep.jar").toURI().toURL()});
 				try {
 					File jEditDir = new File(ServerManager.INSTALL_DIR + "/jEdit");
 					if (!jEditDir.exists()) {
@@ -2249,10 +2283,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 			noSession();
 		} catch (Exception e) {
 			e.printStackTrace();
+			
 			++failureCounter;
 			System.out.println("///// failure counter :" + failureCounter);
+			/*
 			if (failureCounter == 1)
 				manageServerFailure();
+			*/
 		}
 
 		Vector<FileDescription> temp = new Vector<FileDescription>();
@@ -3080,7 +3117,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 								e.printStackTrace();
 							}
 							loadJEditClasses();
-							GDApplet.class.getClassLoader().loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,
+							
+							ClassLoader cl = new URLClassLoader(new URL[]{new URL("http://127.0.0.1:"+LocalHttpServer.getLocalHttpServerPort()+"/classes/plugins/basiceditor.jar")}, GDApplet.class.getClassLoader());							
+							//ClassLoader cl = new URLClassLoader(new URL[]{new File("E:/workspace/distrib/www/appletlibs/biocep.jar").toURI().toURL()});
+							cl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,
 									(Object[]) null);
 						} catch (Exception ex) {
 							ex.printStackTrace();
@@ -3095,7 +3135,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		_actions.put("spreadsheet", new AbstractAction("New Spreadsheet") {
+		_actions.put("spreadsheet", new AbstractAction("New Local Spreadsheet") {
 			public void actionPerformed(final ActionEvent ae) {
 				final DimensionsDialog ddialog = new DimensionsDialog(GDApplet.this);
 				ddialog.setVisible(true);
@@ -3166,6 +3206,64 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
+		
+		_actions.put("newserversidespreadsheet", new AbstractAction("New Server-side Spreadsheet") {
+			public void actionPerformed(final ActionEvent ae) {
+				new Thread(new Runnable() {
+					public void run() {
+
+						final DimensionsDialog ddialog = new DimensionsDialog(GDApplet.this);
+						ddialog.setVisible(true);
+						if (ddialog.getSpreadsheetDimension() != null) {
+							int id = getDynamicViewId();
+							final CollaborativeSpreadsheetView lv = new CollaborativeSpreadsheetView(id, (int) ddialog.getSpreadsheetDimension().getHeight(),
+									(int) ddialog.getSpreadsheetDimension().getWidth(), GDApplet.this);
+							((TabWindow) views[2].getWindowParent()).addTab(lv);
+						}
+					}
+				}).start();
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+
+		_actions.put("connecttoserversidespreadsheet", new AbstractAction("Connect to Server-side Spreadsheet") {
+			public void actionPerformed(final ActionEvent ae) {
+				new Thread(new Runnable() {
+					public void run() {
+
+						try {
+							final SelectIdDialog ddialog = new SelectIdDialog(GDApplet.this, "Connect to Server-side Spreadsheet", "Spreadsheet Id", getR()
+									.listSpreadsheetTableModelRemoteId());
+							ddialog.setVisible(true);
+							if (ddialog.getId() != null) {
+
+								int id = getDynamicViewId();
+								final CollaborativeSpreadsheetView lv = new CollaborativeSpreadsheetView(id, ddialog.getId(), GDApplet.this);
+								((TabWindow) views[2].getWindowParent()).addTab(lv);
+
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+
+						}
+
+					}
+				}).start();
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+
+		
+		
 		_actions.put("createdevice", new AbstractAction("New Device") {
 			public void actionPerformed(final ActionEvent e) {
 

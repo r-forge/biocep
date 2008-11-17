@@ -27,4 +27,5 @@ public interface ConsoleLogger {
 	void printAsInput(String message);
 	void printAsOutput(String message);
 	void print(String expression, String result);
+	public void pasteToConsoleEditor();
 }

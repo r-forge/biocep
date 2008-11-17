@@ -369,3 +369,24 @@ cluster.stop <- function( cl )  {
 }
 
 
+cells.put <- function (  value , location, name='' ) {
+	.PrivateEnv$spreadsheet.put.value<-value;
+	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"spreadsheetPut", location , name );
+	rm (spreadsheet.put.value, envir=.PrivateEnv)
+	if (result[1]=='OK') {
+		return(invisible(NULL)); 
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+
+cells.get <- function ( range , type='numeric', name='' ) {
+	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"spreadsheetGet",  range, type , name);
+	if (result[1]=='OK') {
+		return(.PrivateEnv$spreadsheet.get.result); 
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+
+

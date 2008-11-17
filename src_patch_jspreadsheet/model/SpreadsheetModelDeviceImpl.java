@@ -249,6 +249,11 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		return m.getRangeHashMap(range);
 	}
 	
+	
+	public void paste(int startRow, int startCol, String trstring) throws RemoteException {
+		m.paste(startRow, startCol, trstring);
+		
+	}
 	//-------------------------------
 	
 	public String getId() throws RemoteException {

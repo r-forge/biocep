@@ -437,6 +437,9 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote , Htt
 		return _device.getRangeHashMap(range);
 	}
 	
+	public void paste(int startRow, int startCol, String trstring) throws RemoteException {
+		_device.paste(startRow, startCol, trstring);		
+	}
 	
 	public void stopThreads() {
 		_stopThreads=true;

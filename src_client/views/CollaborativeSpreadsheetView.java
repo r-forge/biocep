@@ -64,7 +64,7 @@ public class CollaborativeSpreadsheetView extends DynamicView {
 			final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(_spreadsheetModelRemote);			
 			((JPanel) getComponent()).setLayout(new BorderLayout());
 			((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
-			getViewProperties().setTitle("Collaboratibe Spreadsheet View <" + spreadsheetModelId + ">");				
+			getViewProperties().setTitle("Server-side Spreadsheet <" + spreadsheetModelId + ">");				
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -87,7 +87,7 @@ public class CollaborativeSpreadsheetView extends DynamicView {
 			((JPanel) getComponent()).setLayout(new BorderLayout());
 			((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
 			System.out.println ("---Step 4");
-			getViewProperties().setTitle("Collaboratibe Spreadsheet View <" + spreadsheetModelId + ">");
+			getViewProperties().setTitle("Server-side Spreadsheet View <" + spreadsheetModelId + ">");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
