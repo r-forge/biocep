@@ -24,7 +24,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import uk.ac.ebi.microarray.pools.PoolUtils;
+import org.kchine.rpf.PoolUtils;
+
 
 import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;

@@ -95,7 +95,7 @@
 	<target name="demogen" depends="initializeProperties,compile">		
 			<mkdir dir="${demo.generatedir}" />
 		
-			<java classname="uk.ac.ebi.microarray.pools.PropertiesGenerator" fork="true" >
+			<java classname="org.kchine.rpf.PropertiesGenerator" fork="true" >
 					<classpath>
 						<pathelement path="${CORE_JAR}"/>
 						<pathelement path="${LOGGING_JAR}"/>
@@ -103,7 +103,7 @@
 					</classpath>					  
 				  	<arg value="${demo.generatedir}/globals.properties"/>
 				
-					<arg value="pools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB"/>
+					<arg value="pools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB"/>
 					<arg value="pools.dbmode.driver=${demo.db.driver}"/>
 					<arg value="pools.dbmode.url=${demo.db.url}"/>
 					<arg value="pools.dbmode.user=${demo.db.user}"/>

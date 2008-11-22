@@ -28,9 +28,11 @@ import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.kchine.rpf.PoolUtils;
+
 import remoting.RKit;
 import server.Java2DUtils;
-import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -79,7 +81,7 @@ public class LocalGraphicsServlet extends javax.servlet.http.HttpServlet impleme
 				}
 
 				device = _rgui.getR().newDevice(width, height);
-				_rgui.getR().sourceFromBuffer(new StringBuffer(command));				
+				_rgui.getR().sourceFromBuffer(command);				
 				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension(width,height), device.popAllGraphicObjects(-1)); 				
 				response.setContentType("image/jpeg");
 				ImageIO.write(bufferedImage, "jpg", response.getOutputStream());

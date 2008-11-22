@@ -8,7 +8,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 
 import server.ServerManager;
 
-import static uk.ac.ebi.microarray.pools.PoolUtils.*;
+import static org.kchine.rpf.PoolUtils.*;
 
 
 public class HttpServer {

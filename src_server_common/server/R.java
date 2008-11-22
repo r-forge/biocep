@@ -20,8 +20,9 @@ package server;
 
 import java.rmi.registry.Registry;
 
+import org.kchine.rpf.ServerDefaults;
+
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 public class R {
 	public static RServices _instance;

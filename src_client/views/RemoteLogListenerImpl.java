@@ -23,7 +23,8 @@ import java.rmi.server.UnicastRemoteObject;
 
 import javax.swing.SwingUtilities;
 
-import uk.ac.ebi.microarray.pools.RemoteLogListener;
+import org.kchine.rpf.RemoteLogListener;
+
 
 public class RemoteLogListenerImpl extends UnicastRemoteObject implements RemoteLogListener {
 	private ServerLogView _serverLogView;

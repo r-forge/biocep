@@ -1,18 +1,22 @@
 /*
- * Copyright (C) 2007  EMBL - EBI - Microarray Informatics
- * Copyright (C) 2007 - 2008  Karim Chine
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Biocep: R-based Platform for Computational e-Science.
+ *  
+ * Copyright (C) 2007-2009 Karim Chine - karim.chine@m4x.org
+ *  
+ * Copyright (C) 2007 EMBL-EBI-Microarray Informatics
+ *  
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server;
 
@@ -35,7 +39,8 @@ import org.bioconductor.packages.rservices.RList;
 import org.bioconductor.packages.rservices.RLogical;
 import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
-import uk.ac.ebi.microarray.pools.PoolUtils;
+import org.kchine.rpf.PoolUtils;
+
 import util.Utils;
 
 /**
@@ -118,7 +123,7 @@ public class Globals {
 				outputWriterWebservice.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
 				outputWriterWebservice
 						.println("import javax.jws.WebService;\nimport org.bioconductor.packages.rservices.*;" +
-								"import static  uk.ac.ebi.microarray.pools.PoolUtils.*;" 
+								"import static  org.kchine.rpf.PoolUtils.*;" 
 								+"import org.apache.commons.httpclient.HttpClient;"
 								+"import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;"
 								+"import remoting.RServices;" 
@@ -230,11 +235,11 @@ public class Globals {
 					outputWriterWebservice
 							.print(mHeader
 									+ ") throws Exception { remoting.RServices r=null;"
-									+  "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();");
+									+  "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();");
 					outputWriterWebservice.print(callStrRemoteImpl);
 					if (m.getReturnType() != null) { outputWriterWebservice.println("return result;"); }
 					outputWriterWebservice.println("} catch (Exception ex) {throw new Exception( util.Utils.getStackTraceAsString(ex) );} finally {"
-							+ "uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);" + "} }");
+							+ "org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);" + "} }");
 					
 
 					
@@ -542,45 +547,45 @@ public class Globals {
 							.println("\npublic String statelessEvaluate(String expression, int n) throws Exception { "
 									+ "remoting.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { String result =  r.evaluate(expression,n); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
-									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
+									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject statelessCall(String methodName, Object... args) throws Exception { "
 									+ "remoting.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { RObject result =  r.call(methodName, args); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
-									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
+									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void statelessCallAndAssign(String varName, String methodName, Object... args) throws Exception { "
 									+ "remoting.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { r.callAndAssign(varName, methodName, args); } catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
-									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
+									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject statelessGetObject(String expression) throws Exception { "
 									+ "remoting.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { RObject result =  r.getObject(expression); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
-									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
+									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statelessConsoleSubmit(String expression) throws Exception { "
 									+ "remoting.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { String result =  r.consoleSubmit(expression); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
-									+ "finally {uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
+									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 				}

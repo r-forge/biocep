@@ -39,6 +39,7 @@ import graphics.pop.GDDevice;
 import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GDApplet;
 import graphics.rmi.JGDPanelPop;
+import graphics.rmi.Macro;
 import graphics.rmi.RGui;
 import groovy.GroovyInterpreter;
 import java.awt.BorderLayout;
@@ -102,11 +103,12 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import org.bioconductor.packages.rservices.RObject;
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.YesSecurityManager;
+
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.YesSecurityManager;
-import static uk.ac.ebi.microarray.pools.PoolUtils.*;
 import static javax.swing.JOptionPane.*;
+import static org.kchine.rpf.PoolUtils.*;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -222,6 +224,14 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			}
 
 			public String getUID() {
+				return null;
+			}
+			
+			public String getInstallDir() {
+				return null;
+			}
+			public Vector<Macro> getMacros() {
+				// TODO Auto-generated method stub
 				return null;
 			}
 		};
@@ -545,6 +555,33 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 		setLayout(new BorderLayout());
 		add(new ToolBarColRow(), BorderLayout.NORTH);
 		add(main, BorderLayout.CENTER);
+		
+		
+		ss.getTable().addKeyListener(new KeyListener() {
+
+
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == 67 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK ) {
+					if (copy.isEnabled()) copy.actionPerformed(null); else Toolkit.getDefaultToolkit().beep();
+				} else if (e.getKeyCode() == 'V' && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK ) {
+					if (paste.isEnabled()) paste.actionPerformed(null); else Toolkit.getDefaultToolkit().beep();
+				} else if (e.getKeyCode() == 'X' && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK ) {
+					if (cut.isEnabled()) cut.actionPerformed(null); else Toolkit.getDefaultToolkit().beep();
+				}else if (e.getKeyCode() == 90 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
+					if (undo.isEnabled()) undo.actionPerformed(null); else Toolkit.getDefaultToolkit().beep();					
+				} else if (e.getKeyCode() == 89 && (e.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) {
+					if (redo.isEnabled()) redo.actionPerformed(null); else Toolkit.getDefaultToolkit().beep();
+				}
+
+			}
+
+			public void keyReleased(KeyEvent e) {
+			}
+
+			public void keyTyped(KeyEvent e) {
+			}
+
+		});
 	}
 
 	private void remove(boolean byRow) {

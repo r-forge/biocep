@@ -1,0 +1,3 @@
+<plugin>  
+	<view name="Basic Editor" class="BasicEditorView" />
+</plugin>

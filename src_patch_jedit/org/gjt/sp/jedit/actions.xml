@@ -2,7 +2,7 @@
 
 <!DOCTYPE ACTIONS SYSTEM "actions.dtd">
 
-<!-- Xml Patched by Karim Chine kchine@ebi.ac.uk to embed jEdit as a view of Virtual R Workbench -->
+<!-- Xml Patched by Karim Chine kchine@m4x.org to embed jEdit as a view of Virtual R Workbench -->
 
 <!-- jEdit action table                                                      -->
 <!-- Copyright (C) 2000, 2003 Slava Pestov                                   -->
@@ -895,40 +895,44 @@
 	</CODE>
 </ACTION>
 
+
+
+
+
 <ACTION NAME="run-r">
 	<CODE>
-		jEdit.runR(buffer.getPath());
+		org.gjt.sp.jedit.WorkbenchActions.runR(buffer.getPath());
 	</CODE>
 	
 	<IS_SELECTED>
-		return jEdit.isRunREnabled();
+		return org.gjt.sp.jedit.WorkbenchActions.isRunREnabled();
 	</IS_SELECTED>
 </ACTION>	
 
 <ACTION NAME="run-r-selection">
 	<CODE>
-		jEdit.runRSelection(buffer.getPath());
+		org.gjt.sp.jedit.WorkbenchActions.runRSelection(buffer.getPath());
 	</CODE>
 	
 	<IS_SELECTED>
-		return jEdit.isRunREnabled();
+		return org.gjt.sp.jedit.WorkbenchActions.isRunREnabled();
 	</IS_SELECTED>
 </ACTION>	
 
 <ACTION NAME="paste-console">
 	<CODE>
-		jEdit.pasteConsole(buffer.getPath());
+		org.gjt.sp.jedit.WorkbenchActions.pasteConsole(buffer.getPath());
 	</CODE>
 	
 	<IS_SELECTED>
-		return jEdit.isRunREnabled();
+		return org.gjt.sp.jedit.WorkbenchActions.isRunREnabled();
 	</IS_SELECTED>
 </ACTION>	
 
 
 <ACTION NAME="run-p">
 	<CODE>
-		jEdit.runP(buffer.getPath());
+		org.gjt.sp.jedit.WorkbenchActions.runP(buffer.getPath());
 	</CODE>
 	
 	<IS_SELECTED>
@@ -938,40 +942,46 @@
 
 <ACTION NAME="run-g">
 	<CODE>
-		jEdit.runG(buffer.getPath());
+		org.gjt.sp.jedit.WorkbenchActions.runG(buffer.getPath());
 	</CODE>
 	<IS_SELECTED>
-		return jEdit.isRunGEnabled();
+		return org.gjt.sp.jedit.WorkbenchActions.isRunGEnabled();
 	</IS_SELECTED>
 </ACTION>	
 			
 <ACTION NAME="run-pl">
 	<CODE>
-		jEdit.runPL(buffer.getPath());
+		org.gjt.sp.jedit.WorkbenchActions.runPL(buffer.getPath());
 	</CODE>
 	<IS_SELECTED>
-		return jEdit.isRunPLEnabled();
+		return org.gjt.sp.jedit.WorkbenchActions.isRunPLEnabled();
 	</IS_SELECTED>
 </ACTION>	
 
 <ACTION NAME="run-gl">
 	<CODE>
-		jEdit.runGL(buffer.getPath());
+		org.gjt.sp.jedit.WorkbenchActions.runGL(buffer.getPath());
 	</CODE>
 	<IS_SELECTED>
-		return jEdit.isRunGLEnabled();
+		return org.gjt.sp.jedit.WorkbenchActions.isRunGLEnabled();
 	</IS_SELECTED>
 </ACTION>	
 
 			
 <ACTION NAME="upload-r">
 	<CODE>
-		jEdit.uploadR(buffer.getPath());
+		org.gjt.sp.jedit.WorkbenchActions.uploadR(buffer.getPath());
 	</CODE>
 	<IS_SELECTED>
-		return jEdit.isUploadREnabled();
+		return org.gjt.sp.jedit.WorkbenchActions.isUploadREnabled();
 	</IS_SELECTED>
 </ACTION>	
+
+
+
+
+
+
 	
 <ACTION NAME="save-a-copy-as">
 	<CODE>

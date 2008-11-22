@@ -304,7 +304,20 @@ public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote , Htt
 		//System.out.println("historyAdd");
 		_device.historyAdd(clip);
 	}
+	
+	public void cellsChangeAdd(CellRange range) throws RemoteException {
+		_device.cellsChangeAdd(range);		
+	}
+	
+	public void cellsChangeAdd(CellRange range, int type) throws RemoteException {
+		_device.cellsChangeAdd(range, type);		
+	}
+	
+	public void cellsChangeAdd(SpreadsheetClipboard clip) throws RemoteException {
+		_device.cellsChangeAdd(clip);
+	}
 
+	
 	public void insertColumn(CellRange insertRange) throws RemoteException {
 		//System.out.println("insertColumn");
 		_device.insertColumn(insertRange);

@@ -37,11 +37,11 @@ import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
 import remoting.RServices;
 
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.RPFSessionInfo;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
-import uk.ac.ebi.microarray.pools.TimeoutException;
-import uk.ac.ebi.microarray.pools.YesSecurityManager;
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.RPFSessionInfo;
+import org.kchine.rpf.ServantProviderFactory;
+import org.kchine.rpf.TimeoutException;
+import org.kchine.rpf.YesSecurityManager;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -116,7 +116,7 @@ public class ParallelizedMatrixProduct {
 
 								try {
 
-									rp = (RServices) uk.ac.ebi.microarray.pools.ServantProviderFactory.getFactory()
+									rp = (RServices) org.kchine.rpf.ServantProviderFactory.getFactory()
 											.getServantProvider().borrowServantProxy();
 
 									rp.putAndAssign(new RNumeric(v1), "rv1");
@@ -233,59 +233,6 @@ public class ParallelizedMatrixProduct {
 	}
 
 	static Remote cservant = null;
-	static {
-		/*		
-		 try {		
-		
-		 GenericObjectPool gop=ServantProxyPoolSingletonDB.getInstance("RSERVANT_", "com.mysql.jdbc.Driver", "jdbc:mysql://172.22.68.47/DWEP", "DWEP", "DWEP");
-		 RServices rservice=null;
-		 long t1,t2;
-		
-		
-		 for (int i=0; i<100; ++i) {
-		 t1=System.currentTimeMillis();	
-		 rservice=(RServices)gop.borrowObject();			
-		 t2=System.currentTimeMillis();
-		 System.out.println(" *** borrowServantProxy took :"+(t2-t1));		
-		
-		 t1=System.currentTimeMillis();	
-		 gop.returnObject(rservice);			
-		 t2=System.currentTimeMillis();
-		 System.out.println(" *** returnServantProxy took :"+(t2-t1));
-		 }
-		
-		 System.exit(0);
-		
-		 } catch (Exception e) {
-		 e.printStackTrace();
-		 }
-		
-		 try {
-		
-		 Class.forName  ("com.mysql.jdbc.Driver");		
-		 Connection conn = DriverManager.getConnection("jdbc:mysql://172.22.68.47/DWEP", "DWEP", "DWEP");
-		
-		 //Class.forName  ("oracle.jdbc.OracleDriver");		
-		 //Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@progression.ebi.ac.uk:1521:AEDWT", "DWEP", "DWEP");
-		
-		 DBLayer registry=new DBLayer(conn);
-		 //registry.recreateTables();
-		
-		 Remote remote=null;
-		
-		 remote=registry.lookup("RSERVANT_1");
-		
-		 ((ManagedServant)remote).ping();
-		 System.out.println(remote);
-		
-		 } catch (Exception e) {
-		 e.printStackTrace();
-		 }
-		
-		 System.exit(0);
 
-		 */
-
-	}
 
 }

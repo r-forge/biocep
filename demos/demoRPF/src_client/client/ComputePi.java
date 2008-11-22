@@ -1,12 +1,12 @@
 package client;
 
 import java.math.BigDecimal;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
+import org.kchine.rpf.ServantProviderFactory;
 import compute.Compute;
-import uk.ac.ebi.microarray.pools.YesSecurityManager;
+import org.kchine.rpf.YesSecurityManager;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine kchine@m4x.org
  */
 public class ComputePi {
 	public static void main(String args[]) throws Exception {

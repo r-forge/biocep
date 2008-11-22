@@ -552,6 +552,17 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 		m.historyAdd(range,type);
 	}
 	
+	public void cellsChangeAdd(CellRange range) {
+		m.cellsChangeAdd(range);		
+	}
+	public void cellsChangeAdd(CellRange range, int type) {
+		m.cellsChangeAdd(range,type);		
+	}
+	
+	public void cellsChangeAdd(SpreadsheetClipboard clip) {
+		cellsChangeAdd(clip);		
+	}
+	
 	public void undo() {
 		m.undo();
 	}
@@ -578,6 +589,10 @@ public class SpreadsheetTableModelBis extends AbstractTableModel implements  Spr
 	
 	public void removeAllSpreadsheetListeners() {
 		m.removeAllSpreadsheetListeners();		
+	}
+	
+	public String getName() {
+		return null;
 	}
 
 }

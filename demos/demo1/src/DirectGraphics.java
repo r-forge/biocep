@@ -27,8 +27,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import remoting.RServices;
 import server.DirectJNI;
-import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
-import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
+import org.kchine.rpf.gui.ConsolePanel;
+import org.kchine.rpf.SubmitInterface;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

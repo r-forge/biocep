@@ -50,11 +50,13 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
+
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.ServerDefaults;
+import org.kchine.rpf.db.ConnectionProvider;
+import org.kchine.rpf.db.DBLayer;
+
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
-import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
-import uk.ac.ebi.microarray.pools.db.DBLayer;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

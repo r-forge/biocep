@@ -25,8 +25,10 @@ import java.io.ObjectOutputStream;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.kchine.rpf.PoolUtils;
+
 import remoting.RKit;
-import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

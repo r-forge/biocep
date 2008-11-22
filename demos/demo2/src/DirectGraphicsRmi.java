@@ -24,9 +24,9 @@ import java.rmi.Naming;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.YesSecurityManager;
-import uk.ac.ebi.microarray.pools.db.monitor.ConsoleDialog;
-import uk.ac.ebi.microarray.pools.db.monitor.ServantStatus;
+import org.kchine.rpf.YesSecurityManager;
+import org.kchine.rpf.db.monitor.ConsoleDialog;
+import org.kchine.rpf.db.monitor.ServantStatus;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

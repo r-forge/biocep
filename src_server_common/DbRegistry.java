@@ -16,8 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import static uk.ac.ebi.microarray.pools.PoolUtils.getDBType;
-import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
+import static org.kchine.rpf.PoolUtils.getDBType;
+import static org.kchine.rpf.PoolUtils.isWindowsOs;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -25,14 +26,16 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Vector;
+
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.ServerDefaults;
+import org.kchine.rpf.db.ConnectionProvider;
+import org.kchine.rpf.db.DBLayer;
+import org.kchine.rpf.db.NodeDataDB;
+import org.kchine.rpf.db.PoolDataDB;
+import org.kchine.rpf.db.RegenerateDB;
+
 import server.ServerManager;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
-import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
-import uk.ac.ebi.microarray.pools.db.DBLayer;
-import uk.ac.ebi.microarray.pools.db.NodeDataDB;
-import uk.ac.ebi.microarray.pools.db.PoolDataDB;
-import uk.ac.ebi.microarray.pools.db.RegenerateDB;
 
 
 public class DbRegistry {

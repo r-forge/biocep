@@ -32,7 +32,8 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import uk.ac.ebi.microarray.pools.PoolUtils;
+
+import org.kchine.rpf.PoolUtils;
 
 public  class SelectIdDialog extends JDialog {
 

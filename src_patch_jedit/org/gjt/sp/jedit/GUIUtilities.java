@@ -32,7 +32,7 @@ import java.util.*;
 import org.gjt.sp.jedit.browser.*;
 import org.gjt.sp.jedit.gui.*;
 import org.gjt.sp.jedit.gui.SplashScreen;
-import org.gjt.sp.jedit.jEdit.TaggedPanel;
+import org.gjt.sp.jedit.TaggedPanel;
 import org.gjt.sp.jedit.menu.*;
 import org.gjt.sp.jedit.syntax.SyntaxStyle;
 import org.gjt.sp.jedit.syntax.Token;

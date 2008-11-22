@@ -26,8 +26,8 @@ import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.vsn.Vsn;
 import org.bioconductor.packages.vsn.vsnFunction;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
-import uk.ac.ebi.microarray.pools.TimeoutException;
+import org.kchine.rpf.ServantProviderFactory;
+import org.kchine.rpf.TimeoutException;
 
 import util.Utils;
 

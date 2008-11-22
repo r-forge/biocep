@@ -280,6 +280,7 @@ public class JSpreadsheet extends JComponent
       tableModel.historyAdd(range);
       Debug.println("Clear");
       tableModel.clearRange(range);
+      tableModel.cellsChangeAdd(range);
    }
 
    /** Perfroms a clipboard function of COPY */
@@ -307,6 +308,7 @@ public class JSpreadsheet extends JComponent
       }
       tableModel.historyAdd(range);
       tableModel.fillRange(range, value);
+      tableModel.cellsChangeAdd(range);
    }
 
    /** Search for a given cell value
@@ -347,11 +349,13 @@ public class JSpreadsheet extends JComponent
       {
          tableModel.historyAdd(range, History.INSERTROW);
          tableModel.insertRow(range);
+         tableModel.cellsChangeAdd(range);
       }
       else
       {
     	  tableModel.historyAdd(range, History.INSERTCOLUMN);
-         tableModel.insertColumn(range);
+    	  tableModel.insertColumn(range);
+    	  tableModel.cellsChangeAdd(range);
       }
    }
 
@@ -394,6 +398,7 @@ public class JSpreadsheet extends JComponent
             tableModel.historyAdd(affectedRange);
             tableModel.fromString(trstring, '\t', rowOff, colOff, affectedRange);
             tableModel.fireSetSelection(null,affectedRange);
+            tableModel.cellsChangeAdd(affectedRange);
          }
          catch (Exception e)
          {
@@ -423,6 +428,7 @@ public class JSpreadsheet extends JComponent
          tableModel.removeRow(range);
          
          Debug.println("Delete row range " + range);
+         tableModel.cellsChangeAdd(range);
       }
       else
       {
@@ -430,6 +436,7 @@ public class JSpreadsheet extends JComponent
          tableModel.historyAdd(range, History.REMOVECOLUMN);
          Debug.println(range);
          tableModel.removeColumn(range);
+         tableModel.cellsChangeAdd(range);
                                     
       }
    }
@@ -463,6 +470,7 @@ public class JSpreadsheet extends JComponent
          second = first;
       }
       tableModel.sort(range, first, second, byRow, firstAscending, secondAscending);
+      tableModel.cellsChangeAdd(range);
    }
 
    /**
@@ -613,6 +621,9 @@ public class JSpreadsheet extends JComponent
          {
             tableModel.clearRange(range);
          }
+         
+         tableModel.cellsChangeAdd(range);
+         
       }
    }
 

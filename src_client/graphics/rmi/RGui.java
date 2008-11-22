@@ -23,6 +23,7 @@ import groovy.GroovyInterpreter;
 
 import java.awt.Component;
 import java.io.File;
+import java.util.Vector;
 
 import net.infonode.docking.View;
 import remoting.RKit;
@@ -50,5 +51,9 @@ public interface RGui extends RKit {
 	public String getUserName(); 
 	
 	public String getUID();
+	
+	public String getInstallDir();
+	
+	public Vector<Macro> getMacros();
 	
 }

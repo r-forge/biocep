@@ -1887,6 +1887,23 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 	public void historyAdd(CellRange range, int type) {
 		history.add(range,type);
 	}
+
+	public void cellsChangeAdd(CellRange range) {
+		
+	}
+	
+	public void cellsChangeAdd(CellRange range, int type) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void cellsChangeAdd(SpreadsheetClipboard clip) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
+	
 	
 	public void undo() {
 		um.undo();
@@ -2008,4 +2025,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Spreads
 		_spreadsheetListeners.removeAllElements();		
 	}
 
+	
+	public String getName() {
+		return null;
+	}
 }

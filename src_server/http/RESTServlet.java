@@ -40,10 +40,12 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.ServantProviderFactory;
+
 import remoting.RServices;
 import server.Java2DUtils;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -165,11 +167,11 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 					}
 						
 					
-					if (!init_command.equals("")) r.sourceFromBuffer(new StringBuffer(init_command));
+					if (!init_command.equals("")) r.sourceFromBuffer(init_command);
 					System.out.println(r.getStatus());
 					
 					if (request.getParameter("expression")==null) {
-						r.sourceFromBuffer(new StringBuffer(command));
+						r.sourceFromBuffer(command);
 					} else {
 						r.consoleSubmit(command);
 					}

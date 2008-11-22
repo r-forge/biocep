@@ -1,6 +1,6 @@
-import static uk.ac.ebi.microarray.pools.PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT;
-import static uk.ac.ebi.microarray.pools.PoolUtils.cacheJar;
-import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
+import static org.kchine.rpf.PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT;
+import static org.kchine.rpf.PoolUtils.cacheJar;
+import static org.kchine.rpf.PoolUtils.isWindowsOs;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,9 +10,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Vector;
 
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.ServerDefaults;
+
 import server.ServerManager;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 
 public class DbRegistryOff {

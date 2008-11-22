@@ -18,9 +18,9 @@
  */
 package registry;
 
-import static uk.ac.ebi.microarray.pools.PoolUtils.getHostIp;
-import static uk.ac.ebi.microarray.pools.PoolUtils.getHostName;
-import static uk.ac.ebi.microarray.pools.PoolUtils.getProcessId;
+import static org.kchine.rpf.PoolUtils.getHostIp;
+import static org.kchine.rpf.PoolUtils.getHostName;
+import static org.kchine.rpf.PoolUtils.getProcessId;
 import http.NotLoggedInException;
 import http.RHttpProxy;
 
@@ -34,9 +34,9 @@ import java.util.HashMap;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.kchine.rpf.RegistryProvider;
+import org.kchine.rpf.db.DBLayerInterface;
 
-import uk.ac.ebi.microarray.pools.RegistryProvider;
-import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 
 public class URLRegistry implements RegistryProvider{
 	

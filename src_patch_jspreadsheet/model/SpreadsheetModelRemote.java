@@ -55,8 +55,11 @@ public interface SpreadsheetModelRemote extends TableModelRemote {
 	 public void historyAdd(CellRange range) throws RemoteException;
 	 public void historyAdd(SpreadsheetClipboard clip) throws RemoteException;
 	 public void historyAdd(CellRange range, int type) throws RemoteException;
-		
-	 
+	 	 
+	 public void cellsChangeAdd(CellRange range) throws RemoteException;
+	 public void cellsChangeAdd(SpreadsheetClipboard clip) throws RemoteException;
+	 public void cellsChangeAdd(CellRange range, int type) throws RemoteException;
+			 
 	 public void addSpreadsheetListener(SpreadsheetListenerRemote l) throws RemoteException;
 	 public void removeSpreadsheetListener(SpreadsheetListenerRemote l)throws RemoteException;
 	 public void removeAllSpreadsheetListeners()throws RemoteException;

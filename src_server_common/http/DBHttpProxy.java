@@ -23,9 +23,9 @@ import java.util.HashMap;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.kchine.rpf.db.DBLayerInterface;
+import org.kchine.rpf.db.monitor.RegistryProvider;
 
-import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
-import uk.ac.ebi.microarray.pools.db.monitor.RegistryProvider;
 
 public class DBHttpProxy implements RegistryProvider{ 
 	public Registry getRegistry() throws Exception {

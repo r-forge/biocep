@@ -367,7 +367,7 @@
 		<if><not><isset property="use.default.libs"/></not><then><property name="use.default.libs" value=""/></then></if>
 		
 		
-		<java maxmemory="256m" classname="uk.ac.ebi.microarray.pools.MainServer"
+		<java maxmemory="256m" classname="org.kchine.rpf.MainServer"
 			fork="true" spawn="${spawn}">
 			
 			<classpath>
@@ -471,7 +471,7 @@
 			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
 			
-			<jvmarg	value="-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A2=org.kchine.rpf.RemoteAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
 			
@@ -606,7 +606,7 @@
 		<if><not><isset property="unbindall"/></not><then><property name="unbindall" value=""/></then></if>
 		<if><not><isset property="invoke"/></not><then><property name="invoke" value=""/></then></if>
 		
-		<java classname="uk.ac.ebi.microarray.pools.MainRegistry" fork="true"
+		<java classname="org.kchine.rpf.MainRegistry" fork="true"
 			spawn="${spawn}">
 			<classpath>
 				<pathelement path="${RPF_JAR}"/>
@@ -631,7 +631,7 @@
 		<if><not><isset property="env.BIOCEP_SRC_HOME"/></not><then><property name="biocep.src.home" value="."/></then><else><property name="biocep.src.home" value="${env.BIOCEP_SRC_HOME}"/></else></if>
 		<if><not><isset property="db.initscript"/></not><then><property name="db.initscript" value=""/></then></if>		
 
-		<java classname="uk.ac.ebi.microarray.pools.db.RegenerateDB" fork="true" newenvironment="">
+		<java classname="org.kchine.rpf.db.RegenerateDB" fork="true" newenvironment="">
 			
 			<classpath>
 				<pathelement path="${CORE_JAR}"/>
@@ -711,7 +711,7 @@
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>		
 		
-		<java classname="uk.ac.ebi.microarray.pools.db.monitor.Supervisor"
+		<java classname="org.kchine.rpf.db.monitor.Supervisor"
 			fork="true" spawn="${spawn}">
 			
 			<classpath>
@@ -766,7 +766,7 @@
 		<if><not><isset property="job"/></not><then><property name="job" value="java"/></then></if>
 		<if><not><isset property="server"/></not><then><property name="server" value="true"/></then></if>		
 		
-		<java classname="uk.ac.ebi.microarray.pools.db.MainNodeManager"
+		<java classname="org.kchine.rpf.db.MainNodeManager"
 			fork="true" spawn="${spawn}">
 			
 			<classpath>
@@ -839,7 +839,7 @@
 			</classpath>
 			
 			<jvmarg value="-Djava.rmi.server.codebase=${clientjarurls}"/>			
-			<jvmarg	value="-Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB"/>
+			<jvmarg	value="-Dpools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB"/>
 
 			
 			<jvmarg value="-Dpools.dbmode.type=${client.db.type}"/>
@@ -1058,7 +1058,7 @@
 			<jvmarg value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
-			<jvmarg	value="-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A2=org.kchine.rpf.RemoteAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
 			
@@ -1078,7 +1078,7 @@
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
 			
-		<java maxmemory="128m" classname="uk.ac.ebi.microarray.pools.SSHTunnelingWorker"
+		<java maxmemory="128m" classname="org.kchine.rpf.SSHTunnelingWorker"
 			fork="true" spawn="${spawn}">
 			
 			<classpath>
@@ -1106,7 +1106,7 @@
 			<jvmarg value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A1.layout.ConversionPattern= [%-5p] - %m%n"/>
-			<jvmarg	value="-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender"/>
+			<jvmarg	value="-Dlog4j.appender.A2=org.kchine.rpf.RemoteAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
 			
@@ -1398,7 +1398,7 @@
 		
 		<if><not><isset property="db.initscript"/></not><then><property name="db.initscript" value=""/></then></if>		
 	
-		<java classname="uk.ac.ebi.microarray.pools.db.KillAllDB" fork="true">
+		<java classname="org.kchine.rpf.db.KillAllDB" fork="true">
 			<classpath>
 				<pathelement path="${CORE_JAR}"/>
 				<pathelement path="${LOGGING_JAR}"/>
@@ -1447,7 +1447,7 @@
 			
 		<if><not><isset property="stub"/></not><then><property name="stub" value=""/></then></if>
 		
-		<java classname="uk.ac.ebi.microarray.pools.KillAll" fork="true">
+		<java classname="org.kchine.rpf.KillAll" fork="true">
 			<classpath>
 				<pathelement path="${CORE_JAR}"/>
 				<pathelement path="${LOGGING_JAR}"/>
@@ -1616,7 +1616,7 @@
 			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.SMarkerInterfaceRemoteImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.DependentRemoteImpl"/>
 		
-			<rmic classpath="binsrv" base="binsrv" classname="uk.ac.ebi.microarray.pools.db.NodeManagerImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.rpf.db.NodeManagerImpl"/>
 				
 			<for list="${src_srv_target}" param="source" delimiter=":">
 			  <sequential>
@@ -1637,7 +1637,8 @@
 				</copy>
 			  </sequential>
 			</for>
-		
+				
+				
 			<java classname="server.ListResources" fork="true" >
 				<classpath>
 					<pathelement path="${LOGGING_JAR}"/>					
@@ -1645,7 +1646,7 @@
 				</classpath>					  				
 				<arg value="${basedir}/binsrv"/>
 			</java>	
-		
+			
 			<unjar src="${JRI_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="${LOGGING_JAR}"  dest="binsrv" overwrite="true"/>
 			<unjar src="${LOG4J_JAR}"  dest="binsrv" overwrite="true"/>
@@ -1988,7 +1989,7 @@
 		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.DependentRemoteImpl"/>
 
 		
-		<rmic classpath="bin" base="bin" classname="uk.ac.ebi.microarray.pools.db.NodeManagerImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.rpf.db.NodeManagerImpl"/>
 		
 		<for list="${src_compile_target}" param="source" delimiter=":">
 		  <sequential>

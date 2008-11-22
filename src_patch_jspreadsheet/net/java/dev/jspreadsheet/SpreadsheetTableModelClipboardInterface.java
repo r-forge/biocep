@@ -54,6 +54,10 @@ public interface SpreadsheetTableModelClipboardInterface {
 	public void historyAdd(CellRange range);
 	public void historyAdd(SpreadsheetClipboard clip);
 	public void historyAdd(CellRange range, int type);
+
+	public void cellsChangeAdd(CellRange range);
+	public void cellsChangeAdd(SpreadsheetClipboard clip);
+	public void cellsChangeAdd(CellRange range, int type);	
 	
 	public void undo();
 	public boolean canUndo();	
@@ -63,6 +67,9 @@ public interface SpreadsheetTableModelClipboardInterface {
 	public void addSpreadsheetListener(SpreadsheetListener l);
 	public void removeSpreadsheetListener(SpreadsheetListener l);
 	public void removeAllSpreadsheetListeners();
+	
+	public String getName();
+	
 	
 		
 }

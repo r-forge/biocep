@@ -20,7 +20,7 @@
  */ 
 package graphics.rmi;
 
-import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
+import static org.kchine.rpf.PoolUtils.unzip;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -52,12 +52,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.kchine.rpf.PoolUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import server.ServerManager;
-import uk.ac.ebi.microarray.pools.PoolUtils;
 import util.Utils;
 
 /**

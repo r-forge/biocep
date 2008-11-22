@@ -20,8 +20,8 @@
  */
 package http;
 
-import static uk.ac.ebi.microarray.pools.PoolUtils.DEFAULT_MEMORY_MAX;
-import static uk.ac.ebi.microarray.pools.PoolUtils.DEFAULT_MEMORY_MIN;
+import static org.kchine.rpf.PoolUtils.DEFAULT_MEMORY_MAX;
+import static org.kchine.rpf.PoolUtils.DEFAULT_MEMORY_MIN;
 import graphics.pop.GDDevice;
 
 import java.io.IOException;
@@ -46,6 +46,20 @@ import model.SpreadsheetModelDevice;
 import model.SpreadsheetModelRemote;
 
 import org.apache.commons.logging.Log;
+import org.kchine.rpf.LocalRmiRegistry;
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.RPFSessionInfo;
+import org.kchine.rpf.RmiCallInterrupted;
+import org.kchine.rpf.RmiCallTimeout;
+import org.kchine.rpf.SSHTunnelingProxy;
+import org.kchine.rpf.SSHUtils;
+import org.kchine.rpf.ServantProvider;
+import org.kchine.rpf.ServantProviderFactory;
+import org.kchine.rpf.ServerDefaults;
+import org.kchine.rpf.YesSecurityManager;
+import org.kchine.rpf.db.DBLayer;
+import org.kchine.rpf.db.DBLayerInterface;
+import org.kchine.rpf.db.monitor.SupervisorUtils;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
 
 import remoting.GenericCallbackDevice;
@@ -54,20 +68,6 @@ import remoting.RServices;
 import server.ExtendedReentrantLock;
 import server.LocalHttpServer;
 import server.ServerManager;
-import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.RPFSessionInfo;
-import uk.ac.ebi.microarray.pools.RmiCallInterrupted;
-import uk.ac.ebi.microarray.pools.RmiCallTimeout;
-import uk.ac.ebi.microarray.pools.SSHTunnelingProxy;
-import uk.ac.ebi.microarray.pools.SSHUtils;
-import uk.ac.ebi.microarray.pools.ServantProvider;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
-import uk.ac.ebi.microarray.pools.YesSecurityManager;
-import uk.ac.ebi.microarray.pools.db.DBLayer;
-import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
-import uk.ac.ebi.microarray.pools.db.monitor.SupervisorUtils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -182,7 +182,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 								if (System.getProperty("submit.mode").equals("ssh")) {
 									r = (RServices) ((DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
 							        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
-							                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
+							                "java -Dpools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar org.kchine.rpf.SSHTunnelingWorker %{file}",
 							                "db",new Class<?>[]{DBLayerInterface.class})).lookup(sname);
 								} else {								
 									ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
@@ -229,7 +229,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									
 							        DBLayerInterface dbLayer =(DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
 					        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
-					                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
+					                "java -Dpools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar org.kchine.rpf.SSHTunnelingWorker %{file}",
 					                "db",new Class<?>[]{DBLayerInterface.class});
 									if (privateName != null && !privateName.equals("")) {
 										try {
@@ -317,7 +317,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									
 									ServantProvider servantProvider =(ServantProvider)SSHTunnelingProxy.getDynamicProxy(
 							        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
-							                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
+							                "java -Dpools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar org.kchine.rpf.SSHTunnelingWorker %{file}",
 							                "servant.provider",new Class<?>[]{ServantProvider.class});									
 									boolean wait = options.keySet().contains("wait") && ((String) options.get("wait")).equalsIgnoreCase("true");									
 									String poolname=((String) options.get("poolname"));

@@ -81,6 +81,19 @@ public class SpreadsheetModelDeviceImpl extends UnicastRemoteObject implements S
 		m.historyAdd(clip);
 	}
 	
+	public void cellsChangeAdd(CellRange range) throws RemoteException {
+		m.cellsChangeAdd(range);		
+	}
+	
+	public void cellsChangeAdd(CellRange range, int type) throws RemoteException {
+		m.cellsChangeAdd(range, type);		
+	}
+	
+	public void cellsChangeAdd(SpreadsheetClipboard clip) throws RemoteException {
+		m.cellsChangeAdd(clip);		
+	}
+	
+	
 	public void insertColumn(CellRange insertRange) throws RemoteException {
 		m.insertColumn(insertRange);
 	}

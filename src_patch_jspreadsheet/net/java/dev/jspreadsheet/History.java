@@ -1,9 +1,14 @@
 package net.java.dev.jspreadsheet;
 
+import java.util.HashMap;
+
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
+
+import remoting.RConsoleAction;
+import server.DirectJNI;
 
 
 /** This is the class to support nearly-arbitrary undo/redo operations.
@@ -44,17 +49,33 @@ public class History extends UndoableEditSupport
 	   this.model=model;
    }
 
+   
+   public void fireCellsChangeEvent(CellRange range) { 
+   
+			HashMap<String, Object> attrs = new HashMap<String, Object>();
+			attrs.put("name", model.getName());
+			attrs.put("range", range);
+			DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("CELLS_CHANGE", attrs));
+	
+   }
+   
    /**
     * This adds the range of cells to the history.
     *
     * @param model the SharpTableModel we operate on
     * @param range the cell range the operation will affect
     */
+   
+   
+   
    public void add(CellRange range)
    {
       // construct the clipboard to be saved
       SpreadsheetClipboard clip = new SpreadsheetClipboard(model, range, false);
       add(clip);
+      
+      //if (model.getName()!=null) fireCellsChangeEvent(model,range);
+
    }
 
    /**
@@ -116,6 +137,10 @@ public class History extends UndoableEditSupport
       model.setModified(true);
 
       //sharp.checkUndoRedoState();
+      
+      //if (model.getName()!=null) fireCellsChangeEvent(model,range);
+      
+      
    }
 
    void setTableModel(SpreadsheetTableModelClipboardInterface model)
@@ -179,6 +204,9 @@ public class History extends UndoableEditSupport
       }
 
       model.setModified(true);
+      
+      
+      if (model.getName()!=null) fireCellsChangeEvent(range);
    }
 
    /**
@@ -243,6 +271,10 @@ public class History extends UndoableEditSupport
       // recover the selection
       model.fireSetSelection(null,range);
       model.setModified(true);
+      
+      if (model.getName()!=null) fireCellsChangeEvent(range);
+      
+      
    }
 
    class UndoableUpdate extends AbstractUndoableEdit

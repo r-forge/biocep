@@ -608,6 +608,36 @@ public class ModelUtils {
 				}				
 			}
 			
+			
+			
+			@Override
+			public void cellsChangeAdd(CellRange range) {
+				try {					
+					 spreadsheetModelRemote.cellsChangeAdd(range);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
+			@Override
+			public void cellsChangeAdd(SpreadsheetClipboard clip) {
+				try {					
+					 spreadsheetModelRemote.cellsChangeAdd(clip);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
+			@Override
+			public void cellsChangeAdd(CellRange range, int type) {
+				try {					
+					 spreadsheetModelRemote.cellsChangeAdd(range,type);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}				
+			}
+			
+			
 			@Override
 			public boolean canUndo() {
 				try {					

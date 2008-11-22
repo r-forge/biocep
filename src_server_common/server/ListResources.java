@@ -23,7 +23,8 @@ import java.io.FileOutputStream;
 import java.util.Properties;
 import java.util.Vector;
 
-import uk.ac.ebi.microarray.pools.PoolUtils;
+import org.kchine.rpf.PoolUtils;
+
 
 public class ListResources {
 	/**
