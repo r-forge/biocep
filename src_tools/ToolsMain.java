@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
-import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -34,9 +32,12 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 
+import org.kchine.rpf.ServerDefaults;
+
 import server.ServantCreationFailed;
 import server.ServerManager;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
+import static org.kchine.rpf.PoolUtils.isWindowsOs;
+import static org.kchine.rpf.PoolUtils.unzip;
 import static server.ServerManager.*;
 
 public class ToolsMain {
@@ -307,7 +308,7 @@ public class ToolsMain {
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender" + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
-		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender" + (isWindowsOs() ? "\"" : ""));
+		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=org.kchine.rpf.RemoteAppender" + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
 		command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
 
@@ -377,7 +378,7 @@ public class ToolsMain {
 			if (embedPropertiesDefaultValues[i] != null)
 				genArgs.add(embedPropertiesNames[i] + "=" + embedPropertiesDefaultValues[i]);
 		}
-		uk.ac.ebi.microarray.pools.PropertiesGenerator.main((String[]) genArgs.toArray(new String[0]));
+		org.kchine.rpf.PropertiesGenerator.main((String[]) genArgs.toArray(new String[0]));
 
 		HashMap<String, String> argMap = new HashMap<String, String>();
 		String[] argNames = new String[] { "file", "dir", "outputdir", "mappingjar", "warname", "propsembed", "keepintermediate", "formatsource", "ws.r.api",

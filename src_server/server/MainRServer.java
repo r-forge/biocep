@@ -18,7 +18,7 @@
  */
 package server;
 
-import uk.ac.ebi.microarray.pools.MainServer;
+import org.kchine.rpf.MainServer;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

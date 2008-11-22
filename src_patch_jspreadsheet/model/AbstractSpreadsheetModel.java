@@ -18,6 +18,8 @@
  */
 package model;
 
+import java.rmi.RemoteException;
+
 import javax.swing.table.AbstractTableModel;
 import net.java.dev.jspreadsheet.Cell;
 import net.java.dev.jspreadsheet.CellPoint;
@@ -45,6 +47,10 @@ abstract public class AbstractSpreadsheetModel extends AbstractTableModel {
 	abstract public void historyAdd(CellRange range);
 	abstract public void historyAdd(SpreadsheetClipboard clip);
 	abstract public void historyAdd(CellRange range, int type);
+	
+	abstract public void cellsChangeAdd(CellRange range);
+	abstract public void cellsChangeAdd(SpreadsheetClipboard clip);
+	abstract public void cellsChangeAdd(CellRange range, int type);
 		
 	abstract public void undo();
 	abstract public boolean canUndo();	

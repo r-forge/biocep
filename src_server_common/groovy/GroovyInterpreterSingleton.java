@@ -86,13 +86,13 @@ public class GroovyInterpreterSingleton {
 								return _status;
 							}
 							
-							public String execFromBuffer(StringBuffer buffer) throws Exception {
+							public String execFromBuffer(String buffer) throws Exception {
 								
 								File tempFile = null;
 								tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_"+System.currentTimeMillis()).getCanonicalFile();
 								if (tempFile.exists())tempFile.delete();								
 							
-								BufferedReader breader = new BufferedReader(new StringReader(buffer.toString()));
+								BufferedReader breader = new BufferedReader(new StringReader(buffer));
 								PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
 								String line;
 								boolean rscriptingOn=false;

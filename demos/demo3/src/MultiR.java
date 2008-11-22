@@ -22,8 +22,8 @@ import org.bioconductor.packages.biobase.ExpressionSet;
 import org.bioconductor.packages.rservices.RNamedArgument;
 import org.bioconductor.packages.vsn.Vsn;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
-import uk.ac.ebi.microarray.pools.TimeoutException;
+import org.kchine.rpf.ServantProviderFactory;
+import org.kchine.rpf.TimeoutException;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

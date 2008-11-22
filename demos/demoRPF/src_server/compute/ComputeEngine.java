@@ -5,10 +5,10 @@ import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.Date;
 
-import uk.ac.ebi.microarray.pools.ManagedServantAbstract;
+import org.kchine.rpf.ManagedServantAbstract;
 
 /**
- * @author Karim Chine kchine@ebi.ac.uk
+ * @author Karim Chine kchine@m4x.org
  */
 public class ComputeEngine extends ManagedServantAbstract implements Compute {
 

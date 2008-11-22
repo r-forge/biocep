@@ -35,7 +35,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import uk.ac.ebi.microarray.pools.PoolUtils;
+import org.kchine.rpf.PoolUtils;
+
 
 public  class DimensionsDialog extends JDialog {
 	static String rownum_str = "300";

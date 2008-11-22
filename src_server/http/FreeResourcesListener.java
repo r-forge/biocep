@@ -30,15 +30,16 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.kchine.rpf.SSHTunnelingProxy;
+import org.kchine.rpf.SSHUtils;
+import org.kchine.rpf.ServantProvider;
+import org.kchine.rpf.ServantProviderFactory;
+
 import remoting.GenericCallbackDevice;
 import remoting.RServices;
 import server.GenericCallbackDeviceImpl;
 import server.ServerManager;
 
-import uk.ac.ebi.microarray.pools.SSHTunnelingProxy;
-import uk.ac.ebi.microarray.pools.SSHUtils;
-import uk.ac.ebi.microarray.pools.ServantProvider;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
 
 /**
  * @author Karim Chine   karim.chine@m4x.org
@@ -168,7 +169,7 @@ public class FreeResourcesListener implements HttpSessionListener {
 				if (System.getProperty("submit.mode").equals("ssh")) {
 					ServantProvider servantProvider =(ServantProvider)SSHTunnelingProxy.getDynamicProxy(
 			        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
-			                "java -Dpools.provider.factory=uk.ac.ebi.microarray.pools.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar uk.ac.ebi.microarray.pools.SSHTunnelingWorker %{file}",
+			                "java -Dpools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar org.kchine.rpf.SSHTunnelingWorker %{file}",
 			                "servant.provider",new Class<?>[]{ServantProvider.class});
 					servantProvider.returnServantProxy(rservices);
 				} else {				

@@ -37,6 +37,8 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.kchine.rpf.PoolUtils;
+
 import remoting.RAction;
 import remoting.RCallBack;
 import remoting.GenericCallbackDevice;
@@ -44,7 +46,6 @@ import remoting.RCollaborationListener;
 import remoting.RConsoleAction;
 import remoting.RConsoleActionListener;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.PoolUtils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

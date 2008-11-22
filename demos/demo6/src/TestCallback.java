@@ -24,7 +24,7 @@ import java.util.HashMap;
 
 import remoting.RCallBack;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
+import org.kchine.rpf.ServantProviderFactory;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

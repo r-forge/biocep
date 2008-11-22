@@ -54,6 +54,12 @@ import model.SpreadsheetModelRemote;
 import model.SpreadsheetModelRemoteImpl;
 import org.apache.commons.logging.Log;
 import org.bioconductor.packages.rservices.RObject;
+import org.kchine.rpf.InitializingException;
+import org.kchine.rpf.LocalRmiRegistry;
+import org.kchine.rpf.ManagedServantAbstract;
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.RemotePanel;
+import org.kchine.rpf.db.DBLayerInterface;
 import org.mortbay.component.Container;
 import org.mortbay.component.Container.Relationship;
 import org.mortbay.jetty.Handler;
@@ -79,12 +85,6 @@ import remoting.RKit;
 import remoting.RNI;
 import remoting.RServices;
 import remoting.UserStatus;
-import uk.ac.ebi.microarray.pools.InitializingException;
-import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
-import uk.ac.ebi.microarray.pools.ManagedServantAbstract;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.RemotePanel;
-import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import util.Utils;
 
 /**
@@ -131,6 +131,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				
 		log.info("Stub:" + PoolUtils.stubToHex(this));
 		
+		
 		if (System.getProperty("preloadall")!=null && System.getProperty("preloadall").equalsIgnoreCase("true") )
 		{			
 			try {
@@ -154,6 +155,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				//e.printStackTrace();
 			}
 		}
+		
 		
 		if (System.getProperty("http.port")!=null && !System.getProperty("http.port").equals("")) {
 			try {
@@ -439,7 +441,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
-	public String sourceFromBuffer(StringBuffer buffer) throws RemoteException {
+	public String sourceFromBuffer(String buffer) throws RemoteException {
 		String result = DirectJNI.getInstance().getRServices().sourceFromBuffer(buffer);
 		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
@@ -604,7 +606,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 			}
 
 			RListener.stopAllClusters();
-			RListener.removeAllRCallbacks();
+			DirectJNI.getInstance().removeAllRCallbacks();
 			try {
 				DirectJNI.getInstance().regenerateWorkingDirectory(true);
 			} catch (Exception e) {
@@ -657,7 +659,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				attrs.put("command", cmd);
 				attrs.put("result", result);
 				consoleLogAppend.setAttributes(attrs);
-				RListener.notifyRActionListeners(consoleLogAppend);
+				DirectJNI.getInstance().notifyRActionListeners(consoleLogAppend);
 			}
 		}).start();
 
@@ -754,7 +756,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().listDemos();
 	}
 
-	public StringBuffer getDemoSource(String demoName) throws RemoteException {
+	public String getDemoSource(String demoName) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getDemoSource(demoName);
 	}
 
@@ -902,7 +904,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().pythonExec(pythonCommand);
 	}
 
-	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException {
+	public String pythonExecFromBuffer(String buffer) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().pythonExecFromBuffer(buffer);
 	}
 
@@ -938,7 +940,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().groovyExec(groovyCommand);
 	}
 
-	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException {
+	public String groovyExecFromBuffer(String buffer) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().groovyExecFromBuffer(buffer);
 	}
 
@@ -1018,5 +1020,45 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return super.getStub();
 	}
 	
+	
+    public void addProbeOnVariables(String[] variables) throws RemoteException {
+    	DirectJNI.getInstance().getRServices().addProbeOnVariables(variables);
+    }
+    
+    public void removeProbeOnVariables(String[] variables) throws RemoteException{
+    	DirectJNI.getInstance().getRServices().removeProbeOnVariables(variables);
+    }
+    
+    public String[] getProbedVariables() throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().getProbedVariables();
+    }
+    
+    public String[] getMissingLibraries(String[] requiredLibraries) throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().getMissingLibraries(requiredLibraries);
+    }
+    
+    public RObject cellsGet(String range , String type, String spreadsheetName ) throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().cellsGet( range ,  type,  spreadsheetName );
+    }
+    
+    public Object cellsGetConverted(String range , String type, String spreadsheetName ) throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().cellsGetConverted( range ,  type,  spreadsheetName );
+    }
+    
+    public void  cellsPut(Object value , String location, String spreadsheetName ) throws RemoteException {
+    	DirectJNI.getInstance().getRServices().cellsPut( value ,  location,  spreadsheetName );
+    }
+
+    public void addProbeOnCells(String spreadsheetName) throws RemoteException{
+    	DirectJNI.getInstance().getRServices().addProbeOnCells( spreadsheetName );
+    }
+    
+    public boolean isProbeOnCell(String spreadsheetName) throws RemoteException{
+    	return DirectJNI.getInstance().getRServices().isProbeOnCell(  spreadsheetName );
+    }
+    
+    public void removeProbeOnCells(String spreadsheetName) throws RemoteException{
+    	DirectJNI.getInstance().getRServices().removeProbeOnCells( spreadsheetName );
+    }
 		
 }

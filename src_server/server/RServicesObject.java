@@ -26,6 +26,9 @@ import mapping.RPackage;
 import model.SpreadsheetModelRemote;
 
 import org.bioconductor.packages.rservices.RObject;
+import org.kchine.rpf.ManagedServant;
+import org.kchine.rpf.RemoteLogListener;
+import org.kchine.rpf.RemotePanel;
 import org.rosuda.ibase.SVarInterfaceRemote;
 import org.rosuda.ibase.SVarSetInterfaceRemote;
 
@@ -37,9 +40,6 @@ import remoting.RConsoleActionListener;
 import remoting.RNI;
 import remoting.RServices;
 import remoting.UserStatus;
-import uk.ac.ebi.microarray.pools.ManagedServant;
-import uk.ac.ebi.microarray.pools.RemoteLogListener;
-import uk.ac.ebi.microarray.pools.RemotePanel;
 
 /**
  * @author Karim Chine   karim.chine@m4x.org
@@ -182,7 +182,7 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public StringBuffer getDemoSource(String demoName) throws RemoteException {
+	public String getDemoSource(String demoName) throws RemoteException {
 		return null;
 	}
 
@@ -286,7 +286,7 @@ public class RServicesObject implements RServices {
 	public void setProgressiveConsoleLogEnabled(boolean progressiveLog) throws RemoteException {
 	}
 
-	public String sourceFromBuffer(StringBuffer buffer) throws RemoteException {
+	public String sourceFromBuffer(String buffer) throws RemoteException {
 		return null;
 	}
 
@@ -330,7 +330,7 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException {
+	public String pythonExecFromBuffer(String buffer) throws RemoteException {
 		return null;
 	}
 
@@ -381,7 +381,7 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException {
+	public String groovyExecFromBuffer(String buffer) throws RemoteException {
 		return null;
 	}
 
@@ -562,6 +562,56 @@ public class RServicesObject implements RServices {
 	public String getStub() throws RemoteException {
 
 		return null;
+	}
+	
+	public void addProbeOnCells(String spreadsheetName) {
+
+		
+	}
+	
+	public void addProbeOnVariables(String[] variables) throws RemoteException {
+
+		
+	}
+	
+	public RObject cellsGet(String range, String type, String spreadsheetName) throws RemoteException {
+
+		return null;
+	}
+	
+	public Object cellsGetConverted(String range, String type, String spreadsheetName) throws RemoteException {
+
+		return null;
+	}
+	
+	public void cellsPut(Object value, String location, String spreadsheetName) throws RemoteException {
+
+		
+	}
+	
+	public String[] getMissingLibraries(String[] requiredLibraries) throws RemoteException {
+
+		return null;
+	}
+	
+	public String[] getProbedVariables() throws RemoteException {
+
+		return null;
+	}
+	
+	public boolean isProbeOnCell(String spreadsheetName)throws RemoteException {
+
+		return false;
+	}
+	
+	public void removeProbeOnCells(String spreadsheetName) throws RemoteException {
+
+		
+	}
+	
+	public void removeProbeOnVariables(String[] variables) throws RemoteException {
+
+		
 	}
 
 }

@@ -26,9 +26,9 @@ import java.util.Vector;
 import mapping.RPackage;
 import model.SpreadsheetModelRemote;
 import org.bioconductor.packages.rservices.RObject;
+import org.kchine.rpf.ManagedServant;
 import org.rosuda.ibase.SVarInterfaceRemote;
 import org.rosuda.ibase.SVarSetInterfaceRemote;
-import uk.ac.ebi.microarray.pools.ManagedServant;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -83,7 +83,7 @@ public interface RServices extends ManagedServant {
 
 	public String sourceFromResource(String resource) throws RemoteException;
 
-	public String sourceFromBuffer(StringBuffer buffer) throws RemoteException;
+	public String sourceFromBuffer(String buffer) throws RemoteException;
 
 	public String getStatus() throws RemoteException;
 
@@ -147,7 +147,7 @@ public interface RServices extends ManagedServant {
 	public void appendBlockToWorkingDirectoryFile(String fileName, byte[] block) throws java.rmi.RemoteException;
 
 	public String[] listDemos() throws java.rmi.RemoteException;
-	public StringBuffer getDemoSource(String demoName) throws java.rmi.RemoteException;
+	public String getDemoSource(String demoName) throws java.rmi.RemoteException;
 
 	public byte[] getRHelpFile(String uri) throws java.rmi.RemoteException;
 	public String getRHelpFileUri(String topic, String pack) throws java.rmi.RemoteException;
@@ -163,7 +163,7 @@ public interface RServices extends ManagedServant {
 	public String pythonExec(String pythonCommand) throws RemoteException;	
 	public String pythonExecFromWorkingDirectoryFile(String fileName) throws RemoteException;	
 	public String pythonExceFromResource(String resource) throws RemoteException;
-	public String pythonExecFromBuffer(StringBuffer buffer) throws RemoteException;	
+	public String pythonExecFromBuffer(String buffer) throws RemoteException;	
 	public RObject pythonEval(String pythonCommand) throws RemoteException;
 	public Object pythonEvalAndConvert(String pythonCommand) throws RemoteException;		
 	public RObject pythonGet(String name) throws RemoteException;
@@ -175,7 +175,7 @@ public interface RServices extends ManagedServant {
 	public String groovyExec(String groovyCommand) throws RemoteException;	
 	public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException;	
 	public String groovyExecFromResource(String resource) throws RemoteException;
-	public String groovyExecFromBuffer(StringBuffer buffer) throws RemoteException;	
+	public String groovyExecFromBuffer(String buffer) throws RemoteException;	
 	public Object groovyEval(String expression) throws RemoteException;		
 	public Object groovyGet(String name) throws RemoteException;
 	public void groovySet(String name, Object Value) throws RemoteException;	
@@ -185,12 +185,29 @@ public interface RServices extends ManagedServant {
 	public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException;	
 	public SpreadsheetModelRemote[] listSpreadsheetTableModelRemote() throws RemoteException;	
 	public String[] listSpreadsheetTableModelRemoteId() throws RemoteException;
-		
+	
     public int countSets() throws RemoteException;
     public SVarSetInterfaceRemote getSet( int i) throws RemoteException;
     public SVarInterfaceRemote getVar( int setId, int i) throws RemoteException;
     public SVarInterfaceRemote getVar( int setId, String name) throws RemoteException;
     public SVarSetInterfaceRemote getCurrentSet() throws RemoteException;
     public int curSetId() throws RemoteException;
-    	
+    
+    public void addProbeOnVariables(String[] variables) throws RemoteException; 
+    public void removeProbeOnVariables(String[] variables) throws RemoteException;
+    public String[] getProbedVariables() throws RemoteException;
+    
+    public String[] getMissingLibraries(String[] requiredLibraries) throws RemoteException;
+    
+    RObject cellsGet(String range , String type, String spreadsheetName ) throws RemoteException;
+    Object cellsGetConverted(String range , String type, String spreadsheetName ) throws RemoteException;
+    void  cellsPut(Object value , String location, String spreadsheetName ) throws RemoteException;    
+
+    void addProbeOnCells(String spreadsheetName)throws RemoteException;    
+
+    boolean isProbeOnCell(String spreadsheetName)throws RemoteException;    
+
+    void removeProbeOnCells(String spreadsheetName)throws RemoteException;    
+
+    
 }

@@ -53,20 +53,18 @@ import org.bioconductor.packages.rservices.RMatrix;
 import org.bioconductor.packages.rservices.RNumeric;
 import org.bioconductor.packages.rservices.RObject;
 import org.bioconductor.packages.rservices.RVector;
+import org.kchine.rpf.NodeManager;
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.ServantProviderFactory;
+import org.kchine.rpf.ServerDefaults;
 import org.python.core.PyComplex;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
 import python.PythonInterpreterSingleton;
-import remoting.RCallBack;
-import remoting.RConsoleActionListener;
 import remoting.RConsoleAction;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.NodeManager;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.ServantProviderFactory;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -75,56 +73,6 @@ public abstract class RListener {
 
 	private static final Log log = org.apache.commons.logging.LogFactory.getLog(RListener.class);
 
-	private static Vector<RCallBack> _callbacks = new Vector<RCallBack>();
-	private static Vector<RConsoleActionListener> _ractionListeners=new Vector<RConsoleActionListener>();
-	private static String _originatorUID;
-	static public void setOrginatorUID(String uid){
-		_originatorUID=uid;
-	}
-	static public String getOriginatorUID() {
-		return _originatorUID;		
-	}
-	
-	public static void addRCallback(RCallBack callback) {
-		_callbacks.add(callback);
-	}
-	
-	public static void removeRCallback(RCallBack callback) {
-		_callbacks.remove(callback);
-	}
-	
-	public static void removeAllRCallbacks() {
-		_callbacks.removeAllElements();
-	}
-	
-
-	
-	public static void addRActionListener(RConsoleActionListener ractionListener) {
-		_ractionListeners.add(ractionListener);
-	}
-	
-	public static void removeRActionListener(RConsoleActionListener ractionListener) {
-		_ractionListeners.remove(ractionListener);
-	}
-	
-	public static void removeAllRActionListeners() {
-		_ractionListeners.removeAllElements();
-	}
-
-	public static void notifyRActionListeners(final RConsoleAction action) {
-		action.getAttributes().put("originatorUID",getOriginatorUID());
-		Vector<RConsoleActionListener> ractionListenersToRemove=new Vector<RConsoleActionListener>();									
-		for (int i=0; i<_ractionListeners.size();++i) {
-			try {
-				_ractionListeners.elementAt(i).rConsoleActionPerformed(action);
-			} catch (Exception e) {
-				e.printStackTrace();
-				ractionListenersToRemove.add(_ractionListeners.elementAt(i));
-			}
-		}
-		_ractionListeners.removeAll(ractionListenersToRemove);
-	}
-	
 	private static RClustserInterface _rClusterInterface = new RClustserInterface() {
 		public Vector<RServices> createRs(int n, String nodeName) throws Exception {
 			Vector<RServices> workers = null;
@@ -219,9 +167,9 @@ public abstract class RListener {
 
 	public static void notifyJavaListeners(String parametersStr) {
 		HashMap<String, String> parameters=PoolUtils.getParameters(parametersStr);
-		for (int i=0; i<_callbacks.size(); ++i) {
+		for (int i=0; i<DirectJNI.getInstance().getRCallBacks().size(); ++i) {
 			try {
-				_callbacks.elementAt(i).notify(parameters);
+				DirectJNI.getInstance().getRCallBacks().elementAt(i).notify(parameters);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -279,7 +227,7 @@ public abstract class RListener {
 			pack = null;
 		attributes.put("topic", topic);
 		attributes.put("package", pack);
-		notifyRActionListeners(new RConsoleAction("help",attributes));
+		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("help",attributes));
 		return null;
 	}
 	
@@ -288,7 +236,7 @@ public abstract class RListener {
 		attributes.put("save", save);
 		attributes.put("status", status);
 		attributes.put("runLast", runLast);
-		notifyRActionListeners(new RConsoleAction("q",attributes));
+		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("q",attributes));
 		return null;
 	}
 
@@ -776,7 +724,7 @@ public abstract class RListener {
 		attributes.put("title", title);
 		attributes.put("deleteFile", new Boolean(deleteFile));
 			
-		notifyRActionListeners(new RConsoleAction("PAGER",attributes));
+		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("PAGER",attributes));
 		
 	}
 

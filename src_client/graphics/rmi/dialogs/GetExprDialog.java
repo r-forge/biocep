@@ -34,7 +34,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import uk.ac.ebi.microarray.pools.PoolUtils;
+import org.kchine.rpf.PoolUtils;
+
 
 public class GetExprDialog extends JDialog {
 	String[] save;

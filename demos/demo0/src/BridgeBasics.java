@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import java.rmi.RemoteException;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -26,6 +27,8 @@ import org.bioconductor.packages.rservices.RNamedArgument;
 import org.bioconductor.packages.rservices.RObjectName;
 import org.bioconductor.packages.rservices.RS3;
 
+import remoting.RConsoleAction;
+import remoting.RConsoleActionListener;
 import remoting.RServices;
 import server.DirectJNI;
 
@@ -40,7 +43,17 @@ public class BridgeBasics {
 	public static void main(String args[]) throws Exception {
 			
 		final RServices rs = DirectJNI.getInstance().getRServices();		
-				
+		rs.addRConsoleActionListener(new RConsoleActionListener(){
+			public void rConsoleActionPerformed(RConsoleAction consoleAction) throws RemoteException {
+				System.out.println(consoleAction);				
+			}
+		});		
+		
+		rs.addProbeOnVariables(new String[]{"x","y"});
+		rs.consoleSubmit("y=1");
+		//rs.evaluate("x=2;y=8",2);
+		
+		/*
 		RS3 s3=(RS3)rs.getReference("packageDescription('stats')");
 		System.out.println("s="+Arrays.toString(s3.getClassAttribute()));
 		s3.setClassAttribute(new String[] {s3.getClassAttribute()[0], "aaa"});
@@ -54,7 +67,7 @@ public class BridgeBasics {
 		RChar s = (RChar) rs.call("paste", new RChar("str1"), new RChar("str2"), new RNamedArgument("sep", new RChar(
 				"--")));
 		System.out.println("s=" + s);
-		
+		*/
 		
 		System.exit(0);
 		

@@ -27,10 +27,10 @@ import javax.swing.JApplet;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.kchine.rpf.db.DBLayerInterface;
+import org.kchine.rpf.db.SupervisorInterface;
+import org.kchine.rpf.db.monitor.Supervisor;
 
-import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
-import uk.ac.ebi.microarray.pools.db.SupervisorInterface;
-import uk.ac.ebi.microarray.pools.db.monitor.Supervisor;
 
 public class SupervisorApplet extends JApplet {
 	

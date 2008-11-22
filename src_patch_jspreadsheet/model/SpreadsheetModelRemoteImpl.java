@@ -624,6 +624,7 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		CellPoint point = new CellPoint(aRow, aColumn);
 		history.add(new CellRange(point, point));
 		doSetValueAt(aValue, aRow, aColumn);
+		history.fireCellsChangeEvent(new CellRange(point, point));
 	}
 
 	private void fireDiscardRowCount() {
@@ -1890,6 +1891,19 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	public void historyAdd(CellRange range, int type) {
 		history.add(range, type);
 	}
+	
+	
+	public void cellsChangeAdd(CellRange range) {
+		history.fireCellsChangeEvent(range);		
+	}
+	
+	public void cellsChangeAdd(CellRange range, int type) {
+		history.fireCellsChangeEvent(range);		
+	}
+	
+	public void cellsChangeAdd(SpreadsheetClipboard clip) {
+
+	}
 
 	public void undo() {
 		um.undo();
@@ -1995,6 +2009,10 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 		return _id;
 	}
 
+	public String getName() {
+		return _id;
+	}
+	
 	public void dispose() throws RemoteException {
 
 	}

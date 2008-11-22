@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import uk.ac.ebi.microarray.pools.ServerDefaults;
+import org.kchine.rpf.ServerDefaults;
 
 public class Supervisor {
 	public static void main(String[] args) {			
 		System.setProperty("naming.mode","db"); ServerDefaults.init();		
-		uk.ac.ebi.microarray.pools.db.monitor.Supervisor.main(new String[0]);
+		org.kchine.rpf.db.monitor.Supervisor.main(new String[0]);
 	}
 }

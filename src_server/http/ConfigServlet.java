@@ -27,7 +27,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import uk.ac.ebi.microarray.pools.PoolUtils;
+import org.kchine.rpf.PoolUtils;
+
 
 /**
  * @author Karim Chine karim.chine@m4x.org

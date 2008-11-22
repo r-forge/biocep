@@ -21,6 +21,7 @@
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
+import graphics.rmi.Macro.MacroScript;
 import graphics.rmi.action.CopyFromCurrentDeviceAction;
 import graphics.rmi.action.CopyToCurrentDeviceAction;
 import graphics.rmi.action.CoupleToCurrentDeviceAction;
@@ -49,7 +50,6 @@ import http.NoRegistryAvailableException;
 import http.NoServantAvailableException;
 import http.NotLoggedInException;
 import http.RHttpProxy;
-import http.RResponse;
 import http.TunnelingException;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -97,6 +97,8 @@ import java.sql.DriverManager;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Stack;
@@ -150,8 +152,22 @@ import net.infonode.docking.util.MixedViewHandler;
 import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
 import net.java.dev.jspreadsheet.CellPoint;
+import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
 import org.bioconductor.packages.rservices.RObject;
+import org.gjt.sp.jedit.Buffer;
+import org.kchine.rpf.LocalRmiRegistry;
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.PropertiesGenerator;
+import org.kchine.rpf.SSHUtils;
+import org.kchine.rpf.YesSecurityManager;
+import org.kchine.rpf.db.ConnectionProvider;
+import org.kchine.rpf.db.DBLayer;
+import org.kchine.rpf.gui.ConsolePanel;
+import org.kchine.rpf.gui.InDialog;
+import org.kchine.rpf.gui.SubmitInterface;
+import org.kchine.rpf.gui.SymbolPopDialog;
+import org.kchine.rpf.gui.SymbolPushDialog;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -182,23 +198,11 @@ import server.NoMappingAvailable;
 import server.ServantCreationFailed;
 import server.ServerManager;
 import splash.SplashWindow;
-import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.PropertiesGenerator;
-import uk.ac.ebi.microarray.pools.SSHUtils;
-import uk.ac.ebi.microarray.pools.YesSecurityManager;
-import uk.ac.ebi.microarray.pools.db.ConnectionProvider;
-import uk.ac.ebi.microarray.pools.db.DBLayer;
-import uk.ac.ebi.microarray.pools.gui.ConsolePanel;
-import uk.ac.ebi.microarray.pools.gui.InDialog;
-import uk.ac.ebi.microarray.pools.gui.SubmitInterface;
-import uk.ac.ebi.microarray.pools.gui.SymbolPopDialog;
-import uk.ac.ebi.microarray.pools.gui.SymbolPushDialog;
 import util.Utils;
 import views.*;
 import static graphics.rmi.JGDPanelPop.*;
-import static uk.ac.ebi.microarray.pools.PoolUtils.redirectIO;
-import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
+import static org.kchine.rpf.PoolUtils.redirectIO;
+import static org.kchine.rpf.PoolUtils.unzip;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -265,6 +269,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private ClassLoader jeditcl = null; 
 	
 	private static int LOCAL_SPREADSHEET_COUNTER=0;
+	
+	
+	HashMap<String, Vector<PluginViewDescriptor>> pluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
+	Vector<Macro> macrosVector=new Vector<Macro>();
+	
 
 	private final ReentrantLock _protectR = new ExtendedReentrantLock() {
 
@@ -429,6 +438,16 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}).start();
 
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					refreshMacros();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		
 		if (true) {
 
 			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
@@ -927,8 +946,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							_rConsoleActionListenerImpl = new RConsoleActionListenerImpl();
 							_rForConsole.addRConsoleActionListener(_rConsoleActionListenerImpl);
-
+							
 							_rForConsole.registerUser(getUID(), getUserName());
+							
+							for (Macro m:macrosVector) _rForConsole.addProbeOnVariables(m.getProbes());
+
 
 							if (_mode == HTTP_MODE) {
 								return "Logged on as " + _login + "\n";
@@ -1646,6 +1668,58 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(demoMenu);
 
+			
+			
+			
+			final JMenu macrosMenu = new JMenu("Macros");
+			macrosMenu.addMenuListener(new MenuListener() {
+				public void menuSelected(MenuEvent e) {
+					macrosMenu.removeAll();
+					for (Macro m:macrosVector) {
+						final Macro finalMacro=m;
+						macrosMenu.add(new AbstractAction(m.getLabel()) {
+							public void actionPerformed(ActionEvent e) {							
+								finalMacro.sourceAll(GDApplet.this);
+							}
+						});
+					}
+					if (macrosVector.size()>0) macrosMenu.addSeparator();
+					
+					macrosMenu.add( _actions.get("macroseditor"));
+					macrosMenu.addSeparator();
+					macrosMenu.add(new AbstractAction("Refresh"){
+						public void actionPerformed(ActionEvent e) {
+							new Thread(new Runnable() {
+								public void run() {
+									try {
+										refreshMacros();
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							}).start();
+						}
+					});
+				}
+
+				public void menuCanceled(MenuEvent e) {
+				}
+
+				public void menuDeselected(MenuEvent e) {
+				}
+			});
+			menuBar.add(macrosMenu);
+
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			final JMenu pluginsMenu = new JMenu("Plugins");
 			pluginsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -3138,6 +3212,39 @@ public class GDApplet extends GDAppletBase implements RGui {
 				return true;
 			}
 		});
+		
+		_actions.put("macroseditor", new AbstractAction("Edit Macros") {
+
+			public void actionPerformed(ActionEvent e) {
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							try {
+								UIManager.setLookAndFeel(getLookAndFeelClassName());
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							loadJEditClasses();
+							Object view=jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,	(Object[]) null);
+							jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("openFile", new Class<?>[]{jeditcl.loadClass("org.gjt.sp.jedit.View"),String.class}).invoke((Object) null, new Object[] {
+										view, new File(getInstallDir()+"/macros.xml").getAbsolutePath()										
+									});
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+				}).start();
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return true;
+			}
+		});
+		
+		//public static Buffer openFile(View view, String parent, String path, boolean newFile, Hashtable props) {
+		
+		
 
 		_actions.put("spreadsheet", new AbstractAction("New Local Spreadsheet") {
 			public void actionPerformed(final ActionEvent ae) {
@@ -4621,6 +4728,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public ConsoleLogger getConsoleLogger() {
 		return _consoleLogger;
 	}
+	
+	public String getInstallDir() {
+		return ServerManager.INSTALL_DIR;
+	}
 
 	public void synchronizeCollaborators() throws RemoteException {
 
@@ -5117,13 +5228,38 @@ public class GDApplet extends GDAppletBase implements RGui {
 				_consolePanel.print(null, (String) action.getAttributes().get("log") + "\n", ConsolePanel.RED);
 			} else if (action.getActionName().equals("UPDATE_USERS")) {
 				updateUsers();
+			} else if (action.getActionName().equals("CELLS_CHANGE")) {
+				System.out.println(action);
+				
+				if (cellsListners.size()>0) {
+					CellsChangeEvent event=new CellsChangeEvent(
+							(String)action.getAttributes().get("name"),
+							(CellRange)action.getAttributes().get("range"),
+							(String)action.getAttributes().get("originatorUID"), GDApplet.this);
+					for (int i=0; i<cellsListners.size();++i) {
+						try {
+							cellsListners.elementAt(i).cellsChanged(event);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			} else if (action.getActionName().equals("VARIABLES_CHANGE")) {
+				if (varsListners.size()>0) {
+					VariablesChangeEvent event=new VariablesChangeEvent((HashSet<String>)action.getAttributes().get("variables"),(String)action.getAttributes().get("originatorUID"), GDApplet.this);
+					for (int i=0; i<varsListners.size();++i) {
+						try {
+							varsListners.elementAt(i).variablesChanged(event);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}				
 			}
-
 		}
-
 	}
 
-	HashMap<String, Vector<PluginViewDescriptor>> pluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
+
 
 	public void refreshPluginViewsHash() throws Exception {
 		HashMap<String, Vector<PluginViewDescriptor>> tempPluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
@@ -5142,61 +5278,69 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 		pluginViewsHash = tempPluginViewsHash;
 	}
+	
+	public void refreshMacros() throws Exception {
+		Vector<Macro> tempMacrosVector=null;
+		try {
+			tempMacrosVector=Macro.getMacros(getInstallDir());
+			for (Macro m:macrosVector) {
+				for (VariablesChangeListener v:m.getVarsListeners()) removeVariablesChangeListener(v);
+				for (CellsChangeListener c:m.getCellsListeners()) removeCellsChangeListener(c);
+			}			
+			macrosVector=tempMacrosVector;
+			
+			for (Macro m:macrosVector) {
+				if (getR()!=null) {
+					getR().addProbeOnVariables(m.getProbes());					
+				}
+				for (VariablesChangeListener v:m.getVarsListeners()) {
+					addVariablesChangeListener(v);
+				}
+				for (CellsChangeListener c:m.getCellsListeners()) addCellsChangeListener(c);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	Vector<VariablesChangeListener> varsListners=new Vector<VariablesChangeListener>();
+	
+	public void removeAllVariablesChangeListeners() {
+		varsListners.removeAllElements();
+	}
 
+	public void removeVariablesChangeListener(VariablesChangeListener listener) {
+		varsListners.remove(listener);
+	}
+
+	public void addVariablesChangeListener(VariablesChangeListener listener) {
+		varsListners.add(listener);
+	}
+
+	
+	
+	Vector<CellsChangeListener> cellsListners=new Vector<CellsChangeListener>();
+	
+	public void removeAllCellsChangeListeners() {
+		cellsListners.removeAllElements();
+	}
+
+	public void removeCellsChangeListener(CellsChangeListener listener) {
+		cellsListners.remove(listener);
+	}
+
+	public void addCellsChangeListener(CellsChangeListener listener) {
+		cellsListners.add(listener);
+	}
+
+	public Vector<Macro> getMacros() {
+		return macrosVector;
+	}
+	
 	static public void main(String[] args) throws Exception {
 
-		RResponse rresponse = new RResponse(new int[] { 8, 9, 6, 3 }, "bbb");
-		XMLEncoder e = new XMLEncoder(new BufferedOutputStream(System.out));
-		/*
-		 * e.setPersistenceDelegate(RResponse.class, new
-		 * DefaultPersistenceDelegate( new String[]{ "status", "value"}) );
-		 */
-		e.writeObject(rresponse);
-		e.close();
+	
 	}
 }
 
-/*
- * if (_pluginServer==null) { ServerSocket ss = new ServerSocket(0);
- * _pluginServerPort = ss.getLocalPort(); ss.close(); _pluginServer = new
- * Server(_pluginServerPort); Context root = new Context(_pluginServer, "/",
- * Context.SESSIONS); final HttpSessionListener sessionListener=new
- * FreeResourcesListener(); root.getSessionHandler().setSessionManager(new
- * HashSessionManager(){
- * 
- * @Override protected void addSession(org.mortbay.jetty.
- * servlet.AbstractSessionManager.Session session, boolean arg1) {
- * super.addSession(session, arg1); sessionListener.sessionCreated(new
- * HttpSessionEvent(session.getSession())); }
- * 
- * @Override protected void addSession(org.mortbay.jetty.
- * servlet.AbstractSessionManager.Session session) { super.addSession(session);
- * }
- * 
- * @Override public void removeSession(HttpSession session, boolean invalidate)
- * { super.removeSession(session, invalidate);
- * sessionListener.sessionDestroyed(new HttpSessionEvent(session)); }
- * 
- * @Override public void removeSession(org.mortbay.jetty.
- * servlet.AbstractSessionManager.Session session, boolean arg1) {
- * super.removeSession(session, arg1); sessionListener.sessionDestroyed(new
- * HttpSessionEvent(session)); }
- * 
- * @Override protected void removeSession(String clusterId) {
- * super.removeSession(clusterId); } }); root.addServlet(new ServletHolder(new
- * http.local.LocalGraphicsServlet(GDApplet.this)), "/rvirtual/graphics/*");
- * root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this)),
- * "/rvirtual/cmd/*"); root.addServlet(new ServletHolder(new
- * http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
- * _pluginServer.start(); }
- * 
- * String _pluginServerUrl="http://"+ PoolUtils.getHostIp() + ":" +
- * _pluginServerPort + "/rvirtual/cmd"; HashMap<String, Object> options=new
- * HashMap<String, Object>(); String
- * pluginSessionId=RHttpProxy.logOn(_pluginServerUrl, "", "guest", "guest",
- * options);
- * 
- * 
- * cl.loadClass("graphics.rmi.RKitBridge").getConstructor
- * (String.class).newInstance(_pluginServerUrl)
- */

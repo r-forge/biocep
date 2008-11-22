@@ -87,7 +87,7 @@ public class BootSsh {
 						new Object[] { new Boolean(args[0]).booleanValue(), args[1], Integer.decode(args[2]).intValue(), stringToProperties(args[3]), Integer.decode(args[5]).intValue(), Integer.decode(args[6]).intValue(), name, false,
 								(URL[]) codeUrls.toArray(new URL[0]), args[4] });
 
-				Class<?> poolUtilsClass = cl.loadClass("uk.ac.ebi.microarray.pools.PoolUtils");
+				Class<?> poolUtilsClass = cl.loadClass("org.kchine.rpf.PoolUtils");
 				String processId = (String) poolUtilsClass.getMethod("getProcessId", new Class<?>[0]).invoke(null, new Object[0]);
 				bw.println(PROCESS_ID_BEGIN_MARKER + processId + PROCESS_ID_END_MARKER);
 				bw.println(R_PROCESS_ID_BEGIN_MARKER + (String) r.getClass().getMethod("getProcessId", new Class<?>[0]).invoke(r, new Object[0])

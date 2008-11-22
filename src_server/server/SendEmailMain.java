@@ -21,9 +21,11 @@ package server;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.activation.*;
+
+import org.kchine.rpf.ServerDefaults;
+import org.kchine.rpf.db.DBLayerInterface;
+
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.ServerDefaults;
-import uk.ac.ebi.microarray.pools.db.DBLayerInterface;
 import java.util.Properties;
 
 public class SendEmailMain

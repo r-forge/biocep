@@ -18,8 +18,9 @@
  */
 package server;
 
-import static uk.ac.ebi.microarray.pools.PoolUtils.isWindowsOs;
-import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
+import static org.kchine.rpf.PoolUtils.isWindowsOs;
+import static org.kchine.rpf.PoolUtils.unzip;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -49,16 +50,18 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+
+import org.kchine.rpf.CreationCallBack;
+import org.kchine.rpf.LocalRmiRegistry;
+import org.kchine.rpf.ManagedServant;
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.RemoteLogListener;
+import org.kchine.rpf.SSHUtils;
+import org.kchine.rpf.ServantCreationTimeout;
+
 import model.TableModelRemoteImpl;
 import bootstrap.BootSsh;
 import remoting.RServices;
-import uk.ac.ebi.microarray.pools.CreationCallBack;
-import uk.ac.ebi.microarray.pools.LocalRmiRegistry;
-import uk.ac.ebi.microarray.pools.ManagedServant;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.RemoteLogListener;
-import uk.ac.ebi.microarray.pools.SSHUtils;
-import uk.ac.ebi.microarray.pools.ServantCreationTimeout;
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
@@ -787,7 +790,7 @@ public class ServerManager {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
 					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A1.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
 
-					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=uk.ac.ebi.microarray.pools.RemoteAppender" + (isWindowsOs() ? "\"" : ""));
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2=org.kchine.rpf.RemoteAppender" + (isWindowsOs() ? "\"" : ""));
 					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout" + (isWindowsOs() ? "\"" : ""));
 					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A2.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
 

@@ -50,19 +50,19 @@ import org.apache.tools.ant.taskdefs.Manifest.Attribute;
 import org.apache.tools.ant.types.DirSet;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
+import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.PoolUtils.EqualNameFilter;
 import org.rosuda.JRI.Rengine;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import com.sun.tools.ws.ant.WsGen;
-import uk.ac.ebi.microarray.pools.PoolUtils;
-import uk.ac.ebi.microarray.pools.PoolUtils.EqualNameFilter;
 import de.hunsicker.jalopy.plugin.ant.AntPlugin;
 import server.DirectJNI;
 import server.ExecutionUnit;
 import server.Globals;
+import static org.kchine.rpf.PoolUtils.unzip;
 import static server.Globals.*;
-import static uk.ac.ebi.microarray.pools.PoolUtils.unzip;
 import util.Utils;
 
 /**
@@ -314,7 +314,7 @@ public class Gen {
 		String lastStatus = DirectJNI.getInstance().runR(new ExecutionUnit() {
 			public void run(Rengine e) {
 				DirectJNI.getInstance().toggleMarker();
-				DirectJNI.getInstance().sourceFromBuffer(initScriptBuffer);
+				DirectJNI.getInstance().sourceFromBuffer(initScriptBuffer.toString());
 				log.info(" init  script status : " + DirectJNI.getInstance().cutStatusSinceMarker());
 
 				for (int i = 0; i < _functionsVector.size(); ++i) {
