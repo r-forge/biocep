@@ -25,6 +25,5 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public interface RKit{
 	public RServices getR();
-
-	public ReentrantLock getRLock();
+	public ReentrantLock getRLock();	
 }
