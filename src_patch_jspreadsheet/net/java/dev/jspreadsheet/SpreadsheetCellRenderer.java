@@ -1,5 +1,10 @@
 package net.java.dev.jspreadsheet;
 
+import graphics.rmi.ColorUtil;
+import graphics.rmi.DataLinkMacro;
+import graphics.rmi.Macro;
+import graphics.rmi.RGui;
+
 import java.awt.Color;
 import java.awt.Component;
 
@@ -21,12 +26,16 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 class SpreadsheetCellRenderer extends DefaultTableCellRenderer
 {
+	RGui rgui;
+	String name;
    /**
     * Creates a SharpCellRenderer.
     */
-   public SpreadsheetCellRenderer()
+   public SpreadsheetCellRenderer(RGui rgui, String name)
    {
       super();
+      this.rgui=rgui;
+      this.name=name;
    }
 
    // implements javax.swing.table.TableCellRenderer
@@ -75,12 +84,29 @@ class SpreadsheetCellRenderer extends DefaultTableCellRenderer
       /* this method has been changed for formula feature */
       setValue(value, isSelected, hasFocus, row, column);
 
+
+    	  for (int i=rgui.getMacros().size()-1;i>=0;--i) {
+    		  Macro m=rgui.getMacros().elementAt(i);
+    		  if (m instanceof DataLinkMacro) {    			  
+    			  Color c=((DataLinkMacro)m).getColor(name,row,column);
+    			  if (c!=null)  {
+    				  if (isSelected) super.setBackground(ColorUtil.darker(c, 0.3)); 
+    				  else super.setBackground(c);
+    			  }
+    		  } else {
+    			  break;
+    		  }
+    	  
+      }
+
+      
       //DefaulTableCellRenderer code
       // begin optimization to avoid painting background
       Color back = getBackground();
       boolean colorMatch = (back != null) && (back.equals(table.getBackground())) && table.isOpaque();
       setOpaque(!colorMatch);
 
+      
       // end optimization to aviod painting background
       return this;
    }

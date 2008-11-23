@@ -325,7 +325,12 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 	public SpreadsheetPanel(final AbstractTableModel m, RGui rgui) {
 		super();
 		_rgui = rgui;
-		ss = new JSpreadsheet(m, rgui);
+		
+		if (m instanceof AbstractSpreadsheetModel) {
+			ss = new JSpreadsheet(m, rgui, ((AbstractSpreadsheetModel) m).getSpreadsheetModelId());
+		} else {
+			ss = new JSpreadsheet(m, rgui, "Local");
+		}
 
 		selectionListener = new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {

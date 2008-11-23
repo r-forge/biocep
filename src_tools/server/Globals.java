@@ -439,8 +439,8 @@ public class Globals {
 									+ "}");
 
 					outputWriterWebservice
-							.println("\npublic String sourceFromBuffer(String session, StringBuffer buffer) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"sourceFromBuffer\", new Class[]{StringBuffer.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							.println("\npublic String sourceFromBuffer(String session, String buffer) throws Exception { "
+									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"sourceFromBuffer\", new Class[]{String.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
@@ -509,8 +509,8 @@ public class Globals {
 									+ "}");
 
 					outputWriterWebservice
-							.println("\npublic String pythonExecFromBuffer(String session, StringBuffer buffer) throws Exception {"
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExecFromBuffer\", new Class[]{StringBuffer.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							.println("\npublic String pythonExecFromBuffer(String session, String buffer) throws Exception {"
+									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExecFromBuffer\", new Class[]{String.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice

@@ -1,5 +1,6 @@
 package graphics.rmi;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +17,7 @@ import model.ImportInfo;
 import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.Formula;
 
+import org.apache.commons.pool.PoolUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -346,23 +348,29 @@ public class Macro {
 		Utils.catchNodes(document.getDocumentElement(), "datalink", dataLinksNodes);
 		for (int i = 0; i < dataLinksNodes.size(); ++i) {
 
-			Macro m1 = new Macro();
-			Macro m2 = new Macro();
 
 			NamedNodeMap attrs = dataLinksNodes.elementAt(i).getAttributes();
 			
 			String name = null;
 			if (attrs.getNamedItem("name") != null)
 				name = attrs.getNamedItem("name").getNodeValue();
+			else 
+				name="SS_0";
 			
 			String variable = attrs.getNamedItem("variable").getNodeValue();
+			
 			String range = attrs.getNamedItem("range").getNodeValue();
+			CellRange cellrange=ImportInfo.getRange(range);
+
+			Color color = (attrs.getNamedItem("color")==null ? null : getColor((String)attrs.getNamedItem("color").getNodeValue()));
 			
 			
 			String type = "numeric";
 			if (attrs.getNamedItem("type") != null)
 				type = attrs.getNamedItem("type").getNodeValue();
 			
+			Macro m1 = new DataLinkMacro(name,cellrange,color);
+			Macro m2 = new DataLinkMacro(name,cellrange,color);
 			
 			Vector<VariablesChangeListener> varsListeners1 = new Vector<VariablesChangeListener>();
 			Vector<CellsChangeListener> cellsListeners1 = new Vector<CellsChangeListener>();
@@ -371,8 +379,6 @@ public class Macro {
 			probes1.add(variable);
 			
 			varsListeners1.add(m1.new MacroVariablesChangeListener(new String[]{variable}));
-			
-			CellRange cellrange=ImportInfo.getRange(range);
 			
 			String rg=null;
 			if (type.equals("data.frame.auto.row")) {
@@ -563,7 +569,25 @@ public class Macro {
 		return 
 		 "<datalink variable=\"x\" range=\"A1:B2\" />\n";
 	}
- 
+	
+	static Color getColor(String color) {
+		Color result=null;
+		if (color.equalsIgnoreCase("red")) result=Color.red; 
+		else if (color.equalsIgnoreCase("green")) result=Color.green;
+		else if (color.equalsIgnoreCase("blue")) result=Color.blue;
+		else if (color.equalsIgnoreCase("yellow")) result=Color.yellow;
+		else if (color.equalsIgnoreCase("cyan")) result=Color.cyan;
+		else if (color.equalsIgnoreCase("white")) result=Color.white;
+		else if (color.equalsIgnoreCase("black")) result=Color.black;
+		else if (color.equalsIgnoreCase("orange")) result=Color.orange;
+		else if (color.equalsIgnoreCase("pink")) result=Color.pink;
+		else if (color.equalsIgnoreCase("gray")) result=Color.gray;
+		if (color.startsWith("#")) {
+			byte[] b=org.kchine.rpf.PoolUtils.hexToBytes(color.substring(1));
+			result= new Color(b[0],b[1],b[2]);
+		}
+		return result;		
+	}
 
 
 }
