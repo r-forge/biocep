@@ -231,8 +231,13 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				return null;
 			}
 			public Vector<Macro> getMacros() {
-				// TODO Auto-generated method stub
+				
 				return null;
+			}
+			
+			public void pushTask(Runnable task) {
+				
+				
 			}
 		};
 		JFrame f = new JFrame("F1");

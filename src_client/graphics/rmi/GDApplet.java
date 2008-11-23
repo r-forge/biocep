@@ -17,11 +17,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */ 
+ */
 package graphics.rmi;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.Macro.MacroScript;
 import graphics.rmi.action.CopyFromCurrentDeviceAction;
 import graphics.rmi.action.CopyToCurrentDeviceAction;
 import graphics.rmi.action.CoupleToCurrentDeviceAction;
@@ -68,8 +67,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.beans.XMLEncoder;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -98,7 +95,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Stack;
@@ -135,6 +131,8 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.text.SimpleAttributeSet;
+
 import net.infonode.docking.DockingWindow;
 import net.infonode.docking.DockingWindowAdapter;
 import net.infonode.docking.DockingWindowListener;
@@ -155,7 +153,6 @@ import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
 import org.bioconductor.packages.rservices.RObject;
-import org.gjt.sp.jedit.Buffer;
 import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.PropertiesGenerator;
@@ -265,15 +262,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private String[] _demos;
 
 	private boolean logonWithoutConfirmation = false;
-	
-	private ClassLoader jeditcl = null; 
-	
-	private static int LOCAL_SPREADSHEET_COUNTER=0;
-	
-	
+
+	private ClassLoader jeditcl = null;
+
+	private static int LOCAL_SPREADSHEET_COUNTER = 0;
+
 	HashMap<String, Vector<PluginViewDescriptor>> pluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
-	Vector<Macro> macrosVector=new Vector<Macro>();
-	
+	Vector<Macro> macrosVector = new Vector<Macro>();
+
+	Vector<Runnable> _tasks = new Vector<Runnable>();
 
 	private final ReentrantLock _protectR = new ExtendedReentrantLock() {
 
@@ -370,9 +367,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}
 		}
-		
+
 		public void pasteToConsoleEditor() {
-			_consolePanel.pasteToConsoleEditor();			
+			_consolePanel.pasteToConsoleEditor();
 		}
 
 	};
@@ -447,7 +444,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			}
 		}).start();
-		
+
 		if (true) {
 
 			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
@@ -455,12 +452,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 
 		try {
-			jeditcl=new URLClassLoader(new URL[]{new URL("http://127.0.0.1:"+LocalHttpServer.getLocalHttpServerPort()+"/classes/plugins/basiceditor.jar")}, GDApplet.class.getClassLoader());
-			
+			jeditcl = new URLClassLoader(new URL[] { new URL("http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort()
+					+ "/classes/plugins/basiceditor.jar") }, GDApplet.class.getClassLoader());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		restoreState();
 
 		if (getParameter("mode") == null || getParameter("mode").equals("")) {
@@ -946,11 +944,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							_rConsoleActionListenerImpl = new RConsoleActionListenerImpl();
 							_rForConsole.addRConsoleActionListener(_rConsoleActionListenerImpl);
-							
-							_rForConsole.registerUser(getUID(), getUserName());
-							
-							for (Macro m:macrosVector) _rForConsole.addProbeOnVariables(m.getProbes());
 
+							_rForConsole.registerUser(getUID(), getUserName());
+
+							for (Macro m : macrosVector)
+								_rForConsole.addProbeOnVariables(m.getProbes());
 
 							if (_mode == HTTP_MODE) {
 								return "Logged on as " + _login + "\n";
@@ -1244,7 +1242,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(filesMenu);
 
-						
 			final JMenu graphicsMenu = new JMenu("Graphics");
 			graphicsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -1466,7 +1463,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(graphicsMenu);
 
-			
 			final JMenu spreadsheetMenu = new JMenu("Spreadsheet");
 			spreadsheetMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -1484,9 +1480,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			});
 			menuBar.add(spreadsheetMenu);
-			
-			
-			
+
 			final JMenu toolsMenu = new JMenu("Tools");
 			toolsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -1514,8 +1508,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				}
 			});
 			menuBar.add(toolsMenu);
-			
-			
+
 			final JMenu collaborationMenu = new JMenu("Collaboration");
 			collaborationMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -1589,7 +1582,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(lfMenu);
 
-			final JMenu demoMenu = new JMenu("Demos / Howtos");
+			final JMenu demoMenu = new JMenu("Demos");
 			demoMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
 					demoMenu.removeAll();
@@ -1668,26 +1661,73 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(demoMenu);
 
-			
-			
-			
 			final JMenu macrosMenu = new JMenu("Macros");
 			macrosMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
 					macrosMenu.removeAll();
-					for (Macro m:macrosVector) {
-						final Macro finalMacro=m;
-						macrosMenu.add(new AbstractAction(m.getLabel()) {
-							public void actionPerformed(ActionEvent e) {							
-								finalMacro.sourceAll(GDApplet.this);
-							}
-						});
+					int count = 0;
+					for (Macro m : macrosVector) {
+						if (m.isShow()) {
+							++count;
+							final Macro finalMacro = m;
+							macrosMenu.add(new AbstractAction(m.getLabel()) {
+								public void actionPerformed(ActionEvent e) {
+									finalMacro.sourceAll(GDApplet.this);
+								}
+							});
+						}
 					}
-					if (macrosVector.size()>0) macrosMenu.addSeparator();
-					
-					macrosMenu.add( _actions.get("macroseditor"));
 					macrosMenu.addSeparator();
-					macrosMenu.add(new AbstractAction("Refresh"){
+
+					macrosMenu.add(new AbstractAction("Copy Hello World Action Macro"){
+						public void actionPerformed(ActionEvent e) {
+							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldAction());
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, new ClipboardOwner() {
+								public void lostOwnership(Clipboard clipboard, Transferable contents) {
+								}
+							});							
+						}
+					});
+					
+					
+					macrosMenu.add(new AbstractAction("Copy Hello World Macro With Variables Listeners"){
+						public void actionPerformed(ActionEvent e) {
+							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldVars());
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, new ClipboardOwner() {
+								public void lostOwnership(Clipboard clipboard, Transferable contents) {
+								}
+							});							
+						}
+					});
+					
+					macrosMenu.add(new AbstractAction("Copy Hello World Macro With Cells Listeners"){
+						public void actionPerformed(ActionEvent e) {
+							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldCells());
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, new ClipboardOwner() {
+								public void lostOwnership(Clipboard clipboard, Transferable contents) {
+								}
+							});							
+						}
+					});
+					
+					macrosMenu.add(new AbstractAction("Copy Hello World Data Link"){
+						public void actionPerformed(ActionEvent e) {
+							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldDataLink());
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, new ClipboardOwner() {
+								public void lostOwnership(Clipboard clipboard, Transferable contents) {
+								}
+							});							
+						}
+					});
+					
+					macrosMenu.addSeparator();
+					macrosMenu.add(_actions.get("macroseditor"));
+					macrosMenu.addSeparator();
+					macrosMenu.add(new AbstractAction("Refresh") {
 						public void actionPerformed(ActionEvent e) {
 							new Thread(new Runnable() {
 								public void run() {
@@ -1710,16 +1750,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			});
 			menuBar.add(macrosMenu);
 
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
 			final JMenu pluginsMenu = new JMenu("Plugins");
 			pluginsMenu.addMenuListener(new MenuListener() {
 				public void menuSelected(MenuEvent e) {
@@ -1751,6 +1781,18 @@ public class GDApplet extends GDAppletBase implements RGui {
 						pluginsMenu.addSeparator();
 					}
 
+
+
+					pluginsMenu.add(_actions.get("installpluginjarfile"));
+					pluginsMenu.add(_actions.get("installpluginjarurl"));
+					pluginsMenu.add(_actions.get("installpluginzipfile"));
+					pluginsMenu.add(_actions.get("installpluginzipurl"));
+
+					pluginsMenu.addSeparator();
+					pluginsMenu.add(_actions.get("openpluginviewjarfile"));
+					pluginsMenu.add(_actions.get("openpluginviewjarurl"));
+					pluginsMenu.add(_actions.get("openpluginviewclasses"));
+					pluginsMenu.addSeparator();
 					pluginsMenu.add(new AbstractAction("Refresh") {
 						public void actionPerformed(ActionEvent e) {
 							new Thread(new Runnable() {
@@ -1766,17 +1808,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 						}
 					});
-
-					pluginsMenu.addSeparator();
-					pluginsMenu.add(_actions.get("installpluginjarfile"));
-					pluginsMenu.add(_actions.get("installpluginjarurl"));
-					pluginsMenu.add(_actions.get("installpluginzipfile"));
-					pluginsMenu.add(_actions.get("installpluginzipurl"));
-
-					pluginsMenu.addSeparator();
-					pluginsMenu.add(_actions.get("openpluginviewjarfile"));
-					pluginsMenu.add(_actions.get("openpluginviewjarurl"));
-					pluginsMenu.add(_actions.get("openpluginviewclasses"));
 					pluginsMenu.addSeparator();
 					pluginsMenu.add(_actions.get("browsepluginsrepository"));
 				}
@@ -2009,6 +2040,34 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		}).start();
 
+		new Thread(new Runnable() {
+			public void run() {
+				while (true) {
+
+					if (_tasks.size() > 0) {
+						Vector<Runnable> tasks = popAllTasks(-1);
+						if (getR() != null) {
+							if (tasks != null) {
+								for (Runnable t : tasks) {
+									try {
+										t.run();
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							}
+						}
+					}
+
+					try {
+						Thread.sleep(200);
+					} catch (Exception e) {
+					}
+
+				}
+			}
+		}).start();
+
 		/*
 		 * new Thread(new Runnable() { public void run() { loadJEditClasses(); }
 		 * }).start();
@@ -2075,8 +2134,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			firstCall = false;
 			try {
 				System.setSecurityManager(new YesSecurityManager());
-				
-			
+
 				try {
 					File jEditDir = new File(ServerManager.INSTALL_DIR + "/jEdit");
 					if (!jEditDir.exists()) {
@@ -2365,13 +2423,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 			noSession();
 		} catch (Exception e) {
 			e.printStackTrace();
-			
+
 			++failureCounter;
 			System.out.println("///// failure counter :" + failureCounter);
 			/*
-			if (failureCounter == 1)
-				manageServerFailure();
-			*/
+			 * if (failureCounter == 1) manageServerFailure();
+			 */
 		}
 
 		Vector<FileDescription> temp = new Vector<FileDescription>();
@@ -3199,7 +3256,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								e.printStackTrace();
 							}
 							loadJEditClasses();
-							jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,	(Object[]) null);
+							jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null, (Object[]) null);
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
@@ -3212,7 +3269,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				return true;
 			}
 		});
-		
+
 		_actions.put("macroseditor", new AbstractAction("Edit Macros") {
 
 			public void actionPerformed(ActionEvent e) {
@@ -3225,10 +3282,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 								e.printStackTrace();
 							}
 							loadJEditClasses();
-							Object view=jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,	(Object[]) null);
-							jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("openFile", new Class<?>[]{jeditcl.loadClass("org.gjt.sp.jedit.View"),String.class}).invoke((Object) null, new Object[] {
-										view, new File(getInstallDir()+"/macros.xml").getAbsolutePath()										
-									});
+							Object view = jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("newView", new Class<?>[0]).invoke((Object) null,
+									(Object[]) null);
+							jeditcl.loadClass("org.gjt.sp.jedit.jEdit").getMethod("openFile",
+									new Class<?>[] { jeditcl.loadClass("org.gjt.sp.jedit.View"), String.class }).invoke((Object) null,
+									new Object[] { view, new File(getInstallDir() + "/macros.xml").getAbsolutePath() });
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
@@ -3241,10 +3299,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 				return true;
 			}
 		});
-		
-		//public static Buffer openFile(View view, String parent, String path, boolean newFile, Hashtable props) {
-		
-		
+
+		// public static Buffer openFile(View view, String parent, String path,
+		// boolean newFile, Hashtable props) {
 
 		_actions.put("spreadsheet", new AbstractAction("New Local Spreadsheet") {
 			public void actionPerformed(final ActionEvent ae) {
@@ -3252,7 +3309,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				ddialog.setVisible(true);
 				if (ddialog.getSpreadsheetDimension() != null) {
 					createView(new SpreadsheetPanel(new SpreadsheetDefaultTableModel((int) ddialog.getSpreadsheetDimension().getHeight(), (int) ddialog
-							.getSpreadsheetDimension().getWidth()), GDApplet.this), "Local Spreadsheet  ("+(++LOCAL_SPREADSHEET_COUNTER)+")");
+							.getSpreadsheetDimension().getWidth()), GDApplet.this), "Local Spreadsheet  (" + (++LOCAL_SPREADSHEET_COUNTER) + ")");
 				}
 			}
 
@@ -3317,7 +3374,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		
 		_actions.put("newserversidespreadsheet", new AbstractAction("New Server-side Spreadsheet") {
 			public void actionPerformed(final ActionEvent ae) {
 				new Thread(new Runnable() {
@@ -3373,8 +3429,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-		
-		
 		_actions.put("createdevice", new AbstractAction("New Device") {
 			public void actionPerformed(final ActionEvent e) {
 
@@ -4125,7 +4179,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 
 					final File[] files = chooser.getSelectedFiles();
-					
+
 					new Thread(new Runnable() {
 						public void run() {
 							for (int i = 0; i < files.length; ++i) {
@@ -4133,12 +4187,12 @@ public class GDApplet extends GDAppletBase implements RGui {
 								try {
 
 									PoolUtils.cacheJar(files[i].toURI().toURL(), pluginsDir.getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, true);
-									JOptionPane.showMessageDialog(GDApplet.this, "Plugin " + files[i].getName().substring(0, files[i].getName().lastIndexOf('.'))
-											+ " Installed Successfully");
+									JOptionPane.showMessageDialog(GDApplet.this, "Plugin "
+											+ files[i].getName().substring(0, files[i].getName().lastIndexOf('.')) + " Installed Successfully");
 								} catch (Exception ex) {
 									ex.printStackTrace();
 								}
-								
+
 								try {
 									refreshPluginViewsHash();
 								} catch (Exception e) {
@@ -4146,7 +4200,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 
 							}
-							
+
 						}
 					}).start();
 
@@ -4158,8 +4212,6 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 		});
 
-
-		
 		_actions.put("installpluginjarurl", new AbstractAction("Install Plugin From Jar URL") {
 			public void actionPerformed(final ActionEvent e) {
 
@@ -4173,13 +4225,13 @@ public class GDApplet extends GDAppletBase implements RGui {
 							} catch (Exception ex) {
 								ex.printStackTrace();
 							}
-							
+
 							try {
 								refreshPluginViewsHash();
 							} catch (Exception ex) {
 								ex.printStackTrace();
 							}
-							
+
 						}
 					}).start();
 
@@ -4208,17 +4260,19 @@ public class GDApplet extends GDAppletBase implements RGui {
 							for (int i = 0; i < files.length; ++i) {
 
 								try {
-									File pf = new File(pluginsDir.getAbsolutePath() + "/" + files[i].getName().substring(0,files[i].getName().lastIndexOf('.')) );
+									File pf = new File(pluginsDir.getAbsolutePath() + "/"
+											+ files[i].getName().substring(0, files[i].getName().lastIndexOf('.')));
 									if (pf.exists()) {
 										PoolUtils.deleteDirectory(pf);
 									}
-									//pf.mkdirs();
+									// pf.mkdirs();
 
 									URL rUrl = files[i].toURI().toURL();
 									InputStream is = rUrl.openConnection().getInputStream();
-									unzip(is,pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+									unzip(is, pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
 
-									JOptionPane.showMessageDialog(null, "Plugin "+ files[i].getName().substring(0, files[i].getName().lastIndexOf('.')) + " Installed Successfully");
+									JOptionPane.showMessageDialog(null, "Plugin " + files[i].getName().substring(0, files[i].getName().lastIndexOf('.'))
+											+ " Installed Successfully");
 								} catch (Exception ex) {
 									ex.printStackTrace();
 								}
@@ -4251,26 +4305,24 @@ public class GDApplet extends GDAppletBase implements RGui {
 					new Thread(new Runnable() {
 						public void run() {
 
-								try {
-									
-									String pluginname=jarUrl.substring(jarUrl.lastIndexOf("/") + 1, jarUrl.lastIndexOf("."));
-									
-									File pf = new File(pluginsDir.getAbsolutePath() + "/" + pluginname );
-									if (pf.exists()) {
-										PoolUtils.deleteDirectory(pf);
-									}
-									//pf.mkdirs();
-									
+							try {
 
-									URL rUrl = new URL(jarUrl);
-									InputStream is = rUrl.openConnection().getInputStream();
-									unzip(is,pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+								String pluginname = jarUrl.substring(jarUrl.lastIndexOf("/") + 1, jarUrl.lastIndexOf("."));
 
-									JOptionPane.showMessageDialog(null, "Plugin "+ pluginname + " Installed Successfully");
-								} catch (Exception ex) {
-									ex.printStackTrace();
+								File pf = new File(pluginsDir.getAbsolutePath() + "/" + pluginname);
+								if (pf.exists()) {
+									PoolUtils.deleteDirectory(pf);
 								}
-						
+								// pf.mkdirs();
+
+								URL rUrl = new URL(jarUrl);
+								InputStream is = rUrl.openConnection().getInputStream();
+								unzip(is, pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+
+								JOptionPane.showMessageDialog(null, "Plugin " + pluginname + " Installed Successfully");
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
 
 							try {
 								refreshPluginViewsHash();
@@ -4289,9 +4341,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 				return true;
 			}
 		});
-		
 
-		
 		_actions.put("openpluginviewjarfile", new AbstractAction("Open Plugin View From Jar File") {
 			public void actionPerformed(final ActionEvent e) {
 
@@ -4728,7 +4778,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public ConsoleLogger getConsoleLogger() {
 		return _consoleLogger;
 	}
-	
+
 	public String getInstallDir() {
 		return ServerManager.INSTALL_DIR;
 	}
@@ -5230,13 +5280,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 				updateUsers();
 			} else if (action.getActionName().equals("CELLS_CHANGE")) {
 				System.out.println(action);
-				
-				if (cellsListners.size()>0) {
-					CellsChangeEvent event=new CellsChangeEvent(
-							(String)action.getAttributes().get("name"),
-							(CellRange)action.getAttributes().get("range"),
-							(String)action.getAttributes().get("originatorUID"), GDApplet.this);
-					for (int i=0; i<cellsListners.size();++i) {
+
+				if (cellsListners.size() > 0) {
+					CellsChangeEvent event = new CellsChangeEvent((String) action.getAttributes().get("name"), (CellRange) action.getAttributes().get("range"),
+							(String) action.getAttributes().get("originatorUID"), GDApplet.this);
+					for (int i = 0; i < cellsListners.size(); ++i) {
 						try {
 							cellsListners.elementAt(i).cellsChanged(event);
 						} catch (Exception e) {
@@ -5245,21 +5293,20 @@ public class GDApplet extends GDAppletBase implements RGui {
 					}
 				}
 			} else if (action.getActionName().equals("VARIABLES_CHANGE")) {
-				if (varsListners.size()>0) {
-					VariablesChangeEvent event=new VariablesChangeEvent((HashSet<String>)action.getAttributes().get("variables"),(String)action.getAttributes().get("originatorUID"), GDApplet.this);
-					for (int i=0; i<varsListners.size();++i) {
+				if (varsListners.size() > 0) {
+					VariablesChangeEvent event = new VariablesChangeEvent((HashSet<String>) action.getAttributes().get("variables"), (String) action
+							.getAttributes().get("originatorUID"), GDApplet.this);
+					for (int i = 0; i < varsListners.size(); ++i) {
 						try {
 							varsListners.elementAt(i).variablesChanged(event);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
-				}				
+				}
 			}
 		}
 	}
-
-
 
 	public void refreshPluginViewsHash() throws Exception {
 		HashMap<String, Vector<PluginViewDescriptor>> tempPluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
@@ -5278,34 +5325,36 @@ public class GDApplet extends GDAppletBase implements RGui {
 		}
 		pluginViewsHash = tempPluginViewsHash;
 	}
-	
+
 	public void refreshMacros() throws Exception {
-		Vector<Macro> tempMacrosVector=null;
+		Vector<Macro> tempMacrosVector = null;
 		try {
-			tempMacrosVector=Macro.getMacros(getInstallDir());
-			for (Macro m:macrosVector) {
-				for (VariablesChangeListener v:m.getVarsListeners()) removeVariablesChangeListener(v);
-				for (CellsChangeListener c:m.getCellsListeners()) removeCellsChangeListener(c);
-			}			
-			macrosVector=tempMacrosVector;
-			
-			for (Macro m:macrosVector) {
-				if (getR()!=null) {
-					getR().addProbeOnVariables(m.getProbes());					
+			tempMacrosVector = Macro.getMacros(getInstallDir());
+			for (Macro m : macrosVector) {
+				for (VariablesChangeListener v : m.getVarsListeners())
+					removeVariablesChangeListener(v);
+				for (CellsChangeListener c : m.getCellsListeners())
+					removeCellsChangeListener(c);
+			}
+			macrosVector = tempMacrosVector;
+
+			for (Macro m : macrosVector) {
+				if (getR() != null) {
+					getR().addProbeOnVariables(m.getProbes());
 				}
-				for (VariablesChangeListener v:m.getVarsListeners()) {
+				for (VariablesChangeListener v : m.getVarsListeners()) {
 					addVariablesChangeListener(v);
 				}
-				for (CellsChangeListener c:m.getCellsListeners()) addCellsChangeListener(c);
+				for (CellsChangeListener c : m.getCellsListeners())
+					addCellsChangeListener(c);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	Vector<VariablesChangeListener> varsListners=new Vector<VariablesChangeListener>();
-	
+
+	Vector<VariablesChangeListener> varsListners = new Vector<VariablesChangeListener>();
+
 	public void removeAllVariablesChangeListeners() {
 		varsListners.removeAllElements();
 	}
@@ -5318,10 +5367,8 @@ public class GDApplet extends GDAppletBase implements RGui {
 		varsListners.add(listener);
 	}
 
-	
-	
-	Vector<CellsChangeListener> cellsListners=new Vector<CellsChangeListener>();
-	
+	Vector<CellsChangeListener> cellsListners = new Vector<CellsChangeListener>();
+
 	public void removeAllCellsChangeListeners() {
 		cellsListners.removeAllElements();
 	}
@@ -5337,10 +5384,27 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public Vector<Macro> getMacros() {
 		return macrosVector;
 	}
-	
+
+	synchronized public Vector<Runnable> popAllTasks(int maxNbrLogActions) {
+		if (_tasks.size() == 0)
+			return null;
+		Vector<Runnable> result = (Vector<Runnable>) _tasks.clone();
+		if (maxNbrLogActions != -1 && result.size() > maxNbrLogActions) {
+			int delta = result.size() - maxNbrLogActions;
+			for (int i = 0; i < delta; ++i) {
+				result.remove(result.size() - 1);
+			}
+		}
+		for (int i = 0; i < result.size(); ++i)
+			_tasks.remove(0);
+		return result;
+	}
+
+	synchronized public void pushTask(Runnable task) {
+		_tasks.add(task);
+	}
+
 	static public void main(String[] args) throws Exception {
 
-	
 	}
 }
-

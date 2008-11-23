@@ -2071,6 +2071,8 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 			historyAdd(affectedRange);
 			fromString(trstring, '\t', rowOff, colOff, affectedRange);
 			fireSetSelection(null, affectedRange);
+			cellsChangeAdd(affectedRange);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
