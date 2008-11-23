@@ -56,7 +56,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -79,7 +78,6 @@ import mapping.ReferenceInterface;
 import mapping.StandardReference;
 import model.SpreadsheetModelRemote;
 import model.SpreadsheetModelRemoteImpl;
-
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.logging.Log;
@@ -120,7 +118,6 @@ import org.htmlparser.util.NodeList;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.RemotePanel;
-import org.python.modules.synchronize;
 import org.rosuda.JRI.RMainLoopCallbacks;
 import org.rosuda.JRI.Rengine;
 import org.rosuda.JRI.RengineWrapper;
@@ -144,7 +141,6 @@ import remoting.RConsoleActionListener;
 import remoting.RNI;
 import remoting.RServices;
 import remoting.UserStatus;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.Utils;
 import static server.RConst.*;
 
@@ -3807,31 +3803,31 @@ public class DirectJNI {
 		}
 
 		public String[] getMissingLibraries(String[] requiredLibraries) throws RemoteException {
-			throw new NotImplementedException();
+			return null;
 		}
 
 		public RObject cellsGet(String range, String type, String spreadsheetName) throws RemoteException {
-			throw new NotImplementedException();
+			return null;
 		}
 
 		public Object cellsGetConverted(String range, String type, String spreadsheetName) throws RemoteException {
-			throw new NotImplementedException();
+			return null;
 		}
 
 		public void cellsPut(Object value, String location, String spreadsheetName) throws RemoteException {
-			throw new NotImplementedException();
+			
 		}
 
 		public void addProbeOnCells(String spreadsheetName) throws RemoteException {
-			throw new NotImplementedException();
+			
 		}
 
 		public boolean isProbeOnCell(String spreadsheetName) throws RemoteException {
-			throw new NotImplementedException();
+			return false;
 		}
 
 		public void removeProbeOnCells(String spreadsheetName) throws RemoteException {
-			throw new NotImplementedException();
+			
 		}
 
 	};
