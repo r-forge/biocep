@@ -1733,6 +1733,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								public void run() {
 									try {
 										refreshMacros();
+										for (CollaborativeSpreadsheetView v:getCollaborativeSpreadsheetViews()) {
+											v.repaint();
+										}
 									} catch (Exception e) {
 										e.printStackTrace();
 									}

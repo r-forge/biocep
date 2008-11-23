@@ -1,5 +1,7 @@
 package net.java.dev.jspreadsheet;
 
+import graphics.rmi.RGui;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -58,7 +60,7 @@ public class JSpreadsheet extends JComponent
     * @param columns The number of columns in the spreadsheet
     * @param rows The number of rows in the spreadsheet
     */
-   public JSpreadsheet(AbstractTableModel m, RKit rgui)
+   public JSpreadsheet(AbstractTableModel m, RGui rgui, String name)
    {
 	   rg=rgui;
 	   
@@ -71,7 +73,7 @@ public class JSpreadsheet extends JComponent
       table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
       // set table editor and renderer to custom ones
-      table.setDefaultRenderer(Cell.class, new SpreadsheetCellRenderer());
+      table.setDefaultRenderer(Cell.class, new SpreadsheetCellRenderer( rgui, name));
       table.setDefaultEditor(Cell.class, new SpreadsheetCellEditor(new JTextField()));
 
       // set selection mode for contiguous  intervals

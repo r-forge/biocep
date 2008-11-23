@@ -607,10 +607,10 @@
 		<if><not><isset property="unbindall"/></not><then><property name="unbindall" value=""/></then></if>
 		<if><not><isset property="invoke"/></not><then><property name="invoke" value=""/></then></if>
 		
-		<java classname="org.kchine.rpf.MainRegistry" fork="true"
+		<java classname="RmiRegistry" fork="true"
 			spawn="${spawn}">
 			<classpath>
-				<pathelement path="${RPF_JAR}"/>
+				<pathelement path="${CORE_JAR}"/>
 				<pathelement path="${LOGGING_JAR}"/>
 			</classpath>
 			<jvmarg value="-Dport=${port}"/>

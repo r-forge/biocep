@@ -18,7 +18,6 @@
  */
 package model;
 
-import java.rmi.RemoteException;
 
 import javax.swing.table.AbstractTableModel;
 import net.java.dev.jspreadsheet.Cell;
@@ -63,4 +62,5 @@ abstract public class AbstractSpreadsheetModel extends AbstractTableModel {
 	
 	abstract public void setSpreadsheetSelection(String origin, CellRange sel);
 	
+	abstract public String getSpreadsheetModelId();
 }

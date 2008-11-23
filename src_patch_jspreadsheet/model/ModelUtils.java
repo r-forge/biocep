@@ -723,6 +723,15 @@ public class ModelUtils {
 				}				
 			}
 			
+			@Override
+			public String getSpreadsheetModelId() {
+				try {					
+					return spreadsheetModelRemote.getSpreadsheetModelId();
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			
 		};
 	}
 	
