@@ -1,1 +1,2 @@
-r=server.R.getInstance();print r;
+				r=server.R.getInstance()
+				r.consoleSubmit("print('ooo')")

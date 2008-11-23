@@ -28,6 +28,7 @@ public class GroovyInterpreterSingleton {
 				
 				try {
 					
+
 					File[] extraJarFiles=new File(ServerManager.INSTALL_DIR).listFiles(new FilenameFilter(){
 						public boolean accept(File dir, String name) {
 							return name.endsWith(".jar");
@@ -35,13 +36,13 @@ public class GroovyInterpreterSingleton {
 					});
 					
 					Arrays.sort(extraJarFiles);
-					System.out.println("Insiders Extra Jars:"+Arrays.toString(extraJarFiles));
 					URL[] urls=new URL[extraJarFiles.length];
 					for (int i=0; i<extraJarFiles.length;++i) {
 						urls[i]=extraJarFiles[i].toURI().toURL();
 					}
 					
 					final Class<?> GroovyShellClass=new URLClassLoader(urls, GroovyInterpreterSingleton.class.getClassLoader()).loadClass("groovy.lang.GroovyShell");
+									
 					final Object groovyShell=GroovyShellClass.newInstance();
 					_groovy = new GroovyInterpreter() {
 						    private String _status;
@@ -89,7 +90,8 @@ public class GroovyInterpreterSingleton {
 							public String execFromBuffer(String buffer) throws Exception {
 								
 								File tempFile = null;
-								tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_"+System.currentTimeMillis()).getCanonicalFile();
+								//tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_"+System.currentTimeMillis()).getCanonicalFile();
+								tempFile = new File("C:/testgroovy");
 								if (tempFile.exists())tempFile.delete();								
 							
 								BufferedReader breader = new BufferedReader(new StringReader(buffer));
@@ -132,7 +134,7 @@ public class GroovyInterpreterSingleton {
 								} finally {
 									System.setOut(saveOut);
 									System.setErr(saveErr);
-									if (tempFile!=null) tempFile.delete();
+									//if (tempFile!=null) tempFile.delete();
 								}
 								_status=new String(baos.toByteArray(),"UTF-8");
 								return _status;

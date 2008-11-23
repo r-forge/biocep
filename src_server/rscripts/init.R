@@ -390,3 +390,12 @@ cells.get <- function ( range , type='numeric', name='' ) {
 }
 
 
+cells.select <- function ( range , name='' ) {
+	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"spreadsheetSelect",  range, name);
+	if (result[1]=='OK') {
+		return(invisible(NULL));
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+

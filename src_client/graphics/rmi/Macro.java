@@ -14,6 +14,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import model.ImportInfo;
 import net.java.dev.jspreadsheet.CellRange;
+import net.java.dev.jspreadsheet.Formula;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -27,25 +29,28 @@ public class Macro {
 	public Macro() {
 	}
 
-	public Macro(String _name, String _label, Vector<VariablesChangeListener> listeners, Vector<CellsChangeListener> listeners2, Vector<MacroScript> _scripts,
-			HashSet<String> probes) {
+	public Macro(String _name, String _label, boolean show, Vector<VariablesChangeListener> listeners, Vector<CellsChangeListener> listeners2,
+			Vector<MacroScript> _scripts, HashSet<String> probes) {
 		this._name = _name;
 		if (_label == null || _label.equals(""))
 			this._label = _name;
 		else
 			this._label = _label;
-		_varsListeners = listeners;
-		_cellsListeners = listeners2;
+
+		this._show = show;
+		this._varsListeners = listeners;
+		this._cellsListeners = listeners2;
 		this._scripts = _scripts;
 		this._probes = probes;
 	}
 
-	String _name;
-	String _label;
-	Vector<VariablesChangeListener> _varsListeners = new Vector<VariablesChangeListener>();
-	Vector<CellsChangeListener> _cellsListeners = new Vector<CellsChangeListener>();
-	Vector<MacroScript> _scripts = new Vector<MacroScript>();
-	HashSet<String> _probes = new HashSet<String>();
+	protected String _name;
+	protected String _label;
+	protected boolean _show;
+	protected Vector<VariablesChangeListener> _varsListeners = new Vector<VariablesChangeListener>();
+	protected Vector<CellsChangeListener> _cellsListeners = new Vector<CellsChangeListener>();
+	protected Vector<MacroScript> _scripts = new Vector<MacroScript>();
+	protected HashSet<String> _probes = new HashSet<String>();
 
 	public String[] getProbes() {
 		String[] result = new String[_probes.size()];
@@ -55,41 +60,40 @@ public class Macro {
 		return result;
 	}
 
-	public void sourceAll(RGui rgui) {
-
-		try {
-			
-			//for (Macro M:rgui.getMacros())
-			Macro M=this;
-			{
-				for (VariablesChangeListener v : M.getVarsListeners())
-					((MacroVariablesChangeListener) v).setEnabled(false);
-				for (CellsChangeListener v : M.getCellsListeners())
-					((MacroCellsChangeListener) v).setEnabled(false);
-			}
-			
-			
-
-			for (MacroScript s : _scripts) {
+	public void sourceAll(final RGui rgui) {
+		rgui.pushTask(new Runnable() {
+			public void run() {
 				try {
-					s.sourceScript(rgui.getR());
+					rgui.getRLock().lock();
+					for (Macro M : rgui.getMacros()) {
+						for (VariablesChangeListener v : M.getVarsListeners())
+							((MacroVariablesChangeListener) v).setEnabled(false);
+						for (CellsChangeListener v : M.getCellsListeners())
+							((MacroCellsChangeListener) v).setEnabled(false);
+					}
+
+					for (MacroScript s : _scripts) {
+						try {
+							s.sourceScript(rgui.getR());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+
+					for (Macro M : rgui.getMacros()) {
+						for (VariablesChangeListener v : M.getVarsListeners())
+							((MacroVariablesChangeListener) v).setEnabled(true);
+						for (CellsChangeListener v : M.getCellsListeners())
+							((MacroCellsChangeListener) v).setEnabled(true);
+					}
+
 				} catch (Exception e) {
 					e.printStackTrace();
+				} finally {
+					rgui.getRLock().unlock();
 				}
 			}
-
-			//for (Macro M:rgui.getMacros())
-			M=this;
-			{
-				for (VariablesChangeListener v : M.getVarsListeners())
-					((MacroVariablesChangeListener) v).setEnabled(true);
-				for (CellsChangeListener v : M.getCellsListeners())
-					((MacroCellsChangeListener) v).setEnabled(true);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		});
 
 	}
 
@@ -100,6 +104,11 @@ public class Macro {
 
 		public MacroVariablesChangeListener(Vector<String> variables) {
 			this.variables = variables;
+		}
+		
+		public MacroVariablesChangeListener(String[] variables) {
+			this.variables = new Vector<String>();
+			for (int i=0; i<variables.length; ++i) this.variables.add(variables[i]);
 		}
 
 		public void variablesChanged(VariablesChangeEvent event) {
@@ -133,49 +142,43 @@ public class Macro {
 		public MacroCellsChangeListener(CellRange range) {
 			this.range = range;
 		}
+		
+		public MacroCellsChangeListener(String range) throws Exception{			
+			this.range = ImportInfo.getRange(range);;
+		}
 
 		public void cellsChanged(CellsChangeEvent event) {
 			if (!enabled)
 				return;
-			
-			CellRange eventRange=event.getRange();
-			if ( (eventRange.getStartCol() >= range.getStartCol() && eventRange.getStartCol() <= range.getEndCol()
-				 && eventRange.getStartRow() >= range.getStartRow() && eventRange.getStartRow() <= range.getEndRow())
-				 ||
-				 (eventRange.getEndCol() >= range.getStartCol() && eventRange.getEndCol() <= range.getEndCol()
-						 && eventRange.getEndRow() >= range.getStartRow() && eventRange.getEndRow() <= range.getEndRow())
-						 
-				||
-				 (eventRange.getEndCol() >= range.getStartCol() && eventRange.getEndCol() <= range.getEndCol()
-						 && eventRange.getStartRow() >= range.getStartRow() && eventRange.getStartRow() <= range.getEndRow())
-						 
-				||
-				 (eventRange.getStartCol() >= range.getStartCol() && eventRange.getStartCol() <= range.getEndCol()
-						 && eventRange.getEndRow() >= range.getStartRow() && eventRange.getEndRow() <= range.getEndRow())		 
-						 
-				||		 				 
-				 (range.getStartCol() >= eventRange.getStartCol() && range.getStartCol() <= eventRange.getEndCol()
-						 && range.getStartRow() >= eventRange.getStartRow() && range.getStartRow() <= eventRange.getEndRow()) 
-			    ||		 				 
-				 (range.getEndCol() >= eventRange.getStartCol() && range.getEndCol() <= eventRange.getEndCol()
-						 && range.getEndRow() >= eventRange.getStartRow() && range.getEndRow() <= eventRange.getEndRow())
-				||		 				 
-				 (range.getEndCol() >= eventRange.getStartCol() && range.getEndCol() <= eventRange.getEndCol()
-						 && range.getStartRow() >= eventRange.getStartRow() && range.getStartRow() <= eventRange.getEndRow())
-						 
-				||		 				 
-				 (range.getStartCol() >= eventRange.getStartCol() && range.getStartCol() <= eventRange.getEndCol()
-						 && range.getEndRow() >= eventRange.getStartRow() && range.getEndRow() <= eventRange.getEndRow())		 
-			
-				) {
-			
+
+			CellRange eventRange = event.getRange();
+			if ((eventRange.getStartCol() >= range.getStartCol() && eventRange.getStartCol() <= range.getEndCol()
+					&& eventRange.getStartRow() >= range.getStartRow() && eventRange.getStartRow() <= range.getEndRow())
+					|| (eventRange.getEndCol() >= range.getStartCol() && eventRange.getEndCol() <= range.getEndCol()
+							&& eventRange.getEndRow() >= range.getStartRow() && eventRange.getEndRow() <= range.getEndRow())
+
+					|| (eventRange.getEndCol() >= range.getStartCol() && eventRange.getEndCol() <= range.getEndCol()
+							&& eventRange.getStartRow() >= range.getStartRow() && eventRange.getStartRow() <= range.getEndRow())
+
+					|| (eventRange.getStartCol() >= range.getStartCol() && eventRange.getStartCol() <= range.getEndCol()
+							&& eventRange.getEndRow() >= range.getStartRow() && eventRange.getEndRow() <= range.getEndRow())
+
+					|| (range.getStartCol() >= eventRange.getStartCol() && range.getStartCol() <= eventRange.getEndCol()
+							&& range.getStartRow() >= eventRange.getStartRow() && range.getStartRow() <= eventRange.getEndRow())
+					|| (range.getEndCol() >= eventRange.getStartCol() && range.getEndCol() <= eventRange.getEndCol()
+							&& range.getEndRow() >= eventRange.getStartRow() && range.getEndRow() <= eventRange.getEndRow())
+					|| (range.getEndCol() >= eventRange.getStartCol() && range.getEndCol() <= eventRange.getEndCol()
+							&& range.getStartRow() >= eventRange.getStartRow() && range.getStartRow() <= eventRange.getEndRow())
+
+					|| (range.getStartCol() >= eventRange.getStartCol() && range.getStartCol() <= eventRange.getEndCol()
+							&& range.getEndRow() >= eventRange.getStartRow() && range.getEndRow() <= eventRange.getEndRow())
+
+			) {
+
 				sourceAll(event.getRGui());
-				
+
 			}
-				 
-			
-			
-			
+
 		}
 
 		public boolean isEnabled() {
@@ -219,7 +222,7 @@ public class Macro {
 		}
 
 		public void sourceScript(RServices r) throws Exception {
-			r.groovyExecFromBuffer(script);
+			System.out.println("\n"+r.groovyExecFromBuffer(script));
 		}
 
 		public String toString() {
@@ -235,7 +238,7 @@ public class Macro {
 		}
 
 		public void sourceScript(RServices r) throws Exception {
-			r.pythonExecFromBuffer(script);
+			System.out.println("\n"+r.pythonExecFromBuffer(script));
 		}
 
 		public String toString() {
@@ -272,29 +275,44 @@ public class Macro {
 			String label = null;
 			if (attrs.getNamedItem("label") != null)
 				label = attrs.getNamedItem("label").getNodeValue();
+
+			boolean show = true;
+			if (attrs.getNamedItem("show") != null) {
+				try {
+					show = new Boolean(attrs.getNamedItem("show").getNodeValue());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
 			Vector<VariablesChangeListener> varsListeners = new Vector<VariablesChangeListener>();
 			Vector<CellsChangeListener> cellsListeners = new Vector<CellsChangeListener>();
 			Vector<MacroScript> scripts = new Vector<MacroScript>();
 			HashSet<String> probes = new HashSet<String>();
-			try {
-				NodeList listenerNodes = Utils.catchNode(macroNodes.elementAt(i), "listeners").getChildNodes();
-				for (int j = 0; j < listenerNodes.getLength(); ++j) {
-					if (listenerNodes.item(j).getNodeName().equals("variables")) {
-						String variableNames = listenerNodes.item(j).getAttributes().getNamedItem("list").getNodeValue();
-						Vector<String> list = new Vector<String>();
-						StringTokenizer st = new StringTokenizer(variableNames, ",");
-						while (st.hasMoreElements())
-							list.add(st.nextToken());
-						probes.addAll(list);
-						varsListeners.add(m.new MacroVariablesChangeListener(list));
-					} else if (listenerNodes.item(j).getNodeName().equals("cells")) {
-						String range = listenerNodes.item(j).getAttributes().getNamedItem("range").getNodeValue();
-						CellRange cellrange = ImportInfo.getRange(range);
-						cellsListeners.add(m.new MacroCellsChangeListener(cellrange));
+
+			Node listenersRoot = Utils.catchNode(macroNodes.elementAt(i), "listeners");
+			if (listenersRoot != null) {
+				try {
+					NodeList listenerNodes = listenersRoot.getChildNodes();
+					for (int j = 0; j < listenerNodes.getLength(); ++j) {
+						if (listenerNodes.item(j).getNodeName().equals("variables")) {
+							String variableNames = listenerNodes.item(j).getAttributes().getNamedItem("list").getNodeValue();
+							Vector<String> list = new Vector<String>();
+							StringTokenizer st = new StringTokenizer(variableNames, ",");
+							while (st.hasMoreElements())
+								list.add(st.nextToken());
+							probes.addAll(list);
+							varsListeners.add(m.new MacroVariablesChangeListener(list));
+						} else if (listenerNodes.item(j).getNodeName().equals("cells")) {
+							String range = listenerNodes.item(j).getAttributes().getNamedItem("range").getNodeValue();
+							CellRange cellrange = ImportInfo.getRange(range);
+							cellsListeners.add(m.new MacroCellsChangeListener(cellrange));
+						}
 					}
+
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 
 			try {
@@ -309,23 +327,96 @@ public class Macro {
 					}
 				}
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
-
 			m.setName(name);
 			m.setLabel(label);
 			m.setVarsListeners(varsListeners);
 			m.setCellsListeners(cellsListeners);
 			m.setScripts(scripts);
 			m.setProbes(probes);
+			m.setShow(show);
 			macros.add(m);
 
-			//System.out.println("name:" + name);
-			//System.out.println("label:" + label);
-			//System.out.println("varsListeners:" + varsListeners);
-			//System.out.println("cellsListeners:" + cellsListeners);
-			//System.out.println("scripts:" + scripts);
 		}
+		
+		
+		
+		Vector<Node> dataLinksNodes = new Vector<Node>();
+		Utils.catchNodes(document.getDocumentElement(), "datalink", dataLinksNodes);
+		for (int i = 0; i < dataLinksNodes.size(); ++i) {
+
+			Macro m1 = new Macro();
+			Macro m2 = new Macro();
+
+			NamedNodeMap attrs = dataLinksNodes.elementAt(i).getAttributes();
+			
+			String name = null;
+			if (attrs.getNamedItem("name") != null)
+				name = attrs.getNamedItem("name").getNodeValue();
+			
+			String variable = attrs.getNamedItem("variable").getNodeValue();
+			String range = attrs.getNamedItem("range").getNodeValue();
+			
+			
+			String type = "numeric";
+			if (attrs.getNamedItem("type") != null)
+				type = attrs.getNamedItem("type").getNodeValue();
+			
+			
+			Vector<VariablesChangeListener> varsListeners1 = new Vector<VariablesChangeListener>();
+			Vector<CellsChangeListener> cellsListeners1 = new Vector<CellsChangeListener>();
+			Vector<MacroScript> scripts1 = new Vector<MacroScript>();
+			HashSet<String> probes1 = new HashSet<String>();
+			probes1.add(variable);
+			
+			varsListeners1.add(m1.new MacroVariablesChangeListener(new String[]{variable}));
+			
+			CellRange cellrange=ImportInfo.getRange(range);
+			
+			String rg=null;
+			if (type.equals("data.frame.auto.row")) {
+				rg=Formula.getCellString(cellrange.getStartRow(), cellrange.getStartCol()-1);
+			} else if (type.equals("data.frame.auto.col")) {
+				rg=Formula.getCellString(cellrange.getStartRow()-1, cellrange.getStartCol());
+			} else if (type.equals("data.frame.auto.row.col")) {
+				rg=Formula.getCellString(cellrange.getStartRow()-1, cellrange.getStartCol()-1);
+			} else {
+				rg=range.substring(0, range.indexOf(':'));
+			}
+			scripts1.add(new RScript("cells.put("+variable+",'"+rg+"'"+(name==null?"":",name='"+name+"'")+")"));
+
+			Vector<VariablesChangeListener> varsListeners2 = new Vector<VariablesChangeListener>();
+			Vector<CellsChangeListener> cellsListeners2 = new Vector<CellsChangeListener>();
+			Vector<MacroScript> scripts2 = new Vector<MacroScript>();
+			HashSet<String> probes2 = new HashSet<String>();
+			cellsListeners2.add(m2.new MacroCellsChangeListener(range));
+			scripts2.add(new RScript(variable+"=cells.get('"+range+"',type='"+type+"'"+(name==null?"":",name='"+name+"'")+")"));
+			
+			m1.setName(null);
+			m1.setLabel(null);
+			m1.setVarsListeners(varsListeners1);
+			m1.setCellsListeners(cellsListeners1);
+			m1.setScripts(scripts1);
+			m1.setProbes(probes1);
+			m1.setShow(false);
+			
+			m2.setName(null);
+			m2.setLabel(null);
+			m2.setVarsListeners(varsListeners2);
+			m2.setCellsListeners(cellsListeners2);
+			m2.setScripts(scripts2);
+			m2.setProbes(probes2);
+			m2.setShow(false);
+			
+			
+			macros.add(m1);
+			macros.add(m2);
+		}
+
+		
+		
+		
 		return macros;
 	}
 
@@ -407,5 +498,72 @@ public class Macro {
 	public void setProbes(HashSet<String> _probes) {
 		this._probes = _probes;
 	}
+
+	public boolean isShow() {
+		return _show;
+	}
+
+	public void setShow(boolean _show) {
+		this._show = _show;
+	}
+	
+	public static String getHelloWorldAction() {
+		return 
+		 "<macro name=\"Hello\" label=\"Say Hello Twice\" >\n"						
+		+"  <actions>\n"		
+		+"    <r >\n"
+		+"    	print(\"Hello\")\n"
+		+" 	 </r>\n"
+		+" 	 <groovy>\n"
+		+"	    r=server.R.getInstance()\n"
+		+"	    r.consoleSubmit(\"print('Hello')\")\n"
+		+" 	 </groovy>\n"
+		+"  </actions>\n"
+	    +"</macro>\n";		
+	}
+	
+	public static String getHelloWorldVars() {
+		return 
+		 "<macro name=\"Hello\" label=\"Say Hello If x or y Changes \" show= \"false\" >\n"
+		+"  <listeners>\n"
+		+"     <variables list=\"x\"/>\n"
+		+"     <variables list=\"y\"/>\n"
+	    +"  </listeners>\n"
+		+"  <actions>\n"		
+		+"    <r >\n"
+		+"    	print(\"Hello\")\n"
+		+" 	 </r>\n"
+		+" 	 <groovy>\n"
+		+"	    r=server.R.getInstance()\n"
+		+"	    r.consoleSubmit(\"print('Hello')\")\n"
+		+" 	 </groovy>\n"
+		+"  </actions>\n"
+	    +"</macro>\n";		
+	}
+
+	public static String getHelloWorldCells() {
+		return 
+		 "<macro name=\"Hello\" label=\"Say Hello Twice If A1:C3 Changes\" show= \"false\" >\n"
+		+"  <listeners>\n"
+		+"    <cells range=\"A1:C3\"/>\n"				
+	    +"  </listeners>\n"
+		+"  <actions>\n"		
+		+"    <r >\n"
+		+"    	print(\"Hello\")\n"
+		+" 	 </r>\n"
+		+" 	 <groovy>\n"
+		+"	    r=server.R.getInstance()\n"
+		+"	    r.consoleSubmit(\"print('Hello')\")\n"
+		+" 	 </groovy>\n"
+		+"  </actions>\n"
+	    +"</macro>\n";		
+	}
+
+	public static String getHelloWorldDataLink() {
+		return 
+		 "<datalink variable=\"x\" range=\"A1:B2\" />\n";
+	}
+ 
+
 
 }

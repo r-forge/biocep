@@ -32,6 +32,7 @@ import remoting.RKit;
  * @author Karim Chine karim.chine@m4x.org
  */
 public interface RGui extends RKit {
+	
 	public ConsoleLogger getConsoleLogger();
 
 	public View createView(Component panel, String title);
@@ -55,5 +56,7 @@ public interface RGui extends RKit {
 	public String getInstallDir();
 	
 	public Vector<Macro> getMacros();
+	
+	void pushTask(Runnable task);
 	
 }

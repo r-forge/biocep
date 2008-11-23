@@ -1116,7 +1116,7 @@ public abstract class RListener {
 			
 			int ssNbr=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();			
 			if (ssNbr==0) {
-				return new String[] { "NOK", convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Collaboration/New Collaborative Spreadsheet\n") };			
+				return new String[] { "NOK", convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Spreadsheet/New Server-side Spreadsheet\n") };			
 			}
 			if (name.equals("")) {
 				if (ssNbr==1) {						
@@ -1159,5 +1159,43 @@ public abstract class RListener {
 		}
 	}
 
-	
+
+	public static String[] spreadsheetSelect(  String range, String name) {
+		try {		
+			
+			System.out.println("name=<"+name+">");
+			
+			int ssNbr=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();			
+			if (ssNbr==0) {
+				return new String[] { "NOK", convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Spreadsheet/New Server-side Spreadsheet\n") };			
+			}
+			if (name.equals("")) {
+				if (ssNbr==1) {						
+					name=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
+				} else {
+					String[] ssNames=new String[ssNbr]; 
+					int i=0;for (String s:DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet()) ssNames[i++]=s;
+					return new String[] { "NOK", convertToPrintCommand("Tere are "+ssNbr+" Spreadsheets on Server : \n"+Arrays.toString(ssNames)+"\nChoose one via name='Spreadsheet Name'\n") };
+				}
+			}
+			
+			SpreadsheetModelRemote model=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
+			if (model==null) return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
+
+			CellRange cellrange=null;
+			try {
+				cellrange=ImportInfo.getRange(range);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new String[] { "NOK", convertToPrintCommand("Bad Cell Range") };
+			}
+			
+			model.setSpreadsheetSelection(DirectJNI.getInstance().getOriginatorUID(),cellrange);
+			return new String[] { "OK" };
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+
 }
