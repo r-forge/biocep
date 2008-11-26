@@ -196,6 +196,7 @@ public interface RServices extends ManagedServant {
     public void addProbeOnVariables(String[] variables) throws RemoteException; 
     public void removeProbeOnVariables(String[] variables) throws RemoteException;
     public String[] getProbedVariables() throws RemoteException;
+    public void setProbedVariables(String[] variables) throws RemoteException;
     
     public String[] getMissingLibraries(String[] requiredLibraries) throws RemoteException;
     

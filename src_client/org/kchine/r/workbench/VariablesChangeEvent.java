@@ -1,4 +1,5 @@
-package graphics.rmi;
+package org.kchine.r.workbench;
+
 
 import java.util.HashSet;
 

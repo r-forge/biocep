@@ -18,11 +18,13 @@
  */
 package graphics.rmi.action;
 
-import graphics.rmi.RGui;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+
+import org.kchine.r.workbench.RGui;
+
 import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
 import graphics.rmi.JGDPanelPop;

@@ -18,7 +18,6 @@
  */
 package views;
 
-import graphics.rmi.RGui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -46,6 +45,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import org.apache.batik.swing.JSVGCanvas;
+import org.kchine.r.workbench.RGui;
 
 import views.highlighting.HighlightDocument;
 import views.highlighting.HighlightKit;

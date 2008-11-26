@@ -613,5 +613,10 @@ public class RServicesObject implements RServices {
 
 		
 	}
+	
+	public void setProbedVariables(String[] variables) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

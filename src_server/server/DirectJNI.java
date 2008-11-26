@@ -3780,7 +3780,6 @@ public class DirectJNI {
 			for (String k : pvHash)
 				newProbedVariables[i++] = k;
 			probedVariables = newProbedVariables;
-
 		}
 
 		synchronized public void removeProbeOnVariables(String[] variables) throws RemoteException {
@@ -3798,6 +3797,17 @@ public class DirectJNI {
 			;
 		}
 
+		public void setProbedVariables(String[] variables) throws RemoteException {
+			HashSet<String> pvHash = new HashSet<String>();
+			for (int i = 0; i < variables.length; ++i)
+				pvHash.add(variables[i]);
+			String[] newProbedVariables = new String[pvHash.size()];
+			int i = 0;
+			for (String k : pvHash)
+				newProbedVariables[i++] = k;
+			probedVariables = newProbedVariables;
+		}
+		
 		public String[] getProbedVariables() throws RemoteException {
 			return probedVariables;
 		}

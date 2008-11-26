@@ -18,7 +18,6 @@
  */
 package views;
 
-import graphics.rmi.RGui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.io.File;
@@ -27,6 +26,8 @@ import javax.swing.Icon;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
+import org.kchine.r.workbench.RGui;
 
 public class PagerView extends DynamicView {
 	RGui _rgui;

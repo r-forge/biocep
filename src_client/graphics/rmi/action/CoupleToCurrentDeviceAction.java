@@ -19,9 +19,10 @@
 package graphics.rmi.action;
 
 import graphics.rmi.JGDPanelPop;
-import graphics.rmi.RGui;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
+
+import org.kchine.r.workbench.RGui;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

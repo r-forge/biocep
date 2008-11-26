@@ -19,13 +19,14 @@
 package views;
 
 import graphics.rmi.AbstractDockingWindowListener;
-import graphics.rmi.RGui;
 import graphics.rmi.spreadsheet.SpreadsheetPanel;
 import http.HttpMarker;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
+
+import org.kchine.r.workbench.RGui;
 
 import model.AbstractSpreadsheetModel;
 import model.ModelUtils;

@@ -20,7 +20,6 @@ package graphics.rmi.action;
 
 import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
-import graphics.rmi.RGui;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -29,6 +28,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+
+import org.kchine.r.workbench.RGui;
 
 /**
  * @author Karim Chine   karim.chine@m4x.org

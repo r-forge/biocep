@@ -26,7 +26,6 @@ package org.gjt.sp.jedit;
 // {{{ Imports
 import bsh.UtilEvalError;
 import com.microstar.xml.*;
-import graphics.rmi.RGui;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -37,13 +36,13 @@ import org.gjt.sp.jedit.buffer.BufferIORequest;
 import org.gjt.sp.jedit.buffer.KillRing;
 import org.gjt.sp.jedit.msg.*;
 import org.gjt.sp.jedit.gui.*;
-import org.gjt.sp.jedit.help.HelpViewer;
 import org.gjt.sp.jedit.io.*;
 import org.gjt.sp.jedit.pluginmgr.PluginManager;
 import org.gjt.sp.jedit.search.SearchAndReplace;
 import org.gjt.sp.jedit.syntax.*;
 import org.gjt.sp.jedit.textarea.*;
 import org.gjt.sp.util.Log;
+import org.kchine.r.workbench.RGui;
 
 // }}}
 

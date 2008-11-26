@@ -19,7 +19,6 @@
 package views;
 
 import graphics.rmi.PDFPanel;
-import graphics.rmi.RGui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -44,6 +43,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+
+import org.kchine.r.workbench.RGui;
 
 import views.highlighting.HighlightDocument;
 import views.highlighting.NonWrappingTextPane;

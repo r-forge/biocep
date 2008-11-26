@@ -1,6 +1,5 @@
 package net.java.dev.jspreadsheet;
 
-import graphics.rmi.RGui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -33,6 +32,9 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+
+import org.kchine.r.workbench.RGui;
+
 import remoting.RKit;
 import model.AbstractSpreadsheetModel;
 import model.SpreadsheetListener;

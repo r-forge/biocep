@@ -2,7 +2,7 @@ import java.io.File;
 
 import javax.swing.SwingUtilities;
 import org.gjt.sp.jedit.jEdit;
-import graphics.rmi.RGui;
+import org.kchine.r.workbench.RGui;
 
 public class BasicEditorView {
 	private RGui _rgui;	

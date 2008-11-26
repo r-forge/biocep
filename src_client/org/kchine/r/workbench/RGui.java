@@ -16,14 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package graphics.rmi;
+package org.kchine.r.workbench;
 
 import graphics.pop.GDDevice;
+import graphics.rmi.ConsoleLogger;
+import graphics.rmi.JGDPanelPop;
 import groovy.GroovyInterpreter;
-
 import java.awt.Component;
 import java.io.File;
 import java.util.Vector;
+import org.kchine.r.workbench.macros.MacroInterface;
 
 import net.infonode.docking.View;
 import remoting.RKit;
@@ -55,7 +57,7 @@ public interface RGui extends RKit {
 	
 	public String getInstallDir();
 	
-	public Vector<Macro> getMacros();
+	public Vector<MacroInterface> getMacros();
 	
 	void pushTask(Runnable task);
 	

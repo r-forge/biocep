@@ -90,8 +90,8 @@ public class GroovyInterpreterSingleton {
 							public String execFromBuffer(String buffer) throws Exception {
 								
 								File tempFile = null;
-								//tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_"+System.currentTimeMillis()).getCanonicalFile();
-								tempFile = new File("C:/testgroovy");
+								tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_"+System.currentTimeMillis()).getCanonicalFile();
+								
 								if (tempFile.exists())tempFile.delete();								
 							
 								BufferedReader breader = new BufferedReader(new StringReader(buffer));
