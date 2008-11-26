@@ -39,8 +39,6 @@ import graphics.pop.GDDevice;
 import graphics.rmi.ConsoleLogger;
 import graphics.rmi.GDApplet;
 import graphics.rmi.JGDPanelPop;
-import graphics.rmi.Macro;
-import graphics.rmi.RGui;
 import groovy.GroovyInterpreter;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -103,6 +101,9 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import org.bioconductor.packages.rservices.RObject;
+import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.macros.Macro;
+import org.kchine.r.workbench.macros.MacroInterface;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.YesSecurityManager;
 
@@ -230,7 +231,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public String getInstallDir() {
 				return null;
 			}
-			public Vector<Macro> getMacros() {
+			public Vector<MacroInterface> getMacros() {
 				
 				return null;
 			}

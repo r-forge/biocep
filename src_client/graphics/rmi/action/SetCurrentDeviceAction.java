@@ -19,11 +19,12 @@
 package graphics.rmi.action;
 
 import graphics.pop.GDDevice;
-import graphics.rmi.RGui;
 
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+
+import org.kchine.r.workbench.RGui;
 
 /**
  * @author Karim Chine   karim.chine@m4x.org

@@ -18,7 +18,6 @@
  */
 package views;
 
-import graphics.rmi.RGui;
 import groovy.GroovyInterpreterSingleton;
 
 import java.awt.BorderLayout;
@@ -27,6 +26,7 @@ import java.awt.Color;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
+import org.kchine.r.workbench.RGui;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.gui.ConsolePanel;
 import org.kchine.rpf.gui.SubmitInterface;

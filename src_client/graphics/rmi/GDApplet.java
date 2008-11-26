@@ -153,6 +153,13 @@ import net.java.dev.jspreadsheet.CellPoint;
 import net.java.dev.jspreadsheet.CellRange;
 import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
 import org.bioconductor.packages.rservices.RObject;
+import org.kchine.r.workbench.CellsChangeEvent;
+import org.kchine.r.workbench.CellsChangeListener;
+import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.VariablesChangeEvent;
+import org.kchine.r.workbench.VariablesChangeListener;
+import org.kchine.r.workbench.macros.Macro;
+import org.kchine.r.workbench.macros.MacroInterface;
 import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.PropertiesGenerator;
@@ -268,7 +275,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	private static int LOCAL_SPREADSHEET_COUNTER = 0;
 
 	HashMap<String, Vector<PluginViewDescriptor>> pluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
-	Vector<Macro> macrosVector = new Vector<Macro>();
+	Vector<MacroInterface> macrosVector = new Vector<MacroInterface>();
 
 	Vector<Runnable> _tasks = new Vector<Runnable>();
 
@@ -947,7 +954,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							_rForConsole.registerUser(getUID(), getUserName());
 
-							for (Macro m : macrosVector)
+							for (MacroInterface m : macrosVector)
 								_rForConsole.addProbeOnVariables(m.getProbes());
 
 							if (_mode == HTTP_MODE) {
@@ -1666,10 +1673,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 				public void menuSelected(MenuEvent e) {
 					macrosMenu.removeAll();
 					int count = 0;
-					for (Macro m : macrosVector) {
+					for (MacroInterface m : macrosVector) {
 						if (m.isShow()) {
 							++count;
-							final Macro finalMacro = m;
+							final MacroInterface finalMacro = m;
 							macrosMenu.add(new AbstractAction(m.getLabel()) {
 								public void actionPerformed(ActionEvent e) {
 									finalMacro.sourceAll(GDApplet.this);
@@ -5330,10 +5337,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	public void refreshMacros() throws Exception {
-		Vector<Macro> tempMacrosVector = null;
+		Vector<MacroInterface> tempMacrosVector = null;
 		try {
 			tempMacrosVector = Macro.getMacros(getInstallDir());
-			for (Macro m : macrosVector) {
+			for (MacroInterface m : macrosVector) {
 				for (VariablesChangeListener v : m.getVarsListeners())
 					removeVariablesChangeListener(v);
 				for (CellsChangeListener c : m.getCellsListeners())
@@ -5341,7 +5348,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 			}
 			macrosVector = tempMacrosVector;
 
-			for (Macro m : macrosVector) {
+			for (MacroInterface m : macrosVector) {
 				if (getR() != null) {
 					getR().addProbeOnVariables(m.getProbes());
 				}
@@ -5384,7 +5391,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		cellsListners.add(listener);
 	}
 
-	public Vector<Macro> getMacros() {
+	public Vector<MacroInterface> getMacros() {
 		return macrosVector;
 	}
 

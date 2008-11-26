@@ -2003,7 +2003,10 @@ public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements 
 	}
 
 	private static int spreadsheetTableModelRemoteCounter = 0;
-	private String _id = "SS_" + (spreadsheetTableModelRemoteCounter++);
+	
+	
+	public static String SPREADSHEET_NAME_PREFIX="SS_";
+	private String _id =  SPREADSHEET_NAME_PREFIX + (spreadsheetTableModelRemoteCounter++);
 
 	public String getSpreadsheetModelId() throws RemoteException {
 		return _id;

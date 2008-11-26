@@ -22,12 +22,13 @@ import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
 import graphics.rmi.JGDPanelPop;
 import graphics.rmi.PDFPanel;
-import graphics.rmi.RGui;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+
+import org.kchine.r.workbench.RGui;
 
 
 /**

@@ -1,11 +1,11 @@
-package graphics.rmi;
+package org.kchine.r.workbench;
 
 import net.java.dev.jspreadsheet.CellRange;
 
 
 public class CellsChangeEvent {
 	
-	String name;
+	String spreadsheetName;
 	CellRange range;
 	
 	int row,col,height,width;
@@ -14,14 +14,14 @@ public class CellsChangeEvent {
 	
 	public CellsChangeEvent(String name, CellRange range, String originator, RGui rgui) {
 		super();
-		this.name = name;
+		this.spreadsheetName = name;
 		this.range = range;
 		this.originator = originator;
 		this.rgui = rgui;		
 	}
 	
-	public String getName() {
-		return name;
+	public String getSpreadsheetName() {
+		return spreadsheetName;
 	}
 	public CellRange getRange() {
 		return range;

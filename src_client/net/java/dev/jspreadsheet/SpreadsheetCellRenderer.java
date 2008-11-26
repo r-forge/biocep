@@ -1,9 +1,6 @@
 package net.java.dev.jspreadsheet;
 
 import graphics.rmi.ColorUtil;
-import graphics.rmi.DataLinkMacro;
-import graphics.rmi.Macro;
-import graphics.rmi.RGui;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -12,6 +9,13 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import org.kchine.r.workbench.CellsChangeListener;
+import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.macros.DataLinkMacro;
+import org.kchine.r.workbench.macros.Macro;
+import org.kchine.r.workbench.macros.MacroCellsChangeListener;
+import org.kchine.r.workbench.macros.MacroInterface;
 
 
 /** The class for rendering (displaying) individual Cell objects in a
@@ -84,14 +88,18 @@ class SpreadsheetCellRenderer extends DefaultTableCellRenderer
       /* this method has been changed for formula feature */
       setValue(value, isSelected, hasFocus, row, column);
 
-
     	  for (int i=rgui.getMacros().size()-1;i>=0;--i) {
-    		  Macro m=rgui.getMacros().elementAt(i);
-    		  if (m instanceof DataLinkMacro) {    			  
-    			  Color c=((DataLinkMacro)m).getColor(name,row,column);
-    			  if (c!=null)  {
-    				  if (isSelected) super.setBackground(ColorUtil.darker(c, 0.3)); 
-    				  else super.setBackground(c);
+    		  MacroInterface m=rgui.getMacros().elementAt(i);
+    		  if (m.getCellsListeners().size()>0) {    			      			  
+    			  for (int k=0;k<m.getCellsListeners().size();++k) {
+    				  CellsChangeListener cellsListener=m.getCellsListeners().elementAt(k);
+    				  if (cellsListener instanceof MacroCellsChangeListener) { 
+    					  Color c=((MacroCellsChangeListener)cellsListener).getColor(name,row,column);
+		    			  if (c!=null)  {
+		    				  if (isSelected) super.setBackground(ColorUtil.darker(c, 0.3)); 
+		    				  else super.setBackground(c);
+		    			  }
+    				  }
     			  }
     		  } else {
     			  break;

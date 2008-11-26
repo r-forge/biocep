@@ -21,7 +21,6 @@ package graphics.rmi.action;
 import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
 import graphics.rmi.JGDPanelPop;
-import graphics.rmi.RGui;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -32,6 +31,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.apache.batik.swing.JSVGCanvas;
+import org.kchine.r.workbench.RGui;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

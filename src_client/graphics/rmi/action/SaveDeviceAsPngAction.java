@@ -20,7 +20,6 @@ package graphics.rmi.action;
 
 import graphics.rmi.GDApplet;
 import graphics.rmi.JBufferedImagePanel;
-import graphics.rmi.RGui;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -28,6 +27,8 @@ import java.awt.event.ActionEvent;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+
+import org.kchine.r.workbench.RGui;
 
 /**
  * @author Karim Chine   karim.chine@m4x.org

@@ -53,6 +53,7 @@ import javax.swing.JTextField;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.kchine.r.workbench.RGui;
 import org.kchine.rpf.PoolUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;

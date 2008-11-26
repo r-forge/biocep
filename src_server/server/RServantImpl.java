@@ -1032,6 +1032,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
     public String[] getProbedVariables() throws RemoteException {
     	return DirectJNI.getInstance().getRServices().getProbedVariables();
     }
+    public void setProbedVariables(String[] variables) throws RemoteException {
+    	DirectJNI.getInstance().getRServices().setProbedVariables(variables);    	
+    }
     
     public String[] getMissingLibraries(String[] requiredLibraries) throws RemoteException {
     	return DirectJNI.getInstance().getRServices().getMissingLibraries(requiredLibraries);

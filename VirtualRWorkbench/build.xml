@@ -470,7 +470,8 @@
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/desktop/activation.jar"/>
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/desktop/mail.jar"/>
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/desktop/jython.jar"/>
-					
+				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="lib/desktop/groovy-all-1.5.4.jar"/>
+									
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="${JETTY_JAR}"/>
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="${JETTY_UTIL_JAR}"/>
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="${JETTY_CLIENT_JAR}"/>
