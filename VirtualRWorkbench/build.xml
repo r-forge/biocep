@@ -516,14 +516,29 @@
 					  		<arg value="VirtualRWorkbench/frontendapp/WEB-INF/classes/globals.properties"/>				
 				  			
 						    <arg value="pools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB"/>
+				  			
 						    <arg value="pools.dbmode.type=${demo.db.type}"/>
 						    <arg value="pools.dbmode.host=${demo.db.host}"/>
 				  			<arg value="pools.dbmode.port=${demo.db.port}"/>
 				  			<arg value="pools.dbmode.name=${demo.db.name}"/>	
 						    <arg value="pools.dbmode.user=${demo.db.user}"/>
 						    <arg value="pools.dbmode.password=${demo.db.password}"/>
+				  			
 				  			<arg value="pools.dbmode.defaultpoolname=${demo.db.defaultpoolname}"/>
 				  			<arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>
+				  			
+
+				  			
+				  			
+				  			<arg value="naming.mode=${demo.naming.mode}"/>				  			
+				  			<arg value="db.type=${demo.db.type}"/>				  			
+				  			<arg value="db.host=${demo.db.host}"/>
+				  			<arg value="db.port=${demo.db.port}"/>
+				  			<arg value="db.name=${demo.db.name}"/>	
+				  			<arg value="db.user=${demo.db.user}"/>
+				  			<arg value="db.password=${demo.db.password}"/>
+				  				
+				  				
 				  			
 						    <!--
 				  			<arg value="pools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDBProxy"/>

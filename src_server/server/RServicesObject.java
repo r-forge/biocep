@@ -20,6 +20,7 @@ package server;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.util.Properties;
 import java.util.Vector;
 
 import org.kchine.r.RObject;
@@ -616,6 +617,11 @@ public class RServicesObject implements RServices {
 	
 	public void setProbedVariables(String[] variables) throws RemoteException {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException {
+		return null;
 		
 	}
 

@@ -55,6 +55,13 @@
 		<servlet-class>http.RESTServlet</servlet-class>
 	</servlet>
 	
+	<servlet>
+		<description>
+		</description>
+		<display-name>RebindServlet</display-name>
+		<servlet-name>RebindServlet</servlet-name>
+		<servlet-class>http.RebindServlet</servlet-class>
+	</servlet>
 	
 	<servlet>
 		<servlet-name>jnlpbuilder</servlet-name>
@@ -94,6 +101,11 @@
 	<servlet-mapping>
 		<servlet-name>RESTServlet</servlet-name>
 		<url-pattern>/rest</url-pattern>		
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>RebindServlet</servlet-name>
+		<url-pattern>/rebind</url-pattern>		
 	</servlet-mapping>
 		
 	<servlet-mapping>

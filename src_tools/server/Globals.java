@@ -228,7 +228,7 @@ public class Globals {
 				}
 
 				outputWriter.println("}");
-				outputWriterRemoteImpl.println("} catch (Exception ex) {throw new java.rmi.RemoteException( util.Utils.getStackTraceAsString(ex) );}}");
+				outputWriterRemoteImpl.println("} catch (Exception ex) {throw new java.rmi.RemoteException( org.kchine.r.server.Utils.getStackTraceAsString(ex) );}}");
 				
 				
 				if (fattrs.isPublishToWeb()) {
@@ -238,7 +238,7 @@ public class Globals {
 									+  "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();");
 					outputWriterWebservice.print(callStrRemoteImpl);
 					if (m.getReturnType() != null) { outputWriterWebservice.println("return result;"); }
-					outputWriterWebservice.println("} catch (Exception ex) {throw new Exception( util.Utils.getStackTraceAsString(ex) );} finally {"
+					outputWriterWebservice.println("} catch (Exception ex) {throw new Exception( org.kchine.r.server.Utils.getStackTraceAsString(ex) );} finally {"
 							+ "org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);" + "} }");
 					
 
@@ -295,7 +295,7 @@ public class Globals {
 				}
 
 				outputWriter.println("}");
-				outputWriterRemoteImpl.println("} catch (Exception ex) {throw new java.rmi.RemoteException( util.Utils.getStackTraceAsString(ex) );}}");
+				outputWriterRemoteImpl.println("} catch (Exception ex) {throw new java.rmi.RemoteException( org.kchine.r.server.Utils.getStackTraceAsString(ex) );}}");
 
 			}
 
@@ -548,7 +548,7 @@ public class Globals {
 									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
-									+ "try { String result =  r.evaluate(expression,n); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
+									+ "try { String result =  r.evaluate(expression,n); return result;} catch (Exception ex) {throw new Exception(org.kchine.r.server.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
@@ -557,7 +557,7 @@ public class Globals {
 									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
-									+ "try { RObject result =  r.call(methodName, args); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
+									+ "try { RObject result =  r.call(methodName, args); return result;} catch (Exception ex) {throw new Exception(org.kchine.r.server.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
@@ -566,7 +566,7 @@ public class Globals {
 									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
-									+ "try { r.callAndAssign(varName, methodName, args); } catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
+									+ "try { r.callAndAssign(varName, methodName, args); } catch (Exception ex) {throw new Exception(org.kchine.r.server.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
@@ -575,7 +575,7 @@ public class Globals {
 									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
-									+ "try { RObject result =  r.getObject(expression); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
+									+ "try { RObject result =  r.getObject(expression); return result;} catch (Exception ex) {throw new Exception(org.kchine.r.server.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
@@ -584,7 +584,7 @@ public class Globals {
 									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
 											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
-									+ "try { String result =  r.consoleSubmit(expression); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
+									+ "try { String result =  r.consoleSubmit(expression); return result;} catch (Exception ex) {throw new Exception(org.kchine.r.server.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
@@ -687,7 +687,7 @@ public class Globals {
 			outputWriter.println("}\n");
 
 			outputWriter
-					.println("\npublic org.kchine.r.RObject extractRObject() {try {return _assignInterface.getObjectFromReference(this);} catch (java.rmi.RemoteException re) {throw new RuntimeException(util.Utils.getStackTraceAsString(re));}}\n");
+					.println("\npublic org.kchine.r.RObject extractRObject() {try {return _assignInterface.getObjectFromReference(this);} catch (java.rmi.RemoteException re) {throw new RuntimeException(org.kchine.r.server.Utils.getStackTraceAsString(re));}}\n");
 
 			String nullifyFields = "";
 			for (int i = 0; i < fields.length; ++i)
@@ -795,7 +795,7 @@ public class Globals {
 				Field f = fields[i];
 
 				outputWriter.print("result.append(" + "\"Field \\\"" + f.getName() + "\\\":\\n\");");
-				outputWriter.print("if (super.get" + Utils.captalizeFirstChar(f.getName()) + "()!=null) result.append(util.Utils.indent (super.get"
+				outputWriter.print("if (super.get" + Utils.captalizeFirstChar(f.getName()) + "()!=null) result.append(org.kchine.r.server.Utils.indent (super.get"
 						+ Utils.captalizeFirstChar(f.getName()) + "().toString(),1)); " + "else result.append(\"null(\"+_rObjectIdHolder[0]+\"@"
 						+ slotsContainer[0][i] + ")\\n\");");
 			}

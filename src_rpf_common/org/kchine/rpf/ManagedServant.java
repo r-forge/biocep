@@ -21,6 +21,8 @@
 package org.kchine.rpf;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.util.Properties;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -86,5 +88,7 @@ public interface ManagedServant extends java.rmi.Remote {
 	public ManagedServant cloneServer() throws java.rmi.RemoteException;
 	
 	public String getStub() throws java.rmi.RemoteException;
+	
+	public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException ;
 
 }

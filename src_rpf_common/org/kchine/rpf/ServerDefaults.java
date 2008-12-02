@@ -24,6 +24,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.kchine.rpf.db.ConnectionProvider;
 import org.kchine.rpf.db.DBLayer;
@@ -131,6 +133,67 @@ public abstract class ServerDefaults {
 			}
 			return _registry;
 		}
+	}
+
+	
+	
+	public static Registry getRegistry(Properties props) throws Exception	{		
+		String namingMode;		
+		String registryHost;
+		int registryPort;
+		String dbUrl=null;
+		String dbDriver=null;
+		String dbUser;
+		String dbPassword;			
+		namingMode = (String)props.get("naming.mode") != null && !props.get("naming.mode").equals("") ? (String)props.get("naming.mode") : DEFAULT_NAMING_MODE;
+
+		registryHost = (String)props.get("registry.host") != null && !props.get("registry.host").equals("") ? (String)props.get("registry.host")
+				: DEFAULT_REGISTRY_HOST;		
+		registryPort = (String)props.get("registry.port") != null && !props.get("registry.port").equals("") ? Integer.decode((String)props.get("registry.port")) : DEFAULT_REGISTRY_PORT;
+				
+		String _DB_TYPE =  (String)props.get("db.type") != null && !props.get("db.type").equals("") ? (String)props.get("db.type") : DEFAULT_DB_TYPE;
+		String _DB_HOST = (String)props.get("db.host") != null &&  !props.get("db.host").equals("") ? (String)props.get("db.host") : DEFAULT_DB_HOST;
+		int    _DB_PORT = (String)props.get("db.port") != null &&  !props.get("db.port").equals("") ? Integer.decode((String)props.get("db.port")) : DEFAULT_DB_PORT;		
+		String _DB_NAME = (String)props.get("db.name") != null &&  !props.get("db.name").equals("") ? (String)props.get("db.name") : DEFAULT_DB_NAME;	
+		
+		if (_DB_TYPE.equals("derby")) {
+			dbUrl = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME+";create=true";
+			dbDriver="org.apache.derby.jdbc.ClientDriver";
+		} else if (_DB_TYPE.equals("mysql")) {			
+			dbUrl = "jdbc:mysql://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME;			
+			dbDriver="org.gjt.mm.mysql.Driver";
+				
+		} else if (_DB_TYPE.equals("oracle")) {			
+			dbUrl = "jdbc:oracle:thin:@"+_DB_HOST+":"+_DB_PORT+":"+_DB_NAME; 
+			dbDriver="oracle.jdbc.driver.OracleDriver";
+		}
+		
+		dbUser = (String)props.get("db.user") != null && !props.get("db.user").equals("") ? (String)props.get("db.user") : DEFAULT_DB_USER;
+		dbPassword = (String)props.get("db.password") != null && !props.get("db.password").equals("") ? (String)props.get("db.password") : DEFAULT_DB_PASSWORD;
+		
+		 Registry registry = null;
+		 
+		if (namingMode.equals("db")) {
+			
+			Class.forName(dbDriver);
+			final String dbUrlFinal=dbUrl ;
+			final String dbUserFinal=dbUser;
+			final String dbPasswordFinal=dbPassword;				
+			registry = DBLayer.getLayer(PoolUtils.getDBType(dbUrl), new ConnectionProvider() {
+				public Connection newConnection() throws java.sql.SQLException {
+					return DriverManager.getConnection(dbUrlFinal, dbUserFinal, dbPasswordFinal);
+				};
+			});
+			
+		} else if (namingMode.equals("generic")){					
+			registry = ((RegistryProvider)ServerDefaults.class.forName((String)props.get("generic.class")).newInstance() ).getRegistry();					
+		} else if (namingMode.equals("self")){
+			registry = LocalRmiRegistry.getInstance();
+		} else {
+			registry = LocateRegistry.getRegistry(registryHost, registryPort);
+		}
+
+		return registry;
 	}
 
 	
