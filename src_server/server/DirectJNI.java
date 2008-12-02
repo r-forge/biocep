@@ -20,11 +20,7 @@
  */
 package server;
 
-import graphics.pop.GDContainerBag;
-import graphics.pop.GDDevice;
-import graphics.rmi.DoublePoint;
-import graphics.rmi.GraphicNotifier;
-import graphics.rmi.JGDPanel;
+import graphics.rmi.RGraphicsPanelRemote;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -73,75 +69,79 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import mapping.RPackage;
-import mapping.ReferenceInterface;
-import mapping.StandardReference;
-import model.SpreadsheetModelRemote;
-import model.SpreadsheetModelRemoteImpl;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.logging.Log;
-import org.bioconductor.packages.rservices.ObjectNameInterface;
-import org.bioconductor.packages.rservices.RArray;
-import org.bioconductor.packages.rservices.RArrayRef;
-import org.bioconductor.packages.rservices.RChar;
-import org.bioconductor.packages.rservices.RCharRef;
-import org.bioconductor.packages.rservices.RComplex;
-import org.bioconductor.packages.rservices.RComplexRef;
-import org.bioconductor.packages.rservices.RDataFrame;
-import org.bioconductor.packages.rservices.RDataFrameRef;
-import org.bioconductor.packages.rservices.REnvironment;
-import org.bioconductor.packages.rservices.REnvironmentRef;
-import org.bioconductor.packages.rservices.RFactor;
-import org.bioconductor.packages.rservices.RFactorRef;
-import org.bioconductor.packages.rservices.RInteger;
-import org.bioconductor.packages.rservices.RIntegerRef;
-import org.bioconductor.packages.rservices.RList;
-import org.bioconductor.packages.rservices.RListRef;
-import org.bioconductor.packages.rservices.RLogical;
-import org.bioconductor.packages.rservices.RLogicalRef;
-import org.bioconductor.packages.rservices.RMatrix;
-import org.bioconductor.packages.rservices.RMatrixRef;
-import org.bioconductor.packages.rservices.RNamedArgument;
-import org.bioconductor.packages.rservices.RNumeric;
-import org.bioconductor.packages.rservices.RNumericRef;
-import org.bioconductor.packages.rservices.RObject;
-import org.bioconductor.packages.rservices.RS3;
-import org.bioconductor.packages.rservices.RS3Ref;
-import org.bioconductor.packages.rservices.RUnknown;
-import org.bioconductor.packages.rservices.RVector;
 import org.htmlparser.Node;
 import org.htmlparser.Parser;
 import org.htmlparser.filters.TagNameFilter;
 import org.htmlparser.tags.LinkTag;
 import org.htmlparser.util.NodeList;
+import org.kchine.r.ObjectNameInterface;
+import org.kchine.r.RArray;
+import org.kchine.r.RArrayRef;
+import org.kchine.r.RChar;
+import org.kchine.r.RCharRef;
+import org.kchine.r.RComplex;
+import org.kchine.r.RComplexRef;
+import org.kchine.r.RDataFrame;
+import org.kchine.r.RDataFrameRef;
+import org.kchine.r.REnvironment;
+import org.kchine.r.REnvironmentRef;
+import org.kchine.r.RFactor;
+import org.kchine.r.RFactorRef;
+import org.kchine.r.RInteger;
+import org.kchine.r.RIntegerRef;
+import org.kchine.r.RList;
+import org.kchine.r.RListRef;
+import org.kchine.r.RLogical;
+import org.kchine.r.RLogicalRef;
+import org.kchine.r.RMatrix;
+import org.kchine.r.RMatrixRef;
+import org.kchine.r.RNamedArgument;
+import org.kchine.r.RNumeric;
+import org.kchine.r.RNumericRef;
+import org.kchine.r.RObject;
+import org.kchine.r.RS3;
+import org.kchine.r.RS3Ref;
+import org.kchine.r.RUnknown;
+import org.kchine.r.RVector;
+import org.kchine.r.server.AssignInterface;
+import org.kchine.r.server.FileDescription;
+import org.kchine.r.server.GenericCallbackDevice;
+import org.kchine.r.server.RCallBack;
+import org.kchine.r.server.RCollaborationListener;
+import org.kchine.r.server.RConsoleAction;
+import org.kchine.r.server.RConsoleActionListener;
+import org.kchine.r.server.RNI;
+import org.kchine.r.server.RPackage;
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.ReferenceInterface;
+import org.kchine.r.server.StandardReference;
+import org.kchine.r.server.UserStatus;
+import org.kchine.r.server.Utils;
+import org.kchine.r.server.graphics.DoublePoint;
+import org.kchine.r.server.graphics.GDContainerBag;
+import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.graphics.GraphicNotifier;
+import org.kchine.r.server.graphics.primitive.GDObject;
+import org.kchine.r.server.iplots.SVarInterfaceRemote;
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+import org.kchine.r.server.scripting.PythonInterpreterSingleton;
+import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
+import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.RemotePanel;
 import org.rosuda.JRI.RMainLoopCallbacks;
 import org.rosuda.JRI.Rengine;
 import org.rosuda.JRI.RengineWrapper;
-import org.rosuda.ibase.SVarInterfaceRemote;
-import org.rosuda.ibase.SVarSetInterfaceRemote;
 import org.rosuda.javaGD.GDInterface;
-import org.rosuda.javaGD.GDObject;
 import org.rosuda.javaGD.JavaGD;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import python.PythonInterpreterSingleton;
-import remoting.AssignInterface;
-import remoting.FileDescription;
-import remoting.GenericCallbackDevice;
-import remoting.RCallBack;
-import remoting.RCollaborationListener;
-import remoting.RConsoleAction;
-import remoting.RConsoleActionListener;
-import remoting.RNI;
-import remoting.RServices;
-import remoting.UserStatus;
-import util.Utils;
 import static server.RConst.*;
 
 /**
@@ -1403,7 +1403,7 @@ public class DirectJNI {
 			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException(util.Utils.getStackTraceAsString(e));
+			throw new RuntimeException(org.kchine.r.server.Utils.getStackTraceAsString(e));
 		}
 	}
 
@@ -1422,7 +1422,7 @@ public class DirectJNI {
 				String argvar = newTemporaryVariableName();
 				usedVars.add(argvar);
 
-				if (arg instanceof mapping.ReferenceInterface) {
+				if (arg instanceof org.kchine.r.server.ReferenceInterface) {
 
 					ReferenceInterface argRef = (ReferenceInterface) arg;
 
@@ -3146,7 +3146,7 @@ public class DirectJNI {
 		}
 
 		public RemotePanel getPanel(int w, int h) throws RemoteException {
-			return new JGDPanel(w, h, gn);
+			return new RGraphicsPanelRemote(w, h, gn);
 		}
 
 		public GDDevice newDevice(int w, int h) throws RemoteException {
@@ -3674,7 +3674,7 @@ public class DirectJNI {
 
 		public String groovyExec(String groovyCommand) throws RemoteException {
 			try {
-				return groovy.GroovyInterpreterSingleton.getInstance().exec(groovyCommand);
+				return org.kchine.r.server.scripting.GroovyInterpreterSingleton.getInstance().exec(groovyCommand);
 			} catch (Exception e) {
 				throw new RemoteException("", e);
 			}
@@ -3683,7 +3683,7 @@ public class DirectJNI {
 		public String groovyExecFromBuffer(String buffer) throws RemoteException {
 			File f = null;
 			try {
-				return groovy.GroovyInterpreterSingleton.getInstance().execFromBuffer(buffer);
+				return org.kchine.r.server.scripting.GroovyInterpreterSingleton.getInstance().execFromBuffer(buffer);
 			} catch (Exception e) {
 				throw new RemoteException("", e);
 			} finally {
@@ -3694,7 +3694,7 @@ public class DirectJNI {
 
 		public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException {
 			try {
-				return groovy.GroovyInterpreterSingleton.getInstance().execFromFile(new File(WDIR + "/" + fileName));
+				return org.kchine.r.server.scripting.GroovyInterpreterSingleton.getInstance().execFromFile(new File(WDIR + "/" + fileName));
 			} catch (Exception e) {
 				throw new RemoteException("", e);
 			}
@@ -3709,7 +3709,7 @@ public class DirectJNI {
 		}
 
 		public boolean isGroovyEnabled() throws RemoteException {
-			return groovy.GroovyInterpreterSingleton.getInstance() != null;
+			return org.kchine.r.server.scripting.GroovyInterpreterSingleton.getInstance() != null;
 		}
 
 		public String getGroovyStatus() throws RemoteException {
@@ -3889,7 +3889,7 @@ public class DirectJNI {
 				_localBroadcastedDevices.add(gdBag.getDeviceNumber());
 		}
 
-		public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
+		public Vector<org.kchine.r.server.graphics.primitive.GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
 			return gdBag.popAllGraphicObjects(maxNbrGraphicPrimitives);
 		};
 
@@ -4378,7 +4378,7 @@ public class DirectJNI {
 
 			for (int i = 0; i < list.size(); ++i) {
 				String className = list.elementAt(i);
-				if (className.startsWith("org.bioconductor.packages.") && !className.startsWith("org.bioconductor.packages.rservices")) {
+				if (className.startsWith("org.kchine.r.packages.") && !className.startsWith("org.kchine.r.packages.rservices")) {
 					Class<?> c_ = _mappingClassLoader.loadClass(className);
 
 					if (c_.getSuperclass() != null && c_.getSuperclass().equals(RObject.class) && !Modifier.isAbstract(c_.getModifiers())) {

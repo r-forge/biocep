@@ -20,11 +20,11 @@ package client;
 
 import java.rmi.registry.Registry;
 
+import org.kchine.r.server.RServices;
 import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.gui.InDialog;
 
 import graphics.rmi.GDApplet;
-import remoting.RServices;
 
 public class R {
 	public static  RServices getInstance() {

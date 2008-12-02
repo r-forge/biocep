@@ -22,8 +22,9 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 
-import remoting.RCallBack;
-import remoting.RServices;
+
+import org.kchine.r.server.RCallBack;
+import org.kchine.r.server.RServices;
 import org.kchine.rpf.ServantProviderFactory;
 
 /**

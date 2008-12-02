@@ -51,6 +51,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.manager.bootstrap.BootSsh;
+import org.kchine.r.server.spreadsheet.TableModelRemoteImpl;
 import org.kchine.rpf.CreationCallBack;
 import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.ManagedServant;
@@ -59,9 +62,6 @@ import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.SSHUtils;
 import org.kchine.rpf.ServantCreationTimeout;
 
-import model.TableModelRemoteImpl;
-import bootstrap.BootSsh;
-import remoting.RServices;
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
@@ -228,11 +228,12 @@ public class ServerManager {
 				}
 			}
 
-			new SCPClient(conn).put(bootstrapDir + "/BootSsh.class", "RWorkbench/classes/bootstrap");
+			
+			new SCPClient(conn).put(bootstrapDir + "/BootSsh.class", "RWorkbench/classes/org/kchine/r/server/manager/bootstrap");
 			try {
 				sess = conn.openSession();
 
-				String command = "java -classpath RWorkbench/classes bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
+				String command = "java -classpath RWorkbench/classes org.kchine.r.server.manager.bootstrap.BootSsh" + " " + new Boolean(keepAlive) + " " + codeServerHostIp + " "
 						+ codeServerPort + " " + BootSsh.propertiesToString(namingInfo) + " " + "NULL" + " " + memoryMinMegabytes + " " + memoryMaxMegabytes
 						+ " " + "System.out" + " " + ((name == null || name.trim().equals("")) ? BootSsh.NO_NAME : name);
 
@@ -613,11 +614,12 @@ public class ServerManager {
 			progressLogger.logProgress("All Required Packages Are Installed.");
 
 			progressLogger.logProgress("Generating Bootstrap Classes..");
-			String bootstrap = (INSTALL_DIR + "classes/bootstrap").replace('\\', '/');
+			
+			String bootstrap = (INSTALL_DIR + "classes/org/kchine/r/server/manager/bootstrap").replace('\\', '/');
 			System.out.println(bootstrap);
 			if (!new File(bootstrap).exists())
 				new File(bootstrap).mkdirs();
-			InputStream is = ServerManager.class.getResourceAsStream("/bootstrap/Boot.class");
+			InputStream is = ServerManager.class.getResourceAsStream("/org/kchine/r/server/manager/bootstrap/Boot.class");
 			byte[] buffer = new byte[is.available()];
 			try {
 				for (int i = 0; i < buffer.length; ++i) {
@@ -800,7 +802,7 @@ public class ServerManager {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
 				}
 
-				command.add("bootstrap.Boot");
+				command.add("org.kchine.r.server.manager.bootstrap.Boot");
 				command.add(new Boolean(keepAlive).toString());
 				command.add(codeServerHostIp);
 				command.add("" + codeServerPort);

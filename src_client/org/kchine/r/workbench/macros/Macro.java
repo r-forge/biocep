@@ -12,11 +12,12 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import model.ImportInfo;
-import model.SpreadsheetModelRemoteImpl;
-import net.java.dev.jspreadsheet.CellRange;
-import net.java.dev.jspreadsheet.Formula;
 
+import org.kchine.r.server.Utils;
+import org.kchine.r.server.spreadsheet.CellRange;
+import org.kchine.r.server.spreadsheet.Formula;
+import org.kchine.r.server.spreadsheet.ImportInfo;
+import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.CellsChangeListener;
 
@@ -27,7 +28,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import server.ServerManager;
-import util.Utils;
 
 public class Macro implements MacroInterface{
 	public Macro() {

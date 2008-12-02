@@ -23,9 +23,9 @@ package server;
 import java.rmi.RemoteException;
 
 import org.apache.commons.logging.Log;
+import org.kchine.r.server.RNI;
 import org.rosuda.JRI.Rengine;
 
-import remoting.RNI;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

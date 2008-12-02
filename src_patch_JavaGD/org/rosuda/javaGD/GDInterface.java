@@ -9,6 +9,18 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import org.kchine.r.server.graphics.GDContainer;
+import org.kchine.r.server.graphics.primitive.GDCircle;
+import org.kchine.r.server.graphics.primitive.GDClip;
+import org.kchine.r.server.graphics.primitive.GDColor;
+import org.kchine.r.server.graphics.primitive.GDFill;
+import org.kchine.r.server.graphics.primitive.GDFont;
+import org.kchine.r.server.graphics.primitive.GDLine;
+import org.kchine.r.server.graphics.primitive.GDLinePar;
+import org.kchine.r.server.graphics.primitive.GDPolygon;
+import org.kchine.r.server.graphics.primitive.GDRect;
+import org.kchine.r.server.graphics.primitive.GDText;
+
 /*---- external API: those methods are called via JNI from the GD C code
 
  public void     gdOpen(int devNr, double w, double h);
@@ -48,7 +60,7 @@ public class GDInterface {
 
 	public GDContainer c = null;
 
-	public LocatorSync ls = null;
+	//public LocatorSync ls = null;
 
 	public void gdOpen(double w, double h) {
 		open = true;

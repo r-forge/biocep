@@ -22,9 +22,11 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Vector;
-import remoting.GenericCallbackDevice;
-import remoting.RAction;
-import remoting.RConsoleAction;
+
+import org.kchine.r.server.GenericCallbackDevice;
+import org.kchine.r.server.RAction;
+import org.kchine.r.server.RConsoleAction;
+
 
 public class GenericCallbackDeviceImpl extends UnicastRemoteObject implements GenericCallbackDevice {
 	

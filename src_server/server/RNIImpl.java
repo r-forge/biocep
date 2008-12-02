@@ -20,7 +20,8 @@ package server;
 
 import java.rmi.RemoteException;
 
-import remoting.RNI;
+import org.kchine.r.server.RNI;
+
 
 /**
  * @author Karim Chine   karim.chine@m4x.org

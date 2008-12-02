@@ -22,10 +22,10 @@ import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
+import org.kchine.r.server.RServices;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServerDefaults;
 
-import remoting.RServices;
 
 public class CoreMain {
 

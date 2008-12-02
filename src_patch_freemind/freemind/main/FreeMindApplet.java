@@ -40,12 +40,14 @@ import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+
+import org.kchine.r.workbench.utils.AppletBase;
+
 import freemind.controller.Controller;
 import freemind.controller.MenuBar;
 import freemind.view.mindmapview.MapView;
-import graphics.rmi.GDAppletBase;
 
-public class FreeMindApplet extends GDAppletBase implements FreeMindMain {
+public class FreeMindApplet extends AppletBase implements FreeMindMain {
 
 	public static final String version = FreeMind.VERSION;
     //    public static final String defaultPropsURL;

@@ -18,7 +18,6 @@
  */
 package http.local;
 
-import graphics.pop.GDDevice;
 import http.TunnelingException;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -29,9 +28,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.kchine.r.server.RKit;
+import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.rpf.PoolUtils;
 
-import remoting.RKit;
 import server.Java2DUtils;
 
 /**

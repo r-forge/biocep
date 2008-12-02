@@ -30,9 +30,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.kchine.r.server.RServices;
 import org.kchine.rpf.PoolUtils;
 
-import remoting.RServices;
 
 /**
  * @author Karim Chine   karim.chine@m4x.org

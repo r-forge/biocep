@@ -18,28 +18,28 @@
  */
 package server;
 
-import graphics.pop.GDDevice;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.Vector;
-import mapping.RPackage;
-import model.SpreadsheetModelRemote;
 
-import org.bioconductor.packages.rservices.RObject;
+import org.kchine.r.RObject;
+import org.kchine.r.server.FileDescription;
+import org.kchine.r.server.RAction;
+import org.kchine.r.server.RCallBack;
+import org.kchine.r.server.RCollaborationListener;
+import org.kchine.r.server.RConsoleActionListener;
+import org.kchine.r.server.RNI;
+import org.kchine.r.server.RPackage;
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.UserStatus;
+import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.iplots.SVarInterfaceRemote;
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
 import org.kchine.rpf.ManagedServant;
 import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.RemotePanel;
-import org.rosuda.ibase.SVarInterfaceRemote;
-import org.rosuda.ibase.SVarSetInterfaceRemote;
 
-import remoting.FileDescription;
-import remoting.RAction;
-import remoting.RCallBack;
-import remoting.RCollaborationListener;
-import remoting.RConsoleActionListener;
-import remoting.RNI;
-import remoting.RServices;
-import remoting.UserStatus;
 
 /**
  * @author Karim Chine   karim.chine@m4x.org
@@ -428,11 +428,11 @@ public class RServicesObject implements RServices {
 	public void removeRCallback(RCallBack callback) throws RemoteException {
 	}
 
-	public remoting.GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
+	public org.kchine.r.server.GenericCallbackDevice newGenericCallbackDevice() throws RemoteException {
 		return null;
 	}
 
-	public remoting.GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException {
+	public org.kchine.r.server.GenericCallbackDevice[] listGenericCallbackDevices() throws RemoteException {
 		return null;
 	}
 

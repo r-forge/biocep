@@ -4,6 +4,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
+import org.kchine.r.server.iplots.SVarInterfaceRemote;
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+
 
 public abstract class RemoteUtil {
 	public static SVarInterface getSVarWrapper(final SVarInterfaceRemote _svarRemote) {

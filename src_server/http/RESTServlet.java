@@ -20,7 +20,6 @@
  */
 package http;
 
-import graphics.pop.GDDevice;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -41,10 +40,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServantProviderFactory;
 
-import remoting.RServices;
 import server.Java2DUtils;
 
 /**

@@ -1,5 +1,7 @@
 package org.rosuda.javaGD;
 
+import org.kchine.r.server.graphics.GDContainer;
+
 public class JavaGD extends GDInterface {
 	private static GDContainer _gdContainer;
 

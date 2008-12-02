@@ -2,6 +2,8 @@ package org.rosuda.ibase;
 
 import java.io.Serializable;
 
+import org.kchine.r.server.iplots.SVarInterfaceRemote;
+
 public interface SVarInterface extends NotifierInterface, Serializable{
 	
 /*	

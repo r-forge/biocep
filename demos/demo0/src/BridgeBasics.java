@@ -22,14 +22,14 @@ import java.rmi.RemoteException;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
-import org.bioconductor.packages.rservices.RChar;
-import org.bioconductor.packages.rservices.RNamedArgument;
-import org.bioconductor.packages.rservices.RObjectName;
-import org.bioconductor.packages.rservices.RS3;
+import org.kchine.r.RChar;
+import org.kchine.r.RNamedArgument;
+import org.kchine.r.RObjectName;
+import org.kchine.r.RS3;
+import org.kchine.r.server.RConsoleAction;
+import org.kchine.r.server.RConsoleActionListener;
+import org.kchine.r.server.RServices;
 
-import remoting.RConsoleAction;
-import remoting.RConsoleActionListener;
-import remoting.RServices;
 import server.DirectJNI;
 
 /**

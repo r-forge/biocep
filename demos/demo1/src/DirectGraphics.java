@@ -18,17 +18,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import graphics.pop.GDDevice;
-import graphics.rmi.JGDPanelPop;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import remoting.RServices;
 import server.DirectJNI;
+
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.workbench.graphics.JGDPanelPop;
 import org.kchine.rpf.gui.ConsolePanel;
-import org.kchine.rpf.SubmitInterface;
+import org.kchine.rpf.gui.SubmitInterface;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

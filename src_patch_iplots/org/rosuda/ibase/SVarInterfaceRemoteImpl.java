@@ -5,6 +5,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Vector;
 
+import org.kchine.r.server.iplots.SVarInterfaceRemote;
+
 public class SVarInterfaceRemoteImpl extends UnicastRemoteObject implements SVarInterfaceRemote{
 	SVarInterface _svarInterface;
 	

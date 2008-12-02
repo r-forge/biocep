@@ -20,7 +20,6 @@
  */
 package http;
 
-import graphics.pop.GDDevice;
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -29,23 +28,24 @@ import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
-import model.SpreadsheetModelDevice;
-import model.SpreadsheetModelRemoteProxy;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.kchine.r.server.GenericCallbackDevice;
+import org.kchine.r.server.RAction;
+import org.kchine.r.server.RCallBack;
+import org.kchine.r.server.RCollaborationListener;
+import org.kchine.r.server.RConsoleAction;
+import org.kchine.r.server.RConsoleActionListener;
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.spreadsheet.SpreadsheetModelDevice;
+import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteProxy;
 import org.kchine.rpf.PoolUtils;
 
-import remoting.RAction;
-import remoting.RCallBack;
-import remoting.GenericCallbackDevice;
-import remoting.RCollaborationListener;
-import remoting.RConsoleAction;
-import remoting.RConsoleActionListener;
-import remoting.RServices;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

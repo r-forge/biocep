@@ -21,7 +21,6 @@
 package http;
 
 
-import graphics.pop.GDDevice;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -30,13 +29,14 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.kchine.r.server.GenericCallbackDevice;
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.rpf.SSHTunnelingProxy;
 import org.kchine.rpf.SSHUtils;
 import org.kchine.rpf.ServantProvider;
 import org.kchine.rpf.ServantProviderFactory;
 
-import remoting.GenericCallbackDevice;
-import remoting.RServices;
 import server.GenericCallbackDeviceImpl;
 import server.ServerManager;
 

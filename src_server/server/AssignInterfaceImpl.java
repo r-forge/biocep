@@ -21,12 +21,12 @@ package server;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 
-import org.bioconductor.packages.rservices.RList;
-import org.bioconductor.packages.rservices.RObject;
-import org.bioconductor.packages.rservices.RVector;
+import org.kchine.r.RList;
+import org.kchine.r.RObject;
+import org.kchine.r.RVector;
+import org.kchine.r.server.AssignInterface;
+import org.kchine.r.server.RNI;
 
-import remoting.AssignInterface;
-import remoting.RNI;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

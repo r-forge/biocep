@@ -18,13 +18,13 @@
  */
 package server;
 
-import graphics.rmi.GraphicNotifier;
 
 import java.awt.Point;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import org.rosuda.javaGD.GDContainer;
+import org.kchine.r.server.graphics.GDContainer;
+import org.kchine.r.server.graphics.GraphicNotifier;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

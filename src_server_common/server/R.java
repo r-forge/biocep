@@ -20,9 +20,9 @@ package server;
 
 import java.rmi.registry.Registry;
 
+import org.kchine.r.server.RServices;
 import org.kchine.rpf.ServerDefaults;
 
-import remoting.RServices;
 
 public class R {
 	public static RServices _instance;

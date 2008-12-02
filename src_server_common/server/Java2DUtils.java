@@ -18,7 +18,6 @@
  */
 package server;
 
-import graphics.pop.GDActionMarker;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -29,8 +28,9 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Vector;
 
-import org.rosuda.javaGD.GDObject;
-import org.rosuda.javaGD.GDState;
+import org.kchine.r.server.graphics.action.GDActionMarker;
+import org.kchine.r.server.graphics.primitive.GDObject;
+import org.kchine.r.server.graphics.primitive.GDState;
 
 public class Java2DUtils {
 	private static boolean _forceAntiAliasing = true;

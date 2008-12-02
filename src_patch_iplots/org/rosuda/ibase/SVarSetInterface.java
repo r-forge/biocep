@@ -2,6 +2,8 @@ package org.rosuda.ibase;
 
 import java.io.Serializable;
 
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+
 
 public interface SVarSetInterface extends Serializable{	
 	public SVarInterface at(int i);

@@ -18,12 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import graphics.rmi.JGDPanelPop;
 import java.awt.BorderLayout;
 import java.rmi.Naming;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import remoting.RServices;
+
+import org.kchine.r.server.RServices;
+import org.kchine.r.workbench.graphics.JGDPanelPop;
 import org.kchine.rpf.YesSecurityManager;
 import org.kchine.rpf.db.monitor.ConsoleDialog;
 import org.kchine.rpf.db.monitor.ServantStatus;

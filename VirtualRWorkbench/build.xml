@@ -488,11 +488,11 @@
 				
 				
 				<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="${CORE_JAR}"/>				  					  	
-			<!--<copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="VirtualRWorkbench/distrib/mapping.jar"/>-->							
+			    <copy todir="VirtualRWorkbench/frontendapp/WEB-INF/lib" file="VirtualRWorkbench/distrib/mapping.jar"/>							
 				
 				  <copy todir="VirtualRWorkbench/frontendapp/rmi">
 						<fileset dir="" includes="RJB.jar"/>						
-						<!--<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>-->
+						<fileset dir="VirtualRWorkbench/distrib" includes="mapping.jar"/>
 				  </copy>				  
 				
 				  <delete>			
@@ -635,9 +635,9 @@
 						
 						
 					  						  	
-					  	<!--
+					  	
 					  	<copy todir="VirtualRWorkbench/frontendapp/appletlibs" file="VirtualRWorkbench/distrib/mapping.jar"/>
-					  	-->
+					  	
 
 				
 

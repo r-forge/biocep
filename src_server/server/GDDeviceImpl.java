@@ -20,13 +20,14 @@
  */
 package server;
 
-import graphics.pop.GDDevice;
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Vector;
+
+import org.kchine.r.server.graphics.GDDevice;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -46,7 +47,7 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 		_deviceHashMap.put(_localGdDevice.getDeviceNumber(), this);
 	}
 
-	public Vector<org.rosuda.javaGD.GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
+	public Vector<org.kchine.r.server.graphics.primitive.GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
 		return _localGdDevice.popAllGraphicObjects(maxNbrGraphicPrimitives);
 	};
 

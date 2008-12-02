@@ -24,9 +24,11 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import remoting.RCallBack;
-import remoting.RServices;
-import graphics.pop.GDDevice;
+
+import org.kchine.r.server.RCallBack;
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.graphics.GDDevice;
+
 import graphics.rmi.JGDPanelPop;
 import http.HttpMarker;
 import http.RHttpProxy;

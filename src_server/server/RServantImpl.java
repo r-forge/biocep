@@ -20,9 +20,7 @@
  */
 package server;
 
-import graphics.pop.GDDevice;
-import graphics.rmi.GraphicNotifier;
-import graphics.rmi.JGDPanel;
+import graphics.rmi.RGraphicsPanelRemote;
 import graphics.rmi.RClustserInterface;
 import http.FreeResourcesListener;
 
@@ -48,12 +46,28 @@ import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-import mapping.RPackage;
-import mapping.ReferenceInterface;
-import model.SpreadsheetModelRemote;
-import model.SpreadsheetModelRemoteImpl;
 import org.apache.commons.logging.Log;
-import org.bioconductor.packages.rservices.RObject;
+import org.kchine.r.RObject;
+import org.kchine.r.server.AssignInterface;
+import org.kchine.r.server.FileDescription;
+import org.kchine.r.server.GenericCallbackDevice;
+import org.kchine.r.server.RCallBack;
+import org.kchine.r.server.RCollaborationListener;
+import org.kchine.r.server.RConsoleAction;
+import org.kchine.r.server.RConsoleActionListener;
+import org.kchine.r.server.RKit;
+import org.kchine.r.server.RNI;
+import org.kchine.r.server.RPackage;
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.ReferenceInterface;
+import org.kchine.r.server.UserStatus;
+import org.kchine.r.server.Utils;
+import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.graphics.GraphicNotifier;
+import org.kchine.r.server.iplots.SVarInterfaceRemote;
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
+import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl;
 import org.kchine.rpf.InitializingException;
 import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.ManagedServantAbstract;
@@ -71,21 +85,7 @@ import org.mortbay.jetty.servlet.HashSessionManager;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.rosuda.JRI.Rengine;
-import org.rosuda.ibase.SVarInterfaceRemote;
-import org.rosuda.ibase.SVarSetInterfaceRemote;
 import org.rosuda.iplots.Framework;
-import remoting.AssignInterface;
-import remoting.FileDescription;
-import remoting.GenericCallbackDevice;
-import remoting.RCallBack;
-import remoting.RCollaborationListener;
-import remoting.RConsoleAction;
-import remoting.RConsoleActionListener;
-import remoting.RKit;
-import remoting.RNI;
-import remoting.RServices;
-import remoting.UserStatus;
-import util.Utils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -699,7 +699,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 
 	public RemotePanel getPanel(int w, int h) throws RemoteException {
-		return new JGDPanel(w, h, _graphicNotifier);
+		return new RGraphicsPanelRemote(w, h, _graphicNotifier);
 	}
 
 	public GDDevice newDevice(int w, int h) throws RemoteException {
