@@ -20,26 +20,6 @@
  */
 package graphics.rmi;
 
-import graphics.pop.GDDevice;
-import graphics.rmi.action.CopyFromCurrentDeviceAction;
-import graphics.rmi.action.CopyToCurrentDeviceAction;
-import graphics.rmi.action.CoupleToCurrentDeviceAction;
-import graphics.rmi.action.FitDeviceAction;
-import graphics.rmi.action.SaveDeviceAsJpgAction;
-import graphics.rmi.action.SaveDeviceAsPdfAction;
-import graphics.rmi.action.SaveDeviceAsPdfAppletAction;
-import graphics.rmi.action.SaveDeviceAsPngAction;
-import graphics.rmi.action.SaveDeviceAsSvgAction;
-import graphics.rmi.action.SetCurrentDeviceAction;
-import graphics.rmi.action.SnapshotDeviceAction;
-import graphics.rmi.action.SnapshotDevicePdfAction;
-import graphics.rmi.action.SnapshotDeviceSvgAction;
-import graphics.rmi.dialogs.GetExprDialog;
-import graphics.rmi.spreadsheet.DimensionsDialog;
-import graphics.rmi.spreadsheet.SelectIdDialog;
-import graphics.rmi.spreadsheet.SpreadsheetPanel;
-import groovy.GroovyInterpreter;
-import groovy.GroovyInterpreterSingleton;
 import http.BadLoginPasswordException;
 import http.ConnectionFailedException;
 import http.FileLoad;
@@ -131,8 +111,6 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.text.SimpleAttributeSet;
-
 import net.infonode.docking.DockingWindow;
 import net.infonode.docking.DockingWindowAdapter;
 import net.infonode.docking.DockingWindowListener;
@@ -149,17 +127,76 @@ import net.infonode.docking.util.DockingUtil;
 import net.infonode.docking.util.MixedViewHandler;
 import net.infonode.docking.util.ViewMap;
 import net.infonode.util.Direction;
-import net.java.dev.jspreadsheet.CellPoint;
-import net.java.dev.jspreadsheet.CellRange;
-import net.java.dev.jspreadsheet.SpreadsheetDefaultTableModel;
-import org.bioconductor.packages.rservices.RObject;
+import org.kchine.r.RObject;
+import org.kchine.r.server.FileDescription;
+import org.kchine.r.server.RCollaborationListener;
+import org.kchine.r.server.RConsoleAction;
+import org.kchine.r.server.RConsoleActionListener;
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.UserStatus;
+import org.kchine.r.server.Utils;
+import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.scripting.GroovyInterpreter;
+import org.kchine.r.server.scripting.GroovyInterpreterSingleton;
+import org.kchine.r.server.spreadsheet.CellPoint;
+import org.kchine.r.server.spreadsheet.CellRange;
+import org.kchine.r.server.spreadsheet.SpreadsheetDefaultTableModel;
 import org.kchine.r.workbench.CellsChangeEvent;
 import org.kchine.r.workbench.CellsChangeListener;
+import org.kchine.r.workbench.ConsoleLogger;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.VariablesChangeEvent;
 import org.kchine.r.workbench.VariablesChangeListener;
+import org.kchine.r.workbench.actions.CopyFromCurrentDeviceAction;
+import org.kchine.r.workbench.actions.CopyToCurrentDeviceAction;
+import org.kchine.r.workbench.actions.CoupleToCurrentDeviceAction;
+import org.kchine.r.workbench.actions.FitDeviceAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsJpgAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsPdfAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsPdfAppletAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsPngAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsSvgAction;
+import org.kchine.r.workbench.actions.SetCurrentDeviceAction;
+import org.kchine.r.workbench.actions.SnapshotDeviceAction;
+import org.kchine.r.workbench.actions.SnapshotDevicePdfAction;
+import org.kchine.r.workbench.actions.SnapshotDeviceSvgAction;
+import org.kchine.r.workbench.dialogs.GetExprDialog;
+import org.kchine.r.workbench.dialogs.Identification;
+import org.kchine.r.workbench.dialogs.LoginDialog;
+import org.kchine.r.workbench.dialogs.OpenPluginViewDialog;
+import org.kchine.r.workbench.dialogs.PushAsDialog;
+import org.kchine.r.workbench.exceptions.BadServantNameException;
+import org.kchine.r.workbench.exceptions.NoDbRegistryAvailableException;
+import org.kchine.r.workbench.exceptions.NoRmiRegistryAvailableException;
+import org.kchine.r.workbench.exceptions.PingRServerFailedException;
+import org.kchine.r.workbench.exceptions.RBusyException;
+import org.kchine.r.workbench.graphics.JGDPanelPop;
 import org.kchine.r.workbench.macros.Macro;
 import org.kchine.r.workbench.macros.MacroInterface;
+import org.kchine.r.workbench.plugins.PluginViewDescriptor;
+import org.kchine.r.workbench.splashscreen.SplashWindow;
+import org.kchine.r.workbench.spreadsheet.DimensionsDialog;
+import org.kchine.r.workbench.spreadsheet.SelectIdDialog;
+import org.kchine.r.workbench.spreadsheet.SpreadsheetPanel;
+import org.kchine.r.workbench.utils.AbstractDockingWindowListener;
+import org.kchine.r.workbench.utils.AppletBase;
+import org.kchine.r.workbench.views.BiocepMindMapView;
+import org.kchine.r.workbench.views.ChatConsoleView;
+import org.kchine.r.workbench.views.ClientGroovyConsoleView;
+import org.kchine.r.workbench.views.ClientPythonConsoleView;
+import org.kchine.r.workbench.views.CollaborativeSpreadsheetView;
+import org.kchine.r.workbench.views.DeviceView;
+import org.kchine.r.workbench.views.DynamicView;
+import org.kchine.r.workbench.views.HelpBrowserPanel;
+import org.kchine.r.workbench.views.HelpView;
+import org.kchine.r.workbench.views.PagerView;
+import org.kchine.r.workbench.views.PdfView;
+import org.kchine.r.workbench.views.ServerGroovyConsoleView;
+import org.kchine.r.workbench.views.ServerLogView;
+import org.kchine.r.workbench.views.ServerPythonConsoleView;
+import org.kchine.r.workbench.views.SvgView;
+import org.kchine.r.workbench.views.UnsafeEvaluatorView;
+import org.kchine.r.workbench.views.UsersView;
 import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.PropertiesGenerator;
@@ -188,12 +225,6 @@ import org.rosuda.ibase.plots.ScatterCanvas;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
-import remoting.FileDescription;
-import remoting.RCollaborationListener;
-import remoting.RConsoleAction;
-import remoting.RConsoleActionListener;
-import remoting.RServices;
-import remoting.UserStatus;
 import server.BadSshHostException;
 import server.BadSshLoginPwdException;
 import server.ExtendedReentrantLock;
@@ -201,17 +232,14 @@ import server.LocalHttpServer;
 import server.NoMappingAvailable;
 import server.ServantCreationFailed;
 import server.ServerManager;
-import splash.SplashWindow;
-import util.Utils;
-import views.*;
-import static graphics.rmi.JGDPanelPop.*;
+import static org.kchine.r.workbench.graphics.JGDPanelPop.*;
 import static org.kchine.rpf.PoolUtils.redirectIO;
 import static org.kchine.rpf.PoolUtils.unzip;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
-public class GDApplet extends GDAppletBase implements RGui {
+public class GDApplet extends AppletBase implements RGui {
 
 	public static final int NEW_R_MODE = 0;
 	public static final int RMI_MODE = 1;
@@ -222,8 +250,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 	public static final int RMI_MODE_STUB_MODE = 2;
 
 	private String _commandServletUrl = null;
-	private String _defaultHelpUrl = null;
-	private String _helpServletUrl = null;
+	private String _helpRootUrl = null;
 	private String _sessionId = null;
 	private RServices _rForConsole;
 	private RServices _rForFiles;
@@ -460,7 +487,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		try {
 			jeditcl = new URLClassLoader(new URL[] { new URL("http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort()
-					+ "/classes/plugins/basiceditor.jar") }, GDApplet.class.getClassLoader());
+					+ "/classes/org/kchine/r/workbench/plugins/embedded/basiceditor.jar") }, GDApplet.class.getClassLoader());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -519,11 +546,11 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		try {
 
-			_currentDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "active_device.gif")));
-			_inactiveDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "inactive_device.png")));
-			_connectedIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "connected.gif")));
-			_disconnectedIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "disconnected.png")));
-			_busyIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/graphics/rmi/icons/" + "busy.gif")));
+			_currentDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/org/kchine/r/workbench/icons/" + "active_device.gif")));
+			_inactiveDeviceIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/org/kchine/r/workbench/icons/" + "inactive_device.png")));
+			_connectedIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/org/kchine/r/workbench/icons/" + "connected.gif")));
+			_disconnectedIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/org/kchine/r/workbench/icons/" + "disconnected.png")));
+			_busyIcon = new ImageIcon(ImageIO.read(GDApplet.class.getResource("/org/kchine/r/workbench/icons/" + "busy.gif")));
 
 			initActions();
 
@@ -699,8 +726,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 								}
 
 								_keepAlive = true;
-								_helpServletUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
-								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
+								_helpRootUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
 
 								_login = ident.getUser();
 								_nopool = ident.isNopool();
@@ -732,8 +758,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 							} else {
 
-								_helpServletUrl = "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/" + "rvirtual/helpme";
-								_defaultHelpUrl = _helpServletUrl + "/doc/html/index.html";
+								_helpRootUrl = "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/" + "rvirtual/helpme";
 
 								RServices r = null;
 
@@ -2164,7 +2189,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 	}
 
-	private GDHelpBrowser getOpenedBrowser() {
+	private HelpBrowserPanel getOpenedBrowser() {
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
 		while (iter.hasNext()) {
 			DynamicView dv = iter.next();
@@ -2187,7 +2212,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return result;
 	}
 
-	private Vector<views.CollaborativeSpreadsheetView> getCollaborativeSpreadsheetViews() {
+	private Vector<org.kchine.r.workbench.views.CollaborativeSpreadsheetView> getCollaborativeSpreadsheetViews() {
 		Vector<CollaborativeSpreadsheetView> result = new Vector<CollaborativeSpreadsheetView>();
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
 		while (iter.hasNext()) {
@@ -2288,10 +2313,10 @@ public class GDApplet extends GDAppletBase implements RGui {
 	}
 
 	private void setHelpBrowserURL(String url) {
-		GDHelpBrowser openedBrowser = getOpenedBrowser();
+		HelpBrowserPanel openedBrowser = getOpenedBrowser();
 		if (openedBrowser == null) {
 
-			GDHelpBrowser _helpBrowser = new GDHelpBrowser(this);
+			HelpBrowserPanel _helpBrowser = new HelpBrowserPanel(this);
 			try {
 				_helpBrowser.setURL(url);
 			} catch (Exception e) {
@@ -2386,7 +2411,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					BufferedReader br = new BufferedReader(new InputStreamReader(GDApplet.class.getResourceAsStream("demoscript.R")));
+					BufferedReader br = new BufferedReader(new InputStreamReader(GDApplet.class.getResourceAsStream("/org/kchine/r/workbench/demos/demoscript.R")));
 					String l;
 					while ((l = br.readLine()) != null) {
 
@@ -3074,7 +3099,7 @@ public class GDApplet extends GDAppletBase implements RGui {
 
 		_actions.put("help", new AbstractAction("Help Contents") {
 			public void actionPerformed(ActionEvent e) {
-				setHelpBrowserURL(_defaultHelpUrl);
+				setHelpBrowserURL(getHelpRootUrl() + "/doc/html/index.html");
 			}
 
 			public boolean isEnabled() {
@@ -4765,17 +4790,15 @@ public class GDApplet extends GDAppletBase implements RGui {
 		return installedLFs[_lf].getClassName();
 	}
 
-	String getSessionId() {
+	public String getSessionId() {
 		return _sessionId;
 	}
 
-	String getHelpServletUrl() {
-		return _helpServletUrl;
+	
+	public String getHelpRootUrl() {
+		return _helpRootUrl;
 	}
 
-	String getDefaultHelpUrl() {
-		return _defaultHelpUrl;
-	}
 
 	public RServices getR() {
 		return _rForConsole;
@@ -5073,9 +5096,9 @@ public class GDApplet extends GDAppletBase implements RGui {
 								String pack = (String) action.getAttributes().get("package");
 								String helpUri = _rForPopCmd.getRHelpFileUri(topic, pack);
 								if (helpUri == null) {
-									setHelpBrowserURL(_defaultHelpUrl);
+									setHelpBrowserURL(getHelpRootUrl() + "/doc/html/index.html");
 								} else {
-									setHelpBrowserURL(_helpServletUrl + helpUri);
+									setHelpBrowserURL(getHelpRootUrl() + helpUri);
 								}
 							} catch (Exception e) {
 								e.printStackTrace();

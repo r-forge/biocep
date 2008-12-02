@@ -3,6 +3,8 @@ package org.rosuda.ibase;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.io.*;
+
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
 import org.rosuda.util.Global;
 
 /** implements set of variables (aka dataset, used as data source)

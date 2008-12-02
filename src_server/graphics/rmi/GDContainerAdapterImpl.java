@@ -25,8 +25,9 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import org.rosuda.javaGD.GDContainer;
-import org.rosuda.javaGD.GDObject;
+
+import org.kchine.r.server.graphics.GDContainer;
+import org.kchine.r.server.graphics.primitive.GDObject;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

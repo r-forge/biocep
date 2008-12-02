@@ -1515,7 +1515,7 @@
 		
 		<property 
 			name="src_srv_target" 
-			value="src_rpf_common:src_client:src_server_common:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD:src_patch_jspreadsheet:src_patch_joi"/>
+			value="src_rpf_common:src_client:src_server_common:src_patch_rJava:src_patch_JavaGD:src_patch_joi"/>
 		
 		<javac
 			srcdir="${src_srv_target}"
@@ -1563,7 +1563,7 @@
 			<mkdir dir="binsrv"/>
 
 			<property 
-				name="src_srv_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_patch_RWebServices:src_patch_rJava:src_patch_JavaGD:src_patch_iplots:src_patch_jspreadsheet"/>		
+				name="src_srv_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_patch_rJava:src_patch_JavaGD:src_patch_iplots"/>		
 			<javac
 				srcdir="${src_srv_target}"
 				destdir="binsrv" debug="true" source="1.5" target="1.5">
@@ -1609,11 +1609,11 @@
 			<rmic classpath="binsrv" base="binsrv" classname="server.GraphicNotifierImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="server.GDDeviceImpl"/>
 		
-			<rmic classpath="binsrv" base="binsrv" classname="model.TableModelRemoteImpl"/>
-			<rmic classpath="binsrv" base="binsrv" classname="model.TableModelListenerRemoteImpl"/>
-			<rmic classpath="binsrv" base="binsrv" classname="model.SpreadsheetModelRemoteImpl"/>
-			<rmic classpath="binsrv" base="binsrv" classname="model.SpreadsheetListenerRemoteImpl"/>
-			<rmic classpath="binsrv" base="binsrv" classname="model.SpreadsheetModelDeviceImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.spreadsheet.TableModelRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.spreadsheet.TableModelListenerRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.spreadsheet.SpreadsheetListenerRemoteImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.spreadsheet.SpreadsheetModelDeviceImpl"/>
 				
 			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.SVarSetInterfaceRemoteImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="org.rosuda.ibase.SVarInterfaceRemoteImpl"/>
@@ -1834,7 +1834,7 @@
 			<unjar src="lib/svg/xml-apis-ext.jar"  dest="binsrv" overwrite="true"/>				
 			<unjar src="${GROOVY_JAR}"  dest="binsrv" overwrite="true"/>
 		
-			<property 	name="src_client_target" value="src_client:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>		
+			<property 	name="src_client_target" value="src_client:src_patch_joi:src_patch_freemind"/>		
 			<javac srcdir="${src_client_target}"
 				destdir="binsrv" debug="true" source="1.5" target="1.5">
 				<classpath>
@@ -1906,7 +1906,7 @@
 			</copy>
 		
 			<jar basedir="binjedit" destfile="basiceditorunsigned.jar" />
-			<signjar jar="basiceditorunsigned.jar" signedjar="src_client/plugins/basiceditor.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
+			<signjar jar="basiceditorunsigned.jar" signedjar="src_client/org/kchine/r/workbench/plugins/embedded/basiceditor.jar" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" />
 	
 	</target>
 	
@@ -1961,7 +1961,7 @@
 	<target name="compile" depends="initializeProperties">
 		
 		<echo message="${basedir}"/>
-		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_patch_RWebServices:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_iplots:src_patch_jspreadsheet:src_patch_joi:src_patch_freemind"/>
+		<property name="src_compile_target" value="src_rpf_common:src_rpf:src_server_common:src_server:src_tools:src_client:src_masq:src_patch_rJava:src_patch_JavaGD:src_patch_iplots:src_patch_joi:src_patch_freemind"/>
 		
 		<javac
 			srcdir="${src_compile_target}"
@@ -1979,11 +1979,11 @@
 		<rmic classpath="bin" base="bin" classname="server.GraphicNotifierImpl"/>
 		<rmic classpath="bin" base="bin" classname="server.GDDeviceImpl"/>
 		
-		<rmic classpath="bin" base="bin" classname="model.TableModelRemoteImpl"/>
-		<rmic classpath="bin" base="bin" classname="model.TableModelListenerRemoteImpl"/>
-		<rmic classpath="bin" base="bin" classname="model.SpreadsheetModelRemoteImpl"/>
-		<rmic classpath="bin" base="bin" classname="model.SpreadsheetListenerRemoteImpl"/>
-		<rmic classpath="bin" base="bin" classname="model.SpreadsheetModelDeviceImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.spreadsheet.TableModelRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.spreadsheet.TableModelListenerRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.spreadsheet.SpreadsheetListenerRemoteImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.spreadsheet.SpreadsheetModelDeviceImpl"/>
 				
 		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.SVarSetInterfaceRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="org.rosuda.ibase.SVarInterfaceRemoteImpl"/>

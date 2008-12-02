@@ -18,10 +18,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import org.bioconductor.packages.biobase.ExpressionSet;
-import org.bioconductor.packages.rservices.RNamedArgument;
-import org.bioconductor.packages.vsn.Vsn;
-import remoting.RServices;
+import org.kchine.r.packages.biobase.ExpressionSet;
+import org.kchine.r.RNamedArgument;
+import org.kchine.r.packages.vsn.Vsn;
+import org.kchine.r.server.RServices;
 import org.kchine.rpf.ServantProviderFactory;
 import org.kchine.rpf.TimeoutException;
 

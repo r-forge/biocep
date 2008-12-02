@@ -1,6 +1,6 @@
 package org.kchine.r.workbench;
 
-import net.java.dev.jspreadsheet.CellRange;
+import org.kchine.r.server.spreadsheet.CellRange;
 
 
 public class CellsChangeEvent {

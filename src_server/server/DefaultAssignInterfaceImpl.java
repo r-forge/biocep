@@ -23,19 +23,19 @@ package server;
 import static server.RConst.STRSXP;
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import mapping.ReferenceInterface;
 import org.apache.commons.logging.Log;
-import org.bioconductor.packages.rservices.RArray;
-import org.bioconductor.packages.rservices.RDataFrame;
-import org.bioconductor.packages.rservices.REnvironment;
-import org.bioconductor.packages.rservices.RFactor;
-import org.bioconductor.packages.rservices.RList;
-import org.bioconductor.packages.rservices.RObject;
-import org.bioconductor.packages.rservices.RVector;
+import org.kchine.r.RArray;
+import org.kchine.r.RDataFrame;
+import org.kchine.r.REnvironment;
+import org.kchine.r.RFactor;
+import org.kchine.r.RList;
+import org.kchine.r.RObject;
+import org.kchine.r.RVector;
+import org.kchine.r.server.AssignInterface;
+import org.kchine.r.server.RNI;
+import org.kchine.r.server.ReferenceInterface;
+import org.kchine.r.server.Utils;
 import org.rosuda.JRI.Rengine;
-import remoting.AssignInterface;
-import remoting.RNI;
-import util.Utils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -58,8 +58,8 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 						e.rniAssign(argvar, DirectJNI.getInstance().putObject(robj), 0);
 					} else {
 						String argvar2 = DirectJNI.getInstance().newTemporaryVariableName();
-						e.rniAssign(argvar2, ((mapping.ReferenceInterface) robj).getRObjectId(), 0);
-						e.rniEval(e.rniParse(argvar + "<-" + argvar2 + ((mapping.ReferenceInterface) robj).getSlotsPath(), 1), 0);
+						e.rniAssign(argvar2, ((org.kchine.r.server.ReferenceInterface) robj).getRObjectId(), 0);
+						e.rniEval(e.rniParse(argvar + "<-" + argvar2 + ((org.kchine.r.server.ReferenceInterface) robj).getSlotsPath(), 1), 0);
 						e.rniEval(e.rniParse("rm(" + argvar2 + ")", 1), 0);
 					}
 

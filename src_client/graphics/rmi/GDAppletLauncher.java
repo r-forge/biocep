@@ -27,7 +27,8 @@ import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import splash.SplashWindow;
+
+import org.kchine.r.workbench.splashscreen.SplashWindow;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -93,12 +94,15 @@ public class GDAppletLauncher {
 	}
 
 	public static void main(String[] args) throws Exception {
-		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(GDAppletLauncher.class.getResource("/splash/splashscreen.png")));
+		
+		
+		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(GDAppletLauncher.class.getResource("/org/kchine/r/workbench/splashscreen/splashscreen.png")));
 		try {
 			Thread.sleep(200);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -108,6 +112,8 @@ public class GDAppletLauncher {
 				}
 			}
 		});
+		
 		SplashWindow.disposeSplash();
+		
 	}
 }

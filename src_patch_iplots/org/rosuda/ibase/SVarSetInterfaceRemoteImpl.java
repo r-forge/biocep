@@ -3,6 +3,9 @@ package org.rosuda.ibase;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+import org.kchine.r.server.iplots.SVarInterfaceRemote;
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+
 public class SVarSetInterfaceRemoteImpl extends UnicastRemoteObject implements SVarSetInterfaceRemote {
 	SVarSetInterface _svarset;
 	public SVarSetInterfaceRemoteImpl(SVarSetInterface svarset) throws RemoteException{

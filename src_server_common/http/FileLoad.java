@@ -23,7 +23,8 @@ package http;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.rmi.RemoteException;
-import remoting.RServices;
+
+import org.kchine.r.server.RServices;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

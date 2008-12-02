@@ -6,6 +6,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+
 public class SMarkerInterfaceRemoteImpl extends UnicastRemoteObject implements SMarkerInterfaceRemote {
 	SMarkerInterface _smarker;
 	public SMarkerInterfaceRemoteImpl(SMarkerInterface smarker) throws RemoteException {

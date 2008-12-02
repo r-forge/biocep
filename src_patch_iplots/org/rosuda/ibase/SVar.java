@@ -3,6 +3,7 @@ package org.rosuda.ibase;
 import java.rmi.RemoteException;
 import java.util.*;
 
+import org.kchine.r.server.iplots.SVarInterfaceRemote;
 import org.rosuda.util.*;
 
 

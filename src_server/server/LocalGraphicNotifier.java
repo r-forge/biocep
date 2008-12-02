@@ -20,13 +20,13 @@
  */
 package server;
 
-import graphics.rmi.GraphicNotifier;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.rmi.RemoteException;
 
-import org.rosuda.javaGD.GDContainer;
+import org.kchine.r.server.graphics.GDContainer;
+import org.kchine.r.server.graphics.GraphicNotifier;
 import org.rosuda.javaGD.GDInterface;
 import org.rosuda.javaGD.JavaGD;
 

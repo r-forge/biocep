@@ -20,15 +20,15 @@
  */
 import java.rmi.Naming;
 
-import org.bioconductor.packages.rGlobalEnv.A;
-import org.bioconductor.packages.rGlobalEnv.B;
-import org.bioconductor.packages.rGlobalEnv.E;
-import org.bioconductor.packages.rservices.RChar;
-import org.bioconductor.packages.rservices.RNumeric;
-import org.bioconductor.packages.rservices.RNumericRef;
+import org.kchine.r.packages.rGlobalEnv.A;
+import org.kchine.r.packages.rGlobalEnv.B;
+import org.kchine.r.packages.rGlobalEnv.E;
+import org.kchine.r.server.RServices;
+import org.kchine.r.server.Utils;
+import org.kchine.r.RChar;
+import org.kchine.r.RNumeric;
+import org.kchine.r.RNumericRef;
 
-import remoting.RServices;
-import util.Utils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

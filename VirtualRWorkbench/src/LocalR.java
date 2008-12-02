@@ -20,7 +20,8 @@
  */
 import java.io.PrintStream;
 
-import remoting.RServices;
+import org.kchine.r.server.RServices;
+
 import server.DirectJNI;
 
 /**

@@ -1,6 +1,6 @@
 package org.kchine.r.workbench.macros;
 
-import remoting.RServices;
+import org.kchine.r.server.RServices;
 
 public class GroovyScript implements Script {
 	private String script;

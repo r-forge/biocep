@@ -2,9 +2,9 @@ package org.kchine.r.workbench.macros;
 
 import java.awt.Color;
 
-import model.ImportInfo;
-import net.java.dev.jspreadsheet.CellRange;
 
+import org.kchine.r.server.spreadsheet.CellRange;
+import org.kchine.r.server.spreadsheet.ImportInfo;
 import org.kchine.r.workbench.CellsChangeEvent;
 import org.kchine.r.workbench.CellsChangeListener;
 

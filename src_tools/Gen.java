@@ -50,6 +50,7 @@ import org.apache.tools.ant.taskdefs.Manifest.Attribute;
 import org.apache.tools.ant.types.DirSet;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
+import org.kchine.r.server.Utils;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.PoolUtils.EqualNameFilter;
 import org.rosuda.JRI.Rengine;
@@ -63,7 +64,6 @@ import server.ExecutionUnit;
 import server.Globals;
 import static org.kchine.rpf.PoolUtils.unzip;
 import static server.Globals.*;
-import util.Utils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -347,7 +347,7 @@ public class Gen {
 					log.info(" createMap status : " + createMapStatus);
 					log.info("------------------------------------------");
 
-					deleteDir(GEN_ROOT_SRC + "/org/bioconductor/rserviceJms");
+					deleteDir(GEN_ROOT_SRC + "/org/kchine/r/rserviceJms");
 					compile(GEN_ROOT_SRC);
 					jar(GEN_ROOT_SRC, GEN_ROOT_LIB + FILE_SEPARATOR + TEMP_JARS_PREFIX + i + ".jar", null);
 

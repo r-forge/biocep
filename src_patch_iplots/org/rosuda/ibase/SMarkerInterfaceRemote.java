@@ -4,6 +4,9 @@ import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.kchine.r.server.iplots.NotifierInterfaceRemote;
+import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+
 public interface SMarkerInterfaceRemote extends NotifierInterfaceRemote, CommanderRemote{
 	public void resize(int newsize) throws RemoteException;
     public int size() throws RemoteException;

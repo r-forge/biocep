@@ -20,12 +20,12 @@
  */
 import java.util.Arrays;
 
-import org.bioconductor.packages.biobase.ExpressionSet;
-import org.bioconductor.packages.rGlobalEnv.rGlobalEnvFunction;
-import org.bioconductor.packages.rservices.RNumeric;
-import org.bioconductor.packages.vsn.Vsn;
-import org.bioconductor.packages.vsn.vsnFunction;
-import remoting.RServices;
+import org.kchine.r.packages.biobase.ExpressionSet;
+import org.kchine.r.packages.rGlobalEnv.rGlobalEnvFunction;
+import org.kchine.r.RNumeric;
+import org.kchine.r.packages.vsn.Vsn;
+import org.kchine.r.packages.vsn.vsnFunction;
+import org.kchine.r.server.RServices;
 import org.kchine.rpf.ServantProviderFactory;
 import org.kchine.rpf.TimeoutException;
 

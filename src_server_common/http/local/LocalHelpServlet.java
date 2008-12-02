@@ -26,9 +26,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.kchine.r.server.RKit;
 import org.kchine.rpf.PoolUtils;
 
-import remoting.RKit;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

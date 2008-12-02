@@ -28,20 +28,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
-import org.bioconductor.packages.rservices.RArray;
-import org.bioconductor.packages.rservices.RChar;
-import org.bioconductor.packages.rservices.RComplex;
-import org.bioconductor.packages.rservices.RDataFrame;
-import org.bioconductor.packages.rservices.REnvironment;
-import org.bioconductor.packages.rservices.RFactor;
-import org.bioconductor.packages.rservices.RInteger;
-import org.bioconductor.packages.rservices.RList;
-import org.bioconductor.packages.rservices.RLogical;
-import org.bioconductor.packages.rservices.RMatrix;
-import org.bioconductor.packages.rservices.RNumeric;
+import org.kchine.r.RArray;
+import org.kchine.r.RChar;
+import org.kchine.r.RComplex;
+import org.kchine.r.RDataFrame;
+import org.kchine.r.REnvironment;
+import org.kchine.r.RFactor;
+import org.kchine.r.RInteger;
+import org.kchine.r.RList;
+import org.kchine.r.RLogical;
+import org.kchine.r.RMatrix;
+import org.kchine.r.RNumeric;
+import org.kchine.r.server.Utils;
 import org.kchine.rpf.PoolUtils;
 
-import util.Utils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -94,7 +94,7 @@ public class Globals {
 			log.info("output remote file:" + outputFileNameRemote);
 			PrintWriter outputWriterRemote = new PrintWriter(outputFileNameRemote);
 			outputWriterRemote.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
-			outputWriterRemote.println("public interface " + shortClassName + " extends mapping.RPackage  {");
+			outputWriterRemote.println("public interface " + shortClassName + " extends org.kchine.r.server.RPackage  {");
 			outputWriter.println("private static " + shortClassName + " _packageInstance = null;private static Integer _lock = new Integer(0);");
 			outputWriter
 					.println("public static "
@@ -122,11 +122,11 @@ public class Globals {
 				outputWriterWebservice = new PrintWriter(outputFileNameWebservice);
 				outputWriterWebservice.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
 				outputWriterWebservice
-						.println("import javax.jws.WebService;\nimport org.bioconductor.packages.rservices.*;" +
+						.println("import javax.jws.WebService;\nimport org.kchine.r.*;" +
 								"import static  org.kchine.rpf.PoolUtils.*;" 
 								+"import org.apache.commons.httpclient.HttpClient;"
 								+"import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;"
-								+"import remoting.RServices;" 
+								+"import org.kchine.r.server.RServices;" 
 								+"import http.RHttpProxy;"
 								+"@WebService");
 				outputWriterWebservice.println("public class " + shortClassName + "Web {");
@@ -198,10 +198,10 @@ public class Globals {
 
 				}
 
-				outputWriter.print(mHeader + ") throws java.rmi.RemoteException {remoting.RServices r=server.DirectJNI.getInstance().getRServices();");
+				outputWriter.print(mHeader + ") throws java.rmi.RemoteException {org.kchine.r.server.RServices r=server.DirectJNI.getInstance().getRServices();");
 				outputWriterRemote.print(mHeader + ") throws java.rmi.RemoteException ;\n");
 				outputWriterRemoteImpl
-						.print(mHeader + ") throws java.rmi.RemoteException {remoting.RServices r=server.DirectJNI.getInstance().getRServices();");
+						.print(mHeader + ") throws java.rmi.RemoteException {org.kchine.r.server.RServices r=server.DirectJNI.getInstance().getRServices();");
 
 				
 
@@ -234,8 +234,8 @@ public class Globals {
 				if (fattrs.isPublishToWeb()) {
 					outputWriterWebservice
 							.print(mHeader
-									+ ") throws Exception { remoting.RServices r=null;"
-									+  "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();");
+									+ ") throws Exception { org.kchine.r.server.RServices r=null;"
+									+  "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();");
 					outputWriterWebservice.print(callStrRemoteImpl);
 					if (m.getReturnType() != null) { outputWriterWebservice.println("return result;"); }
 					outputWriterWebservice.println("} catch (Exception ex) {throw new Exception( util.Utils.getStackTraceAsString(ex) );} finally {"
@@ -266,10 +266,10 @@ public class Globals {
 					
 				}
 
-				outputWriter.print(mHeaderAsRef + ") throws java.rmi.RemoteException { remoting.RServices r=server.DirectJNI.getInstance().getRServices(); ");
+				outputWriter.print(mHeaderAsRef + ") throws java.rmi.RemoteException { org.kchine.r.server.RServices r=server.DirectJNI.getInstance().getRServices(); ");
 				outputWriterRemote.print(mHeaderAsRef + ") throws java.rmi.RemoteException ;\n");
 				outputWriterRemoteImpl.print(mHeaderAsRef
-						+ ") throws java.rmi.RemoteException { remoting.RServices r=server.DirectJNI.getInstance().getRServices(); ");
+						+ ") throws java.rmi.RemoteException { org.kchine.r.server.RServices r=server.DirectJNI.getInstance().getRServices(); ");
 
 				String callStrImplAsRef = null;
 				if (hasDotDotDot) {
@@ -459,13 +459,13 @@ public class Globals {
 									+ "}");
 
 					outputWriterWebservice
-							.println("\npublic remoting.FileDescription[] getWorkingDirectoryFileDescriptions(String session) throws Exception { "
-									+ "try {return (remoting.FileDescription[])http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescriptions\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							.println("\npublic org.kchine.r.server.FileDescription[] getWorkingDirectoryFileDescriptions(String session) throws Exception { "
+									+ "try {return (org.kchine.r.server.FileDescription[])http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescriptions\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
-							.println("\npublic remoting.FileDescription getWorkingDirectoryFileDescription(String session,String fileName) throws Exception { "
-									+ "try {return (remoting.FileDescription)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescription\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							.println("\npublic org.kchine.r.server.FileDescription getWorkingDirectoryFileDescription(String session,String fileName) throws Exception { "
+									+ "try {return (org.kchine.r.server.FileDescription)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescription\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
@@ -545,45 +545,45 @@ public class Globals {
 
 					outputWriterWebservice
 							.println("\npublic String statelessEvaluate(String expression, int n) throws Exception { "
-									+ "remoting.RServices r = null;"
+									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { String result =  r.evaluate(expression,n); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject statelessCall(String methodName, Object... args) throws Exception { "
-									+ "remoting.RServices r = null;"
+									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { RObject result =  r.call(methodName, args); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void statelessCallAndAssign(String varName, String methodName, Object... args) throws Exception { "
-									+ "remoting.RServices r = null;"
+									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { r.callAndAssign(varName, methodName, args); } catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject statelessGetObject(String expression) throws Exception { "
-									+ "remoting.RServices r = null;"
+									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { RObject result =  r.getObject(expression); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String statelessConsoleSubmit(String expression) throws Exception { "
-									+ "remoting.RServices r = null;"
+									+ "org.kchine.r.server.RServices r = null;"
 									+ (System.getProperty("SingleThreadedWeb") != null && System.getProperty("SingleThreadedWeb").equalsIgnoreCase("true") ? "server.DirectJNI.init();r=server.DirectJNI.getInstance().getRServices();"
-											: "r=(remoting.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
+											: "r=(org.kchine.r.server.RServices)org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();")
 									+ "try { String result =  r.consoleSubmit(expression); return result;} catch (Exception ex) {throw new Exception(util.Utils.getStackTraceAsString(ex));}"
 									+ "finally {org.kchine.rpf.ServantProviderFactory.getFactory().getServantProvider().returnServantProxy(r);}"
 									+ "}");
@@ -667,11 +667,11 @@ public class Globals {
 
 			outputWriter.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
 			outputWriter.println("public class " + classShortName + "Ref" + " extends " + classShortName
-					+ " implements mapping.ReferenceInterface, java.io.Externalizable {");
+					+ " implements org.kchine.r.server.ReferenceInterface, java.io.Externalizable {");
 
 			outputWriter.println("private long[] _rObjectIdHolder;\n");
 			outputWriter.println("private String _slotsPath;\n");
-			outputWriter.println("private remoting.AssignInterface _assignInterface;\n");
+			outputWriter.println("private org.kchine.r.server.AssignInterface _assignInterface;\n");
 			outputWriter.println("public long getRObjectId() {");
 			outputWriter.println("	return _rObjectIdHolder[0];");
 			outputWriter.println("}\n");
@@ -679,15 +679,15 @@ public class Globals {
 			outputWriter.println("  	return _slotsPath;");
 			outputWriter.println("}\n");
 
-			outputWriter.println("public void setAssignInterface(remoting.AssignInterface assignInterface) {");
+			outputWriter.println("public void setAssignInterface(org.kchine.r.server.AssignInterface assignInterface) {");
 			outputWriter.println("  	_assignInterface=assignInterface;");
 			outputWriter.println("}\n");
-			outputWriter.println("public remoting.AssignInterface getAssignInterface() {");
+			outputWriter.println("public org.kchine.r.server.AssignInterface getAssignInterface() {");
 			outputWriter.println("	return _assignInterface;");
 			outputWriter.println("}\n");
 
 			outputWriter
-					.println("\npublic org.bioconductor.packages.rservices.RObject extractRObject() {try {return _assignInterface.getObjectFromReference(this);} catch (java.rmi.RemoteException re) {throw new RuntimeException(util.Utils.getStackTraceAsString(re));}}\n");
+					.println("\npublic org.kchine.r.RObject extractRObject() {try {return _assignInterface.getObjectFromReference(this);} catch (java.rmi.RemoteException re) {throw new RuntimeException(util.Utils.getStackTraceAsString(re));}}\n");
 
 			String nullifyFields = "";
 			for (int i = 0; i < fields.length; ++i)
@@ -707,7 +707,7 @@ public class Globals {
 
 				if (f.getDeclaringClass().getName().equals(className)) {
 					outputWriter.print("\n public " + "void " + setterName + "(" + f.getType().getName() + " p0" + ")");
-					outputWriter.print("{ " + "if ( p0 instanceof mapping.ReferenceInterface ) {" + "super." + setterName + "(p0);" + "} else "
+					outputWriter.print("{ " + "if ( p0 instanceof org.kchine.r.server.ReferenceInterface ) {" + "super." + setterName + "(p0);" + "} else "
 							+ "   {try {_rObjectIdHolder[0]=_assignInterface.assign(_rObjectIdHolder[0],_slotsPath+\"@\"+\"" + slotsContainer[0][i]
 							+ "\",p0);} \n catch (Exception ex) {ex.printStackTrace();}}" + " }\n");
 					outputWriter.print("\n public " + f.getType().getName() + " " + getterName + "(){");
@@ -742,7 +742,7 @@ public class Globals {
 								+ "try {"
 
 								+ "	for (int i=0;i<fields.length;++i) {"
-								+ "mapping.ReferenceInterface fValue=(mapping.ReferenceInterface)fields[i].get(this);"
+								+ "org.kchine.r.server.ReferenceInterface fValue=(org.kchine.r.server.ReferenceInterface)fields[i].get(this);"
 								+ "if ( fValue!= null && (!fValue.getAssignInterface().equals(_assignInterface) || fValue.getRObjectId()!=_rObjectIdHolder[0] ||  server.DirectJNI.hasDistributedReferences(fValue)) ) {"
 								+ "   nonNullFields.add(fields[i]);" + "}}" + "	out.writeInt(nonNullFields.size());"
 								+ "	for (java.lang.reflect.Field f:nonNullFields) {" + "		out.writeUTF(f.getName());" + "       out.writeObject(f.get(this));"
@@ -767,7 +767,7 @@ public class Globals {
 
 			outputWriter.println("}");
 			outputWriter.println("public void readExternal(java.io.ObjectInput in) throws java.io.IOException, ClassNotFoundException {"
-					+ "	_rObjectIdHolder[0]=in.readLong();" + "	_slotsPath=in.readUTF();" + "	_assignInterface=(remoting.AssignInterface)in.readObject();");
+					+ "	_rObjectIdHolder[0]=in.readLong();" + "	_slotsPath=in.readUTF();" + "	_assignInterface=(org.kchine.r.server.AssignInterface)in.readObject();");
 
 			outputWriter.println("int counter=in.readInt();  if (counter>0) {");
 			outputWriter.println("try { for (int i=0; i<counter; ++i) {String fname=in.readUTF();");
@@ -816,9 +816,9 @@ public class Globals {
 			PrintWriter objectNameOutputWriter = new PrintWriter(objectNameOutputFileName);
 
 			objectNameOutputWriter.println("package " + className.substring(0, className.lastIndexOf('.')) + ";");
-			objectNameOutputWriter.println("import org.bioconductor.packages.rservices.*;");
+			objectNameOutputWriter.println("import org.kchine.r.*;");
 			objectNameOutputWriter.println("public class " + classShortName + "ObjectName" + " extends " + classShortName
-					+ " implements org.bioconductor.packages.rservices.ObjectNameInterface {");
+					+ " implements org.kchine.r.ObjectNameInterface {");
 			objectNameOutputWriter.println("private String _name; private String _env;");
 			objectNameOutputWriter.println("public String getRObjectName() {return _name;}");
 			objectNameOutputWriter.println("public void setRObjectName(String _name) {this._name = _name;}");
