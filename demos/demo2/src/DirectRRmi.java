@@ -21,6 +21,8 @@
 
 import java.rmi.Naming;
 import java.util.Arrays;
+import java.util.Properties;
+
 import org.kchine.r.packages.biobase.ExpressionSet;
 import org.kchine.r.packages.rGlobalEnv.rGlobalEnvFunction;
 import org.kchine.r.RNamedArgument;
@@ -36,6 +38,11 @@ public class DirectRRmi {
 	public static void main(String[] args) throws Throwable {
 		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));		
 		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));
+		Properties props=new Properties();
+		props.put("naming.mode", "db");
+		r.export(props, "Hey", false);
+		
+		System.exit(0);
 		RNumeric squareOf4 = ((rGlobalEnvFunction) r.getPackage("rGlobalEnvFunction"))
 				.squareAsReference(new RNumeric(4));
 		System.out.println("square of 4 : " + squareOf4.getValue()[0]);

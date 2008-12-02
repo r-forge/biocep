@@ -3839,6 +3839,10 @@ public class DirectJNI {
 		public void removeProbeOnCells(String spreadsheetName) throws RemoteException {
 			
 		}
+		
+		public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException {		
+			return null;
+		}
 
 	};
 

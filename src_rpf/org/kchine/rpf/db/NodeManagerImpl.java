@@ -21,18 +21,23 @@
 package org.kchine.rpf.db;
 
 import java.io.Serializable;
+import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Vector;
 
 import org.kchine.rpf.CreationCallBack;
 import org.kchine.rpf.ManagedServant;
+import org.kchine.rpf.ManagedServantAbstract;
 import org.kchine.rpf.NodeManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.RemotePanel;
 import org.kchine.rpf.ServantCreationTimeout;
+import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.db.DBLayer;
 import org.kchine.rpf.db.NodeDataDB;
 import org.kchine.rpf.db.monitor.SupervisorUtils;
@@ -262,5 +267,27 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	public String getStub() throws RemoteException {
 		return PoolUtils.stubToHex(this);
 	}
-
+	
+	public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException {
+		try {			
+			Registry registry=ServerDefaults.getRegistry(namingRegistryProperties);
+			if (autoName) {
+				String newname = null;			
+				while (true) {
+					newname = ManagedServantAbstract.makeName(prefixOrName, registry);
+					try {
+						registry.bind(newname,  java.rmi.server.RemoteObject.toStub(this));
+						break;
+					} catch (AlreadyBoundException e) {
+					}
+				}
+				return newname;
+			} else {
+				registry.rebind(prefixOrName,  java.rmi.server.RemoteObject.toStub(this) );	
+				return prefixOrName;
+			}			
+		} catch (Exception e) {
+			throw new RemoteException("",e);
+		}
+	}
 }

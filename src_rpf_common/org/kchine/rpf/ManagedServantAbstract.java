@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */ 
+ */
 package org.kchine.rpf;
 
 import java.io.Serializable;
@@ -28,10 +28,10 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
-
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -41,17 +41,17 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 
 	protected String _servantName;
 	private boolean _resetEnabled = true;
-	protected String _jobId="";
+	protected String _jobId = "";
 	protected Registry _registry;
 
-	
 	public ManagedServantAbstract(String name, String prefix, Registry registry) throws RemoteException {
-		this(name, prefix,registry,0);		
+		this(name, prefix, registry, 0);
 	}
+
 	public ManagedServantAbstract(String name, String prefix, Registry registry, int port) throws RemoteException {
 		super(port);
 
-		_registry=registry;
+		_registry = registry;
 		try {
 			registry.list();
 			log.info("ping registry:ok");
@@ -68,14 +68,15 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 			while (true) {
 				newname = makeName(prefix, registry);
 				try {
-					registry.bind(newname,  java.rmi.server.RemoteObject.toStub(this));
+					registry.bind(newname, java.rmi.server.RemoteObject.toStub(this));
 					break;
 				} catch (AlreadyBoundException e) {
 				}
 			}
 		} else {
-			
-			//if (!name.startsWith(prefix)) throw new RemoteException("The server name must start with :" + prefix);
+
+			// if (!name.startsWith(prefix)) throw new
+			// RemoteException("The server name must start with :" + prefix);
 			ManagedServant oldServant = null;
 
 			try {
@@ -94,7 +95,7 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 				}
 			}
 
-			registry.rebind(name,  java.rmi.server.RemoteObject.toStub(this) );
+			registry.rebind(name, java.rmi.server.RemoteObject.toStub(this));
 		}
 
 		_servantName = name == null ? newname : name;
@@ -119,7 +120,7 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	 * @return Servant's name, if any.
 	 * @throws java.rmi.RemoteException
 	 */
-	public String makeName(String servantPoolPrefix, Registry rmiRegistry) throws RemoteException {
+	public static String makeName(String servantPoolPrefix, Registry rmiRegistry) throws RemoteException {
 
 		String servantName = null;
 		String[] servantNames = rmiRegistry.list();
@@ -265,14 +266,14 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		return true;
 	}
 
-	public String getJobId() throws RemoteException {	
+	public String getJobId() throws RemoteException {
 		return _jobId;
 	}
-	
+
 	public void setJobId(String jobId) throws RemoteException {
-		_jobId=jobId;		
+		_jobId = jobId;
 	}
-	
+
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 	}
 
@@ -286,10 +287,33 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 
 	public String getStub() throws RemoteException {
 		return PoolUtils.stubToHex(this);
-	}	
-	
+	}
+
+	public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException {
+		try {
+			Registry registry = ServerDefaults.getRegistry(namingRegistryProperties);
+			if (autoName) {
+				String newname = null;
+				while (true) {
+					newname = makeName(prefixOrName, registry);
+					try {
+						registry.bind(newname, java.rmi.server.RemoteObject.toStub(this));
+						break;
+					} catch (AlreadyBoundException e) {
+					}
+				}
+				return newname;
+			} else {
+				registry.rebind(prefixOrName, java.rmi.server.RemoteObject.toStub(this));
+				return prefixOrName;
+			}
+		} catch (Exception e) {
+			throw new RemoteException("", e);
+		}
+	}
+
 	public String toString() {
 		return super.toString() + " " + _servantName;
-	}	
+	}
 
 }
