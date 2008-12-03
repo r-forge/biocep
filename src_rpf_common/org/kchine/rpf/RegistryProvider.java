@@ -19,7 +19,8 @@
 package org.kchine.rpf;
 
 import java.rmi.registry.Registry;
+import java.util.Properties;
 
 public interface RegistryProvider {
-	Registry getRegistry() throws Exception;
+	Registry getRegistry(Properties props) throws Exception;
 }

@@ -10,6 +10,7 @@ package org.kchine.r.workbench.splashscreen;
  * This software is in the public domain.
  */
 
+
 import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
@@ -222,8 +223,13 @@ public class SplashWindow extends Window {
 		}
 	}
 
+	public static URL getSplashPng() {
+		return SplashWindow.class.getResource("/org/kchine/r/workbench/splashscreen/splashscreen.png");
+	}
+	
+	
 	public static void main(String[] args) throws Exception {
-		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(SplashWindow.class.getResource("/splash/splashscreen.png")));
+		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(getSplashPng()));
 
 		try {
 			Thread.sleep(1000);

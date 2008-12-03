@@ -94,9 +94,8 @@ public class GDAppletLauncher {
 	}
 
 	public static void main(String[] args) throws Exception {
-		
-		
-		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(GDAppletLauncher.class.getResource("/org/kchine/r/workbench/splashscreen/splashscreen.png")));
+				
+		SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(SplashWindow.getSplashPng()));
 		try {
 			Thread.sleep(200);
 		} catch (Exception e) {
@@ -114,6 +113,5 @@ public class GDAppletLauncher {
 		});
 		
 		SplashWindow.disposeSplash();
-		
 	}
 }

@@ -347,6 +347,7 @@
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
@@ -354,9 +355,9 @@
 		<if><not><isset property="registry.host"/></not><then><property name="registry.host" value=""/></then></if>
 		<if><not><isset property="registry.port"/></not><then><property name="registry.port" value=""/></then></if>
 		
-		<if><not><isset property="generic.urlregistry.url"/></not><then><property name="generic.urlregistry.url" value=""/></then></if>
-		<if><not><isset property="generic.urlregistry.login"/></not><then><property name="generic.urlregistry.login" value=""/></then></if>
-		<if><not><isset property="generic.urlregistry.password"/></not><then><property name="generic.urlregistry.password" value=""/></then></if>
+		<if><not><isset property="httpregistry.url"/></not><then><property name="httpregistry.url" value=""/></then></if>
+		<if><not><isset property="httpregistry.login"/></not><then><property name="httpregistry.login" value=""/></then></if>
+		<if><not><isset property="httpregistry.password"/></not><then><property name="httpregistry.password" value=""/></then></if>
 		
 		<if><not><isset property="servant.classpath"/></not><then><property name="servant.classpath" value=""/></then></if>
 		<if><not><isset property="preprocess.help"/></not><then><property name="preprocess.help" value=""/></then></if>
@@ -453,14 +454,14 @@
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
 			
-			<jvmarg value="-Dgeneric.class=${generic.class}"/>
-			<jvmarg value="-Dgeneric.urlregistry.url=${generic.urlregistry.url}"/>
-			<jvmarg value="-Dgeneric.urlregistry.login=${generic.urlregistry.login}"/>
-			<jvmarg value="-Dgeneric.urlregistry.password=${generic.urlregistry.password}"/>
+			<jvmarg value="-Dhttpregistry.url=${httpregistry.url}"/>
+			<jvmarg value="-Dhttpregistry.login=${httpregistry.login}"/>
+			<jvmarg value="-Dhttpregistry.password=${httpregistry.password}"/>
 			
 			<jvmarg value="-Dproperties.extension=${properties.extension}"/>
 			
@@ -493,12 +494,22 @@
 	<target name="derby.startup" depends="initializeProperties">
 		<if>
 			<not>
-				<isset property="derby.port"/>
+				<isset property="db.port"/>
 			</not>
 			<then>
-				<property name="derby.port" value="1527"/>
+				<property name="db.port" value="1527"/>
 			</then>
 		</if>
+		
+		<if>
+			<not>
+				<isset property="db.dir"/>
+			</not>
+			<then>
+				<property name="db.dir" value=""/>
+			</then>
+		</if>
+		
 		<if>
 			<not>
 				<isset property="spawn"/>
@@ -514,11 +525,12 @@
 				<pathelement path="${DERBY_DB_JAR}"/>
 				<pathelement path="${DERBY_JAR}"/>
 			</classpath>
+			<jvmarg value="-Dderby.system.home=${db.dir}"/>
 			<arg value="start"/>
 			<arg value="-h"/>
 			<arg value="0.0.0.0"/>
 			<arg value="-p"/>
-			<arg value="${derby.port}"/>
+			<arg value="${db.port}"/>
 		</java>
 	</target>
 	
@@ -534,10 +546,10 @@
 		
 		<if>
 			<not>
-				<isset property="derby.port"/>
+				<isset property="db.port"/>
 			</not>
 			<then>
-				<property name="derby.port" value="1527"/>
+				<property name="db.port" value="1527"/>
 			</then>
 		</if>
 		
@@ -562,7 +574,7 @@
 			<arg value="-h"/>
 			<arg value="0.0.0.0"/>
 			<arg value="-p"/>
-			<arg value="${derby.port}"/>
+			<arg value="${db.port}"/>
 			
 		</java>
 	</target>
@@ -625,7 +637,8 @@
 		
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
-		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>		
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>		
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
@@ -649,6 +662,7 @@
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
@@ -705,12 +719,19 @@
 		
 		<if><not><isset property="spawn"/></not><then><property name="spawn" value="false"/></then></if>
 		
+		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
+		
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>		
+		
+		<if><not><isset property="httpregistry.url"/></not><then><property name="httpregistry.url" value=""/></then></if>
+		<if><not><isset property="httpregistry.login"/></not><then><property name="httpregistry.login" value=""/></then></if>
+		<if><not><isset property="httpregistry.password"/></not><then><property name="httpregistry.password" value=""/></then></if>
 		
 		<java classname="org.kchine.rpf.db.monitor.Supervisor"
 			fork="true" spawn="${spawn}">
@@ -730,14 +751,18 @@
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
 			</classpath>
 			
-			<jvmarg value="-Dnaming.mode=db"/>
+			<jvmarg value="-Dnaming.mode=${naming.mode}"/>
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
-
+						
+			<jvmarg value="-Dhttpregistry.url=${httpregistry.url}"/>
+			<jvmarg value="-Dhttpregistry.login=${httpregistry.login}"/>
+			<jvmarg value="-Dhttpregistry.password=${httpregistry.password}"/>
 			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
@@ -757,6 +782,7 @@
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
@@ -788,6 +814,7 @@
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
@@ -846,6 +873,7 @@
 			<jvmarg value="-Dpools.dbmode.type=${client.db.type}"/>
 			<jvmarg value="-Dpools.dbmode.host=${client.db.host}"/>
 			<jvmarg value="-Dpools.dbmode.port=${client.db.port}"/>
+			<jvmarg value="-Dpools.dbmode.dir=${client.db.dir}"/>
 			<jvmarg value="-Dpools.dbmode.name=${client.db.name}"/>
 			<jvmarg value="-Dpools.dbmode.user=${client.db.user}"/>
 			<jvmarg value="-Dpools.dbmode.password=${client.db.password}"/>
@@ -881,7 +909,8 @@
 		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
-		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>			
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>		
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
@@ -986,6 +1015,7 @@
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>			
@@ -1098,6 +1128,7 @@
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>			
@@ -1139,11 +1170,12 @@
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
 
-		<java maxmemory="1024m" classname="server.ServerManager"
+		<java maxmemory="1024m" classname="HttpServerLight"
 			fork="true" spawn="${spawn}">
 			<classpath>
 				
@@ -1204,6 +1236,7 @@
 				<pathelement path="lib/j2ee/commons-codec-1.3.jar"/>
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
 				
+				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				<!--optional-->
 				<pathelement path="VirtualRWorkbench/distrib/mapping.jar"/>
 				
@@ -1232,6 +1265,7 @@
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
@@ -1268,6 +1302,7 @@
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>								
@@ -1362,6 +1397,7 @@
 				<jvmarg value="-Ddb.type=${db.type}"/>
 				<jvmarg value="-Ddb.host=${db.host}"/>
 				<jvmarg value="-Ddb.port=${db.port}"/>
+				<jvmarg value="-Ddb.dir=${db.dir}"/>
 				<jvmarg value="-Ddb.name=${db.name}"/>			
 				<jvmarg value="-Ddb.user=${db.user}"/>
 				<jvmarg value="-Ddb.password=${db.password}"/>
@@ -1395,6 +1431,7 @@
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>		
@@ -1418,6 +1455,7 @@
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>
@@ -1443,6 +1481,7 @@
 		<if><not><isset property="db.type"/></not><then><property name="db.type" value=""/></then></if>
 		<if><not><isset property="db.host"/></not><then><property name="db.host" value=""/></then></if>
 		<if><not><isset property="db.port"/></not><then><property name="db.port" value=""/></then></if>
+		<if><not><isset property="db.dir"/></not><then><property name="db.dir" value=""/></then></if>
 		<if><not><isset property="db.name"/></not><then><property name="db.name" value=""/></then></if>		
 		<if><not><isset property="db.user"/></not><then><property name="db.user" value=""/></then></if>
 		<if><not><isset property="db.password"/></not><then><property name="db.password" value=""/></then></if>
@@ -1471,6 +1510,7 @@
 			<jvmarg value="-Ddb.type=${db.type}"/>
 			<jvmarg value="-Ddb.host=${db.host}"/>
 			<jvmarg value="-Ddb.port=${db.port}"/>
+			<jvmarg value="-Ddb.dir=${db.dir}"/>
 			<jvmarg value="-Ddb.name=${db.name}"/>			
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>

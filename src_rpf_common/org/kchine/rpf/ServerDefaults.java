@@ -44,7 +44,7 @@ public abstract class ServerDefaults {
 	public static String _dbUrl ;
 	public static String _dbDriver ;
 	public static String _dbUser;
-	public static String _dbPassword;			
+	public static String _dbPassword;
 	public static int _memoryMin;
 	public static int _memoryMax;
 
@@ -76,10 +76,13 @@ public abstract class ServerDefaults {
 		String _DB_HOST = System.getProperty("db.host") != null && !System.getProperty("db.host").equals("") ? System.getProperty("db.host") : DEFAULT_DB_HOST;
 		int    _DB_PORT = System.getProperty("db.port") != null && !System.getProperty("db.port").equals("") ? Integer.decode(System.getProperty("db.port")) : DEFAULT_DB_PORT;		
 		String _DB_NAME = System.getProperty("db.name") != null && !System.getProperty("db.name").equals("") ? System.getProperty("db.name") : DEFAULT_DB_NAME;	
+		String _DB_DIR = System.getProperty("db.dir") != null && !System.getProperty("db.dir").equals("") ? System.getProperty("db.dir") : DEFAULT_DB_DIR;
+		_DB_DIR=_DB_DIR.replace('\\', '/');	if (!_DB_DIR.equals("") && !_DB_DIR.endsWith("/")) _DB_DIR=_DB_DIR+"/";
+		System.out.println("DB Dir:"+_DB_DIR);
 		
 		if (_DB_TYPE.equals("derby")) {
-			_dbUrl = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME+";create=true";
-			_dbDriver="org.apache.derby.jdbc.ClientDriver";
+			_dbUrl = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_DIR+_DB_NAME+";create=true";
+			_dbDriver="org.apache.derby.jdbc.ClientDriver";			
 		} else if (_DB_TYPE.equals("mysql")) {			
 			_dbUrl = "jdbc:mysql://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME;			
 			_dbDriver="org.gjt.mm.mysql.Driver";
@@ -123,12 +126,12 @@ public abstract class ServerDefaults {
 						};
 					});
 					
-				} else if (_namingMode.equals("generic")){					
-					_registry = ((RegistryProvider)ServerDefaults.class.forName(System.getProperty("generic.class")).newInstance() ).getRegistry();					
 				} else if (_namingMode.equals("self")){
 					_registry = LocalRmiRegistry.getInstance();
-				} else {
+				} else if (_namingMode.equals("registry")) {
 					_registry = LocateRegistry.getRegistry(_registryHost, _registryPort);
+				} else {					
+					_registry = ((RegistryProvider)ServerDefaults.class.forName(_namingMode+"Class").newInstance() ).getRegistry(System.getProperties());					
 				}
 			}
 			return _registry;
@@ -154,11 +157,15 @@ public abstract class ServerDefaults {
 		String _DB_TYPE =  (String)props.get("db.type") != null && !props.get("db.type").equals("") ? (String)props.get("db.type") : DEFAULT_DB_TYPE;
 		String _DB_HOST = (String)props.get("db.host") != null &&  !props.get("db.host").equals("") ? (String)props.get("db.host") : DEFAULT_DB_HOST;
 		int    _DB_PORT = (String)props.get("db.port") != null &&  !props.get("db.port").equals("") ? Integer.decode((String)props.get("db.port")) : DEFAULT_DB_PORT;		
-		String _DB_NAME = (String)props.get("db.name") != null &&  !props.get("db.name").equals("") ? (String)props.get("db.name") : DEFAULT_DB_NAME;	
+		String _DB_NAME = (String)props.get("db.name") != null &&  !props.get("db.name").equals("") ? (String)props.get("db.name") : DEFAULT_DB_NAME;			
+		String _DB_DIR = (String)props.get("db.dir") != null && !props.get("db.dir").equals("") ? (String)props.get("db.dir") : DEFAULT_DB_DIR;
+		_DB_DIR=_DB_DIR.replace('\\', '/');if (!_DB_DIR.equals("") && !_DB_DIR.endsWith("/")) _DB_DIR=_DB_DIR+"/";
+		
 		
 		if (_DB_TYPE.equals("derby")) {
-			dbUrl = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME+";create=true";
+			dbUrl = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_DIR+_DB_NAME+";create=true";
 			dbDriver="org.apache.derby.jdbc.ClientDriver";
+			
 		} else if (_DB_TYPE.equals("mysql")) {			
 			dbUrl = "jdbc:mysql://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME;			
 			dbDriver="org.gjt.mm.mysql.Driver";
@@ -185,12 +192,12 @@ public abstract class ServerDefaults {
 				};
 			});
 			
-		} else if (namingMode.equals("generic")){					
-			registry = ((RegistryProvider)ServerDefaults.class.forName((String)props.get("generic.class")).newInstance() ).getRegistry();					
-		} else if (namingMode.equals("self")){
+		}  else if (namingMode.equals("self")){
 			registry = LocalRmiRegistry.getInstance();
-		} else {
+		} else if (namingMode.equals("registry")) {
 			registry = LocateRegistry.getRegistry(registryHost, registryPort);
+		} else {					
+			registry = ((RegistryProvider)ServerDefaults.class.forName(namingMode+"Class").newInstance() ).getRegistry(props);					
 		}
 
 		return registry;

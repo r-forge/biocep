@@ -18,6 +18,7 @@
  */
 package org.kchine.rpf.db;
 
+import static org.kchine.rpf.PoolUtils.DEFAULT_DB_DIR;
 import static org.kchine.rpf.PoolUtils.DEFAULT_DB_HOST;
 import static org.kchine.rpf.PoolUtils.DEFAULT_DB_NAME;
 import static org.kchine.rpf.PoolUtils.DEFAULT_DB_PASSWORD;
@@ -54,10 +55,12 @@ public class ServantProviderDB implements ServantProvider{
 		String _DB_TYPE =  System.getProperty("pools.dbmode.type") != null && !System.getProperty("pools.dbmode.type").equals("") ? System.getProperty("pools.dbmode.type") : DEFAULT_DB_TYPE;
 		String _DB_HOST = System.getProperty("pools.dbmode.host") != null && !System.getProperty("pools.dbmode.host").equals("") ? System.getProperty("pools.dbmode.host") : DEFAULT_DB_HOST;
 		int    _DB_PORT = System.getProperty("pools.dbmode.port") != null && !System.getProperty("pools.dbmode.port").equals("") ? Integer.decode(System.getProperty("pools.dbmode.port")) : DEFAULT_DB_PORT;		
-		String _DB_NAME = System.getProperty("pools.dbmode.name") != null && !System.getProperty("pools.dbmode.name").equals("") ? System.getProperty("pools.dbmode.name") : DEFAULT_DB_NAME;	
-		
+		String _DB_NAME = System.getProperty("pools.dbmode.name") != null && !System.getProperty("pools.dbmode.name").equals("") ? System.getProperty("pools.dbmode.name") : DEFAULT_DB_NAME;
+		String _DB_DIR = System.getProperty("pools.dbmode.dir") != null && !System.getProperty("pools.dbmode.dir").equals("") ? System.getProperty("pools.dbmode.dir") : DEFAULT_DB_DIR;
+		_DB_DIR=_DB_DIR.replace('\\', '/');	if (!_DB_DIR.equals("") && !_DB_DIR.endsWith("/")) _DB_DIR=_DB_DIR+"/";
+
 		if (_DB_TYPE.equals("derby")) {
-			_url = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME+";create=true";
+			_url = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_DIR+_DB_NAME+";create=true";
 			_driver="org.apache.derby.jdbc.ClientDriver";
 		} else if (_DB_TYPE.equals("mysql")) {			
 			_url = "jdbc:mysql://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_NAME;			

@@ -126,9 +126,14 @@ public class ServerManager {
 
 	public static TableModelRemoteImpl tmri;
 
-	public static String[] namingVars = new String[] { "registry.host", "registry.port", "naming.mode", "db.type", "db.host", "db.port", "db.name", "db.user",
-			"db.password", "generic.class", "generic.urlregistry.url", "generic.urlregistry.login", "generic.urlregistry.password", "rmi.port.start", "job.id",
-			"job.name", "notify.email", "node", "http.port" };
+	public static String[] namingVars = new String[] { 
+		"naming.mode", "registry.host", "registry.port",  
+		"db.type", "db.host", "db.port", "db.dir", "db.name", "db.user", "db.password", 			
+		"httpregistry.url", "httpregistry.login", "httpregistry.password", 
+		"rmi.port.start", 
+		"job.id", "job.name", "notify.email", 
+		"node", 
+		"http.port" };
 
 	private static JTextArea createRSshProgressArea;
 	private static JProgressBar createRSshProgressBar;

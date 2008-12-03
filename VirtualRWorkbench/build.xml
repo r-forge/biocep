@@ -40,6 +40,7 @@
 			<property name="demo.db.type" value="derby" />
 			<property name="demo.db.host" value="127.0.0.1" />
 			<property name="demo.db.port" value="1527" />
+			<property name="demo.db.dir" value="" />
 			<property name="demo.db.name" value="DWEP" />
 			<property name="demo.db.user" value="DWEP" />
 			<property name="demo.db.password" value="DWEP" />
@@ -63,6 +64,7 @@
 					<param name="db.type" value="${demo.db.type}"/>
 					<param name="db.host" value="${demo.db.host}"/>
 					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.dir" value="${demo.db.dir}" />
 					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
 					<param name="db.password" value="${demo.db.password}" />	
@@ -78,6 +80,7 @@
 					<param name="db.type" value="${demo.db.type}"/>
 					<param name="db.host" value="${demo.db.host}"/>
 					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.dir" value="${demo.db.dir}" />
 					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
 					<param name="db.password" value="${demo.db.password}" />	
@@ -93,6 +96,7 @@
 					<param name="db.type" value="${demo.db.type}"/>
 					<param name="db.host" value="${demo.db.host}"/>
 					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.dir" value="${demo.db.dir}" />
 					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
 					<param name="db.password" value="${demo.db.password}" />	
@@ -108,6 +112,7 @@
 					<param name="db.type" value="${demo.db.type}"/>
 					<param name="db.host" value="${demo.db.host}"/>
 					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.dir" value="${demo.db.dir}" />
 					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
 					<param name="db.password" value="${demo.db.password}" />	
@@ -127,18 +132,20 @@
 							<pathelement path="${LOG4J_JAR}"/>
 						</classpath>					  
 					  	<arg value="${demo.generatedir}/globals.properties"/>
-					  
-					    <arg value="pools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB"/>
-					    <arg value="pools.dbmode.driver=${demo.db.driver}"/>
-					    <arg value="pools.dbmode.url=${demo.db.url}"/>
+					 	
+					    <arg value="pools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB"/>			  			
+					    <arg value="pools.dbmode.type=${demo.db.type}"/>
+					    <arg value="pools.dbmode.host=${demo.db.host}"/>
+			  			<arg value="pools.dbmode.port=${demo.db.port}"/>
+			  			<arg value="pools.dbmode.dir=${demo.db.dir}"/>
+			  			<arg value="pools.dbmode.name=${demo.db.name}"/>	
 					    <arg value="pools.dbmode.user=${demo.db.user}"/>
-					    <arg value="pools.dbmode.password=${demo.db.password}"/>					  					  
-					    <arg value="pools.dbmode.defaultpoolname=R"/>					  
-
-					    <arg value="pools.dbmode.killused=${demo.ws.kill.used.R}"/>	
-						
+					    <arg value="pools.dbmode.password=${demo.db.password}"/>			  			
+			  			<arg value="pools.dbmode.defaultpoolname=${demo.db.defaultpoolname}"/>
+			  			<arg value="pools.dbmode.killused=${demo.frontend.kill.used.R}"/>
+							
 						<arg value="node.manager.name=NODE_MANAGER"/>
-						<arg value="private.servant.node.name=N1"/>
+					 	<arg value="private.servant.node.name=${private.servants.node.name}"/>
 					 	
 					 	<!--
 						<arg value="http.frontend.url=http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/cmd"/>
@@ -184,6 +191,7 @@
 					<param name="db.type" value="${demo.db.type}"/>
 					<param name="db.host" value="${demo.db.host}"/>
 					<param name="db.port" value="${demo.db.port}" />
+					<param name="db.dir" value="${demo.db.dir}" />
 					<param name="db.name" value="${demo.db.name}" />
 					<param name="db.user" value="${demo.db.user}" />
 					<param name="db.password" value="${demo.db.password}" />	
@@ -235,6 +243,7 @@
 					<param name="client.db.type" value="${demo.db.type}"/>
 					<param name="client.db.host" value="${demo.db.host}" />
 					<param name="client.db.port" value="${demo.db.port}" />
+					<param name="client.db.dir" value="${demo.db.dir}" />
 					<param name="client.db.name" value="${demo.db.name}" />					
 					<param name="client.db.user" value="${demo.db.user}" />
 					<param name="client.db.password" value="${demo.db.password}" />
@@ -259,6 +268,7 @@
 					<param name="client.db.type" value="${demo.db.type}"/>
 					<param name="client.db.host" value="${demo.db.host}" />
 					<param name="client.db.port" value="${demo.db.port}" />
+					<param name="client.db.dir" value="${demo.db.dir}" />
 					<param name="client.db.name" value="${demo.db.name}" />					
 					<param name="client.db.user" value="${demo.db.user}" />
 					<param name="client.db.password" value="${demo.db.password}" />
@@ -285,6 +295,7 @@
 					<param name="client.db.type" value="${demo.db.type}"/>
 					<param name="client.db.host" value="${demo.db.host}" />
 					<param name="client.db.port" value="${demo.db.port}" />
+					<param name="client.db.dir" value="${demo.db.dir}" />
 					<param name="client.db.name" value="${demo.db.name}" />					
 					<param name="client.db.user" value="${demo.db.user}" />
 					<param name="client.db.password" value="${demo.db.password}" />
@@ -402,6 +413,7 @@
 					<jvmarg value="-Ddb.type=${demo.db.type}"/>
 					<jvmarg value="-Ddb.host=${demo.db.host}"/>
 					<jvmarg value="-Ddb.port=${demo.db.port}"/>
+					<jvmarg value="-Ddb.dir=${demo.db.dir}"/>
 					<jvmarg value="-Ddb.name=${demo.db.name}"/>			
 					<jvmarg value="-Ddb.user=${demo.db.user}"/>
 					<jvmarg value="-Ddb.password=${demo.db.password}"/>
@@ -520,6 +532,7 @@
 						    <arg value="pools.dbmode.type=${demo.db.type}"/>
 						    <arg value="pools.dbmode.host=${demo.db.host}"/>
 				  			<arg value="pools.dbmode.port=${demo.db.port}"/>
+				  			<arg value="pools.dbmode.dir=${demo.db.dir}"/>
 				  			<arg value="pools.dbmode.name=${demo.db.name}"/>	
 						    <arg value="pools.dbmode.user=${demo.db.user}"/>
 						    <arg value="pools.dbmode.password=${demo.db.password}"/>
@@ -534,6 +547,7 @@
 				  			<arg value="db.type=${demo.db.type}"/>				  			
 				  			<arg value="db.host=${demo.db.host}"/>
 				  			<arg value="db.port=${demo.db.port}"/>
+				  			<arg value="db.dir=${demo.db.dir}"/>
 				  			<arg value="db.name=${demo.db.name}"/>	
 				  			<arg value="db.user=${demo.db.user}"/>
 				  			<arg value="db.password=${demo.db.password}"/>
@@ -564,6 +578,7 @@
 				  			<arg value="db.type=${demo.db.type}"/>
 				  			<arg value="db.host=${demo.db.host}"/>
 				  			<arg value="db.port=${demo.db.port}" />
+				  			<arg value="db.dir=${demo.db.dir}" />
 				  			<arg value="db.name=${demo.db.name}" />
 				  			<arg value="db.user=${demo.db.user}" />
 				  			<arg value="db.password=${demo.db.password}" />
@@ -716,14 +731,14 @@
 	
 			<target name="derbyrun" depends="initializeProperties">
 				<antcall target="derby.startup">					
-					<param name="derby.port" value="${db.port}"/>
+					<param name="db.port" value="${db.port}"/>
 				</antcall>	
 			</target>
 	
 			<target name="derbystop" depends="initializeProperties">
 				<antcall target="derby.shutdown">
 					<param name="spawn" value="true"/>
-					<param name="derby.port" value="${db.port}"/>	
+					<param name="db.port" value="${db.port}"/>	
 				</antcall>
 			</target>
 				

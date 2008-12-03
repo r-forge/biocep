@@ -24,7 +24,7 @@ import javax.swing.SwingUtilities;
 
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServerDefaults;
-import org.kchine.rpf.db.DBLayer;
+import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.NodeDataDB;
 import org.kchine.rpf.db.SupervisorInterface;
 
@@ -89,7 +89,7 @@ public class SupervisorUtils implements SupervisorInterface {
 
 	public void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
 
-		DBLayer dbLayer = (DBLayer) ServerDefaults.getRmiRegistry();
+		DBLayerInterface dbLayer = (DBLayerInterface) ServerDefaults.getRmiRegistry();
 		HashMap<String, Object> servantInfo = dbLayer.getTableData("SERVANTS", "NAME='" + servantName + "'").elementAt(0);
 
 		NodeDataDB nd = null;
@@ -267,8 +267,8 @@ public class SupervisorUtils implements SupervisorInterface {
 			public void run() {
 				try {
 
-					((DBLayer) ServerDefaults.getRmiRegistry()).incrementNodeProcessCounter(nodeName);
-					final NodeDataDB info = ((DBLayer) ServerDefaults.getRmiRegistry()).getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
+					((DBLayerInterface) ServerDefaults.getRmiRegistry()).incrementNodeProcessCounter(nodeName);
+					final NodeDataDB info = ((DBLayerInterface) ServerDefaults.getRmiRegistry()).getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
 					String command = info.getCreateServantCommand();
 
 					if (PoolUtils.isLoopBackIP(info.getHostIp()) || info.getHostIp().equals(PoolUtils.getHostIp())) {

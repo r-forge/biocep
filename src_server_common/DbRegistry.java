@@ -48,11 +48,17 @@ public class DbRegistry {
 			port=System.getProperty("db.port");
 		}
 		
+		String dir="";
+		if (System.getProperty("db.dir")!=null && !System.getProperty("db.dir").equals("")) {
+			dir=System.getProperty("db.dir");
+		}
+		
 		DbRegistryOff.main(new String[0]);
 		
 		String cp=new File(ServerManager.INSTALL_DIR+"/derby.jar").getAbsolutePath()+ System.getProperty("path.separator") + new File(ServerManager.INSTALL_DIR+"/derbynet.jar").getAbsolutePath(); 		
 		Vector<String> command = new Vector<String>();
 		command.add((isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java" + (isWindowsOs() ? "\"" : ""));
+		command.add("-Dderby.system.home="+dir);		
 		command.add("-cp");
 		command.add((isWindowsOs() ? "\"" : "") + cp + (isWindowsOs() ? "\"" : ""));
 		command.add("org.apache.derby.drda.NetworkServerControl");

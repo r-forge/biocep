@@ -74,7 +74,7 @@ public class RebindServlet extends javax.servlet.http.HttpServlet implements jav
 				}
 			}
 			
-			response.getOutputStream().println("Rebind succeded");
+			response.getOutputStream().println("Rebind succeeded");
 			response.flushBuffer();
 
 		} catch (Throwable e) {
