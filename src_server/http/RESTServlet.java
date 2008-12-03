@@ -111,7 +111,7 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 				} catch (Exception e) {
 				}
 				if (wait == null)
-					wait = false;
+					wait = true;
 
 				if (wait) {
 					r = (RServices) spFactory.getServantProvider().borrowServantProxy();

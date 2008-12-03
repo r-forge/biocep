@@ -102,6 +102,7 @@ public class PoolUtils {
 	public static final String DEFAULT_DB_TYPE = "derby";
 	public static final String DEFAULT_DB_HOST = "localhost";
 	public static final int DEFAULT_DB_PORT = 1527;
+	public static final String DEFAULT_DB_DIR = "";
 	public static final String DEFAULT_DB_NAME = "DWEP";
 	public static final String DEFAULT_DB_USER = "DWEP";
 	public static final String DEFAULT_DB_PASSWORD = "DWEP";

@@ -257,11 +257,11 @@ public class ToolsMain {
 
 		}
 
-		String bootstrap = (INSTALL_DIR + "classes/bootstrap").replace('\\', '/');
+		String bootstrap = (INSTALL_DIR + "classes/org/kchine/r/server/manager/bootstrap").replace('\\', '/');
 		System.out.println(bootstrap);
 		if (!new File(bootstrap).exists())
 			new File(bootstrap).mkdirs();
-		InputStream is = ServerManager.class.getResourceAsStream("/bootstrap/Boot.class");
+		InputStream is = ServerManager.class.getResourceAsStream("/org/kchine/r/server/manager/bootstrap/Boot.class");
 		byte[] buffer = new byte[is.available()];
 		try {
 			for (int i = 0; i < buffer.length; ++i) {
@@ -366,11 +366,24 @@ public class ToolsMain {
 		if (tempFile.exists())
 			tempFile.delete();
 
-		String[] embedPropertiesNames = new String[] { "pools.provider.factory", "regsitry.host", "regsitry.port", "naming.mode", "pools.dbmode.type",
-				"pools.dbmode.host", "pools.dbmode.port", "pools.dbmode.name", "pools.dbmode.user", "pools.dbmode.password", "pools.dbmode.defaultpoolname",
-				"pools.dbmode.killused", "node.manager.name", "private.servant.node.name", "http.frontend.url" };
+		
+		
+		
+		String[] embedPropertiesNames = new String[] { 
+				
+				"regsitry.host", "regsitry.port", "naming.mode",
+				
+				"db.type", "db.host", "db.port", "db.dir", "db.name", "db.user", "db.password", 			
+				"httpregistry.url", "httpregistry.login", "httpregistry.password", 
+				
+				"pools.provider.factory",  "pools.dbmode.type",	"pools.dbmode.host", "pools.dbmode.port", "pools.dbmode.dir", "pools.dbmode.name", "pools.dbmode.user", "pools.dbmode.password", 
+				"pools.dbmode.defaultpoolname",				
+				"pools.dbmode.killused", 
+				
+				"node.manager.name", "private.servant.node.name", 
+				"http.frontend.url" };
 
-		String[] embedPropertiesDefaultValues = new String[] { null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null };
+		String[] embedPropertiesDefaultValues = new String[embedPropertiesNames.length]; // all null
 
 		Vector<String> genArgs = new Vector<String>();
 		genArgs.add(tempFile.getAbsolutePath());

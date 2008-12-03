@@ -39,6 +39,8 @@ public class RegenerateDB {
 	
 		Class.forName(ServerDefaults._dbDriver);
 
+		System.out.println("DB URL:"+ServerDefaults._dbUrl);
+		
 		DBLayer dbLayer = DBLayer.getLayer(getDBType(ServerDefaults._dbUrl), new ConnectionProvider() {
 			public Connection newConnection() throws SQLException {
 				return DriverManager.getConnection(ServerDefaults._dbUrl, ServerDefaults._dbUser, ServerDefaults._dbPassword);

@@ -1711,7 +1711,8 @@ public class GDApplet extends AppletBase implements RGui {
 					}
 					macrosMenu.addSeparator();
 
-					macrosMenu.add(new AbstractAction("Copy Hello World Action Macro"){
+					JMenu macrosCopyMenu = new JMenu("Copy Example to Clipboard");
+					macrosCopyMenu.add(new AbstractAction("Hello World Action Macro"){
 						public void actionPerformed(ActionEvent e) {
 							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldAction());
 							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -1723,7 +1724,7 @@ public class GDApplet extends AppletBase implements RGui {
 					});
 					
 					
-					macrosMenu.add(new AbstractAction("Copy Hello World Macro With Variables Listeners"){
+					macrosCopyMenu.add(new AbstractAction("Hello World Macro With Variables Listeners"){
 						public void actionPerformed(ActionEvent e) {
 							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldVars());
 							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -1734,7 +1735,7 @@ public class GDApplet extends AppletBase implements RGui {
 						}
 					});
 					
-					macrosMenu.add(new AbstractAction("Copy Hello World Macro With Cells Listeners"){
+					macrosCopyMenu.add(new AbstractAction("Hello World Macro With Cells Listeners"){
 						public void actionPerformed(ActionEvent e) {
 							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldCells());
 							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -1745,7 +1746,7 @@ public class GDApplet extends AppletBase implements RGui {
 						}
 					});
 					
-					macrosMenu.add(new AbstractAction("Copy Hello World Data Link"){
+					macrosCopyMenu.add(new AbstractAction("Hello World Data Link"){
 						public void actionPerformed(ActionEvent e) {
 							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldDataLink());
 							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -1755,7 +1756,7 @@ public class GDApplet extends AppletBase implements RGui {
 							});							
 						}
 					});
-					
+					macrosMenu.add(macrosCopyMenu);
 					macrosMenu.addSeparator();
 					macrosMenu.add(_actions.get("macroseditor"));
 					macrosMenu.addSeparator();
@@ -3187,7 +3188,7 @@ public class GDApplet extends AppletBase implements RGui {
 
 		_actions.put("about", new AbstractAction("About Virtual R") {
 			public void actionPerformed(ActionEvent e) {
-				new SplashWindow(new JFrame(), Toolkit.getDefaultToolkit().createImage(GDAppletLauncher.class.getResource("/splash/splashscreen.png")))
+				new SplashWindow(new JFrame(), Toolkit.getDefaultToolkit().createImage(SplashWindow.getSplashPng()))
 						.setVisible(true);
 			}
 

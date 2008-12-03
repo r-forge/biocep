@@ -179,7 +179,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						if (namedAccessMode) {
 							
 							try {
-								if (System.getProperty("submit.mode").equals("ssh")) {
+								if (System.getProperty("submit.mode") != null  && System.getProperty("submit.mode").equals("ssh")) {
 									r = (RServices) ((DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
 							        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
 							                "java -Dpools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar org.kchine.rpf.SSHTunnelingWorker %{file}",
@@ -224,7 +224,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 								
 								
-								if (System.getProperty("submit.mode").equals("ssh")) {
+								if (System.getProperty("submit.mode")!=null && System.getProperty("submit.mode").equals("ssh")) {
 									
 									
 							        DBLayerInterface dbLayer =(DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
