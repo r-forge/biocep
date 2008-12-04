@@ -166,8 +166,8 @@ public abstract class RListener {
 	}
 
 	public static void notifyJavaListeners(String parametersStr) {
-		HashMap<String, String> parameters=PoolUtils.getParameters(parametersStr);
-		for (int i=0; i<DirectJNI.getInstance().getRCallBacks().size(); ++i) {
+		HashMap<String, String> parameters = PoolUtils.getParameters(parametersStr);
+		for (int i = 0; i < DirectJNI.getInstance().getRCallBacks().size(); ++i) {
 			try {
 				DirectJNI.getInstance().getRCallBacks().elementAt(i).notify(parameters);
 			} catch (Exception e) {
@@ -227,16 +227,16 @@ public abstract class RListener {
 			pack = null;
 		attributes.put("topic", topic);
 		attributes.put("package", pack);
-		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("help",attributes));
+		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("help", attributes));
 		return null;
 	}
-	
-	public static String[] q( String save, String status, String runLast) {		
+
+	public static String[] q(String save, String status, String runLast) {
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("save", save);
 		attributes.put("status", status);
 		attributes.put("runLast", runLast);
-		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("q",attributes));
+		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("q", attributes));
 		return null;
 	}
 
@@ -336,11 +336,10 @@ public abstract class RListener {
 		if (cluster == null)
 			return new String[] { "NOK", "Invalid cluster" };
 		try {
-			
-			
-			//_rClusterInterface.releaseRs(cluster.getWorkers(), cluster.getWorkers().size(), cluster.getNodeName());
-			
-			
+
+			// _rClusterInterface.releaseRs(cluster.getWorkers(),
+			// cluster.getWorkers().size(), cluster.getNodeName());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -537,17 +536,17 @@ public abstract class RListener {
 		}
 	}
 
-	public static String[] clusterExport(String cl, String varName) {
+	public static String[] clusterExport(String cl, String exp, String ato) {
 		try {
 			StringBuffer feedback = new StringBuffer();
 			Cluster cluster = _clustersHash.get(cl);
 			if (cluster == null)
 				return new String[] { "NOK", "Invalid cluster" };
-			RObject v = DirectJNI.getInstance().getObjectFrom(varName);
-
+			RObject v = DirectJNI.getInstance().getObjectFrom(exp);
+			if (ato.equals("")) ato=exp;			
 			for (int i = 0; i < cluster.getWorkers().size(); ++i) {
 				RServices r = cluster.getWorkers().elementAt(i);
-				r.putAndAssign(v, varName);
+				r.putAndAssign(v, ato);
 				String s = r.getStatus();
 				if (s != null && !s.trim().equals(""))
 					feedback.append("worker<" + r.getServantName() + ">:" + s + "\n");
@@ -599,9 +598,9 @@ public abstract class RListener {
 		public RServices getR() {
 			return r;
 		}
-		
+
 		public void setR(RServices r) {
-			this.r=r;
+			this.r = r;
 		}
 
 		public Exception getCreationException() {
@@ -613,13 +612,12 @@ public abstract class RListener {
 		}
 	}
 
-	
 	private static long CLUSTER_COUNTER = 0;
 	private static HashMap<String, Cluster> _clustersHash = new HashMap<String, Cluster>();
-		
+
 	private static long RLINK_COUNTER = 0;
 	private static HashMap<String, RLink> _rlinkHash = new HashMap<String, RLink>();
-	
+
 	public static String convertToPrintCommand(String s) {
 		if (s.length() == 0)
 			return "";
@@ -628,7 +626,7 @@ public abstract class RListener {
 		for (int i = 0; i < s.length(); ++i) {
 			char si = s.charAt(i);
 			if (si == '\n') {
-				if (i==s.length()-1) {
+				if (i == s.length() - 1) {
 
 				} else {
 					result.append("\",quote=FALSE);print(\"");
@@ -648,66 +646,64 @@ public abstract class RListener {
 		result.append("\",quote=FALSE);");
 		return result.toString();
 	}
-	
-	
+
 	public static String[] pythonExec(String command) {
-		
+
 		try {
-			
+
 			PythonInterpreterSingleton.startLogCapture();
 			PythonInterpreterSingleton.getInstance().exec(command);
-			System.out.println("#>>>:"+PythonInterpreterSingleton.getPythonStatus());
+			System.out.println("#>>>:" + PythonInterpreterSingleton.getPythonStatus());
 			return new String[] { "OK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
-			
+
 		} catch (Exception e) {
 			return new String[] { "NOK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
-		} 
+		}
 	}
 
 	public static String[] pythonEval(String expression) {
 
 		try {
-			
+
 			PythonInterpreterSingleton.startLogCapture();
-			PyObject pyObject=PythonInterpreterSingleton.getInstance().eval(expression);
-			if (pyObject!=null) {
-				System.out.println("Python Object Class ::"+pyObject.getClass().getName());
-				RObject v=null;
+			PyObject pyObject = PythonInterpreterSingleton.getInstance().eval(expression);
+			if (pyObject != null) {
+				System.out.println("Python Object Class ::" + pyObject.getClass().getName());
+				RObject v = null;
 				if (pyObject instanceof PyInteger) {
-					v=new RInteger(((PyInteger)pyObject).getValue());
+					v = new RInteger(((PyInteger) pyObject).getValue());
 				} else if (pyObject instanceof PyLong) {
-					v=new RInteger(((PyLong)pyObject).getValue().intValue());
+					v = new RInteger(((PyLong) pyObject).getValue().intValue());
 				} else if (pyObject instanceof PyFloat) {
-					v=new RNumeric(((PyFloat)pyObject).getValue());
+					v = new RNumeric(((PyFloat) pyObject).getValue());
 				} else if (pyObject instanceof PyFloat) {
-					v=new RNumeric(((PyFloat)pyObject).getValue());
+					v = new RNumeric(((PyFloat) pyObject).getValue());
 				} else if (pyObject instanceof PyComplex) {
-					v=new RComplex(new double[]{((PyComplex)pyObject).getReal().getValue()},new double[]{((PyComplex)pyObject).getImag().getValue()},null,null);
-				} 
-				
-				
-				if (v!=null) {
+					v = new RComplex(new double[] { ((PyComplex) pyObject).getReal().getValue() },
+							new double[] { ((PyComplex) pyObject).getImag().getValue() }, null, null);
+				}
+
+				if (v != null) {
 					DirectJNI.getInstance().putObjectAndAssignName(v, "pythonEvalResult", true);
 					return new String[] { "OK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
 				} else {
-					PythonInterpreterSingleton.insertLog("The python type <"+pyObject.getClass().getName()+"> cannot be imported to R");
+					PythonInterpreterSingleton.insertLog("The python type <" + pyObject.getClass().getName() + "> cannot be imported to R");
 					throw new Exception();
 				}
 			} else {
 				DirectJNI.getInstance().getRServices().evaluate("pythonEvalResult<-NULL");
 				return new String[] { "OK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
 			}
-			
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new String[] { "NOK", convertToPrintCommand(PythonInterpreterSingleton.getPythonStatus()) };
-		} 
+		}
 	}
-	
+
 	public static void pager(String fileName, String header, String title, String deleteFile) {
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
-		
+
 		byte[] buffer = null;
 		try {
 			RandomAccessFile raf = new RandomAccessFile(fileName, "r");
@@ -717,230 +713,253 @@ public abstract class RListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		attributes.put("fileName", new File(fileName).getName());
 		attributes.put("content", buffer);
 		attributes.put("header", header);
 		attributes.put("title", title);
 		attributes.put("deleteFile", new Boolean(deleteFile));
+
+		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("PAGER", attributes));
+
+	}
+
+	
+	  public static String[] makeRLink(String mode, String params, String[] name) { return
+		  makeRLink(mode, new String[]{params},name); 
+	  }
+	  
+	  public static String[] makeRLink(String mode, String params, String name) { return
+		  makeRLink(mode, new String[]{params},new String[]{name}); 
+	  }
+	  
+	  public static String[] makeRLink(String mode, String[] params, String name) { return
+		  makeRLink(mode, params,new String[]{name}); 
+	  }
+	  
+	public static String[] makeRLink(final String mode, final String[] params, final String[] name) {
+
+		if (name.length > 1) {
+			String[] rlinkNames=new String[name.length];
+			for (int i=0; i<name.length;++i) {
+				String result[]=makeRLink(mode, params, new String[]{name[i]});
+				rlinkNames[i]=result[0];
+			}
+			return rlinkNames;
 			
-		DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("PAGER",attributes));
-		
-	}
+		} else {
 
-	
-	public static String[] makeRLink(String mode, String params) {
-		return makeRLink(mode, new String[]{params});
-	}
-	
-	
-	public static String[] makeRLink(final String mode,final String[] params) {		
-		try {
-			final String rlinkName = "RLINK_" + (RLINK_COUNTER++);
-			_rlinkHash.put(rlinkName, new RLink(rlinkName,null));
+			try {
+				final String rlinkName = "RLINK_" + (RLINK_COUNTER++);
+				_rlinkHash.put(rlinkName, new RLink(rlinkName, null));
 
-			new Thread(new Runnable(){
-				public void run() {
-					try {
-						
-						//_rlinkHash.get(rlinkName).setR(ServerManager.createR(rlinkName));
-
-						Properties props = new Properties();
-						if (params!=null && params.length>0){
-							for (int i=0; i<params.length; i++) {
-								String element=params[i];
-								int p=element.indexOf('=');
-								if (p==-1) {
-									props.put(element.toLowerCase(),"");
-								}
-								else {
-									props.put(element.substring(0,p).trim().toLowerCase(), element.substring(p+1, element.length()).trim());
-								}
-							}
-						}
-						
-						RServices r=null;
-						if (mode.equalsIgnoreCase("self")) {
-							r=DirectJNI.getInstance().getRServices();
-						} else if (mode.equalsIgnoreCase("new")) {
-							r=ServerManager.createR(rlinkName);
-						} else if (mode.equalsIgnoreCase("rmi")) {
-							
-							try {
-								if (props.getProperty("stub")!=null) {
-									r=(RServices)PoolUtils.hexToStub(props.getProperty("stub"), RListener.class.getClassLoader());
-								} else {
-									r=(RServices)ServerDefaults.getRmiRegistry().lookup(props.getProperty("name"));
-								}
-																
-							} catch (Exception e) {
-								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Creation Failed\nuse show.rlink to see creation error"));
-								_rlinkHash.get(rlinkName).setCreationException(e);
-							}
-							
-						} else if (mode.equalsIgnoreCase("http")) {
-							
-							try {
-							HashMap<String, Object> options = new HashMap<String, Object>();
-							if (props.getProperty("privatename")!=null) {
-								options.put("privatename", props.getProperty("privatename"));	
-							}							
-							if (props.getProperty("memorymin")!=null) {
-								options.put("memorymin", props.getProperty("memorymin"));	
-							}
-							if (props.getProperty("memorymax")!=null) {
-								options.put("memorymax", props.getProperty("memorymax"));	
-							}
-
-								final String sessionId = RHttpProxy.logOn(props.getProperty("url"), "", props.getProperty("login")==null ?"guest":props.getProperty("login"), props.getProperty("password")==null ? "guest" : props.getProperty("password"), options);
-								r = RHttpProxy.getR(props.getProperty("url"), sessionId, true, 30);
-							
-							
-								r=(RServices)ServerDefaults.getRmiRegistry().lookup(props.getProperty("name"));								
-							} catch (Exception e) {
-								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Creation Failed\nuse show.rlink to see creation error"));
-								_rlinkHash.get(rlinkName).setCreationException(e);
-							}
-							
-							
-						}
-						
-						_rlinkHash.get(rlinkName).setR(r);
-						
+				new Thread(new Runnable() {
+					public void run() {
 						try {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Creation Succeeded\nuse show.rlink to get creation details"));
-						} catch (Exception e) {
-							e.printStackTrace();							
+
+							// _rlinkHash.get(rlinkName).setR(ServerManager.createR(rlinkName));
+
+							Properties props = new Properties();
+							if (params != null && params.length > 0) {
+								for (int i = 0; i < params.length; i++) {
+									String element = params[i];
+									int p = element.indexOf('=');
+									if (p == -1) {
+										props.put(element.toLowerCase(), "");
+									} else {
+										props.put(element.substring(0, p).trim().toLowerCase(), element.substring(p + 1, element.length()).trim());
+									}
+								}
+							}
+
+							RServices r = null;
+							if (mode.equalsIgnoreCase("self")) {
+								r = DirectJNI.getInstance().getRServices();
+							} else if (mode.equalsIgnoreCase("new")) {
+								r = ServerManager.createR(rlinkName);
+							} else if (mode.equalsIgnoreCase("rmi")) {
+
+								try {
+									if (props.getProperty("stub") != null) {
+										r = (RServices) PoolUtils.hexToStub(props.getProperty("stub"), RListener.class.getClassLoader());
+									} else {
+										r = (RServices) ServerDefaults.getRegistry(props).lookup(name[0]);
+									}
+
+								} catch (Exception e) {
+									DirectJNI.getInstance().getRServices().consoleSubmit(
+											convertToPrintCommand("RLink Creation Failed\nuse show.rlink to see creation error"));
+									_rlinkHash.get(rlinkName).setCreationException(e);
+								}
+
+							} else if (mode.equalsIgnoreCase("http")) {
+
+								try {
+									HashMap<String, Object> options = new HashMap<String, Object>();
+									if (props.getProperty("privatename") != null) {
+										options.put("privatename", props.getProperty("privatename"));
+									}
+									if (props.getProperty("memorymin") != null) {
+										options.put("memorymin", props.getProperty("memorymin"));
+									}
+									if (props.getProperty("memorymax") != null) {
+										options.put("memorymax", props.getProperty("memorymax"));
+									}
+
+									final String sessionId = RHttpProxy.logOn(props.getProperty("url"), "", props.getProperty("login") == null ? "guest"
+											: props.getProperty("login"), props.getProperty("password") == null ? "guest" : props.getProperty("password"),
+											options);
+									r = RHttpProxy.getR(props.getProperty("url"), sessionId, true, 30);
+
+									r = (RServices) ServerDefaults.getRmiRegistry().lookup(name[0]);
+								} catch (Exception e) {
+									DirectJNI.getInstance().getRServices().consoleSubmit(
+											convertToPrintCommand("RLink Creation Failed\nuse show.rlink to see creation error"));
+									_rlinkHash.get(rlinkName).setCreationException(e);
+								}
+
+							}
+
+							_rlinkHash.get(rlinkName).setR(r);
+
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(
+										convertToPrintCommand("RLink Creation Succeeded\nuse show.rlink to get creation details"));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+
+						} catch (Exception ex) {
+
+							_rlinkHash.get(rlinkName).setCreationException(ex);
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(
+										convertToPrintCommand("RLink Creation Failed!\n" + PoolUtils.getStackTraceAsString(ex)));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
-						
-					} catch (Exception ex) {
-						
-						_rlinkHash.get(rlinkName).setCreationException(ex);
-						try {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Creation Failed!\n"+PoolUtils.getStackTraceAsString(ex)));
-						} catch (Exception e) {
-							e.printStackTrace();							
-						}
+
 					}
-					
-				}
-			}).start();
-			
-			return new String[] { "OK" , rlinkName };
+				}).start();
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new String[] { "NOK", convertToPrintCommand("couldn't create rlink") };
+				return new String[] { rlinkName };
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new String[] { "NOK", convertToPrintCommand("couldn't create rlink") };
+			}
 		}
 	}
-	
-	public static String[] RLinkConsole(final String rlinkName, final String command) {		
-		try {
-			
 
-			new Thread(new Runnable(){
+	public static String[] RLinkConsole(final String rlinkName, final String command) {
+		try {
+
+			new Thread(new Runnable() {
 				public void run() {
-					
+
 					try {
-						
-						
-						if (_rlinkHash.get(rlinkName)==null) {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:"+rlinkName));
-							return; 
+
+						if (_rlinkHash.get(rlinkName) == null) {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
+							return;
 						}
-						
-						RServices r=_rlinkHash.get(rlinkName).getR();
-						Exception creationException=_rlinkHash.get(rlinkName).getCreationException();
-						
-						if (r==null) {
-							if (creationException==null) {
+
+						RServices r = _rlinkHash.get(rlinkName).getR();
+						Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
+
+						if (r == null) {
+							if (creationException == null) {
 								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
 								return;
 							} else {
-								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"+PoolUtils.getStackTraceAsString(creationException)));
+								DirectJNI.getInstance().getRServices().consoleSubmit(
+										convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
+												+ PoolUtils.getStackTraceAsString(creationException)));
 								return;
 							}
 						}
 
 						r.consoleSubmit(command);
-						
+
 						try {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Command submitted to RLink ["+rlinkName+"]\n"+r.getStatus()));
+							DirectJNI.getInstance().getRServices().consoleSubmit(
+									convertToPrintCommand("Command submitted to RLink [" + rlinkName + "]\n" + r.getStatus()));
 						} catch (Exception e) {
-							e.printStackTrace();							
+							e.printStackTrace();
 						}
-						
+
 					} catch (Exception ex) {
-						
+
 						try {
 							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
 						} catch (Exception e) {
-							e.printStackTrace();							
+							e.printStackTrace();
 						}
 					}
-					
+
 				}
 			}).start();
-			
-			return new String[] { "OK" , convertToPrintCommand("RLink Console Submit in background..") };
+
+			return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
 		}
 	}
-	
 
-	public static String[] RLinkGet(final String rlinkName, final String expression, final String ato) {		
+	public static String[] RLinkGet(final String rlinkName, final String expression, final String ato) {
 		try {
-			
 
-			new Thread(new Runnable(){
+			new Thread(new Runnable() {
 				public void run() {
-					
+
 					try {
-						
-						
-						if (_rlinkHash.get(rlinkName)==null) {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:"+rlinkName));
-							return; 
+
+						if (_rlinkHash.get(rlinkName) == null) {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
+							return;
 						}
-						
-						RServices r=_rlinkHash.get(rlinkName).getR();
-						Exception creationException=_rlinkHash.get(rlinkName).getCreationException();
-						
-						if (r==null) {
-							if (creationException==null) {
+
+						RServices r = _rlinkHash.get(rlinkName).getR();
+						Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
+
+						if (r == null) {
+							if (creationException == null) {
 								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
 								return;
 							} else {
-								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"+PoolUtils.getStackTraceAsString(creationException)));
+								DirectJNI.getInstance().getRServices().consoleSubmit(
+										convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
+												+ PoolUtils.getStackTraceAsString(creationException)));
 								return;
 							}
 						}
 
-						RObject robj=r.getObject(expression);
-						
-						try {							
+						RObject robj = r.getObject(expression);
+
+						try {
 							DirectJNI.getInstance().getRServices().putAndAssign(robj, ato);
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(ato + " Has been assigned a value from RLink ["+rlinkName+"]\n"+r.getStatus()));
+							DirectJNI.getInstance().getRServices().consoleSubmit(
+									convertToPrintCommand(ato + " Has been assigned a value from RLink [" + rlinkName + "]\n" + r.getStatus()));
 						} catch (Exception e) {
-							e.printStackTrace();							
+							e.printStackTrace();
 						}
-						
+
 					} catch (Exception ex) {
-						
+
 						try {
 							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
 						} catch (Exception e) {
-							e.printStackTrace();							
+							e.printStackTrace();
 						}
 					}
-					
+
 				}
 			}).start();
-			
-			return new String[] { "OK" , convertToPrintCommand("RLink Get in background..") };
+
+			return new String[] { "OK", convertToPrintCommand("RLink Get in background..") };
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -948,59 +967,60 @@ public abstract class RListener {
 		}
 	}
 
-
-	
-	public static String[] RLinkPut(final String rlinkName, final String expression, final String ato) {		
+	public static String[] RLinkPut(final String rlinkName, final String expression, final String ato) {
 		try {
-			
 
-			new Thread(new Runnable(){
+			new Thread(new Runnable() {
 				public void run() {
-					
+
 					try {
-						
-						
-						if (_rlinkHash.get(rlinkName)==null) {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:"+rlinkName));
-							return; 
+
+						if (_rlinkHash.get(rlinkName) == null) {
+							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
+							return;
 						}
-						
-						RServices r=_rlinkHash.get(rlinkName).getR();
-						Exception creationException=_rlinkHash.get(rlinkName).getCreationException();
-						
-						if (r==null) {
-							if (creationException==null) {
+
+						RServices r = _rlinkHash.get(rlinkName).getR();
+						Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
+
+						if (r == null) {
+							if (creationException == null) {
 								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
 								return;
 							} else {
-								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"+PoolUtils.getStackTraceAsString(creationException)));
+								DirectJNI.getInstance().getRServices().consoleSubmit(
+										convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
+												+ PoolUtils.getStackTraceAsString(creationException)));
 								return;
 							}
 						}
 
-
-						
-						try {							
-							RObject robj=DirectJNI.getInstance().getRServices().getObject(expression);
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Retrieve <"+expression+"> from R Session\n"+DirectJNI.getInstance().getRServices().getStatus()));
-							r.putAndAssign(robj, ato);
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Value assigned to "+ato + " on RLink ["+rlinkName+"]\n"+" has been assigned a value\n")+r.getStatus());
+						try {
+							RObject robj = DirectJNI.getInstance().getRServices().getObject(expression);
+							DirectJNI.getInstance().getRServices()
+									.consoleSubmit(
+											convertToPrintCommand("Retrieve <" + expression + "> from R Session\n"
+													+ DirectJNI.getInstance().getRServices().getStatus()));
+							r.putAndAssign(robj, ato.equals("") ? expression : ato);
+							DirectJNI.getInstance().getRServices().consoleSubmit(
+									convertToPrintCommand("Value assigned to " + ato + " on RLink [" + rlinkName + "]\n" + " has been assigned a value\n")
+											+ r.getStatus());
 						} catch (Exception e) {
-							e.printStackTrace();							
+							e.printStackTrace();
 						}
-						
+
 					} catch (Exception ex) {
 						try {
 							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
 						} catch (Exception e) {
-							e.printStackTrace();							
+							e.printStackTrace();
 						}
 					}
-					
+
 				}
 			}).start();
-			
-			return new String[] { "OK" , convertToPrintCommand("RLink Put in background..") };
+
+			return new String[] { "OK", convertToPrintCommand("RLink Put in background..") };
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1008,56 +1028,77 @@ public abstract class RListener {
 		}
 	}
 
-	
 	public static String[] RLinkShow(String rlinkName) {
-		try {		
-			if (_rlinkHash.get(rlinkName)==null) {
+		try {
+			if (_rlinkHash.get(rlinkName) == null) {
 				return new String[] { "NOK", convertToPrintCommand("couldn't find rlink") };
 			}
-			return new String[] { "OK" , convertToPrintCommand("Name:"+rlinkName+"\nR:"+ _rlinkHash.get(rlinkName).getR()+ "\nCreation Exception:"+_rlinkHash.get(rlinkName).getCreationException())};
+			return new String[] {
+					"OK",
+					convertToPrintCommand("Name:" + rlinkName + "\nR:" + _rlinkHash.get(rlinkName).getR() + "\nCreation Exception:"
+							+ _rlinkHash.get(rlinkName).getCreationException()) };
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new String[] { "NOK", convertToPrintCommand("couldn't create rlink") };
 		}
 	}
 
-
 	public static String[] RLinkRelease(String rlinkName) {
-		try {		
-			_rlinkHash.remove(rlinkName);
-			return new String[] { "OK" , "" };
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
-		}
-	}
-
-	
-	public static String[] RLinkList() {
-		String result="";for (String k:_rlinkHash.keySet()) result+=k+"\n";
-		try {					
-			return new String[] { "OK" , convertToPrintCommand(result)};
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
-		}
-	}
-	
-	public static String[] RLinkRegistryList() {
 		try {
-			String[] names=ServerDefaults.getRmiRegistry().list();		
-			return new String[] { "OK" , convertToPrintCommand(Arrays.toString(names))};
+			_rlinkHash.remove(rlinkName);
+			return new String[] { "OK", "" };
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
 		}
 	}
 
+	public static String[] RLinkList() {
+		String result = "";
+		for (String k : _rlinkHash.keySet())
+			result += k + "\n";
+		try {
+			return new String[] { "OK", convertToPrintCommand(result) };
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
 
-	
+	public static String[] RLinkRegistryList(final String params) {
+		return RLinkRegistryList(new String[]{params});
+	}
+	public static String[] RLinkRegistryList(final String[] params) {
+		try {
+			String[] names = null;
+			if (params.length == 1 && params[0].equals("")) {
+				names = ServerDefaults.getRmiRegistry().list();
+			} else {
+				Properties props = new Properties();
+				if (params != null && params.length > 0) {
+					for (int i = 0; i < params.length; i++) {
+						String element = params[i];
+						int p = element.indexOf('=');
+						if (p == -1) {
+							props.put(element.toLowerCase(), "");
+						} else {
+							props.put(element.substring(0, p).trim().toLowerCase(), element.substring(p + 1, element.length()).trim());
+						}
+					}
+				}
+				names = ServerDefaults.getRegistry(props).list();
+			}
+			return names;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+
 	public static String[] makeRLinkCluster(String[] rlinks) {
 		Vector<RServices> workers = new Vector<RServices>();
-		for (int i=0; i<rlinks.length; ++i) workers.add(_rlinkHash.get(rlinks[i]).getR());
+		for (int i = 0; i < rlinks.length; ++i)
+			workers.add(_rlinkHash.get(rlinks[i]).getR());
 		try {
 			String clusterName = "CL_" + (CLUSTER_COUNTER++);
 			_clustersHash.put(clusterName, new Cluster(clusterName, workers, ""));
@@ -1068,39 +1109,45 @@ public abstract class RListener {
 		}
 	}
 	
-	
 	public static String[] spreadsheetPut(String location, String name) {
-		try {		
-			System.out.println("name=<"+name+">");
-			
-			int ssNbr=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();			
-			if (ssNbr==0) {
-				return new String[] { "NOK", convertToPrintCommand("Tere are no Spreadsheets on Server : \nCreate one first via: Collaboration/New Collaborative Spreadsheet\n") };			
+		try {
+			System.out.println("name=<" + name + ">");
+
+			int ssNbr = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();
+			if (ssNbr == 0) {
+				return new String[] { "NOK",
+						convertToPrintCommand("Tere are no Spreadsheets on Server : \nCreate one first via: Collaboration/New Collaborative Spreadsheet\n") };
 			}
 			if (name.equals("")) {
-				if (ssNbr==1) {						
-					name=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
+				if (ssNbr == 1) {
+					name = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
 				} else {
-					String[] ssNames=new String[ssNbr]; 
-					int i=0;for (String s:DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet()) ssNames[i++]=s;
-					return new String[] { "NOK", convertToPrintCommand("Tere are "+ssNbr+" Spreadsheets on Server : \n"+Arrays.toString(ssNames)+"\nChoose one via name='Spreadsheet Name'\n") };
+					String[] ssNames = new String[ssNbr];
+					int i = 0;
+					for (String s : DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet())
+						ssNames[i++] = s;
+					return new String[] {
+							"NOK",
+							convertToPrintCommand("Tere are " + ssNbr + " Spreadsheets on Server : \n" + Arrays.toString(ssNames)
+									+ "\nChoose one via name='Spreadsheet Name'\n") };
 				}
 			}
-			
-			SpreadsheetModelRemote model=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
-			if (model==null) return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
-			
-			int startRow=0;
-			int startCol=0;
+
+			SpreadsheetModelRemote model = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
+			if (model == null)
+				return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
+
+			int startRow = 0;
+			int startCol = 0;
 			try {
-			startCol=ImportInfo.getCol(location);
-			startRow=ImportInfo.getRow(location);
+				startCol = ImportInfo.getCol(location);
+				startRow = ImportInfo.getRow(location);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return new String[] { "NOK", convertToPrintCommand("Bad Cell Location") };
 			}
-			
-			String trstring=ImportInfo.getImportInfo(DirectJNI.getInstance().getObjectFrom(".PrivateEnv$spreadsheet.put.value")).getTabString();
+
+			String trstring = ImportInfo.getImportInfo(DirectJNI.getInstance().getObjectFrom(".PrivateEnv$spreadsheet.put.value")).getTabString();
 			model.paste(startRow, startCol, trstring);
 			return new String[] { "OK" };
 		} catch (Exception e) {
@@ -1108,50 +1155,61 @@ public abstract class RListener {
 			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
 		}
 	}
-	
-	public static String[] spreadsheetGet(  String range, String type, String name) {
-		try {		
-			
-			System.out.println("name=<"+name+">");
-			
-			int ssNbr=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();			
-			if (ssNbr==0) {
-				return new String[] { "NOK", convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Spreadsheet/New Server-side Spreadsheet\n") };			
+
+	public static String[] spreadsheetGet(String range, String type, String name) {
+		try {
+
+			System.out.println("name=<" + name + ">");
+
+			int ssNbr = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();
+			if (ssNbr == 0) {
+				return new String[] { "NOK",
+						convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Spreadsheet/New Server-side Spreadsheet\n") };
 			}
 			if (name.equals("")) {
-				if (ssNbr==1) {						
-					name=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
+				if (ssNbr == 1) {
+					name = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
 				} else {
-					String[] ssNames=new String[ssNbr]; 
-					int i=0;for (String s:DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet()) ssNames[i++]=s;
-					return new String[] { "NOK", convertToPrintCommand("Tere are "+ssNbr+" Spreadsheets on Server : \n"+Arrays.toString(ssNames)+"\nChoose one via name='Spreadsheet Name'\n") };
+					String[] ssNames = new String[ssNbr];
+					int i = 0;
+					for (String s : DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet())
+						ssNames[i++] = s;
+					return new String[] {
+							"NOK",
+							convertToPrintCommand("Tere are " + ssNbr + " Spreadsheets on Server : \n" + Arrays.toString(ssNames)
+									+ "\nChoose one via name='Spreadsheet Name'\n") };
 				}
 			}
-			
-			SpreadsheetModelRemote model=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
-			if (model==null) return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
 
-			CellRange cellrange=null;
+			SpreadsheetModelRemote model = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
+			if (model == null)
+				return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
+
+			CellRange cellrange = null;
 			try {
-				cellrange=ImportInfo.getRange(range);
+				cellrange = ImportInfo.getRange(range);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return new String[] { "NOK", convertToPrintCommand("Bad Cell Range") };
 			}
 
-			int dataType=-1;
-			for (int i=0; i<ImportInfo.R_TYPES_NAMES.length;++i) {
-				if (ImportInfo.R_TYPES_NAMES[i].equals(type)) {dataType=i;break;}
+			int dataType = -1;
+			for (int i = 0; i < ImportInfo.R_TYPES_NAMES.length; ++i) {
+				if (ImportInfo.R_TYPES_NAMES[i].equals(type)) {
+					dataType = i;
+					break;
+				}
 			}
-			if (dataType==-1) {
-				return new String[] { "NOK", convertToPrintCommand("Bad Data Type, allowed types: "+Arrays.toString(ImportInfo.R_TYPES_NAMES)) };
+			if (dataType == -1) {
+				return new String[] { "NOK", convertToPrintCommand("Bad Data Type, allowed types: " + Arrays.toString(ImportInfo.R_TYPES_NAMES)) };
 			}
-			
-			ExportInfo info=ExportInfo.getExportInfo(cellrange, dataType, (SpreadsheetTableModelClipboardInterface)model);
+
+			ExportInfo info = ExportInfo.getExportInfo(cellrange, dataType, (SpreadsheetTableModelClipboardInterface) model);
 			DirectJNI.getInstance().putObjectAndAssignName(info.getRObject(), "spreadsheet.get.result", true);
 			System.out.println("--->" + PoolUtils.replaceAll(info.getConversionCommand(), "${VAR}", ".PrivateEnv$spreadsheet.get.result"));
-			DirectJNI.getInstance().evaluate(PoolUtils.replaceAll(info.getConversionCommand(), "${VAR}", ".PrivateEnv$spreadsheet.get.result"), info.getCommandsNbr());
-			
+			DirectJNI.getInstance().evaluate(PoolUtils.replaceAll(info.getConversionCommand(), "${VAR}", ".PrivateEnv$spreadsheet.get.result"),
+					info.getCommandsNbr());
+
 			return new String[] { "OK" };
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1159,38 +1217,44 @@ public abstract class RListener {
 		}
 	}
 
+	public static String[] spreadsheetSelect(String range, String name) {
+		try {
 
-	public static String[] spreadsheetSelect(  String range, String name) {
-		try {		
-			
-			System.out.println("name=<"+name+">");
-			
-			int ssNbr=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();			
-			if (ssNbr==0) {
-				return new String[] { "NOK", convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Spreadsheet/New Server-side Spreadsheet\n") };			
+			System.out.println("name=<" + name + ">");
+
+			int ssNbr = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();
+			if (ssNbr == 0) {
+				return new String[] { "NOK",
+						convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Spreadsheet/New Server-side Spreadsheet\n") };
 			}
 			if (name.equals("")) {
-				if (ssNbr==1) {						
-					name=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
+				if (ssNbr == 1) {
+					name = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().iterator().next();
 				} else {
-					String[] ssNames=new String[ssNbr]; 
-					int i=0;for (String s:DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet()) ssNames[i++]=s;
-					return new String[] { "NOK", convertToPrintCommand("Tere are "+ssNbr+" Spreadsheets on Server : \n"+Arrays.toString(ssNames)+"\nChoose one via name='Spreadsheet Name'\n") };
+					String[] ssNames = new String[ssNbr];
+					int i = 0;
+					for (String s : DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet())
+						ssNames[i++] = s;
+					return new String[] {
+							"NOK",
+							convertToPrintCommand("Tere are " + ssNbr + " Spreadsheets on Server : \n" + Arrays.toString(ssNames)
+									+ "\nChoose one via name='Spreadsheet Name'\n") };
 				}
 			}
-			
-			SpreadsheetModelRemote model=DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
-			if (model==null) return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
 
-			CellRange cellrange=null;
+			SpreadsheetModelRemote model = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
+			if (model == null)
+				return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
+
+			CellRange cellrange = null;
 			try {
-				cellrange=ImportInfo.getRange(range);
+				cellrange = ImportInfo.getRange(range);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return new String[] { "NOK", convertToPrintCommand("Bad Cell Range") };
 			}
-			
-			model.setSpreadsheetSelection(DirectJNI.getInstance().getOriginatorUID(),cellrange);
+
+			model.setSpreadsheetSelection(DirectJNI.getInstance().getOriginatorUID(), cellrange);
 			return new String[] { "OK" };
 		} catch (Exception e) {
 			e.printStackTrace();
