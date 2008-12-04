@@ -1242,7 +1242,7 @@
 				
 			</classpath>
 			
-			<env key="PATH" path="${R_LIB_PATH}"/>
+			<env key="PATH" path="${env.Path}${path.separator}${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
