@@ -70,7 +70,8 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 					try {
 						shutdownSucceeded = unexportObject(GDDeviceImpl.this, false);
 					} catch (Exception e) {
-						e.printStackTrace();
+						//TODO: Something to fix here
+						//e.printStackTrace();
 						shutdownSucceeded = true;
 					}
 					System.out.println("-----shutdownSucceeded:" + shutdownSucceeded);
