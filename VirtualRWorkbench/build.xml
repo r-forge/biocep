@@ -675,7 +675,7 @@
 				<signjar destDir="VirtualRWorkbench/frontendapp/appletlibs" alias="appletsigningkey" keystore="keys/appletKeyStore.ks"  storepass="cloudera" >					
 				  <path>
 				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="${CORE_JAR}"/>
-				  	<!--<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="*.jar"/>-->				  					  					  	
+				  	<fileset dir="VirtualRWorkbench/frontendapp/appletlibs" includes="*.jar"/>			  					  					  	
 				  </path>					
 				</signjar>
 				
