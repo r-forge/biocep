@@ -42,25 +42,31 @@
   <property name="privatename" value="<%=privatename%>"/>
   <property name="noconfirmation" value="<%=noconfirmation%>"/>
   
-  <jar href="appletlibs/RJB.jar"/>
   
+  
+  
+  
+  <jar href="appletlibs/RJB.jar"/>
   <jar href="appletlibs/commons-httpclient-3.1-rc1.jar"/>
   <jar href="appletlibs/commons-codec-1.3.jar"/>
   <jar href="appletlibs/commons-logging-1.1.1.jar"/>
   <jar href="appletlibs/log4j-1.2.15.jar"/>
+    <jar href="appletlibs/mapping.jar"/>
   <jar href="appletlibs/idw-gpl.jar"/>
-  <jar href="appletlibs/PDFRenderer.jar"/>
+    <jar href="appletlibs/PDFRenderer.jar"/>
   <jar href="appletlibs/pf-joi-full.jar"/>
-  <jar href="appletlibs/OpenXLS.jar"/>
-  <jar href="appletlibs/JRI.jar"/>     
-  <jar href="appletlibs/htmlparser.jar"/>       
-  <jar href="appletlibs/servlet-api-2.5-6.1.8.jar"/>
-  <jar href="appletlibs/jsp-api-2.1.jar"/>  
-  <jar href="appletlibs/jsp-2.1.jar"/>      
-  <jar href="appletlibs/jetty-6.1.8.jar"/>  
-  <jar href="appletlibs/jetty-util-6.1.8.jar"/>   
+ <jar href="appletlibs/OpenXLS.jar"/>
+  <jar href="appletlibs/jsch-0.1.40.jar"/>
+  <jar href="appletlibs/jetty-6.1.11.jar"/>
+  <jar href="appletlibs/jetty-util-6.1.11.jar"/>
+  <jar href="appletlibs/jetty-client-6.1.11.jar"/>
+  <jar href="appletlibs/servlet-api-2.5-6.1.11.jar"/>
   <jar href="appletlibs/activation.jar"/>
-  <jar href="appletlibs/mail.jar"/>  
+<jar href="appletlibs/mail.jar"/>
+  <jar href="appletlibs/htmlparser.jar"/>
+<jar href="appletlibs/JRI.jar"/>
+  <jar href="appletlibs/derbyclient.jar"/>
+  <jar href="appletlibs/ganymed-ssh2.jar"/>
   <jar href="appletlibs/batik-anim.jar"/>
   <jar href="appletlibs/batik-awt-util.jar"/>
   <jar href="appletlibs/batik-bridge.jar"/>
@@ -80,16 +86,13 @@
   <jar href="appletlibs/js.jar"/>
   <jar href="appletlibs/xml-apis.jar"/>
   <jar href="appletlibs/xml-apis-ext.jar"/>
-  <jar href="appletlibs/derbyclient.jar"/> 
-  <jar href="appletlibs/ganymed-ssh2.jar"/>   
   <jar href="appletlibs/edtftpj.jar"/>
   <jar href="appletlibs/jython.jar"/>
   <jar href="appletlibs/swing-layout-1.0.3.jar"/>
   <jar href="appletlibs/groovy-all-1.5.4.jar"/>
-  
   <jar href="appletlibs/freemindbrowser.jar"/>
   <jar href="appletlibs/biocep-doc.jar"/>
-  <jar href="appletlibs/mapping.jar"/>
+  
   
 </resources>
 
