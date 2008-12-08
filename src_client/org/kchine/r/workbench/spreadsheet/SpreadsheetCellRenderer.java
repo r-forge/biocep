@@ -103,7 +103,7 @@ class SpreadsheetCellRenderer extends DefaultTableCellRenderer
     				  }
     			  }
     		  } else {
-    			  break;
+    			  continue;
     		  }
     	  
       }

@@ -61,6 +61,7 @@ import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.SSHUtils;
 import org.kchine.rpf.ServantCreationTimeout;
+import org.kchine.rpf.ServerDefaults;
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
@@ -324,15 +325,15 @@ public class ServerManager {
 	}
 
 	public static RServices createR(String name) throws Exception {
-		return createR(null, false, "127.0.0.1", LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo("127.0.0.1", LocalRmiRegistry
-				.getLocalRmiRegistryPort()), 256, 256, name, false, null, null);
+		return createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
+				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null);
 	}
 
 	private interface ProgessLoggerInterface {
 		void logProgress(String message);
 	}
 
-	public static RServices createR(String RBinPath, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
+	synchronized public static RServices createR(String RBinPath, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile) throws Exception {
 
 		final JTextArea[] createRProgressArea = new JTextArea[1];
