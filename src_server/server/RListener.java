@@ -56,6 +56,7 @@ import org.kchine.r.server.spreadsheet.ExportInfo;
 import org.kchine.r.server.spreadsheet.ImportInfo;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
 import org.kchine.r.server.spreadsheet.SpreadsheetTableModelClipboardInterface;
+import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.NodeManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServantProviderFactory;
@@ -742,7 +743,7 @@ public abstract class RListener {
 		if (name.length > 1) {
 			String[] rlinkNames=new String[name.length];
 			for (int i=0; i<name.length;++i) {
-				String result[]=makeRLink(mode, params, new String[]{name[i]});
+				String result[]=makeRLink(mode, params, name[i]);
 				rlinkNames[i]=result[0];
 			}
 			return rlinkNames;
@@ -771,12 +772,16 @@ public abstract class RListener {
 									}
 								}
 							}
+							
+							System.out.println(props);
 
 							RServices r = null;
 							if (mode.equalsIgnoreCase("self")) {
 								r = DirectJNI.getInstance().getRServices();
 							} else if (mode.equalsIgnoreCase("new")) {
-								r = ServerManager.createR(rlinkName);
+								r = ServerManager.createR(props.getProperty("r.binary"), false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
+										props, props.get("memorymin")==null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), 
+											   props.get("memorymax")==null ? ServerDefaults._memoryMax: Integer.decode(props.getProperty("memorymax")), name[0], false, null, null);
 							} else if (mode.equalsIgnoreCase("rmi")) {
 
 								try {
@@ -940,9 +945,9 @@ public abstract class RListener {
 						RObject robj = r.getObject(expression);
 
 						try {
-							DirectJNI.getInstance().getRServices().putAndAssign(robj, ato);
+							DirectJNI.getInstance().getRServices().putAndAssign(robj, ato.equals("") ? expression : ato);
 							DirectJNI.getInstance().getRServices().consoleSubmit(
-									convertToPrintCommand(ato + " Has been assigned a value from RLink [" + rlinkName + "]\n" + r.getStatus()));
+									convertToPrintCommand((ato.equals("") ? expression : ato) + " Has been assigned a value from RLink [" + rlinkName + "]\n" + r.getStatus()));
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1003,7 +1008,7 @@ public abstract class RListener {
 													+ DirectJNI.getInstance().getRServices().getStatus()));
 							r.putAndAssign(robj, ato.equals("") ? expression : ato);
 							DirectJNI.getInstance().getRServices().consoleSubmit(
-									convertToPrintCommand("Value assigned to " + ato + " on RLink [" + rlinkName + "]\n" + " has been assigned a value\n")
+									convertToPrintCommand("Value assigned to " + (ato.equals("") ? expression : ato) + " on RLink [" + rlinkName + "]\n" + " has been assigned a value\n")
 											+ r.getStatus());
 						} catch (Exception e) {
 							e.printStackTrace();

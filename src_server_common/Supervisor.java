@@ -20,7 +20,10 @@ import org.kchine.rpf.ServerDefaults;
 
 public class Supervisor {
 	public static void main(String[] args) {			
-		System.setProperty("naming.mode","db"); ServerDefaults.init();		
+		if (System.getProperty("naming.mode")==null || System.getProperty("naming.mode").equals("")) {
+			System.setProperty("naming.mode","db"); 		
+		}
+		ServerDefaults.init();
 		org.kchine.rpf.db.monitor.Supervisor.main(new String[0]);
 	}
 }

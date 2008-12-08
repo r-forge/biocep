@@ -253,7 +253,7 @@ pythonEval <- function( exp )  {
 
 
 
-rlink.make <- function( mode='new' , params=c(''), name=c('') )  {
+rlink.make <- function( mode='rmi' , params=c(''), name=c('') )  {
 	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"makeRLink", mode , params, name); 
 	if ( length(result)>=1 && result[1]=='NOK') { eval(parse("", text=result[2])); '' }
 	else { print("RLink Creation Running in Background"); result } 
@@ -269,7 +269,7 @@ rlink.console <- function( cl, exp )  {
 	}
 }
 
-rlink.get <- function( cl, exp , ato )  {  
+rlink.get <- function( cl, exp , ato='' )  {  
 	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"RLinkGet", cl, exp, ato );
 	if (result[1]=='OK') {		
 		eval(parse("", text=result[2]))
