@@ -134,7 +134,8 @@ public class ServerManager {
 		"rmi.port.start", 
 		"job.id", "job.name", "notify.email", 
 		"node", 
-		"http.port" };
+		"http.port",
+		"cloud"};
 
 	private static JTextArea createRSshProgressArea;
 	private static JProgressBar createRSshProgressBar;

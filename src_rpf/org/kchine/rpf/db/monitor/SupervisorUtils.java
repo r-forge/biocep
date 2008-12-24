@@ -21,13 +21,11 @@
 package org.kchine.rpf.db.monitor;
 
 import javax.swing.SwingUtilities;
-
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.NodeDataDB;
 import org.kchine.rpf.db.SupervisorInterface;
-
 import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,7 +34,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 import java.util.Vector;
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
@@ -182,7 +179,7 @@ public class SupervisorUtils implements SupervisorInterface {
 		cmd.add(isForWindows ? "cmd" : "/bin/sh");
 		cmd.add(isForWindows ? "/c" : "-c");
 		if (isForWindows) {			
-			Vector<String> tokens=tokenizeWindowsCommand(command);
+			Vector<String> tokens=PoolUtils.tokenizeWindowsCommand(command);
 			for (int i=0;i<tokens.size();++i) cmd.add(tokens.elementAt(i));			
 		} else {
 			cmd.add(command);
@@ -380,28 +377,4 @@ public class SupervisorUtils implements SupervisorInterface {
 
 	}
 	
-	public static Vector<String> tokenize(String command, String sep ) {
-		Vector<String> result=new Vector<String>();
-		StringTokenizer st = new StringTokenizer(command, sep);
-		while (st.hasMoreElements())
-			result.add(st.nextToken());
-		return result;
-	}
-	private static final String pattern="%-&sd+-";	
-	public static Vector<String> tokenizeWindowsCommand(String command) throws Exception {
-		String command_t="";
-		boolean changeSpaces=false;
-		for (int i=0; i<command.length();++i) {
-			if (command.charAt(i)=='\"') {
-				changeSpaces=!changeSpaces;
-			} else {
-				if (command.charAt(i)==' ' && changeSpaces) command_t+=pattern;
-				else command_t+=command.charAt(i);
-			}
-		}
-			
-		Vector<String> result=tokenize(command_t, " ");
-		for (int i=0; i<result.size(); ++i) result.setElementAt(PoolUtils.replaceAll( result.elementAt(i).trim(), pattern, " "),i);
-		return result;		
-	}
 }

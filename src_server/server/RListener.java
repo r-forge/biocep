@@ -56,7 +56,6 @@ import org.kchine.r.server.spreadsheet.ExportInfo;
 import org.kchine.r.server.spreadsheet.ImportInfo;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
 import org.kchine.r.server.spreadsheet.SpreadsheetTableModelClipboardInterface;
-import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.NodeManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServantProviderFactory;
@@ -779,6 +778,9 @@ public abstract class RListener {
 							if (mode.equalsIgnoreCase("self")) {
 								r = DirectJNI.getInstance().getRServices();
 							} else if (mode.equalsIgnoreCase("new")) {
+								if (props.get("naming.mode")==null) {
+									props.put("naming.mode", "self");
+								}
 								r = ServerManager.createR(props.getProperty("r.binary"), false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
 										props, props.get("memorymin")==null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), 
 											   props.get("memorymax")==null ? ServerDefaults._memoryMax: Integer.decode(props.getProperty("memorymax")), name[0], false, null, null);

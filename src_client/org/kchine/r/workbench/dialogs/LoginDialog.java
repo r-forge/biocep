@@ -66,7 +66,7 @@ import org.kchine.rpf.db.DBLayer;
 public class LoginDialog extends JDialog {
 
 	public static int mode_int = GDApplet.NEW_R_MODE;
-	public static String url_str = "http://127.0.0.1:8080/cmd";
+	public static String url_str = "http://127.0.0.1:8080/rvirtual/cmd";
 	public static String login_str = "guest";
 	public static String pwd_str = "guest";
 	public static boolean nopool_bool = true;
