@@ -610,6 +610,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	}
 	
 	public void pasteToConsoleEditor() {
+		_commandInputField.requestFocus();
 		inputFiledActionsTable.get(DefaultEditorKit.pasteAction).actionPerformed(null);		
 	}
 

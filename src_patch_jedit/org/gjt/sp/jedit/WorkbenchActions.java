@@ -10,6 +10,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import static org.gjt.sp.jedit.jEdit.getRGui;
@@ -505,6 +508,8 @@ public class WorkbenchActions {
 	public static boolean isRunGLEnabled() {
 		return getRGui().getR() != null && getRGui().getGroovyInterpreter() != null;
 	}
+
+	
 
 	
 }

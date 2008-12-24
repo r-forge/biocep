@@ -381,7 +381,9 @@ public class ToolsMain {
 				"pools.dbmode.killused", 
 				
 				"node.manager.name", "private.servant.node.name", 
-				"http.frontend.url" };
+				"http.frontend.url",
+				
+				"cloud"};
 
 		String[] embedPropertiesDefaultValues = new String[embedPropertiesNames.length]; // all null
 

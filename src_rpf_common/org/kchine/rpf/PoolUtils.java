@@ -199,15 +199,20 @@ public class PoolUtils {
 
 	public static String getHostIp() {
 		if (_hostIp == null) {
-			try {				
-				if (publicIPUnavilable()) {
-					String IPAddressFromNetworkInterfaces = getIPAddressFromNetworkInterfaces();
-					if (IPAddressFromNetworkInterfaces != null)
-						_hostIp = IPAddressFromNetworkInterfaces;
-					else
-						_hostIp = "127.0.0.1";
-				} else {
-					_hostIp = InetAddress.getLocalHost().getHostAddress();
+			try {
+				
+				if (isAmazonCloud()) {					
+					_hostIp=getAMIHostIp();
+				} else {				
+					if (publicIPUnavilable()) {
+						String IPAddressFromNetworkInterfaces = getIPAddressFromNetworkInterfaces();
+						if (IPAddressFromNetworkInterfaces != null)
+							_hostIp = IPAddressFromNetworkInterfaces;
+						else
+							_hostIp = "127.0.0.1";
+					} else {
+						_hostIp = InetAddress.getLocalHost().getHostAddress();
+					}
 				}				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -217,6 +222,124 @@ public class PoolUtils {
 		return _hostIp;
 	}
 
+	
+	public static String getAMIHostIp() throws Exception {		
+		
+		PoolUtils.cacheJar(new URL("http://s3.amazonaws.com/ec2metadata/ec2-metadata"), System.getProperty("java.io.tmpdir") + "/biocep/ec2/", PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+		String ec2_metadata=new File(System.getProperty("java.io.tmpdir") + "/biocep/ec2/"+"ec2-metadata").getAbsolutePath();
+		Runtime rt = Runtime.getRuntime();
+		Process chmodProc=rt.exec(new String[]{"chmod", "u+x" , ec2_metadata});
+		int chmodExitVal = chmodProc.waitFor();
+		if (chmodExitVal != 0) throw new Exception("chmod exit code : " + chmodExitVal);
+		
+		final Process proc = rt.exec(new String[] { ec2_metadata , "-v"});
+		
+		final StringBuffer metadataOut = new StringBuffer();
+		final StringBuffer metadataError = new StringBuffer();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					InputStream is = proc.getInputStream();
+					int b;
+					while ((b = is.read()) != -1) {
+						metadataOut.append((char) b);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					InputStream is = proc.getErrorStream();
+					int b;
+					while ((b = is.read()) != -1) {
+						metadataError.append((char) b);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+		int exitVal = proc.waitFor();
+		if (exitVal != 0) throw new Exception("ec2-metadata exit code : " + exitVal);
+		
+		BufferedReader reader = new BufferedReader(new StringReader(metadataOut.toString()));
+		String line;
+		String lastLine=null;
+		while ((line = reader.readLine())!=null) {
+			lastLine=line;			
+		}
+		
+		System.out.println(lastLine);
+		
+		String result=lastLine.substring(lastLine.indexOf("public-ipv4:")+"public-ipv4:".length()).trim();
+		System.out.println ("PUBLIC AMI IP:<"+result+">");
+
+		return result;
+
+		
+	}
+	public static Properties getAMIUserData() throws Exception {		
+		
+		PoolUtils.cacheJar(new URL("http://s3.amazonaws.com/ec2metadata/ec2-metadata"), System.getProperty("java.io.tmpdir") + "/biocep/ec2/", PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+		String ec2_metadata=new File(System.getProperty("java.io.tmpdir") + "/biocep/ec2/"+"ec2-metadata").getAbsolutePath();
+		Runtime rt = Runtime.getRuntime();
+		Process chmodProc=rt.exec(new String[]{"chmod", "u+x" , ec2_metadata});
+		int chmodExitVal = chmodProc.waitFor();
+		if (chmodExitVal != 0) throw new Exception("chmod exit code : " + chmodExitVal);
+		
+		final Process proc = rt.exec(new String[] { ec2_metadata , "-d"});
+		
+		final StringBuffer metadataOut = new StringBuffer();
+		final StringBuffer metadataError = new StringBuffer();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					InputStream is = proc.getInputStream();
+					int b;
+					while ((b = is.read()) != -1) {
+						metadataOut.append((char) b);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					InputStream is = proc.getErrorStream();
+					int b;
+					while ((b = is.read()) != -1) {
+						metadataError.append((char) b);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+		int exitVal = proc.waitFor();
+		if (exitVal != 0) throw new Exception("ec2-metadata exit code : " + exitVal);
+		
+		BufferedReader reader = new BufferedReader(new StringReader(metadataOut.toString()));
+		String line;
+		String lastLine=null;
+		while ((line = reader.readLine())!=null) {
+			lastLine=line;			
+		}
+		Properties props= extractProperties(lastLine.substring(lastLine.indexOf("user-data:")+"user-data:".length()).trim());
+		return props;
+		
+	}
+	
+	public static boolean isAmazonCloud() {
+		 return (System.getProperty("cloud")!=null && !System.getProperty("cloud").equals("") && System.getProperty("cloud").equals("ec2"));	
+	}	
+	
 	public static String getProcessId() {
 		if (_processId == null) {
 			try {
@@ -1458,6 +1581,66 @@ public class PoolUtils {
 			e.printStackTrace();
 			return false;
 		}		
+	}
+	
+	
+	public static Vector<String> tokenize(String command, String sep ) {
+		Vector<String> result=new Vector<String>();
+		StringTokenizer st = new StringTokenizer(command, sep);
+		while (st.hasMoreElements())
+			result.add(st.nextToken());
+		return result;
+	}
+	
+	private static final String pattern="%-&sd+-";	
+	public static Vector<String> tokenizeWindowsCommand(String command) throws Exception {
+		String command_t="";
+		boolean changeSpaces=false;
+		for (int i=0; i<command.length();++i) {
+			if (command.charAt(i)=='\"') {
+				changeSpaces=!changeSpaces;
+			} else {
+				if (command.charAt(i)==' ' && changeSpaces) command_t+=pattern;
+				else command_t+=command.charAt(i);
+			}
+		}
+			
+		Vector<String> result=tokenize(command_t, " ");
+		for (int i=0; i<result.size(); ++i) result.setElementAt(PoolUtils.replaceAll( result.elementAt(i).trim(), pattern, " "),i);
+		return result;		
+	}
+	
+	public static Properties extractProperties(String[] params ) throws Exception {
+		Properties props = new Properties();
+		if (params != null && params.length > 0) {
+			for (int i = 0; i < params.length; i++) {
+				String element = params[i];
+				int p = element.indexOf('=');
+				if (p == -1) {
+					props.put(element.toLowerCase(), "");
+				} else {
+					props.put(element.substring(0, p).trim().toLowerCase(), element.substring(p + 1, element.length()).trim());
+				}
+			}
+		} 
+		return props;
+	}
+	
+	public static Properties extractProperties(String params_str) throws Exception {
+		Properties props = new Properties();
+		Vector<String> params=tokenizeWindowsCommand(params_str);
+		if (params != null && params.size() > 0) {
+			for (int i = 0; i < params.size(); i++) {				
+				String element = params.elementAt(i);
+				int p = element.indexOf('=');
+				if (p == -1) {
+					props.put(element.toLowerCase(), "");
+				} else {
+					props.put(element.substring(0, p).trim().toLowerCase(), element.substring(p + 1, element.length()).trim());
+				}				
+			}
+		} 
+		return props;
 	}
 
 }
