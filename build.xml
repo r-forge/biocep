@@ -368,6 +368,7 @@
 		<if><not><isset property="rmi.port.start"/></not><then><property name="rmi.port.start" value=""/></then></if>
 		<if><not><isset property="use.default.libs"/></not><then><property name="use.default.libs" value=""/></then></if>
 		
+		<if><not><isset property="cloud"/></not><then><property name="cloud" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="org.kchine.rpf.MainServer"
 			fork="true" spawn="${spawn}">
@@ -464,6 +465,8 @@
 			<jvmarg value="-Dhttpregistry.password=${httpregistry.password}"/>
 			
 			<jvmarg value="-Dproperties.extension=${properties.extension}"/>
+			
+			<jvmarg value="-Dcloud=${cloud}"/>
 			
 			<!-- LOG PARAMS -->
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
