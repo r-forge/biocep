@@ -422,7 +422,7 @@
 				
 			</classpath>
 			
-			<env key="PATH" path="${env.Path}${path.separator}${R_LIB_PATH}"/>
+			<env key="PATH" path="${SYSTEM_PATH}${path.separator}${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg
 			value="-Djava.library.path=${JRI_LIB_PATH}"/>
@@ -1245,7 +1245,7 @@
 				
 			</classpath>
 			
-			<env key="PATH" path="${env.Path}${path.separator}${R_LIB_PATH}"/>
+			<env key="PATH" path="${SYSTEM_PATH}${path.separator}${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			<jvmarg	value="-Dworking.dir.root=${basedir}/VirtualRWorkbench/wdir"/>
@@ -1419,11 +1419,12 @@
 
 	
 	<target name="demoserver" depends="initializeProperties,compile">
-		<antcall target="server">
+		<antcall target="server">			
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
-			<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR}"/>						
-			<param name="servantclass" value="server.RServantImpl"/>
-			<param name="working.dir.root" value="wdir"/>			
+			<param name="servant.codebase" value="file://${windows.root.slash}${basedir}/${CORE_JAR}"/>
+			<param name="working.dir.root" value="${basedir}/VirtualRWorkbench/wdir"/>
+			<param name="servantclass" value="server.RServantImpl"/>											
+			
 		</antcall>		
 	</target>
 	

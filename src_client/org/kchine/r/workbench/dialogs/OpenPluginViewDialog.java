@@ -20,9 +20,6 @@
  */ 
 package org.kchine.r.workbench.dialogs;
 
-import static org.kchine.rpf.PoolUtils.unzip;
-
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -48,12 +45,10 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.kchine.r.server.Utils;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.plugins.PluginViewDescriptor;
@@ -61,8 +56,6 @@ import org.kchine.rpf.PoolUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-
-import server.ServerManager;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
