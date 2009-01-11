@@ -80,6 +80,7 @@ public class ServerManager {
 	}
 
 	public static String INSTALL_DIR = null;
+	public static String PLUGINS_DIR = null;
 	public static final String EMBEDDED_R = "R-version-2.8.0";
 	public static final int ENTRIES_NUMBER = 4832;
 
@@ -115,6 +116,14 @@ public class ServerManager {
 		}
 
 		System.out.println("@@INSTALL_DIR=" + INSTALL_DIR);
+				
+		if (System.getenv("BIOCEP_PLUGINS_HOME") != null) {
+			PLUGINS_DIR = System.getenv("BIOCEP_PLUGINS_HOME");
+		} else {
+			PLUGINS_DIR = INSTALL_DIR + "/plugins";
+		}
+		
+		if (!new File(PLUGINS_DIR).exists())  new File(PLUGINS_DIR).mkdirs();
 
 	}
 

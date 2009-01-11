@@ -60,6 +60,8 @@ public interface RGui extends RKit {
 	
 	public String getInstallDir();
 	
+	public String getPluginsDir();
+	
 	public Vector<MacroInterface> getMacros();
 	
 	void pushTask(Runnable task);

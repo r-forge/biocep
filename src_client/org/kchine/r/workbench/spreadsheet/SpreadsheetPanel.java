@@ -261,6 +261,11 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public void removeVariablesChangeListener(VariablesChangeListener listener) {
 			}
 			
+			public String getPluginsDir() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
 		};
 		JFrame f = new JFrame("F1");
 		f.getContentPane().setLayout(new BorderLayout());

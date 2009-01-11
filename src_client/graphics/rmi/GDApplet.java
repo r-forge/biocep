@@ -5346,16 +5346,24 @@ public class GDApplet extends AppletBase implements RGui {
 
 	public void refreshPluginViewsHash() throws Exception {
 		HashMap<String, Vector<PluginViewDescriptor>> tempPluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
-		if (!new File(ServerManager.INSTALL_DIR + "/plugins").exists())
-			return;
-		File[] list = new File(ServerManager.INSTALL_DIR + "/plugins").listFiles();
+		File[] list = new File(ServerManager.PLUGINS_DIR).listFiles();
 		for (int i = 0; i < list.length; ++i) {
 			Vector<PluginViewDescriptor> views = null;
+			System.out.println("Plugin Candidate:"+list[i].getAbsolutePath());
 			if (list[i].isDirectory())
-				views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath() + "/");
-			else
-				views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath());
-			if (views.size() > 0) {
+				try {
+					views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath() + "/");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			else {
+				try {
+					views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (views!=null && views.size() > 0) {
 				tempPluginViewsHash.put(views.elementAt(0).getPluginName(), views);
 			}
 		}
@@ -5440,6 +5448,10 @@ public class GDApplet extends AppletBase implements RGui {
 		_tasks.add(task);
 	}
 
+	public String getPluginsDir() {		
+		return ServerManager.PLUGINS_DIR;
+	}
+	
 	static public void main(String[] args) throws Exception {
 
 	}
