@@ -131,7 +131,7 @@ public abstract class ServerDefaults {
 				} else if (_namingMode.equals("registry")) {
 					_registry = LocateRegistry.getRegistry(_registryHost, _registryPort);
 				} else {					
-					_registry = ((RegistryProvider)ServerDefaults.class.forName(_namingMode+"Class").newInstance() ).getRegistry(System.getProperties());					
+					_registry = ((RegistryProvider)ServerDefaults.class.forName("genericnaming."+_namingMode+"Class").newInstance() ).getRegistry(System.getProperties());					
 				}
 			}
 			return _registry;
@@ -197,8 +197,10 @@ public abstract class ServerDefaults {
 		} else if (namingMode.equals("registry")) {
 			registry = LocateRegistry.getRegistry(registryHost, registryPort);
 		} else {					
-			registry = ((RegistryProvider)ServerDefaults.class.forName(namingMode+"Class").newInstance() ).getRegistry(props);					
+			registry = ((RegistryProvider)ServerDefaults.class.forName("genericnaming."+namingMode+"Class").newInstance() ).getRegistry(props);					
 		}
+		
+		
 
 		return registry;
 	}

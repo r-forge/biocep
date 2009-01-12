@@ -3407,6 +3407,10 @@ public class DirectJNI {
 		public String getHostIp() throws RemoteException {
 			return PoolUtils.getHostIp();
 		}
+		
+		public String getHostName() throws RemoteException {
+			return PoolUtils.getHostName();
+		}
 
 		public boolean isPortInUse(int port) throws RemoteException {
 			return ServerManager.isPortInUse("127.0.0.1", port);

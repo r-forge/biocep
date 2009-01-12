@@ -1,3 +1,4 @@
+package genericnaming;
 import static org.kchine.rpf.PoolUtils.getHostIp;
 import static org.kchine.rpf.PoolUtils.getHostName;
 import static org.kchine.rpf.PoolUtils.getProcessId;
@@ -15,11 +16,16 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.kchine.rpf.RegistryProvider;
 import org.kchine.rpf.db.DBLayerInterface;
+import org.kchine.rpf.db.SupervisorInterface;
 
 public class httpregistryClass implements RegistryProvider{
 	
-	String sessionId=null;
-	public Registry getRegistry(final Properties props) throws Exception {
+	private Properties props;
+	private String sessionId=null;
+	
+	
+	public Registry getRegistry(final Properties properties) throws Exception {
+		props=properties;
 		System.out.println(props.get("httpregistry.url"));
 		final HashMap<String, Object> options = new HashMap<String, Object>();
 
@@ -45,8 +51,7 @@ public class httpregistryClass implements RegistryProvider{
 						} else {
 							return RHttpProxy.invoke((String)props.get("httpregistry.url"), sessionId, "REGISTRY", method.getName(), method.getParameterTypes(), args, new HttpClient(new MultiThreadedHttpConnectionManager()));
 						}
-					} catch (NotLoggedInException e) {
-						
+					} catch (NotLoggedInException e) {						
 						sessionId = RHttpProxy.logOnDB((String)props.get("httpregistry.url"), "", (String)props.get("httpregistry.login"), (String)props.get("httpregistry.password"), options);
 					} catch (Exception e) {
 						throw e;
@@ -61,6 +66,10 @@ public class httpregistryClass implements RegistryProvider{
 		System.out.println("db:"+Arrays.toString(db.list()));
 		
 		return db;
+	}
+	
+	public SupervisorInterface getSupervisorInterface() {
+		return (SupervisorInterface)RHttpProxy.getDynamicProxy((String)props.get("httpregistry.url"), sessionId, "SUPERVISOR", new Class<?>[]{SupervisorInterface.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));	
 	}
 	
 }
