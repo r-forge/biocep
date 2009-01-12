@@ -144,14 +144,16 @@ public class DbRegistry {
 				jarfile.replace('\\', '/');
 				
 				String cmd=(isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java"+(isWindowsOs() ? "\"" : "")
-				+" -Dnaming.mode=db"
+				+" -Dnaming.mode=db"				
 				+" -Ddb.type="+PoolUtils.DEFAULT_DB_TYPE
 				+" -Ddb.host="+PoolUtils.getHostIp()
 				+" -Ddb.port="+port
 				+" -Ddb.name="+PoolUtils.DEFAULT_DB_NAME		
 				+" -Ddb.user="+PoolUtils.DEFAULT_DB_USER
 				+" -Ddb.password="+PoolUtils.DEFAULT_DB_PASSWORD
-				+" -Dnode=N1 -cp "+jarfile+" RmiServer";
+				+" -Dnode=N1"
+				+(PoolUtils.isAmazonCloud() ? " -Dcloud=ec2":"")
+				+" -cp "+jarfile+" RmiServer";
 				dbLayer.addNode(new NodeDataDB("N1",PoolUtils.getHostIp(),
 						PoolUtils.getHostName(),
 						"","",ServerManager.INSTALL_DIR,cmd,"",PoolUtils.getOs(),3,5,"RSERVANT_",0));

@@ -78,7 +78,6 @@ public abstract class ServerDefaults {
 		String _DB_NAME = System.getProperty("db.name") != null && !System.getProperty("db.name").equals("") ? System.getProperty("db.name") : DEFAULT_DB_NAME;	
 		String _DB_DIR = System.getProperty("db.dir") != null && !System.getProperty("db.dir").equals("") ? System.getProperty("db.dir") : DEFAULT_DB_DIR;
 		_DB_DIR=_DB_DIR.replace('\\', '/');	if (!_DB_DIR.equals("") && !_DB_DIR.endsWith("/")) _DB_DIR=_DB_DIR+"/";
-		System.out.println("DB Dir:"+_DB_DIR);
 		
 		if (_DB_TYPE.equals("derby")) {
 			_dbUrl = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_DIR+_DB_NAME+";create=true";
@@ -161,6 +160,8 @@ public abstract class ServerDefaults {
 		String _DB_DIR = (String)props.get("db.dir") != null && !props.get("db.dir").equals("") ? (String)props.get("db.dir") : DEFAULT_DB_DIR;
 		_DB_DIR=_DB_DIR.replace('\\', '/');if (!_DB_DIR.equals("") && !_DB_DIR.endsWith("/")) _DB_DIR=_DB_DIR+"/";
 		
+		
+		System.out.println("_DB_TYPE:"+_DB_TYPE);
 		
 		if (_DB_TYPE.equals("derby")) {
 			dbUrl = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_DIR+_DB_NAME+";create=true";

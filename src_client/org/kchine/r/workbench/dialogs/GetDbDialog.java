@@ -18,7 +18,6 @@
  */
 package org.kchine.r.workbench.dialogs;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -26,33 +25,42 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.net.URL;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import org.kchine.rpf.PoolUtils;
 
-public class GetUrlLoginPwdDialog extends JDialog {
+public class GetDbDialog extends JDialog {
 	
-	static String url_str="http://127.0.0.1:8080/rvirtual/cmd";
-	static String login_str="guest";
-	static String pwd_str="guest";
+	public static String dbDriver_str = "DERBY";
+	public static String dbHostIp_str = "127.0.0.1";
+	public static Integer dbHostPort_int = 1527;
+	public static String dbName_str = "DWEP";
+	public static String dbUser_str = "DWEP";
+	public static String dbPwd_str = "DWEP";
+
+	
 	
 	private boolean _closedOnOK = false;
-	final JTextField url;
-	final JTextField login;
-	final JPasswordField pwd;
+	
+	private JComboBox _dbDriver;
+	private JTextField _dbHostIp;
+	private JTextField _dbHostPort;
+	private JTextField _dbName;
+	private JTextField _dbUser;
+	private JTextField _dbPwd;
 
-	public UrlLoginPwd getUrlLoginPwd() {
+	
+	
+	public DbInfo getDbInfo() {
 		if (_closedOnOK)
 			try {
-				return new UrlLoginPwd(url_str, login_str, pwd_str);
+				return new DbInfo(dbDriver_str.toLowerCase(), dbHostIp_str, dbHostPort_int, dbName_str , dbUser_str, dbPwd_str);
 			} catch (Exception e) {
 				return null;
 			}
@@ -60,7 +68,7 @@ public class GetUrlLoginPwdDialog extends JDialog {
 			return null;
 	}
 
-	public GetUrlLoginPwdDialog(Component father) {
+	public GetDbDialog(Component father) {
 		super(new JFrame(), true);
 		setLocationRelativeTo(father);
 		getContentPane().setLayout(new GridLayout(1, 2));
@@ -73,39 +81,23 @@ public class GetUrlLoginPwdDialog extends JDialog {
 		p2.setLayout(new GridLayout(0, 1));
 		getContentPane().add(p2);
 
-		url=new JTextField(url_str);
-		login=new JTextField(login_str);
-		pwd=new JPasswordField(pwd_str);
 		
-		p1.add(new JLabel("URL"));
-		p1.add(new JLabel("Login"));
-		p1.add(new JLabel("Pwd"));
-		
-		JButton fixIt=new JButton("Fix It");
-		
-		fixIt.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				if (!url.getText().startsWith("http://")){
-					url.setText("http://"+url.getText()+":8080/rvirtual/cmd");
-				} else {
-					try {
-						url.setText("http://"+new URL(url.getText()).getHost()+":8080/rvirtual/cmd");						
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-				}
-			}
-		});
-		
-		JPanel urlPanel=new JPanel(new BorderLayout());
-		urlPanel.add(url,BorderLayout.CENTER);
-		urlPanel.add(fixIt,BorderLayout.EAST);
-		
-		p2.add(urlPanel);
-		p2.add(login);
-		p2.add(pwd);
+		_dbDriver = new JComboBox(new Object[] { "DERBY", "ORACLE", "MySQL" });
+		_dbDriver.setSelectedItem(dbDriver_str);
+		_dbHostIp = new JTextField(dbHostIp_str);
+		_dbHostPort = new JTextField(new Integer(dbHostPort_int).toString());
+		_dbName = new JTextField(dbName_str);
+		_dbUser = new JTextField(dbUser_str);
+		_dbPwd = new JTextField(dbPwd_str);
 
-
+		p1.add(new JLabel("  DB Driver")); p2.add(_dbDriver);
+		p1.add(new JLabel("  DB Host Name or IP"));	p2.add(_dbHostIp);
+		p1.add(new JLabel("  DB Host port")); p2.add(_dbHostPort);
+		p1.add(new JLabel("  DB Name")); p2.add(_dbName);
+		p1.add(new JLabel("  DB User")); p2.add(_dbUser);
+		p1.add(new JLabel("  DB Pwd")); p2.add(_dbPwd);
+		
+		
 		KeyListener keyListener = new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == 10) {
@@ -122,11 +114,13 @@ public class GetUrlLoginPwdDialog extends JDialog {
 			}
 		};
 		
-		url.addKeyListener(keyListener);
-		login.addKeyListener(keyListener);
-		pwd.addKeyListener(keyListener);
-		
-		
+		_dbDriver.addKeyListener(keyListener);
+		_dbHostIp.addKeyListener(keyListener);
+		_dbHostPort.addKeyListener(keyListener);
+		_dbName.addKeyListener(keyListener);
+		_dbUser.addKeyListener(keyListener);
+		_dbPwd.addKeyListener(keyListener);
+				
 		JButton ok = new JButton("Ok");
 		ok.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -144,18 +138,23 @@ public class GetUrlLoginPwdDialog extends JDialog {
 		p1.add(ok);
 		p2.add(cancel);
 
-		setSize(new Dimension(610, 140));
+		setSize(new Dimension(610, 220));
 
 		PoolUtils.locateInScreenCenter(this);
 
 	}
 
-	private void okMethod() {
-		
-		url_str=url.getText();
-		login_str=login.getText();
-		pwd_str=pwd.getText();
-		
+	private void okMethod() {		
+		dbDriver_str = (String)_dbDriver.getSelectedItem();
+		dbHostIp_str = _dbHostIp.getText();
+		try {
+			dbHostPort_int = Integer.decode(_dbHostPort.getText());
+		} catch (Exception e) {
+			dbHostPort_int = null;
+		}
+		dbName_str = _dbName.getText();
+		dbUser_str = _dbUser.getText();
+		dbPwd_str = _dbPwd.getText();		
 		_closedOnOK = true;
 		setVisible(false);
 	}
@@ -169,7 +168,7 @@ public class GetUrlLoginPwdDialog extends JDialog {
         JFrame frame = new JFrame("DialogDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        GetUrlLoginPwdDialog newContentPane = new GetUrlLoginPwdDialog(frame);
+        GetDbDialog newContentPane = new GetDbDialog(frame);
         newContentPane.setVisible(true);
 
         //Display the window.

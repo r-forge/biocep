@@ -60,6 +60,8 @@ public interface ManagedServant extends java.rmi.Remote {
 	public boolean hasConsoleMode() throws java.rmi.RemoteException;
 
 	public String consoleSubmit(String cmd) throws java.rmi.RemoteException;
+	
+	public String getStatus() throws RemoteException;
 
 	public void asynchronousConsoleSubmit(String cmd) throws java.rmi.RemoteException;
 
