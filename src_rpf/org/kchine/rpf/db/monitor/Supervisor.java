@@ -68,11 +68,8 @@ import javax.swing.event.MenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import static org.kchine.rpf.PoolUtils.*;
-
 import javax.crypto.*;
 import javax.crypto.spec.*;
-
-import org.kchine.r.workbench.macros.Macro;
 import org.kchine.rpf.InitializingException;
 import org.kchine.rpf.ManagedServant;
 import org.kchine.rpf.PoolUtils;
