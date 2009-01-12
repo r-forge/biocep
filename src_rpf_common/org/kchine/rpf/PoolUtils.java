@@ -436,6 +436,24 @@ public class PoolUtils {
 		_propertiesInjected = true;
 
 	}
+	
+	public static String whatIsMyIp() {
+		
+        BufferedReader buffer = null;
+        try {
+                URL url = new URL("http://whatismyip.com/automation/n09230945.asp");
+                InputStreamReader in = new InputStreamReader(url.openStream());
+                buffer = new BufferedReader(in);
+                String line = buffer.readLine();
+                return line;
+        } catch (Throwable e) {
+             //e.printStackTrace();
+             return null;
+        } finally {
+             try {if (buffer != null) {buffer.close();} } catch (IOException e) {e.printStackTrace();}
+        }
+        
+	}
 
 	public static void initRmiSocketFactory() {
 		if (!_rmiSocketFactoryInitialized) {
@@ -1567,9 +1585,6 @@ public class PoolUtils {
 		return tempFile;
 	}
 
-	public static void main(String args[]) throws Exception {
-		System.out.println(currentWinProcessID());
-	}
 	
 	public static boolean isValidJar(String jarFileName) {
 		try {
@@ -1641,6 +1656,15 @@ public class PoolUtils {
 			}
 		} 
 		return props;
+	}
+		
+	public static boolean isStubCandidate(String str) {
+		if (str.length()%2==1 || str.length()<300) return false;
+		for (int i=0; i<str.length();++i) {
+			char c=str.charAt(i);
+			if  (!((c>='0' && c<='9') || (c>='A' && c<='F'))) return false;
+		}
+		return true;
 	}
 
 }

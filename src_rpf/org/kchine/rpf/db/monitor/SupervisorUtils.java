@@ -22,7 +22,6 @@ package org.kchine.rpf.db.monitor;
 
 import javax.swing.SwingUtilities;
 import org.kchine.rpf.PoolUtils;
-import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.NodeDataDB;
 import org.kchine.rpf.db.SupervisorInterface;
@@ -44,6 +43,12 @@ import ch.ethz.ssh2.StreamGobbler;
  * @author Karim Chine karim.chine@m4x.org
  */
 public class SupervisorUtils implements SupervisorInterface {
+	
+	DBLayerInterface dbLayer;
+	public SupervisorUtils(DBLayerInterface dbLayer) {
+		this.dbLayer=dbLayer;
+	}
+	
 	class CancelException extends Exception {
 	};
 
@@ -86,7 +91,6 @@ public class SupervisorUtils implements SupervisorInterface {
 
 	public void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
 
-		DBLayerInterface dbLayer = (DBLayerInterface) ServerDefaults.getRmiRegistry();
 		HashMap<String, Object> servantInfo = dbLayer.getTableData("SERVANTS", "NAME='" + servantName + "'").elementAt(0);
 
 		NodeDataDB nd = null;
@@ -264,8 +268,8 @@ public class SupervisorUtils implements SupervisorInterface {
 			public void run() {
 				try {
 
-					((DBLayerInterface) ServerDefaults.getRmiRegistry()).incrementNodeProcessCounter(nodeName);
-					final NodeDataDB info = ((DBLayerInterface) ServerDefaults.getRmiRegistry()).getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
+					dbLayer.incrementNodeProcessCounter(nodeName);
+					final NodeDataDB info = dbLayer.getNodeData("NODE_NAME='" + nodeName + "'").elementAt(0);
 					String command = info.getCreateServantCommand();
 
 					if (PoolUtils.isLoopBackIP(info.getHostIp()) || info.getHostIp().equals(PoolUtils.getHostIp())) {

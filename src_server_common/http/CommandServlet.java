@@ -175,17 +175,29 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 							
 							try {
 								if (System.getProperty("submit.mode") != null  && System.getProperty("submit.mode").equals("ssh")) {
-									r = (RServices) ((DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
-							        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
-							                "java -Dpools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar org.kchine.rpf.SSHTunnelingWorker %{file}",
-							                "db",new Class<?>[]{DBLayerInterface.class})).lookup(sname);
-								} else {								
-									ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
-									if (spFactory == null) {
-										result = new NoRegistryAvailableException();
-										break;
+									
+									if (PoolUtils.isStubCandidate(sname)) {
+										r=(RServices)PoolUtils.hexToStub(sname, PoolUtils.class.getClassLoader());
+									} else {
+										r = (RServices) ((DBLayerInterface)SSHTunnelingProxy.getDynamicProxy(
+								        		System.getProperty("submit.ssh.host") ,Integer.decode(System.getProperty("submit.ssh.port")),System.getProperty("submit.ssh.user") ,System.getProperty("submit.ssh.password"), System.getProperty("submit.ssh.biocep.home"),
+								                "java -Dpools.provider.factory=org.kchine.rpf.db.ServantsProviderFactoryDB -Dpools.dbmode.defaultpoolname=R -Dpools.dbmode.shutdownhook.enabled=false -cp %{install.dir}/biocep-core.jar org.kchine.rpf.SSHTunnelingWorker %{file}",
+								                "db",new Class<?>[]{DBLayerInterface.class})).lookup(sname);
 									}
-									r = (RServices) spFactory.getServantProvider().getRegistry().lookup(sname);								
+									
+								} else {
+									
+									if (PoolUtils.isStubCandidate(sname)) {
+										r=(RServices)PoolUtils.hexToStub(sname, PoolUtils.class.getClassLoader());
+									} else {
+										ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+										if (spFactory == null) {
+											result = new NoRegistryAvailableException();
+											break;
+										}
+										r = (RServices) spFactory.getServantProvider().getRegistry().lookup(sname);
+									}
+									
 								}
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -447,7 +459,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					
 					session.setAttribute("TYPE", "DBS");
 					session.setAttribute("REGISTRY", (DBLayer) ServerDefaults.getRmiRegistry() );
-					session.setAttribute("SUPERVISOR", new SupervisorUtils() );
+					session.setAttribute("SUPERVISOR", new SupervisorUtils((DBLayer) ServerDefaults.getRmiRegistry()) );
 					session.setAttribute("THREADS", new ThreadsHolder());
 					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session.getId(), session);
 					saveSessionAttributes(session);

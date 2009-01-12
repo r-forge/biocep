@@ -84,7 +84,8 @@ public class ConsoleDialog extends JFrame {
 							log = "no graphics mode available\n";
 						}
 					} else {
-						log = servant.consoleSubmit(cmd);
+						servant.consoleSubmit(cmd);
+						log=servant.getStatus();
 					}
 				} catch (Exception e) {
 					log = PoolUtils.getStackTraceAsString(e);

@@ -25,6 +25,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -67,6 +72,7 @@ import static org.kchine.rpf.PoolUtils.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 
+import org.kchine.r.workbench.macros.Macro;
 import org.kchine.rpf.InitializingException;
 import org.kchine.rpf.ManagedServant;
 import org.kchine.rpf.PoolUtils;
@@ -164,7 +170,11 @@ public class Supervisor {
 	private long _colorCounter = 0;
 	private JMenu _debugMenu;
 	private SupervisorInterface _supervisorInterface;
+	private boolean _stopThreads;
 	
+	public void stopThreads() {
+		_stopThreads=true;
+	}	
 
 	public static String generateKey() {
 		try {
@@ -189,7 +199,7 @@ public class Supervisor {
 
 					_frame = new JFrame("Supervisor");
 					_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-					_frame.getContentPane().add(new Supervisor(db,new SupervisorUtils()).getPanel());					
+					_frame.getContentPane().add(new Supervisor(db,new SupervisorUtils(db)).getPanel());					
 					_frame.pack();
 					_frame.setVisible(true);
 					_frame.setPreferredSize(new Dimension(800, 700));
@@ -425,6 +435,9 @@ public class Supervisor {
 				popupMenu.add(actions.get("unlock_servants"));
 				popupMenu.addSeparator();
 				popupMenu.add(actions.get("select_servants"));
+				popupMenu.addSeparator();
+				popupMenu.add(actions.get("name_to_clipboard"));
+				popupMenu.add(actions.get("stub_to_clipboard"));
 
 				popupMenu.show(e.getComponent(), e.getX(), e.getY());
 			}
@@ -797,11 +810,16 @@ public class Supervisor {
 			dataPane2.add("Reports", reportSP);
 			dataPane2.setBorder(BorderFactory.createLineBorder(reportSP.getBackground(), 10));
 
+			
+			/*
 			JSplitPane dataPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			dataPane.setLeftComponent(dataPane1);
 			dataPane.setRightComponent(dataPane2);
 			dataPane.setDividerLocation((int) 200);
 			dataPane.setDividerSize(10);
+			*/
+			JSplitPane dataPane=dataPane1;
+			
 
 			JSplitPane mainPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			mainPane.setLeftComponent(servantTabbebPane);
@@ -826,6 +844,10 @@ public class Supervisor {
 					manageMenu.add(actions.get("unlock_servants"));
 					manageMenu.addSeparator();
 					manageMenu.add(actions.get("select_servants"));
+					manageMenu.addSeparator();
+					manageMenu.add(actions.get("name_to_clipboard"));
+					manageMenu.add(actions.get("stub_to_clipboard"));
+					
 
 				}
 
@@ -899,7 +921,7 @@ public class Supervisor {
 			new Thread(new Runnable() {
 				public void run() {
 
-					while (true) {
+					while (!_stopThreads) {
 
 						if (_autoRefresh) {
 
@@ -1099,6 +1121,54 @@ public class Supervisor {
 				return _servantTable.getSelectedRowCount() < _servantTable.getRowCount();
 			}
 		});
+		
+		
+		
+		actions.put("name_to_clipboard", new AbstractAction("Copy Name to Clipboard") {
+			public void actionPerformed(ActionEvent e) {
+
+				int[] rows = _servantTable.getSelectedRows();
+				String[] names = new String[rows.length];
+				for (int i = 0; i < rows.length; ++i)
+					names[i] = (String) _V.elementAt(rows[i]).get("NAME");
+			
+				StringSelection stringSelection = new StringSelection(names[0]);
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clipboard.setContents(stringSelection, new ClipboardOwner() {
+					public void lostOwnership(Clipboard clipboard, Transferable contents) {
+					}
+				});	
+
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return _servantTable.getSelectedRows().length > 0;
+			}
+		});
+		
+		actions.put("stub_to_clipboard", new AbstractAction("Copy Stub to Clipboard") {
+			public void actionPerformed(ActionEvent e) {
+
+				int[] rows = _servantTable.getSelectedRows();
+				String[] stub = new String[rows.length];
+				for (int i = 0; i < rows.length; ++i)
+					stub[i] = (String) _V.elementAt(rows[i]).get("STUB_HEX");
+			
+				StringSelection stringSelection = new StringSelection(stub[0]);
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clipboard.setContents(stringSelection, new ClipboardOwner() {
+					public void lostOwnership(Clipboard clipboard, Transferable contents) {
+					}
+				});	
+
+			}
+
+			@Override
+			public boolean isEnabled() {
+				return _servantTable.getSelectedRows().length > 0;
+			}
+		});
 
 		actions.put("show_log", new AbstractAction("Show Log") {
 			public void actionPerformed(ActionEvent e) {
@@ -1229,9 +1299,11 @@ public class Supervisor {
 							try {
 								ManagedServant servant = (ManagedServant) _registry.lookup(name);
 								if (servant.hasConsoleMode()) {
+									
 									new ConsoleDialog(_frame, servant, new ServantStatus() {
 										public boolean isLocked() {
-											return isServantLocked(name);
+											return true;
+											//return isServantLocked(name);
 										}
 									}).setVisible(true);
 								} else {

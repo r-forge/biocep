@@ -20,7 +20,6 @@ package server;
 
 import static org.kchine.rpf.PoolUtils.isWindowsOs;
 import static org.kchine.rpf.PoolUtils.unzip;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -28,10 +27,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -75,8 +76,8 @@ import ch.ethz.ssh2.StreamGobbler;
 public class ServerManager {
 
 	public static void main(String[] args) throws Exception {
-		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), INSTALL_DIR, PoolUtils.LOG_PRGRESS_TO_LOGGER
-				| PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+		
+
 	}
 
 	public static String INSTALL_DIR = null;

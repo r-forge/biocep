@@ -161,6 +161,8 @@ import org.kchine.r.workbench.actions.SetCurrentDeviceAction;
 import org.kchine.r.workbench.actions.SnapshotDeviceAction;
 import org.kchine.r.workbench.actions.SnapshotDevicePdfAction;
 import org.kchine.r.workbench.actions.SnapshotDeviceSvgAction;
+import org.kchine.r.workbench.dialogs.DbInfo;
+import org.kchine.r.workbench.dialogs.GetDbDialog;
 import org.kchine.r.workbench.dialogs.GetExprDialog;
 import org.kchine.r.workbench.dialogs.GetUrlLoginPwdDialog;
 import org.kchine.r.workbench.dialogs.Identification;
@@ -204,12 +206,14 @@ import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.PropertiesGenerator;
 import org.kchine.rpf.SSHUtils;
+import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.YesSecurityManager;
 import org.kchine.rpf.db.ConnectionProvider;
 import org.kchine.rpf.db.DBLayer;
 import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.SupervisorInterface;
 import org.kchine.rpf.db.monitor.Supervisor;
+import org.kchine.rpf.db.monitor.SupervisorUtils;
 import org.kchine.rpf.gui.ConsolePanel;
 import org.kchine.rpf.gui.InDialog;
 import org.kchine.rpf.gui.SubmitInterface;
@@ -239,6 +243,12 @@ import server.NoMappingAvailable;
 import server.ServantCreationFailed;
 import server.ServerManager;
 import static org.kchine.r.workbench.graphics.JGDPanelPop.*;
+import static org.kchine.rpf.PoolUtils.DEFAULT_DB_DIR;
+import static org.kchine.rpf.PoolUtils.DEFAULT_DB_HOST;
+import static org.kchine.rpf.PoolUtils.DEFAULT_DB_NAME;
+import static org.kchine.rpf.PoolUtils.DEFAULT_DB_PORT;
+import static org.kchine.rpf.PoolUtils.DEFAULT_DB_TYPE;
+import static org.kchine.rpf.PoolUtils.DEFAULT_DB_USER;
 import static org.kchine.rpf.PoolUtils.redirectIO;
 import static org.kchine.rpf.PoolUtils.unzip;
 
@@ -311,6 +321,8 @@ public class GDApplet extends AppletBase implements RGui {
 	Vector<MacroInterface> macrosVector = new Vector<MacroInterface>();
 
 	Vector<Runnable> _tasks = new Vector<Runnable>();
+	
+	String _clientIP=null;
 
 	private final ReentrantLock _protectR = new ExtendedReentrantLock() {
 
@@ -450,7 +462,16 @@ public class GDApplet extends AppletBase implements RGui {
 
 	public void init() {
 		super.init();
-
+		
+		//_clientIP=PoolUtils.whatIsMyIp();
+		
+		if (_clientIP==null) _clientIP=PoolUtils.getHostIp();
+		if (System.getProperty("java.rmi.server.hostname")==null || System.getProperty("java.rmi.server.hostname").equals("")) {
+			System.setProperty("java.rmi.server.hostname", _clientIP);
+		}
+		
+		System.out.println("client IP:"+_clientIP);
+		
 		PoolUtils.initLog4J();
 		PoolUtils.initRmiSocketFactory();
 
@@ -788,8 +809,8 @@ public class GDApplet extends AppletBase implements RGui {
 
 									_keepAlive = ident.isKeepAlive();
 									if (ident.isUseSsh()) {
-										r = ServerManager.createRSsh(ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(),
-												ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident
+										r = ServerManager.createRSsh(ident.isKeepAlive(), _clientIP, LocalHttpServer.getLocalHttpServerPort(),
+												ServerManager.getRegistryNamingInfo(_clientIP, LocalRmiRegistry.getLocalRmiRegistryPort()), ident
 														.getMemoryMin(), ident.getMemoryMax(), ident.getSshHostIp(), ident.getSshPort(), ident.getSshLogin(),
 												ident.getSshPwd(), "", false, null, null);
 									} else {
@@ -983,16 +1004,29 @@ public class GDApplet extends AppletBase implements RGui {
 							_isGroovyEnabled = _rForConsole.isGroovyEnabled();
 							_demos = _rForConsole.listDemos();
 
+							
+							
+							System.out.println("S1");
 							_collaborationListenerImpl = new RCollaborationListenerImpl();
+							System.out.println("S2");
 							_rForConsole.addRCollaborationListener(_collaborationListenerImpl);
+							System.out.println("S3");
 
 							_rConsoleActionListenerImpl = new RConsoleActionListenerImpl();
+							System.out.println("S4");
 							_rForConsole.addRConsoleActionListener(_rConsoleActionListenerImpl);
+							System.out.println("S5");
 
 							_rForConsole.registerUser(getUID(), getUserName());
+							System.out.println("S6");
 
 							for (MacroInterface m : macrosVector)
 								_rForConsole.addProbeOnVariables(m.getProbes());
+							
+							System.out.println("S7");
+							
+							
+							
 
 							if (_mode == HTTP_MODE) {
 								return "Logged on as " + _login + "\n";
@@ -1544,6 +1578,7 @@ public class GDApplet extends AppletBase implements RGui {
 					toolsMenu.add(_actions.get("sourcebioclite"));
 					toolsMenu.add(_actions.get("installpackage"));
 					toolsMenu.addSeparator();
+					toolsMenu.add(_actions.get("supervisor"));
 					toolsMenu.add(_actions.get("httpsupervisor"));
 					
 				}
@@ -4086,7 +4121,7 @@ public class GDApplet extends AppletBase implements RGui {
 													.setText(" An HTTP Relay has been created on port "
 															+ port
 															+ "\n You can control the current R session from anywhere via the Workench\n log on in HTTP mode to the following URL : http://"
-															+ PoolUtils.getHostIp() + ":" + port + "/rvirtual/cmd");
+															+ _clientIP + ":" + port + "/rvirtual/cmd");
 											a.setEditable(false);
 											a.setBackground(new JLabel().getBackground());
 
@@ -4540,6 +4575,59 @@ public class GDApplet extends AppletBase implements RGui {
 		
 		
 		
+		_actions.put("supervisor", new AbstractAction("Supervisor") {
+			public void actionPerformed(ActionEvent e) {
+				try {				
+					
+					GetDbDialog getDbDialog = new GetDbDialog(GDApplet.this);			        
+			        getDbDialog.setVisible(true);
+			        DbInfo dbInfo=getDbDialog.getDbInfo();
+			        
+			        if (dbInfo!=null) {
+			        	
+			        	Properties props=new Properties();
+			    		
+			        	props.put("naming.mode","db");			        	
+			        	props.put("db.type",dbInfo.getDbDriver());
+			        	props.put("db.host",dbInfo.getDbHostIp());
+			        	props.put("db.port",dbInfo.getDbHostPort().toString());
+			        	props.put("db.name",dbInfo.getDbName());
+			        	props.put("db.user",dbInfo.getDbUser());
+			        	props.put("db.password",dbInfo.getDbPwd());
+
+			        	DBLayerInterface db=null;
+			        	try {
+			        		db=(DBLayerInterface)ServerDefaults.getRegistry(props);
+			        	} catch (ConnectionFailedException ex) {
+			        		JOptionPane.showMessageDialog(GDApplet.this, "Connection to Server Failed", "", JOptionPane.ERROR_MESSAGE);
+			        		return;
+						}
+			        							        	
+						int id = getDynamicViewId();
+						final Supervisor supervisor=new Supervisor(db,new SupervisorUtils(db));
+						final DynamicView lv = new DynamicView("Supervisor: "+dbInfo.getDbHostIp()+":"+dbInfo.getDbHostPort(), null, supervisor.getPanel(), id);
+						((TabWindow) views[2].getWindowParent()).addTab(lv);
+						lv.addListener(new AbstractDockingWindowListener() {
+							public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+								supervisor.stopThreads();
+							}
+						});
+			        }
+
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+
+		});
+
+		
+		
 		_actions.put("httpsupervisor", new AbstractAction("Supervisor (HTTP) ") {
 			public void actionPerformed(ActionEvent e) {
 				try {					
@@ -4563,10 +4651,12 @@ public class GDApplet extends AppletBase implements RGui {
 			        	
 						SupervisorInterface supervisorInterface=hr.getSupervisorInterface();						        	
 						int id = getDynamicViewId();
-						final DynamicView lv = new DynamicView("Supervisor HTTP: "+ulp.getUrl(), null, new Supervisor(db,supervisorInterface).getPanel(), id);
+						final Supervisor supervisor=new Supervisor(db,supervisorInterface);
+						final DynamicView lv = new DynamicView("Supervisor HTTP: "+ulp.getUrl(), null, supervisor.getPanel(), id);
 						((TabWindow) views[2].getWindowParent()).addTab(lv);
 						lv.addListener(new AbstractDockingWindowListener() {
 							public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+								supervisor.stopThreads();
 							}
 						});
 			        }
@@ -4583,6 +4673,8 @@ public class GDApplet extends AppletBase implements RGui {
 
 		});
 
+		
+		
 	}
 
 	private void disposeDevices() {
@@ -5512,6 +5604,5 @@ public class GDApplet extends AppletBase implements RGui {
 	}
 	
 	static public void main(String[] args) throws Exception {
-
 	}
 }

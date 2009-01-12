@@ -86,8 +86,6 @@ public interface RServices extends ManagedServant {
 
 	public String sourceFromBuffer(String buffer) throws RemoteException;
 
-	public String getStatus() throws RemoteException;
-
 	public String[] listPackages() throws RemoteException;
 
 	public RPackage getPackage(String packageName) throws RemoteException;

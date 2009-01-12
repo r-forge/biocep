@@ -208,6 +208,10 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	public String consoleSubmit(String cmd) throws RemoteException {
 		throw new RemoteException("console mode not supported");
 	}
+	
+	public String getStatus() throws RemoteException {
+		throw new RemoteException("console mode not supported");
+	}
 
 	public boolean hasPushPopMode() throws RemoteException {
 		return false;
