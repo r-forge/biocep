@@ -81,6 +81,8 @@ public interface ManagedServant extends java.rmi.Remote {
 
 	public String getHostIp() throws java.rmi.RemoteException;
 	
+	public String getHostName() throws java.rmi.RemoteException;
+	
 	public String getJobId() throws java.rmi.RemoteException;
 		
 	public void setJobId(String jobId) throws java.rmi.RemoteException;

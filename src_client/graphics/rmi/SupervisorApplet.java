@@ -43,7 +43,7 @@ public class SupervisorApplet extends JApplet {
 			final String sessionId = RHttpProxy.logOnDB(getParameter("url"), "", getParameter("login"), getParameter("password"), options);			
 			DBLayerInterface db = (DBLayerInterface)RHttpProxy.getDynamicProxy(getParameter("url"), sessionId, "REGISTRY", new Class<?>[]{DBLayerInterface.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));
 			SupervisorInterface supervisorInterface=(SupervisorInterface)RHttpProxy.getDynamicProxy(getParameter("url"), sessionId, "SUPERVISOR", new Class<?>[]{SupervisorInterface.class}, new HttpClient(new MultiThreadedHttpConnectionManager()));			
-			getContentPane().add(new Supervisor(db,supervisorInterface).run());
+			getContentPane().add(new Supervisor(db,supervisorInterface).getPanel());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -189,7 +189,7 @@ public class Supervisor {
 
 					_frame = new JFrame("Supervisor");
 					_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-					_frame.getContentPane().add(new Supervisor(db,new SupervisorUtils()).run());					
+					_frame.getContentPane().add(new Supervisor(db,new SupervisorUtils()).getPanel());					
 					_frame.pack();
 					_frame.setVisible(true);
 					_frame.setPreferredSize(new Dimension(800, 700));
@@ -525,7 +525,7 @@ public class Supervisor {
 		}
 	}
 
-	public JPanel run() throws Exception {
+	public JPanel getPanel() throws Exception {
 
 		try {
 			

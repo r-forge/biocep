@@ -20,6 +20,7 @@
  */
 package graphics.rmi;
 
+import genericnaming.httpregistryClass;
 import http.BadLoginPasswordException;
 import http.ConnectionFailedException;
 import http.FileLoad;
@@ -161,10 +162,12 @@ import org.kchine.r.workbench.actions.SnapshotDeviceAction;
 import org.kchine.r.workbench.actions.SnapshotDevicePdfAction;
 import org.kchine.r.workbench.actions.SnapshotDeviceSvgAction;
 import org.kchine.r.workbench.dialogs.GetExprDialog;
+import org.kchine.r.workbench.dialogs.GetUrlLoginPwdDialog;
 import org.kchine.r.workbench.dialogs.Identification;
 import org.kchine.r.workbench.dialogs.LoginDialog;
 import org.kchine.r.workbench.dialogs.OpenPluginViewDialog;
 import org.kchine.r.workbench.dialogs.PushAsDialog;
+import org.kchine.r.workbench.dialogs.UrlLoginPwd;
 import org.kchine.r.workbench.exceptions.BadServantNameException;
 import org.kchine.r.workbench.exceptions.NoDbRegistryAvailableException;
 import org.kchine.r.workbench.exceptions.NoRmiRegistryAvailableException;
@@ -204,6 +207,9 @@ import org.kchine.rpf.SSHUtils;
 import org.kchine.rpf.YesSecurityManager;
 import org.kchine.rpf.db.ConnectionProvider;
 import org.kchine.rpf.db.DBLayer;
+import org.kchine.rpf.db.DBLayerInterface;
+import org.kchine.rpf.db.SupervisorInterface;
+import org.kchine.rpf.db.monitor.Supervisor;
 import org.kchine.rpf.gui.ConsolePanel;
 import org.kchine.rpf.gui.InDialog;
 import org.kchine.rpf.gui.SubmitInterface;
@@ -728,7 +734,11 @@ public class GDApplet extends AppletBase implements RGui {
 								}
 
 								_keepAlive = true;
-								_helpRootUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
+								try {
+									_helpRootUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
 
 								_login = ident.getUser();
 								_nopool = ident.isNopool();
@@ -1533,6 +1543,9 @@ public class GDApplet extends AppletBase implements RGui {
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("sourcebioclite"));
 					toolsMenu.add(_actions.get("installpackage"));
+					toolsMenu.addSeparator();
+					toolsMenu.add(_actions.get("httpsupervisor"));
+					
 				}
 
 				public void menuCanceled(MenuEvent e) {
@@ -4510,6 +4523,7 @@ public class GDApplet extends AppletBase implements RGui {
 					getConsoleLogger().printAsOutput("Server Name :" + getR().getServantName() + "\n");
 					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getProcessId() + "\n");
 					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp() + "\n");
+					getConsoleLogger().printAsOutput("Server Host Name :" + getR().getHostName() + "\n");
 					getConsoleLogger().printAsOutput("STUB : \n" + getR().getStub() + "\n");
 
 				} catch (Exception ex) {
@@ -4520,6 +4534,51 @@ public class GDApplet extends AppletBase implements RGui {
 
 			public boolean isEnabled() {
 				return getR() != null;
+			}
+
+		});
+		
+		
+		
+		_actions.put("httpsupervisor", new AbstractAction("Supervisor (HTTP) ") {
+			public void actionPerformed(ActionEvent e) {
+				try {					
+			        GetUrlLoginPwdDialog getUrlLoginPwdDialog = new GetUrlLoginPwdDialog(GDApplet.this);			        
+			        getUrlLoginPwdDialog.setVisible(true);
+			        UrlLoginPwd ulp=getUrlLoginPwdDialog.getUrlLoginPwd();
+			        if (ulp!=null) {
+			        	Properties props=new Properties();
+			        	props.put("httpregistry.url",ulp.getUrl());
+			        	props.put("httpregistry.login",ulp.getLogin());
+			        	props.put("httpregistry.password",ulp.getPwd());
+			        	
+			        	httpregistryClass hr=new genericnaming.httpregistryClass();
+			        	DBLayerInterface db=null;
+			        	try {
+			        		db=(DBLayerInterface)hr.getRegistry(props);
+			        	} catch (ConnectionFailedException ex) {
+			        		JOptionPane.showMessageDialog(GDApplet.this, "Connection to Server Failed", "", JOptionPane.ERROR_MESSAGE);
+			        		return;
+						}
+			        	
+						SupervisorInterface supervisorInterface=hr.getSupervisorInterface();						        	
+						int id = getDynamicViewId();
+						final DynamicView lv = new DynamicView("Supervisor HTTP: "+ulp.getUrl(), null, new Supervisor(db,supervisorInterface).getPanel(), id);
+						((TabWindow) views[2].getWindowParent()).addTab(lv);
+						lv.addListener(new AbstractDockingWindowListener() {
+							public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+							}
+						});
+			        }
+
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
 			}
 
 		});

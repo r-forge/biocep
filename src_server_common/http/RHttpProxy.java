@@ -632,6 +632,24 @@ public class RHttpProxy {
 	
 	public static String logOnDB(String url, String sessionId, String login, String pwd, HashMap<String, Object> options) throws TunnelingException {
 
+		GetMethod pingServer = null;
+		try {
+			Object result = null;
+			try {
+				pingServer = new GetMethod(url + "?method=ping");
+				mainHttpClient.executeMethod(pingServer);
+				result = new ObjectInputStream(pingServer.getResponseBodyAsStream()).readObject();
+				if (!result.equals("pong")) throw new ConnectionFailedException(); 
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new ConnectionFailedException();
+			}
+		} finally {
+			if (pingServer != null) {
+				pingServer.releaseConnection();
+			}
+		}
+		
 		GetMethod getSession = null;
 		try {
 			Object result = null;

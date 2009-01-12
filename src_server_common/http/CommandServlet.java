@@ -22,7 +22,6 @@ package http;
 
 import static org.kchine.rpf.PoolUtils.DEFAULT_MEMORY_MAX;
 import static org.kchine.rpf.PoolUtils.DEFAULT_MEMORY_MIN;
-
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -40,8 +39,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-
 import org.apache.commons.logging.Log;
 import org.kchine.r.server.GenericCallbackDevice;
 import org.kchine.r.server.RKit;
@@ -64,7 +61,6 @@ import org.kchine.rpf.db.DBLayer;
 import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.monitor.SupervisorUtils;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
-
 import server.ExtendedReentrantLock;
 import server.LocalHttpServer;
 import server.ServerManager;
@@ -146,8 +142,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					}
 					
 					HashMap<String, Object> options = (HashMap<String, Object>) PoolUtils.hexToObject(request.getParameter("options"));
-					if (options == null)
-						options = new HashMap<String, Object>();
+					if (options == null) options = new HashMap<String, Object>();
 					System.out.println("options:" + options);
 
 					RPFSessionInfo.get().put("LOGIN", login);
@@ -430,8 +425,26 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					break;
 
 				} else if (command.equals("logondb")) {
+
+					String login = (String) PoolUtils.hexToObject(request.getParameter("login"));
+					String pwd = (String) PoolUtils.hexToObject(request.getParameter("pwd"));
+					HashMap<String, Object> options = (HashMap<String, Object>) PoolUtils.hexToObject(request.getParameter("options"));
+					if (options == null) options = new HashMap<String, Object>();
+					System.out.println("options:" + options);
 					
 					session = request.getSession(true);
+					
+					Integer sessionTimeOut=null;
+					try {
+						if (options.get("sessiontimeout")!=null) sessionTimeOut = Integer.decode((String)options.get("sessiontimeout"));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					if (sessionTimeOut!=null) {
+						session.setMaxInactiveInterval(sessionTimeOut);
+					}
+					
 					session.setAttribute("TYPE", "DBS");
 					session.setAttribute("REGISTRY", (DBLayer) ServerDefaults.getRmiRegistry() );
 					session.setAttribute("SUPERVISOR", new SupervisorUtils() );

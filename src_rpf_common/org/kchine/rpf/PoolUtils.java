@@ -450,7 +450,7 @@ public class PoolUtils {
 	
 	public static void ensurePublicIPIsUsedForRMI() {
 		if (System.getProperty("java.rmi.server.hostname")==null || System.getProperty("java.rmi.server.hostname").equals("")) {
-			if (publicIPUnavilable()) System.setProperty("java.rmi.server.hostname", getHostIp());
+			if (isAmazonCloud() || publicIPUnavilable()) System.setProperty("java.rmi.server.hostname", getHostIp());
 		}		
 	}
 	

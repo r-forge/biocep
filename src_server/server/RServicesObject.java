@@ -68,6 +68,10 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
+	public String getHostName() throws RemoteException {
+		return null;
+	}
+	
 	public String getLogs() throws RemoteException {
 		return null;
 	}
