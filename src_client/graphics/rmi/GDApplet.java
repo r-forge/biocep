@@ -243,12 +243,6 @@ import server.NoMappingAvailable;
 import server.ServantCreationFailed;
 import server.ServerManager;
 import static org.kchine.r.workbench.graphics.JGDPanelPop.*;
-import static org.kchine.rpf.PoolUtils.DEFAULT_DB_DIR;
-import static org.kchine.rpf.PoolUtils.DEFAULT_DB_HOST;
-import static org.kchine.rpf.PoolUtils.DEFAULT_DB_NAME;
-import static org.kchine.rpf.PoolUtils.DEFAULT_DB_PORT;
-import static org.kchine.rpf.PoolUtils.DEFAULT_DB_TYPE;
-import static org.kchine.rpf.PoolUtils.DEFAULT_DB_USER;
 import static org.kchine.rpf.PoolUtils.redirectIO;
 import static org.kchine.rpf.PoolUtils.unzip;
 
@@ -1122,7 +1116,9 @@ public class GDApplet extends AppletBase implements RGui {
 
 							if (true || _rForConsole instanceof HttpMarker) {
 								getConsoleLogger().printAsInput(expression);
+								System.out.println("before asynchronousConsoleSubmit");
 								_rForConsole.asynchronousConsoleSubmit(expression);
+								System.out.println("after asynchronousConsoleSubmit");
 								/*
 								 * while (_rForConsole.isBusy()) { try {
 								 * Thread.sleep(20); } catch (Exception e) { } }
@@ -4111,7 +4107,7 @@ public class GDApplet extends AppletBase implements RGui {
 											_virtualizationServer = new Server(port);
 											Context root = new Context(_virtualizationServer, "/", Context.SESSIONS);
 											root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(GDApplet.this)), "/rvirtual/graphics/*");
-											root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this)), "/rvirtual/cmd/*");
+											root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this,true)), "/rvirtual/cmd/*");
 											root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
 											System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
 											_virtualizationServer.start();
@@ -5240,6 +5236,7 @@ public class GDApplet extends AppletBase implements RGui {
 
 		public void rConsoleActionPerformed(final RConsoleAction action) throws RemoteException {
 
+			System.out.println("Action:"+action);
 			if (getUID().equals(action.getAttributes().get("originatorUID"))) {
 				if (action.getActionName().equals("help")) {
 					new Thread(new Runnable() {
@@ -5273,6 +5270,8 @@ public class GDApplet extends AppletBase implements RGui {
 					 */
 
 				} else if (action.getActionName().equals("GET_USER_INPUT")) {
+					
+					System.out.println("IIIIs Event dispatch thread ::"+SwingUtilities.isEventDispatchThread());
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							try {
