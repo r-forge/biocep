@@ -1023,6 +1023,9 @@
 			<jvmarg value="-Ddb.user=${db.user}"/>
 			<jvmarg value="-Ddb.password=${db.password}"/>			
 			
+			
+			<jvmarg value="-Duse.default.libs=${use.default.libs}"/>
+			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
 			<jvmarg	value="-Dlog4j.appender.A1=org.apache.log4j.ConsoleAppender"/>
