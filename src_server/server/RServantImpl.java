@@ -830,7 +830,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				});
 				
 				root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(rkit)), "/rvirtual/graphics/*");
-				root.addServlet(new ServletHolder(new http.CommandServlet(rkit)), "/rvirtual/cmd/*");
+				root.addServlet(new ServletHolder(new http.CommandServlet(rkit,false)), "/rvirtual/cmd/*");
 				root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
 				System.out.println("+ going to start virtualization http server port : " + port);
 				_virtualizationServer.start();				

@@ -4176,7 +4176,57 @@ public class DirectJNI {
 		}
 
 		public byte[] getPng() throws RemoteException {
-			return null;
+			File tempFile = null;
+			try {
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".pdf").getCanonicalFile();
+				if (tempFile.exists())
+					tempFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+
+			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
+
+			DirectJNI.getInstance().shutdownDevices("png");
+
+			final String createDeviceCommand = "png(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
+					+ getSize().width + ", height = " + getSize().height + " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+
+			int pdfDevice = DirectJNI.getInstance().getDevice("pdf");
+			DirectJNI.getInstance().getRServices().evaluate(
+					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + pdfDevice + ");" + ".PrivateEnv$dev.set("
+							+ currentDevice + ");", 3);
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+
+			if (tempFile.exists()) {
+
+				byte[] result = null;
+				try {
+
+					DirectJNI.getInstance().shutdownDevices("pdf");
+
+					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
+					result = new byte[(int) raf.length()];
+					raf.readFully(result);
+					raf.close();
+
+					tempFile.delete();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RemoteException("", e);
+				}
+				return result;
+			} else {
+				return null;
+			}
 		}
 
 		public byte[] getPostScript() throws RemoteException {
