@@ -132,6 +132,8 @@ public class ServerManager {
 	private static final String RHOMEEND = "R$HOME$END";
 	private static final String RVERSTART = "R$VER$START";
 	private static final String RVEREND = "R$VER$END";
+	private static final String RJAVAPATHSTART = "RJAVA$PATH$START";
+	private static final String RJAVAPATHEND = "RJAVA$PATH$END";
 
 	public static TableModelRemoteImpl tmri;
 
@@ -410,7 +412,9 @@ public class ServerManager {
 
 			String rpath = null;
 			String rversion = null;
+			String userrjavapath = null;
 			String[] rinfo = null;
+			
 
 			if (RBinPath != null && !RBinPath.equals("")) {
 				rinfo = getRInfo(RBinPath);
@@ -419,6 +423,7 @@ public class ServerManager {
 				}
 				rpath = rinfo[0];
 				rversion = rinfo[1];
+				userrjavapath = rinfo[2];
 			} else if (new File(INSTALL_DIR + "R/" + EMBEDDED_R).exists()) {
 
 				rinfo = getRInfo(INSTALL_DIR + "R/" + EMBEDDED_R + "/bin/R.exe");
@@ -427,6 +432,7 @@ public class ServerManager {
 				}
 				rpath = rinfo[0];
 				rversion = rinfo[1];
+				userrjavapath = rinfo[2];
 
 			} else {
 
@@ -444,10 +450,12 @@ public class ServerManager {
 				System.out.println("+rinfo:" + rinfo + " " + Arrays.toString(rinfo));
 				rpath = rinfo != null ? rinfo[0] : null;
 				rversion = (rinfo != null ? rinfo[1] : "");
+				userrjavapath = (rinfo != null ? rinfo[2] : "");
 			}
 
 			System.out.println("rpath:" + rpath);
 			System.out.println("rversion:" + rversion);
+			System.out.println("user rjava path:" + userrjavapath);
 			if (rpath == null) {
 
 				String noRCause = System.getenv("R_HOME") == null ? "R is not accessible from the command line" : "Your R_HOME is invalid";
@@ -488,6 +496,10 @@ public class ServerManager {
 
 			progressLogger.logProgress("R installation inspection done.");
 
+			boolean useDefaultUserLibs=(System.getenv("BIOCEP_USE_DEFAULT_LIBS") != null && System.getenv("BIOCEP_USE_DEFAULT_LIBS").equalsIgnoreCase("false"))
+			|| (System.getProperty("use.default.libs") != null && System.getProperty("use.default.libs").equalsIgnoreCase("true"));
+
+			
 			if (!rpath.endsWith("/") && !rpath.endsWith("\\"))
 				rpath += "/";
 
@@ -505,8 +517,14 @@ public class ServerManager {
 				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib") + System.getProperty("path.separator")+ OS_PATH);
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 				env.put("R_HOME", rpath);
-				String R_LIBS = rlibs + System.getProperty("path.separator")
-						+ (System.getenv("R_LIBS") != null ? System.getProperty("path.separator") + System.getenv("R_LIBS") : "");
+				
+				String R_LIBS = null;
+				if (useDefaultUserLibs) {
+					R_LIBS = (System.getenv("R_LIBS") != null ? System.getenv("R_LIBS") : "");					
+				} else {
+					R_LIBS = rlibs + System.getProperty("path.separator") + (System.getenv("R_LIBS") != null ? System.getenv("R_LIBS") : "");
+				}
+				
 				System.out.println("R_LIBS:" + R_LIBS);
 				env.put("R_LIBS", R_LIBS);
 				for (String k : env.keySet()) {
@@ -516,9 +534,7 @@ public class ServerManager {
 			}
 
 			String[] requiredPackages = null;
-
-			if ((System.getenv("BIOCEP_USE_DEFAULT_LIBS") != null && System.getenv("BIOCEP_USE_DEFAULT_LIBS").equalsIgnoreCase("false"))
-					|| (System.getProperty("use.default.libs") != null && System.getProperty("use.default.libs").equalsIgnoreCase("true"))) {
+			if (useDefaultUserLibs) {
 				requiredPackages = new String[0];
 			} else {
 				if (isWindowsOs()) {
@@ -672,8 +688,14 @@ public class ServerManager {
 			// ---------------------------------------
 
 			// String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";
-			String jripath = rlibs + "/rJava/jri/";
-			System.out.println("jripath:" + jripath + "\n");
+			String jripath = null;
+			if (useDefaultUserLibs) {
+				jripath = userrjavapath + "/jri/";
+				System.out.println("jripath:" + jripath + "\n");
+			} else {
+				jripath = rlibs + "/rJava/jri/";
+				System.out.println("jripath:" + jripath + "\n");
+			}
 
 			String cp = INSTALL_DIR + "classes";
 
@@ -970,6 +992,8 @@ public class ServerManager {
 		String rversion = null;
 
 		String rlibraypath = null;
+		
+		String rjavapath = null;
 
 		try {
 
@@ -978,9 +1002,9 @@ public class ServerManager {
 			PrintWriter pw = new PrintWriter(fw);
 
 			pw.println("paste('" + RHOMESTART + "',R.home(), '" + RHOMEEND + "',sep='%')");
-
-			pw.println("paste('" + RVERSTART + "', R.version.string , '" + RVEREND + "', sep='%')");
-
+			pw.println("paste('" + RVERSTART + "', R.version.string , '" + RVEREND + "', sep='%')");		
+			pw.println("library('rJava'); paste('" + RJAVAPATHSTART + "', .path.package('rJava') , '" + RJAVAPATHEND + "', sep='%')");
+			
 			fw.close();
 
 			Vector<String> getInfoCommand = new Vector<String>();
@@ -1105,13 +1129,14 @@ public class ServerManager {
 
 						rlibraypath = line.substring(line.indexOf(RHOMESTART + "%") + (RHOMESTART + "%").length(), (line.indexOf("%" + RHOMEEND) > 0 ? line
 								.indexOf("%" + RHOMEEND) : line.length()));
-
 					}
 
 					if (line.contains(RVERSTART + "%")) {
-
 						rversion = line.substring(line.indexOf(RVERSTART + "%") + (RVERSTART + "%").length(), line.indexOf("%" + RVEREND));
-
+					}
+					
+					if (line.contains(RJAVAPATHSTART + "%")) {
+						rjavapath = line.substring(line.indexOf(RJAVAPATHSTART + "%") + (RJAVAPATHSTART + "%").length(), line.indexOf("%" + RJAVAPATHEND));
 					}
 
 				}
@@ -1128,8 +1153,9 @@ public class ServerManager {
 
 		System.out.println("+rversion:" + rversion);
 		System.out.println("+rlibraypath:" + rlibraypath);
+		System.out.println("+rjavapath:" + rjavapath);
 		if (rlibraypath != null) {
-			return new String[] { rlibraypath, rversion };
+			return new String[] { rlibraypath, rversion, rjavapath };
 		} else {
 
 			return null;
