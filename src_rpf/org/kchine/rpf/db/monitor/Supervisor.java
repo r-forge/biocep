@@ -218,7 +218,7 @@ public class Supervisor {
 
 	synchronized void reload() {
 
-		saveSelection();
+		
 
 		try {
 			_V = _registry.getTableData("SERVANTS");
@@ -232,6 +232,9 @@ public class Supervisor {
 			_disconnected = false;
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
+					
+					saveSelection();
+					
 					((AbstractTableModel) _servantTable.getModel()).fireTableDataChanged();
 					((AbstractTableModel) _poolTable.getModel()).fireTableDataChanged();
 					((AbstractTableModel) _nodeTable.getModel()).fireTableDataChanged();

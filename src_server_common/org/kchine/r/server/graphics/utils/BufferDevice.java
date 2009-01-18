@@ -98,6 +98,14 @@ public class BufferDevice implements GDDevice {
 		return null;
 	}
 
+	public byte[] getWmf() throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getEmf() throws RemoteException {
+		return null;
+	}
+	
 	public byte[] getJpg() throws RemoteException {
 		return null;
 	}

@@ -80,6 +80,7 @@ public class ServerManager {
 
 	public static String INSTALL_DIR = null;
 	public static String PLUGINS_DIR = null;
+	public static String EXTENSIONS_DIR = null;
 	public static final String EMBEDDED_R = "R-version-2.8.0";
 	public static final int ENTRIES_NUMBER = 4832;
 
@@ -118,11 +119,23 @@ public class ServerManager {
 				
 		if (System.getenv("BIOCEP_PLUGINS_HOME") != null) {
 			PLUGINS_DIR = System.getenv("BIOCEP_PLUGINS_HOME");
+		} else if (System.getProperty("plugins.home")!=null && !System.getProperty("plugins.home").equals("")) {			
+			PLUGINS_DIR = System.getProperty("plugins.home");
 		} else {
 			PLUGINS_DIR = INSTALL_DIR + "/plugins";
 		}
-		
 		if (!new File(PLUGINS_DIR).exists())  new File(PLUGINS_DIR).mkdirs();
+
+		
+		
+		if (System.getenv("BIOCEP_EXTENSIONS_HOME") != null) {
+			EXTENSIONS_DIR = System.getenv("BIOCEP_EXTENSIONS_HOME");
+		} else if (System.getProperty("extensions.home")!=null && !System.getProperty("extensions.home").equals("")) {			
+			EXTENSIONS_DIR = System.getProperty("extensions.home");
+		} else {
+			EXTENSIONS_DIR = INSTALL_DIR + "/extensions";
+		}
+		if (!new File(EXTENSIONS_DIR).exists())  new File(EXTENSIONS_DIR).mkdirs();
 
 	}
 
@@ -145,7 +158,8 @@ public class ServerManager {
 		"job.id", "job.name", "notify.email", 
 		"node", 
 		"http.port",
-		"cloud"};
+		"cloud",
+		"extensions.home"};
 
 	private static JTextArea createRSshProgressArea;
 	private static JProgressBar createRSshProgressBar;
@@ -700,6 +714,7 @@ public class ServerManager {
 			String cp = INSTALL_DIR + "classes";
 
 			try {
+
 
 				/*
 				 * if (keepAlive) { try

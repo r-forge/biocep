@@ -3,6 +3,7 @@ package org.kchine.r.server.scripting;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.PrintStream;
@@ -12,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Vector;
 
 import server.ServerManager;
 
@@ -28,22 +30,58 @@ public class GroovyInterpreterSingleton {
 				
 				try {
 					
-
-					File[] extraJarFiles=new File(ServerManager.INSTALL_DIR).listFiles(new FilenameFilter(){
+					System.out.println(ServerManager.EXTENSIONS_DIR);
+					Vector<URL> cl_urls = new Vector<URL>();					
+					File[] extextensionsJarFiles=new File(ServerManager.EXTENSIONS_DIR).listFiles(new FilenameFilter(){
 						public boolean accept(File dir, String name) {
 							return name.endsWith(".jar");
 						}
-					});
-					
-					Arrays.sort(extraJarFiles);
-					URL[] urls=new URL[extraJarFiles.length];
-					for (int i=0; i<extraJarFiles.length;++i) {
-						urls[i]=extraJarFiles[i].toURI().toURL();
+					});					
+					Arrays.sort(extextensionsJarFiles);
+					for (int i=0; i<extextensionsJarFiles.length;++i) {
+						cl_urls.add(extextensionsJarFiles[i].toURI().toURL());
 					}
 					
-					final Class<?> GroovyShellClass=new URLClassLoader(urls, GroovyInterpreterSingleton.class.getClassLoader()).loadClass("groovy.lang.GroovyShell");
-									
-					final Object groovyShell=GroovyShellClass.newInstance();
+					
+					File[] extensionsDirs=new File(ServerManager.EXTENSIONS_DIR).listFiles(new FileFilter(){
+						public boolean accept(File pathname) {
+							return pathname.isDirectory();
+						}
+					});										
+					Arrays.sort(extensionsDirs);
+					
+					for (int i=0; i<extensionsDirs.length;++i) {
+						File pluginCodeBase=extensionsDirs[i];						
+						File classesDir = new File(pluginCodeBase.getAbsoluteFile() + "/classes");
+						File libDir = new File(pluginCodeBase.getAbsoluteFile() + "/lib");
+						File[] libList = new File[0];
+						if (libDir.exists()) {
+							libList = libDir.listFiles(new FilenameFilter() {
+								public boolean accept(File dir, String name) {
+									return name.endsWith(".jar");
+								}
+							});
+						}						
+						if (classesDir.exists())
+							cl_urls.add(classesDir.toURI().toURL());
+						for (int j = 0; j < libList.length; ++j)
+							cl_urls.add(libList[j].toURI().toURL());
+						
+					}
+					
+
+					System.out.println(cl_urls);
+					ClassLoader cl = null;
+					if (cl_urls.size()==0) {
+						cl=GroovyInterpreterSingleton.class.getClassLoader();
+					} else {
+						cl=new URLClassLoader(cl_urls.toArray(new URL[0]), GroovyInterpreterSingleton.class.getClassLoader());
+					}
+					
+					System.out.println("*****"+cl.getResourceAsStream("org/kchine/ooc/BiocepOpenOffice.oxt"));
+					
+					final Class<?> GroovyShellClass=cl.loadClass("groovy.lang.GroovyShell");
+					final Object groovyShell=GroovyShellClass.getConstructor(ClassLoader.class).newInstance(cl);
 					_groovy = new GroovyInterpreter() {
 						    private String _status;
 							public String exec(String expression) throws Exception {
@@ -149,5 +187,19 @@ public class GroovyInterpreterSingleton {
 			return _groovy;
 		}
 	}
+	
+	static public void main (String[] args) throws Exception{
+		GroovyInterpreter gr=getInstance();
+		System.out.println(gr.exec("import server.DirectJNI;"));
+		System.out.println(gr.exec("print server.DirectJNI.getDate();"));
+		
+		System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
+		System.out.println(gr.exec("org.kchine.ooc.OOConverter.odgToWmf(\"c:/loess.odg\", \"c:/loess.wmf\" );"));
+
+		System.exit(0);
+		
+	}
+	
+	
 	
 }

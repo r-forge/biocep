@@ -127,6 +127,8 @@ import org.kchine.r.server.graphics.GraphicNotifier;
 import org.kchine.r.server.graphics.primitive.GDObject;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
 import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+import org.kchine.r.server.scripting.GroovyInterpreter;
+import org.kchine.r.server.scripting.GroovyInterpreterSingleton;
 import org.kchine.r.server.scripting.PythonInterpreterSingleton;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl;
@@ -197,11 +199,11 @@ public class DirectJNI {
 	private PrintStream _o = System.out;
 	private HashMap<String, UserStatus> _usersHash = new HashMap<String, UserStatus>();
 	private HashMap<String, SpreadsheetModelRemoteImpl> _spreadsheetTableModelRemoteHashMap = new HashMap<String, SpreadsheetModelRemoteImpl>();
-	private Vector<RConsoleActionListener> _ractionListeners=new Vector<RConsoleActionListener>();
+	private Vector<RConsoleActionListener> _ractionListeners = new Vector<RConsoleActionListener>();
 	private String _originatorUID;
 	private Vector<RCallBack> _callbacks = new Vector<RCallBack>();
-	private Vector<RCollaborationListener> _rCollaborationListeners = new Vector<RCollaborationListener>();	
-	
+	private Vector<RCollaborationListener> _rCollaborationListeners = new Vector<RCollaborationListener>();
+
 	public static DirectJNI getInstance() {
 
 		if (_djni != null)
@@ -2839,7 +2841,6 @@ public class DirectJNI {
 			DirectJNI.this.removeAllRCallbacks();
 		}
 
-
 		public void addRCollaborationListener(RCollaborationListener collaborationListener) throws RemoteException {
 			System.out.println("addRCollaborationListener");
 			_rCollaborationListeners.add(collaborationListener);
@@ -3407,7 +3408,7 @@ public class DirectJNI {
 		public String getHostIp() throws RemoteException {
 			return PoolUtils.getHostIp();
 		}
-		
+
 		public String getHostName() throws RemoteException {
 			return PoolUtils.getHostName();
 		}
@@ -3811,7 +3812,7 @@ public class DirectJNI {
 				newProbedVariables[i++] = k;
 			probedVariables = newProbedVariables;
 		}
-		
+
 		public String[] getProbedVariables() throws RemoteException {
 			return probedVariables;
 		}
@@ -3829,11 +3830,11 @@ public class DirectJNI {
 		}
 
 		public void cellsPut(Object value, String location, String spreadsheetName) throws RemoteException {
-			
+
 		}
 
 		public void addProbeOnCells(String spreadsheetName) throws RemoteException {
-			
+
 		}
 
 		public boolean isProbeOnCell(String spreadsheetName) throws RemoteException {
@@ -3841,10 +3842,10 @@ public class DirectJNI {
 		}
 
 		public void removeProbeOnCells(String spreadsheetName) throws RemoteException {
-			
+
 		}
-		
-		public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException {		
+
+		public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException {
 			return null;
 		}
 
@@ -4112,6 +4113,102 @@ public class DirectJNI {
 			return null;
 		}
 
+		public byte[] getWmf() throws RemoteException {
+
+			File tempFile = null;
+			try {
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".svg").getCanonicalFile();
+				if (tempFile.exists())
+					tempFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+
+			File tempWmfFile = null;
+			try {
+				tempWmfFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".wmf").getCanonicalFile();
+				if (tempWmfFile.exists())
+					tempWmfFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+
+			boolean svgFunctionAvailable = false;
+			boolean CairoFunctionAvailable = false;
+			if (!svgFunctionAvailable) {
+				DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");
+				CairoFunctionAvailable = DirectJNI.getInstance().getRServices().symbolExists("Cairo");
+			}
+
+			String SvgDeviceName = null;
+			if (svgFunctionAvailable)
+				SvgDeviceName = "svg";
+			else
+				SvgDeviceName = "Cairo";
+
+			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
+
+			DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
+
+			final String createDeviceCommand = SvgDeviceName + (SvgDeviceName.equals("svg") ? "" : "SVG") + "(file = \""
+					+ tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (getSize().width / getSize().height)) + ", height = "
+					+ 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
+
+			System.out.println("createDeviceCommand:" + createDeviceCommand);
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+				System.out.println("Status:" + DirectJNI.getInstance().getRServices().getStatus());
+			}
+
+			int cairoDevice = DirectJNI.getInstance().getDevice(SvgDeviceName);
+			DirectJNI.getInstance().getRServices().evaluate(
+					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + cairoDevice + ");" + ".PrivateEnv$dev.set("
+							+ currentDevice + ");", 3);
+
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+
+			if (tempFile.exists()) {
+
+				byte[] result = null;
+				try {
+
+					DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
+
+					GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
+					System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
+					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgToWmf(\"" + tempFile.getAbsolutePath().replace('\\','/') + "\", \"" + tempWmfFile.getAbsolutePath().replace('\\','/') + "\" );"));
+
+					
+					RandomAccessFile raf = new RandomAccessFile(tempWmfFile, "r");
+					result = new byte[(int) raf.length()];
+					raf.readFully(result);
+					raf.close();
+
+					tempWmfFile.delete();
+					tempFile.delete();
+
+					return result;
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RemoteException("", e);
+				}
+
+			} else {
+				return null;
+			}
+
+		}
+
+		public byte[] getEmf() throws RemoteException {
+			return null;
+		}
+
 		public byte[] getJpg() throws RemoteException {
 			return null;
 		}
@@ -4190,8 +4287,8 @@ public class DirectJNI {
 
 			DirectJNI.getInstance().shutdownDevices("png");
 
-			final String createDeviceCommand = "png(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-					+ getSize().width + ", height = " + getSize().height + " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
+			final String createDeviceCommand = "png(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + getSize().width
+					+ ", height = " + getSize().height + " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
 			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
@@ -4286,9 +4383,6 @@ public class DirectJNI {
 	}
 
 	private GraphicNotifier gn = new LocalGraphicNotifier();
-	
-	
-	
 
 	public GraphicNotifier getGraphicNotifier() {
 		return gn;
@@ -4527,9 +4621,9 @@ public class DirectJNI {
 	}
 
 	public void notifyRActionListeners(final RConsoleAction action) {
-		action.getAttributes().put("originatorUID",getOriginatorUID());
-		Vector<RConsoleActionListener> ractionListenersToRemove=new Vector<RConsoleActionListener>();									
-		for (int i=0; i<_ractionListeners.size();++i) {
+		action.getAttributes().put("originatorUID", getOriginatorUID());
+		Vector<RConsoleActionListener> ractionListenersToRemove = new Vector<RConsoleActionListener>();
+		for (int i = 0; i < _ractionListeners.size(); ++i) {
 			try {
 				_ractionListeners.elementAt(i).rConsoleActionPerformed(action);
 			} catch (Exception e) {
@@ -4553,13 +4647,13 @@ public class DirectJNI {
 	}
 
 	public String getOriginatorUID() {
-		return _originatorUID;		
+		return _originatorUID;
 	}
 
-	public void setOrginatorUID(String uid){
-		_originatorUID=uid;
+	public void setOrginatorUID(String uid) {
+		_originatorUID = uid;
 	}
-	
+
 	public void removeAllRCallbacks() {
 		_callbacks.removeAllElements();
 	}
@@ -4571,7 +4665,7 @@ public class DirectJNI {
 	public void addRCallback(RCallBack callback) {
 		_callbacks.add(callback);
 	}
-	
+
 	public Vector<RCallBack> getRCallBacks() {
 		return _callbacks;
 	}

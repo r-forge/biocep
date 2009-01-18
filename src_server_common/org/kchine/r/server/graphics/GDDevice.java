@@ -71,12 +71,17 @@ public interface GDDevice extends Remote {
 
 	public byte[] getBmp() throws RemoteException;
 
+	public byte[] getWmf() throws RemoteException;
+	
+	public byte[] getEmf() throws RemoteException;
+	
 	public byte[] getXfig() throws RemoteException;
 	
 	public String getId() throws RemoteException;
 	
 	public boolean isBroadcasted() throws RemoteException;
 	
-	public void broadcast() throws RemoteException;
+	public void broadcast() throws RemoteException;	
+	
 
 }
