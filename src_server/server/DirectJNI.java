@@ -4116,8 +4116,13 @@ public class DirectJNI {
 		public byte[] getWmf() throws RemoteException {
 
 			File tempFile = null;
+			File tempOdgFile = null;
+			File tempWmfFile = null;
 			try {
-				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".svg").getCanonicalFile();
+				long currentTimeMillis=System.currentTimeMillis();
+				tempFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".svg").getCanonicalFile();
+				tempOdgFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".odg").getCanonicalFile();
+				tempWmfFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".wmf").getCanonicalFile();
 				if (tempFile.exists())
 					tempFile.delete();
 			} catch (Exception e) {
@@ -4125,15 +4130,7 @@ public class DirectJNI {
 				throw new RemoteException("", e);
 			}
 
-			File tempWmfFile = null;
-			try {
-				tempWmfFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".wmf").getCanonicalFile();
-				if (tempWmfFile.exists())
-					tempWmfFile.delete();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteException("", e);
-			}
+			
 
 			boolean svgFunctionAvailable = false;
 			boolean CairoFunctionAvailable = false;
@@ -4182,7 +4179,6 @@ public class DirectJNI {
 					GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
 					System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
 					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgToWmf(\"" + tempFile.getAbsolutePath().replace('\\','/') + "\", \"" + tempWmfFile.getAbsolutePath().replace('\\','/') + "\" );"));
-
 					
 					RandomAccessFile raf = new RandomAccessFile(tempWmfFile, "r");
 					result = new byte[(int) raf.length()];
@@ -4190,6 +4186,7 @@ public class DirectJNI {
 					raf.close();
 
 					tempWmfFile.delete();
+					tempOdgFile.delete();
 					tempFile.delete();
 
 					return result;
