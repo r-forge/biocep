@@ -19,6 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.RandomAccessFile;
 import java.rmi.Naming;
 import java.util.Arrays;
 import java.util.Properties;
@@ -30,14 +31,25 @@ import org.kchine.r.RNumeric;
 import org.kchine.r.packages.vsn.vsnFunction;
 import org.kchine.r.packages.vsn.Vsn;
 import org.kchine.r.server.RServices;
+import org.kchine.r.server.graphics.GDDevice;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
 public class DirectRRmi {
 	public static void main(String[] args) throws Throwable {
-		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));		
+		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
+		GDDevice  device = r.newDevice(400, 400);
+		r.consoleSubmit("plot(pressure)");
+		byte[] pdf=device.getWmf();
+		RandomAccessFile raf=new RandomAccessFile("c:/tt.wmf","rw");
+		raf.setLength(0);
+		raf.write(pdf);
+		raf.close();
 		System.out.println("Available Packages : " + Arrays.toString(r.listPackages()));
+		
+		System.exit(0);
+		
 		Properties props=new Properties();
 		props.put("naming.mode", "db");
 		r.export(props, "Hey", false);
