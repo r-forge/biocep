@@ -29,9 +29,9 @@ import java.util.Vector;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.UndoManager;
 
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
 
-import server.DirectJNI;
 
 public class SpreadsheetModelRemoteImpl extends TableModelRemoteImpl implements SpreadsheetModelRemote, SpreadsheetTableModelInterface,
 		SpreadsheetTableModelClipboardInterface {

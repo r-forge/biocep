@@ -1426,7 +1426,7 @@
 			<param name="servant.classpath" value="${JRI_JAR}${path.separator}${CORE_JAR}"/>
 			<param name="servant.codebase" value="file://${windows.root.slash}${basedir}/${CORE_JAR}"/>
 			<param name="working.dir.root" value="${basedir}/VirtualRWorkbench/wdir"/>
-			<param name="servantclass" value="server.RServantImpl"/>											
+			<param name="servantclass" value="org.kchine.r.server.impl.RServantImpl"/>											
 			
 		</antcall>		
 	</target>
@@ -1650,11 +1650,11 @@
 				</classpath>
 			</javac>
 			
-			<rmic classpath="binsrv" base="binsrv" classname="server.RServantImpl"/>
-			<rmic classpath="binsrv" base="binsrv" classname="server.AssignInterfaceImpl"/>
-			<rmic classpath="binsrv" base="binsrv" classname="server.RNIImpl"/>
-			<rmic classpath="binsrv" base="binsrv" classname="server.GraphicNotifierImpl"/>
-			<rmic classpath="binsrv" base="binsrv" classname="server.GDDeviceImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.impl.RServantImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.impl.AssignInterfaceImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.impl.RNIImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.impl.GraphicNotifierImpl"/>
+			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.impl.GDDeviceImpl"/>
 		
 			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.spreadsheet.TableModelRemoteImpl"/>
 			<rmic classpath="binsrv" base="binsrv" classname="org.kchine.r.server.spreadsheet.TableModelListenerRemoteImpl"/>
@@ -2020,11 +2020,11 @@
 			</classpath>
 		</javac>
 		
-		<rmic classpath="bin" base="bin" classname="server.RServantImpl"/>
-		<rmic classpath="bin" base="bin" classname="server.AssignInterfaceImpl"/>
-		<rmic classpath="bin" base="bin" classname="server.RNIImpl"/>
-		<rmic classpath="bin" base="bin" classname="server.GraphicNotifierImpl"/>
-		<rmic classpath="bin" base="bin" classname="server.GDDeviceImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.impl.RServantImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.impl.AssignInterfaceImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.impl.RNIImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.impl.GraphicNotifierImpl"/>
+		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.impl.GDDeviceImpl"/>
 		
 		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.spreadsheet.TableModelRemoteImpl"/>
 		<rmic classpath="bin" base="bin" classname="org.kchine.r.server.spreadsheet.TableModelListenerRemoteImpl"/>

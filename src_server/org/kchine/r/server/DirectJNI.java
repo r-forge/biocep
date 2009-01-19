@@ -18,9 +18,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server;
 
-import graphics.rmi.RGraphicsPanelRemote;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.geom.Point2D;
@@ -125,6 +124,8 @@ import org.kchine.r.server.graphics.GDContainerBag;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.graphics.GraphicNotifier;
 import org.kchine.r.server.graphics.primitive.GDObject;
+import org.kchine.r.server.impl.DefaultAssignInterfaceImpl;
+import org.kchine.r.server.impl.RGraphicsPanelRemote;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
 import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
 import org.kchine.r.server.manager.ServerManager;
@@ -145,7 +146,10 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static server.RConst.*;
+import server.Java2DUtils;
+import server.NoMappingAvailable;
+
+import static org.kchine.r.server.RConst.*;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -307,7 +311,7 @@ public class DirectJNI {
 		}
 	}
 
-	InputStream getResourceAsStream(String resource) {
+	public InputStream getResourceAsStream(String resource) {
 		if (resource.startsWith("/"))
 			resource = resource.substring(1);
 		byte[] buffer = _resourceCache.get(resource);
@@ -446,7 +450,7 @@ public class DirectJNI {
 		}
 
 		try {
-			String initRSourcingLog = getRServices().sourceFromResource("/rscripts/init.R");
+			String initRSourcingLog = getRServices().sourceFromResource("/org/kchine/r/server/rscripts/init.R");
 			System.out.println("init.R sourcing log : " + initRSourcingLog);
 			initPrivateEnv();
 			_continueStr = ((RChar) ((RList) getRServices().getObject("options('continue')")).getValue()[0]).getValue()[0];
@@ -568,7 +572,8 @@ public class DirectJNI {
 		}
 	}
 
-	long putObject(Object obj) throws Exception {
+	//public for internal use only
+	public long putObject(Object obj) throws Exception {
 
 		Rengine e = _rEngine;
 
@@ -1535,7 +1540,8 @@ public class DirectJNI {
 		}
 	}
 
-	RObject getObjectFromReference(final ReferenceInterface refObj) throws Exception {
+	// public for internal use only
+	public RObject getObjectFromReference(final ReferenceInterface refObj) throws Exception {
 		// log.info( "-->getObjectFromReference :" + refObj);
 		Rengine e = _rEngine;
 
@@ -1809,7 +1815,7 @@ public class DirectJNI {
 		return null;
 	}
 
-	String newTemporaryVariableName() {
+	public String newTemporaryVariableName() {
 		return V_TEMP_PREFIXE + _tempCounter++;
 	}
 
@@ -1837,6 +1843,10 @@ public class DirectJNI {
 
 	public RServices getRServices() {
 		return _rServices;
+	}
+	
+	public RNI getRNI() {
+		return _rni;
 	}
 
 	public static void generateMaps(URL jarUrl) {
@@ -2098,7 +2108,7 @@ public class DirectJNI {
 		if (probedVariables.length > 0) {
 			try {
 				final long[][] finalVariablePointers = new long[1][probedVariables.length];
-				runR(new server.ExecutionUnit() {
+				runR(new org.kchine.r.server.ExecutionUnit() {
 					public void run(Rengine e) {
 						for (int i = 0; i < probedVariables.length; ++i) {
 							int[] exists = e.rniGetBoolArrayI(e.rniEval(e.rniParse("exists('" + probedVariables[i] + "')", 1), 0));
@@ -2122,7 +2132,7 @@ public class DirectJNI {
 		if (probedVariables.length > 0) {
 			try {
 				final long[][] variablePointersAfter = new long[1][probedVariables.length];
-				runR(new server.ExecutionUnit() {
+				runR(new org.kchine.r.server.ExecutionUnit() {
 					public void run(Rengine e) {
 						for (int i = 0; i < probedVariables.length; ++i) {
 							int[] exists = e.rniGetBoolArrayI(e.rniEval(e.rniParse("exists('" + probedVariables[i] + "')", 1), 0));
@@ -2160,7 +2170,7 @@ public class DirectJNI {
 
 			long[] variablePointersBefore = getVariablePointersBefore();
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						e.rniEval(e.rniParse(expression, n), 0);
@@ -2189,7 +2199,7 @@ public class DirectJNI {
 
 			long[] variablePointersBefore = getVariablePointersBefore();
 			final Exception[] exceptionHolder = new Exception[1];
-			runR(new server.ExecutionUnit() {
+			runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						_lastStatus = DirectJNI.this.sourceFromResource(resource);
@@ -2219,7 +2229,7 @@ public class DirectJNI {
 			long[] variablePointersBefore = getVariablePointersBefore();
 
 			final Exception[] exceptionHolder = new Exception[1];
-			runR(new server.ExecutionUnit() {
+			runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						_lastStatus = DirectJNI.this.sourceFromBuffer(buffer);
@@ -2255,7 +2265,7 @@ public class DirectJNI {
 			stringHolder[0] = "";
 			final Exception[] exceptionHolder = new Exception[1];
 
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 
 					try {
@@ -2314,7 +2324,7 @@ public class DirectJNI {
 
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(false, null, methodName, args);
@@ -2345,7 +2355,7 @@ public class DirectJNI {
 			long[] variablePointersBefore = getVariablePointersBefore();
 
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						DirectJNI.this.call(false, varName, methodName, args);
@@ -2377,7 +2387,7 @@ public class DirectJNI {
 
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(true, null, methodName, args);
@@ -2409,7 +2419,7 @@ public class DirectJNI {
 
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(true, null, methodName, args);
@@ -2452,7 +2462,7 @@ public class DirectJNI {
 
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.call(false, null, methodName, args);
@@ -2483,7 +2493,7 @@ public class DirectJNI {
 			if (!(refObj instanceof ReferenceInterface))
 				throw new RemoteException("not an object reference");
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						unprotectSafe(((ReferenceInterface) refObj).getRObjectId());
@@ -2511,7 +2521,7 @@ public class DirectJNI {
 		public RObject getObjectName(final String expression) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, true);
@@ -2550,7 +2560,7 @@ public class DirectJNI {
 				throw new RemoteException("not an object name");
 			final RObject[] robjHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						robjHolder[0] = DirectJNI.this.getObjectFrom(((ObjectNameInterface) objectName).getRObjectEnvironment() + "$"
@@ -2590,7 +2600,7 @@ public class DirectJNI {
 				throw new RemoteException("not an object reference");
 			final RObject[] robjHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						robjHolder[0] = DirectJNI.this.getObjectFromReference((ReferenceInterface) refObj);
@@ -2622,7 +2632,7 @@ public class DirectJNI {
 
 			final RObject[] refHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						refHolder[0] = (RObject) DirectJNI.this.putObjectAndGetReference(obj);
@@ -2653,7 +2663,7 @@ public class DirectJNI {
 
 			final Exception[] exceptionHolder = new Exception[1];
 
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						long resultId = putObject(obj);
@@ -2683,7 +2693,7 @@ public class DirectJNI {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
 
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, false);
@@ -2711,7 +2721,7 @@ public class DirectJNI {
 		public RObject getReference(final String expression) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, true);
@@ -2737,7 +2747,7 @@ public class DirectJNI {
 		public Object getObjectConverted(final String expression) throws RemoteException {
 			final RObject[] objHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.evalAndGetObject(expression, false);
@@ -2774,7 +2784,7 @@ public class DirectJNI {
 			long[] variablePointersBefore = getVariablePointersBefore();
 
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						String rootvar = newTemporaryVariableName();
@@ -2806,7 +2816,7 @@ public class DirectJNI {
 			final Exception[] exceptionHolder = new Exception[1];
 			final Boolean[] objHolder = new Boolean[1];
 
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						long id = e.rniEval(e.rniParse(symbol, 1), 0);
@@ -3058,7 +3068,7 @@ public class DirectJNI {
 			long[] variablePointersBefore = getVariablePointersBefore();
 
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 				}
 
@@ -3121,7 +3131,7 @@ public class DirectJNI {
 
 			final String[][] objHolder = new String[1][];
 			final Exception[] exceptionHolder = new Exception[1];
-			_lastStatus = runR(new server.ExecutionUnit() {
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 						objHolder[0] = DirectJNI.this.listExportableSymbols();
@@ -3370,7 +3380,7 @@ public class DirectJNI {
 				demosList = new Vector<String>();
 				try {
 					Properties props = new Properties();
-					props.loadFromXML(getResourceAsStream("/rdemos/list.properties"));
+					props.loadFromXML(getResourceAsStream("/org/kchine/r/server/rdemos/list.properties"));
 					for (Object key : PoolUtils.orderO(props.keySet())) {
 						demosList.add(props.getProperty((String) key));
 					}
@@ -3385,12 +3395,12 @@ public class DirectJNI {
 		}
 
 		public String getDemoSource(String demoName) throws RemoteException {
-			if (!resourceExists("/rdemos/" + demoName + ".r")) {
+			if (!resourceExists("/org/kchine/r/server/rdemos/" + demoName + ".r")) {
 				throw new RemoteException("no demo with name <" + demoName + ">");
 			} else {
 				try {
 					StringBuffer result = new StringBuffer();
-					BufferedReader br = new BufferedReader(new InputStreamReader(getResourceAsStream("/rdemos/" + demoName + ".r")));
+					BufferedReader br = new BufferedReader(new InputStreamReader(getResourceAsStream("/org/kchine/r/server/rdemos/" + demoName + ".r")));
 					String line = null;
 					while ((line = br.readLine()) != null) {
 						result.append(line + "\n");
@@ -4355,7 +4365,7 @@ public class DirectJNI {
 				return;
 
 			final Exception[] exceptionHolder = new Exception[1];
-			String lastStatus = DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+			String lastStatus = DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 
@@ -4399,7 +4409,7 @@ public class DirectJNI {
 	private static boolean _initHasBeenCalled = false;
 
 	public void initPrivateEnv() {
-		runR(new server.ExecutionUnit() {
+		runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					_privateEnvExp = e.rniEval(e.rniParse(PENV, 1), 0);

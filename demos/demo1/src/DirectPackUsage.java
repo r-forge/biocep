@@ -27,9 +27,9 @@ import org.kchine.r.RNamedArgument;
 import org.kchine.r.RNumeric;
 import org.kchine.r.packages.vsn.Vsn;
 import org.kchine.r.packages.vsn.vsnFunction;
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
 
-import server.DirectJNI;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

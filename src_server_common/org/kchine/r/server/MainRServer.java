@@ -18,8 +18,8 @@
  */
 package org.kchine.r.server;
 
+import org.kchine.r.server.impl.RServantImpl;
 import org.kchine.rpf.MainServer;
-import server.RServantImpl;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

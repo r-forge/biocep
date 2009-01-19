@@ -28,23 +28,23 @@ try(assign('X11', X11 , env=.PrivateEnv),silent=TRUE);
 
 assign('javapager', function (file, header = rep("", nfiles), title = "R Information", 
     delete.file = FALSE, pager = getOption("pager"), encoding = "") {    
-	.jcall("server/RListener",,"pager", as.character(file), as.character(header), as.character(title),  as.character(delete.file) )
+	.jcall("org/kchine/r/server/RListener",,"pager", as.character(file), as.character(header), as.character(title),  as.character(delete.file) )
 }, env=.PrivateEnv)
 
 options(pager=.PrivateEnv$javapager)
 
 load.lightpack <- function( s )  {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"loadLightPack", s ); 
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"loadLightPack", s ); 
 	if (result[1]=='OK') { eval(parse("", text=result[2])); } else { eval(parse("", text=result[2]));  }
 }
 
 list.lightpack <- function()  {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"listLightPacks", 'void' ); 
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"listLightPacks", 'void' ); 
 	if (result[1]=='OK') { eval(parse("", text=result[2])); } else { eval(parse("", text=result[2])); }
 }
 
 assign('notifyJavaListeners', function(parameters)  {
-	.jcall( obj="server/RListener" , "V" ,"notifyJavaListeners", parameters )	
+	.jcall( obj="org/kchine/r/server/RListener" , "V" ,"notifyJavaListeners", parameters )	
 }, env=.PrivateEnv)
 
 
@@ -81,14 +81,14 @@ help <- function (topic, offline = FALSE, package = NULL, lib.loc = NULL,
     packStr<-substitute(package);
 	
 
-    .jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"help", as.character(topicStr)[1], as.character(packStr)[1] , as.character(lib.loc) );
+    .jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"help", as.character(topicStr)[1], as.character(packStr)[1] , as.character(lib.loc) );
     
     'Help is being displayed..'
  	   
 }
 
 q <- function (save = "default", status = 0, runLast = TRUE) {
-	.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"q", as.character(save) , as.character(status) , as.character(runLast) );
+	.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"q", as.character(save) , as.character(status) , as.character(runLast) );
 	return(invisible(NULL)); 
 }
 
@@ -123,7 +123,7 @@ ls <-function (name, pos, envir, all.names = FALSE,  pattern) {
 	}	
 	
 	if (identical(globalenv(), e)) {
-		hiddenSymbols<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"forbiddenSymbols", 'void' );
+		hiddenSymbols<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"forbiddenSymbols", 'void' );
 		result<-character(0);
 		for (i in 1:length(lsresult)) {
 			if (.PrivateEnv$contains(lsresult[i], hiddenSymbols)==FALSE) result<-append(result, lsresult[i]);
@@ -154,7 +154,7 @@ objects <-function (name, pos, envir, all.names = FALSE,  pattern) {
 	}	
 	
 	if (identical(globalenv(), e)) {
-		hiddenSymbols<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"forbiddenSymbols", 'void' );
+		hiddenSymbols<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"forbiddenSymbols", 'void' );
 		result<-character(0);
 		for (i in 1:length(lsresult)) {
 			if (.PrivateEnv$contains(lsresult[i], hiddenSymbols)==FALSE) result<-append(result, lsresult[i]);
@@ -168,7 +168,7 @@ objects <-function (name, pos, envir, all.names = FALSE,  pattern) {
 
 setwd <- function( dir )  {
 	.PrivateEnv$setwd(dir);
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"reinitWorkingDirectory", getwd() );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"reinitWorkingDirectory", getwd() );
 	return(invisible(NULL)); 
 }
 
@@ -180,17 +180,17 @@ setwd <- function( dir )  {
 #dev.off<-function(which = dev.cur()){'dev.off not allowed in this context'}
 
 setClusterPropertiesBiocep <- function( gprops )  {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"setClusterProperties", gprops ); 
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"setClusterProperties", gprops ); 
 	if (result[1]=='OK') { } else { eval(parse("", text=result[2])); }
 }
 
 makeClusterBiocep <- function( n=3, nodeName='N1' )  {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"makeCluster",.jlong(n) , nodeName ); 
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"makeCluster",.jlong(n) , nodeName ); 
 	if (result[1]=='OK') { result[2] } else { eval(parse("", text=result[2])); '' }
 }
 
 clusterEvalQBiocep <- function( cl, exp )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"clusterEvalQ", cl, exp );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterEvalQ", cl, exp );
 	if (result[1]=='OK') {		
 		eval(parse("", text=result[2]))
 	} else {
@@ -199,7 +199,7 @@ clusterEvalQBiocep <- function( cl, exp )  {
 }
 
 clusterExportBiocep <- function( cl, v )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"clusterExport", cl, v );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterExport", cl, v );
 	if (result[1]=='OK') {
 		return(invisible(NULL)); 
 	} else {
@@ -210,7 +210,7 @@ clusterExportBiocep <- function( cl, v )  {
 clusterApplyBiocep <- function( cl, v, fn)  {
     assign('clusterApplyVar', v , env=.PrivateEnv);
     #assign('clusterApplyFunction', v , env=.PrivateEnv);
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"clusterApply", cl, ".PrivateEnv$clusterApplyVar" , fn );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterApply", cl, ".PrivateEnv$clusterApplyVar" , fn );
 	rm('clusterApplyVar', envir=.PrivateEnv);
 	#rm('clusterApplyFunction', envir=.PrivateEnv);	 
 	if (result[1]=='OK') { 
@@ -223,7 +223,7 @@ clusterApplyBiocep <- function( cl, v, fn)  {
 }
 
 stopClusterBiocep <- function( cl )  {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"stopCluster", cl );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"stopCluster", cl );
 	if (result[1]=='OK') {
 		return(invisible(NULL)); 
 	} else {
@@ -232,7 +232,7 @@ stopClusterBiocep <- function( cl )  {
 }
 
 pythonExec <- function( exp )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"pythonExec", exp ); 
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"pythonExec", exp ); 
 	if (result[1]=='OK') {		
 		if (result[2]!="") { eval(parse("", text=result[2])) } else {return(invisible(NULL)); }
 	} else {
@@ -241,7 +241,7 @@ pythonExec <- function( exp )  {
 }
 
 pythonEval <- function( exp )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"pythonEval", exp ); 
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"pythonEval", exp ); 
 	if (result[1]=='OK') {
 		res<-.PrivateEnv$pythonEvalResult;
 		rm('pythonEvalResult', envir=.PrivateEnv);	
@@ -254,14 +254,14 @@ pythonEval <- function( exp )  {
 
 
 rlink.make <- function( mode='rmi' , params=c(''), name=c('') )  {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"makeRLink", mode , params, name); 
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"makeRLink", mode , params, name); 
 	if ( length(result)>=1 && result[1]=='NOK') { eval(parse("", text=result[2])); '' }
 	else { print("RLink Creation Running in Background"); result } 
 	
 }
 
 rlink.console <- function( cl, exp )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"RLinkConsole", cl, exp );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkConsole", cl, exp );
 	if (result[1]=='OK') {		
 		eval(parse("", text=result[2]))
 	} else {
@@ -270,7 +270,7 @@ rlink.console <- function( cl, exp )  {
 }
 
 rlink.get <- function( cl, exp , ato='' )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"RLinkGet", cl, exp, ato );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkGet", cl, exp, ato );
 	if (result[1]=='OK') {		
 		eval(parse("", text=result[2]))
 	} else {
@@ -279,7 +279,7 @@ rlink.get <- function( cl, exp , ato='' )  {
 }
 
 rlink.put <- function( cl, exp , ato='' )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"RLinkPut", cl, exp, ato  );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkPut", cl, exp, ato  );
 	if (result[1]=='OK') {
 		eval(parse("", text=result[2]))
 	} else {
@@ -288,7 +288,7 @@ rlink.put <- function( cl, exp , ato='' )  {
 }
 
 rlink.show <- function( cl )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"RLinkShow", cl);
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkShow", cl);
 	if (result[1]=='OK') {
 		eval(parse("", text=result[2]))
 	} else {
@@ -297,7 +297,7 @@ rlink.show <- function( cl )  {
 }
 
 rlink.list  <- function()  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"RLinkList");
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkList");
 	if (result[1]=='OK') {
 		eval(parse("", text=result[2]))
 	} else {
@@ -306,7 +306,7 @@ rlink.list  <- function()  {
 }
 
 rlink.registry.list  <- function(params='')  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"RLinkRegistryList", params);
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkRegistryList", params);
 	if (length(result)>=1 && result[1]=='NOK') {		
 		eval(parse("", text=result[2]))
 	} else {
@@ -315,7 +315,7 @@ rlink.registry.list  <- function(params='')  {
 }
 
 rlink.release <- function( cl )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"RLinkRelease", cl);
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkRelease", cl);
 	if (result[1]=='OK') {
 		return(invisible(NULL));
 	} else {
@@ -324,12 +324,12 @@ rlink.release <- function( cl )  {
 }
 
 cluster.make <- function( rlinks )  {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"makeRLinkCluster", rlinks ); 
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"makeRLinkCluster", rlinks ); 
 	if (result[1]=='OK') { result[2] } else { eval(parse("", text=result[2])); '' }
 }
 
 cluster.console <- function( cl, exp )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"clusterEvalQ", cl, exp );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterEvalQ", cl, exp );
 	if (result[1]=='OK') {		
 		eval(parse("", text=result[2]))
 	} else {
@@ -338,7 +338,7 @@ cluster.console <- function( cl, exp )  {
 }
 
 cluster.put <- function( cl, exp , ato='' )  {  
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"clusterExport", cl, exp , ato );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterExport", cl, exp , ato );
 	if (result[1]=='OK') {
 		return(invisible(NULL)); 
 	} else {
@@ -349,7 +349,7 @@ cluster.put <- function( cl, exp , ato='' )  {
 cluster.apply <- function( cl, v, fn)  {
     assign('clusterApplyVar', v , env=.PrivateEnv);
     #assign('clusterApplyFunction', v , env=.PrivateEnv);
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"clusterApply", cl, ".PrivateEnv$clusterApplyVar" , fn );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterApply", cl, ".PrivateEnv$clusterApplyVar" , fn );
 	rm('clusterApplyVar', envir=.PrivateEnv);
 	#rm('clusterApplyFunction', envir=.PrivateEnv);	 
 	if (result[1]=='OK') { 
@@ -362,7 +362,7 @@ cluster.apply <- function( cl, v, fn)  {
 }
 
 cluster.stop <- function( cl )  {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"stopCluster", cl );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"stopCluster", cl );
 	if (result[1]=='OK') {
 		return(invisible(NULL)); 
 	} else {
@@ -373,7 +373,7 @@ cluster.stop <- function( cl )  {
 
 cells.put <- function (  value , location, name='' ) {
 	.PrivateEnv$spreadsheet.put.value<-value;
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"spreadsheetPut", location , name );
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"spreadsheetPut", location , name );
 	rm (spreadsheet.put.value, envir=.PrivateEnv)
 	if (result[1]=='OK') {
 		return(invisible(NULL)); 
@@ -383,7 +383,7 @@ cells.put <- function (  value , location, name='' ) {
 }
 
 cells.get <- function ( range , type='numeric', name='' ) {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"spreadsheetGet",  range, type , name);
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"spreadsheetGet",  range, type , name);
 	if (result[1]=='OK') {
 		return(.PrivateEnv$spreadsheet.get.result); 
 	} else {
@@ -393,7 +393,7 @@ cells.get <- function ( range , type='numeric', name='' ) {
 
 
 cells.select <- function ( range , name='' ) {
-	result<-.jcall( obj="server/RListener" , "[Ljava/lang/String;" ,"spreadsheetSelect",  range, name);
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"spreadsheetSelect",  range, name);
 	if (result[1]=='OK') {
 		return(invisible(NULL));
 	} else {

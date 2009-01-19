@@ -183,7 +183,7 @@
 					<param name="servant.classpath" value="${basedir}/lib/pool/commons-pool-1.3.jar${path.separator}${JRI_JAR}${path.separator}${CORE_JAR}${path.separator}${demo.generatedir}/mapping.jar"/>
 					<!--<param name="servant.codebase" value="file://${windows.root.slash}${CORE_JAR} file://${windows.root.slash}${demo.mappingjar}"/>-->
 					<param name="servant.codebase" value="http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/rmi/RJB.jar http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/rmi/mapping.jar"/>
-					<param name="servantclass" value="server.RServantImpl"/>											
+					<param name="servantclass" value="org.kchine.r.server.impl.RServantImpl"/>											
 					<param name="node" value="${node}" />
 					
 					

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RConsoleAction;
 import org.rosuda.ibase.Common;
 import org.rosuda.ibase.Dependent;
@@ -45,7 +46,6 @@ import org.rosuda.ibase.toolkit.TFrame;
 import org.rosuda.ibase.toolkit.TJFrame;
 import org.rosuda.util.Global;
 import org.rosuda.util.MsgDialog;
-import server.DirectJNI;
 
 
 

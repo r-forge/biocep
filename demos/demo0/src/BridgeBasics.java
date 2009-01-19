@@ -26,11 +26,11 @@ import org.kchine.r.RChar;
 import org.kchine.r.RNamedArgument;
 import org.kchine.r.RObjectName;
 import org.kchine.r.RS3;
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RConsoleAction;
 import org.kchine.r.server.RConsoleActionListener;
 import org.kchine.r.server.RServices;
 
-import server.DirectJNI;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

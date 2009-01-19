@@ -16,15 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server.impl;
 
 
 import java.awt.Point;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.graphics.GDContainer;
 import org.kchine.r.server.graphics.GraphicNotifier;
+
 
 /**
  * @author Karim Chine karim.chine@m4x.org
