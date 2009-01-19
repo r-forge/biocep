@@ -18,7 +18,6 @@
  */
 package org.kchine.r.workbench.actions;
 
-import graphics.rmi.GDApplet;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -28,6 +27,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JBufferedImagePanel;
 
 /**
@@ -50,7 +50,7 @@ public class SaveDeviceAsJpgAction extends AbstractAction {
 					final JFileChooser chooser = new JFileChooser();
 					int returnVal = chooser.showOpenDialog(_rgui.getRootComponent());
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) GDApplet.getComponentParent((Component) e.getSource(),
+						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) WorkbenchApplet.getComponentParent((Component) e.getSource(),
 								JBufferedImagePanel.class);
 						ImageIO.write(bufferedImagePanel.getImage(), "jpg", chooser.getSelectedFile());
 					}

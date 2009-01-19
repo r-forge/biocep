@@ -51,7 +51,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.kchine.r.server.RServices;
-import org.kchine.r.server.http.LocalHttpServer;
+import org.kchine.r.server.http.local.LocalHttpServer;
 import org.kchine.r.server.manager.bootstrap.BootSsh;
 import org.kchine.r.server.spreadsheet.TableModelRemoteImpl;
 import org.kchine.rpf.CreationCallBack;

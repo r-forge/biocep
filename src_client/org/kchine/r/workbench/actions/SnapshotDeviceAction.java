@@ -18,7 +18,6 @@
  */
 package org.kchine.r.workbench.actions;
 
-import graphics.rmi.GDApplet;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -29,6 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JBufferedImagePanel;
 
 /**
@@ -52,7 +52,7 @@ public class SnapshotDeviceAction extends AbstractAction {
 
 								JBufferedImagePanel bufferedImagePanel = null;
 
-								bufferedImagePanel = (JBufferedImagePanel) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
+								bufferedImagePanel = (JBufferedImagePanel) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 
 								final JBufferedImagePanel panelclone = new JBufferedImagePanel(bufferedImagePanel.getImage());
 

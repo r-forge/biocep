@@ -72,6 +72,6 @@
    
 </resources>
 
-<application-desc main-class="graphics.rmi.GDAppletLauncher"/>
+<application-desc main-class="org.kchine.r.workbench.WorkbenchLauncher"/>
 
 </jnlp>

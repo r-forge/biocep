@@ -20,7 +20,6 @@
  */
 package org.kchine.r.server.impl;
 
-import http.FreeResourcesListener;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
@@ -68,7 +67,8 @@ import org.kchine.r.server.UserStatus;
 import org.kchine.r.server.Utils;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.graphics.GraphicNotifier;
-import org.kchine.r.server.http.LocalHttpServer;
+import org.kchine.r.server.http.frontend.FreeResourcesListener;
+import org.kchine.r.server.http.local.LocalHttpServer;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
 import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
 import org.kchine.r.server.manager.ServerManager;
@@ -837,9 +837,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 					}
 				});
 				
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.LocalGraphicsServlet(rkit)), "/rvirtual/graphics/*");
-				root.addServlet(new ServletHolder(new http.CommandServlet(rkit,false)), "/rvirtual/cmd/*");
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalGraphicsServlet(rkit)), "/rvirtual/graphics/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(rkit,false)), "/rvirtual/cmd/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
 				System.out.println("+ going to start virtualization http server port : " + port);
 				_virtualizationServer.start();				
 				System.out.println("HTTP R URL :"+"http://"+PoolUtils.getHostIp()+":"+port + "/rvirtual/cmd");

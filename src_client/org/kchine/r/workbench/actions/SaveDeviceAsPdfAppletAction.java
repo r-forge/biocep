@@ -23,14 +23,14 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import org.kchine.r.server.http.frontend.GraphicsServlet;
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JBufferedImagePanel;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
 import org.kchine.rpf.PoolUtils;
 
 
-import graphics.rmi.GDApplet;
-import http.GraphicsServlet;
 
 import java.awt.Component;
 import java.io.File;
@@ -63,7 +63,7 @@ public class SaveDeviceAsPdfAppletAction extends AbstractAction {
 				public void run() {
 					try {
 						_rgui.getRLock().lock();
-						JGDPanelPop panel = (JGDPanelPop) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
+						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 						byte[] result = panel.getGdDevice().getPdf();
 						
 						File selectedFile=chooser.getSelectedFile();

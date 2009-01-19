@@ -321,7 +321,7 @@
 				<if><not><isset property="url"/></not><then><property name="url" value="http://${tomcat.host}:${tomcat.port}/${demo.frontend.war.name}/cmd"/></then></if>
 				
 								
-				<java classname="graphics.rmi.GDAppletLauncher" fork="true" spawn="${spawn}" >
+				<java classname="org.kchine.r.workbench.WorkbenchLauncher" fork="true" spawn="${spawn}" >
 						<classpath>
 							
 							<pathelement path="${JRI_JAR}"/>

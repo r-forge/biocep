@@ -18,12 +18,12 @@
  */
 package org.kchine.r.workbench.views;
 
-import http.HttpMarker;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 
+import org.kchine.r.server.http.HttpMarker;
 import org.kchine.r.server.spreadsheet.AbstractSpreadsheetModel;
 import org.kchine.r.server.spreadsheet.ModelUtils;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;

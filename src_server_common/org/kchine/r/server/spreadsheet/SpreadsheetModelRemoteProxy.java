@@ -18,8 +18,6 @@
  */
 package org.kchine.r.server.spreadsheet;
 
-import http.HttpMarker;
-import http.NotLoggedInException;
 import java.rmi.RemoteException;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -28,6 +26,8 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import org.kchine.r.server.RAction;
+import org.kchine.r.server.http.HttpMarker;
+import org.kchine.r.server.http.frontend.NotLoggedInException;
 
 
 public class SpreadsheetModelRemoteProxy implements SpreadsheetModelRemote , HttpMarker {

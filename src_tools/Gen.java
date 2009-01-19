@@ -734,7 +734,7 @@ public class Gen {
 			pw_web_xml
 					.println("<servlet><servlet-name>"
 							+ shortClassName
-							+ "_servlet</servlet-name><servlet-class>http.InterceptorServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
+							+ "_servlet</servlet-name><servlet-class>org.kchine.r.server.http.frontend.InterceptorServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
 		}
 		
 		pw_web_xml
@@ -745,7 +745,7 @@ public class Gen {
 		pw_web_xml
 		.println("<servlet><servlet-name>"
 				+ "MappingClassServlet"
-				+ "</servlet-name><servlet-class>http.MappingClassServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
+				+ "</servlet-name><servlet-class>org.kchine.r.server.http.frontend.MappingClassServlet</servlet-class><load-on-startup>1</load-on-startup></servlet>");
 
 
 		for (String className : DirectJNI._rPackageInterfacesHash.keySet()) {

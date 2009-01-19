@@ -20,7 +20,6 @@
  */ 
 package org.kchine.r.workbench.dialogs;
 
-import graphics.rmi.GDApplet;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -54,6 +53,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 
 import org.kchine.r.server.RServices;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.db.ConnectionProvider;
@@ -65,7 +65,7 @@ import org.kchine.rpf.db.DBLayer;
  */
 public class LoginDialog extends JDialog {
 
-	public static int mode_int = GDApplet.NEW_R_MODE;
+	public static int mode_int = WorkbenchApplet.NEW_R_MODE;
 	public static String url_str = "http://127.0.0.1:8080/rvirtual/cmd";
 	public static String login_str = "guest";
 	public static String pwd_str = "guest";
@@ -74,7 +74,7 @@ public class LoginDialog extends JDialog {
 	public static String privateName_str = "";
 	
 	
-	public static int rmiMode_int = GDApplet.RMI_MODE_REGISTRY_MODE;
+	public static int rmiMode_int = WorkbenchApplet.RMI_MODE_REGISTRY_MODE;
 
 	public static String rmiregistryIp_str = "127.0.0.1";
 	public static Integer rmiregistryPort_int = 1099;
@@ -457,7 +457,7 @@ public class LoginDialog extends JDialog {
 		//localModeButton.setForeground(new Color(0x00,0x80,0x80));
 		localModeButton.setFont(localModeButton.getFont().deriveFont((float)localModeButton.getFont().getSize()+1));
 		localModeButton.setFont(localModeButton.getFont().deriveFont(java.awt.Font.BOLD));
-		localModeButton.setSelected(mode_int == GDApplet.NEW_R_MODE);
+		localModeButton.setSelected(mode_int == WorkbenchApplet.NEW_R_MODE);
 		localModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();
@@ -468,7 +468,7 @@ public class LoginDialog extends JDialog {
 		//httpModeButton.setForeground(new Color(0x00,0x80,0x80));
 		httpModeButton.setFont(httpModeButton.getFont().deriveFont((float)httpModeButton.getFont().getSize()+1));
 		httpModeButton.setFont(httpModeButton.getFont().deriveFont(java.awt.Font.BOLD));
-		httpModeButton.setSelected(mode_int == GDApplet.HTTP_MODE);
+		httpModeButton.setSelected(mode_int == WorkbenchApplet.HTTP_MODE);
 		httpModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();
@@ -479,7 +479,7 @@ public class LoginDialog extends JDialog {
 		//rmiModeButton.setForeground(new Color(0x00,0x80,0x80));
 		rmiModeButton.setFont(rmiModeButton.getFont().deriveFont((float)rmiModeButton.getFont().getSize()+1));
 		rmiModeButton.setFont(rmiModeButton.getFont().deriveFont(java.awt.Font.BOLD));
-		rmiModeButton.setSelected(mode_int == GDApplet.RMI_MODE);
+		rmiModeButton.setSelected(mode_int == WorkbenchApplet.RMI_MODE);
 		rmiModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateDynamicPanel();
@@ -511,7 +511,7 @@ public class LoginDialog extends JDialog {
 		
 
 		rmiModeRegistryModeButton = new JRadioButton("Rmi Registry");
-		rmiModeRegistryModeButton.setSelected(rmiMode_int == GDApplet.RMI_MODE_REGISTRY_MODE);
+		rmiModeRegistryModeButton.setSelected(rmiMode_int == WorkbenchApplet.RMI_MODE_REGISTRY_MODE);
 		rmiModeRegistryModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateRmiDynamicPanel();
@@ -520,7 +520,7 @@ public class LoginDialog extends JDialog {
 		});
 
 		rmiModeDbModeButton = new JRadioButton("Rmi Database");
-		rmiModeDbModeButton.setSelected(rmiMode_int == GDApplet.RMI_MODE_DB_MODE);
+		rmiModeDbModeButton.setSelected(rmiMode_int == WorkbenchApplet.RMI_MODE_DB_MODE);
 		rmiModeDbModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateRmiDynamicPanel();
@@ -529,7 +529,7 @@ public class LoginDialog extends JDialog {
 		});
 
 		rmiModeStubModeButton = new JRadioButton("Rmi Stub");
-		rmiModeStubModeButton.setSelected(rmiMode_int == GDApplet.RMI_MODE_STUB_MODE);
+		rmiModeStubModeButton.setSelected(rmiMode_int == WorkbenchApplet.RMI_MODE_STUB_MODE);
 		rmiModeStubModeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				recreateRmiDynamicPanel();
@@ -744,11 +744,11 @@ public class LoginDialog extends JDialog {
 
 	private void persistState() {
 		if (localModeButton.isSelected())
-			mode_int = GDApplet.NEW_R_MODE;
+			mode_int = WorkbenchApplet.NEW_R_MODE;
 		else if (httpModeButton.isSelected())
-			mode_int = GDApplet.HTTP_MODE;
+			mode_int = WorkbenchApplet.HTTP_MODE;
 		else
-			mode_int = GDApplet.RMI_MODE;
+			mode_int = WorkbenchApplet.RMI_MODE;
 
 		url_str = _url.getText();
 		login_str = _login.getText();
@@ -758,11 +758,11 @@ public class LoginDialog extends JDialog {
 		privateName_str = _privateName.getText();
 
 		if (rmiModeRegistryModeButton.isSelected())
-			rmiMode_int = GDApplet.RMI_MODE_REGISTRY_MODE;
+			rmiMode_int = WorkbenchApplet.RMI_MODE_REGISTRY_MODE;
 		else if (rmiModeDbModeButton.isSelected())
-			rmiMode_int = GDApplet.RMI_MODE_DB_MODE;
+			rmiMode_int = WorkbenchApplet.RMI_MODE_DB_MODE;
 		else
-			rmiMode_int = GDApplet.RMI_MODE_STUB_MODE;
+			rmiMode_int = WorkbenchApplet.RMI_MODE_STUB_MODE;
 
 		rmiregistryIp_str = _rmiregistryIp.getText();
 		try {

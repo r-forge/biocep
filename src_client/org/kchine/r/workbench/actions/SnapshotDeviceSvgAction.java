@@ -18,7 +18,6 @@
  */
 package org.kchine.r.workbench.actions;
 
-import graphics.rmi.GDApplet;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -30,6 +29,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.apache.batik.swing.JSVGCanvas;
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JBufferedImagePanel;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
 
@@ -55,7 +55,7 @@ public class SnapshotDeviceSvgAction extends AbstractAction {
 				try {
 					_rgui.getRLock().lock();
 
-					JGDPanelPop panel = (JGDPanelPop) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
+					JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 
 					Vector<String> result = panel.getGdDevice().getSVGAsText();
 					final String tempFile = System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg";

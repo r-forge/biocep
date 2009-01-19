@@ -21,7 +21,6 @@
 package org.kchine.r.workbench.spreadsheet;
 
 import net.infonode.docking.View;
-import graphics.rmi.GDApplet;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -104,6 +103,7 @@ import org.kchine.r.workbench.CellsChangeListener;
 import org.kchine.r.workbench.ConsoleLogger;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.VariablesChangeListener;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
 import org.kchine.r.workbench.macros.MacroInterface;
 import org.kchine.rpf.PoolUtils;
@@ -534,7 +534,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			e.printStackTrace();
 		}
 
-		ss.getTable().addMouseListener(new GDApplet.PopupListener(new PopupMenu()));
+		ss.getTable().addMouseListener(new WorkbenchApplet.PopupListener(new PopupMenu()));
 		ss.getTable().addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 			}
@@ -1602,7 +1602,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		public FromRDialog() {
 			super((Frame) null, true);
-			setLocationRelativeTo(GDApplet.getComponentParent(ss, JInternalFrame.class));
+			setLocationRelativeTo(WorkbenchApplet.getComponentParent(ss, JInternalFrame.class));
 			getContentPane().setLayout(new GridLayout(1, 2));
 			((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -1923,7 +1923,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 		public EvalDialog() {
 			super((Frame) null, true);
-			setLocationRelativeTo(GDApplet.getComponentParent(ss, JInternalFrame.class));
+			setLocationRelativeTo(WorkbenchApplet.getComponentParent(ss, JInternalFrame.class));
 			getContentPane().setLayout(new GridLayout(1, 2));
 			((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 

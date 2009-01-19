@@ -19,7 +19,6 @@
 package org.kchine.r.workbench.views;
 
 import freemind.main.FreeMindApplet;
-import graphics.rmi.GDApplet;
 
 import java.awt.BorderLayout;
 import java.util.HashMap;
@@ -27,7 +26,8 @@ import java.util.HashMap;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
-import org.kchine.r.server.http.LocalHttpServer;
+import org.kchine.r.server.http.local.LocalHttpServer;
+import org.kchine.r.workbench.WorkbenchApplet;
 
 
 public class BiocepMindMapView extends DynamicView {
@@ -42,7 +42,7 @@ public class BiocepMindMapView extends DynamicView {
 		params.put("initial_mode", "Browse");
 		params.put("selection_method", "selection_method_direct");
 
-		if (GDApplet.class.getResource("/Biocep.mm") != null) {
+		if (WorkbenchApplet.class.getResource("/Biocep.mm") != null) {
 			params.put("browsemode_initial_map", "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/classes/Biocep.mm");
 		} else {
 			params.put("browsemode_initial_map", "http://biocep-distrib.r-forge.r-project.org/Biocep.mm");
