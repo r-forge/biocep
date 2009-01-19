@@ -71,9 +71,11 @@ public interface GDDevice extends Remote {
 
 	public byte[] getBmp() throws RemoteException;
 
-	public byte[] getWmf() throws RemoteException;
+	public byte[] getWmf(boolean useserver) throws RemoteException;
 	
-	public byte[] getEmf() throws RemoteException;
+	public byte[] getEmf(boolean useserver) throws RemoteException;
+	
+	public byte[] getOdg() throws RemoteException;
 	
 	public byte[] getXfig() throws RemoteException;
 	

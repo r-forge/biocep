@@ -53,7 +53,7 @@ public class SaveDeviceAsPngAction extends AbstractAction {
 						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) WorkbenchApplet.getComponentParent((Component) e.getSource(),
 								JBufferedImagePanel.class);
 
-						ImageIO.write(bufferedImagePanel.getImage(), "png", chooser.getSelectedFile());
+						ImageIO.write(bufferedImagePanel.getImage(), "png", org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"png"));
 					}
 
 				} catch (Exception ex) {

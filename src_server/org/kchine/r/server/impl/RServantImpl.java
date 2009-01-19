@@ -955,10 +955,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().groovyExecFromWorkingDirectoryFile(fileName);
 	}
 
-	public boolean isGroovyEnabled() throws RemoteException {
-		return DirectJNI.getInstance().getRServices().isGroovyEnabled();
-	}
-
 	public Object groovyEval(String expression) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().groovyEval(expression);
 	}
@@ -975,6 +971,18 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().getGroovyStatus();
 	}
 
+	public void resetGroovyInterpreter() throws RemoteException {
+		DirectJNI.getInstance().getRServices().resetGroovyInterpreter();
+	}
+	
+	public void uploadExtension(String extensionName, byte[] extension) throws RemoteException{
+		DirectJNI.getInstance().getRServices().uploadExtension(extensionName, extension);		
+	}
+	
+	public void convertFile(String inputFile, String outputFile, String conversionFilter) throws RemoteException {
+		DirectJNI.getInstance().getRServices().convertFile(inputFile, outputFile, conversionFilter);		
+	}
+	
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().newSpreadsheetTableModelRemote(rowCount, colCount);
 	}	

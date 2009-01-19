@@ -1667,4 +1667,11 @@ public class PoolUtils {
 		return true;
 	}
 
+	public static File fixExtension(File f, String extension) {
+		if (!f.exists() && f.getName().indexOf('.')==-1) {
+			return new File(f.getAbsolutePath()+'.'+extension);
+		} else {
+			return f;
+		}
+	}
 }

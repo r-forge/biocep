@@ -401,14 +401,19 @@ public class RServicesObject implements RServices {
 	public void groovySet(String name, Object Value) throws RemoteException {
 	}
 
-	public boolean isGroovyEnabled() throws RemoteException {
-		return false;
-	}
-
 	public String getGroovyStatus() throws RemoteException {
 		return null;
 	}
 
+	public void resetGroovyInterpreter() throws RemoteException {
+	}
+	
+	public void uploadExtension(String extensionName, byte[] extension) {
+	}
+	
+	public void convertFile(String inputFile, String outputFile, String conversionFilter) throws RemoteException {
+	}
+	
 	public void freeAllReferences() throws RemoteException {
 	}
 

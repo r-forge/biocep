@@ -52,7 +52,7 @@ public class SaveDeviceAsJpgAction extends AbstractAction {
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
 						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) WorkbenchApplet.getComponentParent((Component) e.getSource(),
 								JBufferedImagePanel.class);
-						ImageIO.write(bufferedImagePanel.getImage(), "jpg", chooser.getSelectedFile());
+						ImageIO.write(bufferedImagePanel.getImage(), "jpg", org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"jpg"));
 					}
 
 				} catch (Exception ex) {

@@ -34,12 +34,12 @@ import java.io.RandomAccessFile;
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
-public class SaveDeviceAsPdfAction extends AbstractAction {
+public class SaveDeviceAsWmfAction extends AbstractAction {
 
 	RGui _rgui;
 
-	public SaveDeviceAsPdfAction(RGui rgui) {
-		super("Save as PDF");
+	public SaveDeviceAsWmfAction(RGui rgui) {
+		super("Save as WMF");
 		_rgui = rgui;
 	}
 
@@ -57,12 +57,13 @@ public class SaveDeviceAsPdfAction extends AbstractAction {
 					try {
 						_rgui.getRLock().lock();
 						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
-						byte[] result = panel.getGdDevice().getPdf();
-						RandomAccessFile raf = new RandomAccessFile(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"pdf"), "rw");
+						byte[] result = panel.getGdDevice().getWmf(true);
+						RandomAccessFile raf = new RandomAccessFile(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"wmf"), "rw");
 						raf.setLength(0);
 						raf.write(result);
 						raf.close();
 					} catch (Exception ex) {
+						JOptionPane.showMessageDialog(_rgui.getRootComponent(), "Couldn't generate WMF, check that you have installed open office 3 \nand that soffice is in your system path (accessible from your command line)");
 						ex.printStackTrace();
 					} finally {
 						_rgui.getRLock().unlock();

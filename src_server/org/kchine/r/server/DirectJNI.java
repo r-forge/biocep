@@ -3723,12 +3723,20 @@ public class DirectJNI {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
-		public boolean isGroovyEnabled() throws RemoteException {
-			return org.kchine.r.server.scripting.GroovyInterpreterSingleton.getInstance() != null;
-		}
-
 		public String getGroovyStatus() throws RemoteException {
 			throw new UnsupportedOperationException("Not supported yet.");
+		}
+		
+		public void resetGroovyInterpreter() throws RemoteException {
+			GroovyInterpreterSingleton._groovy=null;			
+		}
+		
+		public void uploadExtension(String extensionName, byte[] extension) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+		
+		public void convertFile(String inputFile, String outputFile, String conversionFilter) throws RemoteException {
+			throw new UnsupportedOperationException("Not supported yet.");			
 		}
 
 		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
@@ -4127,22 +4135,20 @@ public class DirectJNI {
 			return (""+s.charAt(0)).toUpperCase()+s.substring(1);
 		}
 		
-		public byte[] getWmf() throws RemoteException {		
-			return getGenericVectorFormat("wmf");
+		public byte[] getWmf(boolean useServer) throws RemoteException {		
+			return getGenericVectorFormat("wmf", useServer);
 		}
 		
-		private byte[] getGenericVectorFormat(String format) throws RemoteException {
+		private byte[] getGenericVectorFormat(String format, boolean useserver) throws RemoteException {
 
-			File tempFile = null;
-			File tempOdgFile = null;
-			File tempWmfFile = null;
+			File tempSVGFile = null;
+			File tempVectorFile = null;
 			try {
 				long currentTimeMillis=System.currentTimeMillis();
-				tempFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".svg").getCanonicalFile();
-				tempOdgFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".odg").getCanonicalFile();
-				tempWmfFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + "."+format).getCanonicalFile();
-				if (tempFile.exists())
-					tempFile.delete();
+				tempSVGFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".svg").getCanonicalFile();
+				tempVectorFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + "."+format).getCanonicalFile();
+				if (tempSVGFile.exists())
+					tempSVGFile.delete();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
@@ -4168,7 +4174,7 @@ public class DirectJNI {
 			DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
 
 			final String createDeviceCommand = SvgDeviceName + (SvgDeviceName.equals("svg") ? "" : "SVG") + "(file = \""
-					+ tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (getSize().width / getSize().height)) + ", height = "
+					+ tempSVGFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (getSize().width / getSize().height)) + ", height = "
 					+ 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
 
 			System.out.println("createDeviceCommand:" + createDeviceCommand);
@@ -4187,7 +4193,7 @@ public class DirectJNI {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
 			}
 
-			if (tempFile.exists()) {
+			if (tempSVGFile.exists()) {
 
 				byte[] result = null;
 				try {
@@ -4196,18 +4202,17 @@ public class DirectJNI {
 
 					GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
 					System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
-					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgTo"+capitalizeFirstLetter(format)+"(\"" + tempFile.getAbsolutePath().replace('\\','/') + "\", \"" + tempWmfFile.getAbsolutePath().replace('\\','/') + "\" );"));
-					if (!tempWmfFile.exists()) {
+					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgTo"+capitalizeFirstLetter(format)+(useserver?"":"NoServer")+"(\"" + tempSVGFile.getAbsolutePath().replace('\\','/') + "\", \"" + tempVectorFile.getAbsolutePath().replace('\\','/') + "\" );"));
+					if (!tempVectorFile.exists()) {
 						throw new Exception("Couldn't generate "+format+", check that you have installed open office 3 and that soffice is in your system path (accessible from your command line)");
 					}
-					RandomAccessFile raf = new RandomAccessFile(tempWmfFile, "r");
+					RandomAccessFile raf = new RandomAccessFile(tempVectorFile, "r");
 					result = new byte[(int) raf.length()];
 					raf.readFully(result);
 					raf.close();
 
-					tempWmfFile.delete();
-					tempOdgFile.delete();
-					tempFile.delete();
+					tempVectorFile.delete();
+					tempSVGFile.delete();
 
 					return result;
 
@@ -4222,10 +4227,14 @@ public class DirectJNI {
 
 		}
 
-		public byte[] getEmf() throws RemoteException {
-			return getGenericVectorFormat("emf");
+		public byte[] getEmf(boolean useServer) throws RemoteException {
+			return getGenericVectorFormat("emf",useServer);
 		}
 
+		public byte[] getOdg() throws RemoteException {
+			return getGenericVectorFormat("odg",false);
+		}
+		
 		public byte[] getJpg() throws RemoteException {
 			return null;
 		}
