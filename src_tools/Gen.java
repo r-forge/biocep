@@ -53,6 +53,7 @@ import org.apache.tools.ant.types.Path;
 import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.ExecutionUnit;
 import org.kchine.r.server.Utils;
+import org.kchine.r.tools.wsmapper.Globals;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.PoolUtils.EqualNameFilter;
 import org.rosuda.JRI.Rengine;
@@ -61,9 +62,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import com.sun.tools.ws.ant.WsGen;
 import de.hunsicker.jalopy.plugin.ant.AntPlugin;
-import server.Globals;
+import static org.kchine.r.tools.wsmapper.Globals.*;
 import static org.kchine.rpf.PoolUtils.unzip;
-import static server.Globals.*;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -73,9 +73,26 @@ public class Gen {
 	private static Vector<String[]> _functionsVector = new Vector<String[]>();
 	private static Project _project = new Project();
 
-	private static String[] rwebservicesScripts = { "/R/AllMkMapClasses.R", "/R/mkJavaBean.R", "/R/ArrayAndMatrix-class.R", "/R/javaReservedWord.R",
-			"/R/unpackAntScript.R", "/R/basicConvert.R", "/R/mkConverter.R", "/R/mkTest.R", "/R/zzz.R", "/R/basicConvert2.R", "/R/mkDataMap.R", "/R/sink.R",
-			"/R/cConvert.R", "/R/testUtil.R", "/R/mkMapUtil.R", "/R/mkFuncMap.R", "/R/typeInfoToJava.R", "/R/createMap.R" };
+
+	private static String[] rwebservicesScripts = { 
+		"/org/kchine/r/tools/wsmapper/RWebServices/AllMkMapClasses.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/mkJavaBean.R",
+		"/org/kchine/r/tools/wsmapper/RWebServices/ArrayAndMatrix-class.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/javaReservedWord.R",
+		"/org/kchine/r/tools/wsmapper/RWebServices/unpackAntScript.R",
+		"/org/kchine/r/tools/wsmapper/RWebServices/basicConvert.R",
+		"/org/kchine/r/tools/wsmapper/RWebServices/mkConverter.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/mkTest.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/zzz.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/basicConvert2.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/mkDataMap.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/sink.R",
+		"/org/kchine/r/tools/wsmapper/RWebServices/cConvert.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/testUtil.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/mkMapUtil.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/mkFuncMap.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/typeInfoToJava.R", 
+		"/org/kchine/r/tools/wsmapper/RWebServices/createMap.R" };
 
 	private static StringBuffer initScriptBuffer = new StringBuffer();
 
