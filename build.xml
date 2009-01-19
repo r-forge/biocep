@@ -1690,7 +1690,7 @@
 			</for>
 				
 				
-			<java classname="server.ListResources" fork="true" >
+			<java classname="org.kchine.r.server.utils.ListResources" fork="true" >
 				<classpath>
 					<pathelement path="${LOGGING_JAR}"/>					
 					<pathelement location="binsrv"/>					

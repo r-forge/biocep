@@ -128,7 +128,7 @@ public class Globals {
 								+"import org.apache.commons.httpclient.HttpClient;"
 								+"import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;"
 								+"import org.kchine.r.server.RServices;" 
-								+"import http.RHttpProxy;"
+								+"import org.kchine.r.server.http.RHttpProxy;"
 								+"@WebService");
 				outputWriterWebservice.println("public class " + shortClassName + "Web {");
 				outputWriterWebservice.println("public " + className.substring(className.lastIndexOf('.') + 1) + "Web" + "(){};");
@@ -247,7 +247,7 @@ public class Globals {
 					outputWriterWebservice
 					.print(mHeaderStatefull
 							+ ") throws Exception { " +
-							"RServices r = (RServices) RHttpProxy.getDynamicProxy(System.getProperty(\"http.frontend.url\"), sessionId, \"R\", new Class<?>[] { RServices.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));"
+							"RServices r = (RServices) org.kchine.r.server.http.RHttpProxy.getDynamicProxy(System.getProperty(\"http.frontend.url\"), sessionId, \"R\", new Class<?>[] { RServices.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));"
 									
 									+ callStrImpl
 									+(m.getReturnType() != null ?  "return result;" : "")
@@ -257,7 +257,7 @@ public class Globals {
 					outputWriterWebservice
 					.print(mHeaderAsObjectName
 							+ ") throws Exception { " +
-							"RServices r = (RServices) RHttpProxy.getDynamicProxy(System.getProperty(\"http.frontend.url\"), sessionId, \"R\", new Class<?>[] { RServices.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));"
+							"RServices r = (RServices) org.kchine.r.server.http.RHttpProxy.getDynamicProxy(System.getProperty(\"http.frontend.url\"), sessionId, \"R\", new Class<?>[] { RServices.class }, new HttpClient(new MultiThreadedHttpConnectionManager()));"
 									
 									+ PoolUtils.replaceAll(callStrImpl, ".call", ".callAndGetObjectName")
 									+(m.getReturnType() != null ?  "return result;" : "")
@@ -322,226 +322,226 @@ public class Globals {
 									+ "	}"
 									+ "}"
 									+ "map.put(\"urls\", new java.net.URL[]{http.InterceptorServlet.getRMappingUrl()});"
-									+ "try {return http.RHttpProxy.logOn(System.getProperty(\"http.frontend.url\"), session, login, pwd, map);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return org.kchine.r.server.http.RHttpProxy.logOn(System.getProperty(\"http.frontend.url\"), session, login, pwd, map);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void logOff(String session) throws Exception { "
-									+ "try {http.RHttpProxy.logOff(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {org.kchine.r.server.http.RHttpProxy.logOff(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 					.println("\npublic void logOffAndKill(String session) throws Exception { "
-							+ "try {http.RHttpProxy.logOffAndKill(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "try {org.kchine.r.server.http.RHttpProxy.logOffAndKill(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 							+ "}");
 					
 					outputWriterWebservice
 							.println("\npublic void interrupt(String session) throws Exception { "
-									+ "try {http.RHttpProxy.interrupt(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {org.kchine.r.server.http.RHttpProxy.interrupt(System.getProperty(\"http.frontend.url\"), session);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String evaluate(String session, String expression) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"evaluate\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"evaluate\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String evaluateExpressions(String session, String expression, int n) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"evaluate\", new Class[]{String.class, int.class}, new Object[]{expression,n});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"evaluate\", new Class[]{String.class, int.class}, new Object[]{expression,n});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject call(String session, String methodName, Object... args) throws Exception { "
-									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"call\", new Class[]{String.class, Object[].class}, new Object[]{methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"call\", new Class[]{String.class, Object[].class}, new Object[]{methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic Object callAndConvert(String session, String methodName, Object... args) throws Exception { "
-									+ "try {return http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"callAndConvert\", new Class[]{String.class, Object[].class}, new Object[]{methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"callAndConvert\", new Class[]{String.class, Object[].class}, new Object[]{methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject callAndGetObjectName(String session, String methodName, Object... args) throws Exception { "
-									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"callAndGetObjectName\", new Class[]{String.class, Object[].class}, new Object[]{methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"callAndGetObjectName\", new Class[]{String.class, Object[].class}, new Object[]{methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void callAndAssign(String session, String varName, String methodName, Object... args) throws Exception { "
-									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"callAndAssign\", new Class[]{String.class, String.class, RObject[].class}, new Object[]{varName,methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"callAndAssign\", new Class[]{String.class, String.class, RObject[].class}, new Object[]{varName,methodName,args});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void putAndAssign(String session, Object obj, String name) throws Exception { "
-									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"putAndAssign\", new Class[]{Object.class, String.class}, new Object[]{obj,name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"putAndAssign\", new Class[]{Object.class, String.class}, new Object[]{obj,name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject getObject(String session, String expression) throws Exception { "
-									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getObject\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getObject\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic Object getObjectConverted(String session, String expression) throws Exception { "
-									+ "try {return http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getObjectConverted\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getObjectConverted\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject getObjectName(String session, String expression) throws Exception { "
-									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getObjectName\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getObjectName\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject realizeObjectName(String session, RObject objectName) throws Exception { "
-									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"realizeObjectName\", new Class[]{RObject.class}, new Object[]{objectName});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"realizeObjectName\", new Class[]{RObject.class}, new Object[]{objectName});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic Object realizeObjectNameConverted(String session, RObject objectName) throws Exception { "
-									+ "try {return http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"realizeObjectNameConverted\", new Class[]{RObject.class}, new Object[]{objectName});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"realizeObjectNameConverted\", new Class[]{RObject.class}, new Object[]{objectName});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject realizeObjectNameAndFreeAllReferences(String session, RObject objectName) throws Exception { "
-									+ "try {RObject result= (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"realizeObjectName\", new Class[]{RObject.class}, new Object[]{objectName});"
-									+ "http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"freeAllReferences\", null, null);"
+									+ "try {RObject result= (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"realizeObjectName\", new Class[]{RObject.class}, new Object[]{objectName});"
+									+ "org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"freeAllReferences\", null, null);"
 									+ "return result;"
 									+ "} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" + "}");
 
 					outputWriterWebservice
 							.println("\npublic Object realizeObjectNameConvertedAndFreeAllReferences(String session, RObject objectName) throws Exception { "
-									+ "try {Object result=http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"realizeObjectNameConverted\", new Class[]{RObject.class}, new Object[]{objectName});"
-									+ "http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"freeAllReferences\", null, null);"
+									+ "try {Object result=org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"realizeObjectNameConverted\", new Class[]{RObject.class}, new Object[]{objectName});"
+									+ "org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"freeAllReferences\", null, null);"
 									+ "return result;"
 									+ "} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}" + "}");
 
 					outputWriterWebservice
 							.println("\npublic void freeAllReferences(String session) throws Exception { "
-									+ "try { http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"freeAllReferences\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try { org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"freeAllReferences\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String consoleSubmit(String session, String expression) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"consoleSubmit\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"consoleSubmit\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String print(String session, String expression) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"print\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"print\", new Class[]{String.class}, new Object[]{expression});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String printExpressions(String session, String[] expressions) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"printExpressions\", new Class[]{String[].class}, new Object[]{expressions});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"printExpressions\", new Class[]{String[].class}, new Object[]{expressions});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String sourceFromResource(String session, String resource) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"sourceFromResource\", new Class[]{String.class}, new Object[]{resource});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"sourceFromResource\", new Class[]{String.class}, new Object[]{resource});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String sourceFromBuffer(String session, String buffer) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"sourceFromBuffer\", new Class[]{String.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"sourceFromBuffer\", new Class[]{String.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String getStatus(String session) throws Exception { "
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getStatus\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getStatus\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void stop(String session) throws Exception { "
-									+ "try { http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"stop\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try { org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"stop\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String[] getWorkingDirectoryFileNames(String session) throws Exception { "
-									+ "try {return (String[])http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileNames\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileNames\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic org.kchine.r.server.FileDescription[] getWorkingDirectoryFileDescriptions(String session) throws Exception { "
-									+ "try {return (org.kchine.r.server.FileDescription[])http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescriptions\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (org.kchine.r.server.FileDescription[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescriptions\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic org.kchine.r.server.FileDescription getWorkingDirectoryFileDescription(String session,String fileName) throws Exception { "
-									+ "try {return (org.kchine.r.server.FileDescription)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescription\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (org.kchine.r.server.FileDescription)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getWorkingDirectoryFileDescription\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void createWorkingDirectoryFile(String session,String fileName) throws Exception { "
-									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"createWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"createWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void removeWorkingDirectoryFile(String session,String fileName) throws Exception { "
-									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"removeWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"removeWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic byte[] readWorkingDirectoryFileBlock(String session, String fileName,long offset, int blocksize) throws Exception { "
-									+ "try {return (byte[])http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"readWorkingDirectoryFileBlock\", new Class[]{String.class, long.class, int.class}, new Object[]{fileName,offset,blocksize} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"readWorkingDirectoryFileBlock\", new Class[]{String.class, long.class, int.class}, new Object[]{fileName,offset,blocksize} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void appendBlockToWorkingDirectoryFile(String session,String fileName, byte[] block) throws Exception { "
-									+ "try {http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"appendBlockToWorkingDirectoryFile\", new Class[]{String.class, byte[].class}, new Object[]{fileName,block} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"appendBlockToWorkingDirectoryFile\", new Class[]{String.class, byte[].class}, new Object[]{fileName,block} );} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String[] getSvg(String session, String expression, int width, int height) throws Exception{"
-									+ "try {return (String[])((java.util.Vector<String>)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getSvg\", new Class[]{String.class,int.class,int.class}, new Object[]{expression,width,height})).toArray(new String[0]);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String[])((java.util.Vector<String>)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getSvg\", new Class[]{String.class,int.class,int.class}, new Object[]{expression,width,height})).toArray(new String[0]);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String pythonExec(String session, String pythonCommand) throws Exception{"
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExec\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExec\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String pythonExecFromWorkingDirectoryFile(String session, String fileName) throws Exception{"
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExecFromWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExecFromWorkingDirectoryFile\", new Class[]{String.class}, new Object[]{fileName});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String pythonExceFromResource(String session, String resource) throws Exception {"
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExceFromResource\", new Class[]{String.class}, new Object[]{resource});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExceFromResource\", new Class[]{String.class}, new Object[]{resource});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String pythonExecFromBuffer(String session, String buffer) throws Exception {"
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExecFromBuffer\", new Class[]{String.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonExecFromBuffer\", new Class[]{String.class}, new Object[]{buffer});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject pythonEval(String session, String pythonCommand) throws Exception {"
-									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonEval\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonEval\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic Object pythonEvalAndConvert(String session, String pythonCommand) throws Exception {"
-									+ "try {return (Object)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonEvalAndConvert\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (Object)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonEvalAndConvert\", new Class[]{String.class}, new Object[]{pythonCommand});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic RObject pythonGet(String session, String name) throws Exception {"
-									+ "try {return (RObject)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonGet\", new Class[]{String.class}, new Object[]{name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonGet\", new Class[]{String.class}, new Object[]{name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic Object pythonGetAndConvert(String session, String name) throws Exception {"
-									+ "try {return (Object)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonGetAndConvert\", new Class[]{String.class}, new Object[]{name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (Object)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonGetAndConvert\", new Class[]{String.class}, new Object[]{name});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic void pythonSet(String session, String name, Object value) throws Exception {"
-									+ "try { http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonSet\", new Class[]{String.class,Object.class}, new Object[]{name,value});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try { org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"pythonSet\", new Class[]{String.class,Object.class}, new Object[]{name,value});} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice
 							.println("\npublic String getPythonStatus(String session) throws Exception {"
-									+ "try {return (String)http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getPythonStatus\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getPythonStatus\", null, null);} catch (http.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
 					outputWriterWebservice

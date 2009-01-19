@@ -20,7 +20,6 @@
  */
 package org.kchine.r.server;
 
-import http.RHttpProxy;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.net.JarURLConnection;
@@ -47,9 +46,10 @@ import org.kchine.r.RMatrix;
 import org.kchine.r.RNumeric;
 import org.kchine.r.RObject;
 import org.kchine.r.RVector;
-import org.kchine.r.server.LocalHttpServer;
 import org.kchine.r.server.RConsoleAction;
 import org.kchine.r.server.RServices;
+import org.kchine.r.server.http.LocalHttpServer;
+import org.kchine.r.server.http.RHttpProxy;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.r.server.scripting.PythonInterpreterSingleton;
 import org.kchine.r.server.spreadsheet.CellRange;

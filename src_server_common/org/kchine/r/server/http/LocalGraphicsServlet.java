@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package http.local;
+package org.kchine.r.server.http;
 
 import http.TunnelingException;
 import java.awt.Dimension;
@@ -32,7 +32,6 @@ import org.kchine.r.server.RKit;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.rpf.PoolUtils;
 
-import server.Java2DUtils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

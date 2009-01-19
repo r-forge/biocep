@@ -23,6 +23,7 @@ import java.util.HashMap;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.kchine.r.server.http.RHttpProxy;
 import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.monitor.RegistryProvider;
 
