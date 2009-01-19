@@ -153,11 +153,14 @@ import org.kchine.r.workbench.actions.CopyFromCurrentDeviceAction;
 import org.kchine.r.workbench.actions.CopyToCurrentDeviceAction;
 import org.kchine.r.workbench.actions.CoupleToCurrentDeviceAction;
 import org.kchine.r.workbench.actions.FitDeviceAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsEmfAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsJpgAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsOdgAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsPdfAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsPdfAppletAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsPngAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsSvgAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsWmfAction;
 import org.kchine.r.workbench.actions.SetCurrentDeviceAction;
 import org.kchine.r.workbench.actions.SnapshotDeviceAction;
 import org.kchine.r.workbench.actions.SnapshotDevicePdfAction;
@@ -420,8 +423,6 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 	private Icon _connectedIcon = null;
 	private Icon _disconnectedIcon = null;
 	private Icon _busyIcon = null;
-
-	private boolean _isGroovyEnabled = false;
 
 	public WorkbenchApplet() throws HeadlessException {
 		super();
@@ -923,8 +924,10 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 									new FitDeviceAction(WorkbenchApplet.this, d), null, new SnapshotDeviceAction(WorkbenchApplet.this),
 									new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
 									new SaveDeviceAsPngAction(WorkbenchApplet.this), new SaveDeviceAsJpgAction(WorkbenchApplet.this),
-									new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
-									new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
+									new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),									
+									new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), null, 
+									new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),new SaveDeviceAsOdgAction(WorkbenchApplet.this),
+									null,new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
 									new CopyToCurrentDeviceAction(WorkbenchApplet.this, d), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this)
 
 							}, getRLock(), getConsoleLogger());
@@ -964,6 +967,9 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 										new SnapshotDevicePdfAction(WorkbenchApplet.this), null, new SaveDeviceAsPngAction(WorkbenchApplet.this),
 										new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsSvgAction(WorkbenchApplet.this),
 										new SaveDeviceAsPdfAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), null,
+										
+										new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this), new SaveDeviceAsOdgAction(WorkbenchApplet.this),null,
+										
 										new CopyFromCurrentDeviceAction(WorkbenchApplet.this), new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
 										new CoupleToCurrentDeviceAction(WorkbenchApplet.this) }, getRLock(), getConsoleLogger());
 
@@ -989,7 +995,6 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 								_actions.get("createdevice").actionPerformed(null);
 							}
 
-							_isGroovyEnabled = _rForConsole.isGroovyEnabled();
 							_demos = _rForConsole.listDemos();
 
 							
@@ -3540,6 +3545,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
 							new SaveDeviceAsPngAction(WorkbenchApplet.this), new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsSvgAction(WorkbenchApplet.this),
 							new SaveDeviceAsPdfAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), null,
+							new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this), new SaveDeviceAsOdgAction(WorkbenchApplet.this),null,
 							new CopyFromCurrentDeviceAction(WorkbenchApplet.this), new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
 							new CoupleToCurrentDeviceAction(WorkbenchApplet.this) }, getRLock(), getConsoleLogger());
 
@@ -3609,6 +3615,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
 							new SaveDeviceAsPngAction(WorkbenchApplet.this), new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsSvgAction(WorkbenchApplet.this),
 							new SaveDeviceAsPdfAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), null,
+							new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this), new SaveDeviceAsOdgAction(WorkbenchApplet.this),null,
 							new CopyFromCurrentDeviceAction(WorkbenchApplet.this), new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
 							new CoupleToCurrentDeviceAction(WorkbenchApplet.this) }, getRLock(), getConsoleLogger());
 
@@ -3882,7 +3889,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			}
 
 			public boolean isEnabled() {
-				return getR() != null && _isGroovyEnabled;
+				return getR() != null;
 			}
 		});
 

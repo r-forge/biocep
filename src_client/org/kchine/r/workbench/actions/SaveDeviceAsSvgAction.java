@@ -60,7 +60,7 @@ public class SaveDeviceAsSvgAction extends AbstractAction {
 						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 
 						Vector<String> result = panel.getGdDevice().getSVGAsText();
-						PrintWriter pw = new PrintWriter(new FileWriter(chooser.getSelectedFile()));
+						PrintWriter pw = new PrintWriter(new FileWriter(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"svg")));
 						for (int i = 0; i < result.size(); ++i)
 							pw.println(result.elementAt(i));
 						pw.close();

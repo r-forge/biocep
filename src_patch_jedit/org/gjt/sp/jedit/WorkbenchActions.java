@@ -240,14 +240,6 @@ public class WorkbenchActions {
 			activeView.getInputHandler().invokeAction("save");
 		}
 
-		try {
-			if (!getRGui().getR().isGroovyEnabled()) {
-				JOptionPane.showMessageDialog(null, "Groovy Unavailable, Download Core Jars and Retry");
-				return;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
 		if (getRGui().getRLock().isLocked()) {
 			JOptionPane.showMessageDialog(null, "R is busy");
@@ -494,7 +486,7 @@ public class WorkbenchActions {
 
 	public static boolean isRunGEnabled() {
 		try {
-			return getRGui().getR() != null && getRGui().getR().isGroovyEnabled();
+			return getRGui().getR() != null;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

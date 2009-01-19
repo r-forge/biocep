@@ -131,12 +131,16 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 		return _localGdDevice.getBmp();
 	}
 	
-	public byte[] getWmf() throws RemoteException {
-		return _localGdDevice.getWmf();
+	public byte[] getWmf(boolean useServer) throws RemoteException {
+		return _localGdDevice.getWmf(useServer);
 	}
 	
-	public byte[] getEmf() throws RemoteException {
-		return _localGdDevice.getEmf();
+	public byte[] getEmf(boolean useServer) throws RemoteException {
+		return _localGdDevice.getEmf(useServer);
+	}
+	
+	public byte[] getOdg() throws RemoteException {
+		return _localGdDevice.getOdg();
 	}
 	
 	public byte[] getJpg() throws RemoteException {
