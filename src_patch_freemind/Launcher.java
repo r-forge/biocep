@@ -26,7 +26,8 @@ import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import server.LocalHttpServer;
+import org.kchine.r.server.LocalHttpServer;
+
 
 
 

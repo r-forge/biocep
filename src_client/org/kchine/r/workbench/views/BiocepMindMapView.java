@@ -27,7 +27,8 @@ import java.util.HashMap;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
-import server.LocalHttpServer;
+import org.kchine.r.server.LocalHttpServer;
+
 
 public class BiocepMindMapView extends DynamicView {
 	FreeMindApplet _freeMindApplet;

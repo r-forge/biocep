@@ -25,11 +25,11 @@ import java.awt.Color;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
+import org.kchine.r.server.ExtendedReentrantLock;
 import org.kchine.r.workbench.RGui;
 import org.kchine.rpf.gui.ConsolePanel;
 import org.kchine.rpf.gui.SubmitInterface;
 
-import server.ExtendedReentrantLock;
 
 public class ChatConsoleView extends DynamicView {
 	ConsolePanel _consolePanel;

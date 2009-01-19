@@ -40,10 +40,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
+import org.kchine.r.server.ExtendedReentrantLock;
 import org.kchine.r.server.GenericCallbackDevice;
+import org.kchine.r.server.LocalHttpServer;
 import org.kchine.r.server.RKit;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelDevice;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
 import org.kchine.rpf.LocalRmiRegistry;
@@ -61,9 +64,6 @@ import org.kchine.rpf.db.DBLayer;
 import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.monitor.SupervisorUtils;
 import org.neilja.net.interruptiblermi.InterruptibleRMIThreadFactory;
-import server.ExtendedReentrantLock;
-import server.LocalHttpServer;
-import server.ServerManager;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

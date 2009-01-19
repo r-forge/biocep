@@ -44,6 +44,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
+import org.kchine.r.server.ExtendedReentrantLock;
 import org.kchine.r.server.graphics.DoublePoint;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.graphics.action.GDActionMarker;
@@ -53,7 +54,6 @@ import org.kchine.r.server.graphics.primitive.GDState;
 import org.kchine.r.workbench.ConsoleLogger;
 import org.kchine.r.workbench.actions.LinkedToPanel;
 
-import server.ExtendedReentrantLock;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

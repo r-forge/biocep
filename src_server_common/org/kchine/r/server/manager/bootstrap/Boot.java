@@ -46,11 +46,11 @@ public class Boot {
 			cl = new URLClassLoader( (URL[])codeUrls.toArray(new URL[0]), Boot.class.getClassLoader());
 
 			if (!keepAlive) {
-				cl.loadClass("server.ServerManager").getMethod("startPortInUseDogwatcher", new Class<?>[] { String.class, int.class, int.class, int.class })
+				cl.loadClass("org.kchine.r.server.manager.ServerManager").getMethod("startPortInUseDogwatcher", new Class<?>[] { String.class, int.class, int.class, int.class })
 						.invoke(null, args[1], Integer.decode(args[2]), 3, 3);
 			}
 
-			Class<?> mainClass = cl.loadClass("server.MainRServer");
+			Class<?> mainClass = cl.loadClass("org.kchine.r.server.MainRServer");
 			mainClass.getMethod("main", new Class<?>[] { String[].class }).invoke(null, new Object[] { new String[] {} });
 			
 		} catch (Throwable e) {

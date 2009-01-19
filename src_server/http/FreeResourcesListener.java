@@ -32,13 +32,13 @@ import javax.servlet.http.HttpSessionListener;
 import org.kchine.r.server.GenericCallbackDevice;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.SSHTunnelingProxy;
 import org.kchine.rpf.SSHUtils;
 import org.kchine.rpf.ServantProvider;
 import org.kchine.rpf.ServantProviderFactory;
 
 import server.GenericCallbackDeviceImpl;
-import server.ServerManager;
 
 
 /**

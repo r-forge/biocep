@@ -127,6 +127,7 @@ import org.kchine.r.server.graphics.GraphicNotifier;
 import org.kchine.r.server.graphics.primitive.GDObject;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
 import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.r.server.scripting.GroovyInterpreter;
 import org.kchine.r.server.scripting.GroovyInterpreterSingleton;
 import org.kchine.r.server.scripting.PythonInterpreterSingleton;
@@ -4113,7 +4114,15 @@ public class DirectJNI {
 			return null;
 		}
 
-		public byte[] getWmf() throws RemoteException {
+		private String capitalizeFirstLetter(String s) {
+			return (""+s.charAt(0)).toUpperCase()+s.substring(1);
+		}
+		
+		public byte[] getWmf() throws RemoteException {		
+			return getGenericVectorFormat("wmf");
+		}
+		
+		private byte[] getGenericVectorFormat(String format) throws RemoteException {
 
 			File tempFile = null;
 			File tempOdgFile = null;
@@ -4122,7 +4131,7 @@ public class DirectJNI {
 				long currentTimeMillis=System.currentTimeMillis();
 				tempFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".svg").getCanonicalFile();
 				tempOdgFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".odg").getCanonicalFile();
-				tempWmfFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".wmf").getCanonicalFile();
+				tempWmfFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + "."+format).getCanonicalFile();
 				if (tempFile.exists())
 					tempFile.delete();
 			} catch (Exception e) {
@@ -4178,8 +4187,10 @@ public class DirectJNI {
 
 					GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
 					System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
-					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgToWmf(\"" + tempFile.getAbsolutePath().replace('\\','/') + "\", \"" + tempWmfFile.getAbsolutePath().replace('\\','/') + "\" );"));
-					
+					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgTo"+capitalizeFirstLetter(format)+"(\"" + tempFile.getAbsolutePath().replace('\\','/') + "\", \"" + tempWmfFile.getAbsolutePath().replace('\\','/') + "\" );"));
+					if (!tempWmfFile.exists()) {
+						throw new Exception("Couldn't generate "+format+", check that you have installed open office 3 and that soffice is in your system path (accessible from your command line)");
+					}
 					RandomAccessFile raf = new RandomAccessFile(tempWmfFile, "r");
 					result = new byte[(int) raf.length()];
 					raf.readFully(result);
@@ -4203,7 +4214,7 @@ public class DirectJNI {
 		}
 
 		public byte[] getEmf() throws RemoteException {
-			return null;
+			return getGenericVectorFormat("emf");
 		}
 
 		public byte[] getJpg() throws RemoteException {
