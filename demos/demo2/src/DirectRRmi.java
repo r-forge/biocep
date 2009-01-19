@@ -43,11 +43,11 @@ public class DirectRRmi {
 		
 		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
 		GDDevice  device = r.newDevice(400, 400);
-		r.consoleSubmit("plot(pressure)");
-		byte[] pdf=device.getWmf();
+		r.consoleSubmit("library(vsn);data(kidney);plot(exprs(kidney));");
+		byte[] pdf=device.getEmf();
 		
 		
-		RandomAccessFile raf=new RandomAccessFile("c:/tt.wmf","rw");
+		RandomAccessFile raf=new RandomAccessFile("c:/tt.emf","rw");
 		raf.setLength(0);
 		raf.write(pdf);
 		raf.close();

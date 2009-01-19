@@ -16,11 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
+
+import server.LocalClassServlet;
 
 
 public class LocalHttpServer {

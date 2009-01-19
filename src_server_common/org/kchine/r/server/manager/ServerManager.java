@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server.manager;
 
 import static org.kchine.rpf.PoolUtils.isWindowsOs;
 import static org.kchine.rpf.PoolUtils.unzip;
@@ -50,6 +50,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import org.kchine.r.server.LocalHttpServer;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.manager.bootstrap.BootSsh;
 import org.kchine.r.server.spreadsheet.TableModelRemoteImpl;
@@ -61,6 +62,7 @@ import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.SSHUtils;
 import org.kchine.rpf.ServantCreationTimeout;
 import org.kchine.rpf.ServerDefaults;
+
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
@@ -227,7 +229,7 @@ public class ServerManager {
 			if (isAuthenticated == false)
 				throw new BadSshLoginPwdException();
 
-			InputStream is = ServerManager.class.getResourceAsStream("/bootstrap/BootSsh.class");
+			InputStream is = ServerManager.class.getResourceAsStream("/org/kchine/r/server/manager/bootstrap/BootSsh.class");
 			byte[] buffer = new byte[is.available()];
 			try {
 				for (int i = 0; i < buffer.length; ++i) {
@@ -238,7 +240,7 @@ public class ServerManager {
 				e.printStackTrace();
 			}
 
-			String bootstrapDir = INSTALL_DIR + "classes/bootstrap";
+			String bootstrapDir = INSTALL_DIR + "classes/org/kchine/r/server/manager/bootstrap";
 			new File(bootstrapDir).mkdirs();
 			RandomAccessFile raf = new RandomAccessFile(bootstrapDir + "/BootSsh.class", "rw");
 			raf.setLength(0);
@@ -248,7 +250,7 @@ public class ServerManager {
 			Session sess = null;
 			try {
 				sess = conn.openSession();
-				sess.execCommand("mkdir -p RWorkbench/classes/bootstrap");
+				sess.execCommand("mkdir -p RWorkbench/classes/org/kchine/r/server/manager/bootstrap");
 				sess.waitForCondition(ChannelCondition.EXIT_STATUS, 0);
 			} finally {
 				try {

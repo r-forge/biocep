@@ -14,7 +14,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Vector;
-import server.ServerManager;
+
+import org.kchine.r.server.manager.ServerManager;
 
 public class GroovyInterpreterSingleton {
 
@@ -202,7 +203,7 @@ public class GroovyInterpreterSingleton {
 
 		System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
 		// System.out.println(gr.exec("print org.kchine.ooc.OOConverter.odgToWmf(\"c:/loess.odg\", \"c:/loess.wmf\");"));
-		System.out.println(gr.exec("print org.kchine.ooc.OOConverter.svgToOdg(\"c:/loess.svg\");"));
+		System.out.println(gr.exec("print org.kchine.ooc.OOConverter.svgToWmf(\"c:/loess.svg\", \"c:/loess.wmf\");"));
 
 		System.exit(0);
 

@@ -10,10 +10,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Vector;
 
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServerDefaults;
 
-import server.ServerManager;
 
 
 public class DbRegistryOff {

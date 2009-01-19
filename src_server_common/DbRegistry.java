@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Vector;
 
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.db.ConnectionProvider;
@@ -35,7 +36,6 @@ import org.kchine.rpf.db.NodeDataDB;
 import org.kchine.rpf.db.PoolDataDB;
 import org.kchine.rpf.db.RegenerateDB;
 
-import server.ServerManager;
 
 
 public class DbRegistry {

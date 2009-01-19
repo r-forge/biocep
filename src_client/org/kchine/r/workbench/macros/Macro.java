@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.kchine.r.server.Utils;
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.r.server.spreadsheet.CellRange;
 import org.kchine.r.server.spreadsheet.Formula;
 import org.kchine.r.server.spreadsheet.ImportInfo;
@@ -27,7 +28,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import server.ServerManager;
 
 public class Macro implements MacroInterface{
 	public Macro() {

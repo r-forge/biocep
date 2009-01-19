@@ -16,27 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server;
+
+import org.kchine.rpf.MainServer;
+import server.RServantImpl;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
-public class BadSshLoginPwdException extends Exception {
+public class MainRServer {
 
-	public BadSshLoginPwdException() {
-		super();
-	}
-
-	public BadSshLoginPwdException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public BadSshLoginPwdException(String message) {
-		super(message);
-	}
-
-	public BadSshLoginPwdException(Throwable cause) {
-		super(cause);
+	public static void main(String[] args) throws Exception {
+		Class<?> servantClass=RServantImpl.class;
+		System.setProperty("servantclass", servantClass.getName());
+		MainServer.main(args);		
 	}
 
 }

@@ -32,13 +32,13 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 
+import org.kchine.r.server.manager.ServantCreationFailed;
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.ServerDefaults;
 
-import server.ServantCreationFailed;
-import server.ServerManager;
+import static org.kchine.r.server.manager.ServerManager.*;
 import static org.kchine.rpf.PoolUtils.isWindowsOs;
 import static org.kchine.rpf.PoolUtils.unzip;
-import static server.ServerManager.*;
 
 public class ToolsMain {
 
