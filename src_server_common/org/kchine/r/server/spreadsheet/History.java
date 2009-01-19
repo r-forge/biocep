@@ -7,9 +7,9 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
 
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RConsoleAction;
 
-import server.DirectJNI;
 
 
 /** This is the class to support nearly-arbitrary undo/redo operations.

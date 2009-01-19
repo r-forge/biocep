@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server.impl;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -25,7 +25,9 @@ import org.kchine.r.RList;
 import org.kchine.r.RObject;
 import org.kchine.r.RVector;
 import org.kchine.r.server.AssignInterface;
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RNI;
+
 
 
 /**

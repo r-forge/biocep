@@ -92,9 +92,9 @@ public class ServerManager {
 		} else if (new File(System.getProperty("user.dir") + "/biocep.txt").exists()) {
 			INSTALL_DIR = System.getProperty("user.dir");
 		} else {
-			String codeUrl = ServerManager.class.getResource("/server/ServerManager.class").toString();
+			String codeUrl = ServerManager.class.getResource("/org/kchine/r/server/manager/ServerManager.class").toString();
 			if (codeUrl.startsWith("jar:file:")) {
-				String jarfile = codeUrl.substring("jar:file:".length(), codeUrl.length() - "/server/ServerManager.class".length() - 1);
+				String jarfile = codeUrl.substring("jar:file:".length(), codeUrl.length() - "/org/kchine/r/server/manager/ServerManager.class".length() - 1);
 				if (new File(new File(jarfile).getParent() + "/biocep.txt").exists()) {
 					jarfile.replace('\\', '/');
 					INSTALL_DIR = jarfile.substring(0, jarfile.lastIndexOf("/"));

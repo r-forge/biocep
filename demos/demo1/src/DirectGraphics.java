@@ -23,8 +23,8 @@ import java.awt.Color;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import server.DirectJNI;
 
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.workbench.graphics.JGDPanelPop;

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server;
 
 import java.net.ServerSocket;
 import java.net.URL;
@@ -24,6 +24,7 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.kchine.r.server.LocalHttpServer;
 import org.kchine.r.server.RServices;
+import org.kchine.r.server.impl.RServantImpl;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServerDefaults;

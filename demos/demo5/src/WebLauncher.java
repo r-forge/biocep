@@ -23,7 +23,7 @@ import javax.xml.ws.Endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.PropertyConfigurator;
-import server.DirectJNI;
+import org.kchine.r.server.DirectJNI;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

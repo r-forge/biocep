@@ -18,9 +18,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server.impl;
 
-import static server.RConst.STRSXP;
+import static org.kchine.r.server.RConst.STRSXP;
+
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import org.apache.commons.logging.Log;
@@ -32,10 +33,13 @@ import org.kchine.r.RList;
 import org.kchine.r.RObject;
 import org.kchine.r.RVector;
 import org.kchine.r.server.AssignInterface;
+import org.kchine.r.server.DirectJNI;
+import org.kchine.r.server.ExecutionUnit;
 import org.kchine.r.server.RNI;
 import org.kchine.r.server.ReferenceInterface;
 import org.kchine.r.server.Utils;
 import org.rosuda.JRI.Rengine;
+
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -47,7 +51,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		log.info("Assigning.. to obj id " + rObjectId + " " + slotsPath + "   --> " + robj);
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -88,7 +92,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		} else {
 			final RObject[] robjHolder = new RObject[1];
 			final Exception[] exceptionHolder = new Exception[1];
-			DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+			DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 				public void run(Rengine e) {
 					try {
 
@@ -109,7 +113,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public String getOutputMsg(final long rObjectId, final String slotsPath) throws RemoteException {
 		final String[] result = new String[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -137,7 +141,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setOutputMsg(final long rObjectId, final String slotsPath, final String msg) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 
@@ -160,7 +164,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public int[] getIndexNA(final long rObjectId, final String slotsPath) throws RemoteException {
 		final int[][] result = new int[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -184,7 +188,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setIndexNA(final long rObjectId, final String slotsPath, final int[] indexNA) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -218,7 +222,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public String[] getNames(final long rObjectId, final String slotsPath) throws RemoteException {
 		final String[][] result = new String[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -247,7 +251,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 
 		System.out.println("before set name ->" + rObjectId);
 
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -280,7 +284,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public String[] getValueStringArray(final long rObjectId, final String slotsPath) throws RemoteException {
 		final String[][] result = new String[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -308,7 +312,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setValueStringArray(final long rObjectId, final String slotsPath, final String[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -340,7 +344,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public boolean[] getValueBoolArray(final long rObjectId, final String slotsPath) throws RemoteException {
 		final boolean[][] result = new boolean[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -369,7 +373,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setValueBoolArray(final long rObjectId, final String slotsPath, final boolean[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -399,7 +403,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public double[] getValueDoubleArray(final long rObjectId, final String slotsPath) throws RemoteException {
 		final double[][] result = new double[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -427,7 +431,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setValueDoubleArray(final long rObjectId, final String slotsPath, final double[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -458,7 +462,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public int[] getValueIntArray(final long rObjectId, final String slotsPath) throws RemoteException {
 		final int[][] result = new int[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -486,7 +490,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setValueIntArray(final long rObjectId, final String slotsPath, final int[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -518,7 +522,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public double[] getValueCPReal(final long rObjectId, final String slotsPath) throws RemoteException {
 		final double[][] result = new double[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -546,7 +550,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public double[] getValueCPImaginary(final long rObjectId, final String slotsPath) throws RemoteException {
 		final double[][] result = new double[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -574,7 +578,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setValueCP(final long rObjectId, final String slotsPath, final double[] real, final double[] imaginary) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -611,7 +615,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 
 		final int[] result = new int[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -632,7 +636,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public RVector getArrayValue(final long rObjectId, final String slotsPath) throws RemoteException {
 		final RVector[] result = new RVector[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -652,7 +656,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setArrayValue(final long rObjectId, final String slotsPath, final RVector value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -679,7 +683,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public int[] getArrayDim(final long rObjectId, final String slotsPath) throws RemoteException {
 		final int[][] result = new int[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -701,7 +705,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setArrayDim(final long rObjectId, final String slotsPath, final int[] dim) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -732,7 +736,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public RList getArrayDimnames(final long rObjectId, final String slotsPath) throws RemoteException {
 		final RList[] result = new RList[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -753,7 +757,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setArrayDimnames(final long rObjectId, final String slotsPath, final RList dimnames) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -784,7 +788,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public String[] factorAsData(final long rObjectId, final String slotsPath) throws RemoteException {
 		final String[][] result = new String[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -805,7 +809,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public int[] getFactorCode(final long rObjectId, final String slotsPath) throws RemoteException {
 		final int[][] result = new int[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -826,7 +830,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public String[] getFactorLevels(final long rObjectId, final String slotsPath) throws RemoteException {
 		final String[][] result = new String[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -848,7 +852,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setFactorCode(final long rObjectId, final String slotsPath, final int[] code) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -873,7 +877,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -903,7 +907,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 
 		final RList[] result = new RList[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -924,7 +928,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public String[] getDataframeRowNames(final long rObjectId, final String slotsPath) throws RemoteException {
 		final String[][] result = new String[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -946,7 +950,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setDataframeData(final long rObjectId, final String slotsPath, final RList data) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -971,7 +975,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setDataframeRowNames(final long rObjectId, final String slotsPath, final String[] rowNames) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -1001,7 +1005,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public RObject[] getListValue(final long rObjectId, final String slotsPath) throws RemoteException {
 		final RObject[][] result = new RObject[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -1021,7 +1025,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setListValue(final long rObjectId, final String slotsPath, final RObject[] value) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -1054,7 +1058,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public HashMap getEnvData(final long rObjectId, final String slotsPath) throws RemoteException {
 		final HashMap[] result = new HashMap[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -1074,7 +1078,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long putEnv(final long rObjectId, final String slotsPath, final String theKey, final RObject theValue) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -1099,7 +1103,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setEnvData(final long rObjectId, final String slotsPath, final HashMap<String, RObject> data) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					HashMap<String, RObject> plaindata = new HashMap<String, RObject>();
@@ -1125,7 +1129,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	}
 
 	public RNI getRNI() throws RemoteException {
-		return DirectJNI.getInstance()._rni;
+		return DirectJNI.getInstance().getRNI();
 	}
 
 	public String getName() throws RemoteException {
@@ -1135,7 +1139,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public String[] getS3ClassAttribute(final long rObjectId, final String slotsPath) throws RemoteException {
 		final String[][] result = new String[1][];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
@@ -1162,7 +1166,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 	public long setS3ClassAttribute(final long rObjectId, final String slotsPath, final String[] classAttribute) throws RemoteException {
 		final long[] result = new long[1];
 		final Exception[] exceptionHolder = new Exception[1];
-		DirectJNI.getInstance().runR(new server.ExecutionUnit() {
+		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
 

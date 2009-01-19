@@ -18,10 +18,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server.impl;
 
-import graphics.rmi.RGraphicsPanelRemote;
-import graphics.rmi.RClustserInterface;
 import http.FreeResourcesListener;
 
 import java.io.Serializable;
@@ -48,18 +46,23 @@ import javax.servlet.http.HttpSessionListener;
 import org.apache.commons.logging.Log;
 import org.kchine.r.RObject;
 import org.kchine.r.server.AssignInterface;
+import org.kchine.r.server.DirectJNI;
+import org.kchine.r.server.ExecutionUnit;
 import org.kchine.r.server.ExtendedReentrantLock;
 import org.kchine.r.server.FileDescription;
 import org.kchine.r.server.GenericCallbackDevice;
 import org.kchine.r.server.LocalHttpServer;
 import org.kchine.r.server.RCallBack;
+import org.kchine.r.server.RClustserInterface;
 import org.kchine.r.server.RCollaborationListener;
 import org.kchine.r.server.RConsoleAction;
 import org.kchine.r.server.RConsoleActionListener;
 import org.kchine.r.server.RKit;
+import org.kchine.r.server.RListener;
 import org.kchine.r.server.RNI;
 import org.kchine.r.server.RPackage;
 import org.kchine.r.server.RServices;
+import org.kchine.r.server.RServicesObject;
 import org.kchine.r.server.ReferenceInterface;
 import org.kchine.r.server.UserStatus;
 import org.kchine.r.server.Utils;
@@ -88,6 +91,8 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.rosuda.JRI.Rengine;
 import org.rosuda.iplots.Framework;
+
+import server.R;
 
 /**
  * @author Karim Chine karim.chine@m4x.org

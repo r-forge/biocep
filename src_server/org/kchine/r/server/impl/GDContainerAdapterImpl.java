@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package graphics.rmi;
+package org.kchine.r.server.impl;
 
 import java.awt.Dimension;
 import java.awt.Font;

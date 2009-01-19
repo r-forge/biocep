@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import server.CoreMain;
+import org.kchine.r.server.CoreMain;
 
 
 public class RmiServer {

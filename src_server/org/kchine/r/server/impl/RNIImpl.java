@@ -16,11 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package server;
+package org.kchine.r.server.impl;
 
 import java.rmi.RemoteException;
 
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RNI;
+
 
 
 /**
