@@ -18,7 +18,6 @@
  */
 package graphics.rmi;
 
-import http.RHttpProxy;
 
 import java.awt.BorderLayout;
 import java.util.HashMap;
@@ -27,6 +26,7 @@ import javax.swing.JApplet;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.kchine.r.server.http.RHttpProxy;
 import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.SupervisorInterface;
 import org.kchine.rpf.db.monitor.Supervisor;

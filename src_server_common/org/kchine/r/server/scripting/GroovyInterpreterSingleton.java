@@ -146,7 +146,7 @@ public class GroovyInterpreterSingleton {
 							while ((line = breader.readLine()) != null) {
 								if (line.trim().equals("<R>")) {
 									pwriter.print("String log_R_sourceFromBuffer=");
-									if (server.R.getInstance() != null)
+									if (org.kchine.r.server.R.getInstance() != null)
 										pwriter.print("server.");
 									else
 										pwriter.print("client.");

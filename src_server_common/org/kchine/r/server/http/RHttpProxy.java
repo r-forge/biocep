@@ -18,7 +18,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package http;
+package org.kchine.r.server.http;
+
+import http.ConnectionFailedException;
+import http.HttpMarker;
+import http.NotLoggedInException;
+import http.TunnelingException;
 
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationHandler;

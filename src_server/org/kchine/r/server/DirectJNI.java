@@ -124,6 +124,7 @@ import org.kchine.r.server.graphics.GDContainerBag;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.graphics.GraphicNotifier;
 import org.kchine.r.server.graphics.primitive.GDObject;
+import org.kchine.r.server.http.Java2DUtils;
 import org.kchine.r.server.impl.DefaultAssignInterfaceImpl;
 import org.kchine.r.server.impl.RGraphicsPanelRemote;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
@@ -146,8 +147,6 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import server.Java2DUtils;
-import server.NoMappingAvailable;
 
 import static org.kchine.r.server.RConst.*;
 

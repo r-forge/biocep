@@ -29,7 +29,6 @@ import http.NoNodeManagerFound;
 import http.NoRegistryAvailableException;
 import http.NoServantAvailableException;
 import http.NotLoggedInException;
-import http.RHttpProxy;
 import http.TunnelingException;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -131,7 +130,7 @@ import net.infonode.util.Direction;
 import org.kchine.r.RObject;
 import org.kchine.r.server.ExtendedReentrantLock;
 import org.kchine.r.server.FileDescription;
-import org.kchine.r.server.LocalHttpServer;
+import org.kchine.r.server.NoMappingAvailable;
 import org.kchine.r.server.RCollaborationListener;
 import org.kchine.r.server.RConsoleAction;
 import org.kchine.r.server.RConsoleActionListener;
@@ -139,6 +138,8 @@ import org.kchine.r.server.RServices;
 import org.kchine.r.server.UserStatus;
 import org.kchine.r.server.Utils;
 import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.http.LocalHttpServer;
+import org.kchine.r.server.http.RHttpProxy;
 import org.kchine.r.server.manager.BadSshHostException;
 import org.kchine.r.server.manager.BadSshLoginPwdException;
 import org.kchine.r.server.manager.ServantCreationFailed;
@@ -241,7 +242,6 @@ import org.rosuda.ibase.plots.ScatterCanvas;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
-import server.NoMappingAvailable;
 import static org.kchine.r.workbench.graphics.JGDPanelPop.*;
 import static org.kchine.rpf.PoolUtils.redirectIO;
 import static org.kchine.rpf.PoolUtils.unzip;
@@ -502,7 +502,7 @@ public class GDApplet extends AppletBase implements RGui {
 
 		if (true) {
 
-			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
+			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new org.kchine.r.server.http.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
 			LocalRmiRegistry.getLocalRmiRegistryPort();
 		}
 
@@ -4106,9 +4106,9 @@ public class GDApplet extends AppletBase implements RGui {
 
 											_virtualizationServer = new Server(port);
 											Context root = new Context(_virtualizationServer, "/", Context.SESSIONS);
-											root.addServlet(new ServletHolder(new http.local.LocalGraphicsServlet(GDApplet.this)), "/rvirtual/graphics/*");
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.LocalGraphicsServlet(GDApplet.this)), "/rvirtual/graphics/*");
 											root.addServlet(new ServletHolder(new http.CommandServlet(GDApplet.this,true)), "/rvirtual/cmd/*");
-											root.addServlet(new ServletHolder(new http.local.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.LocalHelpServlet(GDApplet.this)), "/rvirtual/helpme/*");
 											System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
 											_virtualizationServer.start();
 

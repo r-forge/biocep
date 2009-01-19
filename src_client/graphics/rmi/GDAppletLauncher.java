@@ -74,19 +74,24 @@ public class GDAppletLauncher {
 				}
 			}));
 
-			try {
-				UIManager.setLookAndFeel(gDApplet.getLookAndFeelClassName());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			JFrame mainframe = new JFrame();
-			mainframe.getContentPane().setLayout(new BorderLayout());
-			mainframe.getContentPane().add(gDApplet.getContentPane(), BorderLayout.CENTER);
-			mainframe.setPreferredSize(new Dimension(840, 720));
-			mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			SwingUtilities.invokeLater(new Runnable(){
+				public void run() {
+					try {
+						UIManager.setLookAndFeel(gDApplet.getLookAndFeelClassName());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					JFrame mainframe = new JFrame();
+					mainframe.getContentPane().setLayout(new BorderLayout());
+					mainframe.getContentPane().add(gDApplet.getContentPane(), BorderLayout.CENTER);
+					mainframe.setPreferredSize(new Dimension(840, 720));
+					mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-			mainframe.pack();
-			mainframe.setVisible(true);
+					mainframe.pack();
+					mainframe.setVisible(true);
+					
+				}
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

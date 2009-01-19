@@ -42,10 +42,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.http.Java2DUtils;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServantProviderFactory;
 
-import server.Java2DUtils;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
