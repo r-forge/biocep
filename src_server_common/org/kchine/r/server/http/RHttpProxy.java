@@ -20,10 +20,6 @@
  */
 package org.kchine.r.server.http;
 
-import http.ConnectionFailedException;
-import http.HttpMarker;
-import http.NotLoggedInException;
-import http.TunnelingException;
 
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationHandler;
@@ -47,6 +43,9 @@ import org.kchine.r.server.RConsoleAction;
 import org.kchine.r.server.RConsoleActionListener;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.http.frontend.ConnectionFailedException;
+import org.kchine.r.server.http.frontend.NotLoggedInException;
+import org.kchine.r.server.http.frontend.TunnelingException;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelDevice;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteProxy;
 import org.kchine.rpf.PoolUtils;

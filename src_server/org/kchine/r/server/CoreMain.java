@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.kchine.r.server.RServices;
-import org.kchine.r.server.http.LocalHttpServer;
+import org.kchine.r.server.http.local.LocalHttpServer;
 import org.kchine.r.server.impl.RServantImpl;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.PoolUtils;

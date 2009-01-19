@@ -1,10 +1,10 @@
 import static org.kchine.rpf.PoolUtils.getHostIp;
-import http.FreeResourcesListener;
 
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.kchine.r.server.http.frontend.FreeResourcesListener;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionManager;
@@ -74,12 +74,12 @@ public class HttpServerLight {
 			}
 		});
 		
-		root.addServlet(new ServletHolder(new http.CommandServlet()), "/rvirtual/cmd/*");
-		root.addServlet(new ServletHolder(new http.HelpServlet()), "/rvirtual/helpme/*");
-		root.addServlet(new ServletHolder(new http.ConfigServlet()), "/rvirtual/config/*");
-		root.addServlet(new ServletHolder(new http.GraphicsServlet()), "/rvirtual/graphics/*");
-		root.addServlet(new ServletHolder(new http.RESTServlet()), "/rvirtual/rest/*");
-		root.addServlet(new ServletHolder(new http.RebindServlet()), "/rvirtual/rebind/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet()), "/rvirtual/cmd/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.HelpServlet()), "/rvirtual/helpme/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.ConfigServlet()), "/rvirtual/config/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet()), "/rvirtual/graphics/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet()), "/rvirtual/rest/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RebindServlet()), "/rvirtual/rebind/*");
 		
 		System.out.println("+ going to start virtualization http server port : " + port);
 		_virtualizationServer.start();				

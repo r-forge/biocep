@@ -8,7 +8,7 @@
 		<display-name>
 		CommandServlet</display-name>
 		<servlet-name>CommandServlet</servlet-name>
-		<servlet-class>http.CommandServlet</servlet-class>
+		<servlet-class>org.kchine.r.server.http.frontend.CommandServlet</servlet-class>
 	</servlet>
 	
 	<servlet>
@@ -17,7 +17,7 @@
 		<display-name>
 			HelpServlet</display-name>
 		<servlet-name>HelpServlet</servlet-name>
-		<servlet-class>http.HelpServlet</servlet-class>
+		<servlet-class>org.kchine.r.server.http.frontend.HelpServlet</servlet-class>
 	</servlet>
 	
 	<servlet>
@@ -26,7 +26,7 @@
 		<display-name>
 		ConfigServlet</display-name>
 		<servlet-name>ConfigServlet</servlet-name>
-		<servlet-class>http.ConfigServlet</servlet-class>
+		<servlet-class>org.kchine.r.server.http.frontend.ConfigServlet</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -35,7 +35,7 @@
 		<display-name>
 		InterceptorServlet</display-name>
 		<servlet-name>InterceptorServlet</servlet-name>
-		<servlet-class>http.InterceptorServlet</servlet-class>
+		<servlet-class>org.kchine.r.server.http.frontend.InterceptorServlet</servlet-class>
 	</servlet>
 	
 			
@@ -44,7 +44,7 @@
 		</description>
 		<display-name>GraphicsServlet</display-name>
 		<servlet-name>GraphicsServlet</servlet-name>
-		<servlet-class>http.GraphicsServlet</servlet-class>
+		<servlet-class>org.kchine.r.server.http.frontend.GraphicsServlet</servlet-class>
 	</servlet>
 	
 	<servlet>
@@ -52,7 +52,7 @@
 		</description>
 		<display-name>RESTServlet</display-name>
 		<servlet-name>RESTServlet</servlet-name>
-		<servlet-class>http.RESTServlet</servlet-class>
+		<servlet-class>org.kchine.r.server.http.frontend.RESTServlet</servlet-class>
 	</servlet>
 	
 	<servlet>
@@ -60,7 +60,7 @@
 		</description>
 		<display-name>RebindServlet</display-name>
 		<servlet-name>RebindServlet</servlet-name>
-		<servlet-class>http.RebindServlet</servlet-class>
+		<servlet-class>org.kchine.r.server.http.frontend.RebindServlet</servlet-class>
 	</servlet>
 	
 	<servlet>
@@ -130,7 +130,7 @@
 		<session-timeout>3</session-timeout>
 	</session-config>
 	<listener>
-		<listener-class>http.FreeResourcesListener</listener-class>
+		<listener-class>org.kchine.r.server.http.frontend.FreeResourcesListener</listener-class>
 	</listener>
 	
 </web-app>

@@ -18,6 +18,6 @@
  */
 public class Workbench {
 	public static void main( String[] args) throws Exception{
-		graphics.rmi.GDAppletLauncher.main(args);
+		org.kchine.r.workbench.WorkbenchLauncher.main(args);
 	}
 }

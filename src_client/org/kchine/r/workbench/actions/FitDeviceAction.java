@@ -18,7 +18,6 @@
  */
 package org.kchine.r.workbench.actions;
 
-import graphics.rmi.GDApplet;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -27,6 +26,7 @@ import javax.swing.AbstractAction;
 
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
 
 /**
@@ -45,7 +45,7 @@ public class FitDeviceAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		try {
 
-			JGDPanelPop panel = (JGDPanelPop) GDApplet.getComponentParent((Component) e.getSource(), JGDPanelPop.class);
+			JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JGDPanelPop.class);
 
 			panel.fit();
 		} catch (Exception ex) {

@@ -18,7 +18,6 @@
  */
 package org.kchine.r.workbench.actions;
 
-import graphics.rmi.GDApplet;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -26,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JBufferedImagePanel;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
 import org.kchine.r.workbench.views.PDFPanel;
@@ -53,7 +53,7 @@ public class SnapshotDevicePdfAction extends AbstractAction {
 				try {
 					_rgui.getRLock().lock();
 
-					final JGDPanelPop panel = (JGDPanelPop) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
+					final JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 					final PDFPanel pdfPanel=new PDFPanel();					
 					_rgui.createView(pdfPanel, "PDF Snapshot");
 					SwingUtilities.invokeLater(new Runnable() {

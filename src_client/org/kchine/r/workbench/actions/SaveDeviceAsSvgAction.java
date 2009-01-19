@@ -24,10 +24,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JBufferedImagePanel;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
 
-import graphics.rmi.GDApplet;
 import java.awt.Component;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -57,7 +57,7 @@ public class SaveDeviceAsSvgAction extends AbstractAction {
 				public void run() {
 					try {
 						_rgui.getRLock().lock();
-						JGDPanelPop panel = (JGDPanelPop) GDApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
+						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 
 						Vector<String> result = panel.getGdDevice().getSVGAsText();
 						PrintWriter pw = new PrintWriter(new FileWriter(chooser.getSelectedFile()));

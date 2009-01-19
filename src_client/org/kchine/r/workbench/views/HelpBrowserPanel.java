@@ -20,7 +20,6 @@
  */ 
 package org.kchine.r.workbench.views;
 
-import graphics.rmi.GDApplet;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -50,6 +49,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.WorkbenchApplet;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -68,7 +68,7 @@ public class HelpBrowserPanel extends JPanel implements HyperlinkListener, Actio
 		return  _rgui.getHelpRootUrl() + "/doc/html/index.html";
 	}
 
-	public HelpBrowserPanel(GDApplet applet) {
+	public HelpBrowserPanel(WorkbenchApplet applet) {
 		this._rgui = applet;
 
 		JPanel topPanel = new JPanel();
@@ -185,7 +185,7 @@ public class HelpBrowserPanel extends JPanel implements HyperlinkListener, Actio
 				}
 			});
 
-			_htmlPane.addMouseListener(new GDApplet.PopupListener(menu));
+			_htmlPane.addMouseListener(new WorkbenchApplet.PopupListener(menu));
 
 			_htmlPane.addKeyListener(new KeyListener() {
 				public void keyPressed(KeyEvent e) {
