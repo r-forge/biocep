@@ -411,7 +411,7 @@ public class RServicesObject implements RServices {
 	public void uploadExtension(String extensionName, byte[] extension) {
 	}
 	
-	public void convertFile(String inputFile, String outputFile, String conversionFilter) throws RemoteException {
+	public void convertFile(String inputFile, String outputFile, String conversionFilter, boolean useServer) throws RemoteException {
 	}
 	
 	public void freeAllReferences() throws RemoteException {

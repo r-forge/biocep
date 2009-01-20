@@ -786,7 +786,7 @@ public class LoginDialog extends JDialog {
 		dbPwd_str = _dbPwd.getText();
 		dbServantName_str = (String) _dbServantName.getSelectedItem();
 
-		stub_str = _stub.getText();
+		stub_str = _stub.getText().trim();
 
 		try {
 			memoryMin_int = Integer.decode(_memoryMin.getText());

@@ -105,10 +105,6 @@ public interface RServices extends ManagedServant {
 	public void removeRConsoleActionListener(RConsoleActionListener ractionListener) throws RemoteException;	
 	public void removeAllRConsoleActionListeners() throws RemoteException;
 	
-	
-	
-	
-	
 	public void  registerUser(String sourceUID,String user) throws RemoteException;
 	public void  unregisterUser(String sourceUID) throws RemoteException;
 	public void  updateUserStatus(String sourceUID, UserStatus userStatus) throws RemoteException;
@@ -180,7 +176,7 @@ public interface RServices extends ManagedServant {
 	public String getGroovyStatus() throws RemoteException;
 	public void resetGroovyInterpreter () throws RemoteException;
 	public void uploadExtension(String extensionName, byte[] extension) throws RemoteException;
-	void convertFile(String inputFile,  String outputFile, String conversionFilter) throws RemoteException;
+	void convertFile(String inputFile,  String outputFile, String conversionFilter, boolean useserver) throws RemoteException;
 		
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException;	
 	public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException;	

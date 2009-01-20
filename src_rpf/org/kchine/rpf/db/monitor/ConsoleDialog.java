@@ -94,7 +94,7 @@ public class ConsoleDialog extends JFrame {
 				return log;
 
 			}
-		},"Evaluate", Color.black,true,null);
+		},"Evaluate", Color.black,null,true,null);
 		getContentPane().add(cp);
 
 		setSize(new Dimension(540, 430));

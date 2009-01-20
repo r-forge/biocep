@@ -147,7 +147,6 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 import static org.kchine.r.server.RConst.*;
 
 /**
@@ -571,7 +570,7 @@ public class DirectJNI {
 		}
 	}
 
-	//public for internal use only
+	// public for internal use only
 	public long putObject(Object obj) throws Exception {
 
 		Rengine e = _rEngine;
@@ -1843,7 +1842,7 @@ public class DirectJNI {
 	public RServices getRServices() {
 		return _rServices;
 	}
-	
+
 	public RNI getRNI() {
 		return _rni;
 	}
@@ -2882,17 +2881,28 @@ public class DirectJNI {
 
 		public void registerUser(String sourceUID, String user) throws RemoteException {
 			_usersHash.put(sourceUID, new UserStatus(sourceUID, user, false));
-			notifyRActionListeners(new RConsoleAction("UPDATE_USERS"));
+			RConsoleAction action=new RConsoleAction("USER_JOINED",new HashMap<String, Object>());
+			action.getAttributes().put("user",user);		
+			action.getAttributes().put("sourceUID",sourceUID);
+			notifyRActionListeners(action);
 		}
 
 		public void unregisterUser(String sourceUID) throws RemoteException {
+			String user=_usersHash.get(sourceUID).getUserName();
 			_usersHash.remove(sourceUID);
-			notifyRActionListeners(new RConsoleAction("UPDATE_USERS"));
+			RConsoleAction action=new RConsoleAction("USER_LEFT",new HashMap<String, Object>());
+			action.getAttributes().put("user",user);
+			action.getAttributes().put("sourceUID",sourceUID);
+			notifyRActionListeners(action);					
 		}
 
 		public void updateUserStatus(String sourceUID, UserStatus userStatus) throws RemoteException {
 			_usersHash.put(sourceUID, userStatus);
-			notifyRActionListeners(new RConsoleAction("UPDATE_USERS"));
+			RConsoleAction action=new RConsoleAction("USER_UPDATED",new HashMap<String, Object>());
+			action.getAttributes().put("user",userStatus.getUserName());
+			action.getAttributes().put("status",userStatus);
+			action.getAttributes().put("sourceUID",sourceUID);
+			notifyRActionListeners(action);		
 		}
 
 		public UserStatus[] getUserStatusTable() throws RemoteException {
@@ -3726,17 +3736,33 @@ public class DirectJNI {
 		public String getGroovyStatus() throws RemoteException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-		
+
 		public void resetGroovyInterpreter() throws RemoteException {
-			GroovyInterpreterSingleton._groovy=null;			
+			GroovyInterpreterSingleton._groovy = null;
 		}
-		
+
 		public void uploadExtension(String extensionName, byte[] extension) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-		
-		public void convertFile(String inputFile, String outputFile, String conversionFilter) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported yet.");			
+
+		public void convertFile(String inputFile, String outputFile, String conversionFilter, boolean useServer) throws RemoteException {
+			if (useServer) {
+				GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
+				try {
+					System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
+					System.out.println(gr.exec("org.kchine.ooc.OOConverter.anythingToAnything(\"" + new File(inputFile).getAbsolutePath().replace('\\', '/')
+						+ "\", \"" + new File(outputFile).getAbsolutePath().replace('\\', '/') + "\", \"" + conversionFilter + "\" );"));
+				} catch (Exception e) {
+					new RemoteException("",e);
+				}
+				
+				if (!new File(outputFile).exists()) {
+					throw new RemoteException(
+							"check that you have installed open office 3 and that soffice is in your system path (accessible from your command line)");
+				}
+			} else {
+				throw new UnsupportedOperationException("Not supported yet.");
+			}
 		}
 
 		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
@@ -4132,29 +4158,27 @@ public class DirectJNI {
 		}
 
 		private String capitalizeFirstLetter(String s) {
-			return (""+s.charAt(0)).toUpperCase()+s.substring(1);
+			return ("" + s.charAt(0)).toUpperCase() + s.substring(1);
 		}
-		
-		public byte[] getWmf(boolean useServer) throws RemoteException {		
+
+		public byte[] getWmf(boolean useServer) throws RemoteException {
 			return getGenericVectorFormat("wmf", useServer);
 		}
-		
+
 		private byte[] getGenericVectorFormat(String format, boolean useserver) throws RemoteException {
 
 			File tempSVGFile = null;
 			File tempVectorFile = null;
 			try {
-				long currentTimeMillis=System.currentTimeMillis();
+				long currentTimeMillis = System.currentTimeMillis();
 				tempSVGFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".svg").getCanonicalFile();
-				tempVectorFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + "."+format).getCanonicalFile();
+				tempVectorFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + "." + format).getCanonicalFile();
 				if (tempSVGFile.exists())
 					tempSVGFile.delete();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			}
-
-			
 
 			boolean svgFunctionAvailable = false;
 			boolean CairoFunctionAvailable = false;
@@ -4202,9 +4226,11 @@ public class DirectJNI {
 
 					GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
 					System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
-					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgTo"+capitalizeFirstLetter(format)+(useserver?"":"NoServer")+"(\"" + tempSVGFile.getAbsolutePath().replace('\\','/') + "\", \"" + tempVectorFile.getAbsolutePath().replace('\\','/') + "\" );"));
+					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgTo" + capitalizeFirstLetter(format) + (useserver ? "" : "NoServer") + "(\""
+							+ tempSVGFile.getAbsolutePath().replace('\\', '/') + "\", \"" + tempVectorFile.getAbsolutePath().replace('\\', '/') + "\" );"));
 					if (!tempVectorFile.exists()) {
-						throw new Exception("Couldn't generate "+format+", check that you have installed open office 3 and that soffice is in your system path (accessible from your command line)");
+						throw new Exception("Couldn't generate " + format
+								+ ", check that you have installed open office 3 and that soffice is in your system path (accessible from your command line)");
 					}
 					RandomAccessFile raf = new RandomAccessFile(tempVectorFile, "r");
 					result = new byte[(int) raf.length()];
@@ -4228,13 +4254,13 @@ public class DirectJNI {
 		}
 
 		public byte[] getEmf(boolean useServer) throws RemoteException {
-			return getGenericVectorFormat("emf",useServer);
+			return getGenericVectorFormat("emf", useServer);
 		}
 
 		public byte[] getOdg() throws RemoteException {
-			return getGenericVectorFormat("odg",false);
+			return getGenericVectorFormat("odg", false);
 		}
-		
+
 		public byte[] getJpg() throws RemoteException {
 			return null;
 		}

@@ -919,6 +919,26 @@
 	</IS_SELECTED>
 </ACTION>	
 
+<ACTION NAME="play-r">
+	<CODE>
+		org.gjt.sp.jedit.WorkbenchActions.playR(buffer.getPath());
+	</CODE>
+	
+	<IS_SELECTED>
+		return org.gjt.sp.jedit.WorkbenchActions.isRunREnabled();
+	</IS_SELECTED>
+</ACTION>	
+
+<ACTION NAME="play-r-selection">
+	<CODE>
+		org.gjt.sp.jedit.WorkbenchActions.playRSelection(buffer.getPath());
+	</CODE>
+	
+	<IS_SELECTED>
+		return org.gjt.sp.jedit.WorkbenchActions.isRunREnabled();
+	</IS_SELECTED>
+</ACTION>
+
 <ACTION NAME="paste-console">
 	<CODE>
 		org.gjt.sp.jedit.WorkbenchActions.pasteConsole(buffer.getPath());

@@ -504,4 +504,138 @@ public class WorkbenchActions {
 	
 
 	
+	
+	
+	public static void playR(final String path) {
+
+		if (getRGui().getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
+
+		final View activeView = getActiveView();
+		if (activeView.getBuffer().isDirty()) {
+			activeView.getInputHandler().invokeAction("save");
+		}
+		if (getRGui().getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+			return;
+		}
+
+		new Thread(new Runnable() {
+			FileReader freader = null;
+
+			public void run() {
+
+				while (activeView.getBuffer().isDirty()) {
+					try {
+						Thread.sleep(100);
+					} catch (Exception e) {
+					}
+				}
+
+				try {
+					
+					freader = new FileReader(path);
+
+					BufferedReader br = new BufferedReader(freader);
+					String l = null;
+					while ((l = br.readLine()) != null) {
+						getRGui().getRLock().lock();
+						try {
+							getRGui().getConsoleLogger().printAsInput(l);
+							getRGui().getR().consoleSubmit(l);
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							getRGui().getRLock().unlock();
+						}						
+					}
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					if (freader != null)
+						try {
+							freader.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+				}
+			}
+		}).start();
+
+	}
+
+	public static void playRSelection(final String path) {
+		
+		
+		
+
+		if (getRGui().getR() == null) {
+			JOptionPane.showMessageDialog(null, "No R available");
+			return;
+		}
+
+		
+		
+		final View activeView = getActiveView();
+		final Clipboard clipboard = activeView.getToolkit().getSystemClipboard();
+		
+        StringSelection data = new StringSelection("");
+        clipboard.setContents(data, data);
+        
+		activeView.getInputHandler().invokeAction("copy");
+
+		if (getRGui().getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+			return;
+		}
+
+		new Thread(new Runnable() {
+			public void run() {
+
+				while (activeView.getBuffer().isPerformingIO() || activeView.getBuffer().isReadOnly()) {
+					try {
+						Thread.sleep(100);
+					} catch (Exception e) {
+					}
+				}
+				
+				try {
+					
+					Transferable clipData = clipboard.getContents(clipboard);
+					if (clipData != null) {
+							if (clipData.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+								String s = (String) (clipData.getTransferData(DataFlavor.stringFlavor));
+								
+								BufferedReader br = new BufferedReader(new StringReader(s));
+								String l = null;
+								while ((l = br.readLine()) != null) {
+									getRGui().getRLock().lock();
+									try {
+										getRGui().getConsoleLogger().printAsInput(l);
+										getRGui().getR().consoleSubmit(l);
+									} catch (Exception e) {
+										e.printStackTrace();
+									} finally {
+										getRGui().getRLock().unlock();
+									}						
+								}
+								
+							}
+					}
+
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+			}
+		}).start();
+
+	}
+
+	
+	
+	
 }

@@ -27,8 +27,8 @@ import org.kchine.rpf.gui.InDialog;
 
 public class R {
 	public static  RServices getInstance() {
-		if (WorkbenchApplet._instance==null) return null;
-		else return WorkbenchApplet._instance.getR();
+		if (WorkbenchApplet.getInstance()==null) return null;
+		else return WorkbenchApplet.getInstance().getR();
 	}
 	public static  Registry getRegistry() throws Exception {
 		return ServerDefaults.getRmiRegistry();

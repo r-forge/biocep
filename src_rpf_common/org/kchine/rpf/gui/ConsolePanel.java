@@ -31,6 +31,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -45,6 +46,8 @@ import java.util.Vector;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -175,7 +178,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	}
 
 	HashMap<String, Action> inputFiledActionsTable = new HashMap<String, Action>();
-	public ConsolePanel(SubmitInterface sInterface, String textFieldLabel, Color textFieldColor, final boolean undoRedoEnabled, AbstractAction[] actions) {
+	public ConsolePanel(SubmitInterface sInterface, String textFieldLabel, Color textFieldColor, String buttonLabel, final boolean undoRedoEnabled, AbstractAction[] actions) {
 		_sInterface = sInterface;
 		_actions = actions;
 		BOLD_BLACK = new SimpleAttributeSet();
@@ -195,7 +198,7 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 
 		_logArea.setEditable(false);
 		_scrollPane = new JScrollPane(_logArea);
-		_scrollPane.setBorder(BorderFactory.createLineBorder(Color.blue, 2));
+		//_scrollPane.setBorder(BorderFactory.createLineBorder(Color.blue, 2));
 
 		_commandInputField = new JTextPane();
 
@@ -423,8 +426,21 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 		JLabel label = new JLabel(textFieldLabel + " : ");
 		label.setForeground(textFieldColor);
 
-		bottomPanel.add(label, BorderLayout.WEST);
+		bottomPanel.add(label, BorderLayout.WEST);		
 		bottomPanel.add(_commandInputField, BorderLayout.CENTER);
+
+		if (buttonLabel!=null) {
+			JButton b=new JButton(buttonLabel);
+			b.setFont(b.getFont().deriveFont(4));
+			b.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e) {
+					play(_commandInputField.getText(), false);				
+				}
+			});
+			bottomPanel.add(b, BorderLayout.EAST);
+		}
+		
+		
 		add(bottomPanel, BorderLayout.SOUTH);
 
 		_logArea.addMouseListener(new MouseAdapter() {
@@ -610,8 +626,18 @@ public class ConsolePanel extends JPanel implements ClipboardOwner {
 	}
 	
 	public void pasteToConsoleEditor() {
-		_commandInputField.requestFocus();
-		inputFiledActionsTable.get(DefaultEditorKit.pasteAction).actionPerformed(null);		
+		final Clipboard clipboard = getToolkit().getSystemClipboard();
+		Transferable clipData = clipboard.getContents(clipboard);
+		if (clipData != null) {
+				if (clipData.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+					try {
+						String s = (String) (clipData.getTransferData(DataFlavor.stringFlavor));
+						_commandInputField.setText(_commandInputField.getText()+s);	
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+		}
 	}
 
 }

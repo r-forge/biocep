@@ -47,7 +47,7 @@ public class UnsafeEvaluatorView extends DynamicView {
 					return PoolUtils.getStackTraceAsString(e);
 				}
 			}
-		}, "R Expression", Color.red, true, null);
+		}, "R Expression", Color.red, "R", true, null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 

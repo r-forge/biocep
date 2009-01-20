@@ -194,14 +194,7 @@ public class GroovyInterpreterSingleton {
 					// e.printStackTrace();
 				}
 			}
-			if (org.kchine.r.server.R.getInstance()!=null) {
-				try {
-					_groovy.exec("import org.kchine.r.server.R;");
-					_groovy.exec("R=org.kchine.r.server.R.getInstance();");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} 
+			 
 			return _groovy;
 		}
 	}
