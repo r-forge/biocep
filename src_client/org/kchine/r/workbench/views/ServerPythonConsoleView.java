@@ -54,7 +54,7 @@ public class ServerPythonConsoleView extends DynamicView {
 					_rgui.getRLock().unlock();
 				}
 			}
-		},"Python Expression", Color.green, true, null);
+		},"Python Expression", Color.green, "P", true, null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 

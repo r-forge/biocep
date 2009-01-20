@@ -41,7 +41,10 @@ public class DirectRRmi {
 	public static void main(String[] args) throws Throwable {
 		
 		
-		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));
+		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));		
+		r.convertFile("c:/F.doc", "c:/F.pdf", "writer_pdf_Export", true);
+		System.exit(0);
+		
 		GDDevice  device = r.newDevice(400, 400);
 		r.consoleSubmit("plot(pressure);");
 		byte[] pdf=device.getEmf(true);

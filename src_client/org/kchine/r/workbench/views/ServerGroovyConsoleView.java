@@ -53,7 +53,7 @@ public 	class ServerGroovyConsoleView extends DynamicView {
 					_rgui.getRLock().unlock();
 				}
 			}
-		}, "Groovy Expression", Color.magenta, true, null);
+		}, "Groovy Expression", Color.magenta, "G",true, null);
 		((JPanel) getComponent()).add(_consolePanel);
 	}
 

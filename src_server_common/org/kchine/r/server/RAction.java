@@ -29,7 +29,7 @@ import java.util.HashMap;
 public class RAction implements Serializable {
 
 	private String _actionName;
-	private HashMap<String, Object> _actionAttributes = new HashMap<String, Object>();
+	private HashMap<String, Object> _actionAttributes = null;
 
 	public RAction() {
 

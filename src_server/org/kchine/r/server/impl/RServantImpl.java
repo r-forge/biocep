@@ -72,6 +72,7 @@ import org.kchine.r.server.http.local.LocalHttpServer;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
 import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
 import org.kchine.r.server.manager.ServerManager;
+import org.kchine.r.server.scripting.GroovyInterpreterSingleton;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl;
 import org.kchine.rpf.InitializingException;
@@ -176,6 +177,19 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				e.printStackTrace();
 			}			
 		}
+		
+		new Thread(new Runnable() {
+			public void run() {
+				try {					
+					GroovyInterpreterSingleton.getInstance().exec("import org.kchine.r.server.R;");
+					GroovyInterpreterSingleton.getInstance().exec("R=org.kchine.r.server.R.getInstance();");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+		}).start();
+
 		
 	}
 
@@ -979,8 +993,8 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		DirectJNI.getInstance().getRServices().uploadExtension(extensionName, extension);		
 	}
 	
-	public void convertFile(String inputFile, String outputFile, String conversionFilter) throws RemoteException {
-		DirectJNI.getInstance().getRServices().convertFile(inputFile, outputFile, conversionFilter);		
+	public void convertFile(String inputFile, String outputFile, String conversionFilter, boolean useServer) throws RemoteException {
+		DirectJNI.getInstance().getRServices().convertFile(inputFile, outputFile, conversionFilter, useServer);		
 	}
 	
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
