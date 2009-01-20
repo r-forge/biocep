@@ -58,7 +58,7 @@ public class SaveDeviceAsEmfAction extends AbstractAction {
 					try {
 						_rgui.getRLock().lock();
 						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
-						byte[] result = panel.getGdDevice().getEmf(true);
+						byte[] result = panel.getGdDevice().getEmf(false);
 						RandomAccessFile raf = new RandomAccessFile(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"emf"), "rw");
 						raf.setLength(0);
 						raf.write(result);
