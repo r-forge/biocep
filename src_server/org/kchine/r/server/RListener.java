@@ -241,46 +241,6 @@ public abstract class RListener {
 		return null;
 	}
 
-	private static Vector<String> list = null;
-
-	public static String[] listLightPacks(String v) {
-
-		if (list == null) {
-
-			list = new Vector<String>();
-			URL jarURL = null;
-			StringTokenizer st = new StringTokenizer(System.getProperty("java.class.path"), System.getProperty("path.separator"));
-			while (st.hasMoreTokens()) {
-				String pathElement = st.nextToken();
-				if (pathElement.endsWith("RJB.jar")) {
-					try {
-						jarURL = (new URL("jar:file:" + pathElement.replace('\\', '/') + "!/"));
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					break;
-				}
-			}
-
-			if (jarURL != null) {
-				try {
-					JarURLConnection jarConnection = (JarURLConnection) jarURL.openConnection();
-					JarFile jarfile = jarConnection.getJarFile();
-					Enumeration<JarEntry> enu = jarfile.entries();
-					while (enu.hasMoreElements()) {
-						String entry = enu.nextElement().toString();
-						if (entry.startsWith("monoscriptpackage") && entry.endsWith(".r"))
-							list.add(entry.substring("monoscriptpackage".length() + 1, entry.length() - 2));
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
-		return new String[] { "OK", convertToPrintCommand(list.toString()) };
-
-	}
 
 	public static String[] setClusterProperties(String gprops) {
 		if (!new File(gprops).exists()) {

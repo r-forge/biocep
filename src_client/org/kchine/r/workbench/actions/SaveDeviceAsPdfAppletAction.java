@@ -56,7 +56,8 @@ public class SaveDeviceAsPdfAppletAction extends AbstractAction {
 			return;
 		}
 		final JFileChooser chooser = new JFileChooser();
-		int returnVal = chooser.showOpenDialog(_rgui.getRootComponent());
+		chooser.setDialogTitle("Save Graphics as PDF-Applet");
+		int returnVal = chooser.showSaveDialog(_rgui.getRootComponent());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 
 			new Thread(new Runnable() {
