@@ -48,7 +48,8 @@ public class SaveDeviceAsJpgAction extends AbstractAction {
 				try {
 
 					final JFileChooser chooser = new JFileChooser();
-					int returnVal = chooser.showOpenDialog(_rgui.getRootComponent());
+					chooser.setDialogTitle("Save Graphics as JPEG");
+					int returnVal = chooser.showSaveDialog(_rgui.getRootComponent());
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
 						JBufferedImagePanel bufferedImagePanel = (JBufferedImagePanel) WorkbenchApplet.getComponentParent((Component) e.getSource(),
 								JBufferedImagePanel.class);

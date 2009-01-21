@@ -52,6 +52,7 @@ import java.net.InetAddress;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.rmi.NoSuchObjectException;
@@ -1674,4 +1675,15 @@ public class PoolUtils {
 			return f;
 		}
 	}
+
+	public static File getFileFromURL(URL url) {
+		File f;
+		try {
+		  f = new File(url.toURI());
+		} catch(URISyntaxException e) {
+		  f = new File(url.getPath());
+		}
+		return f;
+	}
+
 }

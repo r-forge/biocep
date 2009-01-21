@@ -2881,28 +2881,28 @@ public class DirectJNI {
 
 		public void registerUser(String sourceUID, String user) throws RemoteException {
 			_usersHash.put(sourceUID, new UserStatus(sourceUID, user, false));
-			RConsoleAction action=new RConsoleAction("USER_JOINED",new HashMap<String, Object>());
-			action.getAttributes().put("user",user);		
-			action.getAttributes().put("sourceUID",sourceUID);
+			RConsoleAction action = new RConsoleAction("USER_JOINED", new HashMap<String, Object>());
+			action.getAttributes().put("user", user);
+			action.getAttributes().put("sourceUID", sourceUID);
 			notifyRActionListeners(action);
 		}
 
 		public void unregisterUser(String sourceUID) throws RemoteException {
-			String user=_usersHash.get(sourceUID).getUserName();
+			String user = _usersHash.get(sourceUID).getUserName();
 			_usersHash.remove(sourceUID);
-			RConsoleAction action=new RConsoleAction("USER_LEFT",new HashMap<String, Object>());
-			action.getAttributes().put("user",user);
-			action.getAttributes().put("sourceUID",sourceUID);
-			notifyRActionListeners(action);					
+			RConsoleAction action = new RConsoleAction("USER_LEFT", new HashMap<String, Object>());
+			action.getAttributes().put("user", user);
+			action.getAttributes().put("sourceUID", sourceUID);
+			notifyRActionListeners(action);
 		}
 
 		public void updateUserStatus(String sourceUID, UserStatus userStatus) throws RemoteException {
 			_usersHash.put(sourceUID, userStatus);
-			RConsoleAction action=new RConsoleAction("USER_UPDATED",new HashMap<String, Object>());
-			action.getAttributes().put("user",userStatus.getUserName());
-			action.getAttributes().put("status",userStatus);
-			action.getAttributes().put("sourceUID",sourceUID);
-			notifyRActionListeners(action);		
+			RConsoleAction action = new RConsoleAction("USER_UPDATED", new HashMap<String, Object>());
+			action.getAttributes().put("user", userStatus.getUserName());
+			action.getAttributes().put("status", userStatus);
+			action.getAttributes().put("sourceUID", sourceUID);
+			notifyRActionListeners(action);
 		}
 
 		public UserStatus[] getUserStatusTable() throws RemoteException {
@@ -3746,23 +3746,30 @@ public class DirectJNI {
 		}
 
 		public void convertFile(String inputFile, String outputFile, String conversionFilter, boolean useServer) throws RemoteException {
-			if (useServer) {
-				GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
-				try {
-					System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
-					System.out.println(gr.exec("org.kchine.ooc.OOConverter.anythingToAnything(\"" + new File(inputFile).getAbsolutePath().replace('\\', '/')
-						+ "\", \"" + new File(outputFile).getAbsolutePath().replace('\\', '/') + "\", \"" + conversionFilter + "\" );"));
-				} catch (Exception e) {
-					new RemoteException("",e);
-				}
-				
-				if (!new File(outputFile).exists()) {
-					throw new RemoteException(
-							"check that you have installed open office 3 and that soffice is in your system path (accessible from your command line)");
-				}
-			} else {
-				throw new UnsupportedOperationException("Not supported yet.");
+			inputFile = inputFile.replace('\\', '/');
+			outputFile = outputFile.replace('\\', '/');
+			if (!inputFile.startsWith("/")) {
+				inputFile = new File(WDIR + "/" + inputFile).getAbsolutePath();
 			}
+			if (!outputFile.startsWith("/")) {
+				outputFile = new File(WDIR + "/" + outputFile).getAbsolutePath();
+			}
+
+			GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
+			try {
+				System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
+				System.out.println(gr.exec("org.kchine.ooc.OOConverter.convert" + (useServer ? "" : "NoServer") + "(\""
+						+ new File(inputFile).getAbsolutePath().replace('\\', '/') + "\", \"" + new File(outputFile).getAbsolutePath().replace('\\', '/')
+						+ "\", \"" + conversionFilter + "\" );"));
+			} catch (Exception e) {
+				new RemoteException("", e);
+			}
+
+			if (!new File(outputFile).exists()) {
+				throw new RemoteException(
+						"check that you have installed open office 3 and that soffice is in your system path (accessible from your command line)");
+			}
+
 		}
 
 		public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {

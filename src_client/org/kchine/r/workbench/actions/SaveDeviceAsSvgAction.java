@@ -51,7 +51,8 @@ public class SaveDeviceAsSvgAction extends AbstractAction {
 			return;
 		}
 		final JFileChooser chooser = new JFileChooser();
-		int returnVal = chooser.showOpenDialog(_rgui.getRootComponent());
+		chooser.setDialogTitle("Save Graphics as SVG");
+		int returnVal = chooser.showSaveDialog(_rgui.getRootComponent());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			new Thread(new Runnable() {
 				public void run() {

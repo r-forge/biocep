@@ -202,10 +202,11 @@ public class GroovyInterpreterSingleton {
 	static public void main(String[] args) throws Exception {
 		GroovyInterpreter gr = getInstance();
 
-		System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
+		System.out.println("aa:"+gr.exec("import org.kchine.ooc.OOConverter;"));
 		// System.out.println(gr.exec("print org.kchine.ooc.OOConverter.odgToWmf(\"c:/loess.odg\", \"c:/loess.wmf\");"));
-		System.out.println(gr.exec("print org.kchine.ooc.OOConverter.svgToWmf(\"c:/loess.svg\", \"c:/loess.wmf\");"));
-
+		
+		System.out.println("bb:"+gr.exec("print org.kchine.ooc.OOConverter.getDate();"));
+		System.out.println("bb:"+gr.exec("print org.kchine.ooc.OOConverter.svgToOdg(\"c:/loess.svg\", \"c:/loess.odg\");"));
 		System.exit(0);
 
 	}

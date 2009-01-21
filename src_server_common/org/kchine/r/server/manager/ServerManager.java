@@ -135,7 +135,7 @@ public class ServerManager {
 		} else if (System.getProperty("extensions.home")!=null && !System.getProperty("extensions.home").equals("")) {			
 			EXTENSIONS_DIR = System.getProperty("extensions.home");
 		} else {
-			EXTENSIONS_DIR = INSTALL_DIR + "/extensions";
+			EXTENSIONS_DIR = new File(INSTALL_DIR + "/extensions").getAbsolutePath();
 		}
 		if (!new File(EXTENSIONS_DIR).exists())  new File(EXTENSIONS_DIR).mkdirs();
 

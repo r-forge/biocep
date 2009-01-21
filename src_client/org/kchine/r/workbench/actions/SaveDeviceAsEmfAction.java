@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.WorkbenchApplet;
@@ -30,7 +31,6 @@ import org.kchine.r.workbench.graphics.JGDPanelPop;
 
 import java.awt.Component;
 import java.io.RandomAccessFile;
-
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -50,7 +50,8 @@ public class SaveDeviceAsEmfAction extends AbstractAction {
 			return;
 		}
 		final JFileChooser chooser = new JFileChooser();
-		int returnVal = chooser.showOpenDialog(_rgui.getRootComponent());
+		chooser.setDialogTitle("Save Graphics as EMF");
+		int returnVal = chooser.showSaveDialog(_rgui.getRootComponent());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 
 			new Thread(new Runnable() {
@@ -59,16 +60,36 @@ public class SaveDeviceAsEmfAction extends AbstractAction {
 						_rgui.getRLock().lock();
 						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 						byte[] result = panel.getGdDevice().getEmf(false);
-						RandomAccessFile raf = new RandomAccessFile(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"emf"), "rw");
+						RandomAccessFile raf = new RandomAccessFile(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(), "emf"), "rw");
 						raf.setLength(0);
 						raf.write(result);
 						raf.close();
+
+						SwingUtilities.invokeAndWait(new Runnable() {
+							public void run() {
+								JOptionPane.showMessageDialog(_rgui.getRootComponent(), org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(), "emf")
+										.getAbsolutePath()
+										+ " created successfully");
+							}
+						});
+
 					} catch (Exception ex) {
-						JOptionPane.showMessageDialog(_rgui.getRootComponent(), "Couldn't generate EMF, check that you have installed open office 3 \nand that soffice is in your system path (accessible from your command line)");
 						ex.printStackTrace();
+						try {
+							SwingUtilities.invokeAndWait(new Runnable() {
+								public void run() {
+									JOptionPane.showMessageDialog(_rgui.getRootComponent(), "Couldn't generate EMF, check that "
+											+ "\n1. You have installed the ooconvert extension (requires Java 6)" + "\n2. You have installed open office 3 "
+											+ "\n3. soffice is in your system path (accessible from your command line)");
+								}
+							});
+						} catch (Exception e) {
+						}
+
 					} finally {
 						_rgui.getRLock().unlock();
 					}
+
 				}
 			}).start();
 		}
