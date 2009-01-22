@@ -86,31 +86,24 @@ public class BufferDevice implements GDDevice {
 		return null;
 	}
 
-	public Vector<String> getSVGAsBytes() throws RemoteException {
-		return null;
-	}
-	
-	public byte[] getSVG() throws RemoteException {
-		return null;
-	}
-	
-	public byte[] getBmp() throws RemoteException {
+	public Vector<String> getSVGAsText(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
 		return null;
 	}
 
-	public byte[] getWmf(boolean useServer) throws RemoteException {
+	public byte[] getSVG() throws RemoteException {
 		return null;
 	}
-	
-	public byte[] getEmf(boolean useServer) throws RemoteException {
+
+	public byte[] getSVG(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
 		return null;
 	}
-	
-	public byte[] getOdg() throws RemoteException {
+
+	public byte[] getPostscript() throws RemoteException {
 		return null;
 	}
-	
-	public byte[] getJpg() throws RemoteException {
+
+	public byte[] getPostscript(Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg, Integer width,
+			Integer height, Boolean horizontal, Integer pointsize, String paper, Boolean pagecentre, String colormodel) throws RemoteException {
 		return null;
 	}
 
@@ -118,7 +111,32 @@ public class BufferDevice implements GDDevice {
 		return null;
 	}
 
+	public byte[] getPdf(Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper,
+			String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats) throws RemoteException {
+		return null;
+	}
+
 	public byte[] getPictex() throws RemoteException {
+		return null;
+	}
+
+	public byte[] getPictex(Integer width, Integer height, Boolean debug, String bg, String fg) throws RemoteException {
+		return null;
+	}
+
+	public byte[] getBmp() throws RemoteException {
+		return null;
+	}
+
+	public byte[] getBmp(Integer width, Integer height, String units, Integer pointsize, String bg, Integer res) throws RemoteException {
+		return null;
+	}
+
+	public byte[] getJpeg() throws RemoteException {
+		return null;
+	}
+
+	public byte[] getJpeg(Integer width, Integer height, String units, Integer pointsize, Integer quality, String bg, Integer res) throws RemoteException {
 		return null;
 	}
 
@@ -126,24 +144,49 @@ public class BufferDevice implements GDDevice {
 		return null;
 	}
 
-	public byte[] getPostScript() throws RemoteException {
+	public byte[] getPng(Integer width, Integer height, String units, Integer pointsize, String bg, Integer res) throws RemoteException {
+		return null;
+	}
+
+	public byte[] getTiff() throws RemoteException {
+		return null;
+	}
+
+	public byte[] getTiff(Integer width, Integer height, String units, Integer pointsize, String compression, String bg, Integer res) throws RemoteException {
 		return null;
 	}
 
 	public byte[] getXfig() throws RemoteException {
 		return null;
 	}
-	
+
+	public byte[] getXfig(Boolean onefile, String encoding, String paper, Boolean horizontal, Integer width, Integer height, String family, Integer pointsize,
+			String bg, String fg, Boolean pagecentre) throws RemoteException {
+		return null;
+	}
+
+	public byte[] getWmf(boolean useserver) throws RemoteException {
+		return null;
+	}
+
+	public byte[] getEmf(boolean useserver) throws RemoteException {
+		return null;
+	}
+
+	public byte[] getOdg() throws RemoteException {
+		return null;
+	}
+
 	public String getId() throws RemoteException {
 		return null;
 	}
-	
+
 	public boolean isBroadcasted() throws RemoteException {
 		return false;
 	}
-	
+
 	public void broadcast() throws RemoteException {
-		
+
 	}
 
 }

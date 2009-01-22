@@ -405,10 +405,24 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
-	public void resetGroovyInterpreter() throws RemoteException {
+	public void reinitializeGroovyInterpreter() throws RemoteException {
 	}
 	
-	public void uploadExtension(String extensionName, byte[] extension) {
+	public boolean isExtensionAvailable(String extensionName) throws RemoteException {
+		return false;
+	}
+	
+	public String[] listExtensions() throws RemoteException {
+		return null;
+	}
+	
+	public void installExtension(String extensionName, String extensionURL) throws RemoteException {		
+	}
+	
+	public void installExtension(String extensionName, byte[] extension) {
+	}
+	
+	public void removeExtension(String extensionName) throws RemoteException {
 	}
 	
 	public void convertFile(String inputFile, String outputFile, String conversionFilter, boolean useServer) throws RemoteException {

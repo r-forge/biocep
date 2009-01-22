@@ -20,6 +20,7 @@ package org.kchine.r.workbench;
 
 import java.awt.Component;
 import java.io.File;
+import java.util.HashSet;
 import java.util.Vector;
 
 import org.kchine.r.server.RKit;
@@ -71,6 +72,8 @@ public interface RGui extends RKit {
 	
 	public void addCellsChangeListener(CellsChangeListener listener);
 	public void removeCellsChangeListener(CellsChangeListener listener);
+	
+	public HashSet<String> getAvailableExtensions();
 	
 	
 }

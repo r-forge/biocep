@@ -985,12 +985,28 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().getGroovyStatus();
 	}
 
-	public void resetGroovyInterpreter() throws RemoteException {
-		DirectJNI.getInstance().getRServices().resetGroovyInterpreter();
+	public void reinitializeGroovyInterpreter() throws RemoteException {
+		DirectJNI.getInstance().getRServices().reinitializeGroovyInterpreter();
 	}
 	
-	public void uploadExtension(String extensionName, byte[] extension) throws RemoteException{
-		DirectJNI.getInstance().getRServices().uploadExtension(extensionName, extension);		
+	public boolean isExtensionAvailable(String extensionName) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().isExtensionAvailable(extensionName);
+	}
+	
+	public String[] listExtensions() throws RemoteException {
+		return DirectJNI.getInstance().getRServices().listExtensions();
+	}
+	
+	public void installExtension(String extensionName, String extensionURL) throws RemoteException {
+		DirectJNI.getInstance().getRServices().installExtension(extensionName, extensionURL);
+	}
+	
+	public void installExtension(String extensionName, byte[] extension) throws RemoteException{
+		DirectJNI.getInstance().getRServices().installExtension(extensionName, extension);		
+	}
+	
+	public void removeExtension(String extensionName) throws RemoteException {
+		DirectJNI.getInstance().getRServices().removeExtension(extensionName);
 	}
 	
 	public void convertFile(String inputFile, String outputFile, String conversionFilter, boolean useServer) throws RemoteException {

@@ -42,15 +42,14 @@ public class DirectRRmi {
 		
 		
 		final RServices r = ((RServices) Naming.lookup("RSERVANT_1"));		
-		r.convertFile("c:/F.doc", "c:/F.pdf", "writer_pdf_Export", true);
-		System.exit(0);
+	
 		
 		GDDevice  device = r.newDevice(400, 400);
 		r.consoleSubmit("plot(pressure);");
-		byte[] pdf=device.getEmf(true);
+		byte[] pdf=device.getXfig();
+		System.out.println(pdf.length);
 		
-		
-		RandomAccessFile raf=new RandomAccessFile("c:/tt.emf","rw");
+		RandomAccessFile raf=new RandomAccessFile("c:/ss.fig","rw");
 		raf.setLength(0);
 		raf.write(pdf);
 		raf.close();

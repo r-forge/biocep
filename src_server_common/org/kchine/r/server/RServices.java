@@ -174,8 +174,14 @@ public interface RServices extends ManagedServant {
 	public Object groovyGet(String name) throws RemoteException;
 	public void groovySet(String name, Object Value) throws RemoteException;	
 	public String getGroovyStatus() throws RemoteException;
-	public void resetGroovyInterpreter () throws RemoteException;
-	public void uploadExtension(String extensionName, byte[] extension) throws RemoteException;
+	
+	public void reinitializeGroovyInterpreter () throws RemoteException;	
+	public boolean isExtensionAvailable(String extensionName) throws RemoteException;
+	public String[] listExtensions() throws RemoteException;
+	public void installExtension(String extensionName, byte[] extension) throws RemoteException;
+	public void installExtension(String extensionName, String extensionURL) throws RemoteException;
+	public void removeExtension(String extensionName) throws RemoteException; 
+	
 	void convertFile(String inputFile,  String outputFile, String conversionFilter, boolean useserver) throws RemoteException;
 		
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException;	
@@ -202,11 +208,7 @@ public interface RServices extends ManagedServant {
     void  cellsPut(Object value , String location, String spreadsheetName ) throws RemoteException;    
 
     void addProbeOnCells(String spreadsheetName)throws RemoteException;    
-
     boolean isProbeOnCell(String spreadsheetName)throws RemoteException;    
-
     void removeProbeOnCells(String spreadsheetName)throws RemoteException;    
-
-    
-    
+       
 }

@@ -25,7 +25,7 @@ import java.awt.Color;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
-import org.kchine.r.server.scripting.GroovyInterpreterSingleton;
+import org.kchine.r.workbench.scripting.GroovyInterpreterSingleton;
 import org.kchine.r.workbench.RGui;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.gui.ConsolePanel;

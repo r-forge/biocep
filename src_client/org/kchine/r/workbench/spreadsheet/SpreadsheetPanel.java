@@ -44,6 +44,7 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.registry.LocateRegistry;
+import java.util.HashSet;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.imageio.ImageIO;
@@ -262,7 +263,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			}
 			
 			public String getPluginsDir() {
-				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			public HashSet<String> getAvailableExtensions() {
 				return null;
 			}
 			

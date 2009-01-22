@@ -1,20 +1,12 @@
 package org.kchine.r.server.scripting;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Vector;
-
 import org.kchine.r.server.manager.ServerManager;
 
 public class GroovyInterpreterSingleton {
@@ -50,9 +42,9 @@ public class GroovyInterpreterSingleton {
 					Arrays.sort(extensionsDirs);
 
 					for (int i = 0; i < extensionsDirs.length; ++i) {
-						File pluginCodeBase = extensionsDirs[i];
-						File classesDir = new File(pluginCodeBase.getAbsoluteFile() + "/classes");
-						File libDir = new File(pluginCodeBase.getAbsoluteFile() + "/lib");
+						File extensionCodeBase = extensionsDirs[i];
+						File classesDir = new File(extensionCodeBase.getAbsoluteFile() + "/classes");
+						File libDir = new File(extensionCodeBase.getAbsoluteFile() + "/lib");
 						File[] libList = new File[0];
 						if (libDir.exists()) {
 							libList = libDir.listFiles(new FilenameFilter() {
@@ -76,129 +68,35 @@ public class GroovyInterpreterSingleton {
 						cl = new URLClassLoader(cl_urls.toArray(new URL[0]), GroovyInterpreterSingleton.class.getClassLoader());
 					}
 
-					final Class<?> GroovyShellClass = cl.loadClass("groovy.lang.GroovyShell");
-					final Object groovyShell = GroovyShellClass.getConstructor(ClassLoader.class).newInstance(cl);
-
-					// final Class<?> GroovyShellClass=GroovyShell.class;
-					// final GroovyShell groovyShell=new GroovyShell(cl);
-
-					_groovy = new GroovyInterpreter() {
-						private String _status;
-
-						public String exec(String expression) throws Exception {
-
-							ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							PrintStream saveOut = System.out;
-							PrintStream saveErr = System.err;
-							System.setOut(new PrintStream(baos));
-							System.setErr(new PrintStream(baos));
-							try {
-
-								GroovyShellClass.getMethod("evaluate", String.class).invoke(groovyShell, expression);
-
-							} catch (InvocationTargetException e) {
-								return e.getCause().getMessage() + "\n";
-							} finally {
-								System.setOut(saveOut);
-								System.setErr(saveErr);
-							}
-							_status = new String(baos.toByteArray(), "UTF-8");
-							return _status;
-
-						}
-
-						public String execFromFile(File f) throws Exception {
-							ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							PrintStream saveOut = System.out;
-							PrintStream saveErr = System.err;
-							System.setOut(new PrintStream(baos));
-							System.setErr(new PrintStream(baos));
-							try {
-								System.out.println("going to evaluate from file :" + f);
-								GroovyShellClass.getMethod("evaluate", File.class).invoke(groovyShell, f);
-							} catch (InvocationTargetException e) {
-								return e.getCause().getMessage() + "\n";
-							} finally {
-								System.setOut(saveOut);
-								System.setErr(saveErr);
-							}
-							_status = new String(baos.toByteArray(), "UTF-8");
-							return _status;
-						}
-
-						public String getStatus() throws Exception {
-							return _status;
-						}
-
-						public String execFromBuffer(String buffer) throws Exception {
-
-							File tempFile = null;
-							tempFile = new File(System.getProperty("java.io.tmpdir") + "/" + "biocep_temp_" + System.currentTimeMillis()).getCanonicalFile();
-
-							if (tempFile.exists())
-								tempFile.delete();
-
-							BufferedReader breader = new BufferedReader(new StringReader(buffer));
-							PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
-							String line;
-							boolean rscriptingOn = false;
-							int rLinesCounter = 0;
-							while ((line = breader.readLine()) != null) {
-								if (line.trim().equals("<R>")) {
-									pwriter.print("String log_R_sourceFromBuffer=");
-									if (org.kchine.r.server.R.getInstance() != null)
-										pwriter.print("server.");
-									else
-										pwriter.print("client.");
-									pwriter.print("R.getInstance().sourceFromBuffer(new StringBuffer(\"");
-									rscriptingOn = true;
-									rLinesCounter = 0;
-								} else if (line.trim().equals("</R>")) {
-									pwriter.println("\"));System.out.println(\"\\n\"+log_R_sourceFromBuffer+ \"\\n\" );");
-
-									for (int i = 0; i < rLinesCounter - 1; ++i)
-										pwriter.println();
-									rscriptingOn = false;
-									rLinesCounter = 0;
-								} else {
-									if (rscriptingOn) {
-										pwriter.print(line + "\\n");
-										rLinesCounter++;
-									} else {
-										pwriter.println(line);
-									}
-								}
-							}
-							pwriter.close();
-
-							ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							PrintStream saveOut = System.out;
-							PrintStream saveErr = System.err;
-							System.setOut(new PrintStream(baos));
-							System.setErr(new PrintStream(baos));
-							try {
-								GroovyShellClass.getMethod("evaluate", File.class).invoke(groovyShell, tempFile);
-							} catch (InvocationTargetException e) {
-								return e.getCause().getMessage() + "\n";
-							} finally {
-								System.setOut(saveOut);
-								System.setErr(saveErr);
-								// if (tempFile!=null) tempFile.delete();
-							}
-							_status = new String(baos.toByteArray(), "UTF-8");
-							return _status;
-						}
-					};
-
-				} catch (Throwable e) {
-					// e.printStackTrace();
+					_groovy = new GroovyInterpreterImpl(cl);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
-			 
 			return _groovy;
 		}
 	}
+	
+	public static GroovyInterpreter _clientSideGroovy = null;
+	private static Integer _clientSideLock = new Integer(0);
 
+	public static GroovyInterpreter getClientSideInstance() {
+		if (_clientSideGroovy != null)
+			return _clientSideGroovy;
+		synchronized (_clientSideLock) {
+			if (_clientSideGroovy == null) {
+
+				try {
+					_clientSideGroovy = new GroovyInterpreterImpl(GroovyInterpreterSingleton.class.getClassLoader());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return _clientSideGroovy;
+		}
+	}
+
+	
 	static public void main(String[] args) throws Exception {
 		GroovyInterpreter gr = getInstance();
 
@@ -210,5 +108,7 @@ public class GroovyInterpreterSingleton {
 		System.exit(0);
 
 	}
+
+	
 
 }

@@ -180,7 +180,7 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 					if (outputVar.equalsIgnoreCase("pdf")) {
 						value=PoolUtils.bytesToHex(device.getPdf());
 					} else if (outputVar.equalsIgnoreCase("jpg")) {
-						value=PoolUtils.bytesToHex(device.getJpg());
+						value=PoolUtils.bytesToHex(device.getJpeg());
 					} else if (outputVar.equalsIgnoreCase("svg")) {
 						value=PoolUtils.bytesToHex(device.getSVG());
 					} else if (outputVar.equalsIgnoreCase("pdfapplet")) {

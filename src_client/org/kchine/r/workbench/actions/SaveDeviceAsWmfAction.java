@@ -95,7 +95,7 @@ public class SaveDeviceAsWmfAction extends AbstractAction {
 	}
 
 	public boolean isEnabled() {
-		return _rgui.getR() != null;
+		return _rgui.getR() != null && _rgui.getAvailableExtensions().contains("ooconverter");
 	}
 
 }

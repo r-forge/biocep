@@ -62,17 +62,24 @@ public class SaveDeviceAsPdfAppletAction extends AbstractAction {
 
 			new Thread(new Runnable() {
 				public void run() {
+					byte[] result = null;
 					try {
 						_rgui.getRLock().lock();
 						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
-						byte[] result = panel.getGdDevice().getPdf();
+						result = panel.getGdDevice().getPdf();
+					}
+					catch (Exception e) {
 						
+					
+					} finally {
+						_rgui.getRLock().unlock();
+					}
+					try {
 						File selectedFile=chooser.getSelectedFile();
 						String name=selectedFile.getName();
 						String dir=selectedFile.getParent();
 						if (name.indexOf(".")!=-1) name=name.substring(0,name.lastIndexOf("."));
 
-						
 						new java.io.File(dir+"/appletlibs/").mkdirs();
 						
 						PrintWriter htmlWriter= new PrintWriter(new java.io.FileWriter(dir+"/"+name+".html"));
@@ -104,9 +111,8 @@ public class SaveDeviceAsPdfAppletAction extends AbstractAction {
 						
 					} catch (Exception ex) {
 						ex.printStackTrace();
-					} finally {
-						_rgui.getRLock().unlock();
 					}
+					
 				}
 			}).start();
 		}
