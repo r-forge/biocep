@@ -119,7 +119,96 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 	public Point2D[] getRealPoints(Point2D[] points) throws RemoteException {
 		return _localGdDevice.getRealPoints(points);
 	}
+	
+	
+	public Vector<String> getSVGAsText() throws RemoteException {
+		return _localGdDevice.getSVGAsText();		
+	}
+	public Vector<String> getSVGAsText(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
+		return _localGdDevice.getSVGAsText(width, height, onefile, bg, pointsize);
+	}
+	
+	public byte[] getSVG() throws RemoteException {
+		return _localGdDevice.getSVG();
+	}	
+	public byte[] getSVG(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException{
+		return _localGdDevice.getSVG(width, height, onefile, bg, pointsize);
+	}
 
+	public byte[] getPostscript() throws RemoteException {
+		return _localGdDevice.getPostscript();
+	}
+	public byte[] getPostscript(Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg,
+			Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper , Boolean pagecentre, String colormodel) throws RemoteException {
+		return _localGdDevice.getPostscript(onefile, family, title, fonts, encoding, bg, fg, width, height, horizontal, pointsize, paper, pagecentre, colormodel);
+	}
+	
+	public byte[] getPdf() throws RemoteException {
+		return _localGdDevice.getPdf();
+	}
+	public byte[] getPdf(Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
+			String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats) throws RemoteException {
+		return _localGdDevice.getPdf(width, height, onefile, family, title, fonts, version, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, useDingbats);
+	}
+	
+	public byte[] getPictex() throws RemoteException {
+		return _localGdDevice.getPictex();
+	}
+	public byte[] getPictex(Integer width, Integer height, Boolean debug, String bg, String fg) throws RemoteException {
+		return _localGdDevice.getPictex(width, height, debug, bg, fg);
+	}
+	
+	public byte[] getBmp() throws RemoteException {
+		return _localGdDevice.getBmp();
+	}
+	public byte[] getBmp(Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+		return _localGdDevice.getBmp(width, height, units, pointsize, bg, res);
+	}
+		     	     
+	public byte[] getJpeg() throws RemoteException {
+		return _localGdDevice.getJpeg();
+	}
+	
+	public byte[] getJpeg(Integer width, Integer height, String units, Integer pointsize, Integer quality, String bg,Integer res) throws RemoteException  {
+		return _localGdDevice.getJpeg(width, height, units, pointsize, quality, bg, res);
+	}
+	
+	public byte[] getPng() throws RemoteException {
+		return _localGdDevice.getPng();
+	}
+	public byte[] getPng(Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+		return _localGdDevice.getPng(width, height, units, pointsize, bg, res);
+	}
+
+	public byte[] getTiff() throws RemoteException {
+		return _localGdDevice.getTiff();
+	}
+	
+	public byte[] getTiff(Integer width, Integer height, String units, Integer pointsize, String compression, String bg,Integer res) throws RemoteException {
+		return _localGdDevice.getTiff(width, height, units, pointsize, compression, bg, res);
+	}
+	
+	public byte[] getXfig() throws RemoteException {
+		return _localGdDevice.getXfig();
+	}
+	public byte[] getXfig( Boolean onefile, String encoding , String paper, Boolean horizontal, 
+			Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
+		return _localGdDevice.getXfig(onefile, encoding, paper, horizontal, width, height, family, pointsize, bg, fg, pagecentre);
+	}
+	
+	public byte[] getWmf(boolean useserver) throws RemoteException {
+		return _localGdDevice.getWmf(useserver);
+	}
+	public byte[] getEmf(boolean useserver) throws RemoteException {
+		return _localGdDevice.getEmf(useserver);
+	}
+	public byte[] getOdg() throws RemoteException {
+		return _localGdDevice.getOdg();
+	}
+	
+	
+	
+/*
 	public byte[] getSVG() throws RemoteException {
 		return _localGdDevice.getSVG();
 	}
@@ -166,6 +255,13 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 	public byte[] getXfig() throws RemoteException {
 		return _localGdDevice.getXfig();
 	}
+	
+	
+*/	
+	
+	
+	
+	
 	
 	public String getId() throws RemoteException {
 		return _id;

@@ -27,8 +27,10 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,6 +53,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -3737,11 +3740,64 @@ public class DirectJNI {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
-		public void resetGroovyInterpreter() throws RemoteException {
-			GroovyInterpreterSingleton._groovy = null;
+		public void reinitializeGroovyInterpreter() throws RemoteException {
+			GroovyInterpreterSingleton._clientSideGroovy = null;
+			new Thread(new Runnable() {
+				public void run() {
+					try {					
+						GroovyInterpreterSingleton.getInstance().exec("import org.kchine.r.server.R;");
+						GroovyInterpreterSingleton.getInstance().exec("R=org.kchine.r.server.R.getInstance();");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+
+			}).start();
+		}
+		
+		public boolean isExtensionAvailable(String extensionName) throws RemoteException {
+			return new File(ServerManager.EXTENSIONS_DIR+"/"+extensionName+".jar").exists() || new File(ServerManager.EXTENSIONS_DIR+"/"+extensionName).exists();			
+		}
+		
+		public String[] listExtensions() throws RemoteException {
+			File[] extensionsJarFiles = new File(ServerManager.EXTENSIONS_DIR).listFiles(new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					return name.endsWith(".jar");
+				}
+			});
+			Arrays.sort(extensionsJarFiles);
+
+			File[] extensionsDirs = new File(ServerManager.EXTENSIONS_DIR).listFiles(new FileFilter() {
+				public boolean accept(File pathname) {
+					return pathname.isDirectory();
+				}
+			});
+			Arrays.sort(extensionsDirs);
+			
+			String[] result=new String[extensionsJarFiles.length+extensionsDirs.length];
+			for (int i=0; i<extensionsJarFiles.length;++i) {
+				String name=extensionsJarFiles[i].getName();
+				name=name.substring(0,name.length()-".jar".length());
+				result[i]=name;
+			}
+			
+			for (int j=0; j<extensionsDirs.length;++j) {				
+				result[j+extensionsJarFiles.length]=extensionsDirs[j].getName();
+			}
+			
+			return result;
+			
+		}
+		
+		public void installExtension(String extensionName, String extensionURL) throws RemoteException {
+			throw new UnsupportedOperationException("Not supported yet.");			
 		}
 
-		public void uploadExtension(String extensionName, byte[] extension) {
+		public void installExtension(String extensionName, byte[] extension) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+		
+		public void removeExtension(String extensionName) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -4017,15 +4073,8 @@ public class DirectJNI {
 			}
 
 		}
-
-		synchronized public byte[] getSVG() throws RemoteException {
-			Vector<String> result = getSVGAsText();
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < result.size(); ++i)
-				sb.append(result.elementAt(i));
-			return sb.toString().getBytes();
-		}
-
+		
+		
 		synchronized public Vector<String> getSVGAsText() throws RemoteException {
 
 			File tempFile = null;
@@ -4160,16 +4209,330 @@ public class DirectJNI {
 			}
 		}
 
+		
+		public Vector<String> getSVGAsText(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+		
+		
+		synchronized public byte[] getSVG() throws RemoteException {
+			Vector<String> result = getSVGAsText();
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < result.size(); ++i)
+				sb.append(result.elementAt(i));
+			return sb.toString().getBytes();
+		}
+		
+		public byte[] getSVG(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public byte[] getPostscript() throws RemoteException {
+			return getPostscript(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+		}
+		
+		public byte[] getPostscript(Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg,
+				Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper , Boolean pagecentre, String colormodel) throws RemoteException {
+			return getScalable(width, height, onefile, family, title, fonts, null, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, null, horizontal, null,  "postscript");			
+		}
+		
+		public byte[] getPdf() throws RemoteException {			
+			return getPdf(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+		}
+		
+		public byte[] getPdf(Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
+				String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats) throws RemoteException {
+			return getScalable(width, height, onefile, family, title, fonts, version, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, useDingbats, null, null,  "pdf");
+		}
+		
+		public byte[] getScalable(Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
+				String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats, Boolean horizontal, Boolean debug, String extension) throws RemoteException {
+			File tempFile = null;
+			try {
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + "."+extension).getCanonicalFile();
+				if (tempFile.exists())
+					tempFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+			
+			String tempFileName=tempFile.getAbsolutePath().replace('\\', '/');
+
+			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
+			DirectJNI.getInstance().shutdownDevices(extension);
+			
+			String createDeviceCommand = extension+"(file = '" + tempFileName + "' ";
+			
+			
+			if (height==null && width==null) {
+				createDeviceCommand += ", height=6 , width="+ new Double(6 * (getSize().width / getSize().height)) ;
+			} else if (height!=null && width!=null) {
+				createDeviceCommand += ", height="+height+" , width="+ width ;
+			} else {
+				throw new RemoteException("width & height should be both null or both set");
+			}
+			
+			if (onefile!=null) {
+				createDeviceCommand += ", onefile="+onefile.toString().toUpperCase();				
+			}
+			
+			
+			if (family!=null) {
+				createDeviceCommand += ", family='"+family+"'";				
+			}
+			
+			if (title!=null) {
+				createDeviceCommand += ", title='"+title+"'";				
+			}
+			
+			
+			
+			
+			if (fonts!=null && fonts.length>0) {
+				createDeviceCommand += ", c(";
+				for (int i=0;i<fonts.length;++i) createDeviceCommand+="'"+fonts[i]+"'"+(i==fonts.length-1?")":",") ;				
+			}
+			
+			if (version!=null) {
+				createDeviceCommand += ", version='"+version+"'";				
+			}
+			
+			if (paper!=null) {
+				createDeviceCommand += ", paper='"+paper+"'";				
+			}
+			
+			if (paper!=null) {
+				createDeviceCommand += ", paper='"+paper+"'";				
+			}
+			
+			if (encoding!=null) {
+				createDeviceCommand += ", encoding='"+encoding+"'";				
+			}
+			
+			if (bg!=null) {
+				createDeviceCommand += ", bg='"+bg+"'";				
+			}
+			
+			if (fg!=null) {
+				createDeviceCommand += ", fg='"+fg+"'";				
+			}
+			
+			if (pointsize!=null) {
+				createDeviceCommand += ", pointsize="+pointsize;				
+			}
+			
+			if (pagecentre!=null) {
+				createDeviceCommand += ", pagecentre="+pagecentre.toString().toUpperCase();				
+			}
+			
+			if (colormodel!=null) {
+				createDeviceCommand += ", colormodel='"+colormodel+"'";				
+			}
+			
+			if (useDingbats!=null) {
+				createDeviceCommand += ", useDingbats="+useDingbats.toString().toUpperCase();				
+			}
+			
+			if (horizontal!=null) {
+				createDeviceCommand += ", horizontal="+horizontal.toString().toUpperCase();				
+			}
+			
+			if (debug!=null) {
+				createDeviceCommand += ", debug="+debug.toString().toUpperCase();				
+			}
+			
+			
+			createDeviceCommand+=" )";
+			
+			System.out.println(createDeviceCommand);
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
+			
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+			int bmpDevice = DirectJNI.getInstance().getDevice(extension);
+			DirectJNI.getInstance().getRServices().evaluate(
+					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + bmpDevice + ");" + ".PrivateEnv$dev.set("
+							+ currentDevice + ");.PrivateEnv$dev.off("+bmpDevice+")", 4);
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+			
+			if (tempFile.exists()) {
+
+				byte[] result = null;
+				try {
+
+					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
+					result = new byte[(int) raf.length()];
+					raf.readFully(result);
+					raf.close();
+
+					tempFile.delete();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RemoteException("", e);
+				}
+				return result;
+			} else {
+				return null;
+			}
+		}
+		
+		public byte[] getPictex() throws RemoteException {
+			return getPictex(null, null, null, null, null);
+		}
+		
+		public byte[] getPictex(Integer width, Integer height, Boolean debug, String bg, String fg) throws RemoteException {
+			return getScalable(width, height, null, null, null, null, null, null, null, bg, fg, null, null, null, null, null, debug, "pictex");
+		}
+		
 		public byte[] getBmp() throws RemoteException {
-			return null;
+			return getBmp(null,null,null,null,null,null);
+		}
+		
+		public byte[] getBmp(Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+			return getBitMap(width, height, units, pointsize, null , null, null, bg, res, "bmp");
+		}
+		
+		public byte[] getBitMap(Integer width, Integer height, String units, Integer pointsize, Integer quality, String compression, Integer tiffindex , String bg,Integer res, String extension) throws RemoteException {
+			
+			File tempFile = null;
+			try {
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + "."+extension).getCanonicalFile();
+				if (tempFile.exists())
+					tempFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+			
+			String tempFileName=tempFile.getAbsolutePath().replace('\\', '/');
+
+			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
+
+			String createDeviceCommand = extension+"(filename = '" + tempFileName + "' ";
+			
+			
+			if (height==null && width==null) {
+				createDeviceCommand += ", height="+getSize().getHeight()+" , width="+ getSize().getWidth() ;
+			} else if (height!=null && width!=null) {
+				createDeviceCommand += ", height="+height+" , width="+ width ;
+			} else {
+				throw new RemoteException("width & height should be both null or both set");
+			}
+			
+			if (units!=null) {
+				createDeviceCommand += ", units='"+units+"'";				
+			}
+			
+			if (pointsize!=null) {
+				createDeviceCommand += ", pointsize="+pointsize;				
+			}
+			
+			if (quality!=null) {
+				createDeviceCommand += ", quality="+quality;				
+			}
+			
+			if (compression!=null) {
+				createDeviceCommand += ", compression='"+compression+"'";				
+			}
+			
+			if (bg!=null) {
+				createDeviceCommand += ", bg='"+bg+"'";				
+			}
+			
+			if (res!=null) {
+				createDeviceCommand += ", res="+res;				
+			}
+			
+			
+			createDeviceCommand+=" )";
+			
+			System.out.println(createDeviceCommand);
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
+			
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+			int bmpDevice = DirectJNI.getInstance().getDevice(extension+":"+(quality==null?"":quality+":")+(tiffindex==null?"":tiffindex+":")+tempFileName);
+			DirectJNI.getInstance().getRServices().evaluate(
+					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + bmpDevice + ");" + ".PrivateEnv$dev.set("
+							+ currentDevice + ");.PrivateEnv$dev.off("+bmpDevice+")", 4);
+			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
+				log.info(DirectJNI.getInstance().getRServices().getStatus());
+			}
+			
+			if (tempFile.exists()) {
+
+				byte[] result = null;
+				try {
+
+					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
+					result = new byte[(int) raf.length()];
+					raf.readFully(result);
+					raf.close();
+
+					tempFile.delete();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RemoteException("", e);
+				}
+				return result;
+			} else {
+				return null;
+			}
+		}
+			 
+		
+		public byte[] getJpeg() throws RemoteException {
+			return getJpeg(null, null, null, null, null, null, null);
+		}
+		public byte[] getJpeg(Integer width, Integer height, String units, Integer pointsize, Integer quality,  String bg,Integer res) throws RemoteException {
+			return getBitMap(width, height, units, pointsize, (quality==null ? 75 : quality) , null, null, bg, res, "jpeg");
+		}
+		
+		public byte[] getPng() throws RemoteException {
+			return getPng(null, null, null, null, null, null);
+		}
+		public byte[] getPng(Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+			return getBitMap(width, height, units, pointsize, null, null, null, bg, res, "png");
+		}
+
+		public byte[] getTiff() throws RemoteException {
+			return getTiff(null, null, null, null, null, null, null);
+		}
+		
+		public byte[] getTiff(Integer width, Integer height, String units, Integer pointsize, String compression, String bg,Integer res) throws RemoteException {
+			return getBitMap(width, height, units, pointsize, null , compression, 1, bg, res, "tiff");
+		}
+		
+		public byte[] getXfig() throws RemoteException {
+			return getXfig(true, null, null, null, null, null, null, null, null, null, null);
+		}
+		
+		public byte[] getXfig( Boolean onefile, String encoding , String paper, Boolean horizontal, 
+				Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
+			return getScalable(width, height, onefile, family, null, null, null, paper, encoding, bg, fg, pointsize, pagecentre, null, null, horizontal, null, "xfig");
+		}
+		
+		public byte[] getWmf(boolean useServer) throws RemoteException {
+			return getGenericVectorFormat("wmf", useServer);
+		}
+		
+		public byte[] getEmf(boolean useServer) throws RemoteException {
+			return getGenericVectorFormat("emf", useServer);
+		}
+		
+		public byte[] getOdg() throws RemoteException {
+			return getGenericVectorFormat("odg", false);
 		}
 
 		private String capitalizeFirstLetter(String s) {
 			return ("" + s.charAt(0)).toUpperCase() + s.substring(1);
-		}
-
-		public byte[] getWmf(boolean useServer) throws RemoteException {
-			return getGenericVectorFormat("wmf", useServer);
 		}
 
 		private byte[] getGenericVectorFormat(String format, boolean useserver) throws RemoteException {
@@ -4260,139 +4623,19 @@ public class DirectJNI {
 
 		}
 
-		public byte[] getEmf(boolean useServer) throws RemoteException {
-			return getGenericVectorFormat("emf", useServer);
-		}
+		
 
-		public byte[] getOdg() throws RemoteException {
-			return getGenericVectorFormat("odg", false);
-		}
 
-		public byte[] getJpg() throws RemoteException {
-			return null;
-		}
+		
+	
 
-		public byte[] getPdf() throws RemoteException {
-			File tempFile = null;
-			try {
-				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".pdf").getCanonicalFile();
-				if (tempFile.exists())
-					tempFile.delete();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteException("", e);
-			}
+		
 
-			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 
-			DirectJNI.getInstance().shutdownDevices("pdf");
 
-			final String createDeviceCommand = "pdf(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-					+ new Double(6 * (getSize().width / getSize().height)) + ", height = " + 6
-					+ " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
-			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
-			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
-				log.info(DirectJNI.getInstance().getRServices().getStatus());
-			}
+		
 
-			int pdfDevice = DirectJNI.getInstance().getDevice("pdf");
-			DirectJNI.getInstance().getRServices().evaluate(
-					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + pdfDevice + ");" + ".PrivateEnv$dev.set("
-							+ currentDevice + ");", 3);
-			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
-				log.info(DirectJNI.getInstance().getRServices().getStatus());
-			}
-
-			if (tempFile.exists()) {
-
-				byte[] result = null;
-				try {
-
-					DirectJNI.getInstance().shutdownDevices("pdf");
-
-					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
-					result = new byte[(int) raf.length()];
-					raf.readFully(result);
-					raf.close();
-
-					tempFile.delete();
-
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RemoteException("", e);
-				}
-				return result;
-			} else {
-				return null;
-			}
-		}
-
-		public byte[] getPictex() throws RemoteException {
-			return null;
-		}
-
-		public byte[] getPng() throws RemoteException {
-			File tempFile = null;
-			try {
-				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".pdf").getCanonicalFile();
-				if (tempFile.exists())
-					tempFile.delete();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteException("", e);
-			}
-
-			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-
-			DirectJNI.getInstance().shutdownDevices("png");
-
-			final String createDeviceCommand = "png(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + getSize().width
-					+ ", height = " + getSize().height + " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
-			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
-			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
-				log.info(DirectJNI.getInstance().getRServices().getStatus());
-			}
-
-			int pdfDevice = DirectJNI.getInstance().getDevice("pdf");
-			DirectJNI.getInstance().getRServices().evaluate(
-					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + pdfDevice + ");" + ".PrivateEnv$dev.set("
-							+ currentDevice + ");", 3);
-			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
-				log.info(DirectJNI.getInstance().getRServices().getStatus());
-			}
-
-			if (tempFile.exists()) {
-
-				byte[] result = null;
-				try {
-
-					DirectJNI.getInstance().shutdownDevices("pdf");
-
-					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
-					result = new byte[(int) raf.length()];
-					raf.readFully(result);
-					raf.close();
-
-					tempFile.delete();
-
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RemoteException("", e);
-				}
-				return result;
-			} else {
-				return null;
-			}
-		}
-
-		public byte[] getPostScript() throws RemoteException {
-			return null;
-		}
-
-		public byte[] getXfig() throws RemoteException {
-			return null;
-		}
-
+	
 		public String getId() throws RemoteException {
 			return null;
 		}
