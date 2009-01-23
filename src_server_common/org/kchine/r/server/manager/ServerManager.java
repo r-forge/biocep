@@ -544,6 +544,9 @@ public class ServerManager {
 				
 				System.out.println("R_LIBS:" + R_LIBS);
 				env.put("R_LIBS", R_LIBS);
+				
+				if (System.getenv("JDK_HOME")!=null) env.put("JAVA_HOME", System.getenv("JDK_HOME"));
+				
 				for (String k : env.keySet()) {
 					envVector.add(k + "=" + env.get(k));
 				}
