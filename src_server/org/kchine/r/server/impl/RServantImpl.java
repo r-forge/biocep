@@ -815,10 +815,13 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 						return _lock;
 					}
 				};
-
+				
 				_virtualizationServer = new Server(port);
+				
 				_virtualizationServer.setStopAtShutdown(true);
+				
 				Context root = new Context(_virtualizationServer, "/", Context.SESSIONS|Context.NO_SECURITY);
+				
 				
 				final HttpSessionListener sessionListener=new FreeResourcesListener();				
 				root.getSessionHandler().setSessionManager(new HashSessionManager(){
@@ -855,8 +858,10 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(rkit,false)), "/rvirtual/cmd/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
 				System.out.println("+ going to start virtualization http server port : " + port);
-				_virtualizationServer.start();				
-				System.out.println("HTTP R URL :"+"http://"+PoolUtils.getHostIp()+":"+port + "/rvirtual/cmd");
+				
+				_virtualizationServer.start();
+				
+				log.info("HTTP R URL :"+"http://"+PoolUtils.getHostIp()+":"+port + "/rvirtual/cmd");
 
 			} catch (Exception e) {
 				log.info(PoolUtils.getStackTraceAsString(e));
@@ -888,7 +893,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		System.out.println("cloneServer");
 		try {
 			RServices w = ServerManager.createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-					.getLocalRmiRegistryPort()), 256, 256, "", false,null,null);
+					.getLocalRmiRegistryPort()), 256, 256, "", false,null,null,true);
 			return w;
 		} catch (Exception e) {
 			throw new RemoteException("", e);

@@ -86,7 +86,7 @@ public class CoreMain {
 			String rbinary=System.getProperty("r.binary");			
 			r = ServerManager.createR(rbinary, true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
 					ServerManager.getNamingInfo(), 
-							ServerDefaults._memoryMin, ServerDefaults._memoryMax,name , false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file") );
+							ServerDefaults._memoryMin, ServerDefaults._memoryMax,name , false,(URL[])codeUrls.toArray(new URL[0]), System.getProperty("log.file") , true);
 
 			
 		} else {			

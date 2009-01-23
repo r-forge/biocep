@@ -22,6 +22,7 @@ import static org.kchine.rpf.PoolUtils.isWindowsOs;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -139,10 +140,9 @@ public class DbRegistry {
 			
 			
 			String jar = DbRegistry.class.getResource("/DbRegistry.class").toString();
-			if (jar.startsWith("jar:")) {
-				String jarfile = jar.substring("jar:file:".length(), jar.length() - "/DbRegistry.class".length() - 1);
-				jarfile.replace('\\', '/');
-				
+			if (jar.startsWith("jar:")) {								
+				String jarurl=jar.substring("jar:".length(), jar.length()-"/DbRegistry.class".length()-1);				
+				String jarfile = PoolUtils.getFileFromURL(new URL(jarurl)).getAbsolutePath();								
 				String cmd=(isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java"+(isWindowsOs() ? "\"" : "")
 				+" -Dnaming.mode=db"				
 				+" -Ddb.type="+PoolUtils.DEFAULT_DB_TYPE

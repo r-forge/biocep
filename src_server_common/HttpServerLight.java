@@ -1,10 +1,13 @@
 import static org.kchine.rpf.PoolUtils.getHostIp;
 
+import java.util.Properties;
+
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.kchine.r.server.http.frontend.FreeResourcesListener;
+import org.kchine.rpf.PoolUtils;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionManager;
@@ -12,6 +15,26 @@ import org.mortbay.jetty.servlet.ServletHolder;
 public class HttpServerLight {
 
 	public static void main(String[] args) throws Exception {
+		
+		if (System.getProperty("cloud.service")!=null && !System.getProperty("cloud.service").equals("")) {
+			if (!System.getProperty("cloud.service").equals("ec2")) return;
+			Properties props=PoolUtils.getAMIUserData();			
+			if (props.getProperty("start")==null || !props.getProperty("start").equalsIgnoreCase("true")) return;
+			
+			if (props.getProperty("port")!=null) System.setProperty("port", props.getProperty("port"));
+			if (props.getProperty("login")!=null) System.setProperty("login", props.getProperty("login"));
+			if (props.getProperty("pwd")!=null) System.setProperty("pwd", props.getProperty("pwd"));
+			new Thread(new Runnable(){
+				public void run() {
+					try {
+					System.setProperty("create", "true");
+					DbRegistry.main(null);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+		}
 		
 		if (System.getProperty("pools.provider.factory")==null || System.getProperty("pools.provider.factory").equals("")) {
 			System.setProperty("pools.provider.factory", "org.kchine.rpf.db.ServantsProviderFactoryDB");
