@@ -28,10 +28,10 @@ import javax.swing.SwingUtilities;
 import org.kchine.r.server.RCallBack;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.http.HttpMarker;
+import org.kchine.r.server.http.RHttpProxy;
+import org.kchine.r.workbench.graphics.JGDPanelPop;
 
-import graphics.rmi.JGDPanelPop;
-import http.HttpMarker;
-import http.RHttpProxy;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -99,7 +99,7 @@ public class HttpR {
 		System.out.println("***" + r.evaluate("democallback()"));
 
 		byte[] pdf = r.getPdf("plot(rnorm(66))", 500, 500);
-		RandomAccessFile raf = new RandomAccessFile("a0.pdf", "rw");
+		RandomAccessFile raf = new RandomAccessFile("c:/a0.pdf", "rw");
 		raf.setLength(0);
 		raf.write(pdf);
 		raf.close();

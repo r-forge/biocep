@@ -424,8 +424,9 @@ public class ToolsMain {
 		String jar = ToolsMain.class.getResource("/ToolsMain.class").toString();
 		if (jar.startsWith("jar:")) {
 			String jarurl=jar.substring("jar:".length(), jar.length()-"/ToolsMain.class".length()-1);				
-			String jarfile = PoolUtils.getFileFromURL(new URL(jarurl)).getAbsolutePath();
+			String jarfile = PoolUtils.getFileFromURL(new URL(jarurl)).getAbsolutePath().replace('\\','/');
 			File toolsDotJarFile = new File(jarfile.substring(0, jarfile.lastIndexOf("/")) + "/tools.jar");
+			
 			System.out.println("tools jar file :" + toolsDotJarFile);
 			if (toolsDotJarFile.exists()) {
 				try {

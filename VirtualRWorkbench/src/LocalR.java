@@ -20,9 +20,9 @@
  */
 import java.io.PrintStream;
 
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
 
-import server.DirectJNI;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
