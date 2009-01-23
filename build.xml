@@ -173,6 +173,8 @@
 			
 			<env key="PATH" path="${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			<env key="JAVA_HOME" path="${JDK_HOME}"/>
+			
 			<jvmarg value="-Dfile=${file}"/>
 			<jvmarg value="-Ddir=${dir}"/>
 			<jvmarg value="-Doutputdir=${outputdir}"/>
