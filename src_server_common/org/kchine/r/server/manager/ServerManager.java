@@ -161,7 +161,8 @@ public class ServerManager {
 		"node", 
 		"http.port",
 		"cloud",
-		"extensions.home"};
+		"extensions.home",
+		"r.options"};
 
 	private static JTextArea createRSshProgressArea;
 	private static JProgressBar createRSshProgressBar;
