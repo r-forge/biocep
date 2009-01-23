@@ -38,6 +38,13 @@
 			<then><property name="JRI_LIB_PATH" value="${env.R_HOME}/library/rJava/jri"/></then>
 			<else><property name="JRI_LIB_PATH" value="${env.R_LIBS}/rJava/jri"/></else>
 		</if>
+
+		<if><isset property="env.JDK_HOME"/>
+			<then><property name="JDK_HOME" value="${env.JDK_HOME}"/></then>
+			<else><property name="JDK_HOME" value="${env.JAVA_HOME}"/></else>
+		</if>
+
+		
 		
 		<property name="CORE_JAR" value="RJB.jar"/>
 		<property name="RPF_JAR" value="RPF.jar"/>
@@ -127,7 +134,7 @@
 				
 				-->
 				
-				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
+				<pathelement path="${JDK_HOME}/lib/tools.jar"/>
 				<pathelement path="lib/ant/ant.jar"/>
 				<pathelement path="lib/ant/ant-launcher.jar"/>
 								
