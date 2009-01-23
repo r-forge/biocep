@@ -1744,7 +1744,7 @@
 						
 			<manifest file="MANIFEST.MF">
 				<attribute name="Built-By" value="Karim Chine"/>
-				<attribute name="Main-Class" value="server.CoreMain"/>
+				<attribute name="Main-Class" value="org.kchine.r.server.CoreMain"/>
 			</manifest>		
 				
 			<jar destfile="biocep-core.jar" manifest="MANIFEST.MF">

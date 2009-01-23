@@ -71,9 +71,9 @@ public class CoreMain {
 				codeUrls.add(new URL(args[i]));
 			}
 		} else {
-			String jar=CoreMain.class.getResource("/server/CoreMain.class").toString();
+			String jar=CoreMain.class.getResource("/org/kchine/r/server/CoreMain.class").toString();
 			if (jar.startsWith("jar:")) {
-				String jarfile=jar.substring("jar:".length(), jar.length()-"/server/CoreMain.class".length()-1);
+				String jarfile=jar.substring("jar:".length(), jar.length()-"/org/kchine/r/server/CoreMain.class".length()-1);
 				System.out.println("jarfile:"+jarfile);
 				try {codeUrls.add(new URL(jarfile));} catch (Exception e) {e.printStackTrace();}
 			}

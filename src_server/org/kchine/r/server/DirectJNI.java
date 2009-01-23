@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -443,7 +444,16 @@ public class DirectJNI {
 	}
 
 	private DirectJNI() {
-		_rEngine = new RengineWrapper(new String[] { "--no-save" }, true, new RMainLoopCallbacksImpl());
+		
+		String[] roptions=new String[] { "--no-save" };
+		if (System.getProperty("r.options")!=null && !System.getProperty("r.options").equals("")) {
+			Vector<String> roptionsVector=new Vector<String>();
+			StringTokenizer st = new StringTokenizer(System.getProperty("r.options"), " ");
+			while (st.hasMoreElements()) roptionsVector.add((String)st.nextElement());
+			roptions=roptionsVector.toArray(new String[0]);
+		}
+		System.out.println("r options:"+Arrays.toString(roptions));
+		_rEngine = new RengineWrapper(roptions, true, new RMainLoopCallbacksImpl());
 
 		if (!_rEngine.waitForR()) {
 			log.info("Cannot load R");
