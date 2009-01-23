@@ -49,7 +49,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.http.local.LocalHttpServer;
 import org.kchine.r.server.manager.bootstrap.BootSsh;
@@ -354,7 +353,7 @@ public class ServerManager {
 
 	public static RServices createR(String name) throws Exception {
 		return createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null);
+				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null,true);
 	}
 
 	private interface ProgessLoggerInterface {
@@ -362,7 +361,7 @@ public class ServerManager {
 	}
 
 	synchronized public static RServices createR(String RBinPath, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, boolean addLocalJarToClassPath) throws Exception {
 
 		final JTextArea[] createRProgressArea = new JTextArea[1];
 		final JProgressBar[] createRProgressBar = new JProgressBar[1];
@@ -721,7 +720,26 @@ public class ServerManager {
 
 			try {
 
-
+				
+				/*
+				try {
+					if (addLocalJarToClassPath) {
+						String jar=ServerManager.class.getResource("/org/kchine/r/server/manager/ServerManager.class").toString();
+						System.out.println("***>"+jar);
+						if (jar.startsWith("jar:")) {
+							String jarurl=jar.substring("jar:".length(), jar.length()-"/org/kchine/r/server/manager/ServerManager.class".length()-1);
+							System.out.println("*****>"+jarurl);
+							if (jarurl.startsWith("file:")){
+								System.out.println("********>"+PoolUtils.getFileFromURL(new URL(jarurl)).getAbsolutePath());
+								cp = cp + System.getProperty("path.separator") + PoolUtils.getFileFromURL(new URL(jarurl)).getAbsolutePath();
+							}
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				*/
+				
 				/*
 				 * if (keepAlive) { try
 				 * {downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_LOGGER |
@@ -771,6 +789,7 @@ public class ServerManager {
 			 * "groovy-all-1.5.4").getAbsolutePath(); }
 			 */
 
+			
 			ManagedServant[] servantHolder = new ManagedServant[1];
 			RemoteException[] exceptionHolder = new RemoteException[1];
 
