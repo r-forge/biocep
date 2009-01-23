@@ -1766,7 +1766,7 @@
 			
 			<!-- tools begin -->
 			
-		<!--
+		
 		
 			<delete dir="bintools" failonerror="true"/>
 			<mkdir dir="bintools"/>
@@ -1863,7 +1863,7 @@
 			</jar>
 			
 		
-		-->
+		
 		<!-- tools end -->
 		
 		
