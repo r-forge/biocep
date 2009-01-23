@@ -265,7 +265,7 @@
 				
 				
 				
-				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
+				<pathelement path="${JDK_HOME}/lib/tools.jar"/>
 				<pathelement path="lib/ant/ant.jar"/>
 				<pathelement path="lib/ant/ant-launcher.jar"/>
 				
@@ -1778,7 +1778,7 @@
 				<pathelement location="binsrv"/>				
 				<pathelement path="lib/ant/ant.jar"/>
 				<pathelement path="lib/ant/ant-launcher.jar"/>
-				<pathelement path="${env.JAVA_HOME}/lib/tools.jar"/>
+				<pathelement path="${JDK_HOME}/lib/tools.jar"/>
 				<pathelement path="lib/beangenlibs/ant-contrib-1.0b3.jar"/>
 				<pathelement path="lib/beangenlibs/geronimo-jms_1.1_spec-1.0.jar"/>
 				<pathelement path="lib/beangenlibs/jakarta-oro-2.0.8.jar"/>
@@ -1818,7 +1818,7 @@
 		<unjar src="lib/ant/ant-launcher.jar"  dest="bintools" overwrite="true"/>
 		<unjar src="lib/ant/ant.jar"  dest="bintools" overwrite="true"/>
 		
-		<unjar src="${env.JAVA_HOME}/lib/tools.jar"  dest="bintools" overwrite="true"/>
+		<unjar src="${JDK_HOME}/lib/tools.jar"  dest="bintools" overwrite="true"/>
 			
 		<unjar src="lib/beangenlibs/ant-contrib-1.0b3.jar"  dest="bintools" overwrite="true"/>
 		<unjar src="lib/beangenlibs/geronimo-jms_1.1_spec-1.0.jar"  dest="bintools" overwrite="true"/>
