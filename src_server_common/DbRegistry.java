@@ -26,6 +26,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Vector;
 
 import org.kchine.r.server.manager.ServerManager;
@@ -44,6 +45,13 @@ public class DbRegistry {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception{
+		
+		if (System.getProperty("cloud.service")!=null && !System.getProperty("cloud.service").equals("")) {
+			if (!System.getProperty("cloud.service").equals("ec2")) return;
+			Properties props=PoolUtils.getAMIUserData();			
+			if (props.getProperty("start")==null || !props.getProperty("start").equalsIgnoreCase("true")) return;
+		}
+		
 		String port=new Integer(PoolUtils.DEFAULT_DB_PORT).toString();	
 		if (System.getProperty("db.port")!=null && !System.getProperty("db.port").equals("")) {
 			port=System.getProperty("db.port");
