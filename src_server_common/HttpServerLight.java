@@ -44,7 +44,8 @@ public class HttpServerLight {
 		             String from="biocep@gmail.com";
 		             String to = props.getProperty("email");
 		             String subject="EC2-R URL INFO";
-		             String message="Connect Using the R Workbench (R HTTP) with the following URL : "+"http://"+PoolUtils.getAMIHostName()+":"+guessport+"/rvirtual/cmd";     
+		             String message="Connect Using the R Workbench (R HTTP) with the following URL : "+"http://"+PoolUtils.getAMIHostName()+":"+guessport+"/rvirtual/cmd";
+		             //String[] filenames ={"c:/somefile.txt"};         
 		             client.sendMail(server,from,to,subject,message,null);
 		         }
 		         catch(Exception e)
@@ -55,7 +56,20 @@ public class HttpServerLight {
 				
 			}
 			
+			
 
+			
+			
+			new Thread(new Runnable(){
+				public void run() {
+					try {
+					System.setProperty("create", "true");
+					DbRegistry.main(null);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
 		}
 		
 		if (System.getProperty("pools.provider.factory")==null || System.getProperty("pools.provider.factory").equals("")) {
