@@ -153,6 +153,9 @@ public class DbRegistry {
 				+" -Ddb.password="+PoolUtils.DEFAULT_DB_PASSWORD
 				+" -Dnode=N1"
 				+(PoolUtils.isAmazonCloud() ? " -Dcloud=ec2":"")
+				+ (System.getProperty("r.binary")!=null && !System.getProperty("r.binary").equals("")? " "+(isWindowsOs() ? "\"" : "")+"-Dr.binary="+System.getProperty("r.binary")+(isWindowsOs() ? "\"" : "") : "") 
+				+ (System.getProperty("biocep.home")!=null && !System.getProperty("biocep.home").equals("")? " "+(isWindowsOs() ? "\"" : "")+"-Dbiocep.home="+System.getProperty("biocep.home")+(isWindowsOs() ? "\"" : "") : "")
+				
 				+" -cp "+jarfile+" RmiServer";
 				dbLayer.addNode(new NodeDataDB("N1",PoolUtils.getHostIp(),
 						PoolUtils.getHostName(),
