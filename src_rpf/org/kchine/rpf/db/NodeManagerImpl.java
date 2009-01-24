@@ -26,6 +26,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -252,6 +253,14 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 
 	public String getHostName() throws RemoteException {
 		return PoolUtils.getHostName();
+	}
+	
+	public Map<String, String> getSystemEnv() throws RemoteException {
+		return System.getenv();
+	}
+	
+	public Properties getSystemProperties() throws RemoteException {
+		return System.getProperties();
 	}
 	
 	public ManagedServant cloneServer() throws RemoteException {

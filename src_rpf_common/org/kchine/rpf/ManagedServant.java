@@ -22,6 +22,7 @@ package org.kchine.rpf;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -94,5 +95,9 @@ public interface ManagedServant extends java.rmi.Remote {
 	public String getStub() throws java.rmi.RemoteException;
 	
 	public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException ;
+	
+	public Properties getSystemProperties() throws RemoteException ;
+	
+	public Map<String,String> getSystemEnv() throws RemoteException ;
 
 }

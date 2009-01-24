@@ -113,9 +113,11 @@ public class SendEmailMain
      public static void main(String[] args) throws Exception
      {
     	 
+    	 /*
     	 ((RServices)ServerDefaults.getRmiRegistry().lookup("RSERVANT_2")).setJobId("dd.ngs");
     	 ((DBLayerInterface)ServerDefaults.getRmiRegistry()).setNotified("RSERVANT_2",true);
     	 System.exit(0);
+    	 */
     	 
          try
          {
@@ -125,8 +127,7 @@ public class SendEmailMain
              String to = "karim_chine@voila.fr";
              String subject="Test 3";
              String message="Testing";
-             String[] filenames ={"c:/somefile.txt"};
-         
+             String[] filenames ={"c:/somefile.txt"};         
              client.sendMail(server,from,to,subject,message,null);
          }
          catch(Exception e)

@@ -28,6 +28,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -320,6 +322,14 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		}
 	}
 
+	public Map<String, String> getSystemEnv() throws RemoteException {
+		return System.getenv();
+	}
+	
+	public Properties getSystemProperties() throws RemoteException {
+		return System.getProperties();
+	}
+	
 	public String toString() {
 		return super.toString() + " " + _servantName;
 	}

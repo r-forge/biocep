@@ -280,9 +280,68 @@ public class PoolUtils {
 		System.out.println ("PUBLIC AMI IP:<"+result+">");
 
 		return result;
-
 		
 	}
+	
+	public static String getAMIHostName() throws Exception {		
+		
+		PoolUtils.cacheJar(new URL("http://s3.amazonaws.com/ec2metadata/ec2-metadata"), System.getProperty("java.io.tmpdir") + "/biocep/ec2/", PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+		String ec2_metadata=new File(System.getProperty("java.io.tmpdir") + "/biocep/ec2/"+"ec2-metadata").getAbsolutePath();
+		Runtime rt = Runtime.getRuntime();
+		Process chmodProc=rt.exec(new String[]{"chmod", "u+x" , ec2_metadata});
+		int chmodExitVal = chmodProc.waitFor();
+		if (chmodExitVal != 0) throw new Exception("chmod exit code : " + chmodExitVal);
+		
+		final Process proc = rt.exec(new String[] { ec2_metadata , "-p"});
+		
+		final StringBuffer metadataOut = new StringBuffer();
+		final StringBuffer metadataError = new StringBuffer();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					InputStream is = proc.getInputStream();
+					int b;
+					while ((b = is.read()) != -1) {
+						metadataOut.append((char) b);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					InputStream is = proc.getErrorStream();
+					int b;
+					while ((b = is.read()) != -1) {
+						metadataError.append((char) b);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+		int exitVal = proc.waitFor();
+		if (exitVal != 0) throw new Exception("ec2-metadata exit code : " + exitVal);
+		
+		BufferedReader reader = new BufferedReader(new StringReader(metadataOut.toString()));
+		String line;
+		String lastLine=null;
+		while ((line = reader.readLine())!=null) {
+			lastLine=line;			
+		}
+		
+		System.out.println(lastLine);
+		
+		String result=lastLine.substring(lastLine.indexOf("public-hostname:")+"public-hostname:".length()).trim();
+		System.out.println ("PUBLIC AMI HOST NAME:<"+result+">");
+
+		return result;
+		
+	}
+	
 	public static Properties getAMIUserData() throws Exception {		
 		
 		PoolUtils.cacheJar(new URL("http://s3.amazonaws.com/ec2metadata/ec2-metadata"), System.getProperty("java.io.tmpdir") + "/biocep/ec2/", PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
