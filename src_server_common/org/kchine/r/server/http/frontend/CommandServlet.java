@@ -314,7 +314,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 									if (r == null) {
 										codeUrls = (URL[]) options.get("urls");
 										System.out.println("CODE URL->" + Arrays.toString(codeUrls));
-										r = ServerManager.createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
+										//String 
+										r = ServerManager.createR(System.getProperty("r.binary"), false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
 												.getLocalRmiRegistryPort()), memoryMin, memoryMax, privateName, false, codeUrls,null,true);
 									}
 								}

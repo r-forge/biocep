@@ -6,6 +6,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.kchine.r.server.SendEmailMain;
 import org.kchine.r.server.http.frontend.FreeResourcesListener;
 import org.kchine.rpf.PoolUtils;
 import org.mortbay.jetty.Server;
@@ -24,6 +25,41 @@ public class HttpServerLight {
 			if (props.getProperty("port")!=null) System.setProperty("port", props.getProperty("port"));
 			if (props.getProperty("login")!=null) System.setProperty("login", props.getProperty("login"));
 			if (props.getProperty("pwd")!=null) System.setProperty("pwd", props.getProperty("pwd"));
+
+			if (props.getProperty("email")!=null) {
+			
+				int guessport=8080;
+				try {
+					if (System.getProperty("port")!=null && !System.getProperty("port").equals("")) {
+						guessport=Integer.decode(System.getProperty("port"));
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			
+				 try
+		         {
+		        	 SendEmailMain client = new SendEmailMain();
+		             String server="smtp.gmail.com";
+		             String from="biocep@gmail.com";
+		             String to = props.getProperty("email");
+		             String subject="EC2-R URL INFO";
+		             String message="Connect Using the R Workbench (R HTTP) with the following URL : "+"http://"+PoolUtils.getAMIHostName()+":"+guessport+"/rvirtual/cmd";
+		             //String[] filenames ={"c:/somefile.txt"};         
+		             client.sendMail(server,from,to,subject,message,null);
+		         }
+		         catch(Exception e)
+		         {
+		             e.printStackTrace(System.out);
+		         }
+				
+				
+			}
+			
+			
+
+			
+			
 			new Thread(new Runnable(){
 				public void run() {
 					try {

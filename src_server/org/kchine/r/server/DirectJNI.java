@@ -59,6 +59,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -3445,7 +3446,27 @@ public class DirectJNI {
 		public String getHostName() throws RemoteException {
 			return PoolUtils.getHostName();
 		}
+		
+		public Map<String, String> getSystemEnv() throws RemoteException {
+			return System.getenv();
+		}
+		
+		public Properties getSystemProperties() throws RemoteException {
+			return System.getProperties();
+		}
 
+		public String getWorkingDirectory() throws RemoteException {
+			return new File(WDIR).getAbsolutePath();
+		}
+		
+		public String getInstallDirectory() throws RemoteException {
+			return ServerManager.INSTALL_DIR;
+		}
+		
+		public String getExtensionsDirectory() throws RemoteException {
+			return ServerManager.EXTENSIONS_DIR;
+		}
+		
 		public boolean isPortInUse(int port) throws RemoteException {
 			return ServerManager.isPortInUse("127.0.0.1", port);
 		}

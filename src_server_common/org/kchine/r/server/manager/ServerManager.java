@@ -88,16 +88,23 @@ public class ServerManager {
 	static {
 		if (System.getenv("BIOCEP_HOME") != null) {
 			INSTALL_DIR = System.getenv("BIOCEP_HOME");
+		} else if (System.getProperty("biocep.home")!=null && !System.getProperty("biocep.home").equals("")) {			
+			INSTALL_DIR = System.getProperty("biocep.home");
 		} else if (new File(System.getProperty("user.dir") + "/biocep.txt").exists()) {
 			INSTALL_DIR = System.getProperty("user.dir");
 		} else {
 			String codeUrl = ServerManager.class.getResource("/org/kchine/r/server/manager/ServerManager.class").toString();
 			if (codeUrl.startsWith("jar:file:")) {
-				String jarfile = codeUrl.substring("jar:file:".length(), codeUrl.length() - "/org/kchine/r/server/manager/ServerManager.class".length() - 1);
-				if (new File(new File(jarfile).getParent() + "/biocep.txt").exists()) {
-					jarfile.replace('\\', '/');
-					INSTALL_DIR = jarfile.substring(0, jarfile.lastIndexOf("/"));
-				} else {
+				try {
+					String jarurl=codeUrl.substring("jar:".length(), codeUrl.length()-"/org/kchine/r/server/manager/ServerManager.class".length()-1);				
+					String jarfile = PoolUtils.getFileFromURL(new URL(jarurl)).getAbsolutePath().replace('\\','/');
+					if (new File(new File(jarfile).getParent() + "/biocep.txt").exists()) {
+						INSTALL_DIR = jarfile.substring(0, jarfile.lastIndexOf("/"));
+					} else {
+						INSTALL_DIR = System.getProperty("user.home") + "/RWorkbench/";
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 					INSTALL_DIR = System.getProperty("user.home") + "/RWorkbench/";
 				}
 			} else {
@@ -123,7 +130,7 @@ public class ServerManager {
 		} else if (System.getProperty("plugins.home")!=null && !System.getProperty("plugins.home").equals("")) {			
 			PLUGINS_DIR = System.getProperty("plugins.home");
 		} else {
-			PLUGINS_DIR = INSTALL_DIR + "/plugins";
+			PLUGINS_DIR = INSTALL_DIR + "plugins";
 		}
 		if (!new File(PLUGINS_DIR).exists())  new File(PLUGINS_DIR).mkdirs();
 
@@ -134,7 +141,7 @@ public class ServerManager {
 		} else if (System.getProperty("extensions.home")!=null && !System.getProperty("extensions.home").equals("")) {			
 			EXTENSIONS_DIR = System.getProperty("extensions.home");
 		} else {
-			EXTENSIONS_DIR = new File(INSTALL_DIR + "/extensions").getAbsolutePath();
+			EXTENSIONS_DIR = new File(INSTALL_DIR + "extensions").getAbsolutePath();
 		}
 		if (!new File(EXTENSIONS_DIR).exists())  new File(EXTENSIONS_DIR).mkdirs();
 
@@ -161,6 +168,7 @@ public class ServerManager {
 		"http.port",
 		"cloud",
 		"extensions.home",
+		"use.default.libs",
 		"r.options"};
 
 	private static JTextArea createRSshProgressArea;
@@ -514,6 +522,10 @@ public class ServerManager {
 
 			boolean useDefaultUserLibs=(System.getenv("BIOCEP_USE_DEFAULT_LIBS") != null && System.getenv("BIOCEP_USE_DEFAULT_LIBS").equalsIgnoreCase("false"))
 			|| (System.getProperty("use.default.libs") != null && System.getProperty("use.default.libs").equalsIgnoreCase("true"));
+			
+			if (System.getProperty("use.default.libs")==null || System.getProperty("use.default.libs").equals("")) {
+				System.setProperty("use.default.libs",new Boolean(useDefaultUserLibs).toString().toLowerCase());
+			}
 
 			
 			if (!rpath.endsWith("/") && !rpath.endsWith("\\"))

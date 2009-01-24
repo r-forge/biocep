@@ -209,6 +209,10 @@ public interface RServices extends ManagedServant {
 
     void addProbeOnCells(String spreadsheetName)throws RemoteException;    
     boolean isProbeOnCell(String spreadsheetName)throws RemoteException;    
-    void removeProbeOnCells(String spreadsheetName)throws RemoteException;    
-       
+    void removeProbeOnCells(String spreadsheetName)throws RemoteException;
+    
+    String getWorkingDirectory() throws RemoteException;
+    String getInstallDirectory() throws RemoteException;
+    String getExtensionsDirectory() throws RemoteException;
+    
 }

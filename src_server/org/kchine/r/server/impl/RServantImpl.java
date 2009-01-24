@@ -1113,5 +1113,17 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
     public void removeProbeOnCells(String spreadsheetName) throws RemoteException{
     	DirectJNI.getInstance().getRServices().removeProbeOnCells( spreadsheetName );
     }
+    
+    public String getWorkingDirectory() throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().getWorkingDirectory();
+    }
+    
+    public String getInstallDirectory() throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().getInstallDirectory();
+    }
+    
+    public String getExtensionsDirectory() throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().getExtensionsDirectory();
+    }
 		
 }

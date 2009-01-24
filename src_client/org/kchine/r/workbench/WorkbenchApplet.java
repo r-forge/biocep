@@ -817,7 +817,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 												null, null);
 									} else {
 
-										r = ServerManager.createR(ident.isDefaultR() ? null : ident.getDefaultRBin(), ident.isKeepAlive(), PoolUtils
+										r = ServerManager.createR(ident.isDefaultR() ? System.getProperty("r.binary") : ident.getDefaultRBin(), ident.isKeepAlive(), PoolUtils
 												.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils
 												.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident.getMemoryMax(), "",
 												true, null, null,true);
@@ -1312,6 +1312,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					sessionMenu.add(_actions.get("stophttpserverlocalhost"));
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("showsessioninfo"));
+					sessionMenu.add(_actions.get("showworkbenchinfo"));					
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("downloadcorejars"));
 					sessionMenu.addSeparator();
@@ -4593,8 +4594,14 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 						sessionMode = "CONNECT TO RMI";
 					else if (getMode() == NEW_R_MODE)
 						sessionMode = "NEW R";
+					getConsoleLogger().printAsOutput("\nR Server Information :" + "\n");
 					getConsoleLogger().printAsOutput("Session Mode :" + sessionMode + "\n");
 					getConsoleLogger().printAsOutput("Server Name :" + getR().getServantName() + "\n");
+					getConsoleLogger().printAsOutput("Working Directory :" + getR().getWorkingDirectory() + "\n");
+					getConsoleLogger().printAsOutput("Installation Directory :" + getR().getInstallDirectory() + "\n");
+					getConsoleLogger().printAsOutput("Extensions Directory :" + getR().getExtensionsDirectory() + "\n");
+					getConsoleLogger().printAsOutput("System Environment Variables :" + getR().getSystemEnv() + "\n");
+					getConsoleLogger().printAsOutput("System Properties :" + getR().getSystemProperties() + "\n");
 					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getProcessId() + "\n");
 					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp() + "\n");
 					getConsoleLogger().printAsOutput("Server Host Name :" + getR().getHostName() + "\n");
@@ -4612,6 +4619,25 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 		});
 
+		
+		_actions.put("showworkbenchinfo", new AbstractAction("Show Workbench Info") {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					getConsoleLogger().printAsOutput("\nWorkbench Information :" + "\n");
+					getConsoleLogger().printAsOutput("Installation Directory :" + ServerManager.INSTALL_DIR + "\n");
+					getConsoleLogger().printAsOutput("Plugins Directory :" + ServerManager.PLUGINS_DIR + "\n");					
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+			}
+
+			public boolean isEnabled() {
+				return true;
+			}
+
+		});
+		
 		_actions.put("supervisor", new AbstractAction("Supervisor") {
 			public void actionPerformed(ActionEvent e) {
 				try {

@@ -20,6 +20,7 @@ package org.kchine.r.server;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -647,5 +648,29 @@ public class RServicesObject implements RServices {
 		return null;
 		
 	}
+	
+	public Map<String, String> getSystemEnv() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public Properties getSystemProperties() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public String getExtensionsDirectory() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public String getInstallDirectory() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public String getWorkingDirectory() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 
 }
