@@ -75,7 +75,7 @@ public class HttpServerLight {
 			if (props.getProperty("pool.size") != null) {
 				try {
 
-					int poolSize = Integer.decode("pool.size");
+					int poolSize = Integer.decode(props.getProperty("pool.size"));
 					int DB_CREATION_TIMEOUT_MILLISEC = 10000;
 					int guessdbport = 1527;
 					try {
