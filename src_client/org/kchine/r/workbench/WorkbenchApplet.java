@@ -4600,8 +4600,8 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					getConsoleLogger().printAsOutput("Working Directory :" + getR().getWorkingDirectory() + "\n");
 					getConsoleLogger().printAsOutput("Installation Directory :" + getR().getInstallDirectory() + "\n");
 					getConsoleLogger().printAsOutput("Extensions Directory :" + getR().getExtensionsDirectory() + "\n");
-					getConsoleLogger().printAsOutput("System Environment Variables :" + getR().getSystemEnv() + "\n");
-					getConsoleLogger().printAsOutput("System Properties :" + getR().getSystemProperties() + "\n");
+					//getConsoleLogger().printAsOutput("System Environment Variables :" + getR().getSystemEnv() + "\n");
+					//getConsoleLogger().printAsOutput("System Properties :" + getR().getSystemProperties() + "\n");
 					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getProcessId() + "\n");
 					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp() + "\n");
 					getConsoleLogger().printAsOutput("Server Host Name :" + getR().getHostName() + "\n");

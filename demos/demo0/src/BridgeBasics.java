@@ -41,6 +41,9 @@ public class BridgeBasics {
 
 
 	public static void main(String args[]) throws Exception {
+		
+		
+
 			
 		final RServices rs = DirectJNI.getInstance().getRServices();		
 		rs.addRConsoleActionListener(new RConsoleActionListener(){
