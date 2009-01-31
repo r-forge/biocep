@@ -372,7 +372,7 @@ public class DirectJNI {
 			if (busy) {
 
 				_userInput = null;
-				notifyRActionListeners(new RConsoleAction("GET_USER_INPUT"));
+				notifyRActionListeners(new RConsoleAction("GET_USER_INPUT",new HashMap<String, Object>()));
 				_stopRequired = false;
 				while (_userInput == null) {
 					try {
@@ -4954,6 +4954,7 @@ public class DirectJNI {
 	}
 
 	public void notifyRActionListeners(final RConsoleAction action) {
+		
 		action.getAttributes().put("originatorUID", getOriginatorUID());
 		Vector<RConsoleActionListener> ractionListenersToRemove = new Vector<RConsoleActionListener>();
 		for (int i = 0; i < _ractionListeners.size(); ++i) {

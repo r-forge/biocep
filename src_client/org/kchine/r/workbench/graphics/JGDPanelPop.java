@@ -175,6 +175,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 			}
 
 			public void mousePressed(MouseEvent e) {
+				
+				if (e.isPopupTrigger()) {
+					showPopup(e);
+				}
+				
 				if (e.getButton() == MouseEvent.BUTTON1) {
 					_mouseStartPosition = e.getPoint();
 					if (_interactor == INTERACTOR_SCROLL) {
