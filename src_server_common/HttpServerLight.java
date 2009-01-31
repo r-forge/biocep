@@ -72,6 +72,7 @@ public class HttpServerLight {
 				}
 			}).start();
 
+			/*
 			if (props.getProperty("pool.size") != null) {
 				try {
 
@@ -125,6 +126,8 @@ public class HttpServerLight {
 				}
 
 			}
+			*/
+			
 		}
 
 		if (System.getProperty("pools.provider.factory") == null || System.getProperty("pools.provider.factory").equals("")) {

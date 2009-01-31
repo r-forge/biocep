@@ -1636,11 +1636,17 @@ public class Supervisor {
 
 		actions.put("new_servant_without_log_console", new AbstractAction("New Servant") {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", false);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
+				new Thread(new Runnable(){
+					public void run() {
+						try {
+							_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", false);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+						}
+				}).start();
+				
+				
 			}
 
 			@Override
@@ -1651,11 +1657,20 @@ public class Supervisor {
 
 		actions.put("new_servant_with_log_console", new AbstractAction("New Servant (Log Console)") {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", true);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
+				
+				new Thread(new Runnable(){
+					public void run() {
+						try {
+							_supervisorInterface.launch(_NDATA.elementAt(_nodeTable.getSelectedRows()[0]).getNodeName(), "", true);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}		
+					}
+				}).start();
+
+				
+				
+				
 			}
 
 			@Override
