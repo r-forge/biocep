@@ -38,6 +38,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.kchine.r.server.RKit;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.http.Java2DUtils;
@@ -50,8 +51,14 @@ import org.kchine.rpf.ServantProviderFactory;
  */
 public class GraphicsServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
+	private RKit _rkit;
 	public GraphicsServlet() {
 		super();
+	}
+	
+	public GraphicsServlet(RKit rkit) {
+		super();
+		_rkit=rkit;
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -103,23 +110,27 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 				if (type == null)
 					type = "jpg";
 
-				Boolean wait = null;
-				try {
-					wait = new Boolean(request.getParameter("wait"));
-				} catch (Exception e) {
-				}
-				if (wait == null)
-					wait = true;
-
-				if (wait) {
-					r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+				if (_rkit==null) {
+					Boolean wait = null;
+					try {
+						wait = new Boolean(request.getParameter("wait"));
+					} catch (Exception e) {
+					}
+					if (wait == null)
+						wait = true;
+	
+					if (wait) {
+						r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+					} else {
+						r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
+					}
+	
+					if (r == null) {
+						result = new NoServantAvailableException();
+						break;
+					}
 				} else {
-					r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
-				}
-
-				if (r == null) {
-					result = new NoServantAvailableException();
-					break;
+					r=_rkit.getR();
 				}
 
 				if (request.getParameter("demo") != null) {
@@ -192,7 +203,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 				break;
 			} finally {
 
-				spFactory.getServantProvider().returnServantProxy(r);
+				if (_rkit==null) spFactory.getServantProvider().returnServantProxy(r);
 			}
 
 		} while (true);

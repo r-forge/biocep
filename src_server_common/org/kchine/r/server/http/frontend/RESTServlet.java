@@ -20,29 +20,25 @@
  */
 package org.kchine.r.server.http.frontend;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
+import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Vector;
-import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import org.kchine.r.server.RKit;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
-import org.kchine.r.server.http.Java2DUtils;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServantProviderFactory;
 
@@ -52,10 +48,17 @@ import org.kchine.rpf.ServantProviderFactory;
  */
 public class RESTServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
+	private RKit _rkit;
+	
 	public RESTServlet() {
 		super();
 	}
 
+	public RESTServlet(RKit rkit) {
+		super();
+		_rkit=rkit;
+	}
+	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
@@ -93,7 +96,7 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 
 				String command = request.getParameter("expression");
 				if (command == null) {
-					command = "hist(rnorm(100))";
+					command = "1+1";
 				}
 
 				String type = null;
@@ -105,23 +108,27 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 				if (type == null)
 					type = "jpg";
 
-				Boolean wait = null;
-				try {
-					wait = new Boolean(request.getParameter("wait"));
-				} catch (Exception e) {
-				}
-				if (wait == null)
-					wait = true;
-
-				if (wait) {
-					r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+				if (_rkit==null) {
+					Boolean wait = null;
+					try {
+						wait = new Boolean(request.getParameter("wait"));
+					} catch (Exception e) {
+					}
+					if (wait == null)
+						wait = true;
+	
+					if (wait) {
+						r = (RServices) spFactory.getServantProvider().borrowServantProxy();
+					} else {
+						r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
+					}
+	
+					if (r == null) {
+						result = new NoServantAvailableException();
+						break;
+					}
 				} else {
-					r = (RServices) spFactory.getServantProvider().borrowServantProxyNoWait();
-				}
-
-				if (r == null) {
-					result = new NoServantAvailableException();
-					break;
+					r=_rkit.getR();
 				}
 
 				if (request.getParameter("demo") != null) {
@@ -209,7 +216,7 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 				break;
 			} finally {
 
-				spFactory.getServantProvider().returnServantProxy(r);
+				if (_rkit==null) spFactory.getServantProvider().returnServantProxy(r);
 			}
 
 		} while (true);
@@ -281,12 +288,24 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 	}
 
 	static public void main(String[] args) throws Exception {
-							
+		
+		HttpURLConnection connection=(HttpURLConnection)new URL("http://169.254.130.239:8080/rvirtual/rest?expression=x").openConnection();		
+		XMLDecoder decoder=new XMLDecoder(connection.getInputStream());
+		RResponse rresponse=(RResponse)decoder.readObject();
+		connection.disconnect();
+		System.out.println(rresponse.getValue());
+		
+		
+		/*
+		
 		RResponse rresponse=new RResponse( "aaaa" , "bbb" );					
 	    XMLEncoder e = new XMLEncoder(new BufferedOutputStream(System.out));
 	    e.writeObject(rresponse);
 	    e.close();
 		
+		*/
+	    
+	    
 		
 		/*
 		URLConnection urlC = new URL("http://www.biocep.net/kaleidoscope/index.html").openConnection();

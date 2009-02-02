@@ -1,7 +1,4 @@
 import static org.kchine.rpf.PoolUtils.getHostIp;
-import static org.kchine.rpf.PoolUtils.isWindowsOs;
-
-import java.net.Socket;
 import java.util.Properties;
 
 import javax.servlet.http.HttpSession;

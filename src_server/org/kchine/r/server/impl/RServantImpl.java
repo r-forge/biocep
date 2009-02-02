@@ -25,10 +25,7 @@ import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Enumeration;
-import java.util.EventListener;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.Callable;
@@ -36,12 +33,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-
 import org.apache.commons.logging.Log;
 import org.kchine.r.RObject;
 import org.kchine.r.server.AssignInterface;
@@ -74,23 +68,16 @@ import org.kchine.r.server.iplots.SVarSetInterfaceRemote;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.r.server.scripting.GroovyInterpreterSingleton;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemote;
-import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl;
 import org.kchine.rpf.InitializingException;
 import org.kchine.rpf.LocalRmiRegistry;
 import org.kchine.rpf.ManagedServantAbstract;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.RemotePanel;
 import org.kchine.rpf.db.DBLayerInterface;
-import org.mortbay.component.Container;
-import org.mortbay.component.Container.Relationship;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.SessionManager;
-import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionManager;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.SessionHandler;
 import org.rosuda.JRI.Rengine;
 import org.rosuda.iplots.Framework;
 
@@ -854,9 +841,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 					}
 				});
 				
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalGraphicsServlet(rkit)), "/rvirtual/graphics/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(rkit)), "/rvirtual/graphics/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet(rkit)), "/rvirtual/rest/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(rkit,false)), "/rvirtual/cmd/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WorkingDirectoryServlet(rkit)), "/rvirtual/wd/*");
 				System.out.println("+ going to start virtualization http server port : " + port);
 				
 				_virtualizationServer.start();

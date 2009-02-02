@@ -4734,6 +4734,12 @@ public class DirectJNI {
 			}
 		});
 	}
+	
+	// for private use
+	
+	public void assignInPrivateEnv(String name, long exp) {
+		_rEngine.rniAssign(name,exp, _privateEnvExp);
+	}
 
 	private static void init(ClassLoader cl) throws Exception {
 		Properties props = new Properties();
