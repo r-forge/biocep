@@ -20,21 +20,18 @@
  */
 package org.kchine.r.server;
 
+import java.beans.XMLDecoder;
 import java.io.File;
 import java.io.RandomAccessFile;
-import java.net.JarURLConnection;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import org.apache.commons.logging.Log;
 import org.kchine.r.RArray;
 import org.kchine.r.RChar;
@@ -49,6 +46,7 @@ import org.kchine.r.RVector;
 import org.kchine.r.server.RConsoleAction;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.http.RHttpProxy;
+import org.kchine.r.server.http.frontend.RResponse;
 import org.kchine.r.server.http.local.LocalHttpServer;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.r.server.scripting.PythonInterpreterSingleton;
@@ -1230,4 +1228,36 @@ public abstract class RListener {
 		}
 	}
 
+	
+	
+	public static String[] xmlGet(String url) {
+		try {
+			
+			RResponse rresponse=null;
+			try {
+				HttpURLConnection connection=(HttpURLConnection)new URL(url).openConnection();		
+				XMLDecoder decoder=new XMLDecoder(connection.getInputStream());
+				rresponse=(RResponse)decoder.readObject();
+				connection.disconnect();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			if (rresponse == null) {
+				return new String[] { "NOK", convertToPrintCommand("Bad URL: "+url) };
+			}
+
+			
+			long ref=DirectJNI.getInstance().putObject(rresponse.getValue());
+			DirectJNI.getInstance().assignInPrivateEnv("xml.get.result", ref);
+					
+
+			return new String[] { "OK" };
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+	
+	
 }

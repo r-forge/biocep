@@ -401,3 +401,13 @@ cells.select <- function ( range , name='' ) {
 	}
 }
 
+
+xml.get <- function ( url ) {
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"xmlGet",  url );
+	if (result[1]=='OK') {
+		return(.PrivateEnv$xml.get.result); 
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+
