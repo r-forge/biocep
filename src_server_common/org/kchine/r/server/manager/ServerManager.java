@@ -730,76 +730,41 @@ public class ServerManager {
 
 			String cp = INSTALL_DIR + "classes";
 
+			Vector<File> extraJarFiles = new Vector<File>();
+			
 			try {
-
 				
-				/*
-				try {
-					if (addLocalJarToClassPath) {
-						String jar=ServerManager.class.getResource("/org/kchine/r/server/manager/ServerManager.class").toString();
-						System.out.println("***>"+jar);
-						if (jar.startsWith("jar:")) {
-							String jarurl=jar.substring("jar:".length(), jar.length()-"/org/kchine/r/server/manager/ServerManager.class".length()-1);
-							System.out.println("*****>"+jarurl);
-							if (jarurl.startsWith("file:")){
-								System.out.println("********>"+PoolUtils.getFileFromURL(new URL(jarurl)).getAbsolutePath());
-								cp = cp + System.getProperty("path.separator") + PoolUtils.getFileFromURL(new URL(jarurl)).getAbsolutePath();
-							}
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				*/
-				
-				/*
-				 * if (keepAlive) { try
-				 * {downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_LOGGER |
-				 * (showProgress ? PoolUtils.LOG_PRGRESS_TO_DIALOG : 0) );}
-				 * catch (Exception e) {e.printStackTrace(); } }
-				 */
-
-				File[] extraJarFiles = new File(INSTALL_DIR).listFiles(new FilenameFilter() {
+				File[] flist = new File(INSTALL_DIR).listFiles(new FilenameFilter() {
 					public boolean accept(File dir, String name) {
 						return name.endsWith(".jar");
 					}
 				});
-
-				Arrays.sort(extraJarFiles);
-				System.out.println("Insiders Extra Jars:" + Arrays.toString(extraJarFiles));
-				for (int i = 0; i < extraJarFiles.length; ++i) {
-					cp = cp + System.getProperty("path.separator") + extraJarFiles[i];
+				Arrays.sort(flist);
+				for (int i=0; i<flist.length;++i) {
+					extraJarFiles.add(flist[i]);
 				}
+				
+				
+				System.out.println("Insiders Extra Jars:" + Arrays.toString(flist));
 
 				if (System.getenv().get("BIOCEP_EXTRA_JARS_LOCATION") != null) {
-					extraJarFiles = new File(System.getenv().get("BIOCEP_EXTRA_JARS_LOCATION")).listFiles(new FilenameFilter() {
+					flist = new File(System.getenv().get("BIOCEP_EXTRA_JARS_LOCATION")).listFiles(new FilenameFilter() {
 						public boolean accept(File dir, String name) {
 							return name.endsWith(".jar");
 						}
 					});
 
-					Arrays.sort(extraJarFiles);
-					System.out.println("Outsiders Extra Jars:" + Arrays.toString(extraJarFiles));
-					for (int i = 0; i < extraJarFiles.length; ++i) {
-						cp = cp + System.getProperty("path.separator") + extraJarFiles[i];
+					Arrays.sort(flist);
+					System.out.println("Outsiders Extra Jars:" + Arrays.toString(flist));
+					for (int i=0; i<flist.length;++i) {
+						extraJarFiles.add(flist[i]);
 					}
 				}
+				
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
-			/*
-			 * if (new File(INSTALL_DIR + "biocep-core.jar").exists()) { cp = cp
-			 * + System.getProperty("path.separator") + new File(INSTALL_DIR +
-			 * "biocep-core.jar").getAbsolutePath(); } else if (new
-			 * File(INSTALL_DIR + "biocep.jar").exists()) { cp = cp +
-			 * System.getProperty("path.separator") + new File(INSTALL_DIR +
-			 * "biocep.jar").getAbsolutePath(); } if (new File(INSTALL_DIR +
-			 * "groovy-all-1.5.4").exists()) { cp = cp +
-			 * System.getProperty("path.separator") + new File(INSTALL_DIR +
-			 * "groovy-all-1.5.4").getAbsolutePath(); }
-			 */
 
 			
 			ManagedServant[] servantHolder = new ManagedServant[1];
@@ -845,6 +810,12 @@ public class ServerManager {
 					for (int i = 0; i < codeUrls.length; ++i)
 						codeBase += " " + codeUrls[i].toString();
 				}
+				
+				if (extraJarFiles.size()>0) {
+					for (int i = 0; i < extraJarFiles.size(); ++i)
+						codeBase += " " + extraJarFiles.elementAt(i).toURI().toURL().toString();
+				}
+				
 				command.add((isWindowsOs() ? "\"" : "") + "-Djava.rmi.server.codebase=" + codeBase + (isWindowsOs() ? "\"" : ""));
 				if (keepAlive) {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dpreloadall=true" + (isWindowsOs() ? "\"" : ""));
@@ -901,7 +872,12 @@ public class ServerManager {
 						command.add(codeUrls[i].toString());
 					}
 				}
-
+				
+				if (extraJarFiles.size()>0) {
+					for (int i = 0; i < extraJarFiles.size(); ++i)
+						command.add(extraJarFiles.elementAt(i).toURI().toURL().toString());
+				}				
+				
 				final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
 
 				final Vector<String> outPrint = new Vector<String>();
