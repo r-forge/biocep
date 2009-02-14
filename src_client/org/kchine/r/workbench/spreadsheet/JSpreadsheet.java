@@ -2,6 +2,7 @@ package org.kchine.r.workbench.spreadsheet;
 
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -50,6 +51,7 @@ import org.kchine.r.server.spreadsheet.SpreadsheetTableModel;
 import org.kchine.r.server.spreadsheet.SpreadsheetTableModelBis;
 import org.kchine.r.server.spreadsheet.SpreadsheetTableModelClipboardInterface;
 import org.kchine.r.workbench.RGui;
+import org.kchine.rpf.PoolUtils;
 
 
 /**
@@ -137,6 +139,14 @@ public class JSpreadsheet extends JComponent
       table.requestFocus();
 
       Formula.registerFunctions();
+
+      try {
+      if (PoolUtils.isMacOs()) {
+    	  table.setGridColor(Color.black);
+    	  
+      } } catch (Exception e) {
+    	  e.printStackTrace();
+      }
 
    }
 

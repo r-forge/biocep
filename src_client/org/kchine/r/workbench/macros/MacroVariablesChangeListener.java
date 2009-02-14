@@ -33,7 +33,7 @@ public class MacroVariablesChangeListener implements VariablesChangeListener {
 			if (!event.getVariablesHashSet().contains(variables.elementAt(i)))
 				return;
 		}
-		m.sourceAll(event.getRGui());
+		m.sourceAll(event.getRGui(), event.getFrobiddenMacros());
 	}
 
 	public boolean isEnabled() {
