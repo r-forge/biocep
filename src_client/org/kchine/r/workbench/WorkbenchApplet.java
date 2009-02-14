@@ -275,6 +275,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 	private boolean _nopool;
 	private boolean _wait;
 	private String _login;
+	private String _pwd;
 	private Vector<String> _selectedFiles = new Vector<String>();
 	private HashMap<String, AbstractAction> _actions = new HashMap<String, AbstractAction>();
 	private JFileChooser _chooser = null;
@@ -303,8 +304,11 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 	int maxNbrRactionsOnPop = 50;
 
 	private static RGui _instance;
-	public static RGui getInstance() {return _instance;}
-	
+
+	public static RGui getInstance() {
+		return _instance;
+	}
+
 	private RCollaborationListenerImpl _collaborationListenerImpl;
 	private RConsoleActionListenerImpl _rConsoleActionListenerImpl;
 
@@ -323,7 +327,8 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 	String _clientIP = null;
 	HashSet<String> _availableExtensions = null;
-	
+
+	boolean _macrosEnabled = true;
 
 	private final ReentrantLock _protectR = new ExtendedReentrantLock() {
 
@@ -558,12 +563,22 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			LoginDialog.stub_str = getParameter("stub");
 		if (getParameter("name") != null && !getParameter("name").equals(""))
 			LoginDialog.servantName_str = getParameter("name");
-		if (getParameter("registry.host") != null && !getParameter("registry.host").equals(""))
-			LoginDialog.servantName_str = getParameter("registry.host");
-		if (getParameter("registry.port") != null && !getParameter("registry.port").equals(""))
-			LoginDialog.servantName_str = getParameter("registry.port");
+		if (getParameter("registry_host") != null && !getParameter("registry_host").equals(""))
+			LoginDialog.servantName_str = getParameter("registry_host");
+		if (getParameter("registry_port") != null && !getParameter("registry_port").equals(""))
+			LoginDialog.servantName_str = getParameter("registry_port");
 		if (getParameter("privatename") != null && !getParameter("privatename").equals(""))
 			LoginDialog.privateName_str = getParameter("privatename");
+
+		if (getParameter("rmi_mode") != null && !getParameter("rmi_mode").equals("")) {
+			if (getParameter("rmi_mode").equals("registry")) {
+				LoginDialog.rmiMode_int = RMI_MODE_REGISTRY_MODE;
+			} else if (getParameter("rmi_mode").equals("db")) {
+				LoginDialog.rmiMode_int = RMI_MODE_DB_MODE;
+			} else if (getParameter("rmi_mode").equals("stub")) {
+				LoginDialog.rmiMode_int = RMI_MODE_STUB_MODE;
+			}
+		}
 
 		if (getParameter("noconfirmation") != null && getParameter("noconfirmation").equals("true")) {
 			logonWithoutConfirmation = true;
@@ -573,6 +588,16 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 		if (getParameter("selfish") != null && getParameter("selfish").equals("true")) {
 			_selfish = true;
 		}
+
+		_nopool = getParameter("nopool") == null || getParameter("nopool").equals("") || !getParameter("nopool").equalsIgnoreCase("false");
+		_wait = (getParameter("wait") != null && getParameter("wait").equalsIgnoreCase("true"));
+		_login = getParameter("login");
+		_pwd = getParameter("password");
+
+		LoginDialog.nopool_bool = _nopool;
+		LoginDialog.waitForResource_bool = _wait;
+		LoginDialog.login_str = _login;
+		LoginDialog.pwd_str = _pwd;
 
 		try {
 
@@ -817,10 +842,10 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 												null, null);
 									} else {
 
-										r = ServerManager.createR(ident.isDefaultR() ? System.getProperty("r.binary") : ident.getDefaultRBin(), ident.isKeepAlive(), PoolUtils
-												.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils
-												.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident.getMemoryMin(), ident.getMemoryMax(), "",
-												true, null, null,true);
+										r = ServerManager.createR(ident.isDefaultR() ? System.getProperty("r.binary") : ident.getDefaultRBin(), ident
+												.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager
+												.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()),
+												ident.getMemoryMin(), ident.getMemoryMax(), "", true, null, null, true);
 									}
 
 									if (ident.isUseSsh()) {
@@ -936,15 +961,16 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { new SetCurrentDeviceAction(WorkbenchApplet.this, d), null,
 									new FitDeviceAction(WorkbenchApplet.this, d), null, new SnapshotDeviceAction(WorkbenchApplet.this),
 									new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
-									
-									new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this), new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
-									new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this), new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this), new SaveDeviceAsPictexAction(WorkbenchApplet.this),
-									new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), 
-									
-									null, new SaveDeviceAsWmfAction(WorkbenchApplet.this),
-									new SaveDeviceAsEmfAction(WorkbenchApplet.this), new SaveDeviceAsOdgAction(WorkbenchApplet.this), null,
-									new CopyFromCurrentDeviceAction(WorkbenchApplet.this), new CopyToCurrentDeviceAction(WorkbenchApplet.this, d), null,
-									new CoupleToCurrentDeviceAction(WorkbenchApplet.this)
+
+									new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
+									new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+									new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
+									new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
+									new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
+
+									null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
+									new SaveDeviceAsOdgAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
+									new CopyToCurrentDeviceAction(WorkbenchApplet.this, d), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this)
 
 							}, getRLock(), getConsoleLogger());
 							_rootGraphicPanel.removeAll();
@@ -981,13 +1007,14 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 										new SetCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
 										new FitDeviceAction(WorkbenchApplet.this, newDevice), null, new SnapshotDeviceAction(WorkbenchApplet.this),
 										new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
-										
-										new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this), new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
-										new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this), new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this), new SaveDeviceAsPictexAction(WorkbenchApplet.this),
-										new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), 
- 
-										
-										null,new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
+
+										new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
+										new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+										new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
+										new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
+										new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
+
+										null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
 										new SaveDeviceAsOdgAction(WorkbenchApplet.this), null,
 
 										new CopyFromCurrentDeviceAction(WorkbenchApplet.this), new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice),
@@ -1017,6 +1044,8 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 							_demos = _rForConsole.listDemos();
 
+							_macrosEnabled=!_rForConsole.hasRCollaborationListeners();
+							
 							_collaborationListenerImpl = new RCollaborationListenerImpl();
 
 							_rForConsole.addRCollaborationListener(_collaborationListenerImpl);
@@ -1026,16 +1055,31 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							_rForConsole.addRConsoleActionListener(_rConsoleActionListenerImpl);
 
 							_rForConsole.registerUser(getUID(), getUserName());
-														
-							_availableExtensions=new HashSet<String>();
-							String[] extensions=_rForConsole.listExtensions();
-							System.out.println("extensions:"+Arrays.toString(extensions));
-							for (int i=0; i<extensions.length; ++i) {
+
+							_availableExtensions = new HashSet<String>();
+							String[] extensions = _rForConsole.listExtensions();
+							System.out.println("extensions:" + Arrays.toString(extensions));
+							for (int i = 0; i < extensions.length; ++i) {
 								_availableExtensions.add(extensions[i]);
 							}
 
-							for (MacroInterface m : macrosVector)
-								_rForConsole.addProbeOnVariables(m.getProbes());
+							
+							
+							if (_macrosEnabled) {
+								for (MacroInterface m : macrosVector)
+									_rForConsole.addProbeOnVariables(m.getProbes());
+							}
+							
+							new Thread(new Runnable() {
+								public void run() {
+									try {
+										refreshMacros();
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							}).start();
+							
 
 							new Thread(new Runnable() {
 								public void run() {
@@ -1180,9 +1224,9 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 				}
 			};
-			_consolePanel = new ConsolePanel(_submitInterface, "Evaluate", new Color(0x00, 0x80, 0x80), "R",true, new AbstractAction[] { _actions.get("logon"),
-					_actions.get("logoff"), null, _actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"), null,
-					_actions.get("playdemo") });
+			_consolePanel = new ConsolePanel(_submitInterface, "Evaluate", new Color(0x00, 0x80, 0x80), "R", true, new AbstractAction[] {
+					_actions.get("logon"), _actions.get("logoff"), null, _actions.get("saveimage"), _actions.get("loadimage"), null, _actions.get("stopeval"),
+					null, _actions.get("playdemo") });
 
 			_consolePanel.getCommandInputField().addKeyListener(new KeyListener() {
 
@@ -1312,7 +1356,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					sessionMenu.add(_actions.get("stophttpserverlocalhost"));
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("showsessioninfo"));
-					sessionMenu.add(_actions.get("showworkbenchinfo"));					
+					sessionMenu.add(_actions.get("showworkbenchinfo"));
 					sessionMenu.addSeparator();
 					sessionMenu.add(_actions.get("downloadcorejars"));
 					sessionMenu.addSeparator();
@@ -1708,7 +1752,6 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 												getRLock().lock();
 												getConsoleLogger().print("sourcing demo " + PoolUtils.replaceAll(_demos[index], "_", " "), null);
 												String log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(_demos[index]));
-												
 
 											} catch (Exception ex) {
 												ex.printStackTrace();
@@ -1779,7 +1822,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							final MacroInterface finalMacro = m;
 							macrosMenu.add(new AbstractAction(m.getLabel()) {
 								public void actionPerformed(ActionEvent e) {
-									finalMacro.sourceAll(WorkbenchApplet.this);
+									finalMacro.sourceAll(WorkbenchApplet.this, null);
 								}
 							});
 						}
@@ -2118,14 +2161,6 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		_nopool = getParameter("nopool") == null || getParameter("nopool").equals("") || !getParameter("nopool").equalsIgnoreCase("false");
-		_wait = (getParameter("wait") != null && getParameter("wait").equalsIgnoreCase("true"));
-		_login = getParameter("login");
-
-		LoginDialog.nopool_bool = _nopool;
-		LoginDialog.waitForResource_bool = _wait;
-		LoginDialog.login_str = _login;
 
 		new Thread(new Runnable() {
 			public void run() {
@@ -3570,15 +3605,17 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(WorkbenchApplet.this, newDevice),
 							null, new FitDeviceAction(WorkbenchApplet.this, newDevice), null, new SnapshotDeviceAction(WorkbenchApplet.this),
 							new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
-							
-							new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this), new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
-							new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this), new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this), new SaveDeviceAsPictexAction(WorkbenchApplet.this),
-							new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), 
-							
-							null, new SaveDeviceAsWmfAction(WorkbenchApplet.this),
-							new SaveDeviceAsEmfAction(WorkbenchApplet.this), new SaveDeviceAsOdgAction(WorkbenchApplet.this), null,
-							new CopyFromCurrentDeviceAction(WorkbenchApplet.this), new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
-							new CoupleToCurrentDeviceAction(WorkbenchApplet.this) }, getRLock(), getConsoleLogger());
+
+							new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
+							new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+							new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
+							new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
+							new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
+
+							null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
+							new SaveDeviceAsOdgAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
+							new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this) },
+							getRLock(), getConsoleLogger());
 
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
@@ -3645,15 +3682,17 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							null, new FitDeviceAction(WorkbenchApplet.this, newDevice), null, new SnapshotDeviceAction(WorkbenchApplet.this),
 							new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
 							new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
-							
-							new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this), new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
-							new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this), new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this), new SaveDeviceAsPictexAction(WorkbenchApplet.this),
-							new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this), 
-							
-							null, new SaveDeviceAsWmfAction(WorkbenchApplet.this),
-							new SaveDeviceAsEmfAction(WorkbenchApplet.this), new SaveDeviceAsOdgAction(WorkbenchApplet.this), null,
-							new CopyFromCurrentDeviceAction(WorkbenchApplet.this), new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
-							new CoupleToCurrentDeviceAction(WorkbenchApplet.this) }, getRLock(), getConsoleLogger());
+
+							new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
+							new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+							new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
+							new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
+							new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
+
+							null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
+							new SaveDeviceAsOdgAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
+							new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this) },
+							getRLock(), getConsoleLogger());
 
 					rootGraphicPanel.removeAll();
 					rootGraphicPanel.setLayout(new BorderLayout());
@@ -4144,19 +4183,18 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 											_virtualizationServer = new Server(port);
 											Context root = new Context(_virtualizationServer, "/", Context.SESSIONS);
-											
-											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(WorkbenchApplet.this)), "/rvirtual/graphics/*");
-											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet(WorkbenchApplet.this)), "/rvirtual/rest/*");
-											
+
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(WorkbenchApplet.this)),
+													"/rvirtual/graphics/*");
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet(WorkbenchApplet.this)),
+													"/rvirtual/rest/*");
+
 											root.addServlet(
 													new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(WorkbenchApplet.this, true)),
 													"/rvirtual/cmd/*");
 											root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(WorkbenchApplet.this)),
 													"/rvirtual/helpme/*");
-											
-											
-											
-											
+
 											System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
 											_virtualizationServer.start();
 
@@ -4606,8 +4644,10 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					getConsoleLogger().printAsOutput("Working Directory :" + getR().getWorkingDirectory() + "\n");
 					getConsoleLogger().printAsOutput("Installation Directory :" + getR().getInstallDirectory() + "\n");
 					getConsoleLogger().printAsOutput("Extensions Directory :" + getR().getExtensionsDirectory() + "\n");
-					//getConsoleLogger().printAsOutput("System Environment Variables :" + getR().getSystemEnv() + "\n");
-					//getConsoleLogger().printAsOutput("System Properties :" + getR().getSystemProperties() + "\n");
+					// getConsoleLogger().printAsOutput("System Environment Variables :"
+					// + getR().getSystemEnv() + "\n");
+					// getConsoleLogger().printAsOutput("System Properties :" +
+					// getR().getSystemProperties() + "\n");
 					getConsoleLogger().printAsOutput("Server Process ID :" + getR().getProcessId() + "\n");
 					getConsoleLogger().printAsOutput("Server Host IP :" + getR().getHostIp() + "\n");
 					getConsoleLogger().printAsOutput("Server Host Name :" + getR().getHostName() + "\n");
@@ -4625,13 +4665,12 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 		});
 
-		
 		_actions.put("showworkbenchinfo", new AbstractAction("Show Workbench Info") {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					getConsoleLogger().printAsOutput("\nWorkbench Information :" + "\n");
 					getConsoleLogger().printAsOutput("Installation Directory :" + ServerManager.INSTALL_DIR + "\n");
-					getConsoleLogger().printAsOutput("Plugins Directory :" + ServerManager.PLUGINS_DIR + "\n");					
+					getConsoleLogger().printAsOutput("Plugins Directory :" + ServerManager.PLUGINS_DIR + "\n");
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -4643,7 +4682,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			}
 
 		});
-		
+
 		_actions.put("supervisor", new AbstractAction("Supervisor") {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -5304,7 +5343,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 		public void rConsoleActionPerformed(final RConsoleAction action) throws RemoteException {
 
-			//System.out.println("Action:" + action);
+			// System.out.println("Action:" + action);
 			if (getUID().equals(action.getAttributes().get("originatorUID"))) {
 				if (action.getActionName().equals("help")) {
 					new Thread(new Runnable() {
@@ -5522,25 +5561,24 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							}
 						}
 					});
-				} 
+				}
 
-			} 
-				
+			}
+
 			if (action.getActionName().equals("USER_JOINED")) {
-				if (!action.getAttributes().get("sourceUID").equals(getUID()) ){
-					_consolePanel.print(null,"User [ " +(String) action.getAttributes().get("user") + " ] joined \n" );
+				if (!action.getAttributes().get("sourceUID").equals(getUID())) {
+					_consolePanel.print(null, "User [ " + (String) action.getAttributes().get("user") + " ] joined \n");
 				}
 			} else if (action.getActionName().equals("USER_LEFT")) {
-				if (!action.getAttributes().get("sourceUID").equals(getUID()) ){
-					_consolePanel.print(null,"User [ " +(String) action.getAttributes().get("user") + " ] left \n" );
+				if (!action.getAttributes().get("sourceUID").equals(getUID())) {
+					_consolePanel.print(null, "User [ " + (String) action.getAttributes().get("user") + " ] left \n");
 				}
 			} else if (action.getActionName().equals("USER_UPDATED")) {
-				if (!action.getAttributes().get("sourceUID").equals(getUID()) ){
-					_consolePanel.print(null,"User [ " +(String) action.getAttributes().get("user") + " ] updated \n" );
+				if (!action.getAttributes().get("sourceUID").equals(getUID())) {
+					_consolePanel.print(null, "User [ " + (String) action.getAttributes().get("user") + " ] updated \n");
 				}
-				
+
 			}
-			
 
 			if (action.getActionName().equals("APPEND_CONSOLE_LOG")) {
 				_consolePanel.print(null, (String) action.getAttributes().get("log"));
@@ -5605,30 +5643,38 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 	}
 
 	public void refreshMacros() throws Exception {
-		Vector<MacroInterface> tempMacrosVector = null;
-		try {
-			tempMacrosVector = Macro.getMacros(getInstallDir());
-			for (MacroInterface m : macrosVector) {
-				for (VariablesChangeListener v : m.getVarsListeners())
-					removeVariablesChangeListener(v);
-				for (CellsChangeListener c : m.getCellsListeners())
-					removeCellsChangeListener(c);
-			}
-			macrosVector = tempMacrosVector;
-
-			for (MacroInterface m : macrosVector) {
-				if (getR() != null) {
-					getR().addProbeOnVariables(m.getProbes());
+		
+			Vector<MacroInterface> tempMacrosVector = null;
+			try {
+				tempMacrosVector = Macro.getMacros(getInstallDir());
+				
+				for (MacroInterface m : macrosVector) {
+					for (VariablesChangeListener v : m.getVarsListeners())
+						removeVariablesChangeListener(v);
+					for (CellsChangeListener c : m.getCellsListeners())
+						removeCellsChangeListener(c);
 				}
-				for (VariablesChangeListener v : m.getVarsListeners()) {
-					addVariablesChangeListener(v);
+				
+				if (_macrosEnabled) {
+					macrosVector = tempMacrosVector;
+					for (MacroInterface m : macrosVector) {
+						if (getR() != null) {
+							getR().addProbeOnVariables(m.getProbes());
+						}
+						for (VariablesChangeListener v : m.getVarsListeners()) {
+							addVariablesChangeListener(v);
+						}
+						for (CellsChangeListener c : m.getCellsListeners())
+							addCellsChangeListener(c);				
+					}
+				} else {
+					macrosVector = new Vector<MacroInterface>();
 				}
-				for (CellsChangeListener c : m.getCellsListeners())
-					addCellsChangeListener(c);
+								
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 	Vector<VariablesChangeListener> varsListners = new Vector<VariablesChangeListener>();
@@ -5662,7 +5708,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 	public Vector<MacroInterface> getMacros() {
 		return macrosVector;
 	}
-	
+
 	public HashSet<String> getAvailableExtensions() {
 		return _availableExtensions;
 	}

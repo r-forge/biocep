@@ -49,17 +49,26 @@ public class WorkbenchLauncher {
 		} else {
 			params.put("login", "guest");
 		}
+		
+		if (System.getProperty("password") != null && !System.getProperty("password").equals("")) {
+			params.put("password", System.getProperty("password"));
+		} else {
+			params.put("password", "guest");
+		}
+
 		params.put("save", System.getProperty("save"));
 		params.put("mode", System.getProperty("mode"));
+		params.put("rmi_mode", System.getProperty("rmi_mode"));
 		params.put("lf", System.getProperty("lf"));
 		params.put("stub", System.getProperty("stub"));
 		params.put("name", System.getProperty("name"));
-		params.put("registry.host", System.getProperty("registry.host"));
-		params.put("registry.port", System.getProperty("registry.port"));
+		params.put("registry_host", System.getProperty("registry_host"));
+		params.put("registry_port", System.getProperty("registry_port"));
 		params.put("url", System.getProperty("url"));
 		params.put("privatename", System.getProperty("privatename"));
 		params.put("noconfirmation", System.getProperty("noconfirmation"));
 		params.put("desktopapplication", "true");
+		params.put("javaws", System.getProperty("javaws"));
 		params.put("selfish", System.getProperty("selfish"));
 
 		System.out.println("params=" + params);

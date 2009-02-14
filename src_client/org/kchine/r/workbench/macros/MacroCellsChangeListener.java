@@ -67,7 +67,7 @@ public class MacroCellsChangeListener implements CellsChangeListener {
 
 		) {
 
-			m.sourceAll(event.getRGui());
+			m.sourceAll(event.getRGui(), event.getFrobiddenMacros());
 
 		}
 
