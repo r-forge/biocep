@@ -196,6 +196,7 @@ import org.kchine.r.workbench.spreadsheet.SpreadsheetPanel;
 import org.kchine.r.workbench.utils.AbstractDockingWindowListener;
 import org.kchine.r.workbench.utils.AppletBase;
 import org.kchine.r.workbench.views.BiocepMindMapView;
+import org.kchine.r.workbench.views.BroadcastedDeviceView;
 import org.kchine.r.workbench.views.ChatConsoleView;
 import org.kchine.r.workbench.views.ClientGroovyConsoleView;
 import org.kchine.r.workbench.views.ClientPythonConsoleView;
@@ -2364,6 +2365,18 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 		}
 		return null;
 	}
+	
+	private Vector<BroadcastedDeviceView> getOpenedBroadcastedDeviceViews() {
+		Vector<BroadcastedDeviceView> result=new Vector<BroadcastedDeviceView>();
+		Iterator<DynamicView> iter = dynamicViews.values().iterator();
+		while (iter.hasNext()) {
+			DynamicView dv = iter.next();
+			if (dv instanceof BroadcastedDeviceView) {
+				result.add((BroadcastedDeviceView)dv);
+			}
+		}
+		return result;
+	}
 
 	private ServerPythonConsoleView getOpenedServerPythonConsoleView() {
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
@@ -3661,7 +3674,8 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 				JPanel graphicPanel = new JPanel();
 				rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
 				int id = getDynamicViewId();
-				DeviceView deviceView = new DeviceView("Broadcasted Graphic Device", null, rootGraphicPanel, id);
+				DeviceView deviceView = new BroadcastedDeviceView("Broadcasted Graphic Device", null, rootGraphicPanel, id);
+				
 				((TabWindow) views[2].getWindowParent()).addTab(deviceView);
 
 				try {
@@ -5564,7 +5578,16 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 				}
 
 			}
-
+			
+			
+			if (!getUID().equals(action.getAttributes().get("originatorUID"))) {
+				if (action.getActionName().equals("OPEN_BROADCASTED_DEVICE")) {
+					if (getOpenedBroadcastedDeviceViews().size()==0) {
+						_actions.get("createbroadcasteddevice").actionPerformed(null);
+					}
+				}
+			}
+			
 			if (action.getActionName().equals("USER_JOINED")) {
 				if (!action.getAttributes().get("sourceUID").equals(getUID())) {
 					_consolePanel.print(null, "User [ " + (String) action.getAttributes().get("user") + " ] joined \n");
