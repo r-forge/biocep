@@ -1,5 +1,9 @@
 import static org.kchine.rpf.PoolUtils.getHostIp;
+
+import java.net.URLEncoder;
 import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
@@ -30,6 +34,7 @@ public class HttpServerLight {
 				System.setProperty("login", props.getProperty("login"));
 			if (props.getProperty("pwd") != null)
 				System.setProperty("pwd", props.getProperty("pwd"));
+			
 
 			if (props.getProperty("email") != null) {
 
@@ -41,17 +46,50 @@ public class HttpServerLight {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				
+				String guessLogin="guest";				
+				if (System.getProperty("login") != null && !System.getProperty("login").equals("")) {
+					guessLogin=System.getProperty("login");
+				}
+				
+				String guessPwd="guest";
+				if (System.getProperty("pwd") != null && !System.getProperty("pwd").equals("")) {
+					guessPwd=System.getProperty("pwd");
+				}
 
 				try {
 					SendEmailMain client = new SendEmailMain();
 					String server = "smtp.gmail.com";
 					String from = "biocep@gmail.com";
-					String to = props.getProperty("email");
+					Vector<String> to = new Vector<String>();//props.getProperty("email");
+					StringTokenizer tokenizer=new StringTokenizer(props.getProperty("email")," ,");
+					while (tokenizer.hasMoreElements()) {
+						String address=tokenizer.nextToken().trim();
+						if (!address.equals("")) to.add(address);
+					}
+					
 					String subject = "EC2-R URL INFO";
-					String message = "Connect Using the R Workbench (R HTTP) with the following URL : " + "http://" + PoolUtils.getAMIHostName() + ":"
-							+ guessport + "/rvirtual/cmd";
+					String message = "";					
+					message=message+"\n\nClick on the following link to get Direct Access to the an R Server on the EC2 Virtual Machine :\n"+
+					  "http://www.kchine.org/rworkbench.jnlp?mode=http&url="+"http://" + PoolUtils.getAMIHostName() + ":"	+ guessport + "/rvirtual/cmd"
+					+ "&login="+URLEncoder.encode(guessLogin,"UTF-8") 
+					+ "&password="+URLEncoder.encode(guessPwd,"UTF-8") 
+					+ "&privatename=my_EC2_R" 
+					+ "&noconfirmation=true"+"\n\n"+
+					
+					"\n"+"Or Connect Using the R Workbench (R HTTP) with the following URL : " + "http://" + PoolUtils.getAMIHostName() + ":"
+					+ guessport + "/rvirtual/cmd"+"\n";
+					
 					// String[] filenames ={"c:/somefile.txt"};
-					client.sendMail(server, from, to, subject, message, null);
+					
+					for (int i=0; i<to.size();++i) {
+						try {
+							client.sendMail(server, from, to.elementAt(i), subject, message, null);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					
 				} catch (Exception e) {
 					e.printStackTrace(System.out);
 				}

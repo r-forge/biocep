@@ -4032,8 +4032,10 @@ public class DirectJNI {
 
 		public GDDeviceLocal(int w, int h, boolean broadcasted) throws RemoteException {
 			this(w, h);
-			if (broadcasted)
+			if (broadcasted) {
 				_localBroadcastedDevices.add(gdBag.getDeviceNumber());
+				DirectJNI.getInstance().notifyRActionListeners(new RConsoleAction("OPEN_BROADCASTED_DEVICE", new HashMap<String, Object>()));
+			}
 		}
 
 		public Vector<org.kchine.r.server.graphics.primitive.GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
