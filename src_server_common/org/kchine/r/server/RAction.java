@@ -30,6 +30,7 @@ public class RAction implements Serializable {
 
 	private String _actionName;
 	private HashMap<String, Object> _actionAttributes = null;
+	private HashMap<String, Object> _clientProperties = null;
 
 	public RAction() {
 
@@ -42,6 +43,12 @@ public class RAction implements Serializable {
 	public RAction(String actionName, HashMap<String, Object> attributes) {
 		_actionName = actionName;
 		_actionAttributes = attributes;
+	}
+	
+	public RAction(String actionName, HashMap<String, Object> attributes, HashMap<String, Object> clientProperties) {
+		_actionName = actionName;
+		_actionAttributes = attributes;
+		_clientProperties = clientProperties;
 	}
 	
 	public void setActionName(String name) {
@@ -61,7 +68,15 @@ public class RAction implements Serializable {
 	}
 	
 	public String toString() {
-		return "[action name="+_actionName+" attributes="+_actionAttributes+"]";
+		return "[action name="+_actionName+" attributes="+_actionAttributes+" client properties :"+_clientProperties+"]";
+	}
+
+	public HashMap<String, Object> getClientProperties() {
+		return _clientProperties;
+	}
+
+	public void setClientProperties(HashMap<String, Object> properties) {
+		_clientProperties = properties;
 	}
 
 }

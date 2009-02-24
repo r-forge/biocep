@@ -209,6 +209,7 @@ public class DirectJNI {
 	private HashMap<String, SpreadsheetModelRemoteImpl> _spreadsheetTableModelRemoteHashMap = new HashMap<String, SpreadsheetModelRemoteImpl>();
 	private Vector<RConsoleActionListener> _ractionListeners = new Vector<RConsoleActionListener>();
 	private String _originatorUID;
+	private HashMap<String,Object> _clientProperties;
 	private Vector<RCallBack> _callbacks = new Vector<RCallBack>();
 	private Vector<RCollaborationListener> _rCollaborationListeners = new Vector<RCollaborationListener>();
 
@@ -225,11 +226,16 @@ public class DirectJNI {
 	}
 
 	public String runR(ExecutionUnit eu) {
+		return runR(eu,null);
+	}
+	
+	public String runR(ExecutionUnit eu, HashMap<String,Object> clientProperties) {
 
 		if (Thread.currentThread() == _rEngine) {
 			throw new RuntimeException("runR called from within the R MainLoop Thread");
 		} else {
 			_mainLock.lock();
+			_clientProperties=clientProperties;
 			try {
 				boolean hasConsoleInput = (eu.getConsoleInput() != null && !eu.getConsoleInput().equals(""));
 				String consoleLog = null;
@@ -308,6 +314,7 @@ public class DirectJNI {
 				return _sharedBuffer.toString();
 
 			} finally {
+				_clientProperties=null;
 				_mainLock.unlock();
 			}
 
@@ -2140,7 +2147,7 @@ public class DirectJNI {
 		}
 	}
 
-	private void fireVariableChangedEvents(long[] variablePointersBefore) {
+	private void fireVariableChangedEvents(long[] variablePointersBefore, HashMap<String, Object> clientProperties) {
 		if (probedVariables.length > 0) {
 			try {
 				final long[][] variablePointersAfter = new long[1][probedVariables.length];
@@ -2162,12 +2169,16 @@ public class DirectJNI {
 				if (changedVariablesHashSet.size() > 0) {
 					HashMap<String, Object> attrs = new HashMap<String, Object>();
 					attrs.put("variables", changedVariablesHashSet);
-					notifyRActionListeners(new RConsoleAction("VARIABLES_CHANGE", attrs));
+					notifyRActionListeners(new RConsoleAction("VARIABLES_CHANGE", attrs, clientProperties));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void fireVariableChangedEvents(long[] variablePointersBefore) {
+		fireVariableChangedEvents(variablePointersBefore, null);
 	}
 
 	private RServices _rServices = new RServices() {
@@ -2237,6 +2248,10 @@ public class DirectJNI {
 		}
 
 		public String sourceFromBuffer(final String buffer) throws RemoteException {
+			return sourceFromBuffer(buffer,null);
+		}
+		
+		public String sourceFromBuffer(final String buffer, HashMap<String, Object> clientProperties) throws RemoteException {
 
 			long[] variablePointersBefore = getVariablePointersBefore();
 
@@ -2250,9 +2265,9 @@ public class DirectJNI {
 						exceptionHolder[0] = ex;
 					}
 				}
-			});
+			}, clientProperties );
 
-			fireVariableChangedEvents(variablePointersBefore);
+			fireVariableChangedEvents(variablePointersBefore, clientProperties);
 
 			if (exceptionHolder[0] != null) {
 				log.error(_lastStatus);
@@ -3086,6 +3101,10 @@ public class DirectJNI {
 		}
 
 		public String consoleSubmit(final String cmd) throws RemoteException {
+			return consoleSubmit(cmd,null);
+		}
+		
+		public String consoleSubmit(final String cmd, HashMap<String,Object> clientProperties) throws RemoteException {
 			log.info("submit : " + cmd);
 
 			long[] variablePointersBefore = getVariablePointersBefore();
@@ -3102,9 +3121,9 @@ public class DirectJNI {
 						return cmd;
 					}
 				}
-			});
+			}, clientProperties);
 
-			fireVariableChangedEvents(variablePointersBefore);
+			fireVariableChangedEvents(variablePointersBefore, clientProperties);
 
 			if (exceptionHolder[0] != null) {
 				if (exceptionHolder[0] instanceof RemoteException) {
@@ -3485,7 +3504,10 @@ public class DirectJNI {
 			return null;
 		}
 
-		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
+		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {		
+		}
+		
+		public void asynchronousConsoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {
 		}
 
 		public Vector<String> getSvg(String script, int width, int height) throws RemoteException {
@@ -3609,7 +3631,7 @@ public class DirectJNI {
 		}
 
 		public byte[] getPdf(String script, int width, int height) throws RemoteException {
-
+			System.out.println("getPDF::"+"width:"+width+"  height:"+height);
 			String status = "";
 			File tempFile = null;
 			try {
@@ -3625,7 +3647,7 @@ public class DirectJNI {
 			shutdownDevices("pdf");
 
 			final String createDeviceCommand = "pdf(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-					+ new Double(6 * (width / height)) + ", height = " + 6 + " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
+					+ new Double(6 * ((double)width / (double)height)) + ", height = " + 6 + " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
 			evaluate(createDeviceCommand);
 			if (!getStatus().equals("")) {
 				log.info(getStatus());
@@ -4299,7 +4321,7 @@ public class DirectJNI {
 			
 			
 			if (height==null && width==null) {
-				createDeviceCommand += ", height=6 , width="+ new Double(6 * (getSize().width / getSize().height)) ;
+				createDeviceCommand += ", height=6 , width="+ new Double(6 * ((double)getSize().width / (double)getSize().height)) ;
 			} else if (height!=null && width!=null) {
 				createDeviceCommand += ", height="+height+" , width="+ width ;
 			} else {
@@ -4964,6 +4986,8 @@ public class DirectJNI {
 	public void notifyRActionListeners(final RConsoleAction action) {
 		
 		action.getAttributes().put("originatorUID", getOriginatorUID());
+		if (_clientProperties!=null) action.setClientProperties(_clientProperties);
+		
 		Vector<RConsoleActionListener> ractionListenersToRemove = new Vector<RConsoleActionListener>();
 		for (int i = 0; i < _ractionListeners.size(); ++i) {
 			try {

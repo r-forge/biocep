@@ -20,6 +20,7 @@ package org.kchine.r.server;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
@@ -62,6 +63,10 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
+	public String consoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {	
+		return null;
+	}
+	
 	public void die() throws RemoteException {
 	}
 
@@ -240,10 +245,6 @@ public class RServicesObject implements RServices {
 		return false;
 	}
 
-	public boolean isProgressiveConsoleLogEnabled() throws RemoteException {
-		return false;
-	}
-
 	public boolean isReference(RObject obj) throws RemoteException {
 		return false;
 	}
@@ -289,13 +290,14 @@ public class RServicesObject implements RServices {
 	public void setCallBack(RCallBack callback) throws RemoteException {
 	}
 
-	public void setProgressiveConsoleLogEnabled(boolean progressiveLog) throws RemoteException {
-	}
-
 	public String sourceFromBuffer(String buffer) throws RemoteException {
 		return null;
 	}
-
+	
+	public String sourceFromBuffer(String buffer, HashMap<String, Object> clientProperties) throws RemoteException {
+		return null;
+	}
+	
 	public String sourceFromResource(String resource) throws RemoteException {
 		return null;
 	}
@@ -314,6 +316,11 @@ public class RServicesObject implements RServices {
 	}
 
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
+		
+	}
+	
+	public void asynchronousConsoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {
+		
 	}
 
 	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException {

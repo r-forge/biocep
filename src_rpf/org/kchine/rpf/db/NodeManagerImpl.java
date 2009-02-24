@@ -171,6 +171,10 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		return null;
 	}
 	
+	public String consoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {
+		return null;
+	}
+	
 	public String getStatus() throws RemoteException {
 		return null;
 	}
@@ -270,6 +274,10 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 	}
 
+	public void asynchronousConsoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {		
+	}
+	
+	
 	public boolean isBusy() throws RemoteException {
 		return false;
 	}

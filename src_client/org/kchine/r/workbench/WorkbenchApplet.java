@@ -5626,7 +5626,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			} else if (action.getActionName().equals("VARIABLES_CHANGE")) {
 				if (varsListners.size() > 0) {
 					VariablesChangeEvent event = new VariablesChangeEvent((HashSet<String>) action.getAttributes().get("variables"), (String) action
-							.getAttributes().get("originatorUID"), WorkbenchApplet.this);
+							.getAttributes().get("originatorUID"), action.getClientProperties(), WorkbenchApplet.this);
 					for (int i = 0; i < varsListners.size(); ++i) {
 						try {
 							varsListners.elementAt(i).variablesChanged(event);

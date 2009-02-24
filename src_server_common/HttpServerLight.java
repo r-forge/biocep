@@ -71,7 +71,7 @@ public class HttpServerLight {
 					String subject = "EC2-R URL INFO";
 					String message = "";					
 					message=message+"\n\nClick on the following link to get Direct Access to the an R Server on the EC2 Virtual Machine :\n"+
-					  "http://www.kchine.org/rworkbench.jnlp?mode=http&url="+"http://" + PoolUtils.getAMIHostName() + ":"	+ guessport + "/rvirtual/cmd"
+					  "http://www.biocep.net/rworkbench.jnlp?mode=http&url="+"http://" + PoolUtils.getAMIHostName() + ":"	+ guessport + "/rvirtual/cmd"
 					+ "&login="+URLEncoder.encode(guessLogin,"UTF-8") 
 					+ "&password="+URLEncoder.encode(guessPwd,"UTF-8") 
 					+ "&privatename=my_EC2_R" 

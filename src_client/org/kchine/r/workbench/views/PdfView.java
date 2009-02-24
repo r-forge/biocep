@@ -27,6 +27,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -44,13 +48,14 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
 import org.kchine.r.workbench.RGui;
+import org.kchine.r.workbench.VariablesChangeEvent;
+import org.kchine.r.workbench.VariablesChangeListener;
 import org.kchine.r.workbench.views.highlighting.HighlightDocument;
 import org.kchine.r.workbench.views.highlighting.NonWrappingTextPane;
 
-
 import com.sun.pdfview.PagePanel;
 
-public class PdfView extends DynamicView {
+public class PdfView extends DynamicView implements VariablesChangeListener {
 	private RGui _rgui;
 	private JTextPane _area;
 	private JScrollPane _scrollPane;
@@ -69,13 +74,101 @@ public class PdfView extends DynamicView {
 	JPanel bottompanel;
 	JPanel controlPanel;
 
+	JCheckBox zoomRatio;
+	
+	
+	
+	JTextField varsTextField;
+	JCheckBox listen;
+	JButton varListenersRefreshButton;
+	
+	Vector<String> vars=new Vector<String>();
+	
+	
+
+	void submitToR(boolean manual) {
+		if (manual && _rgui.getRLock().isLocked()) {
+			JOptionPane.showMessageDialog(null, "R is busy");
+		} else {
+			_rgui.getRLock().lock();
+			try {
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						_area.setEnabled(false);
+					}
+				});
+
+				byte[] result = null;
+				try {
+					result = _rgui.getR().getPdf(_area.getText(), _pdfCanvas.getWidth(), _pdfCanvas.getHeight());
+				} catch (RemoteException e) {
+					JOptionPane.showMessageDialog(null, e.getCause().getMessage(), "R Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				if (result == null || result.length==0) {
+					JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				/*
+				if (!"".equals(_rgui.getR().getStatus())) {
+					JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
+				}
+				*/
+
+				if (zoomRatio.isSelected()) {
+
+					final double xPos = (double) _pdfCanvasScrollPane.getHorizontalScrollBar().getValue()
+							/ (double) _pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum();
+					final double yPos = (double) _pdfCanvasScrollPane.getVerticalScrollBar().getValue()
+							/ (double) _pdfCanvasScrollPane.getVerticalScrollBar().getMaximum();
+
+					resetPdfCanvasSize();
+					_pdfCanvas.setPDFContent(result);
+
+					new Thread(new Runnable() {
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+								public void run() {
+									_pdfCanvasScrollPane.getHorizontalScrollBar().setValue(
+											(int) (xPos * _pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum()));
+									_pdfCanvasScrollPane.getVerticalScrollBar().setValue(
+											(int) (yPos * _pdfCanvasScrollPane.getVerticalScrollBar().getMaximum()));
+									_pdfCanvasScrollPane.revalidate();
+								}
+							});
+
+						}
+					}).start();
+
+				} else {
+
+					_pdfCanvas.setPDFContent(result);
+
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				_rgui.getRLock().unlock();
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						_area.setEnabled(true);
+					}
+				});
+			}
+		}
+	}
+
 	private void showPopup(MouseEvent e) {
 		JPopupMenu popupMenu = new JPopupMenu();
 
 		popupMenu.add(new AbstractAction("Fit To Panel") {
 			public void actionPerformed(ActionEvent e) {
 				ratioX.setText("1");
-				if (!coupled.isSelected()) ratioX.setText("1");
+				if (!coupled.isSelected())
+					ratioX.setText("1");
 				resetPdfCanvasSize();
 			}
 
@@ -243,67 +336,7 @@ public class PdfView extends DynamicView {
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new Runnable() {
 					public void run() {
-						if (_rgui.getRLock().isLocked()) {
-							JOptionPane.showMessageDialog(null, "R is busy");
-						} else {
-							_rgui.getRLock().lock();
-							try {
-								SwingUtilities.invokeLater(new Runnable() {
-									public void run() {
-										_area.setEnabled(false);
-									}
-								});
-
-								byte[] result = null;
-								try {
-									result = _rgui.getR().getPdf(_area.getText(), bottompanel.getWidth(), bottompanel.getHeight());
-								} catch (RemoteException e) {
-									JOptionPane.showMessageDialog(null, e.getCause().getMessage(), "R Error", JOptionPane.ERROR_MESSAGE);
-									return;
-								}
-
-								if (result == null) {
-									JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
-									return;
-								}
-								if (!"".equals(_rgui.getR().getStatus())) {
-									JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
-								}
-
-								
-								
-								final double xPos=(double)_pdfCanvasScrollPane.getHorizontalScrollBar().getValue()/(double)_pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum();
-								final double yPos=(double)_pdfCanvasScrollPane.getVerticalScrollBar().getValue()/(double)_pdfCanvasScrollPane.getVerticalScrollBar().getMaximum();
-								
-								resetPdfCanvasSize();
-								_pdfCanvas.setPDFContent(result);
-								
-								new Thread(new Runnable(){
-									public void run() {
-										SwingUtilities.invokeLater(new Runnable(){
-											public void run() {
-												_pdfCanvasScrollPane.getHorizontalScrollBar().setValue((int)(xPos*_pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum()));
-												_pdfCanvasScrollPane.getVerticalScrollBar().setValue((int)(yPos*_pdfCanvasScrollPane.getVerticalScrollBar().getMaximum()));
-												_pdfCanvasScrollPane.revalidate();
-											}
-										});
-										
-										
-									}
-								}).start();
-								
-								
-							} catch (Exception e) {
-								e.printStackTrace();
-							} finally {
-								_rgui.getRLock().unlock();
-								SwingUtilities.invokeLater(new Runnable() {
-									public void run() {
-										_area.setEnabled(true);
-									}
-								});
-							}
-						}
+						submitToR(true);
 					}
 				}).start();
 			}
@@ -331,17 +364,24 @@ public class PdfView extends DynamicView {
 		_pdfCanvasScrollPane = new JScrollPane(_pdfCanvas);
 		bottompanel = new JPanel(new BorderLayout());
 		bottompanel.setBackground(Color.white);
-		bottompanel.add(_pdfCanvasScrollPane, BorderLayout.CENTER);
+
+		// bottompanel.add(_pdfCanvasScrollPane, BorderLayout.CENTER);
+		bottompanel.add(_pdfCanvas, BorderLayout.CENTER);
+		bottompanel.setBorder(BorderFactory.createEtchedBorder());
 
 		controlPanel = new JPanel(new BorderLayout());
-		controlPanel.setLayout(new GridLayout(1, 2));
+		controlPanel.setLayout(new GridLayout(1, 3));
 		controlPanel.setBackground(Color.white);
 		JPanel p1 = new JPanel();
 		p1.setLayout(new GridLayout(0, 1));
 		JPanel p2 = new JPanel();
 		p2.setLayout(new GridLayout(0, 1));
+		JPanel p3 = new JPanel();
+		p3.setLayout(new GridLayout(0, 1));
+
 		controlPanel.add(p1);
 		controlPanel.add(p2);
+		controlPanel.add(p3);
 
 		ratioX = new JTextField(new Double(_ratioX).toString());
 		ratioY = new JTextField(new Double(_ratioY).toString());
@@ -354,48 +394,103 @@ public class PdfView extends DynamicView {
 					ratioY.setEnabled(false);
 					ratioYLabel.setEnabled(false);
 				} else {
-					_ratioY=_ratioX;					
+					_ratioY = _ratioX;
 					ratioY.setText(new Double(_ratioY).toString());
 					ratioY.setEnabled(true);
 					ratioYLabel.setEnabled(true);
-				}				
+				}
 			}
 		});
-		
+
 		coupled.setSelected(true);
-		
+
 		refreshButton = new JButton("Refresh");
 		refreshButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				final double xPos=(double)_pdfCanvasScrollPane.getHorizontalScrollBar().getValue()/(double)_pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum();
-				final double yPos=(double)_pdfCanvasScrollPane.getVerticalScrollBar().getValue()/(double)_pdfCanvasScrollPane.getVerticalScrollBar().getMaximum();
-				
+
+				final double xPos = (double) _pdfCanvasScrollPane.getHorizontalScrollBar().getValue()
+						/ (double) _pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum();
+				final double yPos = (double) _pdfCanvasScrollPane.getVerticalScrollBar().getValue()
+						/ (double) _pdfCanvasScrollPane.getVerticalScrollBar().getMaximum();
+
 				resetPdfCanvasSize();
-				
-				new Thread(new Runnable(){
+
+				new Thread(new Runnable() {
 					public void run() {
-						SwingUtilities.invokeLater(new Runnable(){
+						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								_pdfCanvasScrollPane.getHorizontalScrollBar().setValue((int)(xPos*_pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum()));
-								_pdfCanvasScrollPane.getVerticalScrollBar().setValue((int)(yPos*_pdfCanvasScrollPane.getVerticalScrollBar().getMaximum()));
+								_pdfCanvasScrollPane.getHorizontalScrollBar().setValue(
+										(int) (xPos * _pdfCanvasScrollPane.getHorizontalScrollBar().getMaximum()));
+								_pdfCanvasScrollPane.getVerticalScrollBar().setValue((int) (yPos * _pdfCanvasScrollPane.getVerticalScrollBar().getMaximum()));
 								_pdfCanvasScrollPane.revalidate();
 							}
 						});
-						
-						
+
 					}
 				}).start();
-
 
 			}
 		});
 
-		p1.add(new JLabel("Zoom Ratio")); p2.add(ratioX);
-		//p1.add(ratioYLabel); p2.add(ratioY);
-		//p1.add(coupled);p2.add(new JLabel(""));
-		p1.add(new JLabel(""));p2.add(new JLabel(""));
-		p1.add(new JLabel(""));	p2.add(refreshButton);
+		zoomRatio = new JCheckBox("Zoom Ratio");
+		zoomRatio.setSelected(false);
+		ratioX.setEnabled(false);
+		ratioY.setEnabled(false);
+		refreshButton.setEnabled(false);
+		zoomRatio.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				bottompanel.removeAll();
+				if (zoomRatio.isSelected()) {
+					_pdfCanvasScrollPane = new JScrollPane(_pdfCanvas);
+					bottompanel.add(_pdfCanvasScrollPane, BorderLayout.CENTER);
+					ratioX.setEnabled(true);
+					ratioY.setEnabled(true);
+					refreshButton.setEnabled(true);
+				} else {
+					bottompanel.add(_pdfCanvas, BorderLayout.CENTER);
+					ratioX.setEnabled(false);
+					ratioY.setEnabled(false);
+					refreshButton.setEnabled(false);
+				}
+				bottompanel.updateUI();
+				bottompanel.repaint();
+			}
+		});
+		p1.add(zoomRatio);
+		p2.add(ratioX);
+		p3.add(refreshButton);
+
+		p1.add(new JLabel(""));
+		p2.add(new JLabel(""));
+		p3.add(new JLabel(""));
+
+		
+		varsTextField = new JTextField("");
+		listen = new JCheckBox("Listen to");
+		varListenersRefreshButton = new JButton("Refresh");
+		
+		varListenersRefreshButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				updateVars(varsTextField.getText());
+			}
+		});
+		
+		listen.setSelected(false);
+		varsTextField.setEnabled(false);
+		varListenersRefreshButton.setEnabled(false);
+		
+		listen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {				
+				varsTextField.setEnabled(listen.isSelected());
+				varListenersRefreshButton.setEnabled(listen.isSelected());
+				updateVars(listen.isSelected() ? varsTextField.getText() : "");
+			}
+		});
+				
+		p1.add(listen);
+		p2.add(varsTextField);
+		p3.add(varListenersRefreshButton);
+		
 
 		JPanel leftWrapper = new JPanel(new BorderLayout());
 		leftWrapper.add(controlPanel, BorderLayout.NORTH);
@@ -456,4 +551,42 @@ public class PdfView extends DynamicView {
 	PagePanel getSvgCanvas() {
 		return _pdfCanvas;
 	}
+	
+	public void variablesChanged(VariablesChangeEvent event) {
+		for (int i=0;i<vars.size();++i) {			
+			if (event.getVariablesHashSet().contains(vars.elementAt(i))) {
+				
+				System.out.println(new Date()+" : 666");
+				new Thread(new Runnable() {
+					public void run() {
+						submitToR(false);
+					}
+				}).start();				
+				return;
+				
+				
+			}
+		}		
+	}
+	
+	public void updateVars(String varString) {
+		vars = new Vector<String>();
+		StringTokenizer tokenizer=new StringTokenizer(varString," ,");
+		while (tokenizer.hasMoreElements()) {
+			vars.add(tokenizer.nextToken());
+		}	
+		
+		if (_rgui.getR()!=null) {
+			try {
+				_rgui.getR().addProbeOnVariables((String[])vars.toArray(new String[0]));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		_rgui.removeVariablesChangeListener(this);
+		_rgui.addVariablesChangeListener(this);
+		
+		
+	}
+	
 }
