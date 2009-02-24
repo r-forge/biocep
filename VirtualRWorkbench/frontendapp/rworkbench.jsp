@@ -1,50 +1,67 @@
 <% response.setContentType("application/x-java-jnlp-file"); %>
 <?xml version="1.0" encoding="UTF-8"?>
+
 <% java.net.URL thisUrl=new java.net.URL(request.getRequestURL().toString()); %>
 <jnlp spec="1.5+" codebase="<%="http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/"%>" >
 
-<% String autologon=request.getParameter("autologon")==null ? "true" : request.getParameter("autologon");  %>
-<% String nopool=request.getParameter("nopool")==null ? "true" : request.getParameter("nopool");  %>
-<% String save=request.getParameter("save")==null ? "false" : request.getParameter("save");  %>
-<% String wait=request.getParameter("wait")==null ? "false" : request.getParameter("wait");  %>
-<% String demo=request.getParameter("demo")==null ? "false" : request.getParameter("demo");  %>
-<% String lf=request.getParameter("lf")==null ? "0" : request.getParameter("lf");  %>
-<% String login=request.getParameter("login")==null ? "guest" : request.getParameter("login");  %>
+
 <% String mode=request.getParameter("mode")==null ? "http" : request.getParameter("mode");  %>
+<% String rmi_mode=request.getParameter("rmi_mode")==null ? "" : request.getParameter("rmi_mode");  %>
 <% String debug=request.getParameter("debug")==null ? "false" : request.getParameter("debug");  %>
-<% String url=request.getParameter("url")==null ?"http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/cmd" : request.getParameter("url");  %>
+<% String autologon=request.getParameter("autologon")==null ? "true" : request.getParameter("autologon");  %>
+<% String nopool=request.getParameter("nopool")==null ? "" : request.getParameter("nopool");  %>
+<% String save=request.getParameter("save")==null ? "" : request.getParameter("save");  %>
+<% String lf=request.getParameter("lf")==null ? "0" : request.getParameter("lf");  %>
+<% String stub=request.getParameter("stub")==null ? "" : request.getParameter("stub");  %>
+<% String name=request.getParameter("name")==null ? "" : request.getParameter("name");  %>
 <% String privatename=request.getParameter("privatename")==null ? "" : request.getParameter("privatename");  %>
 <% String noconfirmation=request.getParameter("noconfirmation")==null ? "" : request.getParameter("noconfirmation");  %>
+<% String selfish=request.getParameter("selfish")==null ?"" : request.getParameter("selfish");  %>
+<% String url=request.getParameter("url")==null ?"http://"+thisUrl.getHost()+":"+thisUrl.getPort()+"/rvirtual/cmd" : request.getParameter("url");  %>
+<% String login=request.getParameter("login")==null ? "" : request.getParameter("login");  %>
+<% String password=request.getParameter("password")==null ? "" : request.getParameter("password");  %>
+<% String wait=request.getParameter("wait")==null ? "" : request.getParameter("wait");  %>
+<% String demo=request.getParameter("demo")==null ? "" : request.getParameter("demo");  %>
 
-<information>
-  <title>Virtual R Workbench</title>
+  <information>
+   <title>Virtual R Workbench</title>
   <vendor>Karim Chine</vendor>
-  <homepage href="" />
-  <description></description>
-</information>
+    <homepage href="index.htm"/>
+    <description>Virtual R Workbench</description>
+    <description kind="short">R Workbench.</description>
+    <icon href="R_R.png"/>
+    <offline-allowed/>
+    <shortcut online="true">
+        <desktop/>
+        <menu submenu="RWorkbench"/>
+     </shortcut>
+  </information>
 
   <security>
       <all-permissions/>
   </security>
+
+  
 <resources>
   <j2se version="1.5+"/>
-    
+  
+  <property name="mode" value="<%=mode%>"/>
+  <property name="rmi_mode" value="<%=rmi_mode%>"/>
+  <property name="debug" value="<%=debug%>"/>
   <property name="autologon" value="<%=autologon%>"/>
   <property name="nopool" value="<%=nopool%>"/>
   <property name="save" value="<%=save%>"/>
-  <property name="wait" value="<%=wait%>"/>
-  <property name="demo" value="<%=demo%>"/>
   <property name="lf" value="<%=lf%>"/>
-  <property name="login" value="<%=login%>"/>
-  <property name="mode" value="<%=mode%>"/>
-  <property name="debug" value="<%=debug%>"/>
-  <property name="url" value="<%=url%>"/>
+  <property name="stub" value="<%=stub%>"/>
+  <property name="name" value="<%=name%>"/>
   <property name="privatename" value="<%=privatename%>"/>
   <property name="noconfirmation" value="<%=noconfirmation%>"/>
-  
-  
-  
-  
+  <property name="selfish" value="<%=selfish%>"/>
+  <property name="url" value="<%=url%>"/>
+  <property name="login" value="<%=login%>"/>
+  <property name="password" value="<%=password%>"/>
+  <property name="wait" value="<%=wait%>"/>
+  <property name="demo" value="<%=demo%>"/>
   
   <jar href="appletlibs/RJB.jar"/>
   <jar href="appletlibs/commons-httpclient-3.1-rc1.jar"/>

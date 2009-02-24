@@ -21,6 +21,7 @@
 package org.kchine.r.server;
 
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Vector;
 
 import org.kchine.r.RObject;
@@ -83,8 +84,10 @@ public interface RServices extends ManagedServant {
 	public void freeReference(RObject refObj) throws RemoteException;
 
 	public String sourceFromResource(String resource) throws RemoteException;
-
+		
 	public String sourceFromBuffer(String buffer) throws RemoteException;
+	
+	public String sourceFromBuffer(String buffer, HashMap<String, Object> clientProperties) throws RemoteException;
 
 	public String[] listPackages() throws RemoteException;
 

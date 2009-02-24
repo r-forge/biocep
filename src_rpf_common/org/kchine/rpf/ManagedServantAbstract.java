@@ -211,6 +211,10 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 		throw new RemoteException("console mode not supported");
 	}
 	
+	public String consoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {
+		throw new RemoteException("console mode not supported");
+	}
+	
 	public String getStatus() throws RemoteException {
 		throw new RemoteException("console mode not supported");
 	}
@@ -285,6 +289,11 @@ public abstract class ManagedServantAbstract extends java.rmi.server.UnicastRemo
 	}
 
 	public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
+		throw new RemoteException("console mode not supported");
+	}
+	
+	public void asynchronousConsoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {
+		throw new RemoteException("console mode not supported");
 	}
 
 	public ManagedServant cloneServer() throws RemoteException {

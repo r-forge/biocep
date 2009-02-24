@@ -22,6 +22,7 @@ package org.kchine.rpf;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -62,9 +63,13 @@ public interface ManagedServant extends java.rmi.Remote {
 
 	public String consoleSubmit(String cmd) throws java.rmi.RemoteException;
 	
+	public String consoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws java.rmi.RemoteException;
+	
 	public String getStatus() throws RemoteException;
 
 	public void asynchronousConsoleSubmit(String cmd) throws java.rmi.RemoteException;
+	
+	public void asynchronousConsoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws java.rmi.RemoteException;
 
 	public boolean isBusy() throws java.rmi.RemoteException;
 

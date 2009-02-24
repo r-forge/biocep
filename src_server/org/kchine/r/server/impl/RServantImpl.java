@@ -454,6 +454,12 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
 		return result;
 	}
+	
+	public String sourceFromBuffer(String buffer, HashMap<String, Object> clientProperties) throws RemoteException {
+		String result = DirectJNI.getInstance().getRServices().sourceFromBuffer(buffer, clientProperties);
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
 
 	public String print(String expression) throws RemoteException {
 		String result = DirectJNI.getInstance().getRServices().print(expression);
@@ -470,8 +476,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public boolean symbolExists(String symbol) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().symbolExists(symbol);
 	}
-	
-	
 	
 	public void addRCallback(RCallBack callback) throws RemoteException {
 		DirectJNI.getInstance().getRServices().addRCallback(callback);
@@ -529,12 +533,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return DirectJNI.getInstance().getRServices().getUserStatusTable();
 	}
 	
-	
 	public void setUserInput(String userInput) throws RemoteException {
 		DirectJNI.getInstance().getRServices().setUserInput(userInput);		
 	}
-	
-	
 	
 	public void setOrginatorUID(String uid) throws RemoteException {
 		DirectJNI.getInstance().getRServices().setOrginatorUID(uid);			
@@ -643,10 +644,18 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	public String consoleSubmit(String cmd) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().consoleSubmit(cmd);
 	}
+	public String consoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().consoleSubmit(cmd, clientProperties);
+	}
 
 	private boolean submitted;
 
+	
 	public void asynchronousConsoleSubmit(final String cmd) throws RemoteException {
+		asynchronousConsoleSubmit(cmd,null);
+	}
+	
+	public void asynchronousConsoleSubmit(final String cmd, final HashMap<String, Object> clientProperties) throws RemoteException {
 
 		submitted = false;
 
@@ -655,7 +664,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				String result = "";
 
 				try {
-					result = DirectJNI.getInstance().getRServices().consoleSubmit(cmd);
+					result = DirectJNI.getInstance().getRServices().consoleSubmit(cmd,clientProperties);
 				} catch (Exception e) {
 					result = PoolUtils.getStackTraceAsString(e);
 				}
@@ -667,6 +676,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				attrs.put("command", cmd);
 				attrs.put("result", result);
 				consoleLogAppend.setAttributes(attrs);
+				consoleLogAppend.setClientProperties(clientProperties);
 				DirectJNI.getInstance().notifyRActionListeners(consoleLogAppend);
 			}
 		}).start();
