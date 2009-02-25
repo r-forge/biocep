@@ -210,6 +210,7 @@ import org.kchine.r.workbench.views.PdfView;
 import org.kchine.r.workbench.views.ServerGroovyConsoleView;
 import org.kchine.r.workbench.views.ServerLogView;
 import org.kchine.r.workbench.views.ServerPythonConsoleView;
+import org.kchine.r.workbench.views.SliderView;
 import org.kchine.r.workbench.views.SvgView;
 import org.kchine.r.workbench.views.UnsafeEvaluatorView;
 import org.kchine.r.workbench.views.UsersView;
@@ -1637,6 +1638,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("svgview"));
 					toolsMenu.add(_actions.get("pdfview"));
+					toolsMenu.add(_actions.get("slider"));
 					toolsMenu.addSeparator();
 					toolsMenu.add(_actions.get("pythonconsole"));
 					toolsMenu.add(_actions.get("clientpythonconsole"));
@@ -3982,6 +3984,32 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			}
 		});
 
+		_actions.put("slider", new AbstractAction("Variable Slider") {
+			public void actionPerformed(final ActionEvent e) {
+					int id = getDynamicViewId();
+					final SliderView lv = new SliderView("Slider", null, id, WorkbenchApplet.this,0,100,10);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+					
+					
+					lv.addListener(new AbstractDockingWindowListener() {
+						@Override
+						public void windowClosed(DockingWindow arg0) {
+							try { 
+								lv.destroy();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+						
+					});
+					
+			}
+
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+		
 		_actions.put("clientgroovyconsole", new AbstractAction("Local Groovy Console") {
 			public void actionPerformed(final ActionEvent e) {
 				if (getOpenedClientGroovyConsoleView() == null) {

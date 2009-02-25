@@ -31,11 +31,14 @@ import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -47,15 +50,20 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
+import org.kchine.r.server.spreadsheet.CellRange;
+import org.kchine.r.server.spreadsheet.ImportInfo;
+import org.kchine.r.workbench.CellsChangeEvent;
+import org.kchine.r.workbench.CellsChangeListener;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.VariablesChangeEvent;
 import org.kchine.r.workbench.VariablesChangeListener;
+import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.views.highlighting.HighlightDocument;
 import org.kchine.r.workbench.views.highlighting.NonWrappingTextPane;
 
 import com.sun.pdfview.PagePanel;
 
-public class PdfView extends DynamicView implements VariablesChangeListener {
+public class PdfView extends DynamicView implements VariablesChangeListener, CellsChangeListener {
 	private RGui _rgui;
 	private JTextPane _area;
 	private JScrollPane _scrollPane;
@@ -75,16 +83,18 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 	JPanel controlPanel;
 
 	JCheckBox zoomRatio;
-	
-	
-	
+
+	Vector<String> vars = new Vector<String>();
 	JTextField varsTextField;
 	JCheckBox listen;
 	JButton varListenersRefreshButton;
+
+	Vector<CellRange> ranges = new Vector<CellRange>();
+	JTextField cellsTextField;
+	JCheckBox listenOnCells;
+	JButton cellListenersRefreshButton;
 	
-	Vector<String> vars=new Vector<String>();
-	
-	
+	ImageIcon refreshIcon ;
 
 	void submitToR(boolean manual) {
 		if (manual && _rgui.getRLock().isLocked()) {
@@ -106,16 +116,16 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 					return;
 				}
 
-				if (result == null || result.length==0) {
+				if (result == null || result.length == 0) {
 					JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(), "R Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				
+
 				/*
-				if (!"".equals(_rgui.getR().getStatus())) {
-					JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(), "R Info", JOptionPane.INFORMATION_MESSAGE);
-				}
-				*/
+				 * if (!"".equals(_rgui.getR().getStatus())) {
+				 * JOptionPane.showMessageDialog(null, _rgui.getR().getStatus(),
+				 * "R Info", JOptionPane.INFORMATION_MESSAGE); }
+				 */
 
 				if (zoomRatio.isSelected()) {
 
@@ -272,6 +282,13 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 		super(title, icon, new JPanel(), id);
 
 		_rgui = rgui;
+		
+		try {
+			refreshIcon = new ImageIcon(ImageIO.read(WorkbenchApplet.class.getResource("/org/kchine/r/workbench/views/icons/" + "refresh.png")));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		_area = new NonWrappingTextPane();
 		_scrollPane = new JScrollPane(_area);
 		_area.setDocument(new HighlightDocument(false));
@@ -331,7 +348,7 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 			};
 		});
 
-		JButton submit = new JButton("Submit");
+		JButton submit = new JButton(refreshIcon);
 		submit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new Runnable() {
@@ -370,18 +387,17 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 		bottompanel.setBorder(BorderFactory.createEtchedBorder());
 
 		controlPanel = new JPanel(new BorderLayout());
-		controlPanel.setLayout(new GridLayout(1, 3));
+		controlPanel.setLayout(new GridLayout(1, 2));
 		controlPanel.setBackground(Color.white);
 		JPanel p1 = new JPanel();
 		p1.setLayout(new GridLayout(0, 1));
 		JPanel p2 = new JPanel();
 		p2.setLayout(new GridLayout(0, 1));
-		JPanel p3 = new JPanel();
-		p3.setLayout(new GridLayout(0, 1));
+
 
 		controlPanel.add(p1);
 		controlPanel.add(p2);
-		controlPanel.add(p3);
+
 
 		ratioX = new JTextField(new Double(_ratioX).toString());
 		ratioY = new JTextField(new Double(_ratioY).toString());
@@ -404,7 +420,7 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 
 		coupled.setSelected(true);
 
-		refreshButton = new JButton("Refresh");
+		refreshButton = new JButton(refreshIcon);
 		refreshButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -432,6 +448,10 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 			}
 		});
 
+		
+		p1.add(new JLabel(""));
+		p2.add(new JLabel(""));
+		
 		zoomRatio = new JCheckBox("Zoom Ratio");
 		zoomRatio.setSelected(false);
 		ratioX.setEnabled(false);
@@ -457,39 +477,64 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 			}
 		});
 		p1.add(zoomRatio);
-		p2.add(ratioX);
-		p3.add(refreshButton);
+		p2.add(getRefreshPanel(ratioX,refreshButton));
 
 		p1.add(new JLabel(""));
 		p2.add(new JLabel(""));
-		p3.add(new JLabel(""));
 
-		
 		varsTextField = new JTextField("");
-		listen = new JCheckBox("Listen to");
-		varListenersRefreshButton = new JButton("Refresh");
-		
+		listen = new JCheckBox("Variables");
+		varListenersRefreshButton = new JButton(refreshIcon);
+
 		varListenersRefreshButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateVars(varsTextField.getText());
 			}
 		});
-		
+
 		listen.setSelected(false);
 		varsTextField.setEnabled(false);
 		varListenersRefreshButton.setEnabled(false);
-		
+
 		listen.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {				
+			public void actionPerformed(ActionEvent e) {
 				varsTextField.setEnabled(listen.isSelected());
 				varListenersRefreshButton.setEnabled(listen.isSelected());
 				updateVars(listen.isSelected() ? varsTextField.getText() : "");
 			}
 		});
-				
+
 		p1.add(listen);
-		p2.add(varsTextField);
-		p3.add(varListenersRefreshButton);
+		p2.add(getRefreshPanel(varsTextField,varListenersRefreshButton));
+		
+		p1.add(new JLabel(""));
+		p2.add(new JLabel(""));
+
+		cellsTextField = new JTextField("");
+		listenOnCells = new JCheckBox("Cells");
+		cellListenersRefreshButton = new JButton(refreshIcon);
+
+		cellListenersRefreshButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				updateCells(cellsTextField.getText());
+			}
+		});
+
+		listenOnCells.setSelected(false);
+		cellsTextField.setEnabled(false);
+		cellListenersRefreshButton.setEnabled(false);
+
+		listenOnCells.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cellsTextField.setEnabled(listenOnCells.isSelected());
+				cellListenersRefreshButton.setEnabled(listenOnCells.isSelected());
+				updateCells(listenOnCells.isSelected() ? cellsTextField.getText() : "");
+			}
+		});
+
+		p1.add(listenOnCells);
+		p2.add(getRefreshPanel(cellsTextField,cellListenersRefreshButton));
+		
 		
 
 		JPanel leftWrapper = new JPanel(new BorderLayout());
@@ -551,42 +596,106 @@ public class PdfView extends DynamicView implements VariablesChangeListener {
 	PagePanel getSvgCanvas() {
 		return _pdfCanvas;
 	}
-	
+
 	public void variablesChanged(VariablesChangeEvent event) {
-		for (int i=0;i<vars.size();++i) {			
+		for (int i = 0; i < vars.size(); ++i) {
 			if (event.getVariablesHashSet().contains(vars.elementAt(i))) {
-				
-				System.out.println(new Date()+" : 666");
+
+				System.out.println(new Date() + " : 666");
 				new Thread(new Runnable() {
 					public void run() {
 						submitToR(false);
 					}
-				}).start();				
+				}).start();
 				return;
-				
-				
+
 			}
-		}		
+		}
 	}
-	
+
 	public void updateVars(String varString) {
 		vars = new Vector<String>();
-		StringTokenizer tokenizer=new StringTokenizer(varString," ,");
+		StringTokenizer tokenizer = new StringTokenizer(varString, " ,");
 		while (tokenizer.hasMoreElements()) {
 			vars.add(tokenizer.nextToken());
-		}	
-		
-		if (_rgui.getR()!=null) {
+		}
+
+		if (_rgui.getR() != null) {
 			try {
-				_rgui.getR().addProbeOnVariables((String[])vars.toArray(new String[0]));
+				_rgui.getR().addProbeOnVariables((String[]) vars.toArray(new String[0]));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		_rgui.removeVariablesChangeListener(this);
 		_rgui.addVariablesChangeListener(this);
+
+	}
+
+	public void updateCells(String cellString) {
+		ranges = new Vector<CellRange>();
 		
+		try {
+			StringTokenizer tokenizer = new StringTokenizer(cellString, " ,");
+			while (tokenizer.hasMoreElements()) {
+				ranges.add(ImportInfo.getRange(tokenizer.nextToken()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
+		_rgui.removeCellsChangeListener(this);
+		_rgui.addCellsChangeListener(this);
+
+	}
+
+	public void cellsChanged(CellsChangeEvent event) {
+
+		CellRange eventRange = event.getRange();
+
+		for (int i = 0; i < ranges.size(); ++i) {
+			CellRange range = ranges.elementAt(i);
+			if ((eventRange.getStartCol() >= range.getStartCol() && eventRange.getStartCol() <= range.getEndCol()
+					&& eventRange.getStartRow() >= range.getStartRow() && eventRange.getStartRow() <= range.getEndRow())
+					|| (eventRange.getEndCol() >= range.getStartCol() && eventRange.getEndCol() <= range.getEndCol()
+							&& eventRange.getEndRow() >= range.getStartRow() && eventRange.getEndRow() <= range.getEndRow())
+
+					|| (eventRange.getEndCol() >= range.getStartCol() && eventRange.getEndCol() <= range.getEndCol()
+							&& eventRange.getStartRow() >= range.getStartRow() && eventRange.getStartRow() <= range.getEndRow())
+
+					|| (eventRange.getStartCol() >= range.getStartCol() && eventRange.getStartCol() <= range.getEndCol()
+							&& eventRange.getEndRow() >= range.getStartRow() && eventRange.getEndRow() <= range.getEndRow())
+
+					|| (range.getStartCol() >= eventRange.getStartCol() && range.getStartCol() <= eventRange.getEndCol()
+							&& range.getStartRow() >= eventRange.getStartRow() && range.getStartRow() <= eventRange.getEndRow())
+					|| (range.getEndCol() >= eventRange.getStartCol() && range.getEndCol() <= eventRange.getEndCol()
+							&& range.getEndRow() >= eventRange.getStartRow() && range.getEndRow() <= eventRange.getEndRow())
+					|| (range.getEndCol() >= eventRange.getStartCol() && range.getEndCol() <= eventRange.getEndCol()
+							&& range.getStartRow() >= eventRange.getStartRow() && range.getStartRow() <= eventRange.getEndRow())
+
+					|| (range.getStartCol() >= eventRange.getStartCol() && range.getStartCol() <= eventRange.getEndCol()
+							&& range.getEndRow() >= eventRange.getStartRow() && range.getEndRow() <= eventRange.getEndRow())
+
+			) {
+
+				new Thread(new Runnable() {
+					public void run() {
+						submitToR(false);
+					}
+				}).start();
+				return;
+
+			}
+
+		}
+
+	}
+
+	JPanel getRefreshPanel(JComponent c1, JButton button) {
+		JPanel result=new JPanel(new BorderLayout());
+		result.add(c1,BorderLayout.CENTER);
+		result.add(button,BorderLayout.EAST);
+		return result;
 	}
 	
 }
