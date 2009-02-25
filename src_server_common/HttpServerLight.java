@@ -1,6 +1,10 @@
+import static org.kchine.rpf.PoolUtils.getDBType;
 import static org.kchine.rpf.PoolUtils.getHostIp;
 
 import java.net.URLEncoder;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -12,6 +16,11 @@ import javax.servlet.http.HttpSessionListener;
 import org.kchine.r.server.SendEmailMain;
 import org.kchine.r.server.http.frontend.FreeResourcesListener;
 import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.ServerDefaults;
+import org.kchine.rpf.db.ConnectionProvider;
+import org.kchine.rpf.db.DBLayer;
+import org.kchine.rpf.db.SupervisorInterface;
+import org.kchine.rpf.db.monitor.SupervisorUtils;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionManager;
@@ -24,7 +33,7 @@ public class HttpServerLight {
 		if (System.getProperty("cloud.service") != null && !System.getProperty("cloud.service").equals("")) {
 			if (!System.getProperty("cloud.service").equals("ec2"))
 				return;
-			Properties props = PoolUtils.getAMIUserData();
+			final Properties props = PoolUtils.getAMIUserData();
 			if (props.getProperty("start") == null || !props.getProperty("start").equalsIgnoreCase("true"))
 				return;
 
@@ -34,7 +43,6 @@ public class HttpServerLight {
 				System.setProperty("login", props.getProperty("login"));
 			if (props.getProperty("pwd") != null)
 				System.setProperty("pwd", props.getProperty("pwd"));
-			
 
 			if (props.getProperty("email") != null) {
 
@@ -46,50 +54,37 @@ public class HttpServerLight {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
-				String guessLogin="guest";				
+
+				String guessLogin = "guest";
 				if (System.getProperty("login") != null && !System.getProperty("login").equals("")) {
-					guessLogin=System.getProperty("login");
+					guessLogin = System.getProperty("login");
 				}
-				
-				String guessPwd="guest";
+
+				String guessPwd = "guest";
 				if (System.getProperty("pwd") != null && !System.getProperty("pwd").equals("")) {
-					guessPwd=System.getProperty("pwd");
+					guessPwd = System.getProperty("pwd");
 				}
 
 				try {
 					SendEmailMain client = new SendEmailMain();
 					String server = "smtp.gmail.com";
 					String from = "biocep@gmail.com";
-					Vector<String> to = new Vector<String>();//props.getProperty("email");
-					StringTokenizer tokenizer=new StringTokenizer(props.getProperty("email")," ,");
-					while (tokenizer.hasMoreElements()) {
-						String address=tokenizer.nextToken().trim();
-						if (!address.equals("")) to.add(address);
-					}
-					
+					String to = props.getProperty("email");
+
 					String subject = "EC2-R URL INFO";
-					String message = "";					
-					message=message+"\n\nClick on the following link to get Direct Access to the an R Server on the EC2 Virtual Machine :\n"+
-					  "http://www.biocep.net/rworkbench.jnlp?mode=http&url="+"http://" + PoolUtils.getAMIHostName() + ":"	+ guessport + "/rvirtual/cmd"
-					+ "&login="+URLEncoder.encode(guessLogin,"UTF-8") 
-					+ "&password="+URLEncoder.encode(guessPwd,"UTF-8") 
-					+ "&privatename=my_EC2_R" 
-					+ "&noconfirmation=true"+"\n\n"+
-					
-					"\n"+"Or Connect Using the R Workbench (R HTTP) with the following URL : " + "http://" + PoolUtils.getAMIHostName() + ":"
-					+ guessport + "/rvirtual/cmd"+"\n";
-					
+					String message = "";
+					message = message + "\n\nClick on the following link to get Direct Access to the an R Server on the EC2 Virtual Machine :\n"
+							+ "http://www.biocep.net/rworkbench.jnlp?mode=http&url=" + "http://" + PoolUtils.getAMIHostName() + ":" + guessport
+							+ "/rvirtual/cmd" + "&login=" + URLEncoder.encode(guessLogin, "UTF-8") + "&password=" + URLEncoder.encode(guessPwd, "UTF-8")
+							+ "&privatename=my_EC2_R" + "&noconfirmation=true" + "\n\n" +
+
+							"\n" + "Or Connect Using the R Workbench (R HTTP) with the following URL : " + "http://" + PoolUtils.getAMIHostName() + ":"
+							+ guessport + "/rvirtual/cmd" + "\n";
+
 					// String[] filenames ={"c:/somefile.txt"};
-					
-					for (int i=0; i<to.size();++i) {
-						try {
-							client.sendMail(server, from, to.elementAt(i), subject, message, null);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-					
+
+					client.sendMail(server, from, to, subject, message, null);
+
 				} catch (Exception e) {
 					e.printStackTrace(System.out);
 				}
@@ -98,71 +93,72 @@ public class HttpServerLight {
 
 			new Thread(new Runnable() {
 				public void run() {
+
 					try {
 						System.setProperty("create", "true");
 						DbRegistry.main(null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+
+					int workers = 0;
+					if (props.getProperty("workers") != null) {
+						try {
+							workers = Integer.decode(props.getProperty("workers"));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+
+						try {
+							DBLayer dbLayer = DBLayer.getLayer(getDBType(ServerDefaults._dbUrl), new ConnectionProvider() {
+								public Connection newConnection() throws SQLException {
+									return DriverManager.getConnection(ServerDefaults._dbUrl, ServerDefaults._dbUser, ServerDefaults._dbPassword);
+								}
+							});
+
+							SupervisorInterface supervisor = new SupervisorUtils(dbLayer);
+
+							for (int i = 0; i < workers; ++i) {
+								supervisor.launch("N1", "", false);
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+
 				}
 			}).start();
 
 			/*
-			if (props.getProperty("pool.size") != null) {
-				try {
+			 * if (props.getProperty("pool.size") != null) { try {
+			 * 
+			 * int poolSize = Integer.decode(props.getProperty("pool.size"));
+			 * int DB_CREATION_TIMEOUT_MILLISEC = 10000; int guessdbport = 1527;
+			 * try { if (System.getProperty("db.port") != null &&
+			 * !System.getProperty("db.port").equals("")) { guessdbport =
+			 * Integer.decode(System.getProperty("db.port")); } } catch
+			 * (Exception e) { e.printStackTrace(); }
+			 * 
+			 * long startTime = System.currentTimeMillis(); boolean dbAvailable
+			 * = false; while ((System.currentTimeMillis() - startTime) <
+			 * DB_CREATION_TIMEOUT_MILLISEC) { try { new Socket("127.0.0.1",
+			 * guessdbport).close(); dbAvailable = true; break; } catch
+			 * (Exception e) { // e.printStackTrace(); } }
+			 * 
+			 * try { Thread.sleep(3000); } catch (Exception e) { }
+			 * 
+			 * if (dbAvailable) { System.setProperty("node", "N1"); if
+			 * (PoolUtils.isAmazonCloud()) System.setProperty("cloud", "ec2");
+			 * for (int i = 0; i < poolSize; ++i) { new Thread(new Runnable(){
+			 * public void run() { try { RmiServer.main(new String[0]); } catch
+			 * (Exception e) { e.printStackTrace(); } } }).start(); } }
+			 * 
+			 * } catch (Exception e) { e.printStackTrace(); }
+			 * 
+			 * }
+			 */
 
-					int poolSize = Integer.decode(props.getProperty("pool.size"));
-					int DB_CREATION_TIMEOUT_MILLISEC = 10000;
-					int guessdbport = 1527;
-					try {
-						if (System.getProperty("db.port") != null && !System.getProperty("db.port").equals("")) {
-							guessdbport = Integer.decode(System.getProperty("db.port"));
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					long startTime = System.currentTimeMillis();
-					boolean dbAvailable = false;
-					while ((System.currentTimeMillis() - startTime) < DB_CREATION_TIMEOUT_MILLISEC) {
-						try {
-							new Socket("127.0.0.1", guessdbport).close();
-							dbAvailable = true;
-							break;
-						} catch (Exception e) {
-							// e.printStackTrace();
-						}
-					}
-
-					try {
-						Thread.sleep(3000);
-					} catch (Exception e) {
-					}
-
-					if (dbAvailable) {
-						System.setProperty("node", "N1");
-						if (PoolUtils.isAmazonCloud())
-							System.setProperty("cloud", "ec2");
-						for (int i = 0; i < poolSize; ++i) {
-							new Thread(new Runnable(){
-								public void run() {
-									try {
-										RmiServer.main(new String[0]);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							}).start();							
-						}
-					}
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-			}
-			*/
-			
 		}
 
 		if (System.getProperty("pools.provider.factory") == null || System.getProperty("pools.provider.factory").equals("")) {
