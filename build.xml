@@ -999,6 +999,10 @@
 				<pathelement path="VirtualRWorkbench/distrib/mapping.jar"/>
 				-->
 				
+				
+				<pathelement path="C:/try/distrib/mapping.jar"/>
+				
+				
 			</classpath>
 			
 

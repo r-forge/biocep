@@ -785,7 +785,8 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 								_keepAlive = true;
 								try {
-									_helpRootUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
+									//_helpRootUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
+									_helpRootUrl = "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/" + "rvirtual/helpme";
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
