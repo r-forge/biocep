@@ -70,6 +70,7 @@ public class WorkbenchLauncher {
 		params.put("desktopapplication", "true");
 		params.put("javaws", System.getProperty("javaws"));
 		params.put("selfish", System.getProperty("selfish"));
+		params.put("preprocess.help", System.getProperty("preprocess.help"));
 
 		System.out.println("params=" + params);
 		final WorkbenchApplet gDApplet = new WorkbenchApplet(params);

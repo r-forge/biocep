@@ -195,7 +195,7 @@ public class DirectJNI {
 	private String _promptStr = null;
 	private Vector<String> _bootstrapRObjects = new Vector<String>();
 	private long _privateEnvExp;
-	private String[] _packNames = null;
+	
 	private HashMap<String, Vector<String>> _nameSpacesHash = new HashMap<String, Vector<String>>();
 	private HashMap<String, RPackage> _packs = new HashMap<String, RPackage>();
 	private Vector<Long> _protectedExpReference = new Vector<Long>();
@@ -451,8 +451,7 @@ public class DirectJNI {
 
 	}
 
-	private DirectJNI() {
-		
+	public static String[] getROptions() {
 		String[] roptions=new String[] { "--no-save" };
 		if (System.getProperty("r.options")!=null && !System.getProperty("r.options").equals("")) {
 			Vector<String> roptionsVector=new Vector<String>();
@@ -461,7 +460,13 @@ public class DirectJNI {
 			roptions=roptionsVector.toArray(new String[0]);
 		}
 		System.out.println("r options:"+Arrays.toString(roptions));
-		_rEngine = new RengineWrapper(roptions, true, new RMainLoopCallbacksImpl());
+		return roptions;
+	}
+	
+	private DirectJNI() {
+		
+		
+		_rEngine = new RengineWrapper(getROptions(), true, new RMainLoopCallbacksImpl());
 
 		if (!_rEngine.waitForR()) {
 			log.info("Cannot load R");
@@ -476,7 +481,7 @@ public class DirectJNI {
 			_promptStr = ((RChar) ((RList) getRServices().getObject("options('prompt')")).getValue()[0]).getValue()[0];
 
 			getRServices().consoleSubmit("1");
-			_packNames = ((RChar) getRServices().getObject(".packages(all=T)")).getValue();
+			
 
 			upgdateBootstrapObjects();
 
@@ -509,37 +514,47 @@ public class DirectJNI {
 		}
 	}
 
-	public void preprocessHelp() {
-		for (int i = 0; i < _packNames.length; ++i) {
-			try {
+	public void preprocessHelp(final String[] packNames, boolean inBackground) {
+		Runnable run=new Runnable(){
+			public void run() {
+				for (int i = 0; i < packNames.length; ++i) {
+					try {
 
-				String uriPrefix = "/library/" + _packNames[i] + "/html/";
-				String indexFile = null;
+						String uriPrefix = "/library/" + packNames[i] + "/html/";
+						String indexFile = null;
 
-				if (System.getenv().get("R_LIBS") != null && !System.getenv().get("R_LIBS").equals("")) {
-					indexFile = System.getenv().get("R_LIBS") + "/" + _packNames[i] + "/html/" + "00Index.html";
-					if (!new File(indexFile).exists()) {
-						indexFile = null;
-					} else {
-						// System.out.println("index file:" + indexFile);
+						if (System.getenv().get("R_LIBS") != null && !System.getenv().get("R_LIBS").equals("")) {
+							indexFile = System.getenv().get("R_LIBS") + "/" + packNames[i] + "/html/" + "00Index.html";
+							if (!new File(indexFile).exists()) {
+								indexFile = null;
+							} else {
+								// System.out.println("index file:" + indexFile);
+							}
+						}
+
+						if (indexFile == null) {
+							indexFile = System.getenv().get("R_HOME") + uriPrefix + "00Index.html";
+							if (!new File(indexFile).exists())
+								indexFile = null;
+						}
+
+						if (indexFile == null)
+							continue;
+
+						Parser p = new Parser(indexFile);
+						processNode(packNames[i], uriPrefix, p.extractAllNodesThatMatch(new TagNameFilter("BODY")).elementAt(0));
+
+					} catch (Exception e) {
+						// e.printStackTrace();
 					}
 				}
-
-				if (indexFile == null) {
-					indexFile = System.getenv().get("R_HOME") + uriPrefix + "00Index.html";
-					if (!new File(indexFile).exists())
-						indexFile = null;
-				}
-
-				if (indexFile == null)
-					continue;
-
-				Parser p = new Parser(indexFile);
-				processNode(_packNames[i], uriPrefix, p.extractAllNodesThatMatch(new TagNameFilter("BODY")).elementAt(0));
-
-			} catch (Exception e) {
-				// e.printStackTrace();
 			}
+		};
+		
+		if (inBackground) {
+			new Thread(run).start();
+		} else {
+			run.run();
 		}
 	}
 

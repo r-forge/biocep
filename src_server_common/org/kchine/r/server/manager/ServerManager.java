@@ -49,6 +49,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.http.local.LocalHttpServer;
 import org.kchine.r.server.manager.bootstrap.BootSsh;
@@ -169,7 +171,8 @@ public class ServerManager {
 		"cloud",
 		"extensions.home",
 		"use.default.libs",
-		"r.options"};
+		"r.options",
+		"preprocess.help"};
 
 	private static JTextArea createRSshProgressArea;
 	private static JProgressBar createRSshProgressBar;
@@ -177,6 +180,15 @@ public class ServerManager {
 
 	public static Properties getRegistryNamingInfo(String registryHost, int registryPort) {
 		Properties result = new Properties();
+		
+		for (int i = 0; i < namingVars.length; ++i) {
+			String var = namingVars[i];
+			if (System.getProperty(var) != null && !System.getProperty(var).equals("")) {
+				result.put(var, System.getProperty(var));
+			}
+		}
+		
+		result.put("naming.mode","registry");
 		result.put("registry.host", registryHost);
 		result.put("registry.port", new Integer(registryPort).toString());
 		return result;
@@ -830,10 +842,7 @@ public class ServerManager {
 				}
 
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
-
-				command.add((isWindowsOs() ? "\"" : "") + "-Dpreprocess.help=true" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=false" + (isWindowsOs() ? "\"" : ""));
-
 				command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + INSTALL_DIR + "wdir" + (isWindowsOs() ? "\"" : ""));
 
 				for (int i = 0; i < namingVars.length; ++i) {
@@ -1037,12 +1046,14 @@ public class ServerManager {
 
 			Vector<String> getInfoCommand = new Vector<String>();
 
+			String[] roptions=DirectJNI.getROptions();
+			
 			if (rbin != null && !rbin.equals("")) {
 				System.out.println("trying to execute :" + rbin);
 				getInfoCommand.add(rbin);
 				getInfoCommand.add("CMD");
 				getInfoCommand.add("BATCH");
-				getInfoCommand.add("--no-save");
+				for (int i=0; i<roptions.length;++i) getInfoCommand.add(roptions[i]);
 				getInfoCommand.add(getInfoFile.getAbsolutePath());
 				getInfoCommand.add(getInfoOutputFile.getAbsolutePath());
 
@@ -1055,14 +1066,16 @@ public class ServerManager {
 					getInfoCommand.add("R");
 					getInfoCommand.add("CMD");
 					getInfoCommand.add("BATCH");
-					getInfoCommand.add("--no-save");
+					for (int i=0; i<roptions.length;++i) getInfoCommand.add(roptions[i]);
 					getInfoCommand.add(getInfoFile.getAbsolutePath());
 					getInfoCommand.add(getInfoOutputFile.getAbsolutePath());
 
 				} else {
 					getInfoCommand.add(/* System.getenv().get("SHELL") */"/bin/sh");
 					getInfoCommand.add("-c");
-					getInfoCommand.add("R CMD BATCH --no-save " + getInfoFile.getAbsolutePath() + " " + getInfoOutputFile.getAbsolutePath());
+					StringBuffer roptions_str=new StringBuffer();
+					for (int i=0; i<roptions.length;++i) {roptions_str.append(roptions[i]);roptions_str.append(" ");}
+					getInfoCommand.add("R CMD BATCH " + roptions_str+" " + getInfoFile.getAbsolutePath() + " " + getInfoOutputFile.getAbsolutePath());
 				}
 			}
 
