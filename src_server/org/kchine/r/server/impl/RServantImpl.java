@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import org.apache.commons.logging.Log;
+import org.kchine.r.RChar;
 import org.kchine.r.RObject;
 import org.kchine.r.server.AssignInterface;
 import org.kchine.r.server.DirectJNI;
@@ -202,12 +203,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				_rim.put(shortClassName, (RPackage) DirectJNI._mappingClassLoader.loadClass(className + "ImplRemote").newInstance());
 			}
 
-			if (System.getProperty("preprocess.help") != null && System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
-				new Thread(new Runnable() {
-					public void run() {
-						DirectJNI.getInstance().preprocessHelp();
-					}
-				}).start();
+			if (System.getProperty("preprocess.help") == null || System.getProperty("preprocess.help").equals("") || System.getProperty("preprocess.help").equalsIgnoreCase("true")) {
+				String[] packNames = ((RChar) DirectJNI.getInstance().getRServices().getObject(".packages(all=T)")).getValue();
+				DirectJNI.getInstance().preprocessHelp(packNames,true);				
 			}
 
 			if (System.getProperty("apply.sandbox") != null && System.getProperty("apply.sandbox").equalsIgnoreCase("true")) {

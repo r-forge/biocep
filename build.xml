@@ -929,6 +929,10 @@
 		
 		<if><not><isset property="selfish"/></not><then><property name="selfish" value=""/></then></if>
 		<if><not><isset property="use.default.libs"/></not><then><property name="use.default.libs" value=""/></then></if>
+		
+		<if><not><isset property="preprocess.help"/></not><then><property name="preprocess.help" value=""/></then></if>
+		<if><not><isset property="r.options"/></not><then><property name="r.options" value=""/></then></if>
+		
 
 		<java  maxmemory="1024m" classname="org.kchine.r.workbench.WorkbenchLauncher"
 			fork="true" spawn="${spawn}">
@@ -999,10 +1003,6 @@
 				<pathelement path="VirtualRWorkbench/distrib/mapping.jar"/>
 				-->
 				
-				
-				<pathelement path="C:/try/distrib/mapping.jar"/>
-				
-				
 			</classpath>
 			
 
@@ -1038,6 +1038,9 @@
 			
 			
 			<jvmarg value="-Duse.default.libs=${use.default.libs}"/>
+			<jvmarg value="-Dpreprocess.help=${preprocess.help}"/>
+			<jvmarg value="-Dr.options=${r.options}"/>
+			
 			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>
