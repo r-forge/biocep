@@ -84,6 +84,7 @@ public class ServerManager {
 	public static String INSTALL_DIR = null;
 	public static String PLUGINS_DIR = null;
 	public static String EXTENSIONS_DIR = null;
+	public static String DOWNLOAD_DIR = null;
 	public static final String EMBEDDED_R = "R-version-2.8.0";
 	public static final int ENTRIES_NUMBER = 4832;
 
@@ -146,6 +147,16 @@ public class ServerManager {
 			EXTENSIONS_DIR = new File(INSTALL_DIR + "extensions").getAbsolutePath();
 		}
 		if (!new File(EXTENSIONS_DIR).exists())  new File(EXTENSIONS_DIR).mkdirs();
+		
+		
+		if (System.getenv("BIOCEP_DOWNLOAD_DIR") != null) {
+			DOWNLOAD_DIR = System.getenv("BIOCEP_DOWNLOAD_DIR");
+		} else if (System.getProperty("download.home")!=null && !System.getProperty("download.home").equals("")) {			
+			DOWNLOAD_DIR = System.getProperty("download.home");
+		} else {
+			DOWNLOAD_DIR = new File(INSTALL_DIR + "download").getAbsolutePath();
+		}
+		if (!new File(DOWNLOAD_DIR).exists())  new File(DOWNLOAD_DIR).mkdirs();
 
 	}
 

@@ -40,6 +40,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -80,6 +81,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -785,7 +787,10 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 								_keepAlive = true;
 								try {
-									//_helpRootUrl = _commandServletUrl.substring(0, _commandServletUrl.lastIndexOf("cmd")) + "helpme";
+									// _helpRootUrl =
+									// _commandServletUrl.substring(0,
+									// _commandServletUrl.lastIndexOf("cmd")) +
+									// "helpme";
 									_helpRootUrl = "http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort() + "/" + "rvirtual/helpme";
 								} catch (Exception e) {
 									e.printStackTrace();
@@ -1047,8 +1052,8 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 							_demos = _rForConsole.listDemos();
 
-							_macrosEnabled=!_rForConsole.hasRCollaborationListeners();
-							
+							_macrosEnabled = !_rForConsole.hasRCollaborationListeners();
+
 							_collaborationListenerImpl = new RCollaborationListenerImpl();
 
 							_rForConsole.addRCollaborationListener(_collaborationListenerImpl);
@@ -1066,13 +1071,11 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 								_availableExtensions.add(extensions[i]);
 							}
 
-							
-							
 							if (_macrosEnabled) {
 								for (MacroInterface m : macrosVector)
 									_rForConsole.addProbeOnVariables(m.getProbes());
 							}
-							
+
 							new Thread(new Runnable() {
 								public void run() {
 									try {
@@ -1082,7 +1085,6 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 									}
 								}
 							}).start();
-							
 
 							new Thread(new Runnable() {
 								public void run() {
@@ -1243,977 +1245,1037 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 				}
 
 			});
+			
+			
+			String gui_url=getParameter("gui_url");
 
-			try {
-				if (stateProperties.get("command.history") != null) {
-					_consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) stateProperties.get("command.history")));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			if ( gui_url==null || gui_url.equals("") ) {
 
-			JPanel workingDirPanel = new JPanel();
-			workingDirPanel.setLayout(new BorderLayout());
-
-			_filesTable = new JTable();
-			_filesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-			_filesTable.setModel(new AbstractTableModel() {
-
-				public int getColumnCount() {
-					return 4;
+				try {
+					if (stateProperties.get("command.history") != null) {
+						_consolePanel.setCommandHistory((Vector<String>) PoolUtils.hexToObject((String) stateProperties.get("command.history")));
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 
-				public int getRowCount() {
-					return _workDirFiles.size();
-				}
+				JPanel workingDirPanel = new JPanel();
+				workingDirPanel.setLayout(new BorderLayout());
 
-				public Object getValueAt(int rowIndex, int columnIndex) {
-					FileDescription fd = _workDirFiles.elementAt(rowIndex);
-					if (columnIndex == 0) {
-						return fd.getName();
-					} else if (columnIndex == 1) {
-						if (fd.isDir()) {
-							return null;
+				_filesTable = new JTable();
+				_filesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+				_filesTable.setModel(new AbstractTableModel() {
+
+					public int getColumnCount() {
+						return 4;
+					}
+
+					public int getRowCount() {
+						return _workDirFiles.size();
+					}
+
+					public Object getValueAt(int rowIndex, int columnIndex) {
+						FileDescription fd = _workDirFiles.elementAt(rowIndex);
+						if (columnIndex == 0) {
+							return fd.getName();
+						} else if (columnIndex == 1) {
+							if (fd.isDir()) {
+								return null;
+							} else {
+								return fd.getSize();
+							}
+						} else if (columnIndex == 2) {
+							if (fd.isDir()) {
+								return "File Folder";
+							} else {
+								return "";
+							}
+
+						} else if (columnIndex == 3) {
+							return fd.getModifiedOn();
 						} else {
-							return fd.getSize();
+							throw new RuntimeException(columnIndex + " : bad column index");
 						}
-					} else if (columnIndex == 2) {
-						if (fd.isDir()) {
-							return "File Folder";
+					}
+
+					public String getColumnName(int column) {
+						if (column == 0) {
+							return "Name";
+						} else if (column == 1) {
+							return "Size";
+						} else if (column == 2) {
+							return "Type";
+						} else if (column == 3) {
+							return "Last Modified";
 						} else {
-							return "";
+							throw new RuntimeException(column + " : bad column index");
 						}
-
-					} else if (columnIndex == 3) {
-						return fd.getModifiedOn();
-					} else {
-						throw new RuntimeException(columnIndex + " : bad column index");
 					}
-				}
 
-				public String getColumnName(int column) {
-					if (column == 0) {
-						return "Name";
-					} else if (column == 1) {
-						return "Size";
-					} else if (column == 2) {
-						return "Type";
-					} else if (column == 3) {
-						return "Last Modified";
-					} else {
-						throw new RuntimeException(column + " : bad column index");
+					public Class<?> getColumnClass(int columnIndex) {
+						if (columnIndex == 0) {
+							return String.class;
+						} else if (columnIndex == 1) {
+							return Long.class;
+						} else if (columnIndex == 2) {
+							return String.class;
+						} else if (columnIndex == 3) {
+							return Date.class;
+						} else {
+							throw new RuntimeException(columnIndex + " : bad column index");
+						}
 					}
-				}
 
-				public Class<?> getColumnClass(int columnIndex) {
-					if (columnIndex == 0) {
-						return String.class;
-					} else if (columnIndex == 1) {
-						return Long.class;
-					} else if (columnIndex == 2) {
-						return String.class;
-					} else if (columnIndex == 3) {
-						return Date.class;
-					} else {
-						throw new RuntimeException(columnIndex + " : bad column index");
+					@Override
+					public boolean isCellEditable(int rowIndex, int columnIndex) {
+						return false;
 					}
+				});
+
+				TableCellRenderer renderer = new FileCellRenderer();
+				for (int i = 0; i < _filesTable.getColumnCount(); ++i) {
+					_filesTable.getColumnModel().getColumn(i).setCellRenderer(renderer);
 				}
 
-				@Override
-				public boolean isCellEditable(int rowIndex, int columnIndex) {
-					return false;
-				}
-			});
+				MouseListener ml = new FileMousePopupListener();
+				_filesTable.addMouseListener(ml);
 
-			TableCellRenderer renderer = new FileCellRenderer();
-			for (int i = 0; i < _filesTable.getColumnCount(); ++i) {
-				_filesTable.getColumnModel().getColumn(i).setCellRenderer(renderer);
-			}
+				JMenuBar menuBar = new JMenuBar();
 
-			MouseListener ml = new FileMousePopupListener();
-			_filesTable.addMouseListener(ml);
+				final JMenu sessionMenu = new JMenu("R-Session");
+				sessionMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+						sessionMenu.removeAll();
+						sessionMenu.add(_actions.get("logon"));
+						sessionMenu.add(_actions.get("logoff"));
+						sessionMenu.addSeparator();
+						sessionMenu.add(_actions.get("loadimage"));
+						sessionMenu.add(_actions.get("saveimage"));
+						sessionMenu.addSeparator();
+						sessionMenu.add(_actions.get("stopeval"));
+						// sessionMenu.add(_actions.get("interrupteval"));
 
-			JMenuBar menuBar = new JMenuBar();
+						sessionMenu.addSeparator();
+						sessionMenu.add(_actions.get("playdemo"));
+						sessionMenu.addSeparator();
+						sessionMenu.add(_actions.get("runhttpserver"));
+						sessionMenu.add(_actions.get("stophttpserver"));
+						sessionMenu.addSeparator();
+						sessionMenu.add(_actions.get("runhttpserverlocalhost"));
+						sessionMenu.add(_actions.get("stophttpserverlocalhost"));
+						sessionMenu.addSeparator();
+						sessionMenu.add(_actions.get("showsessioninfo"));
+						sessionMenu.add(_actions.get("showworkbenchinfo"));
+						sessionMenu.addSeparator();
+						sessionMenu.add(_actions.get("downloadcorejars"));
+						sessionMenu.addSeparator();
+						sessionMenu.add(_actions.get("quit"));
+					}
 
-			final JMenu sessionMenu = new JMenu("R-Session");
-			sessionMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					sessionMenu.removeAll();
-					sessionMenu.add(_actions.get("logon"));
-					sessionMenu.add(_actions.get("logoff"));
-					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("loadimage"));
-					sessionMenu.add(_actions.get("saveimage"));
-					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("stopeval"));
-					// sessionMenu.add(_actions.get("interrupteval"));
+					public void menuCanceled(MenuEvent e) {
+					}
 
-					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("playdemo"));
-					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("runhttpserver"));
-					sessionMenu.add(_actions.get("stophttpserver"));
-					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("runhttpserverlocalhost"));
-					sessionMenu.add(_actions.get("stophttpserverlocalhost"));
-					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("showsessioninfo"));
-					sessionMenu.add(_actions.get("showworkbenchinfo"));
-					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("downloadcorejars"));
-					sessionMenu.addSeparator();
-					sessionMenu.add(_actions.get("quit"));
-				}
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(sessionMenu);
 
-				public void menuCanceled(MenuEvent e) {
-				}
+				final JMenu filesMenu = new JMenu("File");
+				filesMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
 
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(sessionMenu);
+						filesMenu.removeAll();
+						filesMenu.add(_actions.get("import"));
+						filesMenu.add(_actions.get("export"));
+						filesMenu.add(_actions.get("delete"));
+					}
 
-			final JMenu filesMenu = new JMenu("File");
-			filesMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
+					public void menuCanceled(MenuEvent e) {
+					}
 
-					filesMenu.removeAll();
-					filesMenu.add(_actions.get("import"));
-					filesMenu.add(_actions.get("export"));
-					filesMenu.add(_actions.get("delete"));
-				}
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(filesMenu);
 
-				public void menuCanceled(MenuEvent e) {
-				}
+				final JMenu graphicsMenu = new JMenu("Graphics");
+				graphicsMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
 
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(filesMenu);
+						graphicsMenu.removeAll();
+						graphicsMenu.add(_actions.get("createdevice"));
+						graphicsMenu.addSeparator();
 
-			final JMenu graphicsMenu = new JMenu("Graphics");
-			graphicsMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
+						/*
+						 * graphicsMenu.add(new
+						 * SnapshotDeviceAction(GDApplet.this, _sessionId ==
+						 * null ? null : getCurrentJGPanelPop()));
+						 * graphicsMenu.add(new
+						 * SaveDeviceAsPngAction(GDApplet.this));
+						 * graphicsMenu.add(new
+						 * SaveDeviceAsJpgAction(GDApplet.this));
+						 * graphicsMenu.addSeparator();
+						 */
 
-					graphicsMenu.removeAll();
-					graphicsMenu.add(_actions.get("createdevice"));
-					graphicsMenu.addSeparator();
+						graphicsMenu.add(new AbstractAction("Fit Device to Panel") {
 
-					/*
-					 * graphicsMenu.add(new SnapshotDeviceAction(GDApplet.this,
-					 * _sessionId == null ? null : getCurrentJGPanelPop()));
-					 * graphicsMenu.add(new
-					 * SaveDeviceAsPngAction(GDApplet.this));
-					 * graphicsMenu.add(new
-					 * SaveDeviceAsJpgAction(GDApplet.this));
-					 * graphicsMenu.addSeparator();
-					 */
-
-					graphicsMenu.add(new AbstractAction("Fit Device to Panel") {
-
-						public void actionPerformed(ActionEvent e) {
-							getCurrentJGPanelPop().fit();
-						}
-
-						public boolean isEnabled() {
-							return getR() != null;
-						}
-					});
-					graphicsMenu.addSeparator();
-
-					JRadioButtonMenuItem zoomSelect = new JRadioButtonMenuItem("Zoom In / Out on Region   [mouse click&drag / ctrl-mouse click&drag]",
-							_sessionId != null && getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_SELECT);
-					zoomSelect.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_SELECT) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_ZOOM_IN_OUT_SELECT);
-								}
-
-							}
-						}
-					});
-					zoomSelect.setEnabled(_sessionId != null);
-					graphicsMenu.add(zoomSelect);
-
-					JRadioButtonMenuItem zoom = new JRadioButtonMenuItem("Zoom In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
-							&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT);
-					zoom.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_ZOOM_IN_OUT);
-								}
-
-							}
-						}
-					});
-					zoom.setEnabled(_sessionId != null);
-					graphicsMenu.add(zoom);
-
-					JRadioButtonMenuItem scroll = new JRadioButtonMenuItem("Scroll   [mouse drag]", _sessionId != null
-							&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_SCROLL);
-					scroll.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_SCROLL) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_SCROLL);
-								}
-
-							}
-						}
-					});
-					scroll.setEnabled(_sessionId != null);
-					graphicsMenu.add(scroll);
-
-					graphicsMenu.addSeparator();
-
-					JRadioButtonMenuItem zoomSelectX = new JRadioButtonMenuItem("Zoom X In / Out on Region   [mouse click&drag / ctrl-mouse click&drag]",
-							_sessionId != null && getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_X_SELECT);
-					zoomSelectX.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_ZOOM_IN_OUT_X_SELECT);
-								}
-
-							}
-						}
-					});
-					zoomSelectX.setEnabled(_sessionId != null);
-					graphicsMenu.add(zoomSelectX);
-
-					JRadioButtonMenuItem zoomX = new JRadioButtonMenuItem("Zoom X In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
-							&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_X);
-					zoomX.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_X) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_ZOOM_IN_OUT_X);
-								}
-
-							}
-						}
-					});
-					zoomX.setEnabled(_sessionId != null);
-					graphicsMenu.add(zoomX);
-
-					JRadioButtonMenuItem scrollX = new JRadioButtonMenuItem("Scroll X Left / Right   [mouse click / ctrl-mouse click]", _sessionId != null
-							&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_SCROLL_LEFT_RIGHT);
-					scrollX.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_SCROLL_LEFT_RIGHT) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_SCROLL_LEFT_RIGHT);
-								}
-
-							}
-						}
-					});
-					scrollX.setEnabled(_sessionId != null);
-					graphicsMenu.add(scrollX);
-
-					graphicsMenu.addSeparator();
-
-					JRadioButtonMenuItem zoomSelectY = new JRadioButtonMenuItem("Zoom Y In / Out on Region   [mouse click&drag / ctrl-mouse click&drag]",
-							_sessionId != null && getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_Y_SELECT);
-					zoomSelectY.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_ZOOM_IN_OUT_Y_SELECT);
-								}
-
-							}
-						}
-					});
-					zoomSelectY.setEnabled(_sessionId != null);
-					graphicsMenu.add(zoomSelectY);
-
-					JRadioButtonMenuItem zoomY = new JRadioButtonMenuItem("Zoom Y In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
-							&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_Y);
-					zoomY.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_Y) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_ZOOM_IN_OUT_Y);
-								}
-
-							}
-						}
-					});
-					zoomY.setEnabled(_sessionId != null);
-					graphicsMenu.add(zoomY);
-
-					JRadioButtonMenuItem scrollY = new JRadioButtonMenuItem("Scroll Y Up / Down   [mouse click / ctrl-mouse click]", _sessionId != null
-							&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_SCROLL_UP_DOWN);
-					scrollY.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								if (p.getInteractor() == INTERACTOR_SCROLL_UP_DOWN) {
-									setInteractor(INTERACTOR_NULL);
-								} else {
-									setInteractor(INTERACTOR_SCROLL_UP_DOWN);
-								}
-
-							}
-						}
-					});
-					scrollY.setEnabled(_sessionId != null);
-					graphicsMenu.add(scrollY);
-
-					graphicsMenu.addSeparator();
-
-					JRadioButtonMenuItem mouseTracker = new JRadioButtonMenuItem("Mouse Tracker   [mouse move]", _sessionId != null
-							&& getCurrentJGPanelPop().isShowCoordinates());
-					mouseTracker.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							if (_sessionId != null) {
-								JGDPanelPop p = getCurrentJGPanelPop();
-								p.setShowCoordinates(!p.isShowCoordinates());
-							}
-						}
-					});
-					mouseTracker.setEnabled(_sessionId != null);
-					graphicsMenu.add(mouseTracker);
-
-				}
-
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(graphicsMenu);
-
-			final JMenu spreadsheetMenu = new JMenu("Spreadsheet");
-			spreadsheetMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					spreadsheetMenu.removeAll();
-					spreadsheetMenu.add(_actions.get("spreadsheet"));
-					spreadsheetMenu.addSeparator();
-					spreadsheetMenu.add(_actions.get("newserversidespreadsheet"));
-					spreadsheetMenu.add(_actions.get("connecttoserversidespreadsheet"));
-				}
-
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(spreadsheetMenu);
-
-			final JMenu toolsMenu = new JMenu("Tools");
-			toolsMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					toolsMenu.removeAll();
-					toolsMenu.add(_actions.get("editor"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("svgview"));
-					toolsMenu.add(_actions.get("pdfview"));
-					toolsMenu.add(_actions.get("slider"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("pythonconsole"));
-					toolsMenu.add(_actions.get("clientpythonconsole"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("groovyconsole"));
-					toolsMenu.add(_actions.get("clientgroovyconsole"));
-					toolsMenu.add(_actions.get("unsafeevaluator"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("sourcebioclite"));
-					toolsMenu.add(_actions.get("installpackage"));
-					toolsMenu.addSeparator();
-					toolsMenu.add(_actions.get("supervisor"));
-					toolsMenu.add(_actions.get("httpsupervisor"));
-
-				}
-
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(toolsMenu);
-
-			final JMenu collaborationMenu = new JMenu("Collaboration");
-			collaborationMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					collaborationMenu.removeAll();
-					collaborationMenu.add(_actions.get("createbroadcasteddevice"));
-					collaborationMenu.add(_actions.get("chatconsoleview"));
-					collaborationMenu.addSeparator();
-					collaborationMenu.add(_actions.get("newcollaborativespreadsheet"));
-					collaborationMenu.add(_actions.get("connecttocollaborativespreadsheet"));
-					collaborationMenu.addSeparator();
-					collaborationMenu.add(_actions.get("usersview"));
-				}
-
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(collaborationMenu);
-
-			final JMenu dataMenu = new JMenu("Java");
-			dataMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					dataMenu.removeAll();
-					dataMenu.add(_actions.get("import_symbol"));
-					dataMenu.add(_actions.get("push_symbol"));
-					dataMenu.add(_actions.get("inspect"));
-				}
-
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(dataMenu);
-
-			final JMenu lfMenu = new JMenu("Look & Feel");
-			lfMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-
-					lfMenu.removeAll();
-
-					JRadioButtonMenuItem[] radioButtonsPool = new JRadioButtonMenuItem[installedLFs.length];
-					for (int i = 0; i < installedLFs.length; ++i) {
-						final int idx = i;
-						radioButtonsPool[idx] = new JRadioButtonMenuItem(installedLFs[idx].getName(), idx == _lf);
-						radioButtonsPool[idx].addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
-								_lf = idx;
-								try {
-									UIManager.setLookAndFeel(getLookAndFeelClassName());
-								} catch (Exception ex) {
-									ex.printStackTrace();
-								}
-								SwingUtilities.updateComponentTreeUI(getContentPane());
+								getCurrentJGPanelPop().fit();
+							}
 
+							public boolean isEnabled() {
+								return getR() != null;
 							}
 						});
-						lfMenu.add(radioButtonsPool[idx]);
+						graphicsMenu.addSeparator();
+
+						JRadioButtonMenuItem zoomSelect = new JRadioButtonMenuItem("Zoom In / Out on Region   [mouse click&drag / ctrl-mouse click&drag]",
+								_sessionId != null && getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_SELECT);
+						zoomSelect.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_SELECT) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_ZOOM_IN_OUT_SELECT);
+									}
+
+								}
+							}
+						});
+						zoomSelect.setEnabled(_sessionId != null);
+						graphicsMenu.add(zoomSelect);
+
+						JRadioButtonMenuItem zoom = new JRadioButtonMenuItem("Zoom In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
+								&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT);
+						zoom.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_ZOOM_IN_OUT);
+									}
+
+								}
+							}
+						});
+						zoom.setEnabled(_sessionId != null);
+						graphicsMenu.add(zoom);
+
+						JRadioButtonMenuItem scroll = new JRadioButtonMenuItem("Scroll   [mouse drag]", _sessionId != null
+								&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_SCROLL);
+						scroll.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_SCROLL) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_SCROLL);
+									}
+
+								}
+							}
+						});
+						scroll.setEnabled(_sessionId != null);
+						graphicsMenu.add(scroll);
+
+						graphicsMenu.addSeparator();
+
+						JRadioButtonMenuItem zoomSelectX = new JRadioButtonMenuItem("Zoom X In / Out on Region   [mouse click&drag / ctrl-mouse click&drag]",
+								_sessionId != null && getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_X_SELECT);
+						zoomSelectX.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_X_SELECT) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_ZOOM_IN_OUT_X_SELECT);
+									}
+
+								}
+							}
+						});
+						zoomSelectX.setEnabled(_sessionId != null);
+						graphicsMenu.add(zoomSelectX);
+
+						JRadioButtonMenuItem zoomX = new JRadioButtonMenuItem("Zoom X In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
+								&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_X);
+						zoomX.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_X) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_ZOOM_IN_OUT_X);
+									}
+
+								}
+							}
+						});
+						zoomX.setEnabled(_sessionId != null);
+						graphicsMenu.add(zoomX);
+
+						JRadioButtonMenuItem scrollX = new JRadioButtonMenuItem("Scroll X Left / Right   [mouse click / ctrl-mouse click]", _sessionId != null
+								&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_SCROLL_LEFT_RIGHT);
+						scrollX.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_SCROLL_LEFT_RIGHT) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_SCROLL_LEFT_RIGHT);
+									}
+
+								}
+							}
+						});
+						scrollX.setEnabled(_sessionId != null);
+						graphicsMenu.add(scrollX);
+
+						graphicsMenu.addSeparator();
+
+						JRadioButtonMenuItem zoomSelectY = new JRadioButtonMenuItem("Zoom Y In / Out on Region   [mouse click&drag / ctrl-mouse click&drag]",
+								_sessionId != null && getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_Y_SELECT);
+						zoomSelectY.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_Y_SELECT) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_ZOOM_IN_OUT_Y_SELECT);
+									}
+
+								}
+							}
+						});
+						zoomSelectY.setEnabled(_sessionId != null);
+						graphicsMenu.add(zoomSelectY);
+
+						JRadioButtonMenuItem zoomY = new JRadioButtonMenuItem("Zoom Y In / Out   [mouse click / ctrl-mouse click]", _sessionId != null
+								&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_ZOOM_IN_OUT_Y);
+						zoomY.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_ZOOM_IN_OUT_Y) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_ZOOM_IN_OUT_Y);
+									}
+
+								}
+							}
+						});
+						zoomY.setEnabled(_sessionId != null);
+						graphicsMenu.add(zoomY);
+
+						JRadioButtonMenuItem scrollY = new JRadioButtonMenuItem("Scroll Y Up / Down   [mouse click / ctrl-mouse click]", _sessionId != null
+								&& getCurrentJGPanelPop().getInteractor() == INTERACTOR_SCROLL_UP_DOWN);
+						scrollY.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									if (p.getInteractor() == INTERACTOR_SCROLL_UP_DOWN) {
+										setInteractor(INTERACTOR_NULL);
+									} else {
+										setInteractor(INTERACTOR_SCROLL_UP_DOWN);
+									}
+
+								}
+							}
+						});
+						scrollY.setEnabled(_sessionId != null);
+						graphicsMenu.add(scrollY);
+
+						graphicsMenu.addSeparator();
+
+						JRadioButtonMenuItem mouseTracker = new JRadioButtonMenuItem("Mouse Tracker   [mouse move]", _sessionId != null
+								&& getCurrentJGPanelPop().isShowCoordinates());
+						mouseTracker.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								if (_sessionId != null) {
+									JGDPanelPop p = getCurrentJGPanelPop();
+									p.setShowCoordinates(!p.isShowCoordinates());
+								}
+							}
+						});
+						mouseTracker.setEnabled(_sessionId != null);
+						graphicsMenu.add(mouseTracker);
+
 					}
 
-				}
+					public void menuCanceled(MenuEvent e) {
+					}
 
-				public void menuCanceled(MenuEvent e) {
-				}
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(graphicsMenu);
 
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(lfMenu);
+				final JMenu spreadsheetMenu = new JMenu("Spreadsheet");
+				spreadsheetMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+						spreadsheetMenu.removeAll();
+						spreadsheetMenu.add(_actions.get("spreadsheet"));
+						spreadsheetMenu.addSeparator();
+						spreadsheetMenu.add(_actions.get("newserversidespreadsheet"));
+						spreadsheetMenu.add(_actions.get("connecttoserversidespreadsheet"));
+					}
 
-			final JMenu demoMenu = new JMenu("Demos");
-			demoMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					demoMenu.removeAll();
-					if (_sessionId != null) {
-						try {
+					public void menuCanceled(MenuEvent e) {
+					}
 
-							for (int i = 0; i < _demos.length; ++i) {
-								final int index = i;
-								demoMenu.add(new AbstractAction(PoolUtils.replaceAll(_demos[i], "_", " ")) {
-									public void actionPerformed(ActionEvent e) {
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(spreadsheetMenu);
 
-										if (getRLock().isLocked()) {
-											JOptionPane.showMessageDialog(null, "R is busy");
-										} else {
+				final JMenu toolsMenu = new JMenu("Tools");
+				toolsMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+						toolsMenu.removeAll();
+						toolsMenu.add(_actions.get("editor"));
+						toolsMenu.addSeparator();
+						toolsMenu.add(_actions.get("svgview"));
+						toolsMenu.add(_actions.get("pdfview"));
+						toolsMenu.add(_actions.get("slider"));
+						toolsMenu.addSeparator();
+						toolsMenu.add(_actions.get("pythonconsole"));
+						toolsMenu.add(_actions.get("clientpythonconsole"));
+						toolsMenu.addSeparator();
+						toolsMenu.add(_actions.get("groovyconsole"));
+						toolsMenu.add(_actions.get("clientgroovyconsole"));
+						toolsMenu.add(_actions.get("unsafeevaluator"));
+						toolsMenu.addSeparator();
+						toolsMenu.add(_actions.get("sourcebioclite"));
+						toolsMenu.add(_actions.get("installpackage"));
+						toolsMenu.addSeparator();
+						toolsMenu.add(_actions.get("supervisor"));
+						toolsMenu.add(_actions.get("httpsupervisor"));
+
+					}
+
+					public void menuCanceled(MenuEvent e) {
+					}
+
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(toolsMenu);
+
+				final JMenu collaborationMenu = new JMenu("Collaboration");
+				collaborationMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+						collaborationMenu.removeAll();
+						collaborationMenu.add(_actions.get("createbroadcasteddevice"));
+						collaborationMenu.add(_actions.get("chatconsoleview"));
+						collaborationMenu.addSeparator();
+						collaborationMenu.add(_actions.get("newcollaborativespreadsheet"));
+						collaborationMenu.add(_actions.get("connecttocollaborativespreadsheet"));
+						collaborationMenu.addSeparator();
+						collaborationMenu.add(_actions.get("usersview"));
+					}
+
+					public void menuCanceled(MenuEvent e) {
+					}
+
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(collaborationMenu);
+
+				final JMenu dataMenu = new JMenu("Java");
+				dataMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+						dataMenu.removeAll();
+						dataMenu.add(_actions.get("import_symbol"));
+						dataMenu.add(_actions.get("push_symbol"));
+						dataMenu.add(_actions.get("inspect"));
+					}
+
+					public void menuCanceled(MenuEvent e) {
+					}
+
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(dataMenu);
+
+				final JMenu lfMenu = new JMenu("Look & Feel");
+				lfMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+
+						lfMenu.removeAll();
+
+						JRadioButtonMenuItem[] radioButtonsPool = new JRadioButtonMenuItem[installedLFs.length];
+						for (int i = 0; i < installedLFs.length; ++i) {
+							final int idx = i;
+							radioButtonsPool[idx] = new JRadioButtonMenuItem(installedLFs[idx].getName(), idx == _lf);
+							radioButtonsPool[idx].addActionListener(new ActionListener() {
+								public void actionPerformed(ActionEvent e) {
+									_lf = idx;
+									try {
+										UIManager.setLookAndFeel(getLookAndFeelClassName());
+									} catch (Exception ex) {
+										ex.printStackTrace();
+									}
+									SwingUtilities.updateComponentTreeUI(getContentPane());
+
+								}
+							});
+							lfMenu.add(radioButtonsPool[idx]);
+						}
+
+					}
+
+					public void menuCanceled(MenuEvent e) {
+					}
+
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(lfMenu);
+
+				final JMenu demoMenu = new JMenu("Demos");
+				demoMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+						demoMenu.removeAll();
+						if (_sessionId != null) {
+							try {
+
+								for (int i = 0; i < _demos.length; ++i) {
+									final int index = i;
+									demoMenu.add(new AbstractAction(PoolUtils.replaceAll(_demos[i], "_", " ")) {
+										public void actionPerformed(ActionEvent e) {
+
+											if (getRLock().isLocked()) {
+												JOptionPane.showMessageDialog(null, "R is busy");
+											} else {
+												try {
+													getRLock().lock();
+													getConsoleLogger().print("sourcing demo " + PoolUtils.replaceAll(_demos[index], "_", " "), null);
+													String log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(_demos[index]));
+
+												} catch (Exception ex) {
+													ex.printStackTrace();
+												} finally {
+													getRLock().unlock();
+												}
+											}
+
+										}
+
+										public boolean isEnabled() {
+											return getR() != null;
+										}
+									});
+
+								}
+
+								demoMenu.addSeparator();
+
+								for (int i = 0; i < _demos.length; ++i) {
+									final int index = i;
+									demoMenu.add(new AbstractAction("Copy to Clipboard - " + PoolUtils.replaceAll(_demos[i], "_", " ")) {
+										public void actionPerformed(ActionEvent e) {
 											try {
-												getRLock().lock();
-												getConsoleLogger().print("sourcing demo " + PoolUtils.replaceAll(_demos[index], "_", " "), null);
-												String log = _rForConsole.sourceFromBuffer(_rForConsole.getDemoSource(_demos[index]));
+
+												StringSelection stringSelection = new StringSelection(_rForConsole.getDemoSource(_demos[index]).toString());
+												Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+												clipboard.setContents(stringSelection, new ClipboardOwner() {
+													public void lostOwnership(Clipboard clipboard, Transferable contents) {
+													}
+												});
 
 											} catch (Exception ex) {
 												ex.printStackTrace();
-											} finally {
-												getRLock().unlock();
 											}
 										}
 
-									}
+										@Override
+										public boolean isEnabled() {
+											return getR() != null;
+										}
+									});
 
-									public boolean isEnabled() {
-										return getR() != null;
+								}
+
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+						}
+					}
+
+					public void menuCanceled(MenuEvent e) {
+					}
+
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(demoMenu);
+
+				final JMenu macrosMenu = new JMenu("Macros");
+				macrosMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+						macrosMenu.removeAll();
+						int count = 0;
+						for (MacroInterface m : macrosVector) {
+							if (m.isShow()) {
+								++count;
+								final MacroInterface finalMacro = m;
+								macrosMenu.add(new AbstractAction(m.getLabel()) {
+									public void actionPerformed(ActionEvent e) {
+										finalMacro.sourceAll(WorkbenchApplet.this, null);
 									}
 								});
-
 							}
+						}
+						macrosMenu.addSeparator();
 
-							demoMenu.addSeparator();
+						JMenu macrosCopyMenu = new JMenu("Copy Example to Clipboard");
+						macrosCopyMenu.add(new AbstractAction("Hello World Action Macro") {
+							public void actionPerformed(ActionEvent e) {
+								StringSelection stringSelection = new StringSelection(Macro.getHelloWorldAction());
+								Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+								clipboard.setContents(stringSelection, new ClipboardOwner() {
+									public void lostOwnership(Clipboard clipboard, Transferable contents) {
+									}
+								});
+							}
+						});
 
-							for (int i = 0; i < _demos.length; ++i) {
-								final int index = i;
-								demoMenu.add(new AbstractAction("Copy to Clipboard - " + PoolUtils.replaceAll(_demos[i], "_", " ")) {
-									public void actionPerformed(ActionEvent e) {
+						macrosCopyMenu.add(new AbstractAction("Hello World Macro With Variables Listeners") {
+							public void actionPerformed(ActionEvent e) {
+								StringSelection stringSelection = new StringSelection(Macro.getHelloWorldVars());
+								Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+								clipboard.setContents(stringSelection, new ClipboardOwner() {
+									public void lostOwnership(Clipboard clipboard, Transferable contents) {
+									}
+								});
+							}
+						});
+
+						macrosCopyMenu.add(new AbstractAction("Hello World Macro With Cells Listeners") {
+							public void actionPerformed(ActionEvent e) {
+								StringSelection stringSelection = new StringSelection(Macro.getHelloWorldCells());
+								Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+								clipboard.setContents(stringSelection, new ClipboardOwner() {
+									public void lostOwnership(Clipboard clipboard, Transferable contents) {
+									}
+								});
+							}
+						});
+
+						macrosCopyMenu.add(new AbstractAction("Hello World Data Link") {
+							public void actionPerformed(ActionEvent e) {
+								StringSelection stringSelection = new StringSelection(Macro.getHelloWorldDataLink());
+								Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+								clipboard.setContents(stringSelection, new ClipboardOwner() {
+									public void lostOwnership(Clipboard clipboard, Transferable contents) {
+									}
+								});
+							}
+						});
+						macrosMenu.add(macrosCopyMenu);
+						macrosMenu.addSeparator();
+						macrosMenu.add(_actions.get("macroseditor"));
+						macrosMenu.addSeparator();
+						macrosMenu.add(new AbstractAction("Refresh") {
+							public void actionPerformed(ActionEvent e) {
+								new Thread(new Runnable() {
+									public void run() {
 										try {
+											refreshMacros();
+											for (CollaborativeSpreadsheetView v : getCollaborativeSpreadsheetViews()) {
+												v.repaint();
+											}
+										} catch (Exception e) {
+											e.printStackTrace();
+										}
+									}
+								}).start();
+							}
+						});
+					}
 
-											StringSelection stringSelection = new StringSelection(_rForConsole.getDemoSource(_demos[index]).toString());
-											Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-											clipboard.setContents(stringSelection, new ClipboardOwner() {
-												public void lostOwnership(Clipboard clipboard, Transferable contents) {
+					public void menuCanceled(MenuEvent e) {
+					}
+
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(macrosMenu);
+
+				final JMenu pluginsMenu = new JMenu("Plugins");
+				pluginsMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
+						pluginsMenu.removeAll();
+						if (pluginViewsHash.keySet().size() > 0) {
+							for (String p : pluginViewsHash.keySet()) {
+
+								JMenu viewsMenu = new JMenu(p);
+								for (PluginViewDescriptor pvd : pluginViewsHash.get(p)) {
+
+									final PluginViewDescriptor pvdFinal = pvd;
+									viewsMenu.add(new AbstractAction(pvd.getName()) {
+										public void actionPerformed(ActionEvent e) {
+											System.setSecurityManager(new YesSecurityManager());
+											try {
+												Class<?> c_ = pvdFinal.getPluginClassLoader().loadClass(pvdFinal.getClassName());
+												Object o_ = c_.getConstructor(RGui.class).newInstance(WorkbenchApplet.this);
+												if (JPanel.class.isAssignableFrom(c_)) {
+													View v = createView((JPanel) o_, pvdFinal.getName());
 												}
-											});
+											} catch (Exception ex) {
+												ex.printStackTrace();
+											}
+										}
+									});
+								}
+								pluginsMenu.add(viewsMenu);
+							}
+							pluginsMenu.addSeparator();
+						}
 
+						pluginsMenu.add(_actions.get("installpluginjarfile"));
+						pluginsMenu.add(_actions.get("installpluginjarurl"));
+						pluginsMenu.add(_actions.get("installpluginzipfile"));
+						pluginsMenu.add(_actions.get("installpluginzipurl"));
+
+						pluginsMenu.addSeparator();
+						pluginsMenu.add(_actions.get("openpluginviewjarfile"));
+						pluginsMenu.add(_actions.get("openpluginviewjarurl"));
+						pluginsMenu.add(_actions.get("openpluginviewclasses"));
+						pluginsMenu.addSeparator();
+						pluginsMenu.add(new AbstractAction("Refresh") {
+							public void actionPerformed(ActionEvent e) {
+								new Thread(new Runnable() {
+									public void run() {
+										try {
+											refreshPluginViewsHash();
 										} catch (Exception ex) {
 											ex.printStackTrace();
 										}
 									}
 
-									@Override
-									public boolean isEnabled() {
-										return getR() != null;
-									}
-								});
+								}).start();
 
 							}
-
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
+						});
+						pluginsMenu.addSeparator();
+						pluginsMenu.add(_actions.get("browsepluginsrepository"));
 					}
-				}
 
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(demoMenu);
-
-			final JMenu macrosMenu = new JMenu("Macros");
-			macrosMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					macrosMenu.removeAll();
-					int count = 0;
-					for (MacroInterface m : macrosVector) {
-						if (m.isShow()) {
-							++count;
-							final MacroInterface finalMacro = m;
-							macrosMenu.add(new AbstractAction(m.getLabel()) {
-								public void actionPerformed(ActionEvent e) {
-									finalMacro.sourceAll(WorkbenchApplet.this, null);
-								}
-							});
-						}
+					public void menuCanceled(MenuEvent e) {
 					}
-					macrosMenu.addSeparator();
 
-					JMenu macrosCopyMenu = new JMenu("Copy Example to Clipboard");
-					macrosCopyMenu.add(new AbstractAction("Hello World Action Macro") {
-						public void actionPerformed(ActionEvent e) {
-							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldAction());
-							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-							clipboard.setContents(stringSelection, new ClipboardOwner() {
-								public void lostOwnership(Clipboard clipboard, Transferable contents) {
-								}
-							});
-						}
-					});
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(pluginsMenu);
 
-					macrosCopyMenu.add(new AbstractAction("Hello World Macro With Variables Listeners") {
-						public void actionPerformed(ActionEvent e) {
-							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldVars());
-							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-							clipboard.setContents(stringSelection, new ClipboardOwner() {
-								public void lostOwnership(Clipboard clipboard, Transferable contents) {
-								}
-							});
-						}
-					});
+				final JMenu helpMenu = new JMenu("Help");
+				helpMenu.addMenuListener(new MenuListener() {
+					public void menuSelected(MenuEvent e) {
 
-					macrosCopyMenu.add(new AbstractAction("Hello World Macro With Cells Listeners") {
-						public void actionPerformed(ActionEvent e) {
-							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldCells());
-							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-							clipboard.setContents(stringSelection, new ClipboardOwner() {
-								public void lostOwnership(Clipboard clipboard, Transferable contents) {
-								}
-							});
-						}
-					});
+						helpMenu.removeAll();
+						helpMenu.add(_actions.get("help"));
+						helpMenu.add(_actions.get("biocepmindmap"));
+						helpMenu.addSeparator();
+						helpMenu.add(_actions.get("rbiocmanual"));
+						helpMenu.add(_actions.get("graphicstaskpage"));
+						helpMenu.add(_actions.get("thergraphgallery"));
+						helpMenu.add(_actions.get("rgraphicalmanual"));
+						helpMenu.addSeparator();
+						helpMenu.add(_actions.get("about"));
 
-					macrosCopyMenu.add(new AbstractAction("Hello World Data Link") {
-						public void actionPerformed(ActionEvent e) {
-							StringSelection stringSelection = new StringSelection(Macro.getHelloWorldDataLink());
-							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-							clipboard.setContents(stringSelection, new ClipboardOwner() {
-								public void lostOwnership(Clipboard clipboard, Transferable contents) {
+					}
+
+					public void menuCanceled(MenuEvent e) {
+					}
+
+					public void menuDeselected(MenuEvent e) {
+					}
+				});
+				menuBar.add(helpMenu);
+
+				JScrollPane filesScrollPane = new JScrollPane(_filesTable);
+				filesScrollPane.addMouseListener(ml);
+				workingDirPanel.add(filesScrollPane, BorderLayout.CENTER);
+
+				views[0] = new View("R Console", null, _consolePanel);
+				views[1] = new View("Main Graphic Device", null, _rootGraphicPanel);
+				views[2] = new View("Working Directory", null, workingDirPanel);
+				ViewMap viewMap = new ViewMap();
+				viewMap.addView(0, views[0]);
+				viewMap.addView(1, views[1]);
+				viewMap.addView(2, views[2]);
+
+				MixedViewHandler handler = new MixedViewHandler(viewMap, new ViewSerializer() {
+					public void writeView(View view, ObjectOutputStream out) throws IOException {
+						out.writeInt(((DynamicView) view).getId());
+					}
+
+					public View readView(ObjectInputStream in) throws IOException {
+						return dynamicViews.get(in.readInt());
+					}
+				});
+
+				views[1].getViewProperties().setIcon(_currentDeviceIcon);
+				final RootWindow rootWindow = DockingUtil.createRootWindow(viewMap, handler, true);
+				rootWindow.getWindowBar(Direction.DOWN).setEnabled(true);
+
+				RootWindowProperties properties = new RootWindowProperties();
+				properties.addSuperObject(new ShapedGradientDockingTheme().getRootWindowProperties());
+				rootWindow.getRootWindowProperties().addSuperObject(properties);
+				rootWindow.getWindowBar(Direction.DOWN).setEnabled(true);
+				rootWindow.addListener(new DockingWindowListener() {
+
+					public void viewFocusChanged(View arg0, View arg1) {
+					}
+
+					public void windowAdded(DockingWindow addedToWindow, DockingWindow addedWindow) {
+						updateViews(addedWindow, true);
+						if (addedWindow instanceof FloatingWindow)
+							updateFloatingWindow((FloatingWindow) addedWindow);
+					}
+
+					public void windowClosed(DockingWindow arg0) {
+					}
+
+					public void windowClosing(DockingWindow window) throws OperationAbortedException {
+						if (window == views[0] || window == views[1] || window == views[2])
+							throw new OperationAbortedException("Window close was aborted!");
+
+						if (window instanceof DeviceView) {
+							try {
+								GDDevice d = ((DeviceView) window).getPanel().getGdDevice();
+								if (_currentDevice == d) {
+									setCurrentDevice(((JGDPanelPop) _graphicPanel).getGdDevice());
+									_currentDevice.setAsCurrentDevice();
+								} else {
+									getCurrentJGPanelPop().removeCoupledTo(((DeviceView) window).getPanel());
 								}
-							});
+								((DeviceView) window).getPanel().dispose();
+
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
-					});
-					macrosMenu.add(macrosCopyMenu);
-					macrosMenu.addSeparator();
-					macrosMenu.add(_actions.get("macroseditor"));
-					macrosMenu.addSeparator();
-					macrosMenu.add(new AbstractAction("Refresh") {
-						public void actionPerformed(ActionEvent e) {
-							new Thread(new Runnable() {
-								public void run() {
+
+						if (window instanceof TabWindow) {
+							TabWindow tw = (TabWindow) window;
+							for (int i = 0; i < tw.getChildWindowCount(); ++i) {
+								DockingWindow w = tw.getChildWindow(i);
+								if (w == views[0] || w == views[1] || w == views[2])
+									throw new OperationAbortedException("Window close was aborted!");
+							}
+						}
+
+						if (window instanceof TabWindow) {
+							TabWindow tw = (TabWindow) window;
+							for (int i = 0; i < tw.getChildWindowCount(); ++i) {
+								DockingWindow w = tw.getChildWindow(i);
+								if (w instanceof DeviceView) {
 									try {
-										refreshMacros();
-										for (CollaborativeSpreadsheetView v : getCollaborativeSpreadsheetViews()) {
-											v.repaint();
+
+										GDDevice d = ((DeviceView) w).getPanel().getGdDevice();
+										if (_currentDevice == d) {
+											setCurrentDevice(((JGDPanelPop) _graphicPanel).getGdDevice());
+											_currentDevice.setAsCurrentDevice();
 										}
+										((DeviceView) w).getPanel().dispose();
+
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
 								}
-							}).start();
+							}
 						}
-					});
-				}
+					}
 
-				public void menuCanceled(MenuEvent e) {
-				}
+					public void windowDocked(DockingWindow arg0) {
+					}
 
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(macrosMenu);
+					public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
+					}
 
-			final JMenu pluginsMenu = new JMenu("Plugins");
-			pluginsMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-					pluginsMenu.removeAll();
-					if (pluginViewsHash.keySet().size() > 0) {
-						for (String p : pluginViewsHash.keySet()) {
+					public void windowHidden(DockingWindow arg0) {
+					}
 
-							JMenu viewsMenu = new JMenu(p);
-							for (PluginViewDescriptor pvd : pluginViewsHash.get(p)) {
+					public void windowMaximized(DockingWindow arg0) {
+					}
 
-								final PluginViewDescriptor pvdFinal = pvd;
-								viewsMenu.add(new AbstractAction(pvd.getName()) {
-									public void actionPerformed(ActionEvent e) {
-										System.setSecurityManager(new YesSecurityManager());
-										try {
-											Class<?> c_ = pvdFinal.getPluginClassLoader().loadClass(pvdFinal.getClassName());
-											Object o_ = c_.getConstructor(RGui.class).newInstance(WorkbenchApplet.this);
-											if (JPanel.class.isAssignableFrom(c_)) {
-												View v = createView((JPanel) o_, pvdFinal.getName());
+					public void windowMaximizing(DockingWindow window) throws OperationAbortedException {
+					}
+
+					public void windowMinimized(DockingWindow arg0) {
+					}
+
+					public void windowMinimizing(DockingWindow window) throws OperationAbortedException {
+						if (window == views[2])
+							throw new OperationAbortedException("Window minimize was aborted!");
+						if (window instanceof TabWindow) {
+							TabWindow tw = (TabWindow) window;
+							for (int i = 0; i < tw.getChildWindowCount(); ++i) {
+								DockingWindow w = tw.getChildWindow(i);
+								if (w == views[2])
+									throw new OperationAbortedException("Window minimize was aborted!");
+							}
+						}
+					}
+
+					public void windowRemoved(DockingWindow removedFromWindow, DockingWindow removedWindow) {
+						updateViews(removedWindow, false);
+					}
+
+					public void windowRestored(DockingWindow arg0) {
+					}
+
+					public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
+					}
+
+					public void windowShown(DockingWindow arg0) {
+					}
+
+					public void windowUndocked(DockingWindow arg0) {
+					}
+
+					public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
+					}
+
+				});
+
+				getContentPane().setLayout(new BorderLayout());
+				getContentPane().add(menuBar, BorderLayout.NORTH);
+				JPanel mainPanel = new JPanel();
+				mainPanel.setLayout(new BorderLayout());
+				mainPanel.add(new JLabel("   "), BorderLayout.NORTH);
+				mainPanel.add(rootWindow, BorderLayout.CENTER);
+				((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(Color.gray, 6));
+				getContentPane().add(mainPanel, BorderLayout.CENTER);
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						rootWindow.setWindow(new SplitWindow(true, 0.4f, views[0], new SplitWindow(false, 0.7f,
+								new TabWindow(new DockingWindow[] { views[1] }), views[2])));
+					}
+				});
+
+				
+				
+				new Thread(new Runnable() {
+					public void run() {
+						while (true) {
+
+							updateConsoleIcon(null);
+							try {
+								if (_sessionId != null) {
+									reload();
+								}
+							} catch (Exception e) {
+
+							} finally {
+								try {
+									Thread.sleep(1000);
+								} catch (Exception e) {
+								}
+							}
+						}
+					}
+				}).start();
+
+				new Thread(new Runnable() {
+					public void run() {
+						while (true) {
+
+							if (_tasks.size() > 0) {
+								Vector<Runnable> tasks = popAllTasks(-1);
+								if (getR() != null) {
+									if (tasks != null) {
+										for (Runnable t : tasks) {
+											try {
+												t.run();
+											} catch (Exception e) {
+												e.printStackTrace();
 											}
-										} catch (Exception ex) {
-											ex.printStackTrace();
 										}
 									}
-								});
-							}
-							pluginsMenu.add(viewsMenu);
-						}
-						pluginsMenu.addSeparator();
-					}
-
-					pluginsMenu.add(_actions.get("installpluginjarfile"));
-					pluginsMenu.add(_actions.get("installpluginjarurl"));
-					pluginsMenu.add(_actions.get("installpluginzipfile"));
-					pluginsMenu.add(_actions.get("installpluginzipurl"));
-
-					pluginsMenu.addSeparator();
-					pluginsMenu.add(_actions.get("openpluginviewjarfile"));
-					pluginsMenu.add(_actions.get("openpluginviewjarurl"));
-					pluginsMenu.add(_actions.get("openpluginviewclasses"));
-					pluginsMenu.addSeparator();
-					pluginsMenu.add(new AbstractAction("Refresh") {
-						public void actionPerformed(ActionEvent e) {
-							new Thread(new Runnable() {
-								public void run() {
-									try {
-										refreshPluginViewsHash();
-									} catch (Exception ex) {
-										ex.printStackTrace();
-									}
-								}
-
-							}).start();
-
-						}
-					});
-					pluginsMenu.addSeparator();
-					pluginsMenu.add(_actions.get("browsepluginsrepository"));
-				}
-
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(pluginsMenu);
-
-			final JMenu helpMenu = new JMenu("Help");
-			helpMenu.addMenuListener(new MenuListener() {
-				public void menuSelected(MenuEvent e) {
-
-					helpMenu.removeAll();
-					helpMenu.add(_actions.get("help"));
-					helpMenu.add(_actions.get("biocepmindmap"));
-					helpMenu.addSeparator();
-					helpMenu.add(_actions.get("rbiocmanual"));
-					helpMenu.add(_actions.get("graphicstaskpage"));
-					helpMenu.add(_actions.get("thergraphgallery"));
-					helpMenu.add(_actions.get("rgraphicalmanual"));
-					helpMenu.addSeparator();
-					helpMenu.add(_actions.get("about"));
-
-				}
-
-				public void menuCanceled(MenuEvent e) {
-				}
-
-				public void menuDeselected(MenuEvent e) {
-				}
-			});
-			menuBar.add(helpMenu);
-
-			JScrollPane filesScrollPane = new JScrollPane(_filesTable);
-			filesScrollPane.addMouseListener(ml);
-			workingDirPanel.add(filesScrollPane, BorderLayout.CENTER);
-
-			views[0] = new View("R Console", null, _consolePanel);
-			views[1] = new View("Main Graphic Device", null, _rootGraphicPanel);
-			views[2] = new View("Working Directory", null, workingDirPanel);
-			ViewMap viewMap = new ViewMap();
-			viewMap.addView(0, views[0]);
-			viewMap.addView(1, views[1]);
-			viewMap.addView(2, views[2]);
-
-			MixedViewHandler handler = new MixedViewHandler(viewMap, new ViewSerializer() {
-				public void writeView(View view, ObjectOutputStream out) throws IOException {
-					out.writeInt(((DynamicView) view).getId());
-				}
-
-				public View readView(ObjectInputStream in) throws IOException {
-					return dynamicViews.get(in.readInt());
-				}
-			});
-
-			views[1].getViewProperties().setIcon(_currentDeviceIcon);
-			final RootWindow rootWindow = DockingUtil.createRootWindow(viewMap, handler, true);
-			rootWindow.getWindowBar(Direction.DOWN).setEnabled(true);
-
-			RootWindowProperties properties = new RootWindowProperties();
-			properties.addSuperObject(new ShapedGradientDockingTheme().getRootWindowProperties());
-			rootWindow.getRootWindowProperties().addSuperObject(properties);
-			rootWindow.getWindowBar(Direction.DOWN).setEnabled(true);
-			rootWindow.addListener(new DockingWindowListener() {
-
-				public void viewFocusChanged(View arg0, View arg1) {
-				}
-
-				public void windowAdded(DockingWindow addedToWindow, DockingWindow addedWindow) {
-					updateViews(addedWindow, true);
-					if (addedWindow instanceof FloatingWindow)
-						updateFloatingWindow((FloatingWindow) addedWindow);
-				}
-
-				public void windowClosed(DockingWindow arg0) {
-				}
-
-				public void windowClosing(DockingWindow window) throws OperationAbortedException {
-					if (window == views[0] || window == views[1] || window == views[2])
-						throw new OperationAbortedException("Window close was aborted!");
-
-					if (window instanceof DeviceView) {
-						try {
-							GDDevice d = ((DeviceView) window).getPanel().getGdDevice();
-							if (_currentDevice == d) {
-								setCurrentDevice(((JGDPanelPop) _graphicPanel).getGdDevice());
-								_currentDevice.setAsCurrentDevice();
-							} else {
-								getCurrentJGPanelPop().removeCoupledTo(((DeviceView) window).getPanel());
-							}
-							((DeviceView) window).getPanel().dispose();
-
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-
-					if (window instanceof TabWindow) {
-						TabWindow tw = (TabWindow) window;
-						for (int i = 0; i < tw.getChildWindowCount(); ++i) {
-							DockingWindow w = tw.getChildWindow(i);
-							if (w == views[0] || w == views[1] || w == views[2])
-								throw new OperationAbortedException("Window close was aborted!");
-						}
-					}
-
-					if (window instanceof TabWindow) {
-						TabWindow tw = (TabWindow) window;
-						for (int i = 0; i < tw.getChildWindowCount(); ++i) {
-							DockingWindow w = tw.getChildWindow(i);
-							if (w instanceof DeviceView) {
-								try {
-
-									GDDevice d = ((DeviceView) w).getPanel().getGdDevice();
-									if (_currentDevice == d) {
-										setCurrentDevice(((JGDPanelPop) _graphicPanel).getGdDevice());
-										_currentDevice.setAsCurrentDevice();
-									}
-									((DeviceView) w).getPanel().dispose();
-
-								} catch (Exception e) {
-									e.printStackTrace();
 								}
 							}
+
+							try {
+								Thread.sleep(200);
+							} catch (Exception e) {
+							}
+
+						}
+					}
+				}).start();
+
+				
+			} else {
+
+				JPanel mainPanel = new JPanel();
+				mainPanel.setLayout(new BorderLayout());
+
+				
+				String fileName=PoolUtils.cacheJar(new URL(getParameter("gui_url")), ServerManager.DOWNLOAD_DIR, PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+				String pname=new File(fileName).getName();
+				pname=pname.substring(0, pname.lastIndexOf('.'));
+				File pfile=new File(ServerManager.DOWNLOAD_DIR+"/"+pname);
+				if (!pfile.exists() || pfile.lastModified()<new File(fileName).lastModified()) {
+					if (pfile.exists()) {
+						PoolUtils.deleteDirectory(pfile);				
+					}			
+					InputStream is = new FileInputStream(fileName);
+					unzip(is, ServerManager.DOWNLOAD_DIR, null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+				}		
+				Vector<PluginViewDescriptor> views = OpenPluginViewDialog.getPluginViews(pfile.getAbsolutePath() + "/");
+				
+				System.out.println("####  "+views);
+				PluginViewDescriptor pvd = null;
+				
+				if (getParameter("gui_name")==null || getParameter("gui_name").equals("")) {
+					pvd = views.elementAt(0);
+				} else {
+					for (int i=0; i<views.size(); ++i) {
+						if (views.elementAt(i).getName().equals(getParameter("gui_name"))) {
+							pvd=views.elementAt(i);break;
 						}
 					}
 				}
-
-				public void windowDocked(DockingWindow arg0) {
-				}
-
-				public void windowDocking(DockingWindow arg0) throws OperationAbortedException {
-				}
-
-				public void windowHidden(DockingWindow arg0) {
-				}
-
-				public void windowMaximized(DockingWindow arg0) {
-				}
-
-				public void windowMaximizing(DockingWindow window) throws OperationAbortedException {
-				}
-
-				public void windowMinimized(DockingWindow arg0) {
-				}
-
-				public void windowMinimizing(DockingWindow window) throws OperationAbortedException {
-					if (window == views[2])
-						throw new OperationAbortedException("Window minimize was aborted!");
-					if (window instanceof TabWindow) {
-						TabWindow tw = (TabWindow) window;
-						for (int i = 0; i < tw.getChildWindowCount(); ++i) {
-							DockingWindow w = tw.getChildWindow(i);
-							if (w == views[2])
-								throw new OperationAbortedException("Window minimize was aborted!");
-						}
+				
+				System.out.println("####  "+pvd);
+				
+				System.setSecurityManager(new YesSecurityManager());
+				try {
+					Class<?> c_ = pvd.getPluginClassLoader().loadClass(pvd.getClassName());
+					Object o_ = c_.getConstructor(RGui.class).newInstance(WorkbenchApplet.this);
+					if (JPanel.class.isAssignableFrom(c_)) {
+						mainPanel.add((JPanel) o_);
 					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
-
-				public void windowRemoved(DockingWindow removedFromWindow, DockingWindow removedWindow) {
-					updateViews(removedWindow, false);
-				}
-
-				public void windowRestored(DockingWindow arg0) {
-				}
-
-				public void windowRestoring(DockingWindow arg0) throws OperationAbortedException {
-				}
-
-				public void windowShown(DockingWindow arg0) {
-				}
-
-				public void windowUndocked(DockingWindow arg0) {
-				}
-
-				public void windowUndocking(DockingWindow arg0) throws OperationAbortedException {
-				}
-
-			});
-
-			getContentPane().setLayout(new BorderLayout());
-			getContentPane().add(menuBar, BorderLayout.NORTH);
-			JPanel mainPanel = new JPanel();
-			mainPanel.setLayout(new BorderLayout());
-			mainPanel.add(new JLabel("   "), BorderLayout.NORTH);
-			mainPanel.add(rootWindow, BorderLayout.CENTER);
-			((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(Color.gray, 6));
-			getContentPane().add(mainPanel, BorderLayout.CENTER);
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					rootWindow.setWindow(new SplitWindow(true, 0.4f, views[0], new SplitWindow(false, 0.7f, new TabWindow(new DockingWindow[] { views[1] }),
-							views[2])));
-				}
-			});
+				
+				((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(Color.gray, 6));
+				getContentPane().add(mainPanel, BorderLayout.CENTER);
+				
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		new Thread(new Runnable() {
-			public void run() {
-				while (true) {
-
-					updateConsoleIcon(null);
-					try {
-						if (_sessionId != null) {
-							reload();
-						}
-					} catch (Exception e) {
-
-					} finally {
-						try {
-							Thread.sleep(1000);
-						} catch (Exception e) {
-						}
-					}
-				}
-			}
-		}).start();
-
-		new Thread(new Runnable() {
-			public void run() {
-				while (true) {
-
-					if (_tasks.size() > 0) {
-						Vector<Runnable> tasks = popAllTasks(-1);
-						if (getR() != null) {
-							if (tasks != null) {
-								for (Runnable t : tasks) {
-									try {
-										t.run();
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							}
-						}
-					}
-
-					try {
-						Thread.sleep(200);
-					} catch (Exception e) {
-					}
-
-				}
-			}
-		}).start();
 
 		/*
 		 * new Thread(new Runnable() { public void run() { loadJEditClasses(); }
@@ -2368,14 +2430,14 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 		}
 		return null;
 	}
-	
+
 	private Vector<BroadcastedDeviceView> getOpenedBroadcastedDeviceViews() {
-		Vector<BroadcastedDeviceView> result=new Vector<BroadcastedDeviceView>();
+		Vector<BroadcastedDeviceView> result = new Vector<BroadcastedDeviceView>();
 		Iterator<DynamicView> iter = dynamicViews.values().iterator();
 		while (iter.hasNext()) {
 			DynamicView dv = iter.next();
 			if (dv instanceof BroadcastedDeviceView) {
-				result.add((BroadcastedDeviceView)dv);
+				result.add((BroadcastedDeviceView) dv);
 			}
 		}
 		return result;
@@ -3678,7 +3740,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 				rootGraphicPanel.add(graphicPanel, BorderLayout.CENTER);
 				int id = getDynamicViewId();
 				DeviceView deviceView = new BroadcastedDeviceView("Broadcasted Graphic Device", null, rootGraphicPanel, id);
-				
+
 				((TabWindow) views[2].getWindowParent()).addTab(deviceView);
 
 				try {
@@ -3987,30 +4049,29 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 		_actions.put("slider", new AbstractAction("Variable Slider") {
 			public void actionPerformed(final ActionEvent e) {
-					int id = getDynamicViewId();
-					final SliderView lv = new SliderView("Slider", null, id, WorkbenchApplet.this,0,100,10);
-					((TabWindow) views[2].getWindowParent()).addTab(lv);
-					
-					
-					lv.addListener(new AbstractDockingWindowListener() {
-						@Override
-						public void windowClosed(DockingWindow arg0) {
-							try { 
-								lv.destroy();
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+				int id = getDynamicViewId();
+				final SliderView lv = new SliderView("Slider", null, id, WorkbenchApplet.this, 0, 100, 10);
+				((TabWindow) views[2].getWindowParent()).addTab(lv);
+
+				lv.addListener(new AbstractDockingWindowListener() {
+					@Override
+					public void windowClosed(DockingWindow arg0) {
+						try {
+							lv.destroy();
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						
-					});
-					
+					}
+
+				});
+
 			}
 
 			public boolean isEnabled() {
 				return getR() != null;
 			}
 		});
-		
+
 		_actions.put("clientgroovyconsole", new AbstractAction("Local Groovy Console") {
 			public void actionPerformed(final ActionEvent e) {
 				if (getOpenedClientGroovyConsoleView() == null) {
@@ -5607,16 +5668,15 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 				}
 
 			}
-			
-			
+
 			if (!getUID().equals(action.getAttributes().get("originatorUID"))) {
 				if (action.getActionName().equals("OPEN_BROADCASTED_DEVICE")) {
-					if (getOpenedBroadcastedDeviceViews().size()==0) {
+					if (getOpenedBroadcastedDeviceViews().size() == 0) {
 						_actions.get("createbroadcasteddevice").actionPerformed(null);
 					}
 				}
 			}
-			
+
 			if (action.getActionName().equals("USER_JOINED")) {
 				if (!action.getAttributes().get("sourceUID").equals(getUID())) {
 					_consolePanel.print(null, "User [ " + (String) action.getAttributes().get("user") + " ] joined \n");
@@ -5670,7 +5730,11 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 	public void refreshPluginViewsHash() throws Exception {
 		HashMap<String, Vector<PluginViewDescriptor>> tempPluginViewsHash = new HashMap<String, Vector<PluginViewDescriptor>>();
-		File[] list = new File(ServerManager.PLUGINS_DIR).listFiles();
+		File[] list = new File(ServerManager.PLUGINS_DIR).listFiles(new FileFilter() {
+			public boolean accept(File pathname) {
+				return pathname.isDirectory() || pathname.getName().endsWith(".jar");
+			}
+		});
 		for (int i = 0; i < list.length; ++i) {
 			Vector<PluginViewDescriptor> views = null;
 			System.out.println("Plugin Candidate:" + list[i].getAbsolutePath());
@@ -5695,38 +5759,38 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 	}
 
 	public void refreshMacros() throws Exception {
-		
-			Vector<MacroInterface> tempMacrosVector = null;
-			try {
-				tempMacrosVector = Macro.getMacros(getInstallDir());
-				
-				for (MacroInterface m : macrosVector) {
-					for (VariablesChangeListener v : m.getVarsListeners())
-						removeVariablesChangeListener(v);
-					for (CellsChangeListener c : m.getCellsListeners())
-						removeCellsChangeListener(c);
-				}
-				
-				if (_macrosEnabled) {
-					macrosVector = tempMacrosVector;
-					for (MacroInterface m : macrosVector) {
-						if (getR() != null) {
-							getR().addProbeOnVariables(m.getProbes());
-						}
-						for (VariablesChangeListener v : m.getVarsListeners()) {
-							addVariablesChangeListener(v);
-						}
-						for (CellsChangeListener c : m.getCellsListeners())
-							addCellsChangeListener(c);				
-					}
-				} else {
-					macrosVector = new Vector<MacroInterface>();
-				}
-								
-			} catch (Exception e) {
-				e.printStackTrace();
+
+		Vector<MacroInterface> tempMacrosVector = null;
+		try {
+			tempMacrosVector = Macro.getMacros(getInstallDir());
+
+			for (MacroInterface m : macrosVector) {
+				for (VariablesChangeListener v : m.getVarsListeners())
+					removeVariablesChangeListener(v);
+				for (CellsChangeListener c : m.getCellsListeners())
+					removeCellsChangeListener(c);
 			}
-		
+
+			if (_macrosEnabled) {
+				macrosVector = tempMacrosVector;
+				for (MacroInterface m : macrosVector) {
+					if (getR() != null) {
+						getR().addProbeOnVariables(m.getProbes());
+					}
+					for (VariablesChangeListener v : m.getVarsListeners()) {
+						addVariablesChangeListener(v);
+					}
+					for (CellsChangeListener c : m.getCellsListeners())
+						addCellsChangeListener(c);
+				}
+			} else {
+				macrosVector = new Vector<MacroInterface>();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	Vector<VariablesChangeListener> varsListners = new Vector<VariablesChangeListener>();
@@ -5789,5 +5853,21 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 	}
 
 	static public void main(String[] args) throws Exception {
+
+		
+		
+		//views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath() + "/");
+		/*
+		File pf = new File(pluginsDir.getAbsolutePath() + "/"
+				+ files[i].getName().substring(0, files[i].getName().lastIndexOf('.')));
+		if (pf.exists()) {
+			PoolUtils.deleteDirectory(pf);
+		}
+		// pf.mkdirs();
+
+		URL rUrl = files[i].toURI().toURL();
+		InputStream is = rUrl.openConnection().getInputStream();
+		unzip(is, pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+		*/
 	}
 }
