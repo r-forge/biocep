@@ -933,6 +933,10 @@
 		<if><not><isset property="preprocess.help"/></not><then><property name="preprocess.help" value=""/></then></if>
 		<if><not><isset property="r.options"/></not><then><property name="r.options" value=""/></then></if>
 		
+		<if><not><isset property="noconfirmation"/></not><then><property name="noconfirmation" value="false"/></then></if>
+		<if><not><isset property="gui_url"/></not><then><property name="gui_url" value=""/></then></if>
+		<if><not><isset property="gui_name"/></not><then><property name="gui_name" value=""/></then></if>
+		
 
 		<java  maxmemory="1024m" classname="org.kchine.r.workbench.WorkbenchLauncher"
 			fork="true" spawn="${spawn}">
@@ -1041,6 +1045,9 @@
 			<jvmarg value="-Dpreprocess.help=${preprocess.help}"/>
 			<jvmarg value="-Dr.options=${r.options}"/>
 			
+			<jvmarg value="-Dnoconfirmation=${noconfirmation}"/>
+			<jvmarg value="-Dgui_url=${gui_url}"/>
+			<jvmarg value="-Dgui_name=${gui_name}"/>
 			
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
 			<jvmarg value="-Dlog4j.rootCategory=INFO,A1"/>

@@ -1083,7 +1083,7 @@ public class PoolUtils {
 
 	
 	private static final int RECONNECTION_RETRIAL_NBR=4;
-	public static void cacheJar(URL url, String location, int logInfo, boolean forced) throws Exception {
+	public static String cacheJar(URL url, String location, int logInfo, boolean forced) throws Exception {
 		final String jarName = url.toString().substring(url.toString().lastIndexOf("/") + 1);
 		if (!location.endsWith("/") && !location.endsWith("\\"))
 			location += "/";
@@ -1116,7 +1116,7 @@ public class PoolUtils {
 				boolean somethingToDo=!file.exists() 
 								||  file.lastModified() < urlLastModified
 								|| (file.length() != urlC.getContentLength() && !isValidJar(fileName)); 
-				if (!somethingToDo) return;
+				if (!somethingToDo) return fileName;
 			}
 
 			if ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) {
@@ -1265,6 +1265,8 @@ public class PoolUtils {
 				log.info(" 100% of " + jarName + " has been downloaded");
 			}
 		}
+		
+		return fileName;
 	}
 
 	public static void prepareFileDirectories(String destination, String entryName) {
