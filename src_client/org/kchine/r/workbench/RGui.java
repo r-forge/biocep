@@ -72,6 +72,9 @@ public interface RGui extends RKit {
 	
 	public void addCellsChangeListener(CellsChangeListener listener);
 	public void removeCellsChangeListener(CellsChangeListener listener);
+		
+	public void addRConnectionListener(RConnectionListener listener);
+	public void removeRConnectionListener(RConnectionListener listener);
 	
 	public HashSet<String> getAvailableExtensions();
 	

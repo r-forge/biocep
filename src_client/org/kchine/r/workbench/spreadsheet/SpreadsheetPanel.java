@@ -102,6 +102,7 @@ import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl;
 import org.kchine.r.server.spreadsheet.SpreadsheetTableModelClipboardInterface;
 import org.kchine.r.workbench.CellsChangeListener;
 import org.kchine.r.workbench.ConsoleLogger;
+import org.kchine.r.workbench.RConnectionListener;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.VariablesChangeListener;
 import org.kchine.r.workbench.WorkbenchApplet;
@@ -262,6 +263,15 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public void removeVariablesChangeListener(VariablesChangeListener listener) {
 			}
 			
+			public void addRConnectionListener(RConnectionListener listener) {
+			
+				
+			}
+			public void removeRConnectionListener(RConnectionListener listener) {
+			
+				
+			}
+			
 			public String getPluginsDir() {
 				return null;
 			}
@@ -269,6 +279,7 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 			public HashSet<String> getAvailableExtensions() {
 				return null;
 			}
+			
 			
 		};
 		JFrame f = new JFrame("F1");

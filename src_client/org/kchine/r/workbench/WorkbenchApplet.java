@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -79,9 +80,9 @@ import javax.swing.AbstractAction;
 import javax.swing.AbstractListModel;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -95,6 +96,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -334,6 +336,8 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 	boolean _macrosEnabled = true;
 
+	String gui_url = null;
+
 	private final ReentrantLock _protectR = new ExtendedReentrantLock() {
 
 		@Override
@@ -466,24 +470,19 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 		return getParameter("desktopapplication") != null && getParameter("desktopapplication").equalsIgnoreCase("true");
 	}
 
-	File pluginsDir;
 
 	public void init() {
 		super.init();
 
 		// _clientIP=PoolUtils.whatIsMyIp();
 
-		if (_clientIP == null)
-			_clientIP = PoolUtils.getHostIp();
+		if (_clientIP == null) _clientIP = PoolUtils.getHostIp();
 		if (System.getProperty("java.rmi.server.hostname") == null || System.getProperty("java.rmi.server.hostname").equals("")) {
 			System.setProperty("java.rmi.server.hostname", _clientIP);
 		}
-
 		System.out.println("client IP:" + _clientIP);
-
 		PoolUtils.initLog4J();
 		PoolUtils.initRmiSocketFactory();
-
 		System.setErr(System.out);
 		if (getParameter("debug") != null && getParameter("debug").equalsIgnoreCase("true")) {
 			redirectIO();
@@ -491,36 +490,9 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 		System.out.println("INIT starts");
 
-		pluginsDir = new File(new File(ServerManager.INSTALL_DIR).getAbsoluteFile() + "/plugins");
-		if (!pluginsDir.exists())
-			pluginsDir.mkdirs();
 
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					refreshPluginViewsHash();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					refreshMacros();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-		if (true) {
-
-			LocalHttpServer.getRootContext().addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(WorkbenchApplet.this)),
-					"/rvirtual/helpme/*");
-			LocalRmiRegistry.getLocalRmiRegistryPort();
-		}
+		LocalHttpServer.getRootContext().addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(WorkbenchApplet.this)),"/rvirtual/helpme/*");
+		LocalRmiRegistry.getLocalRmiRegistryPort();
 
 		try {
 			jeditcl = new URLClassLoader(new URL[] { new URL("http://127.0.0.1:" + LocalHttpServer.getLocalHttpServerPort()
@@ -951,69 +923,25 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 							}
 
-							s = new Stack<GDDevice>();
+							if (gui_url == null || gui_url.equals("")) {
 
-							if (_rForConsole instanceof HttpMarker || !_rForConsole.hasRCollaborationListeners() || _selfish) {
-								GDDevice[] ldevices = _rForConsole.listDevices();
-								for (int i = ldevices.length - 1; i >= 0; --i)
-									s.push(ldevices[i]);
-							}
+								s = new Stack<GDDevice>();
 
-							if (s.empty()) {
-								d = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
-							} else {
-								d = s.pop();
-								d.fireSizeChangedEvent(_graphicPanel.getWidth(), _graphicPanel.getHeight());
-							}
-
-							_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { new SetCurrentDeviceAction(WorkbenchApplet.this, d), null,
-									new FitDeviceAction(WorkbenchApplet.this, d), null, new SnapshotDeviceAction(WorkbenchApplet.this),
-									new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
-
-									new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
-									new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
-									new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
-									new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
-									new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
-
-									null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
-									new SaveDeviceAsOdgAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
-									new CopyToCurrentDeviceAction(WorkbenchApplet.this, d), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this)
-
-							}, getRLock(), getConsoleLogger());
-							_rootGraphicPanel.removeAll();
-							_rootGraphicPanel.setLayout(new BorderLayout());
-							_rootGraphicPanel.add(_graphicPanel, BorderLayout.CENTER);
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									_rootGraphicPanel.updateUI();
-									_rootGraphicPanel.repaint();
-
+								if (_rForConsole instanceof HttpMarker || !_rForConsole.hasRCollaborationListeners() || _selfish) {
+									GDDevice[] ldevices = _rForConsole.listDevices();
+									for (int i = ldevices.length - 1; i >= 0; --i)
+										s.push(ldevices[i]);
 								}
-							});
-
-							if (getOpenedServerLogView() != null) {
-								getOpenedServerLogView().recreateRemoteLogListenerImpl();
-								_rForConsole.addErrListener(getOpenedServerLogView().getRemoteLogListenerImpl());
-								_rForConsole.addOutListener(getOpenedServerLogView().getRemoteLogListenerImpl());
-
-							}
-
-							Vector<DeviceView> deviceViews = getDeviceViews();
-							for (int i = 0; i < deviceViews.size(); ++i) {
-								final JPanel rootComponent = (JPanel) deviceViews.elementAt(i).getComponent();
-								GDDevice newDevice = null;
 
 								if (s.empty()) {
-									newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
+									d = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 								} else {
-									newDevice = s.pop();
-									newDevice.fireSizeChangedEvent(rootComponent.getWidth(), rootComponent.getHeight());
+									d = s.pop();
+									d.fireSizeChangedEvent(_graphicPanel.getWidth(), _graphicPanel.getHeight());
 								}
 
-								JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
-										new SetCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
-										new FitDeviceAction(WorkbenchApplet.this, newDevice), null, new SnapshotDeviceAction(WorkbenchApplet.this),
+								_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { new SetCurrentDeviceAction(WorkbenchApplet.this, d),
+										null, new FitDeviceAction(WorkbenchApplet.this, d), null, new SnapshotDeviceAction(WorkbenchApplet.this),
 										new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
 
 										new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
@@ -1023,31 +951,80 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 										new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
 
 										null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
-										new SaveDeviceAsOdgAction(WorkbenchApplet.this), null,
+										new SaveDeviceAsOdgAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
+										new CopyToCurrentDeviceAction(WorkbenchApplet.this, d), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this)
 
-										new CopyFromCurrentDeviceAction(WorkbenchApplet.this), new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice),
-										null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this) }, getRLock(), getConsoleLogger());
-
-								rootComponent.removeAll();
-								rootComponent.setLayout(new BorderLayout());
-								rootComponent.add(gp, BorderLayout.CENTER);
+								}, getRLock(), getConsoleLogger());
+								_rootGraphicPanel.removeAll();
+								_rootGraphicPanel.setLayout(new BorderLayout());
+								_rootGraphicPanel.add(_graphicPanel, BorderLayout.CENTER);
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
-										rootComponent.updateUI();
-										rootComponent.repaint();
+										_rootGraphicPanel.updateUI();
+										_rootGraphicPanel.repaint();
 
 									}
 								});
 
-								deviceViews.elementAt(i).setPanel((JGDPanelPop) gp);
-							}
+								if (getOpenedServerLogView() != null) {
+									getOpenedServerLogView().recreateRemoteLogListenerImpl();
+									_rForConsole.addErrListener(getOpenedServerLogView().getRemoteLogListenerImpl());
+									_rForConsole.addOutListener(getOpenedServerLogView().getRemoteLogListenerImpl());
 
-							_currentDevice = d;
-							setCurrentDevice(d);
-							d.setAsCurrentDevice();
+								}
 
-							while (!s.empty()) {
-								_actions.get("createdevice").actionPerformed(null);
+								Vector<DeviceView> deviceViews = getDeviceViews();
+								for (int i = 0; i < deviceViews.size(); ++i) {
+									final JPanel rootComponent = (JPanel) deviceViews.elementAt(i).getComponent();
+									GDDevice newDevice = null;
+
+									if (s.empty()) {
+										newDevice = _rForConsole.newDevice(_graphicPanel.getWidth(), _graphicPanel.getHeight());
+									} else {
+										newDevice = s.pop();
+										newDevice.fireSizeChangedEvent(rootComponent.getWidth(), rootComponent.getHeight());
+									}
+
+									JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
+											new SetCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
+											new FitDeviceAction(WorkbenchApplet.this, newDevice), null, new SnapshotDeviceAction(WorkbenchApplet.this),
+											new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
+
+											new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
+											new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+											new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
+											new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
+											new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
+
+											null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
+											new SaveDeviceAsOdgAction(WorkbenchApplet.this), null,
+
+											new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
+											new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
+											new CoupleToCurrentDeviceAction(WorkbenchApplet.this) }, getRLock(), getConsoleLogger());
+
+									rootComponent.removeAll();
+									rootComponent.setLayout(new BorderLayout());
+									rootComponent.add(gp, BorderLayout.CENTER);
+									SwingUtilities.invokeLater(new Runnable() {
+										public void run() {
+											rootComponent.updateUI();
+											rootComponent.repaint();
+
+										}
+									});
+
+									deviceViews.elementAt(i).setPanel((JGDPanelPop) gp);
+								}
+
+								_currentDevice = d;
+								setCurrentDevice(d);
+								d.setAsCurrentDevice();
+
+								while (!s.empty()) {
+									_actions.get("createdevice").actionPerformed(null);
+								}
+
 							}
 
 							_demos = _rForConsole.listDemos();
@@ -1099,8 +1076,13 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							}).start();
 
 							if (_mode == HTTP_MODE) {
+
+								connected();
+
 								return "Logged on as " + _login + "\n";
 							} else {
+
+								connected();
 
 								return "Logged on" + "\n";
 							}
@@ -1245,11 +1227,13 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 				}
 
 			});
-			
-			
-			String gui_url=getParameter("gui_url");
 
-			if ( gui_url==null || gui_url.equals("") ) {
+			gui_url = getParameter("gui_url");
+
+			if (gui_url == null || gui_url.equals("")) {
+				
+				
+				
 
 				try {
 					if (stateProperties.get("command.history") != null) {
@@ -2170,7 +2154,25 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					}
 				});
 
-				
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							refreshPluginViewsHash();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							refreshMacros();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
 				
 				new Thread(new Runnable() {
 					public void run() {
@@ -2221,61 +2223,115 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					}
 				}).start();
 
-				
 			} else {
-
-				JPanel mainPanel = new JPanel();
+				final JPanel mainPanel = new JPanel();
 				mainPanel.setLayout(new BorderLayout());
-
-				
-				String fileName=PoolUtils.cacheJar(new URL(getParameter("gui_url")), ServerManager.DOWNLOAD_DIR, PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
-				String pname=new File(fileName).getName();
-				pname=pname.substring(0, pname.lastIndexOf('.'));
-				File pfile=new File(ServerManager.DOWNLOAD_DIR+"/"+pname);
-				if (!pfile.exists() || pfile.lastModified()<new File(fileName).lastModified()) {
-					if (pfile.exists()) {
-						PoolUtils.deleteDirectory(pfile);				
-					}			
-					InputStream is = new FileInputStream(fileName);
-					unzip(is, ServerManager.DOWNLOAD_DIR, null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
-				}		
-				Vector<PluginViewDescriptor> views = OpenPluginViewDialog.getPluginViews(pfile.getAbsolutePath() + "/");
-				
-				System.out.println("####  "+views);
-				PluginViewDescriptor pvd = null;
-				
-				if (getParameter("gui_name")==null || getParameter("gui_name").equals("")) {
-					pvd = views.elementAt(0);
-				} else {
-					for (int i=0; i<views.size(); ++i) {
-						if (views.elementAt(i).getName().equals(getParameter("gui_name"))) {
-							pvd=views.elementAt(i);break;
-						}
-					}
-				}
-				
-				System.out.println("####  "+pvd);
-				
-				System.setSecurityManager(new YesSecurityManager());
-				try {
-					Class<?> c_ = pvd.getPluginClassLoader().loadClass(pvd.getClassName());
-					Object o_ = c_.getConstructor(RGui.class).newInstance(WorkbenchApplet.this);
-					if (JPanel.class.isAssignableFrom(c_)) {
-						mainPanel.add((JPanel) o_);
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-				
+				mainPanel.add(new JLabel("Connecting..."), BorderLayout.CENTER);
 				((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(Color.gray, 6));
 				getContentPane().add(mainPanel, BorderLayout.CENTER);
-				
+
+				String fileName = PoolUtils.cacheJar(new URL(getParameter("gui_url")), ServerManager.DOWNLOAD_DIR, PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+				String pname = new File(fileName).getName();
+				pname = pname.substring(0, pname.lastIndexOf('.'));
+				final File pfile = new File(ServerManager.DOWNLOAD_DIR + "/" + pname);
+				if (!pfile.exists() || pfile.lastModified() < new File(fileName).lastModified()) {
+					if (pfile.exists()) {
+						PoolUtils.deleteDirectory(pfile);
+					}
+					InputStream is = new FileInputStream(fileName);
+					unzip(is, ServerManager.DOWNLOAD_DIR, null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+				}
+
+				addRConnectionListener(new RConnectionListener() {
+					
+					Vector<PluginViewDescriptor> views;
+					Vector<JPanel> perspectives=new Vector<JPanel>();
+					Vector<JToggleButton> buttons=new Vector<JToggleButton>();
+					
+					public void showPerspective(int i) {
+						mainPanel.removeAll();
+
+						if (getParameter("gui_selector")!=null && !getParameter("gui_selector").equals("")) {
+							JPanel p=new JPanel(new GridLayout(1,buttons.size()));
+							for (int k=0;k<buttons.size();++k) p.add(buttons.elementAt(k));
+							mainPanel.add(p, BorderLayout.NORTH);
+						}
+						
+						mainPanel.add(perspectives.elementAt(i), BorderLayout.CENTER);
+						
+						mainPanel.updateUI();
+						mainPanel.repaint();
+						
+					}
+					
+					public void connected() {
+						try {
+
+							views = OpenPluginViewDialog.getPluginViews(pfile.getAbsolutePath() + "/");
+
+							System.out.println("####  " + views);
+							PluginViewDescriptor pvd = null;
+
+							int index=-1;
+							
+							if (getParameter("gui_name") == null || getParameter("gui_name").equals("")) {
+								index=0;
+							} else {
+								for (int i = 0; i < views.size(); ++i) {
+									if (views.elementAt(i).getName().equals(getParameter("gui_name"))) {
+										index=i;
+										break;
+									}
+								}
+							}
+							
+							System.setSecurityManager(new YesSecurityManager());
+							ButtonGroup group=new ButtonGroup();
+							for (int i=0; i<views.size();++i) {
+								try {
+									Class<?> c_ = views.elementAt(i).getPluginClassLoader().loadClass(views.elementAt(i).getClassName());
+									Object o_ = c_.getConstructor(RGui.class).newInstance(WorkbenchApplet.this);
+									if (JPanel.class.isAssignableFrom(c_)) {								
+										perspectives.add((JPanel) o_);
+									}
+								} catch (Exception ex) {
+									ex.printStackTrace();
+									perspectives.add(new JPanel());
+								}
+								JToggleButton tb=new JToggleButton(views.elementAt(i).getName());
+								tb.addActionListener(new ActionListener(){
+									public void actionPerformed(ActionEvent e) {
+										showPerspective(buttons.indexOf(e.getSource()));										
+									}
+								});
+								buttons.add(tb);
+								group.add(tb);
+							}
+							
+							
+							buttons.elementAt(index).setSelected(true);
+							showPerspective(index);
+							
+
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+
+					}
+
+					public void connecting() {}
+
+					public void disconnected() {}
+
+					public void disconnecting() {}
+
+				});
+
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 
 		/*
 		 * new Thread(new Runnable() { public void run() { loadJEditClasses(); }
@@ -4460,7 +4516,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 								try {
 
-									PoolUtils.cacheJar(files[i].toURI().toURL(), pluginsDir.getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, true);
+									PoolUtils.cacheJar(files[i].toURI().toURL(), ServerManager.PLUGINS_DIR, PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, true);
 									JOptionPane.showMessageDialog(WorkbenchApplet.this, "Plugin "
 											+ files[i].getName().substring(0, files[i].getName().lastIndexOf('.')) + " Installed Successfully");
 								} catch (Exception ex) {
@@ -4494,7 +4550,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					new Thread(new Runnable() {
 						public void run() {
 							try {
-								PoolUtils.cacheJar(new URL(jarUrl), pluginsDir.getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, true);
+								PoolUtils.cacheJar(new URL(jarUrl), ServerManager.PLUGINS_DIR, PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, true);
 								JOptionPane.showMessageDialog(WorkbenchApplet.this, "Plugin Installed Successfully");
 							} catch (Exception ex) {
 								ex.printStackTrace();
@@ -4534,7 +4590,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 							for (int i = 0; i < files.length; ++i) {
 
 								try {
-									File pf = new File(pluginsDir.getAbsolutePath() + "/"
+									File pf = new File(ServerManager.PLUGINS_DIR + "/"
 											+ files[i].getName().substring(0, files[i].getName().lastIndexOf('.')));
 									if (pf.exists()) {
 										PoolUtils.deleteDirectory(pf);
@@ -4543,7 +4599,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 									URL rUrl = files[i].toURI().toURL();
 									InputStream is = rUrl.openConnection().getInputStream();
-									unzip(is, pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+									unzip(is, ServerManager.PLUGINS_DIR, null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
 
 									JOptionPane.showMessageDialog(null, "Plugin " + files[i].getName().substring(0, files[i].getName().lastIndexOf('.'))
 											+ " Installed Successfully");
@@ -4583,7 +4639,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 								String pluginname = jarUrl.substring(jarUrl.lastIndexOf("/") + 1, jarUrl.lastIndexOf("."));
 
-								File pf = new File(pluginsDir.getAbsolutePath() + "/" + pluginname);
+								File pf = new File(ServerManager.PLUGINS_DIR + "/" + pluginname);
 								if (pf.exists()) {
 									PoolUtils.deleteDirectory(pf);
 								}
@@ -4591,7 +4647,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 								URL rUrl = new URL(jarUrl);
 								InputStream is = rUrl.openConnection().getInputStream();
-								unzip(is, pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
+								unzip(is, ServerManager.PLUGINS_DIR, null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
 
 								JOptionPane.showMessageDialog(null, "Plugin " + pluginname + " Installed Successfully");
 							} catch (Exception ex) {
@@ -5017,6 +5073,9 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			_sshParameters = null;
 			_rProcessId = null;
 			_virtualizationServer = null;
+
+			disconnected();
+
 		}
 
 	}
@@ -5821,6 +5880,40 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 		cellsListners.add(listener);
 	}
 
+	Vector<RConnectionListener> rconnectionListners = new Vector<RConnectionListener>();
+
+	public void removeAllRConnectionListeners() {
+		rconnectionListners.removeAllElements();
+	}
+
+	public void removeRConnectionListener(RConnectionListener listener) {
+		rconnectionListners.remove(listener);
+	}
+
+	public void addRConnectionListener(RConnectionListener listener) {
+		rconnectionListners.add(listener);
+	}
+
+	void disconnected() {
+		for (int i = 0; i < rconnectionListners.size(); ++i) {
+			try {
+				rconnectionListners.elementAt(i).disconnected();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	void connected() {
+		for (int i = 0; i < rconnectionListners.size(); ++i) {
+			try {
+				rconnectionListners.elementAt(i).connected();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public Vector<MacroInterface> getMacros() {
 		return macrosVector;
 	}
@@ -5854,20 +5947,18 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 	static public void main(String[] args) throws Exception {
 
-		
-		
-		//views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath() + "/");
+		// views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath()
+		// + "/");
 		/*
-		File pf = new File(pluginsDir.getAbsolutePath() + "/"
-				+ files[i].getName().substring(0, files[i].getName().lastIndexOf('.')));
-		if (pf.exists()) {
-			PoolUtils.deleteDirectory(pf);
-		}
-		// pf.mkdirs();
-
-		URL rUrl = files[i].toURI().toURL();
-		InputStream is = rUrl.openConnection().getInputStream();
-		unzip(is, pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true, "Unzipping Plugin..", 10000);
-		*/
+		 * File pf = new File(pluginsDir.getAbsolutePath() + "/" +
+		 * files[i].getName().substring(0,
+		 * files[i].getName().lastIndexOf('.'))); if (pf.exists()) {
+		 * PoolUtils.deleteDirectory(pf); } // pf.mkdirs();
+		 * 
+		 * URL rUrl = files[i].toURI().toURL(); InputStream is =
+		 * rUrl.openConnection().getInputStream(); unzip(is,
+		 * pluginsDir.getAbsolutePath(), null, PoolUtils.BUFFER_SIZE, true,
+		 * "Unzipping Plugin..", 10000);
+		 */
 	}
 }

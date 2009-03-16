@@ -68,7 +68,8 @@ public class WorkbenchLauncher {
 		params.put("privatename", System.getProperty("privatename"));
 		params.put("noconfirmation", System.getProperty("noconfirmation"));
 		params.put("gui_url", System.getProperty("gui_url"));
-		params.put("gui_name", System.getProperty("gui_name"));		
+		params.put("gui_name", System.getProperty("gui_name"));
+		params.put("gui_selector", System.getProperty("gui_selector"));
 		params.put("desktopapplication", "true");
 		params.put("javaws", System.getProperty("javaws"));
 		params.put("selfish", System.getProperty("selfish"));

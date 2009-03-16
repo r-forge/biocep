@@ -1,0 +1,90 @@
+
+package com.amazonaws.ec2.doc._2008_12_01;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+
+
+/**
+ * <p>Java class for BundleInstanceType complex type.
+ * 
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ * 
+ * <pre>
+ * &lt;complexType name="BundleInstanceType">
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="instanceId" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="storage" type="{http://ec2.amazonaws.com/doc/2008-12-01/}BundleInstanceTaskStorageType"/>
+ *       &lt;/sequence>
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
+ * 
+ * 
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "BundleInstanceType", propOrder = {
+    "instanceId",
+    "storage"
+})
+public class BundleInstanceType {
+
+    @XmlElement(required = true)
+    protected String instanceId;
+    @XmlElement(required = true)
+    protected BundleInstanceTaskStorageType storage;
+
+    /**
+     * Gets the value of the instanceId property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    /**
+     * Sets the value of the instanceId property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setInstanceId(String value) {
+        this.instanceId = value;
+    }
+
+    /**
+     * Gets the value of the storage property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link BundleInstanceTaskStorageType }
+     *     
+     */
+    public BundleInstanceTaskStorageType getStorage() {
+        return storage;
+    }
+
+    /**
+     * Sets the value of the storage property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link BundleInstanceTaskStorageType }
+     *     
+     */
+    public void setStorage(BundleInstanceTaskStorageType value) {
+        this.storage = value;
+    }
+
+}
