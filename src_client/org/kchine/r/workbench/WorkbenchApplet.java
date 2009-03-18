@@ -2251,7 +2251,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					public void showPerspective(int i) {
 						mainPanel.removeAll();
 
-						if (getParameter("gui_selector")!=null && !getParameter("gui_selector").equals("")) {
+						if (getParameter("gui_selector")!=null && getParameter("gui_selector").equalsIgnoreCase("true")) {
 							JPanel p=new JPanel(new GridLayout(1,buttons.size()));
 							for (int k=0;k<buttons.size();++k) p.add(buttons.elementAt(k));
 							mainPanel.add(p, BorderLayout.NORTH);

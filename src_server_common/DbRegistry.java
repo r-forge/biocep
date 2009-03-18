@@ -155,8 +155,8 @@ public class DbRegistry {
 				+(PoolUtils.isAmazonCloud() ? " -Dcloud=ec2":"")
 				+ (System.getProperty("r.binary")!=null && !System.getProperty("r.binary").equals("")? " "+(isWindowsOs() ? "\"" : "")+"-Dr.binary="+System.getProperty("r.binary")+(isWindowsOs() ? "\"" : "") : "") 
 				+ (System.getProperty("biocep.home")!=null && !System.getProperty("biocep.home").equals("")? " "+(isWindowsOs() ? "\"" : "")+"-Dbiocep.home="+System.getProperty("biocep.home")+(isWindowsOs() ? "\"" : "") : "")
-				
-				+" -cp "+jarfile+" RmiServer";
+				+ (System.getProperty("use.default.libs")!=null && !System.getProperty("use.default.libs").equals("")? " "+"-Duse.default.libs="+System.getProperty("use.default.libs") : "")
+				+" -cp "+(isWindowsOs() ? "\"" : "")+jarfile+(isWindowsOs() ? "\"" : "")+" RmiServer";
 				dbLayer.addNode(new NodeDataDB("N1",PoolUtils.getHostIp(),
 						PoolUtils.getHostName(),
 						"","",ServerManager.INSTALL_DIR,cmd,"",PoolUtils.getOs(),3,5,"RSERVANT_",0));
