@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.ConnectException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
@@ -50,6 +51,9 @@ import org.kchine.r.server.spreadsheet.SpreadsheetModelDevice;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteProxy;
 import org.kchine.rpf.PoolUtils;
 
+import com.sun.java.browser.net.ProxyInfo;
+import com.sun.java.browser.net.ProxyService;
+
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -60,13 +64,30 @@ public class RHttpProxy {
 	
 	private static HttpClient mainHttpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
 
+	private static String proxyHost=null;
+	private static int proxyPort=-1;
+	
 	public static String logOn(String url, String sessionId, String login, String pwd, HashMap<String, Object> options) throws TunnelingException {
 
+		ProxyInfo info[] = null;
+		try {ProxyService.getProxyInfo(new URL(url + "?method=ping"));} catch (Exception e) {e.printStackTrace();}
+        if(info != null && info.length > 0 && info[0] != null) {
+            proxyHost = info[0].getHost();
+            proxyPort = info[0].getPort();            
+            System.out.println("> > > Using Proxy:"+proxyHost+":"+proxyPort);
+        } 
+
+        if (proxyHost != null && proxyHost.length() > 0 && proxyPort > 0) {                
+        	mainHttpClient.getHostConfiguration().setProxy(proxyHost, proxyPort);
+        }
+        
 		GetMethod pingServer = null;
 		try {
 			Object result = null;
 			try {
 				pingServer = new GetMethod(url + "?method=ping");
+								
+				
 				mainHttpClient.executeMethod(pingServer);
 				result = new ObjectInputStream(pingServer.getResponseBodyAsStream()).readObject();
 				if (!result.equals("pong")) throw new ConnectionFailedException(); 
@@ -170,6 +191,10 @@ public class RHttpProxy {
 	}
 	public static Object invoke(String url, String sessionId, String servantName, String methodName, Class<?>[] methodSignature, Object[] methodParameters,
 			HttpClient httpClient) throws TunnelingException {
+		
+		if (proxyHost != null && proxyHost.length() > 0 && proxyPort > 0) {                
+			httpClient.getHostConfiguration().setProxy(proxyHost, proxyPort);
+        }
 		
 		PostMethod postPush = null;
 		try {
