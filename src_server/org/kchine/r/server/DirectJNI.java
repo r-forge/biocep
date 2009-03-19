@@ -453,6 +453,11 @@ public class DirectJNI {
 
 	public static String[] getROptions() {
 		String[] roptions=new String[] { "--no-save" };
+		
+		if (System.getProperty("proxy_host") != null && !System.getProperty("proxy_host").equals("")) {
+			roptions=new String[] { "--no-save" , "--internet2"};
+		}
+		
 		if (System.getProperty("r.options")!=null && !System.getProperty("r.options").equals("")) {
 			Vector<String> roptionsVector=new Vector<String>();
 			StringTokenizer st = new StringTokenizer(System.getProperty("r.options"), " ");

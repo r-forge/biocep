@@ -488,6 +488,14 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			redirectIO();
 		}
 
+		if (getParameter("proxy_host")!=null && !getParameter("proxy_host").equals("")) {
+			System.setProperty("proxy_host", getParameter("proxy_host"));
+		}
+		
+		if (getParameter("proxy_port")!=null && !getParameter("proxy_port").equals("")) {
+			System.setProperty("proxy_port", getParameter("proxy_port"));
+		}
+		
 		System.out.println("INIT starts");
 
 
