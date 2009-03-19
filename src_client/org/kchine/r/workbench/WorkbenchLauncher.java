@@ -70,6 +70,9 @@ public class WorkbenchLauncher {
 		params.put("gui_url", System.getProperty("gui_url"));
 		params.put("gui_name", System.getProperty("gui_name"));
 		params.put("gui_selector", System.getProperty("gui_selector"));
+		params.put("proxy_host", System.getProperty("proxy_host"));
+		params.put("proxy_port", System.getProperty("proxy_port"));
+		
 		params.put("desktopapplication", "true");
 		params.put("javaws", System.getProperty("javaws"));
 		params.put("selfish", System.getProperty("selfish"));
