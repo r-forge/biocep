@@ -4360,8 +4360,14 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 											root.addServlet(
 													new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(WorkbenchApplet.this, true)),
 													"/rvirtual/cmd/*");
-											root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(WorkbenchApplet.this)),
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(WorkbenchApplet.this)),													
 													"/rvirtual/helpme/*");
+											
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"www")), "/rvirtual/www/*");
+											
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"appletlibs")), "/rvirtual/appletlibs/*");		
+
+											
 
 											System.out.println("+++++++++++++++++++ going to start virtualization http server port : " + port);
 											_virtualizationServer.start();

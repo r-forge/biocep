@@ -22,6 +22,7 @@ package org.kchine.rpf.db.monitor;
 
 import javax.swing.SwingUtilities;
 import org.kchine.rpf.PoolUtils;
+import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.db.DBLayerInterface;
 import org.kchine.rpf.db.NodeDataDB;
 import org.kchine.rpf.db.SupervisorInterface;
@@ -33,6 +34,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Vector;
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
@@ -180,13 +182,22 @@ public class SupervisorUtils implements SupervisorInterface {
 		System.out.println("launchLocalProcess");
 
 		Vector<String> cmd = new Vector<String>();
-		cmd.add(isForWindows ? "cmd" : "/bin/sh");
-		cmd.add(isForWindows ? "/c" : "-c");
-		if (isForWindows) {			
-			Vector<String> tokens=PoolUtils.tokenizeWindowsCommand(command);
-			for (int i=0;i<tokens.size();++i) cmd.add(tokens.elementAt(i));			
+		
+		if (command.startsWith("ant")) {
+			
+			cmd.add(isForWindows ? "cmd" : "/bin/sh");
+			cmd.add(isForWindows ? "/c" : "-c");
+			if (isForWindows) {			
+				Vector<String> tokens=PoolUtils.tokenizeWindowsCommand(command);
+				for (int i=0;i<tokens.size();++i) cmd.add(tokens.elementAt(i));			
+			} else {
+				cmd.add(command);
+			}
 		} else {
-			cmd.add(command);
+			
+			Vector<String> tokens=PoolUtils.tokenizeWindowsCommand(command);
+			for (int i=0;i<tokens.size();++i) cmd.add(tokens.elementAt(i));
+			
 		}
 
 		System.out.println(cmd);
@@ -379,6 +390,30 @@ public class SupervisorUtils implements SupervisorInterface {
 			}
 		}).start();
 
+	}
+	
+	static public void main(String [] args ) throws Exception{
+		Properties props = new Properties();
+
+		props.put("naming.mode", "db");
+		props.put("db.type", "derby");
+		props.put("db.host", "localhost");
+		props.put("db.port", "1527");
+		props.put("db.name", "DWEP");
+		props.put("db.user", "DWEP");
+		props.put("db.password", "DWEP");
+
+		DBLayerInterface db = null;
+		try {
+			db = (DBLayerInterface) ServerDefaults.getRegistry(props);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		SupervisorUtils su=new SupervisorUtils(db);
+		
+		su.launchLocalProcess(true,"F:\\Documents and Settings\\Karim Chine\\Bureau\\Moz\\javaservice", "\"F:/Program Files/Java/jdk1.5.0_16/jre/bin/java\" -Dnaming.mode=db -Ddb.type=derby -Ddb.host=10.0.1.6 -Ddb.port=1527 -Ddb.name=DWEP -Ddb.user=DWEP -Ddb.password=DWEP -Dnode=N1 \"-Dbiocep.home=F:\\Documents and Settings\\Karim Chine\\Bureau\\Moz\\javaservice\\biocep_home\" -Duse.default.libs=true -cp \"F:\\Documents and Settings\\Karim Chine\\Bureau\\Moz\\javaservice\\biocep.jar\" RmiServer", "RSERVANT_", true);
+		
 	}
 	
 }

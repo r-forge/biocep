@@ -85,6 +85,7 @@ public class ServerManager {
 	public static String PLUGINS_DIR = null;
 	public static String EXTENSIONS_DIR = null;
 	public static String DOWNLOAD_DIR = null;
+	public static String WWW_DIR = null;
 	public static final String EMBEDDED_R = "R-version-2.8.0";
 	public static final int ENTRIES_NUMBER = 4832;
 
@@ -157,6 +158,16 @@ public class ServerManager {
 			DOWNLOAD_DIR = new File(INSTALL_DIR + "download").getAbsolutePath();
 		}
 		if (!new File(DOWNLOAD_DIR).exists())  new File(DOWNLOAD_DIR).mkdirs();
+		
+		
+		if (System.getenv("BIOCEP_WWW_DIR") != null) {
+			WWW_DIR = System.getenv("BIOCEP_WWW_DIR");
+		} else if (System.getProperty("www.home")!=null && !System.getProperty("www.home").equals("")) {			
+			WWW_DIR = System.getProperty("www.home");
+		} else {
+			WWW_DIR = new File(INSTALL_DIR + "www").getAbsolutePath();
+		}
+		if (!new File(WWW_DIR).exists())  new File(WWW_DIR).mkdirs();
 
 	}
 

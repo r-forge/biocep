@@ -32,6 +32,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 
 import org.kchine.rpf.ManagedServant;
 import org.kchine.rpf.ServantProvider;
@@ -50,13 +51,13 @@ public class ServantProviderDB implements ServantProvider{
 	private DBLayerInterface _dbLayer = null;	
 	private HashMap<String, PoolDataDB> _poolHashMap = new HashMap<String, PoolDataDB>();
 	
-	public ServantProviderDB() throws Exception{
+	public ServantProviderDB(Properties props) throws Exception{
 		
-		String _DB_TYPE =  System.getProperty("pools.dbmode.type") != null && !System.getProperty("pools.dbmode.type").equals("") ? System.getProperty("pools.dbmode.type") : DEFAULT_DB_TYPE;
-		String _DB_HOST = System.getProperty("pools.dbmode.host") != null && !System.getProperty("pools.dbmode.host").equals("") ? System.getProperty("pools.dbmode.host") : DEFAULT_DB_HOST;
-		int    _DB_PORT = System.getProperty("pools.dbmode.port") != null && !System.getProperty("pools.dbmode.port").equals("") ? Integer.decode(System.getProperty("pools.dbmode.port")) : DEFAULT_DB_PORT;		
-		String _DB_NAME = System.getProperty("pools.dbmode.name") != null && !System.getProperty("pools.dbmode.name").equals("") ? System.getProperty("pools.dbmode.name") : DEFAULT_DB_NAME;
-		String _DB_DIR = System.getProperty("pools.dbmode.dir") != null && !System.getProperty("pools.dbmode.dir").equals("") ? System.getProperty("pools.dbmode.dir") : DEFAULT_DB_DIR;
+		String _DB_TYPE =  props.getProperty("pools.dbmode.type") != null && !props.getProperty("pools.dbmode.type").equals("") ? props.getProperty("pools.dbmode.type") : DEFAULT_DB_TYPE;
+		String _DB_HOST = props.getProperty("pools.dbmode.host") != null && !props.getProperty("pools.dbmode.host").equals("") ? props.getProperty("pools.dbmode.host") : DEFAULT_DB_HOST;
+		int    _DB_PORT = props.getProperty("pools.dbmode.port") != null && !props.getProperty("pools.dbmode.port").equals("") ? Integer.decode(props.getProperty("pools.dbmode.port")) : DEFAULT_DB_PORT;		
+		String _DB_NAME = props.getProperty("pools.dbmode.name") != null && !props.getProperty("pools.dbmode.name").equals("") ? props.getProperty("pools.dbmode.name") : DEFAULT_DB_NAME;
+		String _DB_DIR = props.getProperty("pools.dbmode.dir") != null && !props.getProperty("pools.dbmode.dir").equals("") ? props.getProperty("pools.dbmode.dir") : DEFAULT_DB_DIR;
 		_DB_DIR=_DB_DIR.replace('\\', '/');	if (!_DB_DIR.equals("") && !_DB_DIR.endsWith("/")) _DB_DIR=_DB_DIR+"/";
 
 		if (_DB_TYPE.equals("derby")) {
@@ -71,9 +72,9 @@ public class ServantProviderDB implements ServantProvider{
 			_driver="oracle.jdbc.driver.OracleDriver";
 		}
 		
-		_user = System.getProperty("pools.dbmode.user") != null && !System.getProperty("pools.dbmode.user").equals("") ? System.getProperty("pools.dbmode.user") : DEFAULT_DB_USER;
-		_password = System.getProperty("pools.dbmode.password") != null && !System.getProperty("pools.dbmode.password").equals("") ? System.getProperty("pools.dbmode.password") : DEFAULT_DB_PASSWORD;			
-		_defaultPoolName = System.getProperty("pools.dbmode.defaultpoolname");
+		_user = props.getProperty("pools.dbmode.user") != null && !props.getProperty("pools.dbmode.user").equals("") ? props.getProperty("pools.dbmode.user") : DEFAULT_DB_USER;
+		_password = props.getProperty("pools.dbmode.password") != null && !props.getProperty("pools.dbmode.password").equals("") ? props.getProperty("pools.dbmode.password") : DEFAULT_DB_PASSWORD;			
+		_defaultPoolName = props.getProperty("pools.dbmode.defaultpoolname");
 				
 		System.out.println("db type:"+_url); 
 		System.out.println("db driver:"+_driver);

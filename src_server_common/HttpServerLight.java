@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.kchine.r.server.SendEmailMain;
 import org.kchine.r.server.http.frontend.FreeResourcesListener;
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServerDefaults;
 import org.kchine.rpf.db.ConnectionProvider;
@@ -222,9 +223,11 @@ public class HttpServerLight {
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet()), "/rvirtual/cmd/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.HelpServlet()), "/rvirtual/helpme/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.ConfigServlet()), "/rvirtual/config/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet()), "/rvirtual/graphics/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(true)), "/rvirtual/graphics/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet()), "/rvirtual/rest/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RebindServlet()), "/rvirtual/rebind/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"www")), "/rvirtual/www/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"appletlibs")), "/rvirtual/appletlibs/*");		
 
 		System.out.println("+ going to start virtualization http server port : " + port);
 		_virtualizationServer.start();

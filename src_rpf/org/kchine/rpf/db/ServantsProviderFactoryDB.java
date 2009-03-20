@@ -20,19 +20,9 @@
  */ 
 package org.kchine.rpf.db;
 
-import java.rmi.registry.Registry;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.NoSuchElementException;
 import org.apache.commons.logging.Log;
-import org.kchine.rpf.ManagedServant;
 import org.kchine.rpf.ServantProvider;
 import org.kchine.rpf.ServantProviderFactory;
-import org.kchine.rpf.TimeoutException;
-
-import static org.kchine.rpf.PoolUtils.*;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -44,7 +34,7 @@ public class ServantsProviderFactoryDB extends ServantProviderFactory {
 
 	public ServantsProviderFactoryDB() throws Exception {
 		super();
-		_servantProvider = new ServantProviderDB();
+		_servantProvider = new ServantProviderDB(System.getProperties());
 	}
 
 	@Override

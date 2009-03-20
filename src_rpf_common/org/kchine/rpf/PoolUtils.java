@@ -1747,4 +1747,7 @@ public class PoolUtils {
 		return f;
 	}
 
+	public static void main(String[] args) throws Exception{
+		System.out.println(tokenizeWindowsCommand("\"F:\\Program Files\\Java\\jdk1.5.0_16\\jre/bin/java\" -Dnaming.mode=db -Ddb.type=derby -Ddb.host=192.168.65.1 -Ddb.port=1527 -Ddb.name=DWEP -Ddb.user=DWEP -Ddb.password=DWEP -Dnode=N1 \"-Dbiocep.home=F:\\Documents and Settings\\Karim Chine\\Bureau\\Moz\\javaservice/biocep_home\\\" -Duse.default.libs=true -cp \"F:\\Documents and Settings\\Karim Chine\\Bureau\\Moz\\javaservice\\biocep-core.jar\" RmiServer"));
+	}
 }

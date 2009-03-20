@@ -22,20 +22,15 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-
 import org.kchine.r.server.http.frontend.GraphicsServlet;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JBufferedImagePanel;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
 import org.kchine.rpf.PoolUtils;
-
-
-
 import java.awt.Component;
 import java.io.File;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.net.URL;
 
 /**
@@ -102,8 +97,8 @@ public class SaveDeviceAsPdfAppletAction extends AbstractAction {
 						htmlIndexWriter.close();
 						
 						try {
-							PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/kaleidoscope/appletlibs/pdfviewer_unsigned.jar"), new File(dir+"/appletlibs").getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
-							PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/kaleidoscope/appletlibs/PDFRenderer_unsigned.jar"), new File(dir+"/appletlibs").getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+							PoolUtils.cacheJar(new URL("http://biocep.net/pdflibs/pdfviewer_unsigned.jar"), new File(dir+"/appletlibs").getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+							PoolUtils.cacheJar(new URL("http://biocep.net/pdflibs/PDFRenderer_unsigned.jar"), new File(dir+"/appletlibs").getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
