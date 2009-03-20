@@ -854,6 +854,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(rkit,false)), "/rvirtual/cmd/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WorkingDirectoryServlet(rkit)), "/rvirtual/wd/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"www")), "/rvirtual/www/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"appletlibs")), "/rvirtual/appletlibs/*");
+				
 				System.out.println("+ going to start virtualization http server port : " + port);
 				
 				_virtualizationServer.start();

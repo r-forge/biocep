@@ -24,6 +24,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -42,6 +43,7 @@ import org.kchine.r.server.RKit;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.http.Java2DUtils;
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServantProviderFactory;
 
@@ -52,6 +54,9 @@ import org.kchine.rpf.ServantProviderFactory;
 public class GraphicsServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
 	private RKit _rkit;
+	private boolean _downloadpdflibs=false;
+	boolean _firstPdfApplet=true;
+	
 	public GraphicsServlet() {
 		super();
 	}
@@ -61,6 +66,11 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 		_rkit=rkit;
 	}
 
+	public GraphicsServlet(boolean downloadpdflibs) {
+		super();
+		_downloadpdflibs=downloadpdflibs;
+	}
+	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
@@ -175,6 +185,19 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					System.out.println(r.getStatus());
 
 				} else if (type.equals("pdfapplet")) {
+
+					if (_firstPdfApplet && (_rkit!=null || _downloadpdflibs)) {
+						
+						_firstPdfApplet=false;
+						
+						try {
+							PoolUtils.cacheJar(new URL("http://biocep.net/pdflibs/pdfviewer_unsigned.jar"), new File(ServerManager.WWW_DIR).getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+							PoolUtils.cacheJar(new URL("http://biocep.net/pdflibs/PDFRenderer_unsigned.jar"), new File(ServerManager.WWW_DIR).getAbsolutePath(), PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+						}  catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					
 					response.setContentType("text/html");
 					boolean isIE=request.getHeader("User-Agent").toLowerCase().indexOf("msie") != -1;
 					pdfAppletHtml(response.getWriter(), r.getPdf(command, width, height), isIE, !isIE);
