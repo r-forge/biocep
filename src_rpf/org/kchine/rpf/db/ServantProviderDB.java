@@ -45,13 +45,16 @@ public class ServantProviderDB implements ServantProvider{
 	
 	private String _driver;
 	private String _url;
+	
 	private String _user;
 	private String _password;
 	private String _defaultPoolName;
 	private DBLayerInterface _dbLayer = null;	
 	private HashMap<String, PoolDataDB> _poolHashMap = new HashMap<String, PoolDataDB>();
 	
+	
 	public ServantProviderDB(Properties props) throws Exception{
+		
 		
 		String _DB_TYPE =  props.getProperty("pools.dbmode.type") != null && !props.getProperty("pools.dbmode.type").equals("") ? props.getProperty("pools.dbmode.type") : DEFAULT_DB_TYPE;
 		String _DB_HOST = props.getProperty("pools.dbmode.host") != null && !props.getProperty("pools.dbmode.host").equals("") ? props.getProperty("pools.dbmode.host") : DEFAULT_DB_HOST;
@@ -60,6 +63,7 @@ public class ServantProviderDB implements ServantProvider{
 		String _DB_DIR = props.getProperty("pools.dbmode.dir") != null && !props.getProperty("pools.dbmode.dir").equals("") ? props.getProperty("pools.dbmode.dir") : DEFAULT_DB_DIR;
 		_DB_DIR=_DB_DIR.replace('\\', '/');	if (!_DB_DIR.equals("") && !_DB_DIR.endsWith("/")) _DB_DIR=_DB_DIR+"/";
 
+		
 		if (_DB_TYPE.equals("derby")) {
 			_url = "jdbc:derby://"+_DB_HOST+":"+_DB_PORT+"/"+_DB_DIR+_DB_NAME+";create=true";
 			_driver="org.apache.derby.jdbc.ClientDriver";

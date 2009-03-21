@@ -95,6 +95,8 @@ public class HttpServerLight {
 
 					try {
 						System.setProperty("create", "true");
+						System.setProperty("node.host", "127.0.0.1");
+						System.setProperty("node.ip", "127.0.0.1");
 						DbRegistry.main(null);
 					} catch (Exception e) {
 						e.printStackTrace();
