@@ -146,7 +146,7 @@ public class DbRegistry {
 				String cmd=(isWindowsOs() ? "\"" : "") + System.getProperty("java.home") + "/bin/java"+(isWindowsOs() ? "\"" : "")
 				+" -Dnaming.mode=db"				
 				+" -Ddb.type="+PoolUtils.DEFAULT_DB_TYPE
-				+" -Ddb.host="+PoolUtils.getHostIp()
+				+" -Ddb.host="+(System.getProperty("node.host")==null || System.getProperty("node.host").equals("") ? PoolUtils.getHostIp() : System.getProperty("node.host")) 
 				+" -Ddb.port="+port
 				+" -Ddb.name="+PoolUtils.DEFAULT_DB_NAME		
 				+" -Ddb.user="+PoolUtils.DEFAULT_DB_USER
@@ -157,8 +157,10 @@ public class DbRegistry {
 				+ (System.getProperty("biocep.home")!=null && !System.getProperty("biocep.home").equals("")? " "+(isWindowsOs() ? "\"" : "")+"-Dbiocep.home="+System.getProperty("biocep.home")+(isWindowsOs() ? "\"" : "") : "")
 				+ (System.getProperty("use.default.libs")!=null && !System.getProperty("use.default.libs").equals("")? " "+"-Duse.default.libs="+System.getProperty("use.default.libs") : "")
 				+" -cp "+(isWindowsOs() ? "\"" : "")+jarfile+(isWindowsOs() ? "\"" : "")+" RmiServer";
-				dbLayer.addNode(new NodeDataDB("N1",PoolUtils.getHostIp(),
-						PoolUtils.getHostName(),
+				
+				System.out.println(cmd);
+				dbLayer.addNode(new NodeDataDB("N1",(System.getProperty("node.ip")==null || System.getProperty("node.ip").equals("") ? PoolUtils.getHostIp() : System.getProperty("node.ip")),
+						(System.getProperty("node.host")==null || System.getProperty("node.host").equals("") ? PoolUtils.getHostName() : System.getProperty("node.host")) ,
 						"","",ServerManager.INSTALL_DIR,cmd,"",PoolUtils.getOs(),3,5,"RSERVANT_",0));
 			}
 						

@@ -47,6 +47,7 @@ import ch.ethz.ssh2.StreamGobbler;
 public class SupervisorUtils implements SupervisorInterface {
 	
 	DBLayerInterface dbLayer;
+	
 	public SupervisorUtils(DBLayerInterface dbLayer) {
 		this.dbLayer=dbLayer;
 	}
@@ -178,8 +179,10 @@ public class SupervisorUtils implements SupervisorInterface {
 		conn.close();
 	}
 
+	int counter=0;
 	public void launchLocalProcess(final boolean showConsole, String homeDir, String command, String prefix, boolean isForWindows) throws Exception {
 		System.out.println("launchLocalProcess");
+		++counter;
 
 		Vector<String> cmd = new Vector<String>();
 		
@@ -228,6 +231,8 @@ public class SupervisorUtils implements SupervisorInterface {
 								}
 							});
 						}
+						
+						System.out.println("Process stdout<"+counter+">"+line);
 
 						Thread.sleep(200);
 					}
@@ -257,6 +262,8 @@ public class SupervisorUtils implements SupervisorInterface {
 							});
 						}
 
+						System.out.println("Process stderr<"+counter+">"+line);
+						
 						Thread.sleep(200);
 					}
 				} catch (Exception e) {
