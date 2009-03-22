@@ -742,7 +742,7 @@ public abstract class RListener {
 								}
 								r = ServerManager.createR(props.getProperty("r.binary"), false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
 										props, props.get("memorymin")==null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), 
-											   props.get("memorymax")==null ? ServerDefaults._memoryMax: Integer.decode(props.getProperty("memorymax")), name[0], false, null, null,true);
+											   props.get("memorymax")==null ? ServerDefaults._memoryMax: Integer.decode(props.getProperty("memorymax")), name[0], false, null, null,true,null);
 							} else if (mode.equalsIgnoreCase("rmi")) {
 
 								try {

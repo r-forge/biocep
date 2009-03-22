@@ -893,7 +893,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		System.out.println("cloneServer");
 		try {
 			RServices w = ServerManager.createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-					.getLocalRmiRegistryPort()), 256, 256, "", false,null,null,true);
+					.getLocalRmiRegistryPort()), 256, 256, "", false,null,null,true,null);
 			return w;
 		} catch (Exception e) {
 			throw new RemoteException("", e);

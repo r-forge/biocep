@@ -395,7 +395,7 @@ public class ServerManager {
 
 	public static RServices createR(String name) throws Exception {
 		return createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null,true);
+				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null,true,null);
 	}
 
 	private interface ProgessLoggerInterface {
@@ -403,7 +403,7 @@ public class ServerManager {
 	}
 
 	synchronized public static RServices createR(String RBinPath, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, boolean addLocalJarToClassPath) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, boolean addLocalJarToClassPath,final Runnable rShutdownHook) throws Exception {
 
 		final JTextArea[] createRProgressArea = new JTextArea[1];
 		final JProgressBar[] createRProgressBar = new JProgressBar[1];
@@ -910,6 +910,18 @@ public class ServerManager {
 				}				
 				
 				final Process proc = Runtime.getRuntime().exec(command.toArray(new String[0]), envVector.toArray(new String[0]));
+				if (rShutdownHook!=null) {
+					new Thread(new Runnable(){
+						public void run() {
+							try {
+								proc.waitFor();
+								rShutdownHook.run();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
+				}
 
 				final Vector<String> outPrint = new Vector<String>();
 				final Vector<String> errorPrint = new Vector<String>();

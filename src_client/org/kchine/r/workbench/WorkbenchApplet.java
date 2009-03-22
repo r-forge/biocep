@@ -833,7 +833,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 										r = ServerManager.createR(ident.isDefaultR() ? System.getProperty("r.binary") : ident.getDefaultRBin(), ident
 												.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager
 												.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()),
-												ident.getMemoryMin(), ident.getMemoryMax(), "", true, null, null, true);
+												ident.getMemoryMin(), ident.getMemoryMax(), "", true, null, null, true, null);
 									}
 
 									if (ident.isUseSsh()) {
