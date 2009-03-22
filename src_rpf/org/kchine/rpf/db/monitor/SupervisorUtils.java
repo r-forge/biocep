@@ -295,6 +295,8 @@ public class SupervisorUtils implements SupervisorInterface {
 						command = PoolUtils.replaceAll(command, "${OPTIONS}", options);
 						command = PoolUtils.replaceAll(command, "${INSTALL_DIR}", new File(info.getInstallDir()).getCanonicalPath().replace('\\', '/'));
 						command = PoolUtils.replaceAll(command, "${PROCESS_COUNTER}", new Integer(info.getProcessCounter()).toString());
+						command = PoolUtils.replaceAll(command, "${NODE_NAME}", nodeName);
+						
 
 						System.out.println("--> Launching local process : " + command);
 						if (PoolUtils.isWindowsOs()) {
@@ -308,6 +310,7 @@ public class SupervisorUtils implements SupervisorInterface {
 						command = PoolUtils.replaceAll(command, "${OPTIONS}", options);
 						command = PoolUtils.replaceAll(command, "${INSTALL_DIR}", info.getInstallDir());
 						command = PoolUtils.replaceAll(command, "${PROCESS_COUNTER}", new Integer(info.getProcessCounter()).toString());
+						command = PoolUtils.replaceAll(command, "${NODE_NAME}", nodeName);
 
 						System.out.println("--> Launching process via SSH : " + command);
 
