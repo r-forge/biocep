@@ -1282,8 +1282,5 @@ public class ServerManager {
 		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/biocep-core.jar"), INSTALL_DIR, logInfo, false);
 	}
 
-	synchronized public static void downloadGroovy(int logInfo) throws Exception {
-		PoolUtils.cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/groovy-all-1.5.4.jar"), INSTALL_DIR, logInfo, false);
-	}
 
 }
