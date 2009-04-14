@@ -52,6 +52,7 @@ import java.net.InetAddress;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
+import java.net.ResponseCache;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -1094,8 +1095,8 @@ public class PoolUtils {
 		final JProgressBar jpb = ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) ? new JProgressBar(0, 100) : null;
 		final JFrame f = ((logInfo & LOG_PRGRESS_TO_DIALOG) != 0) ? new JFrame("copying " + jarName + " ...") : null;
 
-		try {
-			
+		try {			
+			ResponseCache.setDefault(null);
 			URLConnection urlC = null;
 			Exception connectionException=null;
 			for (int i=0; i<RECONNECTION_RETRIAL_NBR; ++i) {

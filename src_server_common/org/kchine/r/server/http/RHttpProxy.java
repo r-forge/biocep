@@ -95,9 +95,12 @@ public class RHttpProxy {
 			try {
 				getSession = new GetMethod(url + "?method=logon&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd) + "&options="
 						+ PoolUtils.objectToHex(options));
+				
+				getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
 				if (sessionId != null && !sessionId.equals("")) {
-					getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
 					getSession.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
+				} else {
+					getSession.setRequestHeader("Cookie", "JSESSIONID=" + "");
 				}
 				mainHttpClient.executeMethod(getSession);
 				result = new ObjectInputStream(getSession.getResponseBodyAsStream()).readObject();
@@ -704,9 +707,11 @@ public class RHttpProxy {
 			try {
 				getSession = new GetMethod(url + "?method=logondb&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd) + "&options="
 						+ PoolUtils.objectToHex(options));
-				if (sessionId != null && !sessionId.equals("")) {
-					getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+				getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+				if (sessionId != null && !sessionId.equals("")) {					
 					getSession.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
+				} else {
+					getSession.setRequestHeader("Cookie", "JSESSIONID=" + "");
 				}
 				mainHttpClient.executeMethod(getSession);
 				result = new ObjectInputStream(getSession.getResponseBodyAsStream()).readObject();

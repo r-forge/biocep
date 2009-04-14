@@ -1064,8 +1064,9 @@
 	<target name="httpserver" depends="initializeProperties,compile">
 		
 
+		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
 		
-		<java maxmemory="256m" classname="HttpServer"
+		<java maxmemory="256m" classname="HttpServerLight"
 			fork="true" spawn="${spawn}">
 			
 			<classpath>
@@ -1124,6 +1125,9 @@
 			<jvmarg	value="-Dlog4j.appender.A2=org.kchine.rpf.RemoteAppender"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout=org.apache.log4j.PatternLayout"/>
 			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
+			
+			<jvmarg value="-Dnaming.mode=${naming.mode}"/>
+				
 			
 		</java>
 		

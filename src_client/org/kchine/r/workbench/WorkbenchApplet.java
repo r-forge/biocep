@@ -593,13 +593,21 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 			initActions();
 
+			installedLFs = UIManager.getInstalledLookAndFeels();
+			
 			int lf = 0;
 			try {
 				lf = Integer.decode(getParameter("lf"));
 			} catch (Exception e) {
-
+				if (PoolUtils.isMacOs()) {
+					for (int i=0;i<installedLFs.length;++i) {
+						if (installedLFs[i].getName().toLowerCase().indexOf("mac")!=-1) {
+							lf=i; break;
+						}
+					}					
+				}
 			}
-			installedLFs = UIManager.getInstalledLookAndFeels();
+			
 			if (lf >= installedLFs.length)
 				lf = 0;
 
@@ -1359,8 +1367,6 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 						sessionMenu.addSeparator();
 						sessionMenu.add(_actions.get("showsessioninfo"));
 						sessionMenu.add(_actions.get("showworkbenchinfo"));
-						sessionMenu.addSeparator();
-						sessionMenu.add(_actions.get("downloadcorejars"));
 						sessionMenu.addSeparator();
 						sessionMenu.add(_actions.get("quit"));
 					}
@@ -4489,29 +4495,6 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			}
 		});
 
-		_actions.put("downloadcorejars", new AbstractAction("Download Core Jars") {
-			public void actionPerformed(final ActionEvent e) {
-				new Thread(new Runnable() {
-					public void run() {
-						try {
-							ServerManager.downloadBiocepCore(PoolUtils.LOG_PRGRESS_TO_LOGGER | PoolUtils.LOG_PRGRESS_TO_DIALOG);
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-						try {
-							ServerManager.downloadGroovy(PoolUtils.LOG_PRGRESS_TO_LOGGER | PoolUtils.LOG_PRGRESS_TO_DIALOG);
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					}
-				}).start();
-
-			}
-
-			public boolean isEnabled() {
-				return true;
-			}
-		});
 
 		_actions.put("installpluginjarfile", new AbstractAction("Install Plugin From Jar File") {
 			public void actionPerformed(final ActionEvent e) {
