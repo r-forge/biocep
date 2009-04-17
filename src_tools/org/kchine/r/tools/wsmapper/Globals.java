@@ -128,8 +128,8 @@ public class Globals {
 								+"import org.apache.commons.httpclient.HttpClient;"
 								+"import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;"
 								+"import org.kchine.r.server.RServices;" 
-								+"import org.kchine.r.server.http.RHttpProxy;"
-								+"@WebService");
+								+"import org.kchine.r.server.http.RHttpProxy;"								
+								+"@WebService(targetNamespace = \"http://kchine.org/\")");
 				outputWriterWebservice.println("public class " + shortClassName + "Web {");
 				outputWriterWebservice.println("public " + className.substring(className.lastIndexOf('.') + 1) + "Web" + "(){};");
 			}
