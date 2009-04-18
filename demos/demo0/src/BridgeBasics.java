@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import java.io.RandomAccessFile;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 
@@ -30,6 +31,7 @@ import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RConsoleAction;
 import org.kchine.r.server.RConsoleActionListener;
 import org.kchine.r.server.RServices;
+import org.kchine.r.server.graphics.GDDevice;
 
 
 /**
@@ -43,17 +45,18 @@ public class BridgeBasics {
 	public static void main(String args[]) throws Exception {
 		
 		
-
-			
-		final RServices rs = DirectJNI.getInstance().getRServices();		
-		rs.addRConsoleActionListener(new RConsoleActionListener(){
-			public void rConsoleActionPerformed(RConsoleAction consoleAction) throws RemoteException {
-				System.out.println(consoleAction);				
-			}
-		});		
+		final RServices rs = DirectJNI.getInstance().getRServices();
+		GDDevice device=rs.newDevice(400, 400);
 		
-		rs.addProbeOnVariables(new String[]{"x","y"});
-		rs.consoleSubmit("y=1");
+		rs.consoleSubmit("plot(pressure)");
+		System.out.println(rs.getStatus());
+		byte[] buffer=device.getPng();
+		RandomAccessFile raf=new RandomAccessFile("c:/te.png","rw");
+		raf.setLength(0);
+		raf.write(buffer);
+		raf.close();
+		
+		
 		//rs.evaluate("x=2;y=8",2);
 		
 		/*
