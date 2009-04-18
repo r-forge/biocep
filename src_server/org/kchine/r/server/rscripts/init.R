@@ -2,6 +2,7 @@
 library(rJava);.jinit(classpath=NULL);
 library(JavaGD);
 try(library(TypeInfo));
+try(library(Cairo));
 
 .PrivateEnv<-new.env(parent = .GlobalEnv)
 assign('q', q , env=.PrivateEnv);
