@@ -1844,16 +1844,6 @@ public class DirectJNI {
 		}
 	}
 
-	Integer getDevice(String deviceType) throws RemoteException {
-		RInteger devices = (RInteger) getRServices().getObject(".PrivateEnv$dev.list()");
-		for (int i = 0; i < devices.getValue().length; ++i) {
-			if (devices.getNames()[i].equals(deviceType)) {
-				return devices.getValue()[i];
-			}
-		}
-		return null;
-	}
-
 	public String newTemporaryVariableName() {
 		return V_TEMP_PREFIXE + _tempCounter++;
 	}
@@ -4037,7 +4027,29 @@ public class DirectJNI {
 	public boolean broadcastRequired(int currentDevice) {
 		return _localBroadcastedDevices.size() > 1 && _localBroadcastedDevices.contains(currentDevice);
 	}
-
+	
+	static int[] snapshotDevices() throws RemoteException {
+		RInteger list=(RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.list()");
+		return (list==null ? new int[0] : list.getValue());		
+	}
+	
+	static Integer guessNewDevice( int[] snapshot ) throws RemoteException {
+		Vector<Integer> devicesVectorBefore = new Vector<Integer>();
+		for (int i = 0; i < snapshot.length; ++i) devicesVectorBefore.add(snapshot[i]);	
+		int[] devicesNow = snapshotDevices();			
+		for (int i = 0; i < devicesNow.length; ++i)
+			if (!devicesVectorBefore.contains(devicesNow[i])) {
+				return devicesNow[i];				
+			}
+		return null;
+	}
+	
+	static boolean isCairoAvailable() throws RemoteException {
+		DirectJNI.getInstance().getRServices().evaluate("library(Cairo)");
+		return DirectJNI.getInstance().getRServices().symbolExists("Cairo");		
+	}
+	
+	
 	public static class GDDeviceLocal implements GDDevice {
 		GDContainerBag gdBag = null;
 
@@ -4045,25 +4057,11 @@ public class DirectJNI {
 			gdBag = new GDContainerBag(w, h);
 			JavaGD.setGDContainer(gdBag);
 			Dimension dim = gdBag.getSize();
-
-			RInteger devicesBefore = (RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.list()");
-			Vector<Integer> devicesVector = new Vector<Integer>();
-			if (devicesBefore != null) {
-				for (int i = 0; i < devicesBefore.getValue().length; ++i)
-					devicesVector.add(devicesBefore.getValue()[i]);
-			}
-			System.out.println("devices before :" + devicesBefore);
-
+			
+			int[] devicesVector =  snapshotDevices();
 			System.out.println(DirectJNI.getInstance().getRServices().evaluate(
 					"JavaGD(name='JavaGD', width=" + dim.getWidth() + ", height=" + dim.getHeight() + ", ps=12)"));
-
-			RInteger devicesAfter = (RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.list()");
-			for (int i = 0; i < devicesAfter.getValue().length; ++i)
-				if (!devicesVector.contains(devicesAfter.getValue()[i])) {
-					System.out.println("caught:" + devicesAfter.getValue()[i]);
-					gdBag.setDeviceNumber(devicesAfter.getValue()[i]);
-					break;
-				}
+			gdBag.setDeviceNumber(guessNewDevice(devicesVector));			
 
 			// System.out.println(DirectJNI.getInstance().getRServices().
 			// consoleSubmit(".PrivateEnv$dev.list()"));
@@ -4240,14 +4238,16 @@ public class DirectJNI {
 						+ tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (getSize().width / getSize().height))
 						+ ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
 
+				
+				int[] devicesSnapshot =  snapshotDevices();
 				System.out.println("createDeviceCommand:" + createDeviceCommand);
 				DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
 				if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 					log.info(DirectJNI.getInstance().getRServices().getStatus());
 					System.out.println("Status:" + DirectJNI.getInstance().getRServices().getStatus());
 				}
-
-				int cairoDevice = DirectJNI.getInstance().getDevice(SvgDeviceName);
+				int cairoDevice = guessNewDevice(devicesSnapshot);
+				
 				DirectJNI.getInstance().getRServices().evaluate(
 						".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + cairoDevice + ");" + ".PrivateEnv$dev.set("
 								+ currentDevice + ");", 3);
@@ -4403,30 +4403,26 @@ public class DirectJNI {
 			
 			if (colormodel!=null) {
 				createDeviceCommand += ", colormodel='"+colormodel+"'";				
-			}
-			
+			}			
 			if (useDingbats!=null) {
 				createDeviceCommand += ", useDingbats="+useDingbats.toString().toUpperCase();				
-			}
-			
+			}			
 			if (horizontal!=null) {
 				createDeviceCommand += ", horizontal="+horizontal.toString().toUpperCase();				
-			}
-			
+			}		
 			if (debug!=null) {
 				createDeviceCommand += ", debug="+debug.toString().toUpperCase();				
 			}
-			
-			
 			createDeviceCommand+=" )";
-			
+						
+			int[] devicesSnapshot =  snapshotDevices();			
 			System.out.println(createDeviceCommand);
-			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
-			
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);			
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
-			}
-			int bmpDevice = DirectJNI.getInstance().getDevice(extension);
+			}			
+			int bmpDevice = guessNewDevice(devicesSnapshot);
+			
 			DirectJNI.getInstance().getRServices().evaluate(
 					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + bmpDevice + ");" + ".PrivateEnv$dev.set("
 							+ currentDevice + ");.PrivateEnv$dev.off("+bmpDevice+")", 4);
@@ -4488,8 +4484,8 @@ public class DirectJNI {
 
 			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 
-			String createDeviceCommand = extension+"(filename = '" + tempFileName + "' ";
-			
+			String createDeviceCommand = (isCairoAvailable() ? "Cairo"+extension.toUpperCase() : extension );
+			createDeviceCommand+="(filename = '" + tempFileName + "' ";
 			
 			if (height==null && width==null) {
 				createDeviceCommand += ", height="+getSize().getHeight()+" , width="+ getSize().getWidth() ;
@@ -4526,13 +4522,14 @@ public class DirectJNI {
 			
 			createDeviceCommand+=" )";
 			
-			System.out.println(createDeviceCommand);
-			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
-			
+			int[] devicesSnapshot =  snapshotDevices();
+			System.out.println(">>>>>"+createDeviceCommand+"<<<");
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);			
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
 			}
-			int bmpDevice = DirectJNI.getInstance().getDevice(extension+":"+(quality==null?"":quality+":")+(tiffindex==null?"":tiffindex+":")+tempFileName);
+			int bmpDevice = guessNewDevice(devicesSnapshot);
+			
 			DirectJNI.getInstance().getRServices().evaluate(
 					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + bmpDevice + ");" + ".PrivateEnv$dev.set("
 							+ currentDevice + ");.PrivateEnv$dev.off("+bmpDevice+")", 4);
@@ -4646,14 +4643,15 @@ public class DirectJNI {
 					+ tempSVGFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (getSize().width / getSize().height)) + ", height = "
 					+ 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
 
+			int[] devicesSnapshot =  snapshotDevices();
 			System.out.println("createDeviceCommand:" + createDeviceCommand);
 			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
 				System.out.println("Status:" + DirectJNI.getInstance().getRServices().getStatus());
 			}
-
-			int cairoDevice = DirectJNI.getInstance().getDevice(SvgDeviceName);
+			int cairoDevice = guessNewDevice(devicesSnapshot);
+			
 			DirectJNI.getInstance().getRServices().evaluate(
 					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + cairoDevice + ");" + ".PrivateEnv$dev.set("
 							+ currentDevice + ");", 3);
