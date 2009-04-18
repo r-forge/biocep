@@ -212,6 +212,7 @@ public class DirectJNI {
 	private HashMap<String,Object> _clientProperties;
 	private Vector<RCallBack> _callbacks = new Vector<RCallBack>();
 	private Vector<RCollaborationListener> _rCollaborationListeners = new Vector<RCollaborationListener>();
+	private HashSet<String> _cairoCapabilities=new HashSet<String>();
 
 	public static DirectJNI getInstance() {
 
@@ -484,9 +485,14 @@ public class DirectJNI {
 			initPrivateEnv();
 			_continueStr = ((RChar) ((RList) getRServices().getObject("options('continue')")).getValue()[0]).getValue()[0];
 			_promptStr = ((RChar) ((RList) getRServices().getObject("options('prompt')")).getValue()[0]).getValue()[0];
-
-			getRServices().consoleSubmit("1");
 			
+			 if (((RLogical)getRServices().getObject("exists('Cairo')")).getValue()[0]) {
+				 RLogical c= (RLogical)getRServices().getObject("Cairo.capabilities()");
+				 for (int i=0; i<c.getValue().length;++i) if (c.getValue()[i]) _cairoCapabilities.add(c.getNames()[i]);
+				 System.out.println("Cairo capabilities : "+_cairoCapabilities);
+			 }
+			
+			getRServices().consoleSubmit("1");
 
 			upgdateBootstrapObjects();
 
@@ -499,6 +505,9 @@ public class DirectJNI {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -4291,11 +4300,7 @@ public class DirectJNI {
 		
 		
 		synchronized public byte[] getSVG() throws RemoteException {
-			Vector<String> result = getSVGAsText();
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < result.size(); ++i)
-				sb.append(result.elementAt(i));
-			return sb.toString().getBytes();
+			return getScalable(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  "svg");
 		}
 		
 		public byte[] getSVG(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
@@ -4337,7 +4342,8 @@ public class DirectJNI {
 			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 			DirectJNI.getInstance().shutdownDevices(extension);
 			
-			String createDeviceCommand = extension+"(file = '" + tempFileName + "' ";
+			String createDeviceCommand = DirectJNI.getInstance().getCairoCapabilities().contains(extension) ? "Cairo"+extension.toUpperCase():extension;
+			createDeviceCommand+="(file = '" + tempFileName + "' ";
 			
 			
 			if (height==null && width==null) {
@@ -4416,7 +4422,7 @@ public class DirectJNI {
 			createDeviceCommand+=" )";
 						
 			int[] devicesSnapshot =  snapshotDevices();			
-			System.out.println(createDeviceCommand);
+			System.out.println(">>>"+createDeviceCommand+"<<<<");
 			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);			
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
@@ -4484,7 +4490,7 @@ public class DirectJNI {
 
 			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 
-			String createDeviceCommand = (isCairoAvailable() ? "Cairo"+extension.toUpperCase() : extension );
+			String createDeviceCommand = (DirectJNI.getInstance().getCairoCapabilities().contains(extension) ? "Cairo"+extension.toUpperCase() : extension );
 			createDeviceCommand+="(filename = '" + tempFileName + "' ";
 			
 			if (height==null && width==null) {
@@ -5053,5 +5059,8 @@ public class DirectJNI {
 	public Vector<RCallBack> getRCallBacks() {
 		return _callbacks;
 	}
-
+	
+	HashSet<String> getCairoCapabilities() {
+		return _cairoCapabilities;
+	}
 }
