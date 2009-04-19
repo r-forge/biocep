@@ -20,9 +20,6 @@
  */
 package org.kchine.r.server.http.frontend;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +29,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Enumeration;
-import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.kchine.r.server.RKit;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
-import org.kchine.r.server.http.Java2DUtils;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServantProviderFactory;
@@ -116,7 +111,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 				}
 
 				if (type == null)
-					type = "jpg";
+					type = "png";
 
 				if (_rkit==null) {
 					Boolean wait = null;
@@ -203,6 +198,13 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					pdfAppletHtml(response.getWriter(), r.getPdf(command, width, height), isIE, !isIE);
 					response.flushBuffer();
 
+				} if (type.equals("png")) {
+					
+					response.setContentType("image/svg+xml");
+					response.getOutputStream().write(r.getPng(command, width, height));
+					System.out.println(r.getStatus());
+					response.flushBuffer();
+					
 				} else {
 					
 					response.getOutputStream().write(r.getFromImageIOWriter(command, width, height, type));
