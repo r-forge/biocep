@@ -175,11 +175,13 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					response.setContentType("image/svg+xml");
 					response.getOutputStream().write(r.getSvg(command, width, height));
 					System.out.println(r.getStatus());
+					response.flushBuffer();
 					
 				} else if (type.equals("pdf")) {
 
 					response.setContentType("application/pdf");
 					response.getOutputStream().write(r.getPdf(command, width, height));
+					response.flushBuffer();
 					
 
 				} else if (type.equals("pdfapplet")) {
@@ -199,8 +201,14 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 					response.setContentType("text/html");
 					boolean isIE=request.getHeader("User-Agent").toLowerCase().indexOf("msie") != -1;
 					pdfAppletHtml(response.getWriter(), r.getPdf(command, width, height), isIE, !isIE);
+					response.flushBuffer();
 
 				} else {
+					
+					response.getOutputStream().write(r.getFromImageIOWriter(command, width, height, type));
+					response.flushBuffer();
+					
+					/*
 					try {
 						device = r.newDevice(width, height);
 						r.sourceFromBuffer(command);
@@ -215,6 +223,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 							ex.printStackTrace();
 						}
 					}
+					*/
 				}
 
 				return;
