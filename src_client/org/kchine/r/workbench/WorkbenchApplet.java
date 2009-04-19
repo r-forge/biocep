@@ -160,6 +160,10 @@ import org.kchine.r.workbench.actions.CoupleToCurrentDeviceAction;
 import org.kchine.r.workbench.actions.FitDeviceAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsBmpAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsEmfAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsJavaBmpAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsJavaJpgAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsJavaPngAction;
+import org.kchine.r.workbench.actions.SaveDeviceAsJavaGifAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsJpgAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsOdgAction;
 import org.kchine.r.workbench.actions.SaveDeviceAsPdfAction;
@@ -958,14 +962,21 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 								_graphicPanel = new JGDPanelPop(d, true, true, new AbstractAction[] { new SetCurrentDeviceAction(WorkbenchApplet.this, d),
 										null, new FitDeviceAction(WorkbenchApplet.this, d), null, new SnapshotDeviceAction(WorkbenchApplet.this),
-										new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
-
+										new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), 
+										
+										null,
 										new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
 										new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+										
+										null,
 										new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
 										new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
 										new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
 
+										null,
+										new SaveDeviceAsJavaJpgAction(WorkbenchApplet.this), new SaveDeviceAsJavaPngAction(WorkbenchApplet.this),
+										new SaveDeviceAsJavaBmpAction(WorkbenchApplet.this), new SaveDeviceAsJavaGifAction(WorkbenchApplet.this),
+										
 										null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
 										new SaveDeviceAsOdgAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
 										new CopyToCurrentDeviceAction(WorkbenchApplet.this, d), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this)
@@ -1004,14 +1015,20 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 									JGDPanelPop gp = new JGDPanelPop(newDevice, true, true, new AbstractAction[] {
 											new SetCurrentDeviceAction(WorkbenchApplet.this, newDevice), null,
 											new FitDeviceAction(WorkbenchApplet.this, newDevice), null, new SnapshotDeviceAction(WorkbenchApplet.this),
-											new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
-
+											new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), 
+											null,
 											new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
 											new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+											
+											null,
 											new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
 											new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
 											new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
 
+											null,
+											new SaveDeviceAsJavaJpgAction(WorkbenchApplet.this), new SaveDeviceAsJavaPngAction(WorkbenchApplet.this),
+											new SaveDeviceAsJavaBmpAction(WorkbenchApplet.this), new SaveDeviceAsJavaGifAction(WorkbenchApplet.this),
+											
 											null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
 											new SaveDeviceAsOdgAction(WorkbenchApplet.this), null,
 
@@ -3752,15 +3769,21 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(WorkbenchApplet.this, newDevice),
 							null, new FitDeviceAction(WorkbenchApplet.this, newDevice), null, new SnapshotDeviceAction(WorkbenchApplet.this),
-							new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
-
+							new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), 
+							null,
 							new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
 							new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+							null,
 							new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
 							new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
 							new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
-
-							null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
+							
+							null,
+							new SaveDeviceAsJavaJpgAction(WorkbenchApplet.this), new SaveDeviceAsJavaPngAction(WorkbenchApplet.this),
+							new SaveDeviceAsJavaBmpAction(WorkbenchApplet.this), new SaveDeviceAsJavaGifAction(WorkbenchApplet.this),
+							
+							null, 
+							new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
 							new SaveDeviceAsOdgAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
 							new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this) },
 							getRLock(), getConsoleLogger());
@@ -3830,15 +3853,22 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 					graphicPanel = new JGDPanelPop(newDevice, true, true, new AbstractAction[] { new SetCurrentDeviceAction(WorkbenchApplet.this, newDevice),
 							null, new FitDeviceAction(WorkbenchApplet.this, newDevice), null, new SnapshotDeviceAction(WorkbenchApplet.this),
 							new SnapshotDeviceSvgAction(WorkbenchApplet.this), new SnapshotDevicePdfAction(WorkbenchApplet.this), null,
-							new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
-
+							
+							
 							new SaveDeviceAsJpgAction(WorkbenchApplet.this), new SaveDeviceAsPngAction(WorkbenchApplet.this),
 							new SaveDeviceAsBmpAction(WorkbenchApplet.this), new SaveDeviceAsTiffAction(WorkbenchApplet.this),
+							
+							null,							
 							new SaveDeviceAsSvgAction(WorkbenchApplet.this), new SaveDeviceAsPdfAction(WorkbenchApplet.this),
 							new SaveDeviceAsPsAction(WorkbenchApplet.this), new SaveDeviceAsXfigAction(WorkbenchApplet.this),
 							new SaveDeviceAsPictexAction(WorkbenchApplet.this), new SaveDeviceAsPdfAppletAction(WorkbenchApplet.this),
 
-							null, new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
+							null,
+							new SaveDeviceAsJavaJpgAction(WorkbenchApplet.this), new SaveDeviceAsJavaPngAction(WorkbenchApplet.this),
+							new SaveDeviceAsJavaBmpAction(WorkbenchApplet.this), new SaveDeviceAsJavaGifAction(WorkbenchApplet.this),
+							
+							null, 
+							new SaveDeviceAsWmfAction(WorkbenchApplet.this), new SaveDeviceAsEmfAction(WorkbenchApplet.this),
 							new SaveDeviceAsOdgAction(WorkbenchApplet.this), null, new CopyFromCurrentDeviceAction(WorkbenchApplet.this),
 							new CopyToCurrentDeviceAction(WorkbenchApplet.this, newDevice), null, new CoupleToCurrentDeviceAction(WorkbenchApplet.this) },
 							getRLock(), getConsoleLogger());
