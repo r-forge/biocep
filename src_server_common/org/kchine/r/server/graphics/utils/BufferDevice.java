@@ -90,11 +90,11 @@ public class BufferDevice implements GDDevice {
 		return null;
 	}
 
-	public byte[] getSVG() throws RemoteException {
+	public byte[] getSvg() throws RemoteException {
 		return null;
 	}
 
-	public byte[] getSVG(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
+	public byte[] getSvg(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
 		return null;
 	}
 
@@ -177,6 +177,10 @@ public class BufferDevice implements GDDevice {
 		return null;
 	}
 
+	public byte[] getFromImageIOWriter(String format) throws RemoteException {
+		return null;
+	}
+	
 	public String getId() throws RemoteException {
 		return null;
 	}
@@ -188,5 +192,5 @@ public class BufferDevice implements GDDevice {
 	public void broadcast() throws RemoteException {
 
 	}
-
+	
 }

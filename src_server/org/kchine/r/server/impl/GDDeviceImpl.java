@@ -120,19 +120,11 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 		return _localGdDevice.getRealPoints(points);
 	}
 	
-	
-	public Vector<String> getSVGAsText() throws RemoteException {
-		return _localGdDevice.getSVGAsText();		
-	}
-	public Vector<String> getSVGAsText(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
-		return _localGdDevice.getSVGAsText(width, height, onefile, bg, pointsize);
-	}
-	
-	public byte[] getSVG() throws RemoteException {
-		return _localGdDevice.getSVG();
+	public byte[] getSvg() throws RemoteException {
+		return _localGdDevice.getSvg();
 	}	
-	public byte[] getSVG(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException{
-		return _localGdDevice.getSVG(width, height, onefile, bg, pointsize);
+	public byte[] getSvg(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException{
+		return _localGdDevice.getSvg(width, height, onefile, bg, pointsize);
 	}
 
 	public byte[] getPostscript() throws RemoteException {
@@ -191,6 +183,7 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 	public byte[] getXfig() throws RemoteException {
 		return _localGdDevice.getXfig();
 	}
+	
 	public byte[] getXfig( Boolean onefile, String encoding , String paper, Boolean horizontal, 
 			Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
 		return _localGdDevice.getXfig(onefile, encoding, paper, horizontal, width, height, family, pointsize, bg, fg, pagecentre);
@@ -199,14 +192,18 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 	public byte[] getWmf(boolean useserver) throws RemoteException {
 		return _localGdDevice.getWmf(useserver);
 	}
+	
 	public byte[] getEmf(boolean useserver) throws RemoteException {
 		return _localGdDevice.getEmf(useserver);
 	}
+	
 	public byte[] getOdg() throws RemoteException {
 		return _localGdDevice.getOdg();
 	}
 	
-	
+	public byte[] getFromImageIOWriter(String format) throws RemoteException {
+		return _localGdDevice.getFromImageIOWriter(format);
+	}	
 	
 /*
 	public byte[] getSVG() throws RemoteException {
@@ -255,14 +252,7 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 	public byte[] getXfig() throws RemoteException {
 		return _localGdDevice.getXfig();
 	}
-	
-	
-*/	
-	
-	
-	
-	
-	
+*/		
 	public String getId() throws RemoteException {
 		return _id;
 	}

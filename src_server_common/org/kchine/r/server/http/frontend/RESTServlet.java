@@ -189,7 +189,7 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 					} else if (outputVar.equalsIgnoreCase("jpg")) {
 						value=PoolUtils.bytesToHex(device.getJpeg());
 					} else if (outputVar.equalsIgnoreCase("svg")) {
-						value=PoolUtils.bytesToHex(device.getSVG());
+						value=PoolUtils.bytesToHex(device.getSvg());
 					} else if (outputVar.equalsIgnoreCase("pdfapplet")) {
 						value=PoolUtils.bytesToHex(device.getPdf());
 					} else if (outputVar.equalsIgnoreCase("console")) {

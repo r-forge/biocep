@@ -323,13 +323,97 @@ public class RServicesObject implements RServices {
 		
 	}
 
-	public Vector<String> getSvg(String expression, int width, int height) throws RemoteException {
+
+	public byte[] getSvg(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	public byte[] getSvg(String script, Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPostscript(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPostscript(String script, Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg, Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper , Boolean pagecentre, String colormodel) throws RemoteException{
 		return null;
 	}
 	
 	public byte[] getPdf(String script, int width, int height) throws RemoteException {
 		return null;
 	}
+	
+	public byte[] getPdf(String script, Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
+			String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPictex(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPictex(String script, Integer width, Integer height, Boolean debug, String bg, String fg) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getBmp(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getBmp(String script, Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getJpeg(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getJpeg(String script, Integer width, Integer height, String units, Integer pointsize, Integer quality, String bg,Integer res) throws RemoteException {
+		return null;	
+	}
+	
+	public byte[] getPng(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getPng(String script, Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getTiff(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getTiff(String script, Integer width, Integer height, String units, Integer pointsize, String compression, String bg,Integer res) throws RemoteException {
+		return null;	
+	}
+	
+	public byte[] getXfig(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getXfig(String script, Boolean onefile, String encoding , String paper, Boolean horizontal, 
+			Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getWmf(String script, int width, int height, boolean useserver) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getEmf(String script, int width, int height, boolean useserver) throws RemoteException {
+		return null;	
+	}
+	
+	public byte[] getOdg(String script, int width, int height) throws RemoteException {
+		return null;
+	}
+	
+	public byte[] getFromImageIOWriter(String script, int width, int height,String format) throws RemoteException {
+		return null;
+	}
+
+	
 
 	public String getPythonStatus() throws RemoteException {
 		return null;

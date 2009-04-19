@@ -17,21 +17,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.kchine.r.workbench.actions;
-
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.graphics.JBufferedImagePanel;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
-
 import java.awt.Component;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.Vector;
+import java.io.RandomAccessFile;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -59,13 +54,10 @@ public class SaveDeviceAsSvgAction extends AbstractAction {
 					try {
 						_rgui.getRLock().lock();
 						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
-
-						Vector<String> result = panel.getGdDevice().getSVGAsText();
-						PrintWriter pw = new PrintWriter(new FileWriter(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"svg")));
-						for (int i = 0; i < result.size(); ++i)
-							pw.println(result.elementAt(i));
-						pw.close();
-
+						RandomAccessFile raf = new RandomAccessFile(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(),"svg"), "rw");					
+						raf.setLength(0);
+						raf.write(panel.getGdDevice().getSvg());
+						raf.close();
 					} catch (Exception e) {
 						e.printStackTrace();
 					} finally {
@@ -74,7 +66,6 @@ public class SaveDeviceAsSvgAction extends AbstractAction {
 				}
 			}).start();
 		}
-
 	}
 
 	@Override

@@ -22,8 +22,6 @@ package org.kchine.r.server;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.Vector;
-
 import org.kchine.r.RObject;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
@@ -149,9 +147,41 @@ public interface RServices extends ManagedServant {
 
 	public byte[] getRHelpFile(String uri) throws java.rmi.RemoteException;
 	public String getRHelpFileUri(String topic, String pack) throws java.rmi.RemoteException;
-
-	public Vector<String> getSvg(String script, int width, int height) throws RemoteException;	
-	public byte[] getPdf(String script, int width, int height) throws RemoteException;	
+	
+	public byte[] getSvg(String script, int width, int height) throws RemoteException;
+	public byte[] getSvg(String script, Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException;
+	
+	public byte[] getPostscript(String script, int width, int height) throws RemoteException;
+	public byte[] getPostscript(String script, Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg, Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper , Boolean pagecentre, String colormodel) throws RemoteException;
+	
+	public byte[] getPdf(String script, int width, int height) throws RemoteException;
+	public byte[] getPdf(String script, Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
+			String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats) throws RemoteException;
+	
+	public byte[] getPictex(String script, int width, int height) throws RemoteException;
+	public byte[] getPictex(String script, Integer width, Integer height, Boolean debug, String bg, String fg) throws RemoteException;
+	
+	public byte[] getBmp(String script, int width, int height) throws RemoteException;
+	public byte[] getBmp(String script, Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException;
+	
+	public byte[] getJpeg(String script, int width, int height) throws RemoteException;
+	public byte[] getJpeg(String script, Integer width, Integer height, String units, Integer pointsize, Integer quality, String bg,Integer res) throws RemoteException ;
+	
+	public byte[] getPng(String script, int width, int height) throws RemoteException;
+	public byte[] getPng(String script, Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException;
+	
+	public byte[] getTiff(String script, int width, int height) throws RemoteException;
+	public byte[] getTiff(String script, Integer width, Integer height, String units, Integer pointsize, String compression, String bg,Integer res) throws RemoteException;
+	
+	public byte[] getXfig(String script, int width, int height) throws RemoteException;
+	public byte[] getXfig(String script, Boolean onefile, String encoding , String paper, Boolean horizontal, 
+			Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException;
+	
+	public byte[] getWmf(String script, int width, int height, boolean useserver) throws RemoteException;
+	public byte[] getEmf(String script, int width, int height, boolean useserver) throws RemoteException;	
+	public byte[] getOdg(String script, int width, int height) throws RemoteException;
+	
+	public byte[] getFromImageIOWriter(String script, int width, int height,String format) throws RemoteException;
 	
 	public boolean isPortInUse(int port) throws java.rmi.RemoteException;
 	public void startHttpServer(int port) throws java.rmi.RemoteException;

@@ -43,11 +43,9 @@ public interface GDDevice extends Remote {
 	public Point2D[] getRealPoints(Point2D[] points) throws RemoteException;
 	public int getDeviceNumber() throws RemoteException;
 	public boolean isCurrentDevice() throws RemoteException;
-	public void setAsCurrentDevice() throws RemoteException;
-	public Vector<String> getSVGAsText() throws RemoteException;
-	public Vector<String> getSVGAsText(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException;
-	public byte[] getSVG() throws RemoteException;
-	public byte[] getSVG(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException;
+	public void setAsCurrentDevice() throws RemoteException;	
+	public byte[] getSvg() throws RemoteException;
+	public byte[] getSvg(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException;
 	public byte[] getPostscript() throws RemoteException;
 	public byte[] getPostscript(Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg, Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper , Boolean pagecentre, String colormodel) throws RemoteException;	
 	public byte[] getPdf() throws RemoteException;
@@ -68,7 +66,8 @@ public interface GDDevice extends Remote {
 			Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException;	
 	public byte[] getWmf(boolean useserver) throws RemoteException;
 	public byte[] getEmf(boolean useserver) throws RemoteException;	
-	public byte[] getOdg() throws RemoteException;		
+	public byte[] getOdg() throws RemoteException;	
+	public byte[] getFromImageIOWriter(String format) throws RemoteException;	
 	public String getId() throws RemoteException;	
 	public boolean isBroadcasted() throws RemoteException;	
 	public void broadcast() throws RemoteException;

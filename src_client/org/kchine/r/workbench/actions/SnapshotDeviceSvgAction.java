@@ -21,9 +21,7 @@ package org.kchine.r.workbench.actions;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.Vector;
+import java.io.RandomAccessFile;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -57,12 +55,11 @@ public class SnapshotDeviceSvgAction extends AbstractAction {
 
 					JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
 
-					Vector<String> result = panel.getGdDevice().getSVGAsText();
 					final String tempFile = System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg";
-					PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
-					for (int i = 0; i < result.size(); ++i)
-						pw.println(result.elementAt(i));
-					pw.close();
+					RandomAccessFile raf = new RandomAccessFile(tempFile, "rw");					
+					raf.setLength(0);
+					raf.write(panel.getGdDevice().getSvg());
+					raf.close();
 
 					final JSVGCanvas svgCanvas = new JSVGCanvas();
 					svgCanvas.setEnableZoomInteractor(true);
