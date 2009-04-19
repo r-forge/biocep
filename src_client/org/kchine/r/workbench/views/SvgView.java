@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.rmi.RemoteException;
 import java.util.Vector;
 import javax.swing.AbstractAction;
@@ -47,7 +48,6 @@ import javax.swing.SwingUtilities;
 import org.apache.batik.swing.JSVGCanvas;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.views.highlighting.HighlightDocument;
-import org.kchine.r.workbench.views.highlighting.HighlightKit;
 import org.kchine.r.workbench.views.highlighting.NonWrappingTextPane;
 
 
@@ -63,16 +63,12 @@ public class SvgView extends DynamicView {
 
 		popupMenu.add(new AbstractAction("Get Svg From Current Device") {
 			public void actionPerformed(ActionEvent e) {
-
 				try {
-					Vector<String> svgbuffer = _rgui.getCurrentDevice().getSVGAsText();
 					tempFile = new File(System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg");
-
-					PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
-					for (int i = 0; i < svgbuffer.size(); ++i)
-						pw.println(svgbuffer.elementAt(i));
-					pw.close();
-
+					RandomAccessFile raf = new RandomAccessFile(tempFile, "rw");					
+					raf.setLength(0);
+					raf.write(_rgui.getCurrentDevice().getSvg());
+					raf.close();
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							try {
@@ -86,7 +82,6 @@ public class SvgView extends DynamicView {
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
-
 			}
 		});
 
@@ -275,7 +270,7 @@ public class SvgView extends DynamicView {
 									}
 								});
 
-								Vector<String> result = null;
+								byte[] result = null;
 								try {
 									result = _rgui.getR().getSvg(_area.getText(), _svgCanvas.getWidth(), _svgCanvas.getHeight());
 								} catch (RemoteException e) {
@@ -292,11 +287,12 @@ public class SvgView extends DynamicView {
 								}
 								// System.out.println("SVG RESULT:"+result);
 								final String tempFile = System.getProperty("java.io.tmpdir") + "/svgview" + System.currentTimeMillis() + ".svg";
-								PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
-								for (int i = 0; i < result.size(); ++i)
-									pw.println(result.elementAt(i));
-								pw.close();
-
+								
+								RandomAccessFile raf = new RandomAccessFile(tempFile, "rw");					
+								raf.setLength(0);
+								raf.write(result);
+								raf.close();
+								
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
 										try {

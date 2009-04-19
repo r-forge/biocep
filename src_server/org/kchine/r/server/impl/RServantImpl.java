@@ -909,14 +909,94 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 		return result;
 	}
 
-	public Vector<String> getSvg(String script, int width, int height) throws RemoteException {
+	public byte[] getSvg(String script, int width, int height) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getSvg(script, width, height);
 	}
-
+	public byte[] getSvg(String script, Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getSvg(script, width, height, onefile, bg, pointsize);
+	}
+	
+	public byte[] getPostscript(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getPostscript(script, width, height);
+	}
+	
+	public byte[] getPostscript(String script, Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg, Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper , Boolean pagecentre, String colormodel) throws RemoteException{
+		return DirectJNI.getInstance().getRServices().getPostscript(script, onefile, family, title, fonts, encoding, bg, fg, width, height, horizontal, pointsize, paper, pagecentre, colormodel);
+	}
+	
 	public byte[] getPdf(String script, int width, int height) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getPdf(script, width, height);
 	}
-
+	
+	public byte[] getPdf(String script, Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
+			String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getPdf(script, width, height, onefile, family, title, fonts, version, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, useDingbats);
+	}
+	
+	public byte[] getPictex(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getPictex(script, width, height);
+	}
+	
+	public byte[] getPictex(String script, Integer width, Integer height, Boolean debug, String bg, String fg) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getPictex(script, width, height, debug, bg, fg);
+	}
+	
+	public byte[] getBmp(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getBmp(script, width, height);
+	}
+	
+	public byte[] getBmp(String script, Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getBmp(script, width, height, units, pointsize, bg, res);
+	}
+	
+	public byte[] getJpeg(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getJpeg(script, width, height);
+	}
+	
+	public byte[] getJpeg(String script, Integer width, Integer height, String units, Integer pointsize, Integer quality, String bg,Integer res) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getJpeg(script, width, height, units, pointsize, quality, bg, res);	
+	}
+	
+	public byte[] getPng(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getPng(script, width, height);
+	}
+	
+	public byte[] getPng(String script, Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getPng(script, width, height, units, pointsize, bg, res);
+	}
+	
+	public byte[] getTiff(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getTiff(script, width, height);
+	}
+	
+	public byte[] getTiff(String script, Integer width, Integer height, String units, Integer pointsize, String compression, String bg,Integer res) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getTiff(script, width, height, units, pointsize, compression, bg, res);	
+	}
+	
+	public byte[] getXfig(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getXfig(script, width, height);
+	}
+	
+	public byte[] getXfig(String script, Boolean onefile, String encoding , String paper, Boolean horizontal, 
+			Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getXfig(script, onefile, encoding, paper, horizontal, width, height, family, pointsize, bg, fg, pagecentre);
+	}
+	
+	public byte[] getWmf(String script, int width, int height, boolean useserver) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getWmf(script, width, height, useserver);
+	}
+	
+	public byte[] getEmf(String script, int width, int height, boolean useserver) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getEmf(script, width, height, useserver);	
+	}
+	
+	public byte[] getOdg(String script, int width, int height) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getOdg(script, width, height);
+	}
+	
+	public byte[] getFromImageIOWriter(String script, int width, int height,String format) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().getFromImageIOWriter(script, width, height, format);
+	}
 	
 	public String getPythonStatus() throws RemoteException {
 		return DirectJNI.getInstance().getRServices().getPythonStatus();

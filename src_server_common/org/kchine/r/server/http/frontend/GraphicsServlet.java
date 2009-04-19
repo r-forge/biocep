@@ -32,13 +32,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.kchine.r.server.RKit;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
@@ -173,16 +171,16 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 				
 				response.setDateHeader("Last-Modified ", System.currentTimeMillis());
 				if (type.equals("svg")) {
+					
 					response.setContentType("image/svg+xml");
-					Vector<String> svg = r.getSvg(command, width, height);
-					for (int i = 0; i < svg.size(); ++i) {
-						response.getOutputStream().println(svg.elementAt(i));
-					}
+					response.getOutputStream().write(r.getSvg(command, width, height));
+					System.out.println(r.getStatus());
+					
 				} else if (type.equals("pdf")) {
 
 					response.setContentType("application/pdf");
 					response.getOutputStream().write(r.getPdf(command, width, height));
-					System.out.println(r.getStatus());
+					
 
 				} else if (type.equals("pdfapplet")) {
 

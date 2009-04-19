@@ -39,18 +39,20 @@ public class Java2DUtils {
 		if (_forceAntiAliasing) {
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		}
-		int i = 0, j = _l.size();
-		g.setFont(_gs.f);
-		g.setClip(o.x, o.y, dSize.width, dSize.height); // reset
-		g.setColor(Color.white);
-		g.fillRect(o.x, o.y, dSize.width, dSize.height);
-		g.translate(-o.x, -o.y);
-		while (i < j) {
-			GDObject gdo = (GDObject) _l.elementAt(i++);
-			if (gdo instanceof GDActionMarker) {
-
-			} else {
-				gdo.paint(null, _gs, g);
+		if (_l!=null) {
+			int i = 0, j = _l.size();
+			g.setFont(_gs.f);
+			g.setClip(o.x, o.y, dSize.width, dSize.height); // reset
+			g.setColor(Color.white);
+			g.fillRect(o.x, o.y, dSize.width, dSize.height);
+			g.translate(-o.x, -o.y);
+			while (i < j) {
+				GDObject gdo = (GDObject) _l.elementAt(i++);
+				if (gdo instanceof GDActionMarker) {
+	
+				} else {
+					gdo.paint(null, _gs, g);
+				}
 			}
 		}
 	}
