@@ -200,13 +200,14 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 
 				} if (type.equals("png")) {
 					
-					response.setContentType("image/svg+xml");
+					response.setContentType("image/png");
 					response.getOutputStream().write(r.getPng(command, width, height));
 					System.out.println(r.getStatus());
 					response.flushBuffer();
 					
 				} else {
 					
+					response.setContentType("image/"+type);
 					response.getOutputStream().write(r.getFromImageIOWriter(command, width, height, type));
 					response.flushBuffer();
 					
