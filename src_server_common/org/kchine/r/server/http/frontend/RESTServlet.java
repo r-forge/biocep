@@ -65,6 +65,10 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 
 	protected void doAny(final HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+		response.setHeader("Cache-Control","no-cache");
+		response.setHeader("Pragma","no-cache");
+		response.setDateHeader("Expires", 0);
+		
 		Object result = null;
 		do {
 
@@ -210,6 +214,8 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 					}
 				}
 
+				response.flushBuffer();
+				
 				// ---->
 				return;
 
