@@ -293,7 +293,7 @@ public class WWWDirectoryServlet extends HttpServlet implements ResourceFactory
   */
  public Resource getResource(String pathInContext)
  {	 
-	 pathInContext=pathInContext.substring(("/rvirtual/"+_wwwUri).length());
+	 pathInContext=pathInContext.substring((_wwwUri).length());
 	 try {
 		 _resourceBase=Resource.newResource(new File( _wwwDir ).toURI().toURL());
 		 return _resourceBase.addPath(pathInContext);

@@ -1065,6 +1065,7 @@
 		
 
 		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
+		<if><not><isset property="soapenabled"/></not><then><property name="soapenabled" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="HttpServerLight"
 			fork="true" spawn="${spawn}">
@@ -1127,6 +1128,8 @@
 			<jvmarg	value="-Dlog4j.appender.A2.layout.ConversionPattern= [%-5p] - %m%n"/>
 			
 			<jvmarg value="-Dnaming.mode=${naming.mode}"/>
+			<jvmarg value="-Dsoapenabled=${soapenabled}"/>
+			
 				
 			
 		</java>

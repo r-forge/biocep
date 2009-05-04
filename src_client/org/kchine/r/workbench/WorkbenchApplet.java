@@ -4386,22 +4386,18 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 										} else {
 
 											_virtualizationServer = new Server(port);
-											Context root = new Context(_virtualizationServer, "/", Context.SESSIONS);
-
+											Context root = new Context(_virtualizationServer, "/rvirtual", Context.SESSIONS);
 											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(WorkbenchApplet.this)),
-													"/rvirtual/graphics/*");
+													"/graphics/*");
 											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet(WorkbenchApplet.this)),
-													"/rvirtual/rest/*");
-
+													"/rest/*");
 											root.addServlet(
 													new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(WorkbenchApplet.this, true)),
-													"/rvirtual/cmd/*");
+													"/cmd/*");
 											root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(WorkbenchApplet.this)),													
-													"/rvirtual/helpme/*");
-											
-											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"www")), "/rvirtual/www/*");
-											
-											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"appletlibs")), "/rvirtual/appletlibs/*");		
+													"/helpme/*");											
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/www")), "/www/*");											
+											root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/appletlibs")), "/appletlibs/*");		
 
 											
 
