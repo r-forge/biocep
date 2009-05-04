@@ -49,7 +49,6 @@ import org.kchine.r.server.spreadsheet.SpreadsheetModelDevice;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteProxy;
 import org.kchine.rpf.PoolUtils;
 
-
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
@@ -61,6 +60,17 @@ public class RHttpProxy {
 
 	private static String proxyHost = null;
 	private static int proxyPort = -1;
+
+	public static String logOn(String url, String sessionId, String login, String pwd, String[] options) throws TunnelingException {
+		java.util.HashMap<String, Object> map = new java.util.HashMap<String, Object>();
+		for (int i = 0; i < options.length; ++i) {
+			int equalIdx = options[i].indexOf('=');
+			if (equalIdx != -1) {
+				map.put(options[i].substring(0, equalIdx), options[i].substring(equalIdx + 1));
+			}
+		}
+		return logOn(url, sessionId, login, pwd, map);
+	}
 
 	public static String logOn(String url, String sessionId, String login, String pwd, HashMap<String, Object> options) throws TunnelingException {
 		if (System.getProperty("proxy_host") != null && !System.getProperty("proxy_host").equals("")) {
@@ -77,7 +87,7 @@ public class RHttpProxy {
 				result = new ObjectInputStream(pingServer.getResponseBodyAsStream()).readObject();
 				if (!result.equals("pong"))
 					throw new ConnectionFailedException();
-				
+
 				System.out.println("Ping succeeded");
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -95,7 +105,7 @@ public class RHttpProxy {
 			try {
 				getSession = new GetMethod(url + "?method=logon&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd) + "&options="
 						+ PoolUtils.objectToHex(options));
-				
+
 				getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
 				if (sessionId != null && !sessionId.equals("")) {
 					getSession.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
@@ -126,7 +136,7 @@ public class RHttpProxy {
 	public static void logOff(String url, String sessionId) throws TunnelingException {
 		if (System.getProperty("proxy_host") != null && !System.getProperty("proxy_host").equals("")) {
 			mainHttpClient.getHostConfiguration().setProxy(System.getProperty("proxy_host"), Integer.decode(System.getProperty("proxy_port")));
-		}		
+		}
 		GetMethod getLogOut = null;
 		try {
 			Object result = null;
@@ -243,7 +253,7 @@ public class RHttpProxy {
 	}
 
 	public static void interrupt(String url, String sessionId) throws TunnelingException {
-		
+
 		GetMethod getInterrupt = null;
 		try {
 			Object result = null;
@@ -309,6 +319,42 @@ public class RHttpProxy {
 		} finally {
 			if (getNewDevice != null) {
 				getNewDevice.releaseConnection();
+			}
+			if (mainHttpClient != null) {
+			}
+		}
+	}
+
+	public static String[] listWorkers(String url, String sessionId) throws TunnelingException {
+		GetMethod getList = null;
+		try {
+			Object result = null;
+			mainHttpClient = new HttpClient();
+			if (System.getProperty("proxy_host") != null && !System.getProperty("proxy_host").equals("")) {
+				mainHttpClient.getHostConfiguration().setProxy(System.getProperty("proxy_host"), Integer.decode(System.getProperty("proxy_port")));
+			}
+			getList = new GetMethod(url + "?method=list");
+			try {
+				if (sessionId != null && !sessionId.equals("")) {
+					getList.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+					getList.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
+				}
+				mainHttpClient.executeMethod(getList);
+				result = new ObjectInputStream(getList.getResponseBodyAsStream()).readObject();
+			} catch (ConnectException e) {
+				throw new ConnectionFailedException();
+			} catch (Exception e) {
+				throw new TunnelingException("", e);
+			}
+			if (result != null && result instanceof TunnelingException) {
+				throw (TunnelingException) result;
+			}
+
+			return (String[]) result;
+
+		} finally {
+			if (getList != null) {
+				getList.releaseConnection();
 			}
 			if (mainHttpClient != null) {
 			}
@@ -681,7 +727,7 @@ public class RHttpProxy {
 		if (System.getProperty("proxy_host") != null && !System.getProperty("proxy_host").equals("")) {
 			mainHttpClient.getHostConfiguration().setProxy(System.getProperty("proxy_host"), Integer.decode(System.getProperty("proxy_port")));
 		}
-		
+
 		GetMethod pingServer = null;
 		try {
 			Object result = null;
@@ -708,7 +754,7 @@ public class RHttpProxy {
 				getSession = new GetMethod(url + "?method=logondb&login=" + PoolUtils.objectToHex(login) + "&pwd=" + PoolUtils.objectToHex(pwd) + "&options="
 						+ PoolUtils.objectToHex(options));
 				getSession.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
-				if (sessionId != null && !sessionId.equals("")) {					
+				if (sessionId != null && !sessionId.equals("")) {
 					getSession.setRequestHeader("Cookie", "JSESSIONID=" + sessionId);
 				} else {
 					getSession.setRequestHeader("Cookie", "JSESSIONID=" + "");

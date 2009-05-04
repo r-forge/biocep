@@ -33,8 +33,6 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-
-
 import org.kchine.r.server.RKit;
 import org.kchine.r.server.spreadsheet.AbstractSpreadsheetModel;
 import org.kchine.r.server.spreadsheet.Cell;
@@ -874,4 +872,137 @@ public class JSpreadsheet extends JComponent
 		tableModel.addSpreadsheetListener(l);		
 	}
 	
+	/*
+	 * 
+
+   public JSpreadsheet(AbstractTableModel m, RGui rgui, String name)
+   {
+	   rg=rgui;
+	   
+      table = createTable();
+
+      setLayout(new BorderLayout());
+      newTableModel(m, rgui);
+
+      // clobber resizing of all columns
+      table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+      // set table editor and renderer to custom ones
+      table.setDefaultRenderer(Cell.class, new SpreadsheetCellRenderer( rgui, name));
+      table.setDefaultEditor(Cell.class, new SpreadsheetCellEditor(new JTextField()));
+
+      // set selection mode for contiguous  intervals
+      table.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+      table.setCellSelectionEnabled(true);
+
+      MouseListener ml = new HeaderMouseAdapter();
+
+      // we don't allow reordering
+      table.getTableHeader().setReorderingAllowed(false);
+      table.getTableHeader().addMouseListener(ml);
+
+      // create selection models
+      ListSelectionModel rowSelectionModel = table.getSelectionModel();
+      ListSelectionModel columnSelectionModel = table.getColumnModel().getSelectionModel();
+
+      // add selection listeners to the selection models
+      //rowSelectionModel.addListSelectionListener(this);
+      //columnSelectionModel.addListSelectionListener(this);
+      
+      Dimension tablePreferredSize=table.getPreferredSize();
+      
+      
+      JLayeredPane lp = new JLayeredPane();
+      lp.setPreferredSize(tablePreferredSize);
+      
+      JPanel tableLayer = new JPanel(new BorderLayout());
+      tableLayer.setSize(tablePreferredSize);
+      tableLayer.setOpaque(true);
+      tableLayer.add(table,BorderLayout.CENTER);
+      lp.add(tableLayer, new Integer(1));
+      
+      controlsLayer = new JPanel(null);
+      controlsLayer.setSize(tablePreferredSize);            	  
+	  controlsLayer.setOpaque(false);
+      lp.add(controlsLayer, new Integer(2));      
+      JScrollPane scrollPane = new JScrollPane(lp, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+      add(scrollPane, BorderLayout.CENTER);
+
+      rowHeader = new JTable(new RowModel(table.getModel()));
+      TableCellRenderer renderer = new RowHeaderRenderer();
+      Component comp = renderer.getTableCellRendererComponent(rowHeader, null, false, false, rowHeader.getRowCount() - 1, 0);
+      rowHeader.setIntercellSpacing(new Dimension(0, 0));
+      Dimension d = rowHeader.getPreferredScrollableViewportSize();
+      d.width = comp.getPreferredSize().width;
+      rowHeader.setPreferredScrollableViewportSize(d);
+      rowHeader.setRowHeight(table.getRowHeight());
+      rowHeader.setDefaultRenderer(Object.class, renderer);
+      rowHeader.addMouseListener(ml);
+
+      scrollPane.setRowHeaderView(rowHeader);
+
+      JPanel blank = new JPanel();
+      blank.addMouseListener(ml);
+      scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, blank);
+
+      // initial selection
+      //resetSelection();
+      table.setRequestFocusEnabled(true);
+
+      //menuBar.setRequestFocusEnabled(false);
+      //toolBar.setRequestFocusEnabled(false);
+      table.requestFocus();
+
+      Formula.registerFunctions();
+
+      try {
+      if (PoolUtils.isMacOs()) {
+    	  table.setGridColor(Color.black);
+    	  
+      } } catch (Exception e) {
+    	  e.printStackTrace();
+      }
+      
+		new Thread(new Runnable() {
+			public void run() {
+				
+				final Random rnd=new Random(System.currentTimeMillis());
+				
+				try {
+					while (true) {
+						
+						SwingUtilities.invokeLater(new Runnable(){
+							public void run() {
+
+								JButton b = new JButton("Hi!");
+
+								int row = rnd.nextInt(5);
+								int col = rnd.nextInt(4);
+								Rectangle r1 = table.getCellRect(row, col, true);
+								Rectangle r2 = table.getCellRect(row + 1, col + 1, true);
+
+								b.setLocation(r1.x, r1.y);
+								b.setSize(Math.abs(r2.x - r1.x), Math.abs(r2.y - r1.y));
+
+								controlsLayer.removeAll();
+								controlsLayer.add(b);
+								controlsLayer.updateUI();
+								controlsLayer.repaint();
+
+								
+							}
+						});
+												
+						Thread.sleep(3000);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+      
+   }
+
+	 * 
+	 */	
 }
