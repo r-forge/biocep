@@ -754,7 +754,7 @@ public abstract class RListener {
 
 								} catch (Exception e) {
 									DirectJNI.getInstance().getRServices().consoleSubmit(
-											convertToPrintCommand("RLink Creation Failed\nuse show.rlink to see creation error"));
+											convertToPrintCommand("RLink Creation Failed\nuse rlink.show to see creation error"));
 									_rlinkHash.get(rlinkName).setCreationException(e);
 								}
 
@@ -780,7 +780,7 @@ public abstract class RListener {
 									r = (RServices) ServerDefaults.getRmiRegistry().lookup(name[0]);
 								} catch (Exception e) {
 									DirectJNI.getInstance().getRServices().consoleSubmit(
-											convertToPrintCommand("RLink Creation Failed\nuse show.rlink to see creation error"));
+											convertToPrintCommand("RLink Creation Failed\nuse rlink.show to see creation error"));
 									_rlinkHash.get(rlinkName).setCreationException(e);
 								}
 
@@ -790,7 +790,7 @@ public abstract class RListener {
 
 							try {
 								DirectJNI.getInstance().getRServices().consoleSubmit(
-										convertToPrintCommand("RLink Creation Succeeded\nuse show.rlink to get creation details"));
+										convertToPrintCommand("RLink Creation Succeeded\nuse rlink.show to get creation details"));
 							} catch (Exception e) {
 								e.printStackTrace();
 							}

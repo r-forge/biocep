@@ -471,7 +471,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					break;
 
 					
-				}
+				} 
 
 				
 				session = request.getSession(false);
@@ -698,6 +698,14 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						result = spreadsheetDeviceId;
 						break;
 						
+				} else if (command.equals("list")) {
+					ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+					if (spFactory == null) {
+						result = new NoRegistryAvailableException();
+						break;
+					}
+					result = spFactory.getServantProvider().getRegistry().list();
+					break;					
 				}
 
 			} while (true);
