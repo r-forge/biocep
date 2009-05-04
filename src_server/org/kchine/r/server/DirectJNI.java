@@ -473,18 +473,28 @@ public class DirectJNI {
 			
 			 if (((RLogical)getRServices().getObject("exists('Cairo')")).getValue()[0]) {
 				 
-				 _cairoCapabilities=new HashSet<String>();
+				 _cairoCapabilities=new HashSet<String>();				
 				_cairoCapabilities.add("png");
 				_cairoCapabilities.add("pdf");
 				_cairoCapabilities.add("svg");
 				_cairoCapabilities.add("ps");
 				_cairoCapabilities.add("x11");
-				 try { 
-					 RLogical c= (RLogical)getRServices().getObject("Cairo.capabilities()");
-					 if (c!=null) {
+				
+				 try { 					 
+					 getRServices().evaluate("Cairo_capabilities<-Cairo.capabilities()");
+					 
+					 if (((RLogical)getRServices().getObject("exists('Cairo_capabilities')")).getValue()[0]) {
+						 
+						 RLogical c= (RLogical)getRServices().getObject("Cairo_capabilities");
+						 getRServices().evaluate("rm(Cairo_capabilities)");
 						 _cairoCapabilities=new HashSet<String>();
 						 for (int i=0; i<c.getValue().length;++i) if (c.getValue()[i]) _cairoCapabilities.add(c.getNames()[i]);
 						 System.out.println("Cairo capabilities : "+_cairoCapabilities);
+						 
+					 } else {
+						 
+						 System.out.println("Cairo capabilities (Default) : "+_cairoCapabilities);
+						 
 					 }
 				 } catch (Exception e) {
 					// TODO: handle exception
