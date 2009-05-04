@@ -815,7 +815,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 				
 				_virtualizationServer.setStopAtShutdown(true);
 				
-				Context root = new Context(_virtualizationServer, "/", Context.SESSIONS|Context.NO_SECURITY);
+				Context root = new Context(_virtualizationServer, "/rvirtual", Context.SESSIONS|Context.NO_SECURITY);
 				
 				
 				final HttpSessionListener sessionListener=new FreeResourcesListener();				
@@ -849,13 +849,13 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 					}
 				});
 				
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(rkit)), "/rvirtual/graphics/*");
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet(rkit)), "/rvirtual/rest/*");
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(rkit,false)), "/rvirtual/cmd/*");
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(rkit)), "/rvirtual/helpme/*");
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WorkingDirectoryServlet(rkit)), "/rvirtual/wd/*");
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"www")), "/rvirtual/www/*");
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"appletlibs")), "/rvirtual/appletlibs/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(rkit)), "/graphics/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet(rkit)), "/rest/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(rkit,false)), "/cmd/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(rkit)), "/helpme/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WorkingDirectoryServlet(rkit)), "/wd/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/www")), "/www/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/appletlibs")), "/appletlibs/*");
 				
 				System.out.println("+ going to start virtualization http server port : " + port);
 				

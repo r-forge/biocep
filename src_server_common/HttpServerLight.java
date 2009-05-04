@@ -1,6 +1,10 @@
+import static org.kchine.rpf.PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT;
+import static org.kchine.rpf.PoolUtils.cacheJar;
 import static org.kchine.rpf.PoolUtils.getDBType;
 import static org.kchine.rpf.PoolUtils.getHostIp;
 
+import java.io.File;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,6 +28,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionManager;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.webapp.WebAppContext;
 
 public class HttpServerLight {
 
@@ -187,10 +192,18 @@ public class HttpServerLight {
 			e.printStackTrace();
 		}
 
+		
+		
+		
+		
 		Server _virtualizationServer = new Server(port);
 		_virtualizationServer.setStopAtShutdown(true);
-		Context root = new Context(_virtualizationServer, "/", Context.SESSIONS | Context.NO_SECURITY);
+		
+		
+		Context root = new Context(_virtualizationServer, "/rvirtual", Context.SESSIONS | Context.NO_SECURITY);
+		
 
+		
 		final HttpSessionListener sessionListener = new FreeResourcesListener();
 		root.getSessionHandler().setSessionManager(new HashSessionManager() {
 			@Override
@@ -222,15 +235,27 @@ public class HttpServerLight {
 			}
 		});
 
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet()), "/rvirtual/cmd/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.HelpServlet()), "/rvirtual/helpme/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.ConfigServlet()), "/rvirtual/config/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(true)), "/rvirtual/graphics/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet()), "/rvirtual/rest/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RebindServlet()), "/rvirtual/rebind/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"www")), "/rvirtual/www/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"appletlibs")), "/rvirtual/appletlibs/*");		
-
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet()), "/cmd/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.HelpServlet()), "/helpme/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.ConfigServlet()), "/config/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(true)), "/graphics/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet()), "/rest/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RebindServlet()), "/rebind/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/www")), "/www/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/appletlibs")), "/appletlibs/*");		
+		
+		boolean rsoapEnabled= args.length==0 && System.getProperty("soapenabled")!=null && System.getProperty("soapenabled").equals("true");
+		if (rsoapEnabled) {
+			if (!new File(ServerManager.INSTALL_DIR+"/"+"rws.war").exists()) {
+				cacheJar(new URL("http://biocep-distrib.r-forge.r-project.org/appletlibs/rws.war"), ServerManager.INSTALL_DIR , LOG_PRGRESS_TO_SYSTEM_OUT, false);
+			}			
+    		String contextPath="/rws";
+	        WebAppContext wac = new WebAppContext();
+	        wac.setContextPath(contextPath);
+	        wac.setWar(ServerManager.INSTALL_DIR+"/"+"rws.war");   
+	        _virtualizationServer.addHandler(wac);
+    	}
+		
 		System.out.println("+ going to start virtualization http server port : " + port);
 		_virtualizationServer.start();
 
