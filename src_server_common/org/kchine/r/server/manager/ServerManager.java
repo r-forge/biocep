@@ -171,25 +171,36 @@ public class ServerManager {
 		}
 		if (!new File(WWW_DIR).exists())  new File(WWW_DIR).mkdirs();
 		
-		
-		if (System.getenv("SCI_HOME") != null) {
-			SCI_HOME = System.getenv("SCI_HOME");
-		} else if (System.getProperty("SCI_HOME")!=null && !System.getProperty("SCI_HOME").equals("")) {			
-			SCI_HOME = System.getProperty("SCI_HOME");
-		} else {			
-			File embeddedScilabDir= new File(INSTALL_DIR + "scilab");
-			if (!embeddedScilabDir.exists()) embeddedScilabDir.mkdirs(); 
-			String[] dirList=embeddedScilabDir.list(new FilenameFilter(){
-				public boolean accept(File dir, String name) {
-					return dir.isDirectory();
+		if (System.getenv("SCI") == null) {
+			if (System.getenv("SCI_HOME") != null) {
+				SCI_HOME = System.getenv("SCI_HOME");
+			} else if (System.getProperty("SCI_HOME")!=null && !System.getProperty("SCI_HOME").equals("")) {			
+				SCI_HOME = System.getProperty("SCI_HOME");
+			} else {			
+				File embeddedScilabDir= new File(INSTALL_DIR + "scilab");
+				if (!embeddedScilabDir.exists()) embeddedScilabDir.mkdirs(); 
+				String[] dirList=embeddedScilabDir.list(new FilenameFilter(){
+					public boolean accept(File dir, String name) {
+						return dir.isDirectory();
+					}
+				});
+				if (dirList.length>0) {
+					SCI_HOME=embeddedScilabDir+"/"+dirList[0];
+					
+				} else {
+					SCI_HOME=null;
+				}			
+			}
+		} else {
+			if (isWindowsOs()) {
+				SCI_HOME=System.getenv("SCI");
+			} else {				
+				try {
+					SCI_HOME=new File(new File(System.getenv("SCI")).getAbsolutePath()+"/../..").getCanonicalPath();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			});
-			if (dirList.length>0) {
-				SCI_HOME=embeddedScilabDir+"/"+dirList[0];
-				
-			} else {
-				SCI_HOME=null;
-			}			
+			}
 		}
 		
 		if (SCI_HOME!=null) SCI_HOME = new File(SCI_HOME).getAbsolutePath().replace('\\', '/') + "/";
