@@ -763,5 +763,24 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 	
+	public boolean scilabExec(String cmd) throws RemoteException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	public String scilabConsoleSubmit(String cmd) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	
+	public RObject scilabGetObject(String expression) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public void scilabPutAndAssign(Object obj, String name) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

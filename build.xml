@@ -63,6 +63,8 @@
 		<property name="DERBY_JAR" value="lib/jdbc/derbyclient.jar"/>
 		<property name="GROOVY_JAR" value="lib/desktop/groovy-all-1.5.4.jar"/>
 		
+		<property name="JAVASCI_JAR" value="lib/desktop/javasci.jar"/>
+		
 		<property name="JETTY_JAR" value="lib/desktop/jetty-6.1.11.jar"/>
 		<property name="JETTY_UTIL_JAR" value="lib/desktop/jetty-util-6.1.11.jar"/>
 		<property name="JETTY_CLIENT_JAR" value="lib/desktop/jetty-client-6.1.11.jar"/>
@@ -416,6 +418,8 @@
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>	
 
 				<pathelement path="${GROOVY_JAR}"/>
+				<pathelement path="${JAVASCI_JAR}"/>
+				
 				
 				<pathelement path="lib/svg/batik-svggen.jar"/>
 				<pathelement path="lib/svg/batik-dom.jar"/>
@@ -982,6 +986,7 @@
 				<pathelement path="lib/j2ee/commons-httpclient-3.1-rc1.jar"/>
 								
 				<pathelement path="${GROOVY_JAR}"/>
+				<pathelement path="${JAVASCI_JAR}"/>
 				
 				<pathelement path="lib/svg/batik-anim.jar"/>
 				<pathelement path="lib/svg/batik-awt-util.jar"/>
@@ -1759,7 +1764,7 @@
 			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
 		
 			<unjar src="${GROOVY_JAR}"  dest="binsrv" overwrite="true"/>
-			
+			<unjar src="${JAVASCI_JAR}"  dest="binsrv" overwrite="true"/>
 			
 			
 		
@@ -1914,6 +1919,7 @@
 			<unjar src="lib/svg/xml-apis.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/xml-apis-ext.jar"  dest="binsrv" overwrite="true"/>				
 			<unjar src="${GROOVY_JAR}"  dest="binsrv" overwrite="true"/>
+			<unjar src="${JAVASCI_JAR}"  dest="binsrv" overwrite="true"/>
 		
 			<property 	name="src_client_target" value="src_client:src_patch_joi:src_patch_freemind"/>		
 			<javac srcdir="${src_client_target}"
