@@ -611,7 +611,12 @@ public class ServerManager {
 				
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 				if (SCI_HOME!=null) {
-					env.put("LD_LIBRARY_PATH", SCI_HOME+(isWindowsOs()?"bin":"lib/scilab")+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));
+					if (isWindowsOs()) {
+						env.put("LD_LIBRARY_PATH", SCI_HOME+"bin"+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));	
+					} else {
+						env.put("LD_LIBRARY_PATH", SCI_HOME+"lib/scilab"+System.getProperty("path.separator")+SCI_HOME+"lib/thirdparty"+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));
+					}
+					
 				}
 				
 				env.put("R_HOME", rpath);
