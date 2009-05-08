@@ -63,6 +63,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import javasci.Scilab;
+
 import javax.imageio.ImageIO;
 import org.apache.commons.logging.Log;
 import org.htmlparser.Node;
@@ -4399,6 +4402,25 @@ public class DirectJNI {
 
 		public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException {
 			return null;
+		}
+		
+		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
+			return Scilab.Exec(cmd);
+		}
+		
+		public String scilabConsoleSubmit(String cmd) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		public RObject scilabGetObject(String expression) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		public void scilabPutAndAssign(Object obj, String name) throws RemoteException {
+			// TODO Auto-generated method stub
+			
 		}
 
 	};

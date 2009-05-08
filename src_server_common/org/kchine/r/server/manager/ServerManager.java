@@ -87,7 +87,9 @@ public class ServerManager {
 	public static String DOWNLOAD_DIR = null;
 	public static String WWW_DIR = null;
 	public static final String EMBEDDED_R = "R-version-2.8.0";
-	public static final int ENTRIES_NUMBER = 4832;
+	public static final int ENTRIES_NUMBER = 4832;	
+	public static String SCI_HOME = null;
+	
 
 	static {
 		if (System.getenv("BIOCEP_HOME") != null) {
@@ -168,6 +170,31 @@ public class ServerManager {
 			WWW_DIR = new File(INSTALL_DIR + "www").getAbsolutePath();
 		}
 		if (!new File(WWW_DIR).exists())  new File(WWW_DIR).mkdirs();
+		
+		
+		if (System.getenv("SCI_HOME") != null) {
+			SCI_HOME = System.getenv("SCI_HOME");
+		} else if (System.getProperty("SCI_HOME")!=null && !System.getProperty("SCI_HOME").equals("")) {			
+			SCI_HOME = System.getProperty("SCI_HOME");
+		} else {			
+			File embeddedScilabDir= new File(INSTALL_DIR + "scilab");
+			if (!embeddedScilabDir.exists()) embeddedScilabDir.mkdirs(); 
+			String[] dirList=embeddedScilabDir.list(new FilenameFilter(){
+				public boolean accept(File dir, String name) {
+					return dir.isDirectory();
+				}
+			});
+			if (dirList.length>0) {
+				SCI_HOME=embeddedScilabDir+"/"+dirList[0];
+				
+			} else {
+				SCI_HOME=null;
+			}			
+		}
+		
+		if (SCI_HOME!=null) SCI_HOME = new File(SCI_HOME).getAbsolutePath().replace('\\', '/') + "/";
+				
+		System.out.println("SCI_HOME:"+SCI_HOME);
 
 	}
 
@@ -576,8 +603,17 @@ public class ServerManager {
 				if (OS_PATH==null) OS_PATH="";
 				
 				Map<String, String> env = new HashMap<String, String>(osenv);
+				
 				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib") + System.getProperty("path.separator")+ OS_PATH);
+				if (SCI_HOME!=null) {
+					env.put("Path", SCI_HOME+(isWindowsOs()?"bin":"lib/scilab")+System.getProperty("path.separator")+env.get("Path"));
+				}
+				
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
+				if (SCI_HOME!=null) {
+					env.put("LD_LIBRARY_PATH", SCI_HOME+(isWindowsOs()?"bin":"lib/scilab")+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));
+				}
+				
 				env.put("R_HOME", rpath);
 				
 				String R_LIBS = null;
@@ -761,6 +797,12 @@ public class ServerManager {
 				jripath = rlibs + "/rJava/jri/";
 				System.out.println("jripath:" + jripath + "\n");
 			}
+			
+			if (SCI_HOME!=null) {
+				jripath+=System.getProperty("path.separator")+SCI_HOME+(isWindowsOs()?"bin":"lib/scilab");
+			}
+
+			System.out.println("jri path"+jripath);
 
 			String cp = INSTALL_DIR + "classes";
 

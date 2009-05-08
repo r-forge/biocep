@@ -32,6 +32,7 @@ import org.kchine.r.server.RConsoleAction;
 import org.kchine.r.server.RConsoleActionListener;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
+import org.kchine.r.server.manager.ServerManager;
 
 
 /**
@@ -43,7 +44,13 @@ public class BridgeBasics {
 
 
 	public static void main(String args[]) throws Exception {
+	
 		
+		final RServices r = ServerManager.createR("toto");
+		r.scilabExec("disp(7+9)");
+		r.die();
+		
+		if (true) return;
 		
 		final RServices rs = DirectJNI.getInstance().getRServices();
 		GDDevice device=rs.newDevice(400, 400);

@@ -248,4 +248,10 @@ public interface RServices extends ManagedServant {
     String getInstallDirectory() throws RemoteException;
     String getExtensionsDirectory() throws RemoteException;
     
+    public boolean scilabExec(String cmd) throws java.rmi.RemoteException;
+    
+    public String scilabConsoleSubmit(String cmd) throws java.rmi.RemoteException;    
+    public RObject scilabGetObject(String expression) throws RemoteException;
+    public void scilabPutAndAssign(Object obj, String name) throws RemoteException;
+    
 }

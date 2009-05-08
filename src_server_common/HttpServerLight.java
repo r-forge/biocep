@@ -2,7 +2,6 @@ import static org.kchine.rpf.PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT;
 import static org.kchine.rpf.PoolUtils.cacheJar;
 import static org.kchine.rpf.PoolUtils.getDBType;
 import static org.kchine.rpf.PoolUtils.getHostIp;
-
 import java.io.File;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -10,11 +9,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-
 import org.kchine.r.server.SendEmailMain;
 import org.kchine.r.server.http.frontend.FreeResourcesListener;
 import org.kchine.r.server.manager.ServerManager;
