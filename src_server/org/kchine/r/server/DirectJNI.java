@@ -518,7 +518,13 @@ public class DirectJNI {
 				e.printStackTrace();
 			}
 			
-			
+			if (ServerManager.SCI_HOME!=null) {
+				Runtime.getRuntime().addShutdownHook(new Thread(){
+					public void run() {
+						Scilab.Finish();
+					}
+				});
+			}
 			
 
 		} catch (Exception e) {
@@ -4406,6 +4412,8 @@ public class DirectJNI {
 		
 		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
 			return Scilab.Exec(cmd);
+		
+			
 		}
 		
 		public String scilabConsoleSubmit(String cmd) throws RemoteException {
