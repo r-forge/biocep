@@ -20,6 +20,7 @@ package org.kchine.r.server.http.local;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 
@@ -43,6 +44,8 @@ public class LocalHttpServer {
 					_server = new Server(Integer.decode(System.getProperty("localtomcat.port")));
 				}
 
+				_server.setSessionIdManager(new HashSessionIdManager(new java.util.Random()));
+				
 				_root = new Context(_server, "/", Context.SESSIONS);
 				_root.addServlet(new ServletHolder(new LocalClassServlet()), "/classes/*");
 				try {
