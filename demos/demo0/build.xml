@@ -106,6 +106,7 @@
 			<env key="Path" path="${R_LIB_PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg value="-Djava.library.path=${JRI_LIB_PATH}"/>
+			
 		</java>
 		
 	</target>

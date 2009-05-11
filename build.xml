@@ -1658,7 +1658,7 @@
 					<pathelement path="${SSH_JAR}"/>
 					<pathelement path="${SSH_TUNNEL_JAR}"/>
 					<pathelement path="${FTP_JAR}"/>
-					
+					<pathelement path="${JAVASCI_JAR}"/>
 					
 
 					<pathelement path="lib/desktop/jsp-api-2.1.jar"/>

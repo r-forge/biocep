@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -64,6 +65,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javasci.SciDouble;
 import javasci.Scilab;
 
 import javax.imageio.ImageIO;
@@ -183,7 +185,7 @@ public class DirectJNI {
 	private String _promptStr = null;
 	private Vector<String> _bootstrapRObjects = new Vector<String>();
 	private long _privateEnvExp;
-	
+
 	private HashMap<String, Vector<String>> _nameSpacesHash = new HashMap<String, Vector<String>>();
 	private HashMap<String, RPackage> _packs = new HashMap<String, RPackage>();
 	private Vector<Long> _protectedExpReference = new Vector<Long>();
@@ -197,10 +199,10 @@ public class DirectJNI {
 	private HashMap<String, SpreadsheetModelRemoteImpl> _spreadsheetTableModelRemoteHashMap = new HashMap<String, SpreadsheetModelRemoteImpl>();
 	private Vector<RConsoleActionListener> _ractionListeners = new Vector<RConsoleActionListener>();
 	private String _originatorUID;
-	private HashMap<String,Object> _clientProperties;
+	private HashMap<String, Object> _clientProperties;
 	private Vector<RCallBack> _callbacks = new Vector<RCallBack>();
 	private Vector<RCollaborationListener> _rCollaborationListeners = new Vector<RCollaborationListener>();
-	private HashSet<String> _cairoCapabilities=new HashSet<String>();
+	private HashSet<String> _cairoCapabilities = new HashSet<String>();
 
 	public static DirectJNI getInstance() {
 
@@ -215,16 +217,16 @@ public class DirectJNI {
 	}
 
 	public String runR(ExecutionUnit eu) {
-		return runR(eu,null);
+		return runR(eu, null);
 	}
-	
-	public String runR(ExecutionUnit eu, HashMap<String,Object> clientProperties) {
+
+	public String runR(ExecutionUnit eu, HashMap<String, Object> clientProperties) {
 
 		if (Thread.currentThread() == _rEngine) {
 			throw new RuntimeException("runR called from within the R MainLoop Thread");
 		} else {
 			_mainLock.lock();
-			_clientProperties=clientProperties;
+			_clientProperties = clientProperties;
 			try {
 				boolean hasConsoleInput = (eu.getConsoleInput() != null && !eu.getConsoleInput().equals(""));
 				String consoleLog = null;
@@ -303,7 +305,7 @@ public class DirectJNI {
 				return _sharedBuffer.toString();
 
 			} finally {
-				_clientProperties=null;
+				_clientProperties = null;
 				_mainLock.unlock();
 			}
 
@@ -368,7 +370,7 @@ public class DirectJNI {
 			if (busy) {
 
 				_userInput = null;
-				notifyRActionListeners(new RConsoleAction("GET_USER_INPUT",new HashMap<String, Object>()));
+				notifyRActionListeners(new RConsoleAction("GET_USER_INPUT", new HashMap<String, Object>()));
 				_stopRequired = false;
 				while (_userInput == null) {
 					try {
@@ -441,25 +443,25 @@ public class DirectJNI {
 	}
 
 	public static String[] getROptions() {
-		String[] roptions=new String[] { "--no-save" };
-		
+		String[] roptions = new String[] { "--no-save" };
+
 		if (System.getProperty("proxy_host") != null && !System.getProperty("proxy_host").equals("")) {
-			roptions=new String[] { "--no-save" , "--internet2"};
+			roptions = new String[] { "--no-save", "--internet2" };
 		}
-		
-		if (System.getProperty("r.options")!=null && !System.getProperty("r.options").equals("")) {
-			Vector<String> roptionsVector=new Vector<String>();
+
+		if (System.getProperty("r.options") != null && !System.getProperty("r.options").equals("")) {
+			Vector<String> roptionsVector = new Vector<String>();
 			StringTokenizer st = new StringTokenizer(System.getProperty("r.options"), " ");
-			while (st.hasMoreElements()) roptionsVector.add((String)st.nextElement());
-			roptions=roptionsVector.toArray(new String[0]);
+			while (st.hasMoreElements())
+				roptionsVector.add((String) st.nextElement());
+			roptions = roptionsVector.toArray(new String[0]);
 		}
-		System.out.println("r options:"+Arrays.toString(roptions));
+		System.out.println("r options:" + Arrays.toString(roptions));
 		return roptions;
 	}
-	
+
 	private DirectJNI() {
-		
-		
+
 		_rEngine = new RengineWrapper(getROptions(), true, new RMainLoopCallbacksImpl());
 
 		if (!_rEngine.waitForR()) {
@@ -473,37 +475,39 @@ public class DirectJNI {
 			initPrivateEnv();
 			_continueStr = ((RChar) ((RList) getRServices().getObject("options('continue')")).getValue()[0]).getValue()[0];
 			_promptStr = ((RChar) ((RList) getRServices().getObject("options('prompt')")).getValue()[0]).getValue()[0];
-			
-			 if (((RLogical)getRServices().getObject("exists('Cairo')")).getValue()[0]) {
-				 
-				 _cairoCapabilities=new HashSet<String>();				
+
+			if (((RLogical) getRServices().getObject("exists('Cairo')")).getValue()[0]) {
+
+				_cairoCapabilities = new HashSet<String>();
 				_cairoCapabilities.add("png");
 				_cairoCapabilities.add("pdf");
 				_cairoCapabilities.add("svg");
 				_cairoCapabilities.add("ps");
 				_cairoCapabilities.add("x11");
-				
-				 try { 					 
-					 getRServices().evaluate("Cairo_capabilities<-Cairo.capabilities()");
-					 
-					 if (((RLogical)getRServices().getObject("exists('Cairo_capabilities')")).getValue()[0]) {
-						 
-						 RLogical c= (RLogical)getRServices().getObject("Cairo_capabilities");
-						 getRServices().evaluate("rm(Cairo_capabilities)");
-						 _cairoCapabilities=new HashSet<String>();
-						 for (int i=0; i<c.getValue().length;++i) if (c.getValue()[i]) _cairoCapabilities.add(c.getNames()[i]);
-						 System.out.println("Cairo capabilities : "+_cairoCapabilities);
-						 
-					 } else {
-						 
-						 System.out.println("Cairo capabilities (Default) : "+_cairoCapabilities);
-						 
-					 }
-				 } catch (Exception e) {
+
+				try {
+					getRServices().evaluate("Cairo_capabilities<-Cairo.capabilities()");
+
+					if (((RLogical) getRServices().getObject("exists('Cairo_capabilities')")).getValue()[0]) {
+
+						RLogical c = (RLogical) getRServices().getObject("Cairo_capabilities");
+						getRServices().evaluate("rm(Cairo_capabilities)");
+						_cairoCapabilities = new HashSet<String>();
+						for (int i = 0; i < c.getValue().length; ++i)
+							if (c.getValue()[i])
+								_cairoCapabilities.add(c.getNames()[i]);
+						System.out.println("Cairo capabilities : " + _cairoCapabilities);
+
+					} else {
+
+						System.out.println("Cairo capabilities (Default) : " + _cairoCapabilities);
+
+					}
+				} catch (Exception e) {
 					// TODO: handle exception
 				}
-			 }
-			
+			}
+
 			getRServices().consoleSubmit("1");
 
 			upgdateBootstrapObjects();
@@ -517,15 +521,14 @@ public class DirectJNI {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-			if (ServerManager.SCI_HOME!=null) {
-				Runtime.getRuntime().addShutdownHook(new Thread(){
+
+			if (ServerManager.SCI_HOME != null) {
+				Runtime.getRuntime().addShutdownHook(new Thread() {
 					public void run() {
 						Scilab.Finish();
 					}
 				});
 			}
-			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -547,7 +550,7 @@ public class DirectJNI {
 	}
 
 	public void preprocessHelp(final String[] packNames, boolean inBackground) {
-		Runnable run=new Runnable(){
+		Runnable run = new Runnable() {
 			public void run() {
 				for (int i = 0; i < packNames.length; ++i) {
 					try {
@@ -560,7 +563,8 @@ public class DirectJNI {
 							if (!new File(indexFile).exists()) {
 								indexFile = null;
 							} else {
-								// System.out.println("index file:" + indexFile);
+								// System.out.println("index file:" +
+								// indexFile);
 							}
 						}
 
@@ -582,7 +586,7 @@ public class DirectJNI {
 				}
 			}
 		};
-		
+
 		if (inBackground) {
 			new Thread(run).start();
 		} else {
@@ -2213,7 +2217,7 @@ public class DirectJNI {
 			}
 		}
 	}
-	
+
 	private void fireVariableChangedEvents(long[] variablePointersBefore) {
 		fireVariableChangedEvents(variablePointersBefore, null);
 	}
@@ -2285,9 +2289,9 @@ public class DirectJNI {
 		}
 
 		public String sourceFromBuffer(final String buffer) throws RemoteException {
-			return sourceFromBuffer(buffer,null);
+			return sourceFromBuffer(buffer, null);
 		}
-		
+
 		public String sourceFromBuffer(final String buffer, HashMap<String, Object> clientProperties) throws RemoteException {
 
 			long[] variablePointersBefore = getVariablePointersBefore();
@@ -2302,7 +2306,7 @@ public class DirectJNI {
 						exceptionHolder[0] = ex;
 					}
 				}
-			}, clientProperties );
+			}, clientProperties);
 
 			fireVariableChangedEvents(variablePointersBefore, clientProperties);
 
@@ -2881,9 +2885,9 @@ public class DirectJNI {
 			final Boolean[] objHolder = new Boolean[1];
 
 			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
-				public void run(Rengine e) {					
-					try {				
-						objHolder[0] = ((RLogical)DirectJNI.this.evalAndGetObject("exists('"+symbol+"')", false)).getValue()[0];						
+				public void run(Rengine e) {
+					try {
+						objHolder[0] = ((RLogical) DirectJNI.this.evalAndGetObject("exists('" + symbol + "')", false)).getValue()[0];
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
@@ -3137,10 +3141,10 @@ public class DirectJNI {
 		}
 
 		public String consoleSubmit(final String cmd) throws RemoteException {
-			return consoleSubmit(cmd,null);
+			return consoleSubmit(cmd, null);
 		}
-		
-		public String consoleSubmit(final String cmd, HashMap<String,Object> clientProperties) throws RemoteException {
+
+		public String consoleSubmit(final String cmd, HashMap<String, Object> clientProperties) throws RemoteException {
 			log.info("submit : " + cmd);
 
 			long[] variablePointersBefore = getVariablePointersBefore();
@@ -3501,11 +3505,11 @@ public class DirectJNI {
 		public String getHostName() throws RemoteException {
 			return PoolUtils.getHostName();
 		}
-		
+
 		public Map<String, String> getSystemEnv() throws RemoteException {
 			return System.getenv();
 		}
-		
+
 		public Properties getSystemProperties() throws RemoteException {
 			return System.getProperties();
 		}
@@ -3513,15 +3517,15 @@ public class DirectJNI {
 		public String getWorkingDirectory() throws RemoteException {
 			return new File(WDIR).getAbsolutePath();
 		}
-		
+
 		public String getInstallDirectory() throws RemoteException {
 			return ServerManager.INSTALL_DIR;
 		}
-		
+
 		public String getExtensionsDirectory() throws RemoteException {
 			return ServerManager.EXTENSIONS_DIR;
 		}
-		
+
 		public boolean isPortInUse(int port) throws RemoteException {
 			return ServerManager.isPortInUse("127.0.0.1", port);
 		}
@@ -3540,546 +3544,541 @@ public class DirectJNI {
 			return null;
 		}
 
-		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {		
+		public void asynchronousConsoleSubmit(String cmd) throws RemoteException {
 		}
-		
+
 		public void asynchronousConsoleSubmit(String cmd, HashMap<String, Object> clientProperties) throws RemoteException {
 		}
 
-		
 		public byte[] getSvg(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getSvg();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getSvg(String script, Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
-				return deviceLocal.getSvg( width, height, onefile, bg, pointsize);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
+				return deviceLocal.getSvg(width, height, onefile, bg, pointsize);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getPostscript(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getPostscript();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
-		public byte[] getPostscript(String script, Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg, Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper , Boolean pagecentre, String colormodel) throws RemoteException{
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+
+		public byte[] getPostscript(String script, Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg,
+				Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper, Boolean pagecentre, String colormodel)
+				throws RemoteException {
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
-				return deviceLocal.getPostscript( onefile, family, title, fonts, encoding, bg, fg, width, height, horizontal, pointsize, paper, pagecentre, colormodel);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
+				return deviceLocal.getPostscript(onefile, family, title, fonts, encoding, bg, fg, width, height, horizontal, pointsize, paper, pagecentre,
+						colormodel);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getPdf(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getPdf();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
-		public byte[] getPdf(String script, Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
-				String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+
+		public byte[] getPdf(String script, Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version,
+				String paper, String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats)
+				throws RemoteException {
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
-				return deviceLocal.getPdf( width, height, onefile, family, title, fonts, version, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, useDingbats);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
+				return deviceLocal.getPdf(width, height, onefile, family, title, fonts, version, paper, encoding, bg, fg, pointsize, pagecentre, colormodel,
+						useDingbats);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getPictex(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getPictex();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getPictex(String script, Integer width, Integer height, Boolean debug, String bg, String fg) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getPictex(width, height, debug, bg, fg);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getBmp(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getBmp();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
-		public byte[] getBmp(String script, Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+
+		public byte[] getBmp(String script, Integer width, Integer height, String units, Integer pointsize, String bg, Integer res) throws RemoteException {
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getBmp(width, height, units, pointsize, bg, res);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getJpeg(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getJpeg();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
-		public byte[] getJpeg(String script, Integer width, Integer height, String units, Integer pointsize, Integer quality, String bg,Integer res) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+
+		public byte[] getJpeg(String script, Integer width, Integer height, String units, Integer pointsize, Integer quality, String bg, Integer res)
+				throws RemoteException {
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
-				return deviceLocal.getJpeg( width, height, units, pointsize, quality, bg, res);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
+				return deviceLocal.getJpeg(width, height, units, pointsize, quality, bg, res);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}		
+			}
 		}
-		
+
 		public byte[] getPng(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getPng();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
-		public byte[] getPng(String script, Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+
+		public byte[] getPng(String script, Integer width, Integer height, String units, Integer pointsize, String bg, Integer res) throws RemoteException {
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getPng(width, height, units, pointsize, bg, res);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getTiff(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getTiff();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
-		public byte[] getTiff(String script, Integer width, Integer height, String units, Integer pointsize, String compression, String bg,Integer res) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+
+		public byte[] getTiff(String script, Integer width, Integer height, String units, Integer pointsize, String compression, String bg, Integer res)
+				throws RemoteException {
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
-				return deviceLocal.getTiff( width, height, units, pointsize, compression, bg, res);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
+				return deviceLocal.getTiff(width, height, units, pointsize, compression, bg, res);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}		
+			}
 		}
-		
+
 		public byte[] getXfig(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getXfig();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
-		public byte[] getXfig(String script, Boolean onefile, String encoding , String paper, Boolean horizontal, 
-				Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+
+		public byte[] getXfig(String script, Boolean onefile, String encoding, String paper, Boolean horizontal, Integer width, Integer height, String family,
+				Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
-				return deviceLocal.getXfig( onefile, encoding, paper, horizontal, width, height, family, pointsize, bg, fg, pagecentre);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
+				return deviceLocal.getXfig(onefile, encoding, paper, horizontal, width, height, family, pointsize, bg, fg, pagecentre);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getWmf(String script, int width, int height, boolean useserver) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getWmf(useserver);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
+
 		public byte[] getEmf(String script, int width, int height, boolean useserver) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getEmf(useserver);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}		
+			}
 		}
-		
+
 		public byte[] getOdg(String script, int width, int height) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getOdg();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
+			}
 		}
-		
-		public byte[] getFromImageIOWriter(String script, int width, int height,String format) throws RemoteException {
-			GDDevice deviceLocal=null;
-			String status=null;
-			try {				
+
+		public byte[] getFromImageIOWriter(String script, int width, int height, String format) throws RemoteException {
+			GDDevice deviceLocal = null;
+			String status = null;
+			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal(width,height);
+				deviceLocal = new GDDeviceLocal(width, height);
 				DirectJNI.getInstance().getRServices().sourceFromBuffer(script);
-				status=getStatus();
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set("+ currentDevice + ");", 1);
+				status = getStatus();
+				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
 				return deviceLocal.getFromImageIOWriter(format);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
-			} finally {				
-				if (deviceLocal!=null) deviceLocal.dispose();
+			} finally {
+				if (deviceLocal != null)
+					deviceLocal.dispose();
 				_lastStatus = status;
-			}	
-		}		
-		
+			}
+		}
+
 		/*
-		public byte[] getSvg(String script, int width, int height) throws RemoteException {
-
-			File tempFile = null;
-			String status = "";
-
-			try {
-				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".svg").getCanonicalFile();
-				if (tempFile.exists())
-					tempFile.delete();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteException("", e);
-			}
-			
-			{
-				
-				int[] devices=snapshotDevices();
-				String command = (DirectJNI.getInstance().getCairoCapabilities().contains("svg") ? "CairoSVG":"svg") +"(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (width / height))
-						+ ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);";
-				
-				System.out.println(">>>"+command+"<<");
-				DirectJNI.getInstance().getRServices().evaluate(command);
-				
-				
-				if (!getStatus().equals("")) {
-					log.info(getStatus());
-				}
-				
-				int deviceNumber=guessNewDevice(devices);
-				
-				sourceFromBuffer(script);
-				status = getStatus();
-				if (!status.equals("")) {
-					log.info(status);
-				}
-
-				if (tempFile.exists()) {
-					byte[] result = null;
-					try {
-						DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.off("+deviceNumber+")", 1);
-
-						RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
-						result = new byte[(int) raf.length()];
-						raf.readFully(result);
-						raf.close();
-						tempFile.delete();
-
-					} catch (Exception e) {
-						e.printStackTrace();
-						throw new RemoteException("", e);
-					}
-					_lastStatus = status;
-					return result;
-				} else {
-					return null;
-				}
-
-			}
-		}
-
-		
-		public byte[] getPdf(String script, int width, int height) throws RemoteException {
-			System.out.println("getPDF::"+"width:"+width+"  height:"+height);
-			String status = "";
-			File tempFile = null;
-			try {
-				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + ".pdf").getCanonicalFile();
-				if (tempFile.exists())
-					tempFile.delete();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteException("", e);
-			}
-
-			int currentDevice = ((RInteger) getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-			shutdownDevices("pdf");
-
-			final String createDeviceCommand = "pdf(file = \"" + tempFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-					+ new Double(6 * ((double)width / (double)height)) + ", height = " + 6 + " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
-			evaluate(createDeviceCommand);
-			if (!getStatus().equals("")) {
-				log.info(getStatus());
-			}
-
-			sourceFromBuffer(script);
-			status = getStatus();
-			if (!status.equals("")) {
-				log.info(status);
-			}
-			evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1);
-			if (tempFile.exists()) {
-				byte[] result = null;
-				try {
-					shutdownDevices("pdf");
-					RandomAccessFile raf = new RandomAccessFile(tempFile, "r");
-					result = new byte[(int) raf.length()];
-					raf.readFully(result);
-					raf.close();
-					tempFile.delete();
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RemoteException("", e);
-				}
-				_lastStatus = status;
-				return result;
-			} else {
-				_lastStatus = status;
-				return null;
-			}
-			
-		}
-		*/
+		 * public byte[] getSvg(String script, int width, int height) throws
+		 * RemoteException {
+		 * 
+		 * File tempFile = null; String status = "";
+		 * 
+		 * try { tempFile = new File(TEMP_DIR + "/temp" +
+		 * System.currentTimeMillis() + ".svg").getCanonicalFile(); if
+		 * (tempFile.exists()) tempFile.delete(); } catch (Exception e) {
+		 * e.printStackTrace(); throw new RemoteException("", e); }
+		 * 
+		 * {
+		 * 
+		 * int[] devices=snapshotDevices(); String command =
+		 * (DirectJNI.getInstance().getCairoCapabilities().contains("svg") ?
+		 * "CairoSVG":"svg") +"(file = \"" +
+		 * tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new
+		 * Double(10 (width / height)) + ", height = " + 10 +
+		 * " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12);";
+		 * 
+		 * System.out.println(">>>"+command+"<<");
+		 * DirectJNI.getInstance().getRServices().evaluate(command);
+		 * 
+		 * 
+		 * if (!getStatus().equals("")) { log.info(getStatus()); }
+		 * 
+		 * int deviceNumber=guessNewDevice(devices);
+		 * 
+		 * sourceFromBuffer(script); status = getStatus(); if
+		 * (!status.equals("")) { log.info(status); }
+		 * 
+		 * if (tempFile.exists()) { byte[] result = null; try {
+		 * DirectJNI.getInstance
+		 * ().getRServices().evaluate(".PrivateEnv$dev.off("+deviceNumber+")",
+		 * 1);
+		 * 
+		 * RandomAccessFile raf = new RandomAccessFile(tempFile, "r"); result =
+		 * new byte[(int) raf.length()]; raf.readFully(result); raf.close();
+		 * tempFile.delete();
+		 * 
+		 * } catch (Exception e) { e.printStackTrace(); throw new
+		 * RemoteException("", e); } _lastStatus = status; return result; } else
+		 * { return null; }
+		 * 
+		 * } }
+		 * 
+		 * 
+		 * public byte[] getPdf(String script, int width, int height) throws
+		 * RemoteException {
+		 * System.out.println("getPDF::"+"width:"+width+"  height:"+height);
+		 * String status = ""; File tempFile = null; try { tempFile = new
+		 * File(TEMP_DIR + "/temp" + System.currentTimeMillis() +
+		 * ".pdf").getCanonicalFile(); if (tempFile.exists()) tempFile.delete();
+		 * } catch (Exception e) { e.printStackTrace(); throw new
+		 * RemoteException("", e); }
+		 * 
+		 * int currentDevice = ((RInteger)
+		 * getObject(".PrivateEnv$dev.cur()")).getValue()[0];
+		 * shutdownDevices("pdf");
+		 * 
+		 * final String createDeviceCommand = "pdf(file = \"" +
+		 * tempFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new
+		 * Double(6 ((double)width / (double)height)) + ", height = " + 6 +
+		 * " , onefile = TRUE, title = '', fonts = NULL, version = '1.1' )";
+		 * evaluate(createDeviceCommand); if (!getStatus().equals("")) {
+		 * log.info(getStatus()); }
+		 * 
+		 * sourceFromBuffer(script); status = getStatus(); if
+		 * (!status.equals("")) { log.info(status); }
+		 * evaluate(".PrivateEnv$dev.set(" + currentDevice + ");", 1); if
+		 * (tempFile.exists()) { byte[] result = null; try {
+		 * shutdownDevices("pdf"); RandomAccessFile raf = new
+		 * RandomAccessFile(tempFile, "r"); result = new byte[(int)
+		 * raf.length()]; raf.readFully(result); raf.close(); tempFile.delete();
+		 * } catch (Exception e) { e.printStackTrace(); throw new
+		 * RemoteException("", e); } _lastStatus = status; return result; } else
+		 * { _lastStatus = status; return null; }
+		 * 
+		 * }
+		 */
 
 		public String getPythonStatus() throws RemoteException {
 			return PythonInterpreterSingleton.getPythonStatus();
@@ -4198,7 +4197,7 @@ public class DirectJNI {
 			GroovyInterpreterSingleton._clientSideGroovy = null;
 			new Thread(new Runnable() {
 				public void run() {
-					try {					
+					try {
 						GroovyInterpreterSingleton.getInstance().exec("import org.kchine.r.server.R;");
 						GroovyInterpreterSingleton.getInstance().exec("R=org.kchine.r.server.R.getInstance();");
 					} catch (Exception e) {
@@ -4208,11 +4207,12 @@ public class DirectJNI {
 
 			}).start();
 		}
-		
+
 		public boolean isExtensionAvailable(String extensionName) throws RemoteException {
-			return new File(ServerManager.EXTENSIONS_DIR+"/"+extensionName+".jar").exists() || new File(ServerManager.EXTENSIONS_DIR+"/"+extensionName).exists();			
+			return new File(ServerManager.EXTENSIONS_DIR + "/" + extensionName + ".jar").exists()
+					|| new File(ServerManager.EXTENSIONS_DIR + "/" + extensionName).exists();
 		}
-		
+
 		public String[] listExtensions() throws RemoteException {
 			File[] extensionsJarFiles = new File(ServerManager.EXTENSIONS_DIR).listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
@@ -4227,30 +4227,30 @@ public class DirectJNI {
 				}
 			});
 			Arrays.sort(extensionsDirs);
-			
-			String[] result=new String[extensionsJarFiles.length+extensionsDirs.length];
-			for (int i=0; i<extensionsJarFiles.length;++i) {
-				String name=extensionsJarFiles[i].getName();
-				name=name.substring(0,name.length()-".jar".length());
-				result[i]=name;
+
+			String[] result = new String[extensionsJarFiles.length + extensionsDirs.length];
+			for (int i = 0; i < extensionsJarFiles.length; ++i) {
+				String name = extensionsJarFiles[i].getName();
+				name = name.substring(0, name.length() - ".jar".length());
+				result[i] = name;
 			}
-			
-			for (int j=0; j<extensionsDirs.length;++j) {				
-				result[j+extensionsJarFiles.length]=extensionsDirs[j].getName();
+
+			for (int j = 0; j < extensionsDirs.length; ++j) {
+				result[j + extensionsJarFiles.length] = extensionsDirs[j].getName();
 			}
-			
+
 			return result;
-			
+
 		}
-		
+
 		public void installExtension(String extensionName, String extensionURL) throws RemoteException {
-			throw new UnsupportedOperationException("Not supported yet.");			
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		public void installExtension(String extensionName, byte[] extension) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-		
+
 		public void removeExtension(String extensionName) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -4409,26 +4409,55 @@ public class DirectJNI {
 		public String export(Properties namingRegistryProperties, String prefixOrName, boolean autoName) throws RemoteException {
 			return null;
 		}
-		
+
 		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
 			return Scilab.Exec(cmd);
-		
-			
+
 		}
-		
+
 		public String scilabConsoleSubmit(String cmd) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
+			final StringBuffer result = new StringBuffer();
+			try {
+				
+				
+				String fn=TEMP_DIR+"/"+"scilab"+System.currentTimeMillis();
+				Scilab.Exec("diary(\""+fn+"\")");
+				Scilab.Exec( cmd );
+				if (Scilab.GetLastErrorCode()!=0) Scilab.Exec("disp(lasterror())");
+				Scilab.Exec("diary(0)");
+				BufferedReader br=new BufferedReader(new FileReader(fn));
+				String line=null;
+				while ((line =br.readLine())!=null) {
+					if (!line.startsWith("-->")) result.append(line+"\n");
+				}
+				br.close();
+				new File(fn).delete();
+
+				System.out.println("Result:"+result.toString());
+				return result.toString();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("",e);
+			 }finally {
+				
+			}
+
 		}
-		
-		public RObject scilabGetObject(String expression) throws RemoteException {
-			// TODO Auto-generated method stub
-			return null;
+
+		public Object scilabGetObject(String expression) throws RemoteException {
+			SciDouble d=new SciDouble("var_import");
+			Scilab.Exec("var_import="+expression);
+			d.Get();
+			Double result=d.getData();
+			Scilab.Exec("clear var_import");
+			return result;
 		}
-		
+
 		public void scilabPutAndAssign(Object obj, String name) throws RemoteException {
-			// TODO Auto-generated method stub
-			
+			if (obj instanceof Double) {
+			SciDouble d=new SciDouble(name, (Double)obj);
+			d.Send();
+			}
 		}
 
 	};
@@ -4439,23 +4468,23 @@ public class DirectJNI {
 	public boolean broadcastRequired(int currentDevice) {
 		return _localBroadcastedDevices.size() > 1 && _localBroadcastedDevices.contains(currentDevice);
 	}
-	
+
 	static int[] snapshotDevices() throws RemoteException {
-		RInteger list=(RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.list()");
-		return (list==null ? new int[0] : list.getValue());		
+		RInteger list = (RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.list()");
+		return (list == null ? new int[0] : list.getValue());
 	}
-	
-	static Integer guessNewDevice( int[] snapshot ) throws RemoteException {
+
+	static Integer guessNewDevice(int[] snapshot) throws RemoteException {
 		Vector<Integer> devicesVectorBefore = new Vector<Integer>();
-		for (int i = 0; i < snapshot.length; ++i) devicesVectorBefore.add(snapshot[i]);	
-		int[] devicesNow = snapshotDevices();			
+		for (int i = 0; i < snapshot.length; ++i)
+			devicesVectorBefore.add(snapshot[i]);
+		int[] devicesNow = snapshotDevices();
 		for (int i = 0; i < devicesNow.length; ++i)
 			if (!devicesVectorBefore.contains(devicesNow[i])) {
-				return devicesNow[i];				
+				return devicesNow[i];
 			}
 		return null;
 	}
-	
 
 	public static class GDDeviceLocal implements GDDevice {
 		GDContainerBag gdBag = null;
@@ -4464,11 +4493,11 @@ public class DirectJNI {
 			gdBag = new GDContainerBag(w, h);
 			JavaGD.setGDContainer(gdBag);
 			Dimension dim = gdBag.getSize();
-			
-			int[] devicesVector =  snapshotDevices();
+
+			int[] devicesVector = snapshotDevices();
 			System.out.println(DirectJNI.getInstance().getRServices().evaluate(
 					"JavaGD(name='JavaGD', width=" + dim.getWidth() + ", height=" + dim.getHeight() + ", ps=12)"));
-			gdBag.setDeviceNumber(guessNewDevice(devicesVector));			
+			gdBag.setDeviceNumber(guessNewDevice(devicesVector));
 
 			// System.out.println(DirectJNI.getInstance().getRServices().
 			// consoleSubmit(".PrivateEnv$dev.list()"));
@@ -4553,12 +4582,11 @@ public class DirectJNI {
 			}
 
 		}
-		
-				
+
 		synchronized public byte[] getSvg() throws RemoteException {
-			return getScalable(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  "svg");
+			return getScalable(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "svg");
 		}
-		
+
 		public byte[] getSvg(Integer width, Integer height, Boolean onefile, String bg, String pointsize) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -4566,132 +4594,131 @@ public class DirectJNI {
 		public byte[] getPostscript() throws RemoteException {
 			return getPostscript(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 		}
-		
-		public byte[] getPostscript(Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg,
-				Integer width, Integer height, Boolean horizontal, Integer pointsize, String paper , Boolean pagecentre, String colormodel) throws RemoteException {
-			return getScalable(width, height, onefile, family, title, fonts, null, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, null, horizontal, null,  "postscript");			
+
+		public byte[] getPostscript(Boolean onefile, String family, String title, String[] fonts, String encoding, String bg, String fg, Integer width,
+				Integer height, Boolean horizontal, Integer pointsize, String paper, Boolean pagecentre, String colormodel) throws RemoteException {
+			return getScalable(width, height, onefile, family, title, fonts, null, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, null,
+					horizontal, null, "postscript");
 		}
-		
-		public byte[] getPdf() throws RemoteException {			
+
+		public byte[] getPdf() throws RemoteException {
 			return getPdf(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 		}
-		
-		public byte[] getPdf(Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
+
+		public byte[] getPdf(Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper,
 				String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats) throws RemoteException {
-			return getScalable(width, height, onefile, family, title, fonts, version, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, useDingbats, null, null,  "pdf");
+			return getScalable(width, height, onefile, family, title, fonts, version, paper, encoding, bg, fg, pointsize, pagecentre, colormodel, useDingbats,
+					null, null, "pdf");
 		}
-		
-		public byte[] getScalable(Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper, 
-				String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats, Boolean horizontal, Boolean debug, String extension) throws RemoteException {
+
+		public byte[] getScalable(Integer width, Integer height, Boolean onefile, String family, String title, String[] fonts, String version, String paper,
+				String encoding, String bg, String fg, Integer pointsize, Boolean pagecentre, String colormodel, Boolean useDingbats, Boolean horizontal,
+				Boolean debug, String extension) throws RemoteException {
 			File tempFile = null;
 			try {
-				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + "."+extension).getCanonicalFile();
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + "." + extension).getCanonicalFile();
 				if (tempFile.exists())
 					tempFile.delete();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			}
-			
-			String tempFileName=tempFile.getAbsolutePath().replace('\\', '/');
+
+			String tempFileName = tempFile.getAbsolutePath().replace('\\', '/');
 
 			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 			DirectJNI.getInstance().shutdownDevices(extension);
-			
-			String createDeviceCommand = DirectJNI.getInstance().getCairoCapabilities().contains(extension) ? "Cairo"+extension.toUpperCase():extension;
-			createDeviceCommand+="(file = '" + tempFileName + "' ";
-			
-			
-			if (height==null && width==null) {
-				createDeviceCommand += ", height=6 , width="+ new Double(6 * ((double)getSize().width / (double)getSize().height)) ;
-			} else if (height!=null && width!=null) {
-				createDeviceCommand += ", height="+height+" , width="+ width ;
+
+			String createDeviceCommand = DirectJNI.getInstance().getCairoCapabilities().contains(extension) ? "Cairo" + extension.toUpperCase() : extension;
+			createDeviceCommand += "(file = '" + tempFileName + "' ";
+
+			if (height == null && width == null) {
+				createDeviceCommand += ", height=6 , width=" + new Double(6 * ((double) getSize().width / (double) getSize().height));
+			} else if (height != null && width != null) {
+				createDeviceCommand += ", height=" + height + " , width=" + width;
 			} else {
 				throw new RemoteException("width & height should be both null or both set");
 			}
-			
-			if (onefile!=null) {
-				createDeviceCommand += ", onefile="+onefile.toString().toUpperCase();				
+
+			if (onefile != null) {
+				createDeviceCommand += ", onefile=" + onefile.toString().toUpperCase();
 			}
-			
-			
-			if (family!=null) {
-				createDeviceCommand += ", family='"+family+"'";				
+
+			if (family != null) {
+				createDeviceCommand += ", family='" + family + "'";
 			}
-			
-			if (title!=null) {
-				createDeviceCommand += ", title='"+title+"'";				
+
+			if (title != null) {
+				createDeviceCommand += ", title='" + title + "'";
 			}
-			
-			
-			
-			
-			if (fonts!=null && fonts.length>0) {
+
+			if (fonts != null && fonts.length > 0) {
 				createDeviceCommand += ", c(";
-				for (int i=0;i<fonts.length;++i) createDeviceCommand+="'"+fonts[i]+"'"+(i==fonts.length-1?")":",") ;				
+				for (int i = 0; i < fonts.length; ++i)
+					createDeviceCommand += "'" + fonts[i] + "'" + (i == fonts.length - 1 ? ")" : ",");
 			}
-			
-			if (version!=null) {
-				createDeviceCommand += ", version='"+version+"'";				
+
+			if (version != null) {
+				createDeviceCommand += ", version='" + version + "'";
 			}
-			
-			if (paper!=null) {
-				createDeviceCommand += ", paper='"+paper+"'";				
+
+			if (paper != null) {
+				createDeviceCommand += ", paper='" + paper + "'";
 			}
-			
-			if (paper!=null) {
-				createDeviceCommand += ", paper='"+paper+"'";				
+
+			if (paper != null) {
+				createDeviceCommand += ", paper='" + paper + "'";
 			}
-			
-			if (encoding!=null) {
-				createDeviceCommand += ", encoding='"+encoding+"'";				
+
+			if (encoding != null) {
+				createDeviceCommand += ", encoding='" + encoding + "'";
 			}
-			
-			if (bg!=null) {
-				createDeviceCommand += ", bg='"+bg+"'";				
+
+			if (bg != null) {
+				createDeviceCommand += ", bg='" + bg + "'";
 			}
-			
-			if (fg!=null) {
-				createDeviceCommand += ", fg='"+fg+"'";				
+
+			if (fg != null) {
+				createDeviceCommand += ", fg='" + fg + "'";
 			}
-			
-			if (pointsize!=null) {
-				createDeviceCommand += ", pointsize="+pointsize;				
+
+			if (pointsize != null) {
+				createDeviceCommand += ", pointsize=" + pointsize;
 			}
-			
-			if (pagecentre!=null) {
-				createDeviceCommand += ", pagecentre="+pagecentre.toString().toUpperCase();				
+
+			if (pagecentre != null) {
+				createDeviceCommand += ", pagecentre=" + pagecentre.toString().toUpperCase();
 			}
-			
-			if (colormodel!=null) {
-				createDeviceCommand += ", colormodel='"+colormodel+"'";				
-			}			
-			if (useDingbats!=null) {
-				createDeviceCommand += ", useDingbats="+useDingbats.toString().toUpperCase();				
-			}			
-			if (horizontal!=null) {
-				createDeviceCommand += ", horizontal="+horizontal.toString().toUpperCase();				
-			}		
-			if (debug!=null) {
-				createDeviceCommand += ", debug="+debug.toString().toUpperCase();				
+
+			if (colormodel != null) {
+				createDeviceCommand += ", colormodel='" + colormodel + "'";
 			}
-			createDeviceCommand+=" )";
-						
-			int[] devicesSnapshot =  snapshotDevices();			
-			System.out.println(">>>"+createDeviceCommand+"<<<<");
-			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);			
+			if (useDingbats != null) {
+				createDeviceCommand += ", useDingbats=" + useDingbats.toString().toUpperCase();
+			}
+			if (horizontal != null) {
+				createDeviceCommand += ", horizontal=" + horizontal.toString().toUpperCase();
+			}
+			if (debug != null) {
+				createDeviceCommand += ", debug=" + debug.toString().toUpperCase();
+			}
+			createDeviceCommand += " )";
+
+			int[] devicesSnapshot = snapshotDevices();
+			System.out.println(">>>" + createDeviceCommand + "<<<<");
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
-			}			
+			}
 			int bmpDevice = guessNewDevice(devicesSnapshot);
-			
+
 			DirectJNI.getInstance().getRServices().evaluate(
 					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + bmpDevice + ");" + ".PrivateEnv$dev.set("
-							+ currentDevice + ");.PrivateEnv$dev.off("+bmpDevice+")", 4);
+							+ currentDevice + ");.PrivateEnv$dev.off(" + bmpDevice + ")", 4);
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
 			}
-			
+
 			if (tempFile.exists()) {
 
 				byte[] result = null;
@@ -4713,92 +4740,92 @@ public class DirectJNI {
 				return null;
 			}
 		}
-		
+
 		public byte[] getPictex() throws RemoteException {
 			return getPictex(null, null, null, null, null);
 		}
-		
+
 		public byte[] getPictex(Integer width, Integer height, Boolean debug, String bg, String fg) throws RemoteException {
 			return getScalable(width, height, null, null, null, null, null, null, null, bg, fg, null, null, null, null, null, debug, "pictex");
 		}
-		
+
 		public byte[] getBmp() throws RemoteException {
-			return getBmp(null,null,null,null,null,null);
+			return getBmp(null, null, null, null, null, null);
 		}
-		
-		public byte[] getBmp(Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
-			return getBitMap(width, height, units, pointsize, null , null, null, bg, res, "bmp");
+
+		public byte[] getBmp(Integer width, Integer height, String units, Integer pointsize, String bg, Integer res) throws RemoteException {
+			return getBitMap(width, height, units, pointsize, null, null, null, bg, res, "bmp");
 		}
-		
-		public byte[] getBitMap(Integer width, Integer height, String units, Integer pointsize, Integer quality, String compression, Integer tiffindex , String bg,Integer res, String extension) throws RemoteException {
-			
+
+		public byte[] getBitMap(Integer width, Integer height, String units, Integer pointsize, Integer quality, String compression, Integer tiffindex,
+				String bg, Integer res, String extension) throws RemoteException {
+
 			File tempFile = null;
 			try {
-				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + "."+extension).getCanonicalFile();
+				tempFile = new File(TEMP_DIR + "/temp" + System.currentTimeMillis() + "." + extension).getCanonicalFile();
 				if (tempFile.exists())
 					tempFile.delete();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			}
-			
-			String tempFileName=tempFile.getAbsolutePath().replace('\\', '/');
+
+			String tempFileName = tempFile.getAbsolutePath().replace('\\', '/');
 
 			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 
-			String createDeviceCommand = (DirectJNI.getInstance().getCairoCapabilities().contains(extension) ? "Cairo"+extension.toUpperCase() : extension );
-			createDeviceCommand+="(filename = '" + tempFileName + "' ";
-			
-			if (height==null && width==null) {
-				createDeviceCommand += ", height="+getSize().getHeight()+" , width="+ getSize().getWidth() ;
-			} else if (height!=null && width!=null) {
-				createDeviceCommand += ", height="+height+" , width="+ width ;
+			String createDeviceCommand = (DirectJNI.getInstance().getCairoCapabilities().contains(extension) ? "Cairo" + extension.toUpperCase() : extension);
+			createDeviceCommand += "(filename = '" + tempFileName + "' ";
+
+			if (height == null && width == null) {
+				createDeviceCommand += ", height=" + getSize().getHeight() + " , width=" + getSize().getWidth();
+			} else if (height != null && width != null) {
+				createDeviceCommand += ", height=" + height + " , width=" + width;
 			} else {
 				throw new RemoteException("width & height should be both null or both set");
 			}
-			
-			if (units!=null) {
-				createDeviceCommand += ", units='"+units+"'";				
+
+			if (units != null) {
+				createDeviceCommand += ", units='" + units + "'";
 			}
-			
-			if (pointsize!=null) {
-				createDeviceCommand += ", pointsize="+pointsize;				
+
+			if (pointsize != null) {
+				createDeviceCommand += ", pointsize=" + pointsize;
 			}
-			
-			if (quality!=null) {
-				createDeviceCommand += ", quality="+quality;				
+
+			if (quality != null) {
+				createDeviceCommand += ", quality=" + quality;
 			}
-			
-			if (compression!=null) {
-				createDeviceCommand += ", compression='"+compression+"'";				
+
+			if (compression != null) {
+				createDeviceCommand += ", compression='" + compression + "'";
 			}
-			
-			if (bg!=null) {
-				createDeviceCommand += ", bg='"+bg+"'";				
+
+			if (bg != null) {
+				createDeviceCommand += ", bg='" + bg + "'";
 			}
-			
-			if (res!=null) {
-				createDeviceCommand += ", res="+res;				
+
+			if (res != null) {
+				createDeviceCommand += ", res=" + res;
 			}
-			
-			
-			createDeviceCommand+=" )";
-			
-			int[] devicesSnapshot =  snapshotDevices();
-			System.out.println(">>>>>"+createDeviceCommand+"<<<");
-			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);			
+
+			createDeviceCommand += " )";
+
+			int[] devicesSnapshot = snapshotDevices();
+			System.out.println(">>>>>" + createDeviceCommand + "<<<");
+			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
 			}
 			int bmpDevice = guessNewDevice(devicesSnapshot);
-			
+
 			DirectJNI.getInstance().getRServices().evaluate(
 					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + bmpDevice + ");" + ".PrivateEnv$dev.set("
-							+ currentDevice + ");.PrivateEnv$dev.off("+bmpDevice+")", 4);
+							+ currentDevice + ");.PrivateEnv$dev.off(" + bmpDevice + ")", 4);
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
 			}
-			
+
 			if (tempFile.exists()) {
 
 				byte[] result = null;
@@ -4820,67 +4847,74 @@ public class DirectJNI {
 				return null;
 			}
 		}
-			 
-		
+
 		public byte[] getJpeg() throws RemoteException {
 			return getJpeg(null, null, null, null, null, null, null);
 		}
-		public byte[] getJpeg(Integer width, Integer height, String units, Integer pointsize, Integer quality,  String bg,Integer res) throws RemoteException {
-			return getBitMap(width, height, units, pointsize, (quality==null ? 75 : quality) , null, null, bg, res, "jpeg");
+
+		public byte[] getJpeg(Integer width, Integer height, String units, Integer pointsize, Integer quality, String bg, Integer res) throws RemoteException {
+			return getBitMap(width, height, units, pointsize, (quality == null ? 75 : quality), null, null, bg, res, "jpeg");
 		}
-		
+
 		public byte[] getPng() throws RemoteException {
 			return getPng(null, null, null, null, null, null);
 		}
-		public byte[] getPng(Integer width, Integer height, String units, Integer pointsize, String bg,Integer res) throws RemoteException {
+
+		public byte[] getPng(Integer width, Integer height, String units, Integer pointsize, String bg, Integer res) throws RemoteException {
 			return getBitMap(width, height, units, pointsize, null, null, null, bg, res, "png");
 		}
 
 		public byte[] getTiff() throws RemoteException {
 			return getTiff(null, null, null, null, null, null, null);
 		}
-		
-		public byte[] getTiff(Integer width, Integer height, String units, Integer pointsize, String compression, String bg,Integer res) throws RemoteException {
-			return getBitMap(width, height, units, pointsize, null , compression, 1, bg, res, "tiff");
+
+		public byte[] getTiff(Integer width, Integer height, String units, Integer pointsize, String compression, String bg, Integer res)
+				throws RemoteException {
+			return getBitMap(width, height, units, pointsize, null, compression, 1, bg, res, "tiff");
 		}
-		
+
 		public byte[] getXfig() throws RemoteException {
 			return getXfig(true, null, null, null, null, null, null, null, null, null, null);
 		}
-		
-		public byte[] getXfig( Boolean onefile, String encoding , String paper, Boolean horizontal, 
-				Integer width, Integer height, String family , Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
-			return getScalable(width, height, onefile, family, null, null, null, paper, encoding, bg, fg, pointsize, pagecentre, null, null, horizontal, null, "xfig");
+
+		public byte[] getXfig(Boolean onefile, String encoding, String paper, Boolean horizontal, Integer width, Integer height, String family,
+				Integer pointsize, String bg, String fg, Boolean pagecentre) throws RemoteException {
+			return getScalable(width, height, onefile, family, null, null, null, paper, encoding, bg, fg, pointsize, pagecentre, null, null, horizontal, null,
+					"xfig");
 		}
-		
+
 		public byte[] getWmf(boolean useServer) throws RemoteException {
 			return getGenericVectorFormat("wmf", useServer);
 		}
-		
+
 		public byte[] getEmf(boolean useServer) throws RemoteException {
 			return getGenericVectorFormat("emf", useServer);
 		}
-		
+
 		public byte[] getOdg() throws RemoteException {
 			return getGenericVectorFormat("odg", false);
 		}
-		
+
 		public byte[] getFromImageIOWriter(String format) throws RemoteException {
-			GDDevice deviceLocal=null;
+			GDDevice deviceLocal = null;
 			try {
 				int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-				deviceLocal=new GDDeviceLocal((int)getSize().getWidth(),(int)getSize().getHeight());				
-				DirectJNI.getInstance().getRServices().evaluate(".PrivateEnv$dev.set(" + getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + deviceLocal.getDeviceNumber() + ");" + ".PrivateEnv$dev.set("+ currentDevice + ");", 3);
-				BufferedImage bufferedImage = Java2DUtils.getBufferedImage( new Point(0, 0), new Dimension((int)getSize().getWidth(), (int)getSize().getHeight()), deviceLocal.popAllGraphicObjects(-1));				
-				ByteArrayOutputStream bos=new ByteArrayOutputStream();
+				deviceLocal = new GDDeviceLocal((int) getSize().getWidth(), (int) getSize().getHeight());
+				DirectJNI.getInstance().getRServices().evaluate(
+						".PrivateEnv$dev.set(" + getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + deviceLocal.getDeviceNumber() + ");"
+								+ ".PrivateEnv$dev.set(" + currentDevice + ");", 3);
+				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension((int) getSize().getWidth(), (int) getSize()
+						.getHeight()), deviceLocal.popAllGraphicObjects(-1));
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				ImageIO.write(bufferedImage, format, bos);
-				return bos.toByteArray();				
+				return bos.toByteArray();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			} finally {
-				if (deviceLocal!=null) deviceLocal.dispose();
-			}		
+				if (deviceLocal != null)
+					deviceLocal.dispose();
+			}
 		}
 
 		private String capitalizeFirstLetter(String s) {
@@ -4901,14 +4935,13 @@ public class DirectJNI {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			}
-			String SvgDeviceName = DirectJNI.getInstance().getCairoCapabilities().contains("svg") ? "CairoSVG" : "svg" ;
+			String SvgDeviceName = DirectJNI.getInstance().getCairoCapabilities().contains("svg") ? "CairoSVG" : "svg";
 			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
 			DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
-			final String createDeviceCommand = SvgDeviceName + "(file = \""
-					+ tempSVGFile.getAbsolutePath().replace('\\', '/') + "\", width = " + new Double(10 * (getSize().width / getSize().height)) + ", height = "
-					+ 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
+			final String createDeviceCommand = SvgDeviceName + "(file = \"" + tempSVGFile.getAbsolutePath().replace('\\', '/') + "\", width = "
+					+ new Double(10 * (getSize().width / getSize().height)) + ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
 
-			int[] devicesSnapshot =  snapshotDevices();
+			int[] devicesSnapshot = snapshotDevices();
 			System.out.println("createDeviceCommand:" + createDeviceCommand);
 			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
@@ -4916,7 +4949,7 @@ public class DirectJNI {
 				System.out.println("Status:" + DirectJNI.getInstance().getRServices().getStatus());
 			}
 			int cairoDevice = guessNewDevice(devicesSnapshot);
-			
+
 			DirectJNI.getInstance().getRServices().evaluate(
 					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + cairoDevice + ");" + ".PrivateEnv$dev.set("
 							+ currentDevice + ");", 3);
@@ -4961,19 +4994,6 @@ public class DirectJNI {
 
 		}
 
-		
-
-
-		
-	
-
-		
-
-
-
-		
-
-	
 		public String getId() throws RemoteException {
 			return null;
 		}
@@ -5041,11 +5061,11 @@ public class DirectJNI {
 			}
 		});
 	}
-	
+
 	// for private use
-	
+
 	public void assignInPrivateEnv(String name, long exp) {
-		_rEngine.rniAssign(name,exp, _privateEnvExp);
+		_rEngine.rniAssign(name, exp, _privateEnvExp);
 	}
 
 	private static void init(ClassLoader cl) throws Exception {
@@ -5267,10 +5287,11 @@ public class DirectJNI {
 	}
 
 	public void notifyRActionListeners(final RConsoleAction action) {
-		
+
 		action.getAttributes().put("originatorUID", getOriginatorUID());
-		if (_clientProperties!=null) action.setClientProperties(_clientProperties);
-		
+		if (_clientProperties != null)
+			action.setClientProperties(_clientProperties);
+
 		Vector<RConsoleActionListener> ractionListenersToRemove = new Vector<RConsoleActionListener>();
 		for (int i = 0; i < _ractionListeners.size(); ++i) {
 			try {
@@ -5318,7 +5339,7 @@ public class DirectJNI {
 	public Vector<RCallBack> getRCallBacks() {
 		return _callbacks;
 	}
-	
+
 	HashSet<String> getCairoCapabilities() {
 		return _cairoCapabilities;
 	}
