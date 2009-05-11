@@ -215,6 +215,7 @@ import org.kchine.r.workbench.views.HelpBrowserPanel;
 import org.kchine.r.workbench.views.HelpView;
 import org.kchine.r.workbench.views.PagerView;
 import org.kchine.r.workbench.views.PdfView;
+import org.kchine.r.workbench.views.ScilabConsoleView;
 import org.kchine.r.workbench.views.ServerGroovyConsoleView;
 import org.kchine.r.workbench.views.ServerLogView;
 import org.kchine.r.workbench.views.ServerPythonConsoleView;
@@ -1670,6 +1671,8 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 						toolsMenu.add(_actions.get("groovyconsole"));
 						toolsMenu.add(_actions.get("clientgroovyconsole"));
 						toolsMenu.add(_actions.get("unsafeevaluator"));
+						toolsMenu.addSeparator();
+						toolsMenu.add(_actions.get("scilabconsole"));
 						toolsMenu.addSeparator();
 						toolsMenu.add(_actions.get("sourcebioclite"));
 						toolsMenu.add(_actions.get("installpackage"));
@@ -4147,6 +4150,22 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			}
 		});
 
+		_actions.put("scilabconsole", new AbstractAction("Scilab Console") {
+			public void actionPerformed(final ActionEvent e) {
+				if (getOpenedServerGroovyConsoleView() == null) {
+					int id = getDynamicViewId();
+
+					final ScilabConsoleView lv = new ScilabConsoleView("Scilab Console", null, id, WorkbenchApplet.this);
+					((TabWindow) views[2].getWindowParent()).addTab(lv);
+
+				}
+			}
+
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+		
 		_actions.put("slider", new AbstractAction("Variable Slider") {
 			public void actionPerformed(final ActionEvent e) {
 				int id = getDynamicViewId();

@@ -773,7 +773,7 @@ public class RServicesObject implements RServices {
 			return null;
 		}
 	
-	public RObject scilabGetObject(String expression) throws RemoteException {
+	public Object scilabGetObject(String expression) throws RemoteException {
 		// TODO Auto-generated method stub
 		return null;
 	}

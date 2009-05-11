@@ -1210,7 +1210,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
     	return DirectJNI.getInstance().getRServices().scilabConsoleSubmit(cmd);
     }
     
-    public RObject scilabGetObject(String expression) throws RemoteException {
+    public Object scilabGetObject(String expression) throws RemoteException {
     	return DirectJNI.getInstance().getRServices().scilabGetObject(expression);
     }
     
