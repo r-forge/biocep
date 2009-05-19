@@ -20,9 +20,11 @@
  */
 package org.kchine.r.server.graphics;
 
-import java.awt.Dimension;
+import org.kchine.r.server.graphics.utils.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
@@ -68,12 +70,22 @@ public class GDContainerBag implements GDContainer {
 			_actions.remove(0);
 		return result;
 	}
+	
+	public byte[] popAllGraphicObjectsSerialized(int maxNbrGraphicPrimitives) throws RemoteException {
+		try {
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();		
+			new ObjectOutputStream(baos).writeObject(popAllGraphicObjects(maxNbrGraphicPrimitives));		
+			return baos.toByteArray();
+		} catch (Exception e) {
+			throw new RemoteException("",e);
+		}
+	}
 
 	public boolean hasGraphicObjects() {
 		return _actions.size() > 0;
 	}
 
-	public Dimension getSize() throws RemoteException {
+	public Dimension getContainerSize() throws RemoteException {
 		return _size;
 	}
 

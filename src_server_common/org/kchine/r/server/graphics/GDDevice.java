@@ -20,8 +20,8 @@
  */
 package org.kchine.r.server.graphics;
 
-import java.awt.Dimension;
-import java.awt.geom.Point2D;
+import org.kchine.r.server.graphics.utils.Dimension;
+import org.kchine.r.server.graphics.utils.Point2D;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Vector;
@@ -34,6 +34,7 @@ import org.kchine.r.server.graphics.primitive.GDObject;
  */
 public interface GDDevice extends Remote {
 	public Vector<GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException;
+	public byte[] popAllGraphicObjectsSerialized(int maxNbrGraphicPrimitives) throws RemoteException;
 	public boolean hasGraphicObjects() throws RemoteException;
 	void fireSizeChangedEvent(int w, int h) throws RemoteException;
 	public void dispose() throws RemoteException;

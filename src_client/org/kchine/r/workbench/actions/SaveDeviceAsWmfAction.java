@@ -59,7 +59,7 @@ public class SaveDeviceAsWmfAction extends AbstractAction {
 					try {
 						_rgui.getRLock().lock();
 						JGDPanelPop panel = (JGDPanelPop) WorkbenchApplet.getComponentParent((Component) e.getSource(), JBufferedImagePanel.class);
-						byte[] result = panel.getGdDevice().getWmf(false);
+						byte[] result = panel.getGdDevice().getWmf(true);
 						RandomAccessFile raf = new RandomAccessFile(org.kchine.rpf.PoolUtils.fixExtension(chooser.getSelectedFile(), "wmf"), "rw");
 						raf.setLength(0);
 						raf.write(result);

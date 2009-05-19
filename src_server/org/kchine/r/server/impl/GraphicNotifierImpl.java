@@ -19,7 +19,7 @@
 package org.kchine.r.server.impl;
 
 
-import java.awt.Point;
+import org.kchine.r.server.graphics.utils.Point;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
