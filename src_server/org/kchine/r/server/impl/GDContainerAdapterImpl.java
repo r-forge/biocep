@@ -84,9 +84,9 @@ public class GDContainerAdapterImpl extends UnicastRemoteObject implements GDCon
 			throw new RemoteException("No GD Container connected");
 	}
 
-	public Dimension getSize() throws RemoteException {
+	public org.kchine.r.server.graphics.utils.Dimension getContainerSize() throws RemoteException {
 		if (_gdContainer != null)
-			return _gdContainer.getSize();
+			return _gdContainer.getContainerSize();
 		else
 			throw new RemoteException("No GD Container connected");
 	}

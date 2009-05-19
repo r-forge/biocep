@@ -20,7 +20,7 @@
  */
 package org.kchine.r.server.graphics;
 
-import java.awt.geom.Point2D;
+import org.kchine.r.server.graphics.utils.Point2D;
 import java.io.Serializable;
 
 /**

@@ -1,7 +1,7 @@
 package org.rosuda.javaGD;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
+import org.kchine.r.server.graphics.utils.Point2D;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
@@ -286,9 +286,8 @@ public class GDInterface {
 			double[] res = new double[4];
 			double width = 0d, height = 0d;
 			if (c != null) {
-				Dimension d = c.getSize();
-				width = d.getWidth();
-				height = d.getHeight();
+				width = c.getContainerSize().getWidth();
+				height = c.getContainerSize().getHeight();
 			}
 			res[0] = 0d;
 			res[1] = width;

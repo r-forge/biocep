@@ -24,18 +24,21 @@ package org.kchine.r.workbench.graphics;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
+import org.kchine.r.server.graphics.utils.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
+import org.kchine.r.server.graphics.utils.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.Point2D;
+import org.kchine.r.server.graphics.utils.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Vector;
@@ -63,15 +66,15 @@ public class JGDPanelPop extends JBufferedImagePanel {
 	private Vector<GDObject> _l;
 	private static boolean _forceAntiAliasing = true;
 	private GDState _gs;
-	private Dimension _lastSize;
-	private Dimension _prefSize;
+	private java.awt.Dimension _lastSize;
+	private java.awt.Dimension _prefSize;
 	private Long _lastResizeTime = null;
 	private GDDevice _gdDevice = null;
 	private boolean _autoPop;
 	private boolean _autoResize;
 	private AbstractAction[] _actions;
 	private boolean mouseInside;
-	private Point2D mouseLocation = null;
+	private java.awt.Point mouseLocation = null;
 	private Point2D[] realLocations = null;
 	private ReentrantLock _protectR = null;
 	private ConsoleLogger _consoleLogger = null;
@@ -102,7 +105,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 	private int _interactor = INTERACTOR_NULL;
 	private boolean _showCoordinates = false;
-	private Point _mouseStartPosition = null;
+	private java.awt.Point _mouseStartPosition = null;
 	private double _x0Start;
 	private double _y0Start;
 
@@ -132,7 +135,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		} catch (Exception e) {
 		}
 
-		setSize(sz);
+		setSize((int)sz.getWidth(), (int)sz.getHeight());
 
 		_prefSize = getSize();
 		_l = new Vector<GDObject>();
@@ -358,7 +361,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				}
 				if (_mouseStartPosition == null)
 					return;
-				final Point startPosition = _mouseStartPosition;
+				final java.awt.Point startPosition = _mouseStartPosition;
 				_mouseStartPosition = null;
 
 				if (_interactor == INTERACTOR_NULL && _showCoordinates) {
@@ -687,9 +690,11 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 	
 	synchronized public void popNow() {
-
 		try {
-			Vector<GDObject> gdObjects = _gdDevice.popAllGraphicObjects(maxNbrGraphicPrimitives);
+			
+			Vector<GDObject> gdObjects = (Vector<GDObject>)new ObjectInputStream(new ByteArrayInputStream(_gdDevice.popAllGraphicObjectsSerialized(maxNbrGraphicPrimitives))).readObject();
+			//Vector<GDObject> gdObjects = _gdDevice.popAllGraphicObjects(maxNbrGraphicPrimitives);
+			
 			if (gdObjects != null && gdObjects.size() > 0) {
 
 				_l.addAll(gdObjects);
@@ -721,9 +726,12 @@ public class JGDPanelPop extends JBufferedImagePanel {
 				
 
 			}
-
 		} catch (RemoteException e) {
 
+		}  catch (IOException ioe) {
+			ioe.printStackTrace();
+		} catch (ClassNotFoundException cnfe) {
+			cnfe.printStackTrace();
 		}
 	}
 
@@ -934,8 +942,8 @@ public class JGDPanelPop extends JBufferedImagePanel {
 		return _l;
 	}
 
-	public Dimension getPreferredSize() {
-		return new Dimension(_prefSize);
+	public java.awt.Dimension getPreferredSize() {
+		return _prefSize;
 	}
 
 	synchronized public void recreateBufferedImage() {
@@ -993,7 +1001,7 @@ public class JGDPanelPop extends JBufferedImagePanel {
 
 	public synchronized void paintComponent(Graphics g) {
 
-		Dimension d = getSize();
+		java.awt.Dimension d = getSize();
 
 		if (!d.equals(_lastSize)) {
 			_lastResizeTime = System.currentTimeMillis();

@@ -20,7 +20,7 @@
  */
 package org.kchine.r.server.graphics;
 
-import java.awt.Point;
+import org.kchine.r.server.graphics.utils.Point;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 

@@ -20,8 +20,15 @@
  */
 package org.kchine.r.server.impl;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -32,6 +39,7 @@ import org.kchine.r.server.graphics.GDContainer;
 import org.kchine.r.server.graphics.GraphicNotifier;
 import org.kchine.r.server.graphics.primitive.GDObject;
 import org.kchine.r.server.graphics.primitive.GDState;
+import org.kchine.r.server.graphics.utils.Point;
 import org.kchine.rpf.RemotePanel;
 
 /**
@@ -187,7 +195,7 @@ public class RGraphicsPanelRemote extends RemotePanel implements GDContainer {
 	}
 
 	public Dimension getPreferredSize() {
-		return new Dimension(_prefSize);
+		return _prefSize;
 	}
 
 	public synchronized void paintComponent(Graphics g) {
@@ -217,6 +225,10 @@ public class RGraphicsPanelRemote extends RemotePanel implements GDContainer {
 			GDObject o = (GDObject) _l.elementAt(i++);
 			o.paint(this, _gs, g);
 		}
+	}
+	
+	public org.kchine.r.server.graphics.utils.Dimension getContainerSize() throws RemoteException {
+		return new org.kchine.r.server.graphics.utils.Dimension((int)getSize().getWidth(),(int)getSize().getHeight());
 	}
 
 }

@@ -22,7 +22,7 @@ package org.kchine.r.server;
 
 
 import java.awt.Dimension;
-import java.awt.Point;
+import org.kchine.r.server.graphics.utils.Point;
 import java.rmi.RemoteException;
 
 import org.kchine.r.server.graphics.GDContainer;
@@ -41,7 +41,7 @@ public class LocalGraphicNotifier implements GraphicNotifier {
 
 	public void registerContainer(GDContainer container) throws RemoteException {
 		JavaGD.setGDContainer(container);
-		Dimension dim = container.getSize();
+		org.kchine.r.server.graphics.utils.Dimension dim = container.getContainerSize();
 		System.out.println(DirectJNI.getInstance().getRServices().evaluate(
 				"JavaGD(name='JavaGD', width=" + dim.getWidth() + ", height=" + dim.getHeight() + ", ps=12)"));
 	}

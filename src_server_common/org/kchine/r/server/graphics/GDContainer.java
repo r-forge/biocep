@@ -25,7 +25,7 @@ public interface GDContainer extends Remote {
 
 	public int getDeviceNumber() throws RemoteException;
 
-	public Dimension getSize() throws RemoteException;
+	public org.kchine.r.server.graphics.utils.Dimension getContainerSize() throws RemoteException;
 
 	public Font getGFont() throws RemoteException;
 

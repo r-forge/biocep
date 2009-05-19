@@ -20,8 +20,11 @@
  */
 package org.kchine.r.server.graphics.utils;
 
-import java.awt.Dimension;
-import java.awt.geom.Point2D;
+import org.kchine.r.server.graphics.utils.Dimension;
+import org.kchine.r.server.graphics.utils.Point2D;
+
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
@@ -52,6 +55,16 @@ public class BufferDevice implements GDDevice {
 
 	public Vector<GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
 		return _l;
+	}
+	
+	public byte[] popAllGraphicObjectsSerialized(int maxNbrGraphicPrimitives) throws RemoteException {
+		try {
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();		
+			new ObjectOutputStream(baos).writeObject(_l);		
+			return baos.toByteArray();
+		} catch (Exception e) {
+			throw new RemoteException("",e);
+		}
 	}
 
 	public boolean hasGraphicObjects() throws RemoteException {

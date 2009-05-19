@@ -20,9 +20,9 @@
  */
 package org.kchine.r.server;
 
-import java.awt.Dimension;
+import org.kchine.r.server.graphics.utils.Dimension;
 import java.awt.Point;
-import java.awt.geom.Point2D;
+import org.kchine.r.server.graphics.utils.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -4492,7 +4492,7 @@ public class DirectJNI {
 		public GDDeviceLocal(int w, int h) throws RemoteException {
 			gdBag = new GDContainerBag(w, h);
 			JavaGD.setGDContainer(gdBag);
-			Dimension dim = gdBag.getSize();
+			Dimension dim = gdBag.getContainerSize();
 
 			int[] devicesVector = snapshotDevices();
 			System.out.println(DirectJNI.getInstance().getRServices().evaluate(
@@ -4516,6 +4516,10 @@ public class DirectJNI {
 
 		public Vector<org.kchine.r.server.graphics.primitive.GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
 			return gdBag.popAllGraphicObjects(maxNbrGraphicPrimitives);
+		};
+		
+		public byte[] popAllGraphicObjectsSerialized(int maxNbrGraphicPrimitives) throws RemoteException {
+			return gdBag.popAllGraphicObjectsSerialized(maxNbrGraphicPrimitives);
 		};
 
 		public boolean hasGraphicObjects() throws RemoteException {
@@ -4552,7 +4556,7 @@ public class DirectJNI {
 		}
 
 		public Dimension getSize() throws RemoteException {
-			return gdBag.getSize();
+			return gdBag.getContainerSize();
 		}
 
 		public void putLocation(Point2D p) throws RemoteException {
@@ -4903,7 +4907,7 @@ public class DirectJNI {
 				DirectJNI.getInstance().getRServices().evaluate(
 						".PrivateEnv$dev.set(" + getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + deviceLocal.getDeviceNumber() + ");"
 								+ ".PrivateEnv$dev.set(" + currentDevice + ");", 3);
-				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new Dimension((int) getSize().getWidth(), (int) getSize()
+				BufferedImage bufferedImage = Java2DUtils.getBufferedImage(new Point(0, 0), new java.awt.Dimension((int) getSize().getWidth(), (int) getSize()
 						.getHeight()), deviceLocal.popAllGraphicObjects(-1));
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				ImageIO.write(bufferedImage, format, bos);

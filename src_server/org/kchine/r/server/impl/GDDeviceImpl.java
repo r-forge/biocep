@@ -20,15 +20,13 @@
  */
 package org.kchine.r.server.impl;
 
-import java.awt.Dimension;
-import java.awt.geom.Point2D;
+import org.kchine.r.server.graphics.utils.Dimension;
+import org.kchine.r.server.graphics.utils.Point2D;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Vector;
-
 import org.kchine.r.server.DirectJNI;
-import org.kchine.r.server.DirectJNI.GDDeviceLocal;
 import org.kchine.r.server.graphics.GDDevice;
 
 
@@ -52,6 +50,10 @@ public class GDDeviceImpl extends UnicastRemoteObject implements GDDevice {
 
 	public Vector<org.kchine.r.server.graphics.primitive.GDObject> popAllGraphicObjects(int maxNbrGraphicPrimitives) throws RemoteException {
 		return _localGdDevice.popAllGraphicObjects(maxNbrGraphicPrimitives);
+	};
+	
+	public byte[] popAllGraphicObjectsSerialized(int maxNbrGraphicPrimitives) throws RemoteException {
+		return _localGdDevice.popAllGraphicObjectsSerialized(maxNbrGraphicPrimitives);
 	};
 
 	public boolean hasGraphicObjects() throws RemoteException {
