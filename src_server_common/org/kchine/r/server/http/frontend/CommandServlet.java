@@ -440,6 +440,13 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 				} else if (command.equals("logondb")) {
 
+					
+					ServantProviderFactory spFactory = ServantProviderFactory.getFactory();
+					if (spFactory == null) {
+						result = new NoRegistryAvailableException();
+						break;
+					}
+					
 					String login = (String) PoolUtils.hexToObject(request.getParameter("login"));
 					String pwd = (String) PoolUtils.hexToObject(request.getParameter("pwd"));
 					HashMap<String, Object> options = (HashMap<String, Object>) PoolUtils.hexToObject(request.getParameter("options"));
@@ -460,8 +467,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					}
 					
 					session.setAttribute("TYPE", "DBS");
-					session.setAttribute("REGISTRY", (DBLayer) ServerDefaults.getRmiRegistry() );
-					session.setAttribute("SUPERVISOR", new SupervisorUtils((DBLayer) ServerDefaults.getRmiRegistry()) );
+					session.setAttribute("REGISTRY", (DBLayer) spFactory.getServantProvider().getRegistry());
+					session.setAttribute("SUPERVISOR", new SupervisorUtils((DBLayer) spFactory.getServantProvider().getRegistry() ) );
 					session.setAttribute("THREADS", new ThreadsHolder());
 					((HashMap<String, HttpSession>) getServletContext().getAttribute("SESSIONS_MAP")).put(session.getId(), session);
 					saveSessionAttributes(session);
