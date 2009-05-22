@@ -1024,7 +1024,7 @@ public class Supervisor {
 							final HashMap<String, Object> row = rows[i];
 							System.out.println("Killing Process :" + row.get("NAME"));
 							try {
-								_supervisorInterface.killProcess((String) row.get("NAME"), false, _frame);
+								_supervisorInterface.killProcess((String) row.get("NAME"), false);
 								_registry.unbind((String) row.get("NAME"));
 							} catch (Exception ex) {
 								ex.printStackTrace();
@@ -1054,7 +1054,7 @@ public class Supervisor {
 							final HashMap<String, Object> row = rows[i];
 							System.out.println("Killing Process :" + row.get("NAME"));
 							try {
-								_supervisorInterface.killProcess((String) row.get("NAME"), true, _frame);
+								_supervisorInterface.killProcess((String) row.get("NAME"), true);
 								_registry.unbind((String) row.get("NAME"));
 
 							} catch (Exception ex) {
