@@ -43,7 +43,7 @@ public class HttpSupervisor {
 			public void run() {
 				try {
 						
-					DBLayerInterface db = (DBLayerInterface) ServerDefaults.getRmiRegistry();
+					
 					JFrame frame;
 					frame = new JFrame("Supervisor");
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
