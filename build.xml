@@ -1792,7 +1792,7 @@
 			
 			
 			<!-- tools begin -->
-			
+			<!--
 		
 		
 			<delete dir="bintools" failonerror="true"/>
@@ -1890,7 +1890,7 @@
 			</jar>
 			
 		
-		
+		-->
 		<!-- tools end -->
 		
 		

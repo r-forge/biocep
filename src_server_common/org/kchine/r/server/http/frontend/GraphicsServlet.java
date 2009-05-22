@@ -301,7 +301,7 @@ public class GraphicsServlet extends javax.servlet.http.HttpServlet implements j
 			}
 		}
 		pw.println("</object><!--[if !IE]> close outer object --></object><!--<![endif]--></div></center></body></html>");
-		pw.println("<!-- This applet was generated with Biocep : www.biocep.net , Biocep is a GPL Software , (C) 2007-2008 Karim Chine -->");
+		pw.println("<!-- This applet was generated with Biocep : www.biocep.net , Biocep is a GPL Software , (C) 2007-2009 Karim Chine -->");
 		
 	}
 
