@@ -106,7 +106,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					new SupervisorUtils(_dbLayer).killProcess(servantName, true, null);
+					new SupervisorUtils(_dbLayer).killProcess(servantName, true);
 					_dbLayer.unbind(servantName);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -119,7 +119,7 @@ public class NodeManagerImpl extends UnicastRemoteObject implements NodeManager 
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					new SupervisorUtils(_dbLayer).killProcess(servantName, true, null);
+					new SupervisorUtils(_dbLayer).killProcess(servantName, true);
 					_dbLayer.unbind(servantName);
 				} catch (Exception e) {
 					e.printStackTrace();

@@ -92,7 +92,7 @@ public class SupervisorUtils implements SupervisorInterface {
 
 	private HashMap<String, Identification> identificationsCache = new HashMap<String, Identification>();
 
-	public void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception {
+	public void killProcess(String servantName, boolean useKillCommand) throws Exception {
 
 		HashMap<String, Object> servantInfo = dbLayer.getTableData("SERVANTS", "NAME='" + servantName + "'").elementAt(0);
 
@@ -144,9 +144,12 @@ public class SupervisorUtils implements SupervisorInterface {
 		}
 
 		if (ident == null) {
-			if (referenceFrame == null) {
+			if (true) {
+				// TODO				
 				throw new Exception("No Valid Login/Pwd For Node");
 			} else {
+				// TODO
+				/*
 				LoginDialog d = new LoginDialog(referenceFrame);
 				d.setVisible(true);
 				ident = d.getIndentification();
@@ -155,6 +158,7 @@ public class SupervisorUtils implements SupervisorInterface {
 				} else {
 					identificationsCache.put(hostIp, ident);
 				}
+				*/
 			}
 		}
 

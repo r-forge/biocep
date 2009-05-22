@@ -19,13 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */ 
 package org.kchine.rpf.db;
-import java.awt.Frame;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
 public interface SupervisorInterface {
-	public void killProcess(String servantName, boolean useKillCommand, Frame referenceFrame) throws Exception;
+	public void killProcess(String servantName, boolean useKillCommand) throws Exception;
 	public void launchLocalProcess(final boolean showConsole, String homeDir, String command, String prefix, boolean isForWindows) throws Exception;
 	public void launch(final String nodeName, final String options, final boolean showConsole) throws Exception;
 }
