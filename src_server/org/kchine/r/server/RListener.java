@@ -740,7 +740,21 @@ public abstract class RListener {
 								if (props.get("naming.mode")==null) {
 									props.put("naming.mode", "self");
 								}
-								r = ServerManager.createR(props.getProperty("r.binary"), false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), 
+								
+								String codeServerHost=null;
+								int codeServerPort=-1;
+								if ( (System.getProperty("code.server.host")!=null) && (System.getProperty("code.server.port")!=null)
+									&& !System.getProperty("code.server.host").equals("") && !System.getProperty("code.server.port").equals("")	) {									
+									codeServerHost= System.getProperty("code.server.host");
+									codeServerPort= Integer.decode(System.getProperty("code.server.port"));
+									System.out.println("code.server.host:"+codeServerHost);
+									System.out.println("code.server.port:"+codeServerPort);
+								} else {
+									codeServerHost= PoolUtils.getHostIp();
+									codeServerPort=LocalHttpServer.getLocalHttpServerPort();
+								}
+								
+								r = ServerManager.createR(props.getProperty("r.binary"), false, codeServerHost, codeServerPort, 
 										props, props.get("memorymin")==null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), 
 											   props.get("memorymax")==null ? ServerDefaults._memoryMax: Integer.decode(props.getProperty("memorymax")), name[0], false, null, null,true,null);
 							} else if (mode.equalsIgnoreCase("rmi")) {

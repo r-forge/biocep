@@ -37,6 +37,9 @@ public class Boot {
 			Vector<URL> codeUrls=new Vector<URL>();
 			codeUrls.add(new URL("http://" + args[1] + ":" + args[2] + "/classes/"));
 			
+			System.setProperty("code.server.host", args[1]);
+			System.setProperty("code.server.port", args[2]);
+			
 			if (args.length > 3) {
 				for (int i=3;i<args.length;++i) {
 					codeUrls.add(new URL(args[i]));
