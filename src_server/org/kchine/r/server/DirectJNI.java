@@ -30,7 +30,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -65,10 +64,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import javasci.SciDouble;
-import javasci.Scilab;
-
 import javax.imageio.ImageIO;
 import org.apache.commons.logging.Log;
 import org.htmlparser.Node;
@@ -4417,8 +4412,8 @@ public class DirectJNI {
 		}
 
 		
-		
 		/*
+		
 		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
 			return Scilab.Exec(cmd);
 
@@ -4468,8 +4463,8 @@ public class DirectJNI {
 			d.Send();
 			}
 		}
-		*/
 		
+		*/
 		
 		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
 			return ScilabServicesSingleton.getInstance().scilabExec(cmd);
