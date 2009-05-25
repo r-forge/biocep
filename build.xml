@@ -1070,9 +1070,10 @@
 
 		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
 		<if><not><isset property="soapenabled"/></not><then><property name="soapenabled" value=""/></then></if>
+		<if><not><isset property="port"/></not><then><property name="port" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="HttpServerLight"
-			fork="true" spawn="${spawn}" newenvironment="true">
+			fork="true" spawn="${spawn}" >
 			
 			<classpath>
 				
@@ -1116,9 +1117,7 @@
 				
 			</classpath>
 			
-			<env key="SCI_HOME" path="${env.SCI_HOME}"/>
-			<env key="PATH" path="${R_LIB_PATH}${path.separator}${env.PATH}"/>
-			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			
 			<jvmarg	value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			
 						
@@ -1134,7 +1133,7 @@
 			
 			<jvmarg value="-Dnaming.mode=${naming.mode}"/>
 			<jvmarg value="-Dsoapenabled=${soapenabled}"/>
-			
+			<jvmarg value="-Dport=${port}"/>
 				
 			
 		</java>
