@@ -23,6 +23,7 @@ import org.kchine.rpf.db.SupervisorInterface;
 import org.kchine.rpf.db.monitor.SupervisorUtils;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.servlet.HashSessionManager;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -188,12 +189,10 @@ public class HttpServerLight {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		
-		
 		
 		
 		Server _virtualizationServer = new Server(port);
+		_virtualizationServer.setSessionIdManager(new HashSessionIdManager(new java.util.Random()));
 		_virtualizationServer.setStopAtShutdown(true);
 		
 		
