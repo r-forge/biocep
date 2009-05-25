@@ -382,7 +382,7 @@
 		<if><not><isset property="cloud"/></not><then><property name="cloud" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="org.kchine.rpf.MainServer"
-			fork="true" spawn="${spawn}">
+			fork="true" spawn="${spawn}" newenvironement="true">
 			
 			<classpath>
 				
@@ -1072,7 +1072,7 @@
 		<if><not><isset property="soapenabled"/></not><then><property name="soapenabled" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="HttpServerLight"
-			fork="true" spawn="${spawn}">
+			fork="true" spawn="${spawn}" newenvironment="true">
 			
 			<classpath>
 				
