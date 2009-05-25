@@ -1116,7 +1116,8 @@
 				
 			</classpath>
 			
-			<env key="PATH" path="${R_LIB_PATH}"/>
+			<env key="SCI_HOME" path="${env.SCI_HOME}"/>
+			<env key="PATH" path="${R_LIB_PATH}${path.separator}${env.PATH}"/>
 			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
 			<jvmarg	value="-Djava.library.path=${JRI_LIB_PATH}"/>
 			
