@@ -5,10 +5,6 @@ public class ScilabServicesSingleton {
 	public static ScilabServices _scilabServices = null;
 	private static Integer lock = new Integer(0);
 	
-	static {
-		System.out.println("/*/*/*/*/*"+getInstance());
-	}
-	
 	public static ScilabServices getInstance() {
 		if (_scilabServices != null) return _scilabServices;
 		

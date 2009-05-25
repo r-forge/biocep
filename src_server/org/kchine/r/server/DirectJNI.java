@@ -4411,61 +4411,6 @@ public class DirectJNI {
 			return null;
 		}
 
-		
-		/*
-		
-		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
-			return Scilab.Exec(cmd);
-
-		}
-
-		public String scilabConsoleSubmit(String cmd) throws RemoteException {
-			final StringBuffer result = new StringBuffer();
-			try {
-				
-				
-				String fn=TEMP_DIR+"/"+"scilab"+System.currentTimeMillis();
-				Scilab.Exec("diary(\""+fn+"\")");
-				Scilab.Exec( cmd );
-				if (Scilab.GetLastErrorCode()!=0) Scilab.Exec("disp(lasterror())");
-				Scilab.Exec("diary(0)");
-				BufferedReader br=new BufferedReader(new FileReader(fn));
-				String line=null;
-				while ((line =br.readLine())!=null) {
-					if (!line.startsWith("-->")) result.append(line+"\n");
-				}
-				br.close();
-				new File(fn).delete();
-
-				System.out.println("Result:"+result.toString());
-				return result.toString();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteException("",e);
-			 }finally {
-				
-			}
-
-		}
-
-		public Object scilabGetObject(String expression) throws RemoteException {
-			SciDouble d=new SciDouble("var_import");
-			Scilab.Exec("var_import="+expression);
-			d.Get();
-			Double result=d.getData();
-			Scilab.Exec("clear var_import");
-			return result;
-		}
-
-		public void scilabPutAndAssign(Object obj, String name) throws RemoteException {
-			if (obj instanceof Double) {
-			SciDouble d=new SciDouble(name, (Double)obj);
-			d.Send();
-			}
-		}
-		
-		*/
-		
 		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
 			return ScilabServicesSingleton.getInstance().scilabExec(cmd);
 		}
