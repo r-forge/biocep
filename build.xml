@@ -1765,7 +1765,8 @@
 		
 			<unjar src="${GROOVY_JAR}"  dest="binsrv" overwrite="true"/>
 			
-			
+			<unjar src="${JAVASCI_JAR}"  dest="binsrv" overwrite="true"/>
+		
 		
 			<jar destfile="biocep-core-tomcat.jar" >
 				<fileset dir="binsrv"/>
@@ -1895,7 +1896,7 @@
 		
 		<!-- biocep starts -->
 		
-			
+			<!--
 			<unjar src="lib/desktop/OpenXLS.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/pf-joi-full.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/desktop/idw-gpl.jar"  dest="binsrv" overwrite="true"/>
@@ -1956,7 +1957,7 @@
 					
 			<antcall target="sign.extra"/>
 		
-		
+			-->
 			
 			<!-- biocep ends -->		
 	</target>
