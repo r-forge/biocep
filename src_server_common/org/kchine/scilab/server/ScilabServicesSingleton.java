@@ -6,8 +6,9 @@ public class ScilabServicesSingleton {
 	private static Integer lock = new Integer(0);
 	
 	static {
-		getInstance();
+		System.out.println("/*/*/*/*/*"+getInstance());
 	}
+	
 	public static ScilabServices getInstance() {
 		if (_scilabServices != null) return _scilabServices;
 		
