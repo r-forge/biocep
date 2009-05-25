@@ -34,6 +34,7 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.kchine.openoffice.server.OpenOfficeServices;
 import org.kchine.r.server.GenericCallbackDevice;
 import org.kchine.r.server.RAction;
 import org.kchine.r.server.RCallBack;
@@ -48,6 +49,7 @@ import org.kchine.r.server.http.frontend.TunnelingException;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelDevice;
 import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteProxy;
 import org.kchine.rpf.PoolUtils;
+import org.kchine.scilab.server.ScilabServices;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -557,7 +559,7 @@ public class RHttpProxy {
 		if (System.getProperty("proxy_host") != null && !System.getProperty("proxy_host").equals("")) {
 			httpClient.getHostConfiguration().setProxy(System.getProperty("proxy_host"), Integer.decode(System.getProperty("proxy_port")));
 		}
-		final Object proxy = Proxy.newProxyInstance(RHttpProxy.class.getClassLoader(), new Class<?>[] { RServices.class, HttpMarker.class },
+		final Object proxy = Proxy.newProxyInstance(RHttpProxy.class.getClassLoader(), new Class<?>[] { RServices.class, ScilabServices.class, OpenOfficeServices.class , HttpMarker.class },
 				new InvocationHandler() {
 
 					Vector<RCallBack> rCallbacks = new Vector<RCallBack>();

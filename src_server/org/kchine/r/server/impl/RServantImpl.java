@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import org.apache.commons.logging.Log;
+import org.kchine.openoffice.server.OpenOfficeServices;
 import org.kchine.r.RChar;
 import org.kchine.r.RObject;
 import org.kchine.r.server.AssignInterface;
@@ -75,6 +76,7 @@ import org.kchine.rpf.ManagedServantAbstract;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.RemotePanel;
 import org.kchine.rpf.db.DBLayerInterface;
+import org.kchine.scilab.server.ScilabServices;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionManager;
@@ -86,7 +88,7 @@ import org.rosuda.iplots.Framework;
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
-public class RServantImpl extends ManagedServantAbstract implements RServices {
+public class RServantImpl extends ManagedServantAbstract implements RServices, ScilabServices , OpenOfficeServices {
 
 	public static final int PORT_RANGE_WIDTH=5;
 	
@@ -1095,7 +1097,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
 	}
 	
 	public void convertFile(String inputFile, String outputFile, String conversionFilter, boolean useServer) throws RemoteException {
-		DirectJNI.getInstance().getRServices().convertFile(inputFile, outputFile, conversionFilter, useServer);		
+		DirectJNI.getInstance().getOpenOfficeServices().convertFile(inputFile, outputFile, conversionFilter, useServer);		
 	}
 	
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException {
@@ -1207,18 +1209,18 @@ public class RServantImpl extends ManagedServantAbstract implements RServices {
     }
     
     public String scilabConsoleSubmit(String cmd) throws RemoteException {
-    	return DirectJNI.getInstance().getRServices().scilabConsoleSubmit(cmd);
+    	return DirectJNI.getInstance().getScilabServices().scilabConsoleSubmit(cmd);
     }
     
     public Object scilabGetObject(String expression) throws RemoteException {
-    	return DirectJNI.getInstance().getRServices().scilabGetObject(expression);
+    	return DirectJNI.getInstance().getScilabServices().scilabGetObject(expression);
     }
     
     public void scilabPutAndAssign(Object obj, String name) throws RemoteException {
-    	DirectJNI.getInstance().getRServices().scilabPutAndAssign(obj, name);    	
+    	DirectJNI.getInstance().getScilabServices().scilabPutAndAssign(obj, name);    	
     }
 
     public boolean scilabExec(String cmd) throws RemoteException {
-    	return DirectJNI.getInstance().getRServices().scilabExec(cmd);
+    	return DirectJNI.getInstance().getScilabServices().scilabExec(cmd);
     }
 }

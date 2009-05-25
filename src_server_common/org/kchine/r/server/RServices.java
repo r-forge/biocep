@@ -214,8 +214,6 @@ public interface RServices extends ManagedServant {
 	public void installExtension(String extensionName, byte[] extension) throws RemoteException;
 	public void installExtension(String extensionName, String extensionURL) throws RemoteException;
 	public void removeExtension(String extensionName) throws RemoteException; 
-	
-	void convertFile(String inputFile,  String outputFile, String conversionFilter, boolean useserver) throws RemoteException;
 		
 	public SpreadsheetModelRemote newSpreadsheetTableModelRemote(int rowCount, int colCount) throws RemoteException;	
 	public SpreadsheetModelRemote getSpreadsheetTableModelRemote(String Id) throws RemoteException;	
@@ -248,10 +246,5 @@ public interface RServices extends ManagedServant {
     String getInstallDirectory() throws RemoteException;
     String getExtensionsDirectory() throws RemoteException;
     
-    public boolean scilabExec(String cmd) throws java.rmi.RemoteException;
-    
-    public String scilabConsoleSubmit(String cmd) throws java.rmi.RemoteException;    
-    public Object scilabGetObject(String expression) throws RemoteException;
-    public void scilabPutAndAssign(Object obj, String name) throws RemoteException;
     
 }

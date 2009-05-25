@@ -29,6 +29,7 @@ import org.kchine.r.workbench.RGui;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.gui.ConsolePanel;
 import org.kchine.rpf.gui.SubmitInterface;
+import org.kchine.scilab.server.ScilabServices;
 
 
 public 	class ScilabConsoleView extends DynamicView {
@@ -45,7 +46,7 @@ public 	class ScilabConsoleView extends DynamicView {
 				}
 				try {
 					_rgui.getRLock().lock();
-					final String log = _rgui.getR().scilabConsoleSubmit(expression);
+					final String log = ((ScilabServices)_rgui.getR()).scilabConsoleSubmit(expression);
 					return log+"\n";
 				} catch (Exception e) {
 					return PoolUtils.getStackTraceAsString(e)+"\n";

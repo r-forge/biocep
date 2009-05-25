@@ -20,6 +20,7 @@
  */
 package org.kchine.r.server;
 
+import org.kchine.openoffice.server.OpenOfficeServices;
 import org.kchine.r.server.graphics.utils.Dimension;
 import java.awt.Point;
 import org.kchine.r.server.graphics.utils.Point2D;
@@ -29,7 +30,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -64,9 +64,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import javasci.SciDouble;
-import javasci.Scilab;
 
 import javax.imageio.ImageIO;
 import org.apache.commons.logging.Log;
@@ -136,6 +133,8 @@ import org.kchine.r.server.spreadsheet.SpreadsheetModelRemoteImpl;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.RemotePanel;
+import org.kchine.scilab.server.ScilabServices;
+import org.kchine.scilab.server.ScilabServicesSingleton;
 import org.rosuda.JRI.RMainLoopCallbacks;
 import org.rosuda.JRI.Rengine;
 import org.rosuda.JRI.RengineWrapper;
@@ -522,13 +521,6 @@ public class DirectJNI {
 				e.printStackTrace();
 			}
 
-			if (ServerManager.SCI_HOME != null) {
-				Runtime.getRuntime().addShutdownHook(new Thread() {
-					public void run() {
-						Scilab.Finish();
-					}
-				});
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1904,6 +1896,14 @@ public class DirectJNI {
 	public RServices getRServices() {
 		return _rServices;
 	}
+	
+	public ScilabServices getScilabServices() {
+		return (ScilabServices)_rServices;
+	}
+	
+	public OpenOfficeServices getOpenOfficeServices() {
+		return (OpenOfficeServices)_rServices;
+	}
 
 	public RNI getRNI() {
 		return _rni;
@@ -2222,7 +2222,9 @@ public class DirectJNI {
 		fireVariableChangedEvents(variablePointersBefore, null);
 	}
 
-	private RServices _rServices = new RServices() {
+	private RServices _rServices = new RServicesImpl(); 
+		
+	private class RServicesImpl implements RServices, ScilabServices , OpenOfficeServices{
 
 		private String _lastStatus = null;
 
@@ -4411,53 +4413,19 @@ public class DirectJNI {
 		}
 
 		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
-			return Scilab.Exec(cmd);
-
+			return ScilabServicesSingleton.getInstance().scilabExec(cmd);
 		}
 
 		public String scilabConsoleSubmit(String cmd) throws RemoteException {
-			final StringBuffer result = new StringBuffer();
-			try {
-				
-				
-				String fn=TEMP_DIR+"/"+"scilab"+System.currentTimeMillis();
-				Scilab.Exec("diary(\""+fn+"\")");
-				Scilab.Exec( cmd );
-				if (Scilab.GetLastErrorCode()!=0) Scilab.Exec("disp(lasterror())");
-				Scilab.Exec("diary(0)");
-				BufferedReader br=new BufferedReader(new FileReader(fn));
-				String line=null;
-				while ((line =br.readLine())!=null) {
-					if (!line.startsWith("-->")) result.append(line+"\n");
-				}
-				br.close();
-				new File(fn).delete();
-
-				System.out.println("Result:"+result.toString());
-				return result.toString();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RemoteException("",e);
-			 }finally {
-				
-			}
-
+			return ScilabServicesSingleton.getInstance().scilabConsoleSubmit(cmd);
 		}
 
 		public Object scilabGetObject(String expression) throws RemoteException {
-			SciDouble d=new SciDouble("var_import");
-			Scilab.Exec("var_import="+expression);
-			d.Get();
-			Double result=d.getData();
-			Scilab.Exec("clear var_import");
-			return result;
+			return ScilabServicesSingleton.getInstance().scilabGetObject(expression);
 		}
 
 		public void scilabPutAndAssign(Object obj, String name) throws RemoteException {
-			if (obj instanceof Double) {
-			SciDouble d=new SciDouble(name, (Double)obj);
-			d.Send();
-			}
+			ScilabServicesSingleton.getInstance().scilabPutAndAssign(obj, name);
 		}
 
 	};
