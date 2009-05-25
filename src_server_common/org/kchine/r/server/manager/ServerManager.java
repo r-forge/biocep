@@ -49,7 +49,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-
 import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.http.local.LocalHttpServer;
@@ -63,8 +62,6 @@ import org.kchine.rpf.RemoteLogListener;
 import org.kchine.rpf.SSHUtils;
 import org.kchine.rpf.ServantCreationTimeout;
 import org.kchine.rpf.ServerDefaults;
-
-
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
