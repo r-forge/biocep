@@ -25,4 +25,5 @@ public interface GroovyInterpreter {
 	public String execFromFile(File f) throws Exception;
 	public String execFromBuffer(String buffer) throws Exception;
 	public String getStatus() throws Exception ;
+	public ClassLoader getClassLoader() throws Exception ;
 }

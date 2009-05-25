@@ -4268,10 +4268,19 @@ public class DirectJNI {
 
 			GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
 			try {
+				
+				Class<?> OOConverterClass=GroovyInterpreterSingleton.getInstance().getClassLoader().loadClass("org.kchine.ooc.OOConverter");
+				Method m=OOConverterClass.getMethod("convert" + (useServer ? "" : "NoServer"), String.class, String.class, String.class);
+				m.invoke(OOConverterClass.newInstance(),new File(inputFile).getAbsolutePath().replace('\\', '/') , new File(outputFile).getAbsolutePath().replace('\\', '/'), conversionFilter );
+
+				/*
 				System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
 				System.out.println(gr.exec("org.kchine.ooc.OOConverter.convert" + (useServer ? "" : "NoServer") + "(\""
 						+ new File(inputFile).getAbsolutePath().replace('\\', '/') + "\", \"" + new File(outputFile).getAbsolutePath().replace('\\', '/')
 						+ "\", \"" + conversionFilter + "\" );"));
+				 */				
+				
+				
 			} catch (Exception e) {
 				new RemoteException("", e);
 			}
@@ -4907,25 +4916,16 @@ public class DirectJNI {
 				e.printStackTrace();
 				throw new RemoteException("", e);
 			}
-			String SvgDeviceName = DirectJNI.getInstance().getCairoCapabilities().contains("svg") ? "CairoSVG" : "svg";
-			int currentDevice = ((RInteger) DirectJNI.getInstance().getRServices().getObject(".PrivateEnv$dev.cur()")).getValue()[0];
-			DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
-			final String createDeviceCommand = SvgDeviceName + "(file = \"" + tempSVGFile.getAbsolutePath().replace('\\', '/') + "\", width = "
-					+ new Double(10 * (getSize().width / getSize().height)) + ", height = " + 10 + " , onefile = TRUE, bg = \"transparent\" ,pointsize = 12)";
-
-			int[] devicesSnapshot = snapshotDevices();
-			System.out.println("createDeviceCommand:" + createDeviceCommand);
-			DirectJNI.getInstance().getRServices().evaluate(createDeviceCommand);
-			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
-				log.info(DirectJNI.getInstance().getRServices().getStatus());
-				System.out.println("Status:" + DirectJNI.getInstance().getRServices().getStatus());
+			
+			
+			try {
+				RandomAccessFile svgRaf=new RandomAccessFile(tempSVGFile,"rw");svgRaf.setLength(0);
+				svgRaf.write(getSvg());
+				svgRaf.close();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			int cairoDevice = guessNewDevice(devicesSnapshot);
-
-			DirectJNI.getInstance().getRServices().evaluate(
-					".PrivateEnv$dev.set(" + gdBag.getDeviceNumber() + ");" + ".PrivateEnv$dev.copy(which=" + cairoDevice + ");" + ".PrivateEnv$dev.set("
-							+ currentDevice + ");", 3);
-
+			
 			if (!DirectJNI.getInstance().getRServices().getStatus().equals("")) {
 				log.info(DirectJNI.getInstance().getRServices().getStatus());
 			}
@@ -4934,13 +4934,12 @@ public class DirectJNI {
 
 				byte[] result = null;
 				try {
+					
+					Class<?> OOConverterClass=GroovyInterpreterSingleton.getInstance().getClassLoader().loadClass("org.kchine.ooc.OOConverter");
+					Method m=OOConverterClass.getMethod("svgTo" + capitalizeFirstLetter(format) + (useserver ? "" : "NoServer"), String.class, String.class);
+					m.invoke(OOConverterClass.newInstance(), tempSVGFile.getAbsolutePath().replace('\\', '/'), tempVectorFile.getAbsolutePath().replace('\\', '/'));
+					
 
-					DirectJNI.getInstance().shutdownDevices(SvgDeviceName);
-
-					GroovyInterpreter gr = GroovyInterpreterSingleton.getInstance();
-					System.out.println(gr.exec("import org.kchine.ooc.OOConverter;"));
-					System.out.println(gr.exec("org.kchine.ooc.OOConverter.svgTo" + capitalizeFirstLetter(format) + (useserver ? "" : "NoServer") + "(\""
-							+ tempSVGFile.getAbsolutePath().replace('\\', '/') + "\", \"" + tempVectorFile.getAbsolutePath().replace('\\', '/') + "\" );"));
 					if (!tempVectorFile.exists()) {
 						throw new Exception("Couldn't generate " + format
 								+ ", check that you have installed open office 3 and that soffice is in your system path (accessible from your command line)");

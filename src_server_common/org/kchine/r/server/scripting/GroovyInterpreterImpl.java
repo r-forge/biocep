@@ -13,11 +13,18 @@ public class GroovyInterpreterImpl implements GroovyInterpreter {
 	private String _status;
 	final Class<?> _groovyShellClass;
 	final Object _groovyShell;
+	private ClassLoader _cl;
 	
 	public GroovyInterpreterImpl(ClassLoader cl) throws Exception{
+		_cl=cl;
 		_groovyShellClass = cl.loadClass("groovy.lang.GroovyShell");
 		_groovyShell = _groovyShellClass.getConstructor(ClassLoader.class).newInstance(cl);
 	}
+	
+	public ClassLoader getClassLoader() throws Exception {		
+		return _cl;
+	}
+	
 	public String exec(String expression) throws Exception {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
