@@ -628,7 +628,7 @@ public class ServerManager {
 						env.put("LD_LIBRARY_PATH", SCI_HOME+"bin"+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));	
 					} else {
 						env.put("LD_LIBRARY_PATH", SCI_HOME+"lib/scilab"+System.getProperty("path.separator")+SCI_HOME+"lib/thirdparty"+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));
-						env.put("SCI", SCI_HOME + "share/scilab");						
+						env.put("SCIHOME", SCI_HOME + "share/scilab");						
 					}
 					
 					env.put("SCI_DISABLE_TK","1");
@@ -879,6 +879,7 @@ public class ServerManager {
 			RemoteException[] exceptionHolder = new RemoteException[1];
 
 			CreationCallBack callBack = null;
+			
 
 			progressLogger.logProgress("Creating R Server..");
 

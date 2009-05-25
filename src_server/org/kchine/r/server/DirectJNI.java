@@ -4418,7 +4418,7 @@ public class DirectJNI {
 
 		
 		
-		
+		/*
 		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
 			return Scilab.Exec(cmd);
 
@@ -4468,7 +4468,9 @@ public class DirectJNI {
 			d.Send();
 			}
 		}
-		/*
+		*/
+		
+		
 		public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
 			return ScilabServicesSingleton.getInstance().scilabExec(cmd);
 		}
@@ -4484,7 +4486,7 @@ public class DirectJNI {
 		public void scilabPutAndAssign(Object obj, String name) throws RemoteException {
 			ScilabServicesSingleton.getInstance().scilabPutAndAssign(obj, name);
 		}
-		*/
+		
 
 	};
 
