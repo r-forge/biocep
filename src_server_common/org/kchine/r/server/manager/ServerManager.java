@@ -86,8 +86,8 @@ public class ServerManager {
 	public static String EXTENSIONS_DIR = null;
 	public static String DOWNLOAD_DIR = null;
 	public static String WWW_DIR = null;
-	public static final String EMBEDDED_R = "R-version-2.8.0";
-	public static final int ENTRIES_NUMBER = 4832;	
+	public static final String EMBEDDED_R = "R-version-2.9.0";
+	public static final int ENTRIES_NUMBER = 5354;	
 	public static String SCI_HOME = null;
 	
 
@@ -174,8 +174,8 @@ public class ServerManager {
 		if (System.getenv("SCI") == null) {
 			if (System.getenv("SCI_HOME") != null) {
 				SCI_HOME = System.getenv("SCI_HOME");
-			} else if (System.getProperty("SCI_HOME")!=null && !System.getProperty("SCI_HOME").equals("")) {			
-				SCI_HOME = System.getProperty("SCI_HOME");
+			} else if (System.getProperty("sci.home")!=null && !System.getProperty("sci.home").equals("")) {			
+				SCI_HOME = System.getProperty("sci.home");
 			} else {			
 				File embeddedScilabDir= new File(INSTALL_DIR + "scilab");
 				if (!embeddedScilabDir.exists()) embeddedScilabDir.mkdirs(); 
@@ -529,6 +529,8 @@ public class ServerManager {
 				rpath = rinfo[0];
 				rversion = rinfo[1];
 				userrjavapath = rinfo[2];
+				
+				System.setProperty("use.default.libs","true");
 
 			} else {
 
@@ -571,6 +573,8 @@ public class ServerManager {
 						}
 						rpath = rinfo[0];
 						rversion = rinfo[1];
+						userrjavapath = rinfo[2];
+						System.setProperty("use.default.libs","true");
 
 					} else {
 						JOptionPane.showMessageDialog(null,
@@ -826,6 +830,16 @@ public class ServerManager {
 			System.out.println("jri path"+jripath);
 
 			String cp = INSTALL_DIR + "classes";
+			
+			if (SCI_HOME!=null) {
+				if (isWindowsOs()) {
+					cp=cp+System.getProperty("path.separator")+SCI_HOME + "modules/javasci/jar/javasci.jar";	
+				} else {
+					cp=cp+System.getProperty("path.separator")+SCI_HOME + "share/scilab/modules/javasci/jar/javasci.jar";
+				}
+				
+			}
+			
 
 			Vector<File> extraJarFiles = new Vector<File>();
 			
