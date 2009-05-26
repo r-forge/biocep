@@ -1113,6 +1113,8 @@
 				<pathelement path="lib/svg/batik-util.jar"/>
 				
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
+				
+				<pathelement path="${GROOVY_JAR}"/>
 
 				
 			</classpath>
