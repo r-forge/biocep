@@ -245,6 +245,13 @@ public interface RServices extends ManagedServant {
     String getWorkingDirectory() throws RemoteException;
     String getInstallDirectory() throws RemoteException;
     String getExtensionsDirectory() throws RemoteException;
+
+    String getRHome() throws RemoteException;
+    String getRVersion() throws RemoteException;
+    String getRJavaHome() throws RemoteException;
+    
+    void installPackage(String label, byte[] packageBuffer) throws RemoteException;
+    void installPackages(String[] label, byte[][] packageBuffer) throws RemoteException;
     
     
 }

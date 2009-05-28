@@ -896,7 +896,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 	synchronized public RServices cloneServer() throws RemoteException {
 		System.out.println("cloneServer");
 		try {
-			RServices w = ServerManager.createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
+			RServices w = ServerManager.createR(null, false, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
 					.getLocalRmiRegistryPort()), 256, 256, "", false,null,null,true,null);
 			return w;
 		} catch (Exception e) {
@@ -1225,4 +1225,25 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
     public boolean scilabExec(String cmd) throws RemoteException {
     	return DirectJNI.getInstance().getScilabServices().scilabExec(cmd);
     }
+    
+    public void installPackage(String label, byte[] packageBuffer) throws RemoteException {
+    	DirectJNI.getInstance().getRServices().installPackage(label, packageBuffer);    	
+    }
+    
+    public void installPackages(String[] label, byte[][] packageBuffer) throws RemoteException {
+    	DirectJNI.getInstance().getRServices().installPackages(label, packageBuffer);    	
+    }
+        
+    public String getRHome() throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().getRHome();
+    }
+    
+    public String getRVersion() throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().getRVersion();
+    }
+    
+    public String getRJavaHome() throws RemoteException {
+    	return DirectJNI.getInstance().getRServices().getRJavaHome();
+    }
+    
 }

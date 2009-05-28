@@ -754,7 +754,8 @@ public abstract class RListener {
 									codeServerPort=LocalHttpServer.getLocalHttpServerPort();
 								}
 								
-								r = ServerManager.createR(props.getProperty("r.binary"), false, codeServerHost, codeServerPort, 
+								boolean useEmbeddedR=("use_embedded_r")==null || props.getProperty("use_embedded_r").equals("") ? false :  new Boolean(props.getProperty("use_embedded_r"));
+								r = ServerManager.createR(props.getProperty("r.binary"), useEmbeddedR , false, codeServerHost, codeServerPort, 
 										props, props.get("memorymin")==null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), 
 											   props.get("memorymax")==null ? ServerDefaults._memoryMax: Integer.decode(props.getProperty("memorymax")), name[0], false, null, null,true,null);
 							} else if (mode.equalsIgnoreCase("rmi")) {

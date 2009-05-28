@@ -782,5 +782,29 @@ public class RServicesObject implements RServices {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public void installPackage(String label, byte[] packageBuffer) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void installPackages(String[] label, byte[][] packageBuffer) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
 
+	public String getRHome() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public String getRJavaHome() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public String getRVersion() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

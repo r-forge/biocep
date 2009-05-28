@@ -19,21 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import java.io.RandomAccessFile;
-import java.rmi.RemoteException;
-import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
-import org.kchine.r.RChar;
-import org.kchine.r.RNamedArgument;
-import org.kchine.r.RObjectName;
-import org.kchine.r.RS3;
 import org.kchine.r.server.DirectJNI;
-import org.kchine.r.server.RConsoleAction;
-import org.kchine.r.server.RConsoleActionListener;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.manager.ServerManager;
-
+import org.kchine.scilab.server.ScilabServices;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -46,7 +37,7 @@ public class BridgeBasics {
 	public static void main(String args[]) throws Exception {
 	
 		
-		final RServices r = ServerManager.createR("toto");
+		final ScilabServices r = (ScilabServices)ServerManager.createR("toto");
 		r.scilabExec("disp(7+9)");
 		r.die();
 		

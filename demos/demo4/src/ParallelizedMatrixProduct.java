@@ -79,6 +79,7 @@ public class ParallelizedMatrixProduct {
 	}
 
 	public static void main(String args[]) throws Exception {		
+		
 		System.setSecurityManager(new YesSecurityManager());
 		
 

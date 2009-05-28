@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -141,6 +142,7 @@ import org.rosuda.javaGD.GDInterface;
 import org.rosuda.javaGD.JavaGD;
 
 import static org.kchine.r.server.RConst.*;
+import static org.kchine.rpf.PoolUtils.isWindowsOs;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -181,6 +183,10 @@ public class DirectJNI {
 	private long _tempCounter = 0;
 	private String _continueStr = null;
 	private String _promptStr = null;
+	private String _rHomeStr = null;
+	private String _rVersionStr = null;
+	private String _rJavaHomeStr = null;
+	
 	private Vector<String> _bootstrapRObjects = new Vector<String>();
 	private long _privateEnvExp;
 
@@ -473,6 +479,13 @@ public class DirectJNI {
 			initPrivateEnv();
 			_continueStr = ((RChar) ((RList) getRServices().getObject("options('continue')")).getValue()[0]).getValue()[0];
 			_promptStr = ((RChar) ((RList) getRServices().getObject("options('prompt')")).getValue()[0]).getValue()[0];
+			
+			_rHomeStr=((RChar)getRServices().getObject("R.home()")).getValue()[0];
+			_rHomeStr=new File(_rHomeStr).getAbsolutePath().replace('\\', '/') + "/";
+			
+			_rVersionStr=((RChar)getRServices().getObject("R.version.string")).getValue()[0];
+			_rJavaHomeStr=((RChar)getRServices().getObject(".path.package('rJava')")).getValue()[0];
+
 
 			if (((RLogical) getRServices().getObject("exists('Cairo')")).getValue()[0]) {
 
@@ -4436,6 +4449,150 @@ public class DirectJNI {
 			ScilabServicesSingleton.getInstance().scilabPutAndAssign(obj, name);
 		}
 		
+		public void installPackage(String label, byte[] packageBuffer) throws RemoteException {
+			
+				
+			
+		}
+		
+		public void installPackages(String[] label, byte[][] packageBuffer) throws RemoteException {
+			
+			/*
+			File tempSVGFile = null;
+			File tempVectorFile = null;
+			try {
+				long currentTimeMillis = System.currentTimeMillis();
+				tempSVGFile = new File(TEMP_DIR + "/temp" + currentTimeMillis + ".svg").getCanonicalFile();
+				if (tempSVGFile.exists()) tempSVGFile.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+			
+			
+			try {
+				RandomAccessFile svgRaf=new RandomAccessFile(tempSVGFile,"rw");svgRaf.setLength(0);
+				svgRaf.write(getSvg());
+				svgRaf.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			
+			    String rbin = _rHomeStr + "bin/R";
+
+					Vector<String> getInfoCommand = new Vector<String>();
+
+					String[] roptions=DirectJNI.getROptions();
+					
+					if (rbin != null && !rbin.equals("")) {
+						System.out.println("trying to execute :" + rbin);
+						getInfoCommand.add(rbin);
+						getInfoCommand.add("CMD");
+						getInfoCommand.add("BATCH");
+						
+						
+
+					} 
+					Vector<String> systemEnvVector = new Vector<String>();
+					{
+
+						Map<String, String> osenv = System.getenv();
+
+						Map<String, String> env = new HashMap<String, String>(osenv);
+
+						for (String k : env.keySet()) {
+
+							systemEnvVector.add(k + "=" + env.get(k));
+
+						}
+
+					}
+
+					System.out.println("exec->" + getInfoCommand);
+
+					System.out.println(systemEnvVector);
+
+					final Process getInfoProc = Runtime.getRuntime().exec(getInfoCommand.toArray(new String[0]),
+
+					systemEnvVector.toArray(new String[0]));
+
+					new Thread(new Runnable() {
+
+						public void run() {
+
+							try {
+
+								BufferedReader br = new BufferedReader(new InputStreamReader(getInfoProc.getErrorStream()));
+
+								String line = null;
+
+								while ((line = br.readLine()) != null) {
+
+									System.out.println(line);
+
+								}
+
+							} catch (Exception e) {
+
+								e.printStackTrace();
+
+							}
+
+						}
+
+					}).start();
+
+					new Thread(new Runnable() {
+
+						public void run() {
+
+							try {
+
+								BufferedReader br = new BufferedReader(new InputStreamReader(getInfoProc.getInputStream()));
+
+								String line = null;
+
+								while ((line = br.readLine()) != null) {
+
+									System.out.println(line);
+
+								}
+
+							} catch (Exception e) {
+
+								e.printStackTrace();
+
+							}
+
+						}
+
+					}).start();
+
+					getInfoProc.waitFor();
+
+
+			}
+
+			
+			
+			// TODO Auto-generated method stub
+			
+			*/
+			
+		}
+		
+		public String getRHome() throws RemoteException {
+			return _rHomeStr;
+		}
+		
+		public String getRVersion() throws RemoteException {
+			return _rVersionStr;
+		}
+		
+		public String getRJavaHome() throws RemoteException {
+			return _rJavaHomeStr;
+		}
 
 	};
 

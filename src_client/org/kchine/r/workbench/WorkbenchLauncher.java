@@ -70,8 +70,12 @@ public class WorkbenchLauncher {
 		params.put("gui_url", System.getProperty("gui_url"));
 		params.put("gui_name", System.getProperty("gui_name"));
 		params.put("gui_selector", System.getProperty("gui_selector"));
+		
 		params.put("proxy_host", System.getProperty("proxy_host"));
 		params.put("proxy_port", System.getProperty("proxy_port"));
+		params.put("use_embedded_r", System.getProperty("use_embedded_r"));
+		params.put("gui_no_r", System.getProperty("gui_no_r"));
+		params.put("gui_no_workbench", System.getProperty("gui_no_workbench"));
 		
 		params.put("desktopapplication", "true");
 		params.put("javaws", System.getProperty("javaws"));
@@ -103,24 +107,26 @@ public class WorkbenchLauncher {
 
 		final WorkbenchApplet gDApplet = createApplet();
 
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					UIManager.setLookAndFeel(gDApplet.getLookAndFeelClassName());
-				} catch (Exception e) {
-					e.printStackTrace();
+		if (System.getProperty("gui_no_workbench")==null || System.getProperty("gui_no_workbench").equals("") || ! new Boolean(System.getProperty("gui_no_workbench"))) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						UIManager.setLookAndFeel(gDApplet.getLookAndFeelClassName());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					JFrame mainframe = new JFrame();
+					mainframe.getContentPane().setLayout(new BorderLayout());
+					mainframe.getContentPane().add(gDApplet.getContentPane(), BorderLayout.CENTER);
+					mainframe.setPreferredSize(new Dimension(840, 720));
+					mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	
+					mainframe.pack();
+					mainframe.setVisible(true);
+	
 				}
-				JFrame mainframe = new JFrame();
-				mainframe.getContentPane().setLayout(new BorderLayout());
-				mainframe.getContentPane().add(gDApplet.getContentPane(), BorderLayout.CENTER);
-				mainframe.setPreferredSize(new Dimension(840, 720));
-				mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-				mainframe.pack();
-				mainframe.setVisible(true);
-
-			}
-		});
+			});
+		}
 
 		SplashWindow.disposeSplash();
 	}
