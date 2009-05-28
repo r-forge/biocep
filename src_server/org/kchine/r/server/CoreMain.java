@@ -89,7 +89,7 @@ public class CoreMain {
 		if (ServerDefaults.isRegistryAccessible()) {
 			String name = System.getProperty("name");
 			String rbinary = System.getProperty("r.binary");
-			r = ServerManager.createR(rbinary, wait ? false : true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getNamingInfo(),
+			r = ServerManager.createR(rbinary, false,  wait ? false : true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getNamingInfo(),
 					ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, (URL[]) codeUrls.toArray(new URL[0]), System.getProperty("log.file"),
 					true, new Runnable() {
 						public void run() {

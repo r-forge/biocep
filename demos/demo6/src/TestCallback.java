@@ -36,6 +36,7 @@ public class TestCallback {
 		RServices r = null;
 		try {
 			r = (RServices) ServantProviderFactory.getFactory().getServantProvider().borrowServantProxy();
+			
 			r.addRCallback(new RCallbackImpl());
 			r.addRCallback(new RCallbackImpl());
 			System.out.println("***" + r.evaluate("library(rJava)"));

@@ -1589,8 +1589,9 @@
 		<delete>
 			
 			<fileset dir=".">
-				<include name="*.jar"/>
+				<include name="RJB.jar"/>
 			</fileset>
+			
 		</delete>
 	</target>
 

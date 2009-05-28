@@ -429,7 +429,7 @@ public class ServerManager {
 	}
 
 	public static RServices createR(String name) throws Exception {
-		return createR(null, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
+		return createR(null, false, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
 				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null,true,null);
 	}
 
@@ -437,7 +437,7 @@ public class ServerManager {
 		void logProgress(String message);
 	}
 
-	synchronized public static RServices createR(String RBinPath, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
+	synchronized public static RServices createR(String RBinPath, boolean forceEmbedded, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, boolean addLocalJarToClassPath,final Runnable rShutdownHook) throws Exception {
 
 		final JTextArea[] createRProgressArea = new JTextArea[1];
@@ -502,6 +502,9 @@ public class ServerManager {
 
 			progressLogger.logProgress("Inspecting R installation..");
 			new File(INSTALL_DIR).mkdir();
+			
+			
+			
 
 			String rpath = null;
 			String rversion = null;
@@ -529,7 +532,7 @@ public class ServerManager {
 				
 				System.setProperty("use.default.libs","true");
 
-			} else {
+			} else if (!forceEmbedded){
 
 				String rhome = System.getenv("R_HOME");
 				if (rhome == null) {
@@ -556,7 +559,12 @@ public class ServerManager {
 				String noRCause = System.getenv("R_HOME") == null ? "R is not accessible from the command line" : "Your R_HOME is invalid";
 				if (isWindowsOs()) {
 
-					int n = JOptionPane.showConfirmDialog(null, noRCause + "\nWould you like to use the Embedded R?", "", JOptionPane.YES_NO_OPTION);
+					int n ;
+					if (forceEmbedded) {
+						n=JOptionPane.OK_OPTION;
+					} else {
+						n=JOptionPane.showConfirmDialog(null, noRCause + "\nWould you like to use the Embedded R?", "", JOptionPane.YES_NO_OPTION);
+					}
 					if (n == JOptionPane.OK_OPTION) {
 						String rZipFileName = null;
 						rZipFileName = "http://biocep-distrib.r-forge.r-project.org/r/" + EMBEDDED_R + ".zip";
