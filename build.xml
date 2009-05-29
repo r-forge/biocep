@@ -1114,6 +1114,7 @@
 				
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				
+				<pathelement path="${JAVASCI_JAR}"/>
 				<pathelement path="${GROOVY_JAR}"/>
 
 				
