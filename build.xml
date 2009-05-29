@@ -1767,7 +1767,7 @@
 			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
 		
 			<unjar src="${GROOVY_JAR}"  dest="binsrv" overwrite="true"/>
-		
+			<unjar src="${JAVASCI_JAR}"  dest="binsrv" overwrite="true"/>
 		
 			<jar destfile="biocep-core-tomcat.jar" >
 				<fileset dir="binsrv"/>

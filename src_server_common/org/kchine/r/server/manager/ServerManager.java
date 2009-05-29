@@ -837,6 +837,7 @@ public class ServerManager {
 
 			String cp = INSTALL_DIR + "classes";
 			
+			/*
 			if (SCI_HOME!=null) {
 				if (isWindowsOs()) {
 					cp=cp+System.getProperty("path.separator")+SCI_HOME + "modules/javasci/jar/javasci.jar";	
@@ -845,6 +846,7 @@ public class ServerManager {
 				}
 				
 			}
+			*/
 			
 
 			Vector<File> extraJarFiles = new Vector<File>();
