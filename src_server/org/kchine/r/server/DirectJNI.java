@@ -30,7 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileReader;
+
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -66,7 +66,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import javasci.Scilab;
+
 
 import javax.imageio.ImageIO;
 import org.apache.commons.logging.Log;
@@ -467,10 +467,7 @@ public class DirectJNI {
 		return roptions;
 	}
 
-	private DirectJNI() {
-
-		Scilab.Exec("45+2");
-		
+	private DirectJNI() {		
 		
 		_rEngine = new RengineWrapper(getROptions(), true, new RMainLoopCallbacksImpl());
 
