@@ -1918,7 +1918,6 @@
 			<unjar src="lib/svg/js.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/xml-apis.jar"  dest="binsrv" overwrite="true"/>
 			<unjar src="lib/svg/xml-apis-ext.jar"  dest="binsrv" overwrite="true"/>				
-			<unjar src="${GROOVY_JAR}"  dest="binsrv" overwrite="true"/>
 		
 			<property 	name="src_client_target" value="src_client:src_patch_joi:src_patch_freemind"/>		
 			<javac srcdir="${src_client_target}"
