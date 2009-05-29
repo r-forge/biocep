@@ -20,7 +20,7 @@ import org.kchine.rpf.RemotePanel;
 public class ScilabServicesImpl implements ScilabServices{
 
 	public ScilabServicesImpl() {
-		if (ServerManager.SCI_HOME != null) {
+		if (ServerManager.sci != null) {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				public void run() {
 					Scilab.Finish();
