@@ -84,9 +84,11 @@ public class ServerManager {
 	public static String DOWNLOAD_DIR = null;
 	public static String WWW_DIR = null;
 	public static final String EMBEDDED_R = "R-version-2.9.0";
-	public static final int ENTRIES_NUMBER = 5354;	
-	public static String SCI_HOME = null;
+	public static final String SCILAB_VERSION = "Scilab-version-5.1";
+	public static final int ENTRIES_NUMBER = 5354;
 	
+	public static String sci = null;
+	public static String sci_ld_library_path = null;	
 
 	static {
 		if (System.getenv("BIOCEP_HOME") != null) {
@@ -168,41 +170,54 @@ public class ServerManager {
 		}
 		if (!new File(WWW_DIR).exists())  new File(WWW_DIR).mkdirs();
 		
-		if (System.getenv("SCI") == null) {
-			if (System.getenv("SCI_HOME") != null) {
-				SCI_HOME = System.getenv("SCI_HOME");
-			} else if (System.getProperty("sci.home")!=null && !System.getProperty("sci.home").equals("")) {			
-				SCI_HOME = System.getProperty("sci.home");
-			} else {			
+		
+		sci= System.getProperty("sci");
+		if (sci==null || sci.equals("")) sci=System.getenv("SCI");
+		if (sci==null || sci.equals("")) {
+			if (isWindowsOs()) {				
 				File embeddedScilabDir= new File(INSTALL_DIR + "scilab");
-				if (!embeddedScilabDir.exists()) embeddedScilabDir.mkdirs(); 
+				if (!embeddedScilabDir.exists()) embeddedScilabDir.mkdirs();
 				String[] dirList=embeddedScilabDir.list(new FilenameFilter(){
 					public boolean accept(File dir, String name) {
 						return dir.isDirectory();
 					}
 				});
 				if (dirList.length>0) {
-					SCI_HOME=embeddedScilabDir+"/"+dirList[0];
-					
+					sci=embeddedScilabDir+"/"+dirList[0];
 				} else {
-					SCI_HOME=null;
-				}			
-			}
-		} else {
-			if (isWindowsOs()) {
-				SCI_HOME=System.getenv("SCI");
-			} else {				
-				try {
-					SCI_HOME=new File(new File(System.getenv("SCI")).getAbsolutePath()+"/../..").getCanonicalPath();
-				} catch (Exception e) {
-					e.printStackTrace();
+					sci=null;
+				}
+				
+			} else {
+				if (new File("/usr/share/scilab").exists()) {
+					sci="/usr/share/scilab";
+				} else {
+					sci=null;
 				}
 			}
 		}
+	
+		if (sci!=null) {
+			sci = new File(sci).getAbsolutePath().replace('\\', '/') + "/";			
+			sci_ld_library_path= System.getProperty("sci.ld.library.path");
+			if (sci_ld_library_path==null || sci_ld_library_path.equals("")) sci_ld_library_path=System.getenv("SCI_LD_LIBRARY_PATH");
+			if (sci_ld_library_path==null || sci_ld_library_path.equals("")) {
+				if (isWindowsOs()) {
+					sci_ld_library_path=sci+"bin";
+				} else {					
+					if (new File("/usr/lib/scilab").exists()) {
+						sci_ld_library_path="/usr/lib/scilab";
+					}					
+				}
+			}		
+		}
+			
+			
 		
-		if (SCI_HOME!=null) SCI_HOME = new File(SCI_HOME).getAbsolutePath().replace('\\', '/') + "/";
 				
-		System.out.println("SCI_HOME:"+SCI_HOME);
+		
+				
+		System.out.println("SCI:"+sci);
 
 	}
 
@@ -625,24 +640,21 @@ public class ServerManager {
 				Map<String, String> env = new HashMap<String, String>(osenv);
 				
 				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib") + System.getProperty("path.separator")+ OS_PATH);
-				if (SCI_HOME!=null) {
-					env.put("Path", SCI_HOME+(isWindowsOs()?"bin":"lib/scilab")+System.getProperty("path.separator")+env.get("Path"));
+				if (sci!=null && isWindowsOs()) {
+					env.put("Path", sci_ld_library_path+System.getProperty("path.separator")+env.get("Path"));
 				}
 				
+				
+				
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
-								
-				if (SCI_HOME!=null) {
-					if (isWindowsOs()) {
-						env.put("LD_LIBRARY_PATH", SCI_HOME+"bin"+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));	
-					} else {
-						env.put("LD_LIBRARY_PATH", SCI_HOME+"lib/scilab"+System.getProperty("path.separator")+SCI_HOME+"lib/thirdparty"+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));
-						env.put("SCI", SCI_HOME + "share/scilab");
-						env.put("SCIHOME", SCI_HOME + "share/scilab");
-					}
-					
+				if (sci!=null) {
+					env.put("SCI", sci);
 					env.put("SCI_DISABLE_TK","1");
 					env.put("SCI_JAVA_ENABLE_HEADLESS","1");
-					
+
+					if (!isWindowsOs()) {
+						env.put("LD_LIBRARY_PATH",sci_ld_library_path+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));						
+					}
 				}
 				
 				env.put("R_HOME", rpath);
@@ -820,33 +832,34 @@ public class ServerManager {
 			// ---------------------------------------
 
 			// String jripath = getLibraryPath("rJava", rpath, rlibs) + "jri/";
-			String jripath = null;
+			String java_library_path = null;
 			if (useDefaultUserLibs) {
-				jripath = userrjavapath + "/jri/";
-				System.out.println("jripath:" + jripath + "\n");
+				java_library_path = userrjavapath + "/jri/";
+				System.out.println("jripath:" + java_library_path + "\n");
 			} else {
-				jripath = rlibs + "/rJava/jri/";
-				System.out.println("jripath:" + jripath + "\n");
+				java_library_path = rlibs + "/rJava/jri/";
+				System.out.println("jripath:" + java_library_path + "\n");
 			}
 			
-			if (SCI_HOME!=null) {
-				jripath+=System.getProperty("path.separator")+SCI_HOME+(isWindowsOs()?"bin":"lib/scilab");
+			if (sci!=null) {
+				java_library_path+=System.getProperty("path.separator")+sci_ld_library_path;
 			}
 
-			System.out.println("jri path"+jripath);
+			System.out.println("java.library.path"+java_library_path);
 
 			String cp = INSTALL_DIR + "classes";
 			
-			/*
-			if (SCI_HOME!=null) {
+			if (sci!=null) {
 				if (isWindowsOs()) {
-					cp=cp+System.getProperty("path.separator")+SCI_HOME + "modules/javasci/jar/javasci.jar";	
-				} else {
-					cp=cp+System.getProperty("path.separator")+SCI_HOME + "share/scilab/modules/javasci/jar/javasci.jar";
+					cp=cp+System.getProperty("path.separator")+sci + "modules/javasci/jar/javasci.jar";	
+				} else {									
+					String scilabLibraryDir=INSTALL_DIR+"scilab/javasci/"+SCILAB_VERSION+"/";					
+					if (new File(scilabLibraryDir).exists()) new File(scilabLibraryDir).mkdirs();
+					PoolUtils.cacheJar(new URL("http://www.biocep.net/scilab/"+SCILAB_VERSION+"/"+"javasci.jar"),scilabLibraryDir , PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+					cp=cp+System.getProperty("path.separator")+scilabLibraryDir +"javasci.jar";
 				}
 				
 			}
-			*/
 			
 
 			Vector<File> extraJarFiles = new Vector<File>();
@@ -922,7 +935,7 @@ public class ServerManager {
 				command.add("-cp");
 				command.add((isWindowsOs() ? "\"" : "") + cp + (isWindowsOs() ? "\"" : ""));
 
-				command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + jripath + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Djava.library.path=" + java_library_path + (isWindowsOs() ? "\"" : ""));
 
 				String codeBase = "http://" + codeServerHostIp + ":" + codeServerPort + "/classes/";
 

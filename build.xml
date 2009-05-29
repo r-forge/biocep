@@ -1114,7 +1114,6 @@
 				
 				<pathelement path="lib/pool/commons-pool-1.3.jar"/>
 				
-				<pathelement path="${JAVASCI_JAR}"/>
 				<pathelement path="${GROOVY_JAR}"/>
 
 				
@@ -1767,7 +1766,6 @@
 			<unjar src="lib/jdbc/derbyclient.jar"  dest="binsrv" overwrite="true"/>
 		
 			<unjar src="${GROOVY_JAR}"  dest="binsrv" overwrite="true"/>
-			<unjar src="${JAVASCI_JAR}"  dest="binsrv" overwrite="true"/>
 		
 			<jar destfile="biocep-core-tomcat.jar" >
 				<fileset dir="binsrv"/>
