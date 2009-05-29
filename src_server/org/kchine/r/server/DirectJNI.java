@@ -65,6 +65,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import javasci.Scilab;
+
 import javax.imageio.ImageIO;
 import org.apache.commons.logging.Log;
 import org.htmlparser.Node;
@@ -466,6 +469,9 @@ public class DirectJNI {
 
 	private DirectJNI() {
 
+		Scilab.Exec("45+2");
+		
+		
 		_rEngine = new RengineWrapper(getROptions(), true, new RMainLoopCallbacksImpl());
 
 		if (!_rEngine.waitForR()) {
