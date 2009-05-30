@@ -128,7 +128,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 		
 		for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
 		
-		if (true) return;
+		if (true) System.exit(0);
 		
 		log.info("$$>rmi.port.start:"+_port);
 		// --------------	
