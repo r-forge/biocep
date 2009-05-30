@@ -10,8 +10,10 @@ public class ScilabServicesSingleton {
 		
 		synchronized (lock) {
 			if (_scilabServices == null) {
-				try {
-					_scilabServices = (ScilabServices)ScilabServicesSingleton.class.forName("org.kchine.scilab.server.ScilabServicesImpl").newInstance();
+				try {					
+					//_scilabServices = (ScilabServices)ScilabServicesSingleton.class.forName("org.kchine.scilab.server.ScilabServicesImpl").newInstance();
+					_scilabServices = new ScilabServicesImpl();
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
