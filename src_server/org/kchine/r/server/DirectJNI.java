@@ -143,9 +143,7 @@ import org.rosuda.JRI.Rengine;
 import org.rosuda.JRI.RengineWrapper;
 import org.rosuda.javaGD.GDInterface;
 import org.rosuda.javaGD.JavaGD;
-
 import static org.kchine.r.server.RConst.*;
-import static org.kchine.rpf.PoolUtils.isWindowsOs;
 
 /**
  * @author Karim Chine karim.chine@m4x.org
