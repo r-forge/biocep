@@ -34,7 +34,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javasci.Scilab;
+
 
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
@@ -125,10 +125,6 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 
 	public RServantImpl(String name, String prefix, Registry registry) throws RemoteException {
 		super(name, prefix, registry,_port);
-		
-		for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
-		
-		if (true) System.exit(0);
 		
 		log.info("$$>rmi.port.start:"+_port);
 		// --------------	
