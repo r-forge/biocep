@@ -485,9 +485,11 @@
 			</classpath>
 			
 			<env key="PATH" path="${SYSTEM_PATH}${path.separator}${R_LIB_PATH}${path.separator}${SCI_DLL_PATH}"/>
-			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}${path.separator}${SCI_DLL_PATH}"/>
-						
+			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}${path.separator}${SCI_DLL_PATH}"/>						
 			<env key="SCI" path="${SCI_PATH}"/>
+			
+			<env key="SCI_DISABLE_TK" path="1"/>
+			<env key="SCI_JAVA_ENABLE_HEADLESS" path="1"/>
 			
 			<jvmarg
 			value="-Djava.library.path=${JRI_LIB_PATH}${path.separator}${SCI_DLL_PATH}"/>
