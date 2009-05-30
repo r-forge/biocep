@@ -19,7 +19,9 @@
 package org.kchine.r.server;
 
 import org.kchine.r.server.impl.RServantImpl;
+import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.MainServer;
+
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -28,6 +30,14 @@ public class MainRServer {
 
 	public static void main(String[] args) throws Exception {
 		Class<?> servantClass=RServantImpl.class;
+		if (ServerManager.sci!=null) {
+			try {
+				Class<?> scilabClass=MainRServer.class.getClassLoader().loadClass("javasci.Scilab");
+				scilabClass.getMethod("Exec", String.class).invoke(null, "disp(1+3)");
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}		
 		System.setProperty("servantclass", servantClass.getName());
 		MainServer.main(args);		
 	}
