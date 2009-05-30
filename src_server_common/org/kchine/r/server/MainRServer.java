@@ -35,7 +35,7 @@ public class MainRServer {
 				Class<?> scilabClass=MainRServer.class.getClassLoader().loadClass("javasci.Scilab");
 				scilabClass.getMethod("Exec", String.class).invoke(null, "disp(1+3)");
 			} catch (Exception e) {
-				// TODO: handle exception
+				e.printStackTrace();
 			}
 		}		
 		System.setProperty("servantclass", servantClass.getName());
