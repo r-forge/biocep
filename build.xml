@@ -430,7 +430,7 @@
 		<if><not><isset property="cloud"/></not><then><property name="cloud" value=""/></then></if>
 		<if><not><isset property="host.ip.forced"/></not><then><property name="host.ip.forced" value=""/></then></if>
 		
-		<java maxmemory="256m" classname="org.kchine.rpf.MainServer"
+		<java maxmemory="256m" classname="org.kchine.rpf.MainRServer"
 			fork="true" spawn="${spawn}" >
 			
 			<classpath>
