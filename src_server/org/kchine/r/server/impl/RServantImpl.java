@@ -63,6 +63,7 @@ import org.kchine.r.server.UserStatus;
 import org.kchine.r.server.Utils;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.graphics.GraphicNotifier;
+import org.kchine.r.server.http.frontend.DiretoryProvider;
 import org.kchine.r.server.http.frontend.FreeResourcesListener;
 import org.kchine.r.server.http.local.LocalHttpServer;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
@@ -857,7 +858,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet(rkit)), "/rest/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(rkit,false)), "/cmd/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.local.LocalHelpServlet(rkit)), "/helpme/*");
-				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WorkingDirectoryServlet(rkit)), "/wd/*");
+				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(new DiretoryProvider(){
+					public String getDirectory() throws Exception {
+						return DirectJNI.getInstance().getRServices().getWorkingDirectory();
+					}
+				},"/wd"))	, "/wd/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/www")), "/www/*");
 				root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/appletlibs")), "/appletlibs/*");
 				
