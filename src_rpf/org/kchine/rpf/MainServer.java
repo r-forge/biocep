@@ -68,9 +68,6 @@ public class MainServer {
 		PoolUtils.ensurePublicIPIsUsedForRMI();
 		PoolUtils.noGui();
 		
-		for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
-		
-		if (true) System.exit(0);
 		
 		
 		try {
@@ -125,6 +122,11 @@ public class MainServer {
 				servantCreationListener = (ServantCreationListener) PoolUtils.hexToObject(servantCreationListenerStub);
 			}
 
+			
+			for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
+			
+			if (true) System.exit(0);
+			
 
 			if (!isPrivateServant) {
 				mservant = (ManagedServant) mainServantClass.getConstructor(new Class[] { String.class, String.class, Registry.class }).newInstance(
