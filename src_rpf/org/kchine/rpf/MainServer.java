@@ -120,13 +120,7 @@ public class MainServer {
 			String servantCreationListenerStub = System.getProperty("listener.stub");
 			if (servantCreationListenerStub != null && !servantCreationListenerStub.equals("")) {
 				servantCreationListener = (ServantCreationListener) PoolUtils.hexToObject(servantCreationListenerStub);
-			}
-
-			
-			for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
-			
-			if (true) System.exit(0);
-			
+			}			
 
 			if (!isPrivateServant) {
 				mservant = (ManagedServant) mainServantClass.getConstructor(new Class[] { String.class, String.class, Registry.class }).newInstance(
@@ -175,6 +169,11 @@ public class MainServer {
 			}
 			//log.info("*************************$$$$$$$$$$$$");
 			log.info("Servant " + sname + " instantiated successfully.");
+			
+			for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
+			
+			if (true) System.exit(0);
+
 
 		} catch (InvocationTargetException ite) {
 			if (servantCreationListener != null) {
