@@ -63,6 +63,9 @@ public class MainServer {
 	public static void main(String[] args) throws Exception {
 
 		
+		for (int i=0;i<300;++i) Scilab.Exec("disp(22+1);");
+		
+
 		
 		PoolUtils.initLog4J();
 		PoolUtils.ensurePublicIPIsUsedForRMI();
@@ -169,11 +172,7 @@ public class MainServer {
 			}
 			//log.info("*************************$$$$$$$$$$$$");
 			log.info("Servant " + sname + " instantiated successfully.");
-			
-			for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
-			
-			if (true) System.exit(0);
-
+	
 
 		} catch (InvocationTargetException ite) {
 			if (servantCreationListener != null) {
