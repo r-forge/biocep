@@ -62,13 +62,15 @@ public class MainServer {
 
 	public static void main(String[] args) throws Exception {
 
-		for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
 		
-		if (true) System.exit(0);
 		
 		PoolUtils.initLog4J();
 		PoolUtils.ensurePublicIPIsUsedForRMI();
 		PoolUtils.noGui();
+		
+		for (int i=0;i<300;++i) Scilab.Exec("disp((%pi^2)/6);");
+		
+		if (true) System.exit(0);
 		
 		
 		try {
