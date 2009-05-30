@@ -135,14 +135,25 @@ public class WWWDirectoryServlet extends HttpServlet implements ResourceFactory
  private boolean _aliases=false;
  private boolean _useFileMappedBuffer=false;
  ByteArrayBuffer _cacheControl;
- String _wwwDir;
+ DiretoryProvider _dirProvider;
  String _wwwUri;
  
- public WWWDirectoryServlet(String wwwDir, String wwwUri) {
+ public WWWDirectoryServlet(final String wwwDir, String wwwUri) {
 	 super();
-	 _wwwDir=wwwDir;
+	 _dirProvider=new DiretoryProvider(){
+		 public String getDirectory() {
+			return wwwDir;
+		}
+	 };	 
 	 _wwwUri=wwwUri;
  }
+ 
+ public WWWDirectoryServlet(DiretoryProvider dirProvider, String wwwUri) {
+	 super();
+	 _dirProvider=dirProvider;	 
+	 _wwwUri=wwwUri;
+ }
+ 
  
  /* ------------------------------------------------------------ */
  public void init()
@@ -295,7 +306,7 @@ public class WWWDirectoryServlet extends HttpServlet implements ResourceFactory
  {	 
 	 pathInContext=pathInContext.substring((_wwwUri).length());
 	 try {
-		 _resourceBase=Resource.newResource(new File( _wwwDir ).toURI().toURL());
+		 _resourceBase=Resource.newResource(new File( _dirProvider.getDirectory() ).toURI().toURL());
 		 return _resourceBase.addPath(pathInContext);
 	 } catch (Exception e) {
 		 e.printStackTrace();
