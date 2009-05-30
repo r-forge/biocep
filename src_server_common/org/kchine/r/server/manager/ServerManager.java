@@ -88,7 +88,7 @@ public class ServerManager {
 	public static final int ENTRIES_NUMBER = 5354;
 	
 	public static String sci = null;
-	public static String sci_ld_library_path = null;	
+	public static String sci_dll_path = null;	
 
 	static {
 		if (System.getenv("BIOCEP_HOME") != null) {
@@ -199,14 +199,14 @@ public class ServerManager {
 	
 		if (sci!=null) {
 			sci = new File(sci).getAbsolutePath().replace('\\', '/') + "/";			
-			sci_ld_library_path= System.getProperty("sci.ld.library.path");
-			if (sci_ld_library_path==null || sci_ld_library_path.equals("")) sci_ld_library_path=System.getenv("SCI_DLL");
-			if (sci_ld_library_path==null || sci_ld_library_path.equals("")) {
+			sci_dll_path= System.getProperty("sci.ld.library.path");
+			if (sci_dll_path==null || sci_dll_path.equals("")) sci_dll_path=System.getenv("SCI_DLL");
+			if (sci_dll_path==null || sci_dll_path.equals("")) {
 				if (isWindowsOs()) {
-					sci_ld_library_path=sci+"bin";
+					sci_dll_path=sci+"bin";
 				} else {					
 					if (new File("/usr/lib/scilab").exists()) {
-						sci_ld_library_path="/usr/lib/scilab";
+						sci_dll_path="/usr/lib/scilab";
 					}					
 				}
 			}		
@@ -641,7 +641,7 @@ public class ServerManager {
 				
 				env.put("Path", rpath + (isWindowsOs() ? "bin" : "lib") + System.getProperty("path.separator")+ OS_PATH);
 				if (sci!=null && isWindowsOs()) {
-					env.put("Path", sci_ld_library_path+System.getProperty("path.separator")+env.get("Path"));
+					env.put("Path", sci_dll_path+System.getProperty("path.separator")+env.get("Path"));
 				}
 				
 				
@@ -653,7 +653,7 @@ public class ServerManager {
 					env.put("SCI_JAVA_ENABLE_HEADLESS","1");
 
 					if (!isWindowsOs()) {
-						env.put("LD_LIBRARY_PATH",sci_ld_library_path+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));						
+						env.put("LD_LIBRARY_PATH",sci_dll_path+System.getProperty("path.separator")+env.get("LD_LIBRARY_PATH"));						
 					}
 				}
 				
@@ -842,7 +842,7 @@ public class ServerManager {
 			}
 			
 			if (sci!=null) {
-				java_library_path+=System.getProperty("path.separator")+sci_ld_library_path;
+				java_library_path+=System.getProperty("path.separator")+sci_dll_path;
 			}
 
 			System.out.println("java.library.path"+java_library_path);

@@ -29,8 +29,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
-import javasci.Scilab;
-
 import org.apache.commons.logging.Log;
 import org.kchine.rpf.ManagedServant;
 import org.kchine.rpf.PoolUtils;
@@ -62,7 +60,6 @@ public class MainServer {
 
 	public static void main(String[] args) throws Exception {
 
-		Scilab.Exec("1");
 
 		PoolUtils.initLog4J();
 		PoolUtils.ensurePublicIPIsUsedForRMI();
