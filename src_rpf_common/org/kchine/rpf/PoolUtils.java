@@ -203,23 +203,30 @@ public class PoolUtils {
 		if (_hostIp == null) {
 			try {
 				
-				if (isAmazonCloud()) {					
-					_hostIp=getAMIHostIp();
-				} else {				
-					if (publicIPUnavilable()) {
-						String IPAddressFromNetworkInterfaces = getIPAddressFromNetworkInterfaces();
-						if (IPAddressFromNetworkInterfaces != null)
-							_hostIp = IPAddressFromNetworkInterfaces;
-						else
-							_hostIp = "127.0.0.1";
-					} else {
-						_hostIp = InetAddress.getLocalHost().getHostAddress();
+				if (System.getProperty("host.ip.forced")!=null && !System.getProperty("host.ip.forced").equals("")) {
+					_hostIp=System.getProperty("host.ip.forced");
+				} else {
+					if (isAmazonCloud()) {					
+						_hostIp=getAMIHostIp();
+					} else {				
+						if (publicIPUnavilable()) {
+							String IPAddressFromNetworkInterfaces = getIPAddressFromNetworkInterfaces();
+							if (IPAddressFromNetworkInterfaces != null)
+								_hostIp = IPAddressFromNetworkInterfaces;
+							else
+								_hostIp = "127.0.0.1";
+						} else {
+							_hostIp = InetAddress.getLocalHost().getHostAddress();
+						}
 					}
-				}				
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				_hostIp = UNKOWN;
 			}
+			
+			System.out.println("$$$ HOST IP:"+_hostIp);
+			
 		}
 		return _hostIp;
 	}

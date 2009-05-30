@@ -428,6 +428,7 @@
 		<if><not><isset property="use.default.libs"/></not><then><property name="use.default.libs" value=""/></then></if>
 		
 		<if><not><isset property="cloud"/></not><then><property name="cloud" value=""/></then></if>
+		<if><not><isset property="host.ip.forced"/></not><then><property name="host.ip.forced" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="org.kchine.rpf.MainServer"
 			fork="true" spawn="${spawn}" >
@@ -531,6 +532,7 @@
 			<jvmarg value="-Dproperties.extension=${properties.extension}"/>
 			
 			<jvmarg value="-Dcloud=${cloud}"/>
+			<jvmarg value="-Dhost.ip.forced=${host.ip.forced}"/>
 			
 			<!-- LOG PARAMS -->
 			<jvmarg	value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
