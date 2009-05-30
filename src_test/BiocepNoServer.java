@@ -15,22 +15,24 @@ public class BiocepNoServer {
 	
 	
 	public static void main(String[] args) throws Exception{
+
 		/*
-		String session=RHttpProxy.logOn("http://ec2-67-202-23-14.compute-1.amazonaws.com:8080/rvirtual/cmd", "", "guest", "guest", new String[]{"privatename=tata"});
+		String session=RHttpProxy.logOn("http://ec2-72-44-43-37.compute-1.amazonaws.com:8080/rvirtual/cmd", "", "guest", "guest", new String[]{"privatename=tata"});
 		RServices r=(RServices)RHttpProxy.getR("http://ec2-67-202-23-14.compute-1.amazonaws.com:8080/rvirtual/cmd", session, false,-1);
 		
 		
 		r.consoleSubmit("1+33");System.out.println (r.getStatus());
-		System.out.println(((ScilabServices)r).scilabConsoleSubmit("disp(2+9)"));
+		//System.out.println(((ScilabServices)r).scilabConsoleSubmit("disp(2+9)"));
 		*/
 
 
-		String stub="ACED00057372002A6F72672E6B6368696E652E722E7365727665722E696D706C2E5253657276616E74496D706C5F5374756200000000000000020200007872001A6A6176612E726D692E7365727665722E52656D6F746553747562E9FEDCC98BE1651A0200007872001C6A6176612E726D692E7365727665722E52656D6F74654F626A656374D361B4910C61331E03000078707734000A556E6963617374526566000B37322E34342E34332E33370000B6A412E1259FC6DFA8C841AE405800000121936331DC80010078";
+		String stub="ACED00057372002A6F72672E6B6368696E652E722E7365727665722E696D706C2E5253657276616E74496D706C5F5374756200000000000000020200007872001A6A6176612E726D692E7365727665722E52656D6F746553747562E9FEDCC98BE1651A0200007872001C6A6176612E726D692E7365727665722E52656D6F74654F626A656374D361B4910C61331E03000078707734000A556E6963617374526566000B37322E34342E34332E33370000B944C737C4652E0A6F38C80C825000000121937A3E4B80010078";
 		final ScilabServices sci = (ScilabServices)PoolUtils.hexToStub(stub, new URLClassLoader(new URL[]{new File("E:/workspace/biocep/bin/").toURI().toURL()},BiocepNoServer.class.getClassLoader()));
 		final RServices r =(RServices)sci;
 		System.out.println("sci="+sci);		
 		r.consoleSubmit("4+5");System.out.println(r.getStatus());
 		System.out.println(sci.scilabConsoleSubmit("disp(2+2)"));
+
 		
 		
 		
