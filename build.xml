@@ -86,6 +86,54 @@
 				<property name="SYSTEM_PATH" value="${env.PATH}"/>
 			</else>
 		</if>
+
+		<if><os family="windows"/>
+			<then>
+				
+				<if><not><isset property="env.SCI"/></not>
+					
+					<then>
+						<property name="SCI_PATH" value="C:/Program Files/scilab-5.1.1"/>
+						<property name="SCI_DLL_PATH" value="C:/Program Files/scilab-5.1.1/bin"/>
+					</then>
+					
+					<else>
+						
+						<property name="SCI_PATH" value="${env.SCI}"/>
+						<property name="SCI_DLL_PATH" value="${env.SCI}/bin"/>
+					
+					</else>
+					
+				</if>				
+				
+				
+			</then>
+			<else>
+				
+				
+				<if><not><isset property="env.SCI"/></not>
+					<then>						
+						<property name="SCI_PATH" value="/usr/share/scilab"/>
+						<property name="SCI_DLL_PATH" value="/usr/lib/scilab"/>						
+					</then>					
+					<else>						
+						<property name="SCI_PATH" value="${env.SCI}"/>
+						<if><not><isset property="env.SCI_DLL"/></not>													
+							<then>											
+								<property name="SCI_DLL_PATH" value="/usr/lib/scilab"/>
+							</then>
+							<else>											
+								<property name="SCI_DLL_PATH" value="${env.SCI_DLL}"/>										
+							</else>
+						</if>
+					</else>
+				</if>
+				
+				
+			</else>
+		</if>
+		
+		
 		
 	</target>
 	
@@ -382,7 +430,7 @@
 		<if><not><isset property="cloud"/></not><then><property name="cloud" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="org.kchine.rpf.MainServer"
-			fork="true" spawn="${spawn}" newenvironement="true">
+			fork="true" spawn="${spawn}" >
 			
 			<classpath>
 				
@@ -435,10 +483,13 @@
 				
 			</classpath>
 			
-			<env key="PATH" path="${SYSTEM_PATH}${path.separator}${R_LIB_PATH}"/>
-			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}"/>
+			<env key="PATH" path="${SYSTEM_PATH}${path.separator}${R_LIB_PATH}${path.separator}${SCI_DLL_PATH}"/>
+			<env key="LD_LIBRARY_PATH" path="${R_LIB_PATH}${path.separator}${SCI_DLL_PATH}"/>
+						
+			<env key="SCI" path="${SCI_PATH}"/>
+			
 			<jvmarg
-			value="-Djava.library.path=${JRI_LIB_PATH}"/>
+			value="-Djava.library.path=${JRI_LIB_PATH}${path.separator}${SCI_DLL_PATH}"/>
 			<jvmarg value="-Djava.rmi.server.codebase=${servant.codebase}"/>
 			<jvmarg value="-Dservantclass=${servantclass}"/>
 			<jvmarg value="-Dname=${name}"/>

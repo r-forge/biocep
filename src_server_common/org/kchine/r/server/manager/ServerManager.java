@@ -200,7 +200,7 @@ public class ServerManager {
 		if (sci!=null) {
 			sci = new File(sci).getAbsolutePath().replace('\\', '/') + "/";			
 			sci_ld_library_path= System.getProperty("sci.ld.library.path");
-			if (sci_ld_library_path==null || sci_ld_library_path.equals("")) sci_ld_library_path=System.getenv("SCI_LD_LIBRARY_PATH");
+			if (sci_ld_library_path==null || sci_ld_library_path.equals("")) sci_ld_library_path=System.getenv("SCI_DLL");
 			if (sci_ld_library_path==null || sci_ld_library_path.equals("")) {
 				if (isWindowsOs()) {
 					sci_ld_library_path=sci+"bin";
