@@ -18,6 +18,8 @@
  */
 package org.kchine.r.server;
 
+import javasci.Scilab;
+
 import org.kchine.r.server.impl.RServantImpl;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.MainServer;
@@ -32,8 +34,9 @@ public class MainRServer {
 		Class<?> servantClass=RServantImpl.class;
 		if (ServerManager.sci!=null) {
 			try {
-				Class<?> scilabClass=MainRServer.class.getClassLoader().loadClass("javasci.Scilab");
-				scilabClass.getMethod("Exec", String.class).invoke(null, "disp(1+3)");
+				Scilab.Exec("disp(8+6)");
+				//Class<?> scilabClass=MainRServer.class.getClassLoader().loadClass("javasci.Scilab");
+				//scilabClass.getMethod("Exec", String.class).invoke(null, "disp(1+3)");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
