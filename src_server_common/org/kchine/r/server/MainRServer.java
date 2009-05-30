@@ -18,12 +18,8 @@
  */
 package org.kchine.r.server;
 
-import javasci.Scilab;
-
 import org.kchine.r.server.impl.RServantImpl;
-import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.MainServer;
-
 
 /**
  * @author Karim Chine karim.chine@m4x.org
@@ -32,11 +28,6 @@ public class MainRServer {
 
 	public static void main(String[] args) throws Exception {
 		Class<?> servantClass=RServantImpl.class;
-		try {
-			Class<?> scilabClass=MainRServer.class.getClassLoader().loadClass("javasci.Scilab");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		System.setProperty("servantclass", servantClass.getName());
 		MainServer.main(args);		
 	}
