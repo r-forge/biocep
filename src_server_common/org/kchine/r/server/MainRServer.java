@@ -32,15 +32,11 @@ public class MainRServer {
 
 	public static void main(String[] args) throws Exception {
 		Class<?> servantClass=RServantImpl.class;
-		if (ServerManager.sci!=null) {
-			try {
-				Scilab.Exec("disp(8+6)");
-				//Class<?> scilabClass=MainRServer.class.getClassLoader().loadClass("javasci.Scilab");
-				//scilabClass.getMethod("Exec", String.class).invoke(null, "disp(1+3)");
+		try {
+			Class<?> scilabClass=MainRServer.class.getClassLoader().loadClass("javasci.Scilab");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}		
 		System.setProperty("servantclass", servantClass.getName());
 		MainServer.main(args);		
 	}
