@@ -445,7 +445,7 @@ public class ServerManager {
 
 	public static RServices createR(String name) throws Exception {
 		return createR(null, false, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null,true,null);
+				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null, System.getProperty("application_type"), null);
 	}
 
 	private interface ProgessLoggerInterface {
@@ -453,7 +453,7 @@ public class ServerManager {
 	}
 
 	synchronized public static RServices createR(String RBinPath, boolean forceEmbedded, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, boolean addLocalJarToClassPath,final Runnable rShutdownHook) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, String applicationType, final Runnable rShutdownHook) throws Exception {
 
 		final JTextArea[] createRProgressArea = new JTextArea[1];
 		final JProgressBar[] createRProgressBar = new JProgressBar[1];
@@ -512,7 +512,13 @@ public class ServerManager {
 				SwingUtilities.invokeLater(runnable);
 			}
 		}
-
+		
+		
+		boolean useClassPath=  (codeUrls==null || codeUrls.length==0) && ( applicationType==null || applicationType.equals("") || applicationType.equals("standard"));
+		System.out.println("application type : "+applicationType);
+		System.out.println("!! use class path : "+useClassPath);
+		System.out.println("java.class.path : "+System.getProperty("java.class.path"));
+		
 		try {
 
 			progressLogger.logProgress("Inspecting R installation..");
@@ -847,7 +853,13 @@ public class ServerManager {
 
 			System.out.println("java.library.path"+java_library_path);
 
-			String cp = INSTALL_DIR + "classes";
+			String cp = null;
+			if (useClassPath) {
+				cp=System.getProperty("java.class.path");
+			} else {
+				cp=INSTALL_DIR + "classes";
+			}
+			
 			
 			if (sci!=null) {
 				if (isWindowsOs()) {
@@ -855,7 +867,11 @@ public class ServerManager {
 				} else {									
 					String scilabLibraryDir=INSTALL_DIR+"scilab/javasci/"+SCILAB_VERSION+"/";					
 					if (new File(scilabLibraryDir).exists()) new File(scilabLibraryDir).mkdirs();
+					try {
 					PoolUtils.cacheJar(new URL("http://www.biocep.net/scilab/"+SCILAB_VERSION+"/"+"javasci.jar"),scilabLibraryDir , PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					cp=cp+System.getProperty("path.separator")+scilabLibraryDir +"javasci.jar";
 				}
 				
@@ -973,6 +989,8 @@ public class ServerManager {
 					}
 				}
 
+				command.add((isWindowsOs() ? "\"" : "")+"-Dapplication_type="+ (applicationType==null ? "" : applicationType)+(isWindowsOs() ? "\"" : ""));
+				
 				if (logFile != null && !logFile.equals("")) {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"
 							+ (isWindowsOs() ? "\"" : ""));
@@ -992,7 +1010,13 @@ public class ServerManager {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dlog4j.appender.A3.layout.ConversionPattern=[%-5p] - %m%n" + (isWindowsOs() ? "\"" : ""));
 				}
 
-				command.add("org.kchine.r.server.manager.bootstrap.Boot");
+				if (useClassPath){
+					command.add("org.kchine.r.server.MainRServer");
+				} else {
+					command.add("org.kchine.r.server.manager.bootstrap.Boot");
+				}
+				
+				
 				command.add(new Boolean(keepAlive).toString());
 				command.add(codeServerHostIp);
 				command.add("" + codeServerPort);

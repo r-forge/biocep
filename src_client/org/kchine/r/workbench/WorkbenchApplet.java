@@ -474,8 +474,13 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 	}
 
 	private boolean isDesktopApplication() {
-		return getParameter("desktopapplication") != null && getParameter("desktopapplication").equalsIgnoreCase("true");
+		return !( getParameter("application_type") != null && getParameter("application_type").equalsIgnoreCase("applet"));
 	}
+	
+	private boolean isStandardApplication() {
+		return getParameter("application_type") == null || getParameter("application_type").equals("") || getParameter("application_type").equalsIgnoreCase("standard");
+	}
+	
 
 	public void init() {
 		super.init();
@@ -855,7 +860,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 										r = ServerManager.createR(ident.isDefaultR() ? System.getProperty("r.binary") : ident.getDefaultRBin(), useEmbeddedR,
 												ident.isKeepAlive(), PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager
 														.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry.getLocalRmiRegistryPort()), ident
-														.getMemoryMin(), ident.getMemoryMax(), "", true, null, null, true, null);
+														.getMemoryMin(), ident.getMemoryMax(), "", true, null, null,getParameter("application_type"), null);
 									}
 
 									if (ident.isUseSsh()) {

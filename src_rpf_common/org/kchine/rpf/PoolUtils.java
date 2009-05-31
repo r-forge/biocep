@@ -232,6 +232,10 @@ public class PoolUtils {
 	}
 
 	
+	public static boolean isStandardApplication() {
+		return System.getProperty("application_type") == null || System.getProperty("application_type").equals("") || System.getProperty("application_type").equalsIgnoreCase("standard");
+	}
+	
 	public static String getAMIHostIp() throws Exception {		
 		
 		PoolUtils.cacheJar(new URL("http://s3.amazonaws.com/ec2metadata/ec2-metadata"), System.getProperty("java.io.tmpdir") + "/biocep/ec2/", PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);

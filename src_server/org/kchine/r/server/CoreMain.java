@@ -69,6 +69,7 @@ public class CoreMain {
 				codeUrls.add(new URL(args[i]));
 			}
 		} else {
+			/*
 			String jar = CoreMain.class.getResource("/org/kchine/r/server/CoreMain.class").toString();
 			if (jar.startsWith("jar:")) {
 				String jarfile = jar.substring("jar:".length(), jar.length() - "/org/kchine/r/server/CoreMain.class".length() - 1);
@@ -79,6 +80,7 @@ public class CoreMain {
 					e.printStackTrace();
 				}
 			}
+			*/
 		}
 
 		
@@ -91,7 +93,7 @@ public class CoreMain {
 			String rbinary = System.getProperty("r.binary");
 			r = ServerManager.createR(rbinary, false,  wait ? false : true, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getNamingInfo(),
 					ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, (URL[]) codeUrls.toArray(new URL[0]), System.getProperty("log.file"),
-					true, new Runnable() {
+					"standard", new Runnable() {
 						public void run() {
 							System.exit(0);
 						}
