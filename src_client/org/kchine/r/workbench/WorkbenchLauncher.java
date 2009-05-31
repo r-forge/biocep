@@ -77,7 +77,12 @@ public class WorkbenchLauncher {
 		params.put("gui_no_r", System.getProperty("gui_no_r"));
 		params.put("gui_no_workbench", System.getProperty("gui_no_workbench"));
 		
-		params.put("desktopapplication", "true");
+		if (System.getProperty("application_type")!=null && !System.getProperty("application_type").equals("")) {
+			params.put("application_type", System.getProperty("application_type"));
+		} else {
+			params.put("application_type", "standard");
+		}
+		
 		params.put("javaws", System.getProperty("javaws"));
 		params.put("selfish", System.getProperty("selfish"));
 		params.put("preprocess.help", System.getProperty("preprocess.help"));
