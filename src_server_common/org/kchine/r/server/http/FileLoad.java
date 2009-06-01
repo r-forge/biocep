@@ -31,8 +31,8 @@ import org.kchine.r.server.RServices;
  */
 public class FileLoad {
 
-	private static final int BLOCK_SIZE_DOWNLOAD = 1024 * 16;
-	private static final int BLOCK_SIZE_UPLOAD = 1024 * 16;
+	private static final int BLOCK_SIZE_DOWNLOAD = 1024 * 80;
+	private static final int BLOCK_SIZE_UPLOAD = 1024 * 80;
 
 	public static void download(String fileName, File toFile, RServices r) throws RemoteException {
 		try {
