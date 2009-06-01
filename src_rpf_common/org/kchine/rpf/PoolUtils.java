@@ -1758,8 +1758,23 @@ public class PoolUtils {
 		}
 		return f;
 	}
+	
+	public static String getAbsoluteClassPath() {
+		StringBuffer result=new StringBuffer();
+		StringTokenizer st=new StringTokenizer(System.getProperty("java.class.path"),System.getProperty("path.separator"));
+		while (st.hasMoreElements()) {
+			String element = (String)st.nextElement();
+			try {
+				result.append(new File(element).getAbsolutePath());
+				if (st.hasMoreElements()) {result.append(System.getProperty("path.separator"));}
+			} catch (Exception e) {
+				result.append(element); if (st.hasMoreElements()) { result.append(System.getProperty("path.separator"));}
+			}			
+		}			
+		return result.toString();		
+	}
 
 	public static void main(String[] args) throws Exception{
-		System.out.println(tokenizeWindowsCommand("\"F:\\Program Files\\Java\\jdk1.5.0_16\\jre/bin/java\" -Dnaming.mode=db -Ddb.type=derby -Ddb.host=192.168.65.1 -Ddb.port=1527 -Ddb.name=DWEP -Ddb.user=DWEP -Ddb.password=DWEP -Dnode=N1 \"-Dbiocep.home=F:\\Documents and Settings\\Karim Chine\\Bureau\\Moz\\javaservice/biocep_home\\\" -Duse.default.libs=true -cp \"F:\\Documents and Settings\\Karim Chine\\Bureau\\Moz\\javaservice\\biocep-core.jar\" RmiServer"));
+		System.out.println(PoolUtils.getAbsoluteClassPath());
 	}
 }
