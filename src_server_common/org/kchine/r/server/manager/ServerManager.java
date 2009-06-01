@@ -655,6 +655,7 @@ public class ServerManager {
 				env.put("LD_LIBRARY_PATH", rpath + (isWindowsOs() ? "bin" : "lib"));
 				if (sci!=null) {
 					env.put("SCI", sci);
+					env.put("SCIHOME", sci);
 					env.put("SCI_DISABLE_TK","1");
 					env.put("SCI_JAVA_ENABLE_HEADLESS","1");
 
