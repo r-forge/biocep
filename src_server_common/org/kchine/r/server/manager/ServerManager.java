@@ -855,7 +855,7 @@ public class ServerManager {
 
 			String cp = null;
 			if (useClassPath) {
-				cp=System.getProperty("java.class.path");
+				cp=PoolUtils.getAbsoluteClassPath();
 			} else {
 				cp=INSTALL_DIR + "classes";
 			}
