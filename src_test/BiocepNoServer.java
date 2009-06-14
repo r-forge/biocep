@@ -7,6 +7,12 @@ import java.util.Properties;
 import org.apache.ftpserver.FtpServer;
 import org.apache.ftpserver.FtpServerFactory;
 import org.apache.ftpserver.listener.ListenerFactory;
+import org.kchine.r.RChar;
+import org.kchine.r.RDataFrame;
+import org.kchine.r.RDataFrameRef;
+import org.kchine.r.RListRef;
+import org.kchine.r.RObject;
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.http.RHttpProxy;
 import org.kchine.rpf.PoolUtils;
@@ -18,7 +24,7 @@ public class BiocepNoServer {
 
 	
 	
-	public static void main(String[] args) throws Exception{
+	public static void main_1(String[] args) throws Exception{
 
 		/*
 		String session=RHttpProxy.logOn("http://ec2-72-44-43-37.compute-1.amazonaws.com:8080/rvirtual/cmd", "", "guest", "guest", new String[]{"privatename=tata"});
@@ -96,10 +102,13 @@ public class BiocepNoServer {
 	/**
 	 * @param args
 	 */
-	/*
+	
 	public static void main(String[] args) throws Exception{
+		
 		System.out.println("hello");
 		final RServices r = DirectJNI.getInstance().getRServices();
+		
+	    
 		r.consoleSubmit("x=c(2,6);y=serialize(x,NULL)");
 		System.out.println(r.getStatus());
 		r.consoleSubmit("y");
@@ -108,7 +117,9 @@ public class BiocepNoServer {
 		System.out.println("%"+r.getObject("y"));
 		
 		System.exit(0);
+		
+		
 	}
-	*/
+	
 
 }
