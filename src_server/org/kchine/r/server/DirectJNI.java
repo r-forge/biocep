@@ -680,15 +680,15 @@ public class DirectJNI {
 						Class<?> componentType = ((ArrayList<?>) obj).get(0).getClass();
 						if (componentType == Integer.class)
 							obj = getRArrayFromJavaArray((Integer[]) ((ArrayList<?>) obj).toArray(new Integer[0]));
-						else if (obj instanceof Long)
+						else if (componentType ==  Long.class)
 							obj = getRArrayFromJavaArray((Long[]) ((ArrayList<?>) obj).toArray(new Long[0]));
-						else if (obj instanceof String)
+						else if (componentType ==  String.class)
 							obj = getRArrayFromJavaArray((String[]) ((ArrayList<?>) obj).toArray(new String[0]));
-						else if (obj instanceof Double)
+						else if (componentType ==  Double.class)
 							obj = getRArrayFromJavaArray((Double[]) ((ArrayList<?>) obj).toArray(new Double[0]));
-						else if (obj instanceof Float)
+						else if (componentType ==  Float.class)
 							obj = getRArrayFromJavaArray((Float[]) ((ArrayList<?>) obj).toArray(new Float[0]));
-						else if (obj instanceof Boolean)
+						else if (componentType ==  Boolean.class)
 							obj = getRArrayFromJavaArray((Boolean[]) ((ArrayList<?>) obj).toArray(new Boolean[0]));
 						else {
 							throw new Exception("cannot convert type in ArrayList");
@@ -1042,10 +1042,22 @@ public class DirectJNI {
 	}
 
 	private String expressionClass(String expression) {
-		String cls = _rEngine.rniGetString(_rEngine.rniEval(_rEngine.rniParse("class(" + expression + ")", 1), 0));
-		if (cls.equals("NULL"))
-			throw new RuntimeException("NULL CLASS");
-		return cls;
+		String[] cls = _rEngine.rniGetStringArray(_rEngine.rniEval(_rEngine.rniParse("class(" + expression + ")", 1), 0));
+		if (cls.equals("NULL"))	throw new RuntimeException("NULL CLASS");
+		if (cls.length==1) {
+			return cls[0];
+		}
+		else {
+			
+			HashSet<String> classSet=new HashSet<String>();for (int i=0; i<cls.length;++i) classSet.add(cls[i]);
+			if (classSet.contains("data.frame")) {
+				return "data.frame";	
+			} else if (classSet.contains("list")) {
+				return "list";	
+			} else {
+				return cls[0];
+			}
+		}
 	}
 
 	private boolean isS3Class(String expression) {
@@ -1094,23 +1106,41 @@ public class DirectJNI {
 
 		if (isClass && isVirtual) {
 
-			String unionrclass = e.rniGetString(e.rniEval(e.rniParse("class(" + expression + ")", 1), 0));
+			String[] unionrclass = e.rniGetStringArray(e.rniEval(e.rniParse("class(" + expression + ")", 1), 0));
+			System.out.println("Union Class : "+Arrays.toString(unionrclass));
 			// log.info(">>> union r class=" + unionrclass );
-			RObject o = getObjectFrom(expression, unionrclass);
-
-			if (rmode != S4SXP) {
-				if (DirectJNI._s4BeansMapping.get(unionrclass) != null) {
-
-					o = (RObject) DirectJNI._mappingClassLoader.loadClass(DirectJNI._s4BeansMapping.get(unionrclass)).getConstructor(
-							new Class[] { o.getClass() }).newInstance(new Object[] { o });
-				} else {
+			if (unionrclass.length==1) {
+				
+				RObject o = getObjectFrom(expression, unionrclass[0]);	
+				if (rmode != S4SXP) {
+					if (DirectJNI._s4BeansMapping.get(unionrclass) != null) {
+	
+						o = (RObject) DirectJNI._mappingClassLoader.loadClass(DirectJNI._s4BeansMapping.get(unionrclass)).getConstructor(
+								new Class[] { o.getClass() }).newInstance(new Object[] { o });
+					} else {
+					}
 				}
+	
+				String factoryJavaClassName = DirectJNI._factoriesMapping.get(Utils.captalizeFirstChar(rclass) + "FactoryForR" + unionrclass);
+				result = (RObject) DirectJNI._mappingClassLoader.loadClass(factoryJavaClassName).newInstance();
+				Method setDataM = result.getClass().getMethod("setData", new Class[] { RObject.class });
+				setDataM.invoke(result, o);
+				
+			} else {				
+				if (rmode==VECSXP) {
+					HashSet<String> unionClassSet=new HashSet<String>();for (int i=0; i<unionrclass.length;++i) unionClassSet.add(unionrclass[i]);
+					if (unionClassSet.contains("data.frame")) {
+						result = getObjectFrom(expression, "data.frame");	
+					} else if (unionClassSet.contains("list")) {
+						result = getObjectFrom(expression, "list");	
+					} else {					
+						RList rlist=(RList)getObjectFrom(expression, "list");
+						result = new RS3(rlist.getValue(), rlist.getNames(), unionrclass);						
+					}
+				} else {
+					throw new NoMappingAvailable("No mapping available for the object of class : " + Arrays.toString(unionrclass));
+				}				
 			}
-
-			String factoryJavaClassName = DirectJNI._factoriesMapping.get(Utils.captalizeFirstChar(rclass) + "FactoryForR" + unionrclass);
-			result = (RObject) DirectJNI._mappingClassLoader.loadClass(factoryJavaClassName).newInstance();
-			Method setDataM = result.getClass().getMethod("setData", new Class[] { RObject.class });
-			setDataM.invoke(result, o);
 
 		} else {
 
@@ -1764,7 +1794,8 @@ public class DirectJNI {
 				result = getObjectFrom(resultvar);
 			} else {
 				String rclass = expressionClass(resultvar);
-				String javaClassName = guessJavaClassRef(rclass, resultType, isS3Class(expression));
+				
+				String javaClassName = guessJavaClassRef(rclass, resultType, isS3Class(resultvar));
 				Class<?> javaClass = DirectJNI._mappingClassLoader.loadClass(javaClassName);
 				protectSafe(resultId);
 				result = (RObject) javaClass.getConstructor(new Class[] { long.class, String.class }).newInstance(new Object[] { resultId, "" });
