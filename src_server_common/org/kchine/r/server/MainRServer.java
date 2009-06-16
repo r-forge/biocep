@@ -28,6 +28,12 @@ import org.kchine.rpf.MainServer;
 public class MainRServer {
 
 	public static void main(String[] args) throws Exception {
+		
+		boolean keepAlive = new Boolean(System.getProperty("keepalive"));			
+		if (!keepAlive) {
+			ServerManager.startPortInUseDogwatcher(System.getProperty("code.server.host"),Integer.decode(System.getProperty("code.server.port")), 3,3);
+		}
+		
 		Class<?> servantClass=RServantImpl.class;
 		System.setProperty("servantclass", servantClass.getName());
 		

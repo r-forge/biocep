@@ -30,7 +30,6 @@ import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -49,7 +48,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
-
+import net.infonode.docking.View;
 import org.kchine.r.server.spreadsheet.CellRange;
 import org.kchine.r.server.spreadsheet.ImportInfo;
 import org.kchine.r.workbench.CellsChangeEvent;
@@ -58,6 +57,8 @@ import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.VariablesChangeEvent;
 import org.kchine.r.workbench.VariablesChangeListener;
 import org.kchine.r.workbench.WorkbenchApplet;
+import org.kchine.r.workbench.dialogs.GetExprDialog;
+import org.kchine.r.workbench.spreadsheet.EmbeddedPanelDescription;
 import org.kchine.r.workbench.views.highlighting.HighlightDocument;
 import org.kchine.r.workbench.views.highlighting.NonWrappingTextPane;
 
@@ -95,7 +96,13 @@ public class PdfView extends DynamicView implements VariablesChangeListener, Cel
 	JButton cellListenersRefreshButton;
 	
 	ImageIcon refreshIcon ;
-
+	
+	JPanel root;
+	EmbeddedPanelDescription embeddedPanelDescritption=null; 
+	View view=this;
+	
+	String[] rangeExpr_save=new String[]{""};
+	
 	void submitToR(boolean manual) {
 		if (manual && _rgui.getRLock().isLocked()) {
 			JOptionPane.showMessageDialog(null, "R is busy");
@@ -236,6 +243,53 @@ public class PdfView extends DynamicView implements VariablesChangeListener, Cel
 				return true;
 			}
 		});
+		
+		popupMenu.addSeparator();
+		popupMenu.add(new AbstractAction("Dock") {
+			public void actionPerformed(ActionEvent e) {
+				
+				GetExprDialog dialog=new GetExprDialog(root,"Docking Range",rangeExpr_save);
+				dialog.setVisible(true);
+				if (dialog.getExpr()!=null) {
+					view.close();
+					embeddedPanelDescritption=new EmbeddedPanelDescription("SS_0", dialog.getExpr(), _pdfCanvas);
+					_rgui.addEmbeddedPanelDescription(embeddedPanelDescritption);			
+					
+					ratioX.setText("1");
+					if (!coupled.isSelected())
+						ratioX.setText("1");
+					resetPdfCanvasSize();
+				}
+				
+			}
+			
+			public boolean isEnabled() {
+				return embeddedPanelDescritption==null;
+			}
+		});
+		
+		
+		popupMenu.add(new AbstractAction("Undock") {
+			public void actionPerformed(ActionEvent e) {
+				
+				_rgui.removeEmbeddedPanelDescription(embeddedPanelDescritption);
+				embeddedPanelDescritption=null;
+				bottompanel.add(_pdfCanvas, BorderLayout.CENTER);
+				view=_rgui.createView(root, "PDF Viewer");
+				
+											
+				ratioX.setText("1");
+				if (!coupled.isSelected())
+					ratioX.setText("1");
+				resetPdfCanvasSize();
+				
+			}
+			
+			public boolean isEnabled() {
+				return embeddedPanelDescritption!=null;
+			}
+		});	
+		
 
 		popupMenu.show(_pdfCanvas, e.getX(), e.getY());
 
@@ -546,10 +600,13 @@ public class PdfView extends DynamicView implements VariablesChangeListener, Cel
 
 		final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, pb);
 		splitPane.setDividerSize(3);
+		
+		root=new JPanel(new BorderLayout());root.add(splitPane, BorderLayout.CENTER);
+		
 
 		((JPanel) getComponent()).setLayout(new BorderLayout());
 		((JPanel) getComponent()).setBorder(BorderFactory.createLineBorder(Color.gray, 2));
-		((JPanel) getComponent()).add(splitPane);
+		((JPanel) getComponent()).add(root);
 
 		new Thread(new Runnable() {
 			public void run() {

@@ -280,6 +280,20 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 				return null;
 			}
 			
+			public void addEmbeddedPanelDescription(EmbeddedPanelDescription embeddedPanelDescription) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void removeEmbeddedPanelDescription(EmbeddedPanelDescription embeddedPanelDescription) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public Vector<EmbeddedPanelDescription> getEmbeddedPanelDescriptions() {
+				// TODO Auto-generated method stub
+				return null;
+			}
 			
 		};
 		JFrame f = new JFrame("F1");
@@ -2019,6 +2033,10 @@ public class SpreadsheetPanel extends JPanel implements ClipboardOwner {
 
 	}
 
+	public void refreshEmbeddedPanelsLayer() {
+		ss.refreshEmbeddedPanelsLayer();
+	}
+	
 	public void lostOwnership(Clipboard clipboard, Transferable contents) {
 
 	}

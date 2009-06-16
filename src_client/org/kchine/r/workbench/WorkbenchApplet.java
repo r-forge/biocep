@@ -83,6 +83,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -199,6 +200,7 @@ import org.kchine.r.workbench.macros.MacroInterface;
 import org.kchine.r.workbench.plugins.PluginViewDescriptor;
 import org.kchine.r.workbench.splashscreen.SplashWindow;
 import org.kchine.r.workbench.spreadsheet.DimensionsDialog;
+import org.kchine.r.workbench.spreadsheet.EmbeddedPanelDescription;
 import org.kchine.r.workbench.spreadsheet.SelectIdDialog;
 import org.kchine.r.workbench.spreadsheet.SpreadsheetPanel;
 import org.kchine.r.workbench.utils.AbstractDockingWindowListener;
@@ -1684,6 +1686,16 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 						toolsMenu.addSeparator();
 						toolsMenu.add(_actions.get("supervisor"));
 						toolsMenu.add(_actions.get("httpsupervisor"));
+						toolsMenu.addSeparator(); 
+						toolsMenu.add(new AbstractAction("add embedded") {
+							public void actionPerformed(ActionEvent e) {
+								JPanel p=new JPanel(new BorderLayout()); p.add(new JButton("toto"), BorderLayout.CENTER);
+								addEmbeddedPanelDescription(new EmbeddedPanelDescription("SS_0", "D1:F4", p));
+								JPanel p2=new JPanel(new BorderLayout()); p2.add(new JButton("toto"), BorderLayout.CENTER);
+								addEmbeddedPanelDescription(new EmbeddedPanelDescription("SS_0", "A2:C6", p2));
+							}
+						});
+						//public void refreshEmbeddedPanelsLayer() {
 
 					}
 
@@ -5145,7 +5157,9 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			_sshParameters = null;
 			_rProcessId = null;
 			_virtualizationServer = null;
-
+			
+			_embeddedPanelDescriptions=new Vector<EmbeddedPanelDescription>();
+			
 			disconnected();
 
 		}
@@ -6025,6 +6039,28 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 		}
 	}
 
+	Vector<EmbeddedPanelDescription> _embeddedPanelDescriptions=new Vector<EmbeddedPanelDescription>();
+	public void addEmbeddedPanelDescription(EmbeddedPanelDescription embeddedPanelDescription) {
+		_embeddedPanelDescriptions.add(embeddedPanelDescription);
+		for (CollaborativeSpreadsheetView v : getCollaborativeSpreadsheetViews()) {
+			v.refreshEmbeddedPanelsLayer();
+		}								
+
+	}
+	
+	public void removeEmbeddedPanelDescription(EmbeddedPanelDescription embeddedPanelDescription) {
+		_embeddedPanelDescriptions.remove(embeddedPanelDescription);
+		for (CollaborativeSpreadsheetView v : getCollaborativeSpreadsheetViews()) {
+			v.refreshEmbeddedPanelsLayer();
+		}								
+
+	}
+	
+	public Vector<EmbeddedPanelDescription> getEmbeddedPanelDescriptions() {
+		return _embeddedPanelDescriptions;
+	}
+	
+	
 	static public void main(String[] args) throws Exception {
 
 		// views = OpenPluginViewDialog.getPluginViews(list[i].getAbsolutePath()

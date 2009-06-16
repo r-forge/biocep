@@ -982,6 +982,11 @@ public class ServerManager {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=false" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + INSTALL_DIR + "wdir" + (isWindowsOs() ? "\"" : ""));
+				
+				command.add((isWindowsOs() ? "\"" : "") + "-Dkeepalive=" +  keepAlive + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dcode.server.host=" +  codeServerHostIp + (isWindowsOs() ? "\"" : ""));
+				command.add((isWindowsOs() ? "\"" : "") + "-Dcode.server.port=" +  codeServerPort + (isWindowsOs() ? "\"" : ""));
+				
 
 				for (int i = 0; i < namingVars.length; ++i) {
 					String var = namingVars[i];
@@ -1017,11 +1022,9 @@ public class ServerManager {
 					command.add("org.kchine.r.server.manager.bootstrap.Boot");
 				}
 				
-				
-				command.add(new Boolean(keepAlive).toString());
-				command.add(codeServerHostIp);
-				command.add("" + codeServerPort);
 
+				command.add("http://" + codeServerHostIp + ":" + codeServerPort + "/classes/");
+				
 				if (codeUrls != null && codeUrls.length > 0) {
 					for (int i = 0; i < codeUrls.length; ++i) {
 						command.add(codeUrls[i].toString());

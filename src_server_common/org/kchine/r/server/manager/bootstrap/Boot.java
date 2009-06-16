@@ -27,38 +27,19 @@ import java.util.Vector;
  * @author Karim Chine karim.chine@m4x.org
  */
 public class Boot {
-
 	public static void main(final String[] args) throws Exception {
 		try {
-			boolean keepAlive = new Boolean(args[0]);
 			URLClassLoader cl = null;
-
 			System.out.println("Boot Args:" + Arrays.toString(args));
 			Vector<URL> codeUrls=new Vector<URL>();
-			codeUrls.add(new URL("http://" + args[1] + ":" + args[2] + "/classes/"));
-			
-			System.setProperty("code.server.host", args[1]);
-			System.setProperty("code.server.port", args[2]);
-			
-			if (args.length > 3) {
-				for (int i=3;i<args.length;++i) {
-					codeUrls.add(new URL(args[i]));
-				}
+			for (int i=0;i<args.length;++i) {
+				codeUrls.add(new URL(args[i]));
 			}
-			
 			cl = new URLClassLoader( (URL[])codeUrls.toArray(new URL[0]), Boot.class.getClassLoader());
-
-			if (!keepAlive) {
-				cl.loadClass("org.kchine.r.server.manager.ServerManager").getMethod("startPortInUseDogwatcher", new Class<?>[] { String.class, int.class, int.class, int.class })
-						.invoke(null, args[1], Integer.decode(args[2]), 3, 3);
-			}
-
 			Class<?> mainClass = cl.loadClass("org.kchine.r.server.MainRServer");
-			mainClass.getMethod("main", new Class<?>[] { String[].class }).invoke(null, new Object[] { new String[] {} });
-			
+			mainClass.getMethod("main", new Class<?>[] { String[].class }).invoke(null, new Object[] { new String[] {} });			
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-
 	}
 }

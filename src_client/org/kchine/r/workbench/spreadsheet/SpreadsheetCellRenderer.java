@@ -12,8 +12,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import org.kchine.r.server.spreadsheet.Cell;
 import org.kchine.r.workbench.CellsChangeListener;
 import org.kchine.r.workbench.RGui;
-import org.kchine.r.workbench.macros.DataLinkMacro;
-import org.kchine.r.workbench.macros.Macro;
 import org.kchine.r.workbench.macros.MacroCellsChangeListener;
 import org.kchine.r.workbench.macros.MacroInterface;
 import org.kchine.r.workbench.utils.ColorUtil;

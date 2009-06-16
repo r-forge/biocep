@@ -36,7 +36,7 @@ import net.infonode.docking.DockingWindowListener;
 
 public class CollaborativeSpreadsheetView extends DynamicView {
 	SpreadsheetModelRemote _spreadsheetModelRemote;
-	
+	SpreadsheetPanel _spreadsheetPanel;
 	SpreadsheetModelRemote getSpreadsheetModelRemote() {
 		return _spreadsheetModelRemote;
 	}
@@ -64,7 +64,8 @@ public class CollaborativeSpreadsheetView extends DynamicView {
 			final String spreadsheetModelId = _spreadsheetModelRemote.getSpreadsheetModelId();
 			final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(_spreadsheetModelRemote);			
 			((JPanel) getComponent()).setLayout(new BorderLayout());
-			((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
+			_spreadsheetPanel=new SpreadsheetPanel(spreadsheetModel, rgui);
+			((JPanel) getComponent()).add(_spreadsheetPanel);
 			getViewProperties().setTitle("Server-side Spreadsheet <" + spreadsheetModelId + ">");				
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -83,13 +84,19 @@ public class CollaborativeSpreadsheetView extends DynamicView {
 			_spreadsheetModelRemote = rgui.getR().getSpreadsheetTableModelRemote(spreadsheetModelId);
 			final AbstractSpreadsheetModel spreadsheetModel = ModelUtils.getSpreadsheetTableModelWrapper(_spreadsheetModelRemote);
 			((JPanel) getComponent()).setLayout(new BorderLayout());
-			((JPanel) getComponent()).add(new SpreadsheetPanel(spreadsheetModel, rgui));
+			_spreadsheetPanel=new SpreadsheetPanel(spreadsheetModel, rgui);
+			((JPanel) getComponent()).add(_spreadsheetPanel);
 			getViewProperties().setTitle("Server-side Spreadsheet View <" + spreadsheetModelId + ">");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 
 		}			
+	}
+	
+	public void refreshEmbeddedPanelsLayer() {
+		_spreadsheetPanel.refreshEmbeddedPanelsLayer();
+		
 	}
 
 }
