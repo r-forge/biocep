@@ -14,20 +14,29 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
+import java.util.Random;
 import java.util.UUID;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
@@ -41,6 +50,7 @@ import org.kchine.r.server.spreadsheet.CellRange;
 import org.kchine.r.server.spreadsheet.Debug;
 import org.kchine.r.server.spreadsheet.Formula;
 import org.kchine.r.server.spreadsheet.History;
+import org.kchine.r.server.spreadsheet.ImportInfo;
 import org.kchine.r.server.spreadsheet.Node;
 import org.kchine.r.server.spreadsheet.SpreadsheetListener;
 import org.kchine.r.server.spreadsheet.SpreadsheetSelectionEvent;
@@ -70,15 +80,20 @@ public class JSpreadsheet extends JComponent
    private RKit rg;
    
    private JTable rowHeader;   
+   private JPanel controlsLayer;
+   private String _name;
+   
+   
 
    /** Create a new spreadsheet
     * @param columns The number of columns in the spreadsheet
     * @param rows The number of rows in the spreadsheet
     */
+
    public JSpreadsheet(AbstractTableModel m, RGui rgui, String name)
    {
 	   rg=rgui;
-	   
+	   _name=name;
       table = createTable();
 
       setLayout(new BorderLayout());
@@ -108,8 +123,10 @@ public class JSpreadsheet extends JComponent
       // add selection listeners to the selection models
       //rowSelectionModel.addListSelectionListener(this);
       //columnSelectionModel.addListSelectionListener(this);
-      JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-      add(scrollPane, BorderLayout.CENTER);
+      
+      Dimension tablePreferredSize=table.getPreferredSize();
+      tablePreferredSize=new Dimension((int)(tablePreferredSize.getWidth()*1.5), (int)tablePreferredSize.getHeight());
+      
 
       rowHeader = new JTable(new RowModel(table.getModel()));
       TableCellRenderer renderer = new RowHeaderRenderer();
@@ -122,11 +139,16 @@ public class JSpreadsheet extends JComponent
       rowHeader.setDefaultRenderer(Object.class, renderer);
       rowHeader.addMouseListener(ml);
 
+      /*
+      JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+      add(scrollPane, BorderLayout.CENTER);
+
       scrollPane.setRowHeaderView(rowHeader);
 
       JPanel blank = new JPanel();
       blank.addMouseListener(ml);
       scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, blank);
+      */
 
       // initial selection
       //resetSelection();
@@ -145,9 +167,128 @@ public class JSpreadsheet extends JComponent
       } } catch (Exception e) {
     	  e.printStackTrace();
       }
+      
+      
+      
+      JLayeredPane lp = new JLayeredPane();
+      lp.setPreferredSize(tablePreferredSize);
+      
+      JPanel tableLayer = new JPanel(new BorderLayout());
+      tableLayer.setSize(tablePreferredSize);
+      tableLayer.setOpaque(true);
+      tableLayer.add(table,BorderLayout.WEST);
+      lp.add(tableLayer, new Integer(1));
+      
+      controlsLayer = new JPanel(null);
+      controlsLayer.setSize(tablePreferredSize);            	  
+	  controlsLayer.setOpaque(false);
+      lp.add(controlsLayer, new Integer(2));
+      
+      
+      
+      
+      JScrollPane scrollPane = new JScrollPane(lp, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+      add(scrollPane, BorderLayout.CENTER);
+      
+      
 
+      scrollPane.setRowHeaderView(rowHeader);
+      JPanel blank = new JPanel();
+      blank.addMouseListener(ml);
+      scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, blank);
+      
+      
+      final DefaultTableColumnModel model = new DefaultTableColumnModel();
+      for (int i = 0; i < table.getColumnCount(); i++) {
+         TableColumn column = new TableColumn();
+         column.setHeaderValue(table.getColumnName(i));
+         model.addColumn(column);
+      }      
+      JTableHeader extraHeader = new JTableHeader(model);
+      
+      model.addColumnModelListener(new TableColumnModelListener(){
+     	 public void columnAdded(TableColumnModelEvent e) {}
+     	 public void columnMarginChanged(ChangeEvent e) {
+     		 System.out.println(e);    		 
+     		  for (int i = 0; i < table.getColumnCount(); i++) {    			  
+     			  table.getColumnModel().getColumn(i).setPreferredWidth(model.getColumn(i).getWidth());
+     		  }
+     		 new Thread(new Runnable(){
+     			 public void run() {
+     				SwingUtilities.invokeLater(new Runnable(){
+     					public void run() {
+     						refreshEmbeddedPanelsLayer();     						
+     					}
+     				});
+     				
+     			}
+     		 }).start();
+     	}
+     	 public void columnMoved(TableColumnModelEvent e) {}
+     	 public void columnRemoved(TableColumnModelEvent e) {}
+     	 public void columnSelectionChanged(ListSelectionEvent e) {}
+       });
+      
+      scrollPane.setColumnHeaderView(extraHeader);
+      
+      new Thread(new Runnable(){
+			 public void run() {
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run() {
+						for (int i = 0; i < table.getColumnCount(); i++) {    			  
+							  table.getColumnModel().getColumn(i).setPreferredWidth(model.getColumn(i).getWidth());
+						  }     						
+					}
+				});
+				
+			}
+		 }).start();
+      
+      
+
+      /*
+		new Thread(new Runnable() {
+			public void run() {
+				
+				final Random rnd=new Random(System.currentTimeMillis());
+				
+				try {
+					while (true) {
+						
+						SwingUtilities.invokeLater(new Runnable(){
+							public void run() {
+
+								JButton b = new JButton("Hi!");
+
+								int row = rnd.nextInt(5);
+								int col = rnd.nextInt(4);
+								Rectangle r1 = table.getCellRect(row, col, true);
+								Rectangle r2 = table.getCellRect(row + 1, col + 1, true);
+
+								b.setLocation(r1.x, r1.y);
+								b.setSize(Math.abs(r2.x - r1.x), Math.abs(r2.y - r1.y));
+
+								controlsLayer.removeAll();
+								controlsLayer.add(b);
+								controlsLayer.updateUI();
+								controlsLayer.repaint();
+
+								
+							}
+						});
+												
+						Thread.sleep(3000);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();		
+		*/
+      
    }
 
+   
    /** Get the cell at the given position
     * @param row Row number relative to <CODE>baseRow</CODE>
     * @param col Column number relative to <CODE>baseCol</CODE>
@@ -871,6 +1012,42 @@ public class JSpreadsheet extends JComponent
 	public void addSpreadsheetListener(SpreadsheetListener l) throws RemoteException {
 		tableModel.addSpreadsheetListener(l);		
 	}
+
+	public void refreshEmbeddedPanelsLayer() {
+		
+		controlsLayer.removeAll();
+		
+		for (EmbeddedPanelDescription desc:((RGui)rg).getEmbeddedPanelDescriptions()) {
+			if (desc.getSpreadsheetName().equals(_name)) {
+				CellRange cellrange = null;
+				try {
+					cellrange = ImportInfo.getRange(desc.getRange());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				if (cellrange!=null) {
+					JPanel container=new JPanel(new BorderLayout());
+					container.setBorder(BorderFactory.createLineBorder(Color.gray, 1));
+					container.add(desc.getPanel(), BorderLayout.CENTER);
+					
+					
+					Rectangle r1 = table.getCellRect(cellrange.getStartRow(), cellrange.getStartCol(), true);
+					Rectangle r2 = table.getCellRect(cellrange.getEndRow()+1, cellrange.getEndCol()+1, true);
+					container.setLocation(r1.x-1, r1.y-1);
+					container.setSize(Math.abs(r2.x - r1.x)+1, Math.abs(r2.y - r1.y)+1);
+					
+					controlsLayer.add(container);					
+				}
+				
+				
+			}
+		}
+		
+		controlsLayer.updateUI();
+		controlsLayer.repaint();
+
+	}
 	
 	/*
 	 * 
@@ -971,27 +1148,7 @@ public class JSpreadsheet extends JComponent
 				try {
 					while (true) {
 						
-						SwingUtilities.invokeLater(new Runnable(){
-							public void run() {
-
-								JButton b = new JButton("Hi!");
-
-								int row = rnd.nextInt(5);
-								int col = rnd.nextInt(4);
-								Rectangle r1 = table.getCellRect(row, col, true);
-								Rectangle r2 = table.getCellRect(row + 1, col + 1, true);
-
-								b.setLocation(r1.x, r1.y);
-								b.setSize(Math.abs(r2.x - r1.x), Math.abs(r2.y - r1.y));
-
-								controlsLayer.removeAll();
-								controlsLayer.add(b);
-								controlsLayer.updateUI();
-								controlsLayer.repaint();
-
-								
-							}
-						});
+c
 												
 						Thread.sleep(3000);
 					}

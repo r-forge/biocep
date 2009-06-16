@@ -28,6 +28,8 @@ import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.scripting.GroovyInterpreter;
 import org.kchine.r.workbench.graphics.JGDPanelPop;
 import org.kchine.r.workbench.macros.MacroInterface;
+import org.kchine.r.workbench.spreadsheet.EmbeddedPanelDescription;
+
 import net.infonode.docking.View;
 
 /**
@@ -78,5 +80,8 @@ public interface RGui extends RKit {
 	
 	public HashSet<String> getAvailableExtensions();
 	
+	public void addEmbeddedPanelDescription(EmbeddedPanelDescription embeddedPanelDescription);
+	public void removeEmbeddedPanelDescription(EmbeddedPanelDescription embeddedPanelDescription);
+	public Vector<EmbeddedPanelDescription> getEmbeddedPanelDescriptions();
 	
 }
