@@ -83,7 +83,6 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -207,6 +206,7 @@ import org.kchine.r.workbench.utils.AbstractDockingWindowListener;
 import org.kchine.r.workbench.utils.AppletBase;
 import org.kchine.r.workbench.views.BiocepMindMapView;
 import org.kchine.r.workbench.views.BroadcastedDeviceView;
+import org.kchine.r.workbench.views.ButtonView;
 import org.kchine.r.workbench.views.ChatConsoleView;
 import org.kchine.r.workbench.views.ClientGroovyConsoleView;
 import org.kchine.r.workbench.views.ClientPythonConsoleView;
@@ -1687,14 +1687,7 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 						toolsMenu.add(_actions.get("supervisor"));
 						toolsMenu.add(_actions.get("httpsupervisor"));
 						toolsMenu.addSeparator(); 
-						toolsMenu.add(new AbstractAction("add embedded") {
-							public void actionPerformed(ActionEvent e) {
-								JPanel p=new JPanel(new BorderLayout()); p.add(new JButton("toto"), BorderLayout.CENTER);
-								addEmbeddedPanelDescription(new EmbeddedPanelDescription("SS_0", "D1:F4", p));
-								JPanel p2=new JPanel(new BorderLayout()); p2.add(new JButton("toto"), BorderLayout.CENTER);
-								addEmbeddedPanelDescription(new EmbeddedPanelDescription("SS_0", "A2:C6", p2));
-							}
-						});
+						toolsMenu.add(_actions.get("buttonview"));
 						//public void refreshEmbeddedPanelsLayer() {
 
 					}
@@ -4126,6 +4119,27 @@ public class WorkbenchApplet extends AppletBase implements RGui {
 			}
 		});
 
+		_actions.put("buttonview", new AbstractAction("New Button View") {
+			public void actionPerformed(final ActionEvent e) {
+
+				int id = getDynamicViewId();
+				final ButtonView lv = new ButtonView("Button View", null, id, WorkbenchApplet.this);
+				((TabWindow) views[2].getWindowParent()).addTab(lv);
+				lv.addListener(new AbstractDockingWindowListener() {
+					public void windowClosing(DockingWindow arg0) throws OperationAbortedException {
+						try {
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+
+			public boolean isEnabled() {
+				return getR() != null;
+			}
+		});
+		
 		_actions.put("pythonconsole", new AbstractAction("Python Console") {
 			public void actionPerformed(final ActionEvent e) {
 				if (getOpenedServerPythonConsoleView() == null) {

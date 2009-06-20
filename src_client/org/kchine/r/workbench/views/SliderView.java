@@ -12,6 +12,7 @@ public class SliderView extends DynamicView {
 		super(title, icon, new JPanel(), id);
 		setLayout(new BorderLayout());		
 		sliderPanel=new SliderBean();
+		sliderPanel.setView(this);
 		sliderPanel.init(rgui,min,max,init,true,"",true);
 		add(sliderPanel);
 	}

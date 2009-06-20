@@ -425,7 +425,7 @@ public class Globals {
 									+ "}");
 
 					outputWriterWebservice
-							.println("\npublic String print(String session, String expression) throws Exception { "
+							.println("\npublic String printExpression(String session, String expression) throws Exception { "
 									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"print\", new Class[]{String.class}, new Object[]{expression});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
@@ -543,7 +543,29 @@ public class Globals {
 							.println("\npublic String getPythonStatus(String session) throws Exception {"
 									+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"org.kchine.r.server.http.frontend.frontend.url\"), session, \"R\", \"getPythonStatus\", null, null);} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
+					
+										
+					outputWriterWebservice
+					.println("\npublic byte[] getPdf(String session, String script, int width, int height) throws Exception {"
+							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getPdf\", new Class[]{String.class, int.class, int.class}, new Object[]{script,width,height});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
+					.println("\npublic void scilabPutAndAssign(String session, Object obj, String name) throws Exception { "
+							+ "try {org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"scilabPutAndAssign\", new Class[]{Object.class, String.class}, new Object[]{obj,name});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
 
+					outputWriterWebservice
+					.println("\npublic RObject scilabGetObject(String session, String expression) throws Exception { "
+							+ "try {return (RObject)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"scilabGetObject\", new Class[]{String.class}, new Object[]{expression});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
+					.println("\npublic String scilabConsoleSubmit(String session, String expression) throws Exception { "
+							+ "try {return (String)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"scilabConsoleSubmit\", new Class[]{String.class}, new Object[]{expression});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					
 					outputWriterWebservice
 							.println("\npublic String statelessEvaluate(String expression, int n) throws Exception { "
 									+ "org.kchine.r.server.RServices r = null;"

@@ -23,11 +23,16 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import net.infonode.docking.View;
+
 import org.kchine.r.workbench.RConnectionListener;
 import org.kchine.r.workbench.RGui;
 import org.kchine.r.workbench.VariablesChangeEvent;
 import org.kchine.r.workbench.VariablesChangeListener;
 import org.kchine.r.workbench.WorkbenchApplet;
+import org.kchine.r.workbench.dialogs.GetExprDialog;
+import org.kchine.r.workbench.spreadsheet.EmbeddedPanelDescription;
 
 public class SliderBean extends JPanel implements ChangeListener, VariablesChangeListener , RConnectionListener {
 	
@@ -39,6 +44,20 @@ public class SliderBean extends JPanel implements ChangeListener, VariablesChang
 	JPanel _controlsPanel;
 	boolean _showControls=true;
 	
+	JPanel root;
+	EmbeddedPanelDescription embeddedPanelDescritption=null; 
+	View view;
+	
+	String[] rangeExpr_save=new String[]{""};
+	
+	public View getView() {
+		return view;
+	}
+
+	public void setView(View view) {
+		this.view = view;
+	}
+
 	static ImageIcon refreshIcon ;
 	static {
 		try {
@@ -107,8 +126,8 @@ public class SliderBean extends JPanel implements ChangeListener, VariablesChang
 			}
 			
 			private void showPopup(MouseEvent e) {
-
 				JPopupMenu popupMenu = new JPopupMenu();
+
 				popupMenu.add(new AbstractAction(_showControls?"Hide Controls":"Show Controls") {
 					public void actionPerformed(ActionEvent e) {
 						_showControls=!_showControls;
@@ -118,15 +137,52 @@ public class SliderBean extends JPanel implements ChangeListener, VariablesChang
 						SliderBean.this.repaint();						
 					}					
 				});
+				popupMenu.addSeparator();
+				popupMenu.add(new AbstractAction("Dock") {
+					public void actionPerformed(ActionEvent e) {
+						
+						GetExprDialog dialog=new GetExprDialog(root,"Docking Range",rangeExpr_save);
+						dialog.setVisible(true);
+						if (dialog.getExpr()!=null) {
+							view.close();
+							embeddedPanelDescritption=new EmbeddedPanelDescription("SS_0", dialog.getExpr(), root);
+							_rgui.addEmbeddedPanelDescription(embeddedPanelDescritption);			
+							
+						}
+						
+					}
+					
+					public boolean isEnabled() {
+						return embeddedPanelDescritption==null;
+					}
+				});
 				
+				
+				popupMenu.add(new AbstractAction("Undock") {
+					public void actionPerformed(ActionEvent e) {
+						_rgui.removeEmbeddedPanelDescription(embeddedPanelDescritption);
+						embeddedPanelDescritption=null;
+						add(root, BorderLayout.CENTER);
+						view=_rgui.createView(SliderBean.this, "Slider View");								
+					}
+					
+					public boolean isEnabled() {
+						return embeddedPanelDescritption!=null;
+					}
+				});	
+				
+
 				popupMenu.show(_slider, e.getX(), e.getY());
 
 			}
+			
 		});
 		
 		
 		setLayout(new BorderLayout());		
-		add(_slider, BorderLayout.CENTER);
+		
+		root=new JPanel(new BorderLayout()); root.add(_slider);
+		add(root, BorderLayout.CENTER);
 		add(_controlsPanel, BorderLayout.SOUTH);
 
 	}
