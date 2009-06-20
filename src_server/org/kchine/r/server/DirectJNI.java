@@ -4481,6 +4481,10 @@ public class DirectJNI {
 			ScilabServicesSingleton.getInstance().scilabPutAndAssign(obj, name);
 		}
 		
+		public void scilabSetWorkingDirectory(String dir) throws RemoteException {
+			ScilabServicesSingleton.getInstance().scilabSetWorkingDirectory(dir);			
+		}
+		
 		public void installPackage(String label, byte[] packageBuffer) throws RemoteException {
 			
 				
@@ -5317,6 +5321,13 @@ public class DirectJNI {
 		System.setProperty("wks.persitent", "true");
 		WDIR = d.getCanonicalPath().replace('\\', '/');
 		regenerateWorkingDirectory(false);
+		
+		try {
+			ScilabServicesSingleton.getInstance().scilabSetWorkingDirectory(WDIR);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public static final String LOC_STR_LEFT = "It represents the S4 Class";

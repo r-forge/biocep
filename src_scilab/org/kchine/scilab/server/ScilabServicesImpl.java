@@ -12,6 +12,7 @@ import java.util.Properties;
 import javasci.SciDouble;
 import javasci.Scilab;
 
+import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.rpf.ManagedServant;
 import org.kchine.rpf.RemoteLogListener;
@@ -20,6 +21,13 @@ import org.kchine.rpf.RemotePanel;
 public class ScilabServicesImpl implements ScilabServices{
 
 	public ScilabServicesImpl() {
+		
+		try {
+			scilabSetWorkingDirectory(DirectJNI.getInstance().getRServices().getWorkingDirectory());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		if (ServerManager.sci != null) {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				public void run() {
@@ -29,6 +37,10 @@ public class ScilabServicesImpl implements ScilabServices{
 		}
 	}
 
+	
+	public void scilabSetWorkingDirectory(String dir) throws RemoteException {
+		Scilab.Exec("chdir('"+dir+"')");		
+	}
 	
     public boolean scilabExec(String cmd) throws java.rmi.RemoteException {
 		return Scilab.Exec(cmd);
