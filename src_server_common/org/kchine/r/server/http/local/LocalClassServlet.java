@@ -18,9 +18,9 @@
  */
 package org.kchine.r.server.http.local;
 
-
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import javax.servlet.ServletException;
@@ -32,8 +32,11 @@ import javax.servlet.http.HttpServletResponse;
  * @author Karim Chine karim.chine@m4x.org
  */
 public class LocalClassServlet extends HttpServlet {
-	
-	public static int BUFFER_SIZE=1024*16;
+
+	ClassLoader cl = this.getClass().getClassLoader();
+
+	public static int BUFFER_SIZE = 1024 * 64;
+
 	public void init() throws ServletException {
 		super.init();
 	}
@@ -47,58 +50,54 @@ public class LocalClassServlet extends HttpServlet {
 	}
 
 	protected void doAny(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
 		String url = req.getRequestURL().toString();
 		String resource = url.substring(url.indexOf("/classes") + "/classes".length());
+
 		if (resource.equals("")) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-
 		}
-		InputStream is = null;
-		is = LocalClassServlet.class.getResourceAsStream(resource);
-		if (is == null && resource.endsWith(".class")) {
-			// System.out.println("--> trying to load missing class
-			// :"+resource);
+		if (resource.endsWith(".class")) {
 			String className = resource.substring(1, resource.indexOf(".class")).replace('/', '.');
-			// System.out.println("--> class name:"+className);
+			Class<?> c = null;
 			try {
-				LocalClassServlet.class.getClassLoader().loadClass(className);
-				is = LocalClassServlet.class.getResourceAsStream(resource);
+				c = cl.loadClass(className);
 			} catch (Exception e) {
-				// e.printStackTrace();
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
 			}
-		}
 
-		// System.out.println("url : " + url);
-		// System.out.println("requested resource stream: " + resource);
-		// System.out.println("requested resource url: " +
-		// LocalClassServlet.class.getResource(resource));
-		// System.out.println("is : " + is);
+			resp.setContentType("application/java");
 
-		if (is == null || resource.equals("")) {
-			// System.out.println("Going to send error");
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-
-		} else {
-			if (url.endsWith(".class"))
-				resp.setContentType("application/java");
-			else
-				resp.setContentType("text/plain");
-						
-			
+			InputStream is = cl.getResourceAsStream(resource.substring(1));
+			resp.setContentType("text/plain");
 			byte data[] = new byte[BUFFER_SIZE];
-			int count=0;
+			int count = 0;
 			while ((count = is.read(data, 0, BUFFER_SIZE)) != -1) {
 				resp.getOutputStream().write(data, 0, count);
 				resp.getOutputStream().flush();
 			}
-			
 			resp.getOutputStream().close();
-			
+
+		} else {
+			InputStream is = cl.getResourceAsStream(resource.substring(1));
+			if (is == null) {
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+			} else {
+				resp.setContentType("text/plain");
+				byte data[] = new byte[BUFFER_SIZE];
+				int count = 0;
+				while ((count = is.read(data, 0, BUFFER_SIZE)) != -1) {
+					resp.getOutputStream().write(data, 0, count);
+					resp.getOutputStream().flush();
+				}
+				resp.getOutputStream().close();
+			}
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
-		URLClassLoader cl = new URLClassLoader(new URL[] { new URL("http://127.0.0.1:9999/classes/") }, null);
-		System.out.println(cl.getResource("rjbmaps.properties"));
+		ClassLoader cl = new URLClassLoader(new URL[] { new URL("http://www.biocep.net/bbb/bin/") }, null);
+		System.out.println(cl.getResource("org/kchine/r/server/http/local/LocalClassServlet.class"));
 	}
 }
