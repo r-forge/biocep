@@ -1234,6 +1234,10 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
     public boolean scilabExec(String cmd) throws RemoteException {
     	return DirectJNI.getInstance().getScilabServices().scilabExec(cmd);
     }
+ 
+    public void scilabSetWorkingDirectory(String dir) throws RemoteException {
+    	DirectJNI.getInstance().getScilabServices().scilabSetWorkingDirectory(dir);	
+    }
     
     public void installPackage(String label, byte[] packageBuffer) throws RemoteException {
     	DirectJNI.getInstance().getRServices().installPackage(label, packageBuffer);    	
