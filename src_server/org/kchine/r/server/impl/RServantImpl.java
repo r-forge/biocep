@@ -169,19 +169,23 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 			}			
 		}
 		
+		
+		
 		new Thread(new Runnable() {
 			public void run() {
 				try {					
 					GroovyInterpreterSingleton.getInstance().exec("import org.kchine.r.server.R;");
 					GroovyInterpreterSingleton.getInstance().exec("R=org.kchine.r.server.R.getInstance();");
-					GroovyInterpreterSingleton.getInstance().exec("SCI=(org.kchine.scilab.server.ScilabServices)org.kchine.r.server.R.getInstance();");
-					GroovyInterpreterSingleton.getInstance().exec("OO=(org.kchine.openoffice.server.OpenOfficeServices)org.kchine.r.server.R.getInstance();");
+					//GroovyInterpreterSingleton.getInstance().exec("SCI=(org.kchine.scilab.server.ScilabServices)org.kchine.r.server.R.getInstance();");
+					//GroovyInterpreterSingleton.getInstance().exec("OO=(org.kchine.openoffice.server.OpenOfficeServices)org.kchine.r.server.R.getInstance();");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 
 		}).start();
+		
+		
 
 		
 	}
