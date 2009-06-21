@@ -59,6 +59,7 @@ import org.kchine.rpf.NodeManager;
 import org.kchine.rpf.PoolUtils;
 import org.kchine.rpf.ServantProviderFactory;
 import org.kchine.rpf.ServerDefaults;
+import org.kchine.scilab.server.ScilabServices;
 import org.python.core.PyComplex;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
@@ -758,6 +759,8 @@ public abstract class RListener {
 								r = ServerManager.createR(props.getProperty("r.binary"), useEmbeddedR , false, codeServerHost, codeServerPort, 
 										props, props.get("memorymin")==null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), 
 											   props.get("memorymax")==null ? ServerDefaults._memoryMax: Integer.decode(props.getProperty("memorymax")), name[0], false, null, null, System.getProperty("application_type"),null);
+								
+								r.consoleSubmit("setwd('"+DirectJNI.getInstance().getRServices().getWorkingDirectory()+"')");
 							} else if (mode.equalsIgnoreCase("rmi")) {
 
 								try {
@@ -833,67 +836,233 @@ public abstract class RListener {
 		}
 	}
 
-	public static String[] RLinkConsole(final String rlinkName, final String command) {
+	public static String[] RLinkConsole(final String rlinkName, final String command, final String asynch) {
 		try {
 
-			new Thread(new Runnable() {
+			Runnable task=new Runnable() {
 				public void run() {
 
 					try {
 
 						if (_rlinkHash.get(rlinkName) == null) {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
+							
+							new Thread(new Runnable(){
+								public void run() {
+									try {
+										DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
+									} catch (Exception e) {
+										e.printStackTrace();
+									}									
+								}
+							}).start();
+							
 							return;
 						}
 
-						RServices r = _rlinkHash.get(rlinkName).getR();
-						Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
+						final RServices r = _rlinkHash.get(rlinkName).getR();
+						final Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
 
 						if (r == null) {
 							if (creationException == null) {
-								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
+								
+								new Thread(new Runnable(){
+									public void run() {
+										try {
+											DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
+										} catch (Exception e) {
+											e.printStackTrace();
+										}									
+									}
+								}).start();
+								
+								
+								
 								return;
 							} else {
-								DirectJNI.getInstance().getRServices().consoleSubmit(
-										convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
-												+ PoolUtils.getStackTraceAsString(creationException)));
+								
+								
+								new Thread(new Runnable(){
+									public void run() {
+										try {
+											DirectJNI.getInstance().getRServices().consoleSubmit(
+													convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
+															+ PoolUtils.getStackTraceAsString(creationException)));
+										} catch (Exception e) {
+											e.printStackTrace();
+										}									
+									}
+								}).start();
+								
+								
+								
+								
 								return;
 							}
 						}
 
+						
 						r.consoleSubmit(command);
+						
+						
+						new Thread(new Runnable(){
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(
+											convertToPrintCommand("Command submitted to RLink [" + rlinkName + "]\n" + r.getStatus()));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}									
+							}
+						}).start();
+						
 
-						try {
-							DirectJNI.getInstance().getRServices().consoleSubmit(
-									convertToPrintCommand("Command submitted to RLink [" + rlinkName + "]\n" + r.getStatus()));
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+					} catch (final Exception ex) {
 
-					} catch (Exception ex) {
-
-						try {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						new Thread(new Runnable(){
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}									
+							}
+						}).start();
 					}
 
 				}
-			}).start();
-
-			return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };
-
+			};
+			
+			if (asynch.equalsIgnoreCase("true")) {				
+				new Thread(task).start();
+				return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };				
+			} else {				
+				task.run();
+				return new String[] { "OK", "" };				
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
 		}
 	}
 
-	public static String[] RLinkGet(final String rlinkName, final String expression, final String ato) {
+	public static String[] RLinkScilabConsole(final String rlinkName, final String command, final String asynch) {
 		try {
 
-			new Thread(new Runnable() {
+			Runnable task=new Runnable() {
+				public void run() {
+
+					try {
+
+						if (_rlinkHash.get(rlinkName) == null) {
+							
+							new Thread(new Runnable(){
+								public void run() {
+									try {
+										DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
+									} catch (Exception e) {
+										e.printStackTrace();
+									}									
+								}
+							}).start();
+							
+							return;
+						}
+
+						final RServices r = _rlinkHash.get(rlinkName).getR();
+						final Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
+
+						if (r == null) {
+							if (creationException == null) {
+								
+								new Thread(new Runnable(){
+									public void run() {
+										try {
+											DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
+										} catch (Exception e) {
+											e.printStackTrace();
+										}									
+									}
+								}).start();
+								
+								
+								
+								return;
+							} else {
+								
+								
+								new Thread(new Runnable(){
+									public void run() {
+										try {
+											DirectJNI.getInstance().getRServices().consoleSubmit(
+													convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
+															+ PoolUtils.getStackTraceAsString(creationException)));
+										} catch (Exception e) {
+											e.printStackTrace();
+										}									
+									}
+								}).start();
+								
+								
+								
+								
+								return;
+							}
+						}
+
+						
+						final String status=((ScilabServices)r).scilabConsoleSubmit(command);
+						
+						
+						new Thread(new Runnable(){
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(
+											convertToPrintCommand("Command submitted to RLink [" + rlinkName + "]\n" + status));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}									
+							}
+						}).start();
+						
+
+					} catch (final Exception ex) {
+						
+						new Thread(new Runnable(){
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}									
+							}
+						}).start();
+
+						
+					}
+
+				}
+			};
+			
+			if (asynch.equalsIgnoreCase("true")) {				
+				new Thread(task).start();
+				return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };				
+			} else {				
+				task.run();
+				return new String[] { "OK", "" };				
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}
+	}
+
+	
+	public static String[] RLinkGet(final String rlinkName, final String expression, final String ato, final String asynch) {
+		try {
+
+			Runnable task=new Runnable() {
 				public void run() {
 
 					try {
@@ -938,9 +1107,15 @@ public abstract class RListener {
 					}
 
 				}
-			}).start();
+			};
 
-			return new String[] { "OK", convertToPrintCommand("RLink Get in background..") };
+			if (asynch.equalsIgnoreCase("true")) {				
+				new Thread(task).start();
+				return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };				
+			} else {				
+				task.run();
+				return new String[] { "OK", "" };				
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -948,10 +1123,10 @@ public abstract class RListener {
 		}
 	}
 
-	public static String[] RLinkPut(final String rlinkName, final String expression, final String ato) {
+	public static String[] RLinkPut(final String rlinkName, final String expression, final String ato, final String asynch) {
 		try {
 
-			new Thread(new Runnable() {
+			Runnable task=new Runnable() {
 				public void run() {
 
 					try {
@@ -999,9 +1174,15 @@ public abstract class RListener {
 					}
 
 				}
-			}).start();
+			};
 
-			return new String[] { "OK", convertToPrintCommand("RLink Put in background..") };
+			if (asynch.equalsIgnoreCase("true")) {				
+				new Thread(task).start();
+				return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };				
+			} else {				
+				task.run();
+				return new String[] { "OK", "" };				
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1097,7 +1278,7 @@ public abstract class RListener {
 			int ssNbr = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();
 			if (ssNbr == 0) {
 				return new String[] { "NOK",
-						convertToPrintCommand("Tere are no Spreadsheets on Server : \nCreate one first via: Collaboration/New Collaborative Spreadsheet\n") };
+						convertToPrintCommand("No Spreadsheets on Server : \nCreate one first via: Collaboration/New Collaborative Spreadsheet\n") };
 			}
 			if (name.equals("")) {
 				if (ssNbr == 1) {
@@ -1206,7 +1387,7 @@ public abstract class RListener {
 			int ssNbr = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().keySet().size();
 			if (ssNbr == 0) {
 				return new String[] { "NOK",
-						convertToPrintCommand("Tere are No Spreadsheets on Server : \nCreate one first via: Spreadsheet/New Server-side Spreadsheet\n") };
+						convertToPrintCommand("No Spreadsheets on Server : \nCreate one first via: Spreadsheet/New Server-side Spreadsheet\n") };
 			}
 			if (name.equals("")) {
 				if (ssNbr == 1) {
