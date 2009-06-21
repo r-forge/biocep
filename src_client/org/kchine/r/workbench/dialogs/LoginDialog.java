@@ -583,6 +583,9 @@ public class LoginDialog extends JDialog {
 		_keepAlive.setSelected(keepAlive_bool);
 
 		_useSsh = new JRadioButton("On Remote Machine via SSH");
+		
+		_useSsh.setEnabled(false);
+		
 		_useSsh.setSelected(useSsh_bool);
 		_useSsh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

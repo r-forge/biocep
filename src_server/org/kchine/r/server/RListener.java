@@ -21,8 +21,11 @@
 package org.kchine.r.server;
 
 import java.beans.XMLDecoder;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.RandomAccessFile;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.rmi.NotBoundException;
@@ -240,7 +243,6 @@ public abstract class RListener {
 		return null;
 	}
 
-
 	public static String[] setClusterProperties(String gprops) {
 		if (!new File(gprops).exists()) {
 			return new String[] { "NOK", "The file '" + gprops + "' doesn't exist" };
@@ -307,214 +309,451 @@ public abstract class RListener {
 		return new String[] { "OK" };
 	}
 
-	public static String[] clusterApply(String cl, String varName, final String functionName) {
-		try {
+	public static String[] clusterApply(final String cl, final String varName, final String functionName, final String ato, final String asynch) {
+		new Thread(new Runnable() {
+			public void run() {
+				try {
 
-			Cluster cluster = _clustersHash.get(cl);
-			if (cluster == null)
-				return new String[] { "NOK", "Invalid cluster" };
-			RObject v = DirectJNI.getInstance().getObjectFrom(varName);
-			RObject vtemp = null;
-			if (v.getClass() == RMatrix.class) {
-				vtemp = ((RMatrix) v).getValue();
-			} else if (v.getClass() == RArray.class) {
-				vtemp = ((RArray) v).getValue();
-			} else {
-				vtemp = v;
-			}
+					Cluster cluster = _clustersHash.get(cl);
 
-			final RObject var = vtemp;
-
-			final VWrapper vwrapper = new VWrapper() {
-				public int getSize() {
-					if (var.getClass() == RNumeric.class) {
-						return ((RNumeric) var).getValue().length;
-					} else if (var.getClass() == RInteger.class) {
-						return ((RInteger) var).getValue().length;
-					} else if (var.getClass() == RChar.class) {
-						return ((RChar) var).getValue().length;
-					} else if (var.getClass() == RLogical.class) {
-						return ((RLogical) var).getValue().length;
-					} else if (var.getClass() == RComplex.class) {
-						return ((RComplex) var).getReal().length;
-					} else if (var.getClass() == RList.class) {
-						return ((RList) var).getValue().length;
-					}
-					return 0;
-				}
-
-				public RObject getElementAt(int i) {
-					if (var.getClass() == RNumeric.class) {
-						return new RNumeric(((RNumeric) var).getValue()[i]);
-					} else if (var.getClass() == RInteger.class) {
-						return new RInteger(((RInteger) var).getValue()[i]);
-					} else if (var.getClass() == RChar.class) {
-						return new RChar(((RChar) var).getValue()[i]);
-					} else if (var.getClass() == RLogical.class) {
-						return new RLogical(((RLogical) var).getValue()[i]);
-					} else if (var.getClass() == RComplex.class) {
-						return new RComplex(new double[] { ((RComplex) var).getReal()[i] }, new double[] { ((RComplex) var).getImaginary()[i] },
-								((RComplex) var).getIndexNA() != null ? new int[] { ((RComplex) var).getIndexNA()[i] } : null,
-								((RComplex) var).getNames() != null ? new String[] { ((RComplex) var).getNames()[i] } : null);
-					}
-
-					else if (var.getClass() == RList.class) {
-						return (RObject) ((RList) var).getValue()[i];
-					}
-					return null;
-				}
-
-				public Object gatherResults(RObject[] f) {
-
-					if (var.getClass() == RList.class) {
-						return f;
-					} else {
-						Class<?> resultClass = f[0].getClass();
-						RObject result = null;
-						if (resultClass == RNumeric.class) {
-							double[] t = new double[f.length];
-							for (int i = 0; i < f.length; ++i)
-								t[i] = ((RNumeric) f[i]).getValue()[0];
-							result = new RNumeric(t);
-						} else if (resultClass == RInteger.class) {
-							int[] t = new int[f.length];
-							for (int i = 0; i < f.length; ++i)
-								t[i] = ((RInteger) f[i]).getValue()[0];
-							result = new RInteger(t);
-						} else if (resultClass == RChar.class) {
-							String[] t = new String[f.length];
-							for (int i = 0; i < f.length; ++i)
-								t[i] = ((RChar) f[i]).getValue()[0];
-							result = new RChar(t);
-						} else if (resultClass == RLogical.class) {
-							boolean[] t = new boolean[f.length];
-							for (int i = 0; i < f.length; ++i)
-								t[i] = ((RLogical) f[i]).getValue()[0];
-							result = new RLogical(t);
-						} else if (resultClass == RComplex.class) {
-							double[] real = new double[f.length];
-							double[] im = new double[f.length];
-
-							for (int i = 0; i < f.length; ++i) {
-								real[i] = ((RComplex) f[i]).getReal()[0];
-								im[i] = ((RComplex) f[i]).getImaginary()[0];
-							}
-
-							result = new RComplex(real, im, null, null);
-						} else {
-							throw new RuntimeException("Can't Handle this result type :" + resultClass.getName());
-						}
-						return result;
-					}
-
-				}
-			};
-
-			if (vwrapper.getSize() == 0)
-				return new String[] { "NOK", "0 elements in data" };
-
-			Vector<RServices> workers = cluster.getWorkers();
-
-			final ArrayBlockingQueue<Integer> indexesQueue = new ArrayBlockingQueue<Integer>(vwrapper.getSize());
-			for (int i = 0; i < vwrapper.getSize(); ++i)
-				indexesQueue.add(i);
-
-			final ArrayBlockingQueue<RServices> workersQueue = new ArrayBlockingQueue<RServices>(workers.size());
-			for (int i = 0; i < workers.size(); ++i)
-				workersQueue.add(workers.elementAt(i));
-
-			final RObject[] result = new RObject[vwrapper.getSize()];
-
-			for (int i = 0; i < workers.size(); ++i) {
-				new Thread(new Runnable() {
-					public void run() {
-						RServices r = workersQueue.poll();
-						while (indexesQueue.size() > 0) {
-							Integer idx = indexesQueue.poll();
-							if (idx != null) {
+					if (cluster == null) {
+						new Thread(new Runnable() {
+							public void run() {
 								try {
-									result[idx] = r.call(functionName, vwrapper.getElementAt(idx));
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid cluster"));
 								} catch (Exception e) {
 									e.printStackTrace();
-									result[idx] = nullObject;
 								}
 							}
-						}
+						}).start();
+
 					}
-				}).start();
+
+					RObject v = DirectJNI.getInstance().getRServices().getObject(varName);
+					RObject vtemp = null;
+					if (v.getClass() == RMatrix.class) {
+						vtemp = ((RMatrix) v).getValue();
+					} else if (v.getClass() == RArray.class) {
+						vtemp = ((RArray) v).getValue();
+					} else {
+						vtemp = v;
+					}
+
+					final RObject var = vtemp;
+
+					final VWrapper vwrapper = new VWrapper() {
+						public int getSize() {
+							if (var.getClass() == RNumeric.class) {
+								return ((RNumeric) var).getValue().length;
+							} else if (var.getClass() == RInteger.class) {
+								return ((RInteger) var).getValue().length;
+							} else if (var.getClass() == RChar.class) {
+								return ((RChar) var).getValue().length;
+							} else if (var.getClass() == RLogical.class) {
+								return ((RLogical) var).getValue().length;
+							} else if (var.getClass() == RComplex.class) {
+								return ((RComplex) var).getReal().length;
+							} else if (var.getClass() == RList.class) {
+								return ((RList) var).getValue().length;
+							}
+							return 0;
+						}
+
+						public RObject getElementAt(int i) {
+							if (var.getClass() == RNumeric.class) {
+								return new RNumeric(((RNumeric) var).getValue()[i]);
+							} else if (var.getClass() == RInteger.class) {
+								return new RInteger(((RInteger) var).getValue()[i]);
+							} else if (var.getClass() == RChar.class) {
+								return new RChar(((RChar) var).getValue()[i]);
+							} else if (var.getClass() == RLogical.class) {
+								return new RLogical(((RLogical) var).getValue()[i]);
+							} else if (var.getClass() == RComplex.class) {
+								return new RComplex(new double[] { ((RComplex) var).getReal()[i] }, new double[] { ((RComplex) var).getImaginary()[i] },
+										((RComplex) var).getIndexNA() != null ? new int[] { ((RComplex) var).getIndexNA()[i] } : null, ((RComplex) var)
+												.getNames() != null ? new String[] { ((RComplex) var).getNames()[i] } : null);
+							}
+
+							else if (var.getClass() == RList.class) {
+								return (RObject) ((RList) var).getValue()[i];
+							}
+							return null;
+						}
+
+						public Object gatherResults(RObject[] f) {
+
+							if (var.getClass() == RList.class) {
+								return f;
+							} else {
+								Class<?> resultClass = f[0].getClass();
+								RObject result = null;
+								if (resultClass == RNumeric.class) {
+									double[] t = new double[f.length];
+									for (int i = 0; i < f.length; ++i)
+										t[i] = ((RNumeric) f[i]).getValue()[0];
+									result = new RNumeric(t);
+								} else if (resultClass == RInteger.class) {
+									int[] t = new int[f.length];
+									for (int i = 0; i < f.length; ++i)
+										t[i] = ((RInteger) f[i]).getValue()[0];
+									result = new RInteger(t);
+								} else if (resultClass == RChar.class) {
+									String[] t = new String[f.length];
+									for (int i = 0; i < f.length; ++i)
+										t[i] = ((RChar) f[i]).getValue()[0];
+									result = new RChar(t);
+								} else if (resultClass == RLogical.class) {
+									boolean[] t = new boolean[f.length];
+									for (int i = 0; i < f.length; ++i)
+										t[i] = ((RLogical) f[i]).getValue()[0];
+									result = new RLogical(t);
+								} else if (resultClass == RComplex.class) {
+									double[] real = new double[f.length];
+									double[] im = new double[f.length];
+
+									for (int i = 0; i < f.length; ++i) {
+										real[i] = ((RComplex) f[i]).getReal()[0];
+										im[i] = ((RComplex) f[i]).getImaginary()[0];
+									}
+
+									result = new RComplex(real, im, null, null);
+								} else {
+									throw new RuntimeException("Can't Handle this result type :" + resultClass.getName());
+								}
+								return result;
+							}
+
+						}
+					};
+
+					if (vwrapper.getSize() == 0) {
+
+						new Thread(new Runnable() {
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("0 elements in data"));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}).start();
+
+					}
+
+					Vector<RServices> workers = cluster.getWorkers();
+
+					final ArrayBlockingQueue<Integer> indexesQueue = new ArrayBlockingQueue<Integer>(vwrapper.getSize());
+					for (int i = 0; i < vwrapper.getSize(); ++i)
+						indexesQueue.add(i);
+
+					final ArrayBlockingQueue<RServices> workersQueue = new ArrayBlockingQueue<RServices>(workers.size());
+					for (int i = 0; i < workers.size(); ++i)
+						workersQueue.add(workers.elementAt(i));
+
+					final RObject[] result = new RObject[vwrapper.getSize()];
+
+					for (int i = 0; i < workers.size(); ++i) {
+						new Thread(new Runnable() {
+							public void run() {
+								RServices r = workersQueue.poll();
+								while (indexesQueue.size() > 0) {
+									Integer idx = indexesQueue.poll();
+									if (idx != null) {
+										try {
+											result[idx] = r.call(functionName, vwrapper.getElementAt(idx));
+										} catch (Exception e) {
+											e.printStackTrace();
+											result[idx] = nullObject;
+										}
+									}
+								}
+							}
+						}).start();
+					}
+
+					while (true) {
+						int count = 0;
+						for (int i = 0; i < result.length; ++i)
+							if (result[i] != null)
+								++count;
+						if (count == result.length)
+							break;
+						Thread.sleep(100);
+					}
+
+					Object reconstituedObject = vwrapper.gatherResults(result);
+					if (v.getClass() == RMatrix.class) {
+						((RArray) v).setValue((RVector) reconstituedObject);
+					} else if (v.getClass() == RArray.class) {
+						((RArray) v).setValue((RVector) reconstituedObject);
+					} else if (v.getClass() == RList.class) {
+						((RList) v).setValue((RObject[]) reconstituedObject);
+					} else {
+						v = (RObject) reconstituedObject;
+					}
+
+					final RObject final_v = v;
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().putAndAssign(final_v, (ato.equals("") ? functionName + "_" + varName : ato));
+								DirectJNI.getInstance().getRServices().consoleSubmit(
+										convertToPrintCommand("Cluster Apply result assigned to R variable "
+												+ (ato.equals("") ? functionName + "_" + varName : ato) + "\n"));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 			}
+		}).start();
 
-			while (true) {
-				int count = 0;
-				for (int i = 0; i < result.length; ++i)
-					if (result[i] != null)
-						++count;
-				if (count == result.length)
-					break;
-				Thread.sleep(100);
-			}
-
-			Object reconstituedObject = vwrapper.gatherResults(result);
-			if (v.getClass() == RMatrix.class) {
-				((RArray) v).setValue((RVector) reconstituedObject);
-			} else if (v.getClass() == RArray.class) {
-				((RArray) v).setValue((RVector) reconstituedObject);
-			} else if (v.getClass() == RList.class) {
-				((RList) v).setValue((RObject[]) reconstituedObject);
-			} else {
-				v = (RObject) reconstituedObject;
-			}
-
-			DirectJNI.getInstance().putObjectAndAssignName(v, "clusterApplyResult", true);
-			// DirectJNI.getInstance().putObjectAndAssignName(new RNumeric(12)
-			// ,"clusterApplyResult" , true);
-
-			return new String[] { "OK" };
-		} catch (Exception e) {
-			return new String[] { "NOK", PoolUtils.getStackTraceAsString(e) };
-		}
+		return new String[] { "OK", convertToPrintCommand("Cluster Apply Submitted in background..") };
 	}
 
-	public static String[] clusterEvalQ(String cl, String expression) {
-		try {
-			StringBuffer feedback = new StringBuffer();
-			Cluster cluster = _clustersHash.get(cl);
-			if (cluster == null)
-				return new String[] { "NOK", "Invalid cluster" };
-			for (int i = 0; i < cluster.getWorkers().size(); ++i) {
-				RServices r = cluster.getWorkers().elementAt(i);
-				r.consoleSubmit(expression);
-				String s = r.getStatus();
-				System.out.println("** submitted :" + expression + " to " + r.getServantName());
-				if (s != null && !s.trim().equals(""))
-					feedback.append("worker<" + r.getServantName() + ">:\n" + s + "\n");
+	public static String[] clusterEvalQ(final String cl, final String expression) {
+
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					final StringBuffer feedback = new StringBuffer();
+					Cluster cluster = _clustersHash.get(cl);
+					if (cluster == null) {
+						new Thread(new Runnable() {
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid cluster\n"));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}).start();
+						return;
+					}
+
+					for (int i = 0; i < cluster.getWorkers().size(); ++i) {
+						RServices r = cluster.getWorkers().elementAt(i);
+						r.consoleSubmit(expression);
+						String s = r.getStatus();
+						System.out.println("** submitted :" + expression + " to " + r.getServantName());
+						if (s != null && !s.trim().equals(""))
+							feedback.append("worker<" + r.getServantName() + ">:\n" + s + "\n");
+					}
+					System.out.println("##<" + feedback + ">##");
+
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(feedback.toString()));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
+					return;
+
+				} catch (final Exception e) {
+
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(e)));
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+						}
+					}).start();
+					return;
+				}
 			}
-			System.out.println("##<" + feedback + ">##");
-			return new String[] { "OK", convertToPrintCommand(feedback.toString()) };
-		} catch (Exception e) {
-			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
-		}
+		}).start();
+
+		return new String[] { "OK", convertToPrintCommand("Cluster Console Submitted in background..") };
 	}
 
-	public static String[] clusterExport(String cl, String exp, String ato) {
-		try {
-			StringBuffer feedback = new StringBuffer();
-			Cluster cluster = _clustersHash.get(cl);
-			if (cluster == null)
-				return new String[] { "NOK", "Invalid cluster" };
-			RObject v = DirectJNI.getInstance().getObjectFrom(exp);
-			if (ato.equals("")) ato=exp;			
-			for (int i = 0; i < cluster.getWorkers().size(); ++i) {
-				RServices r = cluster.getWorkers().elementAt(i);
-				r.putAndAssign(v, ato);
-				String s = r.getStatus();
-				if (s != null && !s.trim().equals(""))
-					feedback.append("worker<" + r.getServantName() + ">:" + s + "\n");
+	public static String[] clusterScilabEvalQ(final String cl, final String expression) {
+
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					final StringBuffer feedback = new StringBuffer();
+					Cluster cluster = _clustersHash.get(cl);
+					if (cluster == null) {
+						new Thread(new Runnable() {
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid cluster\n"));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}).start();
+						return;
+					}
+
+					for (int i = 0; i < cluster.getWorkers().size(); ++i) {
+						RServices r = cluster.getWorkers().elementAt(i);
+
+						String s = ((ScilabServices) r).scilabConsoleSubmit(expression);
+
+						System.out.println("** submitted :" + expression + " to " + r.getServantName());
+						if (s != null && !s.trim().equals(""))
+							feedback.append("worker<" + r.getServantName() + ">:\n" + s + "\n");
+					}
+					System.out.println("##<" + feedback + ">##");
+
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(feedback.toString()));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
+					return;
+
+				} catch (final Exception e) {
+
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(e)));
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+						}
+					}).start();
+					return;
+				}
 			}
-			return new String[] { "OK", convertToPrintCommand(feedback.toString()) };
-		} catch (Exception e) {
-			return new String[] { "NOK", PoolUtils.getStackTraceAsString(e) };
-		}
+		}).start();
+
+		return new String[] { "OK", convertToPrintCommand("Cluster Scilab Console Submitted in background..") };
+	}
+
+	public static String[] clusterExport(final String cl, final String exp, final String ato) {
+
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					final StringBuffer feedback = new StringBuffer();
+					Cluster cluster = _clustersHash.get(cl);
+					if (cluster == null) {
+						new Thread(new Runnable() {
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid cluster\n"));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}).start();
+						return;
+					}
+
+					RObject v = DirectJNI.getInstance().getRServices().getObject(exp);
+
+					for (int i = 0; i < cluster.getWorkers().size(); ++i) {
+						RServices r = cluster.getWorkers().elementAt(i);
+						r.putAndAssign(v, ato.equals("") ? exp : ato);
+						String s = r.getStatus();
+						if (s != null && !s.trim().equals(""))
+							feedback.append("worker<" + r.getServantName() + ">:" + s + "\n");
+					}
+
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(feedback.toString()));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
+					return;
+
+				} catch (final Exception e) {
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(e)));
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+						}
+					}).start();
+					return;
+				}
+
+			}
+		}).start();
+		return new String[] { "OK", convertToPrintCommand("Cluster Put Submitted in background..") };
+	}
+
+	public static String[] clusterScilabExport(final String cl, final String exp, final String ato) {
+
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					final StringBuffer feedback = new StringBuffer();
+					Cluster cluster = _clustersHash.get(cl);
+					if (cluster == null) {
+						new Thread(new Runnable() {
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid cluster\n"));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}).start();
+						return;
+					}
+
+					// problem here
+					Object v = DirectJNI.getInstance().getRServices().getObjectConverted(exp);
+
+					for (int i = 0; i < cluster.getWorkers().size(); ++i) {
+						RServices r = cluster.getWorkers().elementAt(i);
+						((ScilabServices) r).scilabPutAndAssign(v, ato.equals("") ? exp : ato);
+						String s = ((ScilabServices) r).scilabGetStatus();
+						if (s != null && !s.trim().equals(""))
+							feedback.append("worker<" + r.getServantName() + ">:" + s + "\n");
+					}
+
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(feedback.toString()));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
+					return;
+
+				} catch (final Exception e) {
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(e)));
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+						}
+					}).start();
+					return;
+				}
+
+			}
+		}).start();
+		return new String[] { "OK", convertToPrintCommand("Cluster Scilab Put Submitted in background..") };
 	}
 
 	public static class Cluster {
@@ -684,29 +923,28 @@ public abstract class RListener {
 
 	}
 
-	
-	  public static String[] makeRLink(String mode, String params, String[] name) { return
-		  makeRLink(mode, new String[]{params},name); 
-	  }
-	  
-	  public static String[] makeRLink(String mode, String params, String name) { return
-		  makeRLink(mode, new String[]{params},new String[]{name}); 
-	  }
-	  
-	  public static String[] makeRLink(String mode, String[] params, String name) { return
-		  makeRLink(mode, params,new String[]{name}); 
-	  }
-	  
+	public static String[] makeRLink(String mode, String params, String[] name) {
+		return makeRLink(mode, new String[] { params }, name);
+	}
+
+	public static String[] makeRLink(String mode, String params, String name) {
+		return makeRLink(mode, new String[] { params }, new String[] { name });
+	}
+
+	public static String[] makeRLink(String mode, String[] params, String name) {
+		return makeRLink(mode, params, new String[] { name });
+	}
+
 	public static String[] makeRLink(final String mode, final String[] params, final String[] name) {
 
 		if (name.length > 1) {
-			String[] rlinkNames=new String[name.length];
-			for (int i=0; i<name.length;++i) {
-				String result[]=makeRLink(mode, params, name[i]);
-				rlinkNames[i]=result[0];
+			String[] rlinkNames = new String[name.length];
+			for (int i = 0; i < name.length; ++i) {
+				String result[] = makeRLink(mode, params, name[i]);
+				rlinkNames[i] = result[0];
 			}
 			return rlinkNames;
-			
+
 		} else {
 
 			try {
@@ -731,36 +969,38 @@ public abstract class RListener {
 									}
 								}
 							}
-							
+
 							System.out.println(props);
 
 							RServices r = null;
 							if (mode.equalsIgnoreCase("self")) {
 								r = DirectJNI.getInstance().getRServices();
 							} else if (mode.equalsIgnoreCase("new")) {
-								if (props.get("naming.mode")==null) {
+								if (props.get("naming.mode") == null) {
 									props.put("naming.mode", "self");
 								}
-								
-								String codeServerHost=null;
-								int codeServerPort=-1;
-								if ( (System.getProperty("code.server.host")!=null) && (System.getProperty("code.server.port")!=null)
-									&& !System.getProperty("code.server.host").equals("") && !System.getProperty("code.server.port").equals("")	) {									
-									codeServerHost= System.getProperty("code.server.host");
-									codeServerPort= Integer.decode(System.getProperty("code.server.port"));
-									System.out.println("code.server.host:"+codeServerHost);
-									System.out.println("code.server.port:"+codeServerPort);
+
+								String codeServerHost = null;
+								int codeServerPort = -1;
+								if ((System.getProperty("code.server.host") != null) && (System.getProperty("code.server.port") != null)
+										&& !System.getProperty("code.server.host").equals("") && !System.getProperty("code.server.port").equals("")) {
+									codeServerHost = System.getProperty("code.server.host");
+									codeServerPort = Integer.decode(System.getProperty("code.server.port"));
+									System.out.println("code.server.host:" + codeServerHost);
+									System.out.println("code.server.port:" + codeServerPort);
 								} else {
-									codeServerHost= PoolUtils.getHostIp();
-									codeServerPort=LocalHttpServer.getLocalHttpServerPort();
+									codeServerHost = PoolUtils.getHostIp();
+									codeServerPort = LocalHttpServer.getLocalHttpServerPort();
 								}
 
-								boolean useEmbeddedR=props.getProperty("use_embedded_r")==null || props.getProperty("use_embedded_r").equals("") ? false :  new Boolean(props.getProperty("use_embedded_r"));
-								r = ServerManager.createR(props.getProperty("r.binary"), useEmbeddedR , false, codeServerHost, codeServerPort, 
-										props, props.get("memorymin")==null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), 
-											   props.get("memorymax")==null ? ServerDefaults._memoryMax: Integer.decode(props.getProperty("memorymax")), name[0], false, null, null, System.getProperty("application_type"),null);
-								
-								r.consoleSubmit("setwd('"+DirectJNI.getInstance().getRServices().getWorkingDirectory()+"')");
+								boolean useEmbeddedR = props.getProperty("use_embedded_r") == null || props.getProperty("use_embedded_r").equals("") ? false
+										: new Boolean(props.getProperty("use_embedded_r"));
+								r = ServerManager.createR(props.getProperty("r.binary"), useEmbeddedR, false, codeServerHost, codeServerPort, props, props
+										.get("memorymin") == null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), props
+										.get("memorymax") == null ? ServerDefaults._memoryMax : Integer.decode(props.getProperty("memorymax")), name[0], false,
+										null, null, System.getProperty("application_type"), null);
+
+								r.consoleSubmit("setwd('" + DirectJNI.getInstance().getRServices().getWorkingDirectory().replace('\\', '/') + "')");
 							} else if (mode.equalsIgnoreCase("rmi")) {
 
 								try {
@@ -836,358 +1076,260 @@ public abstract class RListener {
 		}
 	}
 
+	public interface WorkerTask {
+		void run(String workerName, RServices worker) throws Exception;
+	}
+
 	public static String[] RLinkConsole(final String rlinkName, final String command, final String asynch) {
-		try {
-
-			Runnable task=new Runnable() {
-				public void run() {
-
-					try {
-
-						if (_rlinkHash.get(rlinkName) == null) {
-							
-							new Thread(new Runnable(){
-								public void run() {
-									try {
-										DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
-									} catch (Exception e) {
-										e.printStackTrace();
-									}									
-								}
-							}).start();
-							
-							return;
+		return submitTask(rlinkName, new WorkerTask() {
+			public void run(String workerName, final RServices worker) throws Exception {
+				worker.consoleSubmit(command);
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(
+									convertToPrintCommand("Command submitted to RLink [" + rlinkName + "]\n" + worker.getStatus()));
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-
-						final RServices r = _rlinkHash.get(rlinkName).getR();
-						final Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
-
-						if (r == null) {
-							if (creationException == null) {
-								
-								new Thread(new Runnable(){
-									public void run() {
-										try {
-											DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
-										} catch (Exception e) {
-											e.printStackTrace();
-										}									
-									}
-								}).start();
-								
-								
-								
-								return;
-							} else {
-								
-								
-								new Thread(new Runnable(){
-									public void run() {
-										try {
-											DirectJNI.getInstance().getRServices().consoleSubmit(
-													convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
-															+ PoolUtils.getStackTraceAsString(creationException)));
-										} catch (Exception e) {
-											e.printStackTrace();
-										}									
-									}
-								}).start();
-								
-								
-								
-								
-								return;
-							}
-						}
-
-						
-						r.consoleSubmit(command);
-						
-						
-						new Thread(new Runnable(){
-							public void run() {
-								try {
-									DirectJNI.getInstance().getRServices().consoleSubmit(
-											convertToPrintCommand("Command submitted to RLink [" + rlinkName + "]\n" + r.getStatus()));
-								} catch (Exception e) {
-									e.printStackTrace();
-								}									
-							}
-						}).start();
-						
-
-					} catch (final Exception ex) {
-
-						new Thread(new Runnable(){
-							public void run() {
-								try {
-									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
-								} catch (Exception e) {
-									e.printStackTrace();
-								}									
-							}
-						}).start();
 					}
-
-				}
-			};
-			
-			if (asynch.equalsIgnoreCase("true")) {				
-				new Thread(task).start();
-				return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };				
-			} else {				
-				task.run();
-				return new String[] { "OK", "" };				
+				}).start();
 			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
-		}
+		}, asynch);
 	}
 
 	public static String[] RLinkScilabConsole(final String rlinkName, final String command, final String asynch) {
-		try {
+		return submitTask(rlinkName, new WorkerTask() {
+			public void run(String workerName, final RServices worker) throws Exception {
+				final String status = ((ScilabServices) worker).scilabConsoleSubmit(command);
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(
+									convertToPrintCommand("Command submitted to RLink [" + rlinkName + "]\n" + status));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+			}
+		}, asynch);
+	}
 
-			Runnable task=new Runnable() {
-				public void run() {
+	public static String[] submitTask(final String rlinkName, final WorkerTask workerTask, final String asynch) {
 
-					try {
+		Runnable task = new Runnable() {
+			public void run() {
 
-						if (_rlinkHash.get(rlinkName) == null) {
-							
-							new Thread(new Runnable(){
-								public void run() {
-									try {
-										DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
-									} catch (Exception e) {
-										e.printStackTrace();
-									}									
+				try {
+
+					if (_rlinkHash.get(rlinkName) == null) {
+
+						new Thread(new Runnable() {
+							public void run() {
+								try {
+									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
+								} catch (Exception e) {
+									e.printStackTrace();
 								}
-							}).start();
-							
-							return;
-						}
-
-						final RServices r = _rlinkHash.get(rlinkName).getR();
-						final Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
-
-						if (r == null) {
-							if (creationException == null) {
-								
-								new Thread(new Runnable(){
-									public void run() {
-										try {
-											DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
-										} catch (Exception e) {
-											e.printStackTrace();
-										}									
-									}
-								}).start();
-								
-								
-								
-								return;
-							} else {
-								
-								
-								new Thread(new Runnable(){
-									public void run() {
-										try {
-											DirectJNI.getInstance().getRServices().consoleSubmit(
-													convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
-															+ PoolUtils.getStackTraceAsString(creationException)));
-										} catch (Exception e) {
-											e.printStackTrace();
-										}									
-									}
-								}).start();
-								
-								
-								
-								
-								return;
-							}
-						}
-
-						
-						final String status=((ScilabServices)r).scilabConsoleSubmit(command);
-						
-						
-						new Thread(new Runnable(){
-							public void run() {
-								try {
-									DirectJNI.getInstance().getRServices().consoleSubmit(
-											convertToPrintCommand("Command submitted to RLink [" + rlinkName + "]\n" + status));
-								} catch (Exception e) {
-									e.printStackTrace();
-								}									
-							}
-						}).start();
-						
-
-					} catch (final Exception ex) {
-						
-						new Thread(new Runnable(){
-							public void run() {
-								try {
-									DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
-								} catch (Exception e) {
-									e.printStackTrace();
-								}									
 							}
 						}).start();
 
-						
+						return;
 					}
 
+					final RServices r = _rlinkHash.get(rlinkName).getR();
+					final Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
+
+					if (r == null) {
+						if (creationException == null) {
+
+							new Thread(new Runnable() {
+								public void run() {
+									try {
+										DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							}).start();
+
+							return;
+						} else {
+
+							new Thread(new Runnable() {
+								public void run() {
+									try {
+										DirectJNI.getInstance().getRServices().consoleSubmit(
+												convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
+														+ PoolUtils.getStackTraceAsString(creationException)));
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							}).start();
+
+							return;
+						}
+					}
+
+					workerTask.run(rlinkName, r);
+
+				} catch (final Exception ex) {
+
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
 				}
-			};
-			
-			if (asynch.equalsIgnoreCase("true")) {				
-				new Thread(task).start();
-				return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };				
-			} else {				
-				task.run();
-				return new String[] { "OK", "" };				
+
 			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		};
+
+		if (asynch.equalsIgnoreCase("true")) {
+			new Thread(task).start();
+			return new String[] { "OK", convertToPrintCommand("RLink Task Submitted in background..") };
+		} else {
+
+			try {
+				task.run();
+				return new String[] { "OK", "" };
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+			}
 		}
 	}
 
-	
 	public static String[] RLinkGet(final String rlinkName, final String expression, final String ato, final String asynch) {
-		try {
-
-			Runnable task=new Runnable() {
-				public void run() {
-
-					try {
-
-						if (_rlinkHash.get(rlinkName) == null) {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
-							return;
-						}
-
-						RServices r = _rlinkHash.get(rlinkName).getR();
-						Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
-
-						if (r == null) {
-							if (creationException == null) {
-								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
-								return;
-							} else {
-								DirectJNI.getInstance().getRServices().consoleSubmit(
-										convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
-												+ PoolUtils.getStackTraceAsString(creationException)));
-								return;
-							}
-						}
-
-						RObject robj = r.getObject(expression);
-
+		return submitTask(rlinkName, new WorkerTask() {
+			public void run(String workerName, final RServices worker) throws Exception {
+				final RObject robj = worker.getObject(expression);
+				new Thread(new Runnable() {
+					public void run() {
 						try {
 							DirectJNI.getInstance().getRServices().putAndAssign(robj, ato.equals("") ? expression : ato);
 							DirectJNI.getInstance().getRServices().consoleSubmit(
-									convertToPrintCommand((ato.equals("") ? expression : ato) + " Has been assigned a value from RLink [" + rlinkName + "]\n" + r.getStatus()));
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
-					} catch (Exception ex) {
-
-						try {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
+									convertToPrintCommand((ato.equals("") ? expression : ato) + " Has been assigned a value from RLink [" + rlinkName + "]\n"
+											+ worker.getStatus()));
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
-
-				}
-			};
-
-			if (asynch.equalsIgnoreCase("true")) {				
-				new Thread(task).start();
-				return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };				
-			} else {				
-				task.run();
-				return new String[] { "OK", "" };				
+				}).start();
 			}
+		}, asynch);
+	}
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
-		}
+	public static String[] RLinkScilabGet(final String rlinkName, final String expression, final String ato, final String asynch) {
+		return submitTask(rlinkName, new WorkerTask() {
+			public void run(String workerName, final RServices worker) throws Exception {
+				final Object obj = ((ScilabServices) worker).scilabGetObject(expression);
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							DirectJNI.getInstance().getRServices().putAndAssign(obj, ato.equals("") ? expression : ato);
+							DirectJNI.getInstance().getRServices().consoleSubmit(
+									convertToPrintCommand((ato.equals("") ? expression : ato) + " Has been assigned a value from RLink [" + rlinkName + "]\n"
+											+ worker.getStatus()));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+			}
+		}, asynch);
 	}
 
 	public static String[] RLinkPut(final String rlinkName, final String expression, final String ato, final String asynch) {
-		try {
 
-			Runnable task=new Runnable() {
-				public void run() {
+		return submitTask(rlinkName, new WorkerTask() {
+			public void run(String workerName, final RServices worker) throws Exception {
 
-					try {
+				// problem here !!!
+				RObject robj = DirectJNI.getInstance().getRServices().getObject(expression);
 
-						if (_rlinkHash.get(rlinkName) == null) {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("Invalid RLink:" + rlinkName));
-							return;
-						}
-
-						RServices r = _rlinkHash.get(rlinkName).getR();
-						Exception creationException = _rlinkHash.get(rlinkName).getCreationException();
-
-						if (r == null) {
-							if (creationException == null) {
-								DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand("RLink Not yet Created"));
-								return;
-							} else {
-								DirectJNI.getInstance().getRServices().consoleSubmit(
-										convertToPrintCommand("RLink creation has failed :\nCreation Exception:\n"
-												+ PoolUtils.getStackTraceAsString(creationException)));
-								return;
-							}
-						}
-
+				new Thread(new Runnable() {
+					public void run() {
 						try {
-							RObject robj = DirectJNI.getInstance().getRServices().getObject(expression);
+
 							DirectJNI.getInstance().getRServices()
 									.consoleSubmit(
 											convertToPrintCommand("Retrieve <" + expression + "> from R Session\n"
 													+ DirectJNI.getInstance().getRServices().getStatus()));
-							r.putAndAssign(robj, ato.equals("") ? expression : ato);
-							DirectJNI.getInstance().getRServices().consoleSubmit(
-									convertToPrintCommand("Value assigned to " + (ato.equals("") ? expression : ato) + " on RLink [" + rlinkName + "]\n" + " has been assigned a value\n")
-											+ r.getStatus());
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
 
-					} catch (Exception ex) {
-						try {
-							DirectJNI.getInstance().getRServices().consoleSubmit(convertToPrintCommand(PoolUtils.getStackTraceAsString(ex)));
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
+				}).start();
 
-				}
-			};
+				worker.putAndAssign(robj, ato.equals("") ? expression : ato);
 
-			if (asynch.equalsIgnoreCase("true")) {				
-				new Thread(task).start();
-				return new String[] { "OK", convertToPrintCommand("RLink Console Submit in background..") };				
-			} else {				
-				task.run();
-				return new String[] { "OK", "" };				
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(
+									convertToPrintCommand("Value assigned to R variable " + (ato.equals("") ? expression : ato) + " on RLink [" + rlinkName
+											+ "]\n")
+											+ worker.getStatus());
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
 			}
+		}, asynch);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
-		}
+	}
+
+	public static String[] RLinkScilabPut(final String rlinkName, final String expression, final String ato, final String asynch) {
+
+		return submitTask(rlinkName, new WorkerTask() {
+			public void run(String workerName, final RServices worker) throws Exception {
+
+				// problem here !!!
+				Object obj = DirectJNI.getInstance().getRServices().getObjectConverted(expression);
+
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+
+							DirectJNI.getInstance().getRServices()
+									.consoleSubmit(
+											convertToPrintCommand("Retrieve <" + expression + "> from R Session\n"
+													+ DirectJNI.getInstance().getRServices().getStatus()));
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+
+				((ScilabServices) worker).scilabPutAndAssign(obj, ato.equals("") ? expression : ato);
+
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							DirectJNI.getInstance().getRServices().consoleSubmit(
+									convertToPrintCommand("Value assigned to Scilab variable " + (ato.equals("") ? expression : ato) + " on RLink ["
+											+ rlinkName + "]\n"));
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+			}
+		}, asynch);
+
 	}
 
 	public static String[] RLinkShow(String rlinkName) {
@@ -1228,8 +1370,9 @@ public abstract class RListener {
 	}
 
 	public static String[] RLinkRegistryList(final String params) {
-		return RLinkRegistryList(new String[]{params});
+		return RLinkRegistryList(new String[] { params });
 	}
+
 	public static String[] RLinkRegistryList(final String[] params) {
 		try {
 			String[] names = null;
@@ -1270,7 +1413,7 @@ public abstract class RListener {
 			return new String[] { "NOK", convertToPrintCommand("couldn't create cluster") };
 		}
 	}
-	
+
 	public static String[] spreadsheetPut(String location, String name) {
 		try {
 			System.out.println("name=<" + name + ">");
@@ -1424,29 +1567,25 @@ public abstract class RListener {
 		}
 	}
 
-	
-	
 	public static String[] xmlGet(String url) {
 		try {
-			
-			RResponse rresponse=null;
+
+			RResponse rresponse = null;
 			try {
-				HttpURLConnection connection=(HttpURLConnection)new URL(url).openConnection();		
-				XMLDecoder decoder=new XMLDecoder(connection.getInputStream());
-				rresponse=(RResponse)decoder.readObject();
+				HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+				XMLDecoder decoder = new XMLDecoder(connection.getInputStream());
+				rresponse = (RResponse) decoder.readObject();
 				connection.disconnect();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 			if (rresponse == null) {
-				return new String[] { "NOK", convertToPrintCommand("Bad URL: "+url) };
+				return new String[] { "NOK", convertToPrintCommand("Bad URL: " + url) };
 			}
 
-			
-			long ref=DirectJNI.getInstance().putObject(rresponse.getValue());
+			long ref = DirectJNI.getInstance().putObject(rresponse.getValue());
 			DirectJNI.getInstance().assignInPrivateEnv("xml.get.result", ref);
-					
 
 			return new String[] { "OK" };
 		} catch (Exception e) {
@@ -1454,6 +1593,28 @@ public abstract class RListener {
 			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
 		}
 	}
-	
-	
+
+	public static String[] AsString(String file, String wd) {
+		File f = null;
+		if (file.startsWith("/"))
+			f = new File(file);
+		else
+			f = new File(new File(wd).getAbsolutePath() + "/" + file);
+		if (!f.exists())
+			return new String[] { "NOK", convertToPrintCommand("File <" + file + "> doesn't exist") };
+		else {
+			try {
+				BufferedReader br = new BufferedReader(new FileReader(f));
+				StringBuffer buffer = new StringBuffer();
+				String line = null;
+				while ((line = br.readLine()) != null)
+					buffer.append(line + "\n");
+				return new String[] { "OK" , buffer.toString()};
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+			}
+		}
+	}
+
 }

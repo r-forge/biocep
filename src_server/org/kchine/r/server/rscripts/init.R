@@ -252,7 +252,14 @@ pythonEval <- function( exp )  {
 	}
 }
 
-
+as.string <- function( file )  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"AsString", file , getwd() );
+	if (result[1]=='OK') {
+		result[2];		
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
 
 rlink.make <- function( mode='rmi' , params=c(''), name=c('') )  {
 	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"makeRLink", mode , params, name); 
@@ -282,7 +289,7 @@ rlink.sciconsole <- function( cl, exp , asynch=TRUE)  {
 rlink.get <- function( cl, exp , ato='', asynch=TRUE )  {  
 	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkGet", cl, exp, ato , as.character(asynch));
 	if (result[1]=='OK') {		
-		eval(parse("", text=result[2]))
+		if (result[2]!='') eval(parse("", text=result[2]))
 	} else {
 		eval(parse("", text=result[2]))
 	}
@@ -291,7 +298,7 @@ rlink.get <- function( cl, exp , ato='', asynch=TRUE )  {
 rlink.sciget <- function( cl, exp , ato='' , asynch=TRUE )  {  
 	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkScilabGet", cl, exp, ato , as.character(asynch) );
 	if (result[1]=='OK') {		
-		eval(parse("", text=result[2]))
+		if (result[2]!='') eval(parse("", text=result[2]))
 	} else {
 		eval(parse("", text=result[2]))
 	}
@@ -301,7 +308,7 @@ rlink.sciget <- function( cl, exp , ato='' , asynch=TRUE )  {
 rlink.put <- function( cl, exp , ato='' , asynch=TRUE)  {  
 	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkPut", cl, exp, ato, as.character(asynch)  );
 	if (result[1]=='OK') {
-		eval(parse("", text=result[2]))
+		if (result[2]!='') eval(parse("", text=result[2]))
 	} else {
 		eval(parse("", text=result[2]))
 	}
@@ -310,7 +317,7 @@ rlink.put <- function( cl, exp , ato='' , asynch=TRUE)  {
 rlink.sciput <- function( cl, exp , ato='', asynch=TRUE )  {  
 	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkScilabPut", cl, exp, ato , as.character(asynch)  );
 	if (result[1]=='OK') {
-		eval(parse("", text=result[2]))
+		if (result[2]!='') eval(parse("", text=result[2]))
 	} else {
 		eval(parse("", text=result[2]))
 	}
@@ -366,6 +373,15 @@ cluster.console <- function( cl, exp )  {
 	}
 }
 
+cluster.sciconsole <- function( cl, exp )  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterScilabEvalQ", cl, exp );
+	if (result[1]=='OK') {		
+		eval(parse("", text=result[2]))
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+
 cluster.put <- function( cl, exp , ato='' )  {  
 	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterExport", cl, exp , ato );
 	if (result[1]=='OK') {
@@ -375,19 +391,24 @@ cluster.put <- function( cl, exp , ato='' )  {
 	}
 }
 
-cluster.apply <- function( cl, v, fn)  {
-    assign('clusterApplyVar', v , env=.PrivateEnv);
-    #assign('clusterApplyFunction', v , env=.PrivateEnv);
-	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterApply", cl, ".PrivateEnv$clusterApplyVar" , fn );
-	rm('clusterApplyVar', envir=.PrivateEnv);
-	#rm('clusterApplyFunction', envir=.PrivateEnv);	 
-	if (result[1]=='OK') { 
-		res<-.PrivateEnv$clusterApplyResult;
-		rm('clusterApplyResult', envir=.PrivateEnv);	
-		res;
+cluster.sciput <- function( cl, exp , ato='' )  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterScilabExport", cl, exp , ato );
+	if (result[1]=='OK') {
+		return(invisible(NULL)); 
 	} else {
 		eval(parse("", text=result[2]))
 	}
+}
+
+cluster.apply <- function( cl, v, fn, ato='', asynch=TRUE )  {
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"clusterApply", cl, v , fn , ato , as.character(asynch) );
+	if (asynch) {
+		if (result[1]=='OK') {		
+			eval(parse("", text=result[2]))
+		} else {
+			eval(parse("", text=result[2]))
+		}
+	} 
 }
 
 cluster.stop <- function( cl )  {
