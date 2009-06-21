@@ -90,6 +90,10 @@ public class ScilabServicesImpl implements ScilabServices{
 			d.Send();
 			}
     }
+    
+    public String scilabGetStatus() throws RemoteException {
+    	return "";
+    }
 
     
     

@@ -4485,6 +4485,11 @@ public class DirectJNI {
 			ScilabServicesSingleton.getInstance().scilabSetWorkingDirectory(dir);			
 		}
 		
+		public String scilabGetStatus() throws RemoteException {
+			return ScilabServicesSingleton.getInstance().scilabGetStatus();
+		}
+		
+		
 		public void installPackage(String label, byte[] packageBuffer) throws RemoteException {
 			
 				
