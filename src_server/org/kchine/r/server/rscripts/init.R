@@ -261,8 +261,26 @@ rlink.make <- function( mode='rmi' , params=c(''), name=c('') )  {
 	
 }
 
-rlink.console <- function( cl, exp )  {  
-	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkConsole", cl, exp );
+rlink.console <- function( cl, exp , asynch=TRUE )  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkConsole", cl, exp , as.character(asynch));
+	if (result[1]=='OK') {		
+		if (result[2]!='') eval(parse("", text=result[2]))
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+
+rlink.sciconsole <- function( cl, exp , asynch=TRUE)  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkScilabConsole", cl, exp, as.character(asynch) );
+	if (result[1]=='OK') {		
+		if (result[2]!='') eval(parse("", text=result[2]))
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+
+rlink.get <- function( cl, exp , ato='', asynch=TRUE )  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkGet", cl, exp, ato , as.character(asynch));
 	if (result[1]=='OK') {		
 		eval(parse("", text=result[2]))
 	} else {
@@ -270,8 +288,8 @@ rlink.console <- function( cl, exp )  {
 	}
 }
 
-rlink.get <- function( cl, exp , ato='' )  {  
-	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkGet", cl, exp, ato );
+rlink.sciget <- function( cl, exp , ato='' , asynch=TRUE )  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkScilabGet", cl, exp, ato , as.character(asynch) );
 	if (result[1]=='OK') {		
 		eval(parse("", text=result[2]))
 	} else {
@@ -279,8 +297,18 @@ rlink.get <- function( cl, exp , ato='' )  {
 	}
 }
 
-rlink.put <- function( cl, exp , ato='' )  {  
-	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkPut", cl, exp, ato  );
+
+rlink.put <- function( cl, exp , ato='' , asynch=TRUE)  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkPut", cl, exp, ato, as.character(asynch)  );
+	if (result[1]=='OK') {
+		eval(parse("", text=result[2]))
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+
+rlink.sciput <- function( cl, exp , ato='', asynch=TRUE )  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"RLinkScilabPut", cl, exp, ato , as.character(asynch)  );
 	if (result[1]=='OK') {
 		eval(parse("", text=result[2]))
 	} else {
