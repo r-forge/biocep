@@ -150,12 +150,12 @@
 		<if><not><isset property="ws.r.api"/></not><then><property name="ws.r.api" value="true"/></then></if>
 		<if><not><isset property="targetjdk"/></not><then><property name="targetjdk" value=""/></then></if>
 		
-		<java maxmemory="1024m" classname="Gen" fork="true">
+		<java maxmemory="1024m" classname="ToolsMain" fork="true">
 			
 			<classpath>
 				
 				<pathelement path="${CORE_JAR}"/>
-				
+				<pathelement path="${JAVASCI_JAR}"/>
 				<pathelement path="lib/beangenlibs/ant-contrib-1.0b3.jar"/>
 				<pathelement path="lib/beangenlibs/geronimo-jms_1.1_spec-1.0.jar"/>
 				<pathelement path="lib/beangenlibs/jakarta-oro-2.0.8.jar"/>
@@ -166,6 +166,8 @@
 				<pathelement path="lib/beangenlibs/jdom.jar"/>		
 				
 				<pathelement path="lib/jaxws/jaxws-tools.jar"/>
+				
+				
 				
 				<!--
 				<pathelement path="lib/jaxws/FastInfoset.jar"/>

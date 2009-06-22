@@ -244,7 +244,13 @@ public class ServerManager {
 		"extensions.home",
 		"use.default.libs",
 		"r.options",
-		"preprocess.help"};
+		"preprocess.help",
+		
+		// gor Gen target
+		"file", "dir", "outputdir", "mappingjar", "warname", "propsembed", "keepintermediate", "formatsource", "ws.r.api",
+		"targetjdk"
+	
+	};
 
 	private static JTextArea createRSshProgressArea;
 	private static JProgressBar createRSshProgressBar;
@@ -454,6 +460,13 @@ public class ServerManager {
 
 	synchronized public static RServices createR(String RBinPath, boolean forceEmbedded, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
 			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, String applicationType, final Runnable rShutdownHook) throws Exception {
+		return createRInternal(RBinPath, forceEmbedded, keepAlive, codeServerHostIp, codeServerPort, namingInfo, memoryMinMegabytes, memoryMaxMegabytes, name, showProgress, codeUrls, logFile, applicationType, rShutdownHook, "org.kchine.r.server.MainRServer", true );		
+	}
+	
+	
+	
+	synchronized public static RServices createRInternal(String RBinPath, boolean forceEmbedded, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, String applicationType, final Runnable rShutdownHook, String mainClassName, boolean useCreationCallback) throws Exception {
 
 		final JTextArea[] createRProgressArea = new JTextArea[1];
 		final JProgressBar[] createRProgressBar = new JProgressBar[1];
@@ -920,13 +933,16 @@ public class ServerManager {
 			RemoteException[] exceptionHolder = new RemoteException[1];
 
 			CreationCallBack callBack = null;
-			
+			String listenerStub = null;
 
 			progressLogger.logProgress("Creating R Server..");
 
 			try {
-				callBack = new CreationCallBack(servantHolder, exceptionHolder);
-				String listenerStub = PoolUtils.stubToHex(callBack);
+				
+				if (useCreationCallback) {
+					callBack = new CreationCallBack(servantHolder, exceptionHolder);
+					listenerStub = PoolUtils.stubToHex(callBack);
+				}
 
 				String uid = null;
 
@@ -979,7 +995,11 @@ public class ServerManager {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dname=" + name + (isWindowsOs() ? "\"" : ""));
 				}
 
-				command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
+				if (useCreationCallback) {
+					command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
+				}
+				
+				
 				command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=false" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + INSTALL_DIR + "wdir" + (isWindowsOs() ? "\"" : ""));
 				
@@ -1017,7 +1037,7 @@ public class ServerManager {
 				}
 
 				if (useClassPath){
-					command.add("org.kchine.r.server.MainRServer");
+					command.add(mainClassName);
 				} else {
 					command.add("org.kchine.r.server.manager.bootstrap.Boot");
 				}
@@ -1087,23 +1107,30 @@ public class ServerManager {
 					}
 				}).start();
 
-				long t1 = System.currentTimeMillis();
-				while (servantHolder[0] == null && exceptionHolder[0] == null) {
-					if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
-						throw new ServantCreationTimeout();
-					try {
-						Thread.sleep(100);
-					} catch (Exception e) {
+				
+				if (useCreationCallback) {	
+					long t1 = System.currentTimeMillis();
+					while (servantHolder[0] == null && exceptionHolder[0] == null) {
+						if (System.currentTimeMillis() - t1 >= SERVANT_CREATION_TIMEOUT_MILLISEC)
+							throw new ServantCreationTimeout();
+						try {
+							Thread.sleep(100);
+						} catch (Exception e) {
+						}
 					}
+					if (exceptionHolder[0] != null) {
+						throw exceptionHolder[0];
+					}
+					progressLogger.logProgress("R Server Created.");
+					return (RServices) servantHolder[0];
+				} else {
+					return null;
 				}
-
-				if (exceptionHolder[0] != null) {
-					throw exceptionHolder[0];
-				}
-
-				progressLogger.logProgress("R Server Created.");
-
-				return (RServices) servantHolder[0];
+				
+				
+				
+				
+				
 			} finally {
 				if (callBack != null) {
 					UnicastRemoteObject.unexportObject(callBack, true);

@@ -5326,12 +5326,16 @@ public class DirectJNI {
 		System.setProperty("wks.persitent", "true");
 		WDIR = d.getCanonicalPath().replace('\\', '/');
 		regenerateWorkingDirectory(false);
-		
-		try {
-			ScilabServicesSingleton.getInstance().scilabSetWorkingDirectory(WDIR);
-		} catch (Exception e) {
-			e.printStackTrace();
+			
+		boolean scilabEnabled=System.getProperty("scilab_enabled")!=null && System.getProperty("scilab_enbaled").equalsIgnoreCase("true");
+		if (scilabEnabled) {
+			try {
+				ScilabServicesSingleton.getInstance().scilabSetWorkingDirectory(WDIR);
+			} catch (Exception e) {
+				//e.printStackTrace();
+			}
 		}
+		
 		
 	}
 

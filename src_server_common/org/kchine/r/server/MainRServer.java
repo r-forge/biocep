@@ -37,10 +37,13 @@ public class MainRServer {
 		Class<?> servantClass=RServantImpl.class;
 		System.setProperty("servantclass", servantClass.getName());
 		
+		System.setProperty("scilab_enabled", "false");
+		
 		if (ServerManager.sci!=null) {
 			try {
 				Class<?> scilabClass=MainRServer.class.getClassLoader().loadClass("javasci.Scilab");
 				scilabClass.getMethod("Exec", String.class).invoke(null, "disp(1+3)");
+				System.setProperty("scilab_enabled", "true");		
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
