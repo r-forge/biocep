@@ -1000,7 +1000,9 @@ public abstract class RListener {
 										.get("memorymax") == null ? ServerDefaults._memoryMax : Integer.decode(props.getProperty("memorymax")), name[0], false,
 										null, null, System.getProperty("application_type"), null);
 
-								r.consoleSubmit("setwd('" + DirectJNI.getInstance().getRServices().getWorkingDirectory().replace('\\', '/') + "')");
+								r.consoleSubmit("setwd('" + DirectJNI.getInstance().getRServices().getWorkingDirectory().replace('\\', '/') + "')");								
+								r.consoleSubmit("father=rlink.make('rmi',c('stub="+DirectJNI.getInstance().getRServices().getStub()+"'))");
+								
 							} else if (mode.equalsIgnoreCase("rmi")) {
 
 								try {
@@ -1011,6 +1013,7 @@ public abstract class RListener {
 									}
 
 								} catch (Exception e) {
+									e.printStackTrace();
 									DirectJNI.getInstance().getRServices().consoleSubmit(
 											convertToPrintCommand("RLink Creation Failed\nuse rlink.show to see creation error"));
 									_rlinkHash.get(rlinkName).setCreationException(e);
@@ -1034,9 +1037,8 @@ public abstract class RListener {
 											: props.getProperty("login"), props.getProperty("password") == null ? "guest" : props.getProperty("password"),
 											options);
 									r = RHttpProxy.getR(props.getProperty("url"), sessionId, true, 30);
-
-									r = (RServices) ServerDefaults.getRmiRegistry().lookup(name[0]);
 								} catch (Exception e) {
+									e.printStackTrace();
 									DirectJNI.getInstance().getRServices().consoleSubmit(
 											convertToPrintCommand("RLink Creation Failed\nuse rlink.show to see creation error"));
 									_rlinkHash.get(rlinkName).setCreationException(e);
@@ -1054,7 +1056,7 @@ public abstract class RListener {
 							}
 
 						} catch (Exception ex) {
-
+							ex.printStackTrace();
 							_rlinkHash.get(rlinkName).setCreationException(ex);
 							try {
 								DirectJNI.getInstance().getRServices().consoleSubmit(
@@ -1616,5 +1618,16 @@ public abstract class RListener {
 			}
 		}
 	}
+
+	public static String[] Wait(String millisec) {		
+		try {
+			Thread.sleep(Integer.decode(millisec));
+			return new String[] { "OK" };
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[] { "NOK", convertToPrintCommand(PoolUtils.getStackTraceAsString(e)) };
+		}		
+	}
+	
 
 }

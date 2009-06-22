@@ -1003,6 +1003,7 @@ public class ServerManager {
 				command.add((isWindowsOs() ? "\"" : "") + "-Dapply.sandbox=false" + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dworking.dir.root=" + INSTALL_DIR + "wdir" + (isWindowsOs() ? "\"" : ""));
 				
+				
 				command.add((isWindowsOs() ? "\"" : "") + "-Dkeepalive=" +  keepAlive + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dcode.server.host=" +  codeServerHostIp + (isWindowsOs() ? "\"" : ""));
 				command.add((isWindowsOs() ? "\"" : "") + "-Dcode.server.port=" +  codeServerPort + (isWindowsOs() ? "\"" : ""));
@@ -1016,6 +1017,7 @@ public class ServerManager {
 				}
 
 				command.add((isWindowsOs() ? "\"" : "")+"-Dapplication_type="+ (applicationType==null ? "" : applicationType)+(isWindowsOs() ? "\"" : ""));
+
 				
 				if (logFile != null && !logFile.equals("")) {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"

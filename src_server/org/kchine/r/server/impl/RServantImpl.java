@@ -21,6 +21,7 @@
 package org.kchine.r.server.impl;
 
 
+import java.io.File;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
@@ -186,13 +187,11 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 		}).start();
 		
 		
-
-		
 	}
 
 	public void init() throws RemoteException {
 		try {
-			System.setProperty("wks.persitent", "false");
+			//System.setProperty("wks.persitent", "false");
 
 			DirectJNI.init(getServantName());
 
@@ -291,6 +290,19 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 			
 			RServices rstub=(RServices)java.rmi.server.RemoteObject.toStub(this);
 			R._instance=rstub;
+			
+			DirectJNI.getInstance().setStub(PoolUtils.stubToHex(rstub));
+
+			// to be removed
+			try {
+				File mainlog=new File(DirectJNI.getInstance().getRServices().getWorkingDirectory()+"/"+"main.log");
+				if (mainlog.exists()) mainlog.delete();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			
+			
 			_isReady = true;
 
 		} catch (Exception ex) {
@@ -1160,10 +1172,9 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 	
 
 	public String getStub() throws RemoteException {
-		return super.getStub();
+		return DirectJNI.getInstance().getRServices().getStub();
 	}
-	
-	
+		
     public void addProbeOnVariables(String[] variables) throws RemoteException {
     	DirectJNI.getInstance().getRServices().addProbeOnVariables(variables);
     }

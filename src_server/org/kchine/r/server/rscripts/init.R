@@ -261,6 +261,15 @@ as.string <- function( file )  {
 	}
 }
 
+wait <- function( millisec )  {  
+	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"Wait", file , as.character(millisec) );
+	if (result[1]=='OK') {
+		return(invisible(NULL));
+	} else {
+		eval(parse("", text=result[2]))
+	}
+}
+
 rlink.make <- function( mode='rmi' , params=c(''), name=c('') )  {
 	result<-.jcall( obj="org/kchine/r/server/RListener" , "[Ljava/lang/String;" ,"makeRLink", mode , params, name); 
 	if ( length(result)>=1 && result[1]=='NOK') { eval(parse("", text=result[2])); '' }

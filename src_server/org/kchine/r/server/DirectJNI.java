@@ -187,6 +187,7 @@ public class DirectJNI {
 	private String _rHomeStr = null;
 	private String _rVersionStr = null;
 	private String _rJavaHomeStr = null;
+	private String _stubStr = null;
 	
 	private Vector<String> _bootstrapRObjects = new Vector<String>();
 	private long _privateEnvExp;
@@ -4386,7 +4387,7 @@ public class DirectJNI {
 		}
 
 		public String getStub() throws RemoteException {
-			throw new UnsupportedOperationException("Not supported at this layer.");
+			return _stubStr;
 		}
 
 		synchronized public void addProbeOnVariables(String[] variables) throws RemoteException {
@@ -5301,7 +5302,9 @@ public class DirectJNI {
 
 	public void regenerateWorkingDirectory(boolean callR) throws Exception {
 		File wdirFile = new File(WDIR);
-		if (wdirFile.exists() && System.getProperty("wks.persitent") != null && System.getProperty("wks.persitent").equals("false")) {
+		
+		if (wdirFile.exists() && System.getProperty("wks.persitent") != null && System.getProperty("wks.persitent").equalsIgnoreCase("false")) {			
+			System.out.println(".......Deleting Working Directory Previous Content");
 			File[] list = wdirFile.listFiles();
 			for (int i = 0; i < list.length; ++i) {
 				if (list[i].isDirectory()) {
@@ -5522,5 +5525,9 @@ public class DirectJNI {
 
 	HashSet<String> getCairoCapabilities() {
 		return _cairoCapabilities;
+	}
+	
+	public void setStub(String stub) {
+		_stubStr=stub;
 	}
 }
