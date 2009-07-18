@@ -191,14 +191,21 @@ public class HttpServerLight {
 		}
 		
 		
+
+		
+		
 		Server _virtualizationServer = new Server(port);
 		_virtualizationServer.setSessionIdManager(new HashSessionIdManager(new java.util.Random()));
 		_virtualizationServer.setStopAtShutdown(true);
 		
 		
-		Context root = new Context(_virtualizationServer, "/rvirtual", Context.SESSIONS | Context.NO_SECURITY);
-		
+		WebAppContext webapp = new WebAppContext();
+		webapp.setContextPath("/rvirtual/www");
+		webapp.setWar(ServerManager.WWW_DIR);
+		_virtualizationServer.setHandler(webapp);
 
+		
+		Context root = new Context(_virtualizationServer, "/rvirtual", Context.SESSIONS | Context.NO_SECURITY);
 		
 		final HttpSessionListener sessionListener = new FreeResourcesListener();
 		root.getSessionHandler().setSessionManager(new HashSessionManager() {
@@ -237,7 +244,9 @@ public class HttpServerLight {
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(true)), "/graphics/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RESTServlet()), "/rest/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.RebindServlet()), "/rebind/*");
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/www")), "/www/*");
+		
+		//root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/www")), "/www/*");
+		
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.WWWDirectoryServlet(ServerManager.WWW_DIR,"/appletlibs")), "/appletlibs/*");		
 		
 		boolean rsoapEnabled= args.length==0 && System.getProperty("soapenabled")!=null && System.getProperty("soapenabled").equals("true");
