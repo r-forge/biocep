@@ -232,13 +232,11 @@ public class PoolUtils {
 	}
 
 	
-	public static boolean isStandardApplication() {
-		return System.getProperty("application_type") == null || System.getProperty("application_type").equals("") || System.getProperty("application_type").equalsIgnoreCase("standard");
-	}
+
 	
 	public static String getAMIHostIp() throws Exception {		
 		
-		PoolUtils.cacheJar(new URL("http://s3.amazonaws.com/ec2metadata/ec2-metadata"), System.getProperty("java.io.tmpdir") + "/biocep/ec2/", PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
+		cacheJar(new URL("http://s3.amazonaws.com/ec2metadata/ec2-metadata"), System.getProperty("java.io.tmpdir") + "/biocep/ec2/", PoolUtils.LOG_PRGRESS_TO_SYSTEM_OUT, false);
 		String ec2_metadata=new File(System.getProperty("java.io.tmpdir") + "/biocep/ec2/"+"ec2-metadata").getAbsolutePath();
 		Runtime rt = Runtime.getRuntime();
 		Process chmodProc=rt.exec(new String[]{"chmod", "u+x" , ec2_metadata});
@@ -293,6 +291,11 @@ public class PoolUtils {
 
 		return result;
 		
+	}
+	
+	
+	public static boolean isStandardApplication() {
+		return System.getProperty("application_type") == null || System.getProperty("application_type").equals("") || System.getProperty("application_type").equalsIgnoreCase("standard");
 	}
 	
 	public static String getAMIHostName() throws Exception {		
