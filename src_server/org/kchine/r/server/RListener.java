@@ -1440,7 +1440,7 @@ public abstract class RListener {
 				}
 			}
 
-			SpreadsheetModelRemote model = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
+			final SpreadsheetModelRemote model = DirectJNI.getInstance().getSpreadsheetTableModelRemoteHashMap().get(name);
 			if (model == null)
 				return new String[] { "NOK", convertToPrintCommand("Bad Spreadsheet Name") };
 
@@ -1454,8 +1454,18 @@ public abstract class RListener {
 				return new String[] { "NOK", convertToPrintCommand("Bad Cell Location") };
 			}
 
-			String trstring = ImportInfo.getImportInfo(DirectJNI.getInstance().getObjectFrom(".PrivateEnv$spreadsheet.put.value")).getTabString();
-			model.paste(startRow, startCol, trstring);
+			final String trstring = ImportInfo.getImportInfo(DirectJNI.getInstance().getObjectFrom(".PrivateEnv$spreadsheet.put.value")).getTabString();
+			final int startRowFinal = startRow;
+			final int startColFinal = startCol;
+			new Thread(new Runnable(){
+				public void run() {
+					try {
+						model.paste(startRowFinal, startColFinal, trstring);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
 			return new String[] { "OK" };
 		} catch (Exception e) {
 			e.printStackTrace();
