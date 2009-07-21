@@ -34,22 +34,22 @@ import org.kchine.r.workbench.WorkbenchApplet;
 import org.kchine.r.workbench.dialogs.GetExprDialog;
 import org.kchine.r.workbench.spreadsheet.EmbeddedPanelDescription;
 
-public class SliderBean extends JPanel implements ChangeListener, VariablesChangeListener , RConnectionListener {
-	
+public class SliderBean extends JPanel implements ChangeListener, VariablesChangeListener, RConnectionListener {
+
 	RGui _rgui;
 	JTextField _var, _value, _min, _max, _init;
 	JButton _refreshButton;
 	JCheckBox _showLabels;
 	JSlider _slider;
 	JPanel _controlsPanel;
-	boolean _showControls=true;
-	
+	boolean _showControls = true;
+
 	JPanel root;
-	EmbeddedPanelDescription embeddedPanelDescritption=null; 
+	EmbeddedPanelDescription embeddedPanelDescritption = null;
 	View view;
-	
-	String[] rangeExpr_save=new String[]{""};
-	
+
+	String[] rangeExpr_save = new String[] { "" };
+
 	public View getView() {
 		return view;
 	}
@@ -58,149 +58,176 @@ public class SliderBean extends JPanel implements ChangeListener, VariablesChang
 		this.view = view;
 	}
 
-	static ImageIcon refreshIcon ;
+	static ImageIcon refreshIcon;
 	static {
 		try {
 			refreshIcon = new ImageIcon(ImageIO.read(WorkbenchApplet.class.getResource("/org/kchine/r/workbench/views/icons/" + "refresh.png")));
 		} catch (Exception e) {
 			e.printStackTrace();
-		}	
+		}
 	}
 
 	private String _uid = null;
 
-	public SliderBean() {setBackground(Color.white);}
+	public SliderBean() {
+		setBackground(Color.white);
+	}
 
 	public void init(RGui rgui, int min, int max, int init, boolean showLabel, String var, boolean showControls) {
-		_rgui=rgui;		
+		_rgui = rgui;
 		_rgui.addRConnectionListener(this);
-		
-		_showControls=showControls;
-		_var=new JTextField(); _var.setText(var);updateVars();
-		_value=new JTextField(); _value.setText(new Integer(init).toString());_value.setEditable(false);
-		_min=new JTextField(); _min.setText(new Integer(min).toString());
-		_max=new JTextField();_max.setText(new Integer(max).toString());
-		_init=new JTextField();_init.setText(new Integer(init).toString());
-		_showLabels=new JCheckBox("L");_showLabels.setSelected(showLabel);_showLabels.setHorizontalAlignment(SwingConstants.CENTER);		
-		_refreshButton=new JButton(refreshIcon);
-		_refreshButton.addActionListener(new ActionListener(){
+
+		_showControls = showControls;
+		_var = new JTextField();
+		_var.setText(var);
+		updateVars();
+		_value = new JTextField();
+		_value.setText(new Integer(init).toString());
+		_value.setEditable(false);
+		_min = new JTextField();
+		_min.setText(new Integer(min).toString());
+		_max = new JTextField();
+		_max.setText(new Integer(max).toString());
+		_init = new JTextField();
+		_init.setText(new Integer(init).toString());
+		_showLabels = new JCheckBox("L");
+		_showLabels.setSelected(showLabel);
+		_showLabels.setHorizontalAlignment(SwingConstants.CENTER);
+		_refreshButton = new JButton(refreshIcon);
+		_refreshButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateVars();
-				if (getMin()!=null) _slider.setMinimum(getMin());
-				if (getMax()!=null) _slider.setMaximum(getMax());
-				if (getInit()!=null) _slider.setValue(getInit());
+				if (getMin() != null)
+					_slider.setMinimum(getMin());
+				if (getMax() != null)
+					_slider.setMaximum(getMax());
+				if (getInit() != null)
+					_slider.setValue(getInit());
 				_slider.setPaintLabels(_showLabels.isSelected());
 			}
 		});
-		
-		_controlsPanel=new JPanel(new GridLayout(0,12));
+
+		_controlsPanel = new JPanel(new GridLayout(0, 12));
 		if (_showControls) {
 			initControlPanel();
 		}
-				
-    	_slider = new JSlider(JSlider.HORIZONTAL, min, max, init);			
+
+		_slider = new JSlider(JSlider.HORIZONTAL, min, max, init);
 		_slider.addChangeListener(this);
 		_slider.setMajorTickSpacing(10);
 		_slider.setMinorTickSpacing(1);
 		_slider.setPaintTicks(true);
 		_slider.setPaintLabels(true);
-		_slider.addMouseListener(new MouseListener(){
+		_slider.addMouseListener(new MouseListener() {
 			public void mouseClicked(MouseEvent e) {
-				
+
 			}
+
 			public void mouseEntered(MouseEvent e) {
-				
+
 			}
+
 			public void mouseExited(MouseEvent e) {
-				
+
 			}
+
 			public void mousePressed(MouseEvent e) {
 				if (e.isPopupTrigger()) {
 					showPopup(e);
 				}
 			}
+
 			public void mouseReleased(MouseEvent e) {
 				if (e.isPopupTrigger()) {
 					showPopup(e);
-				}				
+				}
 			}
-			
+
 			private void showPopup(MouseEvent e) {
 				JPopupMenu popupMenu = new JPopupMenu();
 
-				popupMenu.add(new AbstractAction(_showControls?"Hide Controls":"Show Controls") {
+				popupMenu.add(new AbstractAction(_showControls ? "Hide Controls" : "Show Controls") {
 					public void actionPerformed(ActionEvent e) {
-						_showControls=!_showControls;
+						_showControls = !_showControls;
 						_controlsPanel.removeAll();
-						if (_showControls) initControlPanel();
+						if (_showControls)
+							initControlPanel();
 						_controlsPanel.updateUI();
-						SliderBean.this.repaint();						
-					}					
+						SliderBean.this.repaint();
+					}
 				});
 				popupMenu.addSeparator();
 				popupMenu.add(new AbstractAction("Dock") {
 					public void actionPerformed(ActionEvent e) {
-						
-						GetExprDialog dialog=new GetExprDialog(root,"Docking Range",rangeExpr_save);
+
+						GetExprDialog dialog = new GetExprDialog(root, "Docking Range", rangeExpr_save);
 						dialog.setVisible(true);
-						if (dialog.getExpr()!=null) {
+						if (dialog.getExpr() != null) {
 							view.close();
-							embeddedPanelDescritption=new EmbeddedPanelDescription("SS_0", dialog.getExpr(), root);
-							_rgui.addEmbeddedPanelDescription(embeddedPanelDescritption);			
-							
+							embeddedPanelDescritption = new EmbeddedPanelDescription("SS_0", dialog.getExpr(), root);
+							_rgui.addEmbeddedPanelDescription(embeddedPanelDescritption);
+
+							updateVars();
+
 						}
-						
+
 					}
-					
+
 					public boolean isEnabled() {
-						return embeddedPanelDescritption==null;
+						return embeddedPanelDescritption == null;
 					}
 				});
-				
-				
+
 				popupMenu.add(new AbstractAction("Undock") {
 					public void actionPerformed(ActionEvent e) {
 						_rgui.removeEmbeddedPanelDescription(embeddedPanelDescritption);
-						embeddedPanelDescritption=null;
+						embeddedPanelDescritption = null;
 						add(root, BorderLayout.CENTER);
-						view=_rgui.createView(SliderBean.this, "Slider View");								
+						view = _rgui.createView(SliderBean.this, "Slider View");
+
+						updateVars();
 					}
-					
+
 					public boolean isEnabled() {
-						return embeddedPanelDescritption!=null;
+						return embeddedPanelDescritption != null;
 					}
-				});	
-				
+				});
 
 				popupMenu.show(_slider, e.getX(), e.getY());
 
 			}
-			
+
 		});
-		
-		
-		setLayout(new BorderLayout());		
-		
-		root=new JPanel(new BorderLayout()); root.add(_slider);
+
+		setLayout(new BorderLayout());
+
+		root = new JPanel(new BorderLayout());
+		root.add(_slider);
 		add(root, BorderLayout.CENTER);
 		add(_controlsPanel, BorderLayout.SOUTH);
 
 	}
 
 	void initControlPanel() {
-		_controlsPanel.add(new JLabel("Variable",SwingConstants.RIGHT));_controlsPanel.add(_var);
-		_controlsPanel.add(new JLabel("Value",SwingConstants.RIGHT));_controlsPanel.add(_value);
-		_controlsPanel.add(new JLabel("Min",SwingConstants.RIGHT));_controlsPanel.add(_min);
-		_controlsPanel.add(new JLabel("Max",SwingConstants.RIGHT));_controlsPanel.add(_max);
-		_controlsPanel.add(new JLabel("Init",SwingConstants.RIGHT));_controlsPanel.add(_init);_controlsPanel.add(_showLabels);
-		_controlsPanel.add(_refreshButton);		
+		_controlsPanel.add(new JLabel("Variable", SwingConstants.RIGHT));
+		_controlsPanel.add(_var);
+		_controlsPanel.add(new JLabel("Value", SwingConstants.RIGHT));
+		_controlsPanel.add(_value);
+		_controlsPanel.add(new JLabel("Min", SwingConstants.RIGHT));
+		_controlsPanel.add(_min);
+		_controlsPanel.add(new JLabel("Max", SwingConstants.RIGHT));
+		_controlsPanel.add(_max);
+		_controlsPanel.add(new JLabel("Init", SwingConstants.RIGHT));
+		_controlsPanel.add(_init);
+		_controlsPanel.add(_showLabels);
+		_controlsPanel.add(_refreshButton);
 	}
-	
-	public void updateVars() {		
+
+	public void updateVars() {
 		if (!getVariableName().equals("")) {
 			if (_rgui.getR() != null) {
 				try {
-					_rgui.getR().addProbeOnVariables(new String[] {getVariableName()});
+					_rgui.getR().addProbeOnVariables(new String[] { getVariableName() });
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -209,17 +236,17 @@ public class SliderBean extends JPanel implements ChangeListener, VariablesChang
 			_rgui.addVariablesChangeListener(this);
 		}
 	}
-	
+
 	public void stateChanged(ChangeEvent e) {
 		JSlider source = (JSlider) e.getSource();
 		_value.setText(new Integer(source.getValue()).toString());
-		if (!source.getValueIsAdjusting() &&!getVariableName().equals("")) {
+		if (!source.getValueIsAdjusting() && !getVariableName().equals("")) {
 			int fps = (int) source.getValue();
 			try {
 				_rgui.getRLock().lock();
 				HashMap<String, Object> props = new HashMap<String, Object>();
 				props.put("Scroller", getUID());
-				_rgui.getR().consoleSubmit(getVariableName()+"<-" + fps, props);
+				_rgui.getR().consoleSubmit(getVariableName() + "<-" + fps, props);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			} finally {
@@ -247,7 +274,7 @@ public class SliderBean extends JPanel implements ChangeListener, VariablesChang
 	public void setMax(Integer max) {
 		_max.setText(new Integer(max).toString());
 	}
-	
+
 	public Integer getMax() {
 		try {
 			return Integer.decode(_max.getText().trim());
@@ -255,7 +282,7 @@ public class SliderBean extends JPanel implements ChangeListener, VariablesChang
 			return null;
 		}
 	}
-	
+
 	public Integer getInit() {
 		try {
 			return Integer.decode(_init.getText().trim());
@@ -292,25 +319,24 @@ public class SliderBean extends JPanel implements ChangeListener, VariablesChang
 			}
 		}
 	}
-	
+
 	public void destroy() {
 		_rgui.removeVariablesChangeListener(this);
 	}
-	
-	
+
 	public void connected() {
-		updateVars();		
+		updateVars();
 	}
-	
+
 	public void connecting() {
 	}
-	
+
 	public void disconnected() {
 	}
-	
+
 	public void disconnecting() {
 	}
-	
+
 	public String getUID() {
 		if (_uid == null) {
 			_uid = UUID.randomUUID().toString();
