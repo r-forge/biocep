@@ -238,7 +238,7 @@ public class HttpServerLight {
 			}
 		});
 
-		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet()), "/cmd/*");
+		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.CommandServlet(false)), "/cmd/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.HelpServlet()), "/helpme/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.ConfigServlet()), "/config/*");
 		root.addServlet(new ServletHolder(new org.kchine.r.server.http.frontend.GraphicsServlet(true)), "/graphics/*");

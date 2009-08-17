@@ -102,6 +102,9 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 				if (command == null) {
 					command = "1+1";
 				}
+				
+				
+				System.out.println("COMMAND :"+command);
 
 				String type = null;
 				try {
@@ -181,8 +184,9 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 					if (!init_command.equals("")) r.sourceFromBuffer(init_command);
 					System.out.println(r.getStatus());
 					
-					if (request.getParameter("expression")==null) {
+					if (request.getParameter("source")==null || request.getParameter("source").equalsIgnoreCase("true")) {
 						r.sourceFromBuffer(command);
+						System.out.println("Sourcing From Buffer");
 					} else {
 						r.consoleSubmit(command);
 					}
@@ -202,7 +206,7 @@ public class RESTServlet extends javax.servlet.http.HttpServlet implements javax
 						value=r.getObjectConverted(outputVar);
 					}
 										
-					RResponse rresponse=new RResponse( value, r.getStatus());					
+					RResponse rresponse=new RResponse( value, (outputVar.equalsIgnoreCase("console") ? "" :r.getStatus()) );					
 				    XMLEncoder e = new XMLEncoder(new BufferedOutputStream(response.getOutputStream()));
 				    e.writeObject(rresponse);
   			        e.close();

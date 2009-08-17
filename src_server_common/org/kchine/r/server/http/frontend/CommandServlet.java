@@ -75,7 +75,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 	private static final Integer RMICALL_DONE = new Integer(0);
 
 	RKit _rkit = null;
-	boolean _safeModeEnabled;
+	boolean _safeModeEnabled;	
+	boolean _webAppMode=true;
 
 	public CommandServlet(RKit rkit, boolean safeModeEnabled) {
 		super();
@@ -89,6 +90,12 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 		PoolUtils.initLog4J();
 	}
 
+	public CommandServlet(boolean webAppMode) {
+		super();
+		PoolUtils.initLog4J();
+		_webAppMode=webAppMode;
+	}
+	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doAny(request, response);
 	}
@@ -316,7 +323,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 										System.out.println("CODE URL->" + Arrays.toString(codeUrls));
 										//String 
 										r = ServerManager.createR(System.getProperty("r.binary"),false, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-												.getLocalRmiRegistryPort()), memoryMin, memoryMax, privateName, false, codeUrls,null,"standard",null);
+												.getLocalRmiRegistryPort()), memoryMin, memoryMax, privateName, false, codeUrls,null,(_webAppMode?"javaws":"standard"),null);
 									}
 								}
 
