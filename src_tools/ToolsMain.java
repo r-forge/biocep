@@ -101,7 +101,7 @@ public class ToolsMain {
 			public void run() {
 				System.exit(0);							
 			}
-		}, "Gen", false);
+		}, "127.0.0.1", "Gen", false);
 		
 	}
 

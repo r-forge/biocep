@@ -21,11 +21,13 @@
 import java.io.RandomAccessFile;
 import org.apache.commons.logging.Log;
 import org.kchine.r.RChar;
+import org.kchine.r.RFunction;
 import org.kchine.r.RList;
 import org.kchine.r.RObject;
+import org.kchine.r.RRaw;
+import org.kchine.r.RUnknown;
 import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
-import org.kchine.r.server.ReferenceInterface;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.manager.ServerManager;
 import org.kchine.scilab.server.ScilabServices;
@@ -40,24 +42,18 @@ public class BridgeBasics {
 
 	public static void main(String args[]) throws Exception {
 		RServices rs = DirectJNI.getInstance().getRServices();
-		rs.consoleSubmit("x=structure(list(1,2), caption = 'foo' , merde=45)");
-		RList ro1 = (RList)rs.getReference("x");	
-		RList l1=ro1.getAttributes();
-		System.out.println("888888888888888888888 "+l1);
-		l1.setNames(new String[]{"rr","zzz"});
-		l1.setValue(new RObject[]{new RChar("qqqqqqqqq"), new RChar("qq")});
-		System.out.println("888888888888888888888 "+l1);
-
 		
-		ro1.setAttributes(l1);
+		rs.consoleSubmit("setClass('foo', representation(a = 'character', b = 'numeric'));setClass('bar', representation(d = 'numeric', c = 'numeric'));setClass('baz', contains = c('foo', 'bar'))");
+		rs.consoleSubmit("x <- new('baz', a = 'xxx', b = 5, c = 10)");		
+		RObject o=rs.getObject("x");
+		System.out.println("////////////////////////////////"+o);
+		rs.consoleSubmit("rm(x)");		
+		rs.putAndAssign(o, "y");	
 		
+		System.out.println("////////////////////////////////"+rs.print("y"));
 		
-				
-			RObject ro2 = rs.getReference("structure(list(1,2), caption = 'foo')");
-			
-			System.out.println(rs.callAndConvert("str", ro1));
-			
-			System.out.println(rs.callAndConvert("str", ro2));
+		//rs.putAndAssign(new RUnknown(o.getValue()), "b");
+		//System.out.println("-------------------------------"+rs.print("h"));
 			
 			
 			

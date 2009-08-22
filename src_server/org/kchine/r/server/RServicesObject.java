@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.kchine.r.RFunction;
 import org.kchine.r.RObject;
 import org.kchine.r.server.FileDescription;
 import org.kchine.r.server.RAction;
@@ -152,6 +153,7 @@ public class RServicesObject implements RServices {
 	public void assignReference(String name, RObject refObj) throws RemoteException {
 	}
 
+	
 	public RObject call(String methodName, Object... args) throws RemoteException {
 		return null;
 	}
@@ -167,6 +169,29 @@ public class RServicesObject implements RServices {
 		return null;
 	}
 
+
+	
+	public RObject call(RFunction method, Object... args) throws RemoteException {
+		return null;
+	}
+	
+	public Object callAndConvert(RFunction method, Object... args) throws RemoteException {
+		return null;
+	}
+
+	public void callAndAssign(String varName, RFunction method, Object... args) throws RemoteException {
+	}
+
+	public RObject callAndGetReference(RFunction method, Object... args) throws RemoteException {
+		return null;
+	}
+
+	public RObject callAndGetObjectName(RFunction method, Object... args) throws RemoteException {
+		return null;
+	}
+
+		
+	
 	public void createWorkingDirectoryFile(String fileName) throws RemoteException {
 	}
 

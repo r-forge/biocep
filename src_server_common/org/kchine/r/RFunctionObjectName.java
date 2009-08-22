@@ -22,19 +22,19 @@ package org.kchine.r;
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
-public class RUnknownObjectName extends RUnknown implements ObjectNameInterface{
+public class RFunctionObjectName extends RFunction implements ObjectNameInterface {
 	private String _name; 
 	private String _env;
 	
-	public RUnknownObjectName() {
+	public RFunctionObjectName() {
 	}
 
-	public RUnknownObjectName(String name) {
+	public RFunctionObjectName(String name) {
 		this._name = name;
 		this._env = ".GlobalEnv";
 	}
 
-	public RUnknownObjectName(String environment, String name) {
+	public RFunctionObjectName(String environment, String name) {
 		this._name = name;
 		this._env = environment;
 	}
@@ -52,7 +52,7 @@ public class RUnknownObjectName extends RUnknown implements ObjectNameInterface{
 	}
 	
 	public String toString() {
-		return "RRawObjectName:"+_env+"$"+_name;
+		return "RFunctionObjectName:"+_env+"$"+_name;
 	}
 
     public void writeExternal(java.io.ObjectOutput out)

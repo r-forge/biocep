@@ -1,9 +1,7 @@
 /*
  * Biocep: R-based Platform for Computational e-Science.
  *  
- * Copyright (C) 2007-2009 Karim Chine - karim.chine@m4x.org
- *  
- * Copyright (C) 2007 EMBL-EBI-Microarray Informatics
+ * Copyright (C) 2009 Karim Chine - karim.chine@m4x.org
  *  
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,35 +110,18 @@ public class RUnknownRef extends RUnknown implements org.kchine.r.server.Referen
 		return result.toString();
 	}
 
+
 	@Override
-	public String getContents() {
+	public int[] getValue() {
 		throw new RuntimeException("not yet implemented feature");
 	}
 
+	
 	@Override
-	public int getLength() {
+	public void setValue(int[] value) {
 		throw new RuntimeException("not yet implemented feature");
 	}
-
-	@Override
-	public String getRclass() {
-		throw new RuntimeException("not yet implemented feature");
-	}
-
-	@Override
-	public void setContents(String contents) {
-		throw new RuntimeException("not yet implemented feature");
-	}
-
-	@Override
-	public void setLength(int length) {
-		throw new RuntimeException("not yet implemented feature");
-	}
-
-	@Override
-	public void setRclass(String rclass) {
-		throw new RuntimeException("not yet implemented feature");
-	}
+	
 
 	@Override
 	public RList getAttributes() {

@@ -323,7 +323,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 										System.out.println("CODE URL->" + Arrays.toString(codeUrls));
 										//String 
 										r = ServerManager.createR(System.getProperty("r.binary"),false, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-												.getLocalRmiRegistryPort()), memoryMin, memoryMax, privateName, false, codeUrls,null,(_webAppMode?"javaws":"standard"),null);
+												.getLocalRmiRegistryPort()), memoryMin, memoryMax, privateName, false, codeUrls,null,(_webAppMode?"javaws":"standard"),null,"127.0.0.1");
 									}
 								}
 

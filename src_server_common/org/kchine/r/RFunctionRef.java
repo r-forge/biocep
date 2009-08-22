@@ -1,9 +1,7 @@
 /*
  * Biocep: R-based Platform for Computational e-Science.
  *  
- * Copyright (C) 2007-2009 Karim Chine - karim.chine@m4x.org
- *  
- * Copyright (C) 2007 EMBL-EBI-Microarray Informatics
+ * Copyright (C) 2009 Karim Chine - karim.chine@m4x.org
  *  
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +32,7 @@ import org.kchine.r.server.Utils;
 /**
  * @author Karim Chine karim.chine@m4x.org
  */
-public class RRawRef extends RRaw implements org.kchine.r.server.ReferenceInterface, org.kchine.r.server.StandardReference, Externalizable {
+public class RFunctionRef extends RFunction implements org.kchine.r.server.ReferenceInterface, org.kchine.r.server.StandardReference, Externalizable {
 	private long[] _rObjectIdHolder;
 
 	private String _slotsPath;
@@ -65,19 +63,19 @@ public class RRawRef extends RRaw implements org.kchine.r.server.ReferenceInterf
 		return _slotsPath;
 	}
 
-	public RRawRef() {
+	public RFunctionRef() {
 		super();
 		_rObjectIdHolder = new long[1];
 	}
 
-	public RRawRef(long rObjectId, String slotsPath) {
+	public RFunctionRef(long rObjectId, String slotsPath) {
 		super();
 		_rObjectIdHolder = new long[1];
 		_rObjectIdHolder[0] = rObjectId;
 		_slotsPath = slotsPath;
 	}
 
-	public RRawRef(long[] rObjectIdHolder, String slotsPath) {
+	public RFunctionRef(long[] rObjectIdHolder, String slotsPath) {
 		super();
 		_rObjectIdHolder = rObjectIdHolder;
 		_slotsPath = slotsPath;
@@ -96,15 +94,15 @@ public class RRawRef extends RRaw implements org.kchine.r.server.ReferenceInterf
 	}
 
 	public boolean equals(Object inputObject) {
-		if (inputObject == null || !(inputObject instanceof RRawRef))
+		if (inputObject == null || !(inputObject instanceof RFunctionRef))
 			return false;
-		return ((RRawRef) inputObject)._rObjectIdHolder[0] == _rObjectIdHolder[0] && ((RRawRef) inputObject)._slotsPath.equals(_slotsPath);
+		return ((RFunctionRef) inputObject)._rObjectIdHolder[0] == _rObjectIdHolder[0] && ((RFunctionRef) inputObject)._slotsPath.equals(_slotsPath);
 	}
 
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		try {
-			result.append("A Reference to an object of Class \"RRaw\" on the R servant <" + _assignInterface.getName() + ">  [" + _rObjectIdHolder[0] + "/"
+			result.append("A Reference to an object of Class \"RFunction\" on the R servant <" + _assignInterface.getName() + ">  [" + _rObjectIdHolder[0] + "/"
 					+ _slotsPath + "]\n");
 		} catch (java.rmi.RemoteException e) {
 			e.printStackTrace();
@@ -116,6 +114,7 @@ public class RRawRef extends RRaw implements org.kchine.r.server.ReferenceInterf
 	public int[] getValue() {
 		throw new RuntimeException("not yet implemented feature");
 	}
+
 
 	@Override
 	public void setValue(int[] value) {
@@ -129,7 +128,6 @@ public class RRawRef extends RRaw implements org.kchine.r.server.ReferenceInterf
 		} catch (Exception e) {
 			throw new RuntimeException(Utils.getStackTraceAsString(e));
 		}
-
 	}
 
 	@Override

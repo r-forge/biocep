@@ -22,6 +22,8 @@ package org.kchine.r.server;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
+
+import org.kchine.r.RFunction;
 import org.kchine.r.RObject;
 import org.kchine.r.server.graphics.GDDevice;
 import org.kchine.r.server.iplots.SVarInterfaceRemote;
@@ -38,7 +40,8 @@ public interface RServices extends ManagedServant {
 	public String evaluate(String expression) throws RemoteException;
 
 	public String evaluate(String expression, int n) throws RemoteException;
-		
+	
+	
 	public RObject call(String methodName, Object... args) throws RemoteException;
 
 	public Object callAndConvert(String methodName, Object... args) throws RemoteException;
@@ -48,7 +51,21 @@ public interface RServices extends ManagedServant {
 	public RObject callAndGetObjectName(String methodName, Object... args) throws RemoteException;
 
 	public void callAndAssign(String varName, String methodName, Object... args) throws RemoteException;
-		
+
+
+	
+	public RObject call(RFunction method, Object... args) throws RemoteException;
+
+	public Object callAndConvert(RFunction method, Object... args) throws RemoteException;
+	
+	public RObject callAndGetReference(RFunction method, Object... args) throws RemoteException;
+	
+	public RObject callAndGetObjectName(RFunction method, Object... args) throws RemoteException;
+
+	public void callAndAssign(String varName, RFunction method, Object... args) throws RemoteException;
+
+	
+	
 	public boolean isReference(RObject obj) throws RemoteException;
 
 	public RObject referenceToObject(RObject refObj) throws RemoteException;
