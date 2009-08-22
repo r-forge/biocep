@@ -40,6 +40,7 @@ import javax.servlet.http.HttpSessionListener;
 import org.apache.commons.logging.Log;
 import org.kchine.openoffice.server.OpenOfficeServices;
 import org.kchine.r.RChar;
+import org.kchine.r.RFunction;
 import org.kchine.r.RObject;
 import org.kchine.r.server.AssignInterface;
 import org.kchine.r.server.DirectJNI;
@@ -367,6 +368,37 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 		return result;
 	}
 
+	
+	public RObject call(RFunction method, Object... args) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().call(method, args);
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+
+	public RObject callAndGetReference(RFunction method, Object... args) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().callAndGetReference(method, args);
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+	
+	public RObject callAndGetObjectName(RFunction method, Object... args) throws RemoteException {
+		RObject result = DirectJNI.getInstance().getRServices().callAndGetObjectName(method, args);
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+
+	public void callAndAssign(String varName, RFunction method, Object... args) throws RemoteException {
+		DirectJNI.getInstance().getRServices().callAndAssign(varName, method, args);
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
+	}
+	
+	public Object callAndConvert(RFunction method, Object... args) throws RemoteException {
+		Object result=DirectJNI.getInstance().getRServices().callAndConvert( method, args);
+		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
+		return result;
+	}
+	
+	
 	public void freeReference(RObject refObj) throws RemoteException {
 		DirectJNI.getInstance().getRServices().freeReference(refObj);
 		if (archiveLog) _log.append(DirectJNI.getInstance().getRServices().getStatus());
@@ -918,7 +950,7 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 		System.out.println("cloneServer");
 		try {
 			RServices w = ServerManager.createR(null, false, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-					.getLocalRmiRegistryPort()), 256, 256, "", false,null,null,System.getProperty("application_type"),null);
+					.getLocalRmiRegistryPort()), 256, 256, "", false,null,null,System.getProperty("application_type"),null,null);
 			return w;
 		} catch (Exception e) {
 			throw new RemoteException("", e);

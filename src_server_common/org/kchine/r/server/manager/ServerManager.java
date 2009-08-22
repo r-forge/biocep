@@ -204,8 +204,10 @@ public class ServerManager {
 			if (sci_dll_path==null || sci_dll_path.equals("")) {
 				if (isWindowsOs()) {
 					sci_dll_path=sci+"bin";
-				} else {					
-					if (new File("/usr/lib/scilab").exists()) {
+				} else {
+					if (new File("/usr/lib64/scilab").exists()) {
+						sci_dll_path="/usr/lib64/scilab";
+					} else if (new File("/usr/lib/scilab").exists()) {
 						sci_dll_path="/usr/lib/scilab";
 					}					
 				}
@@ -451,7 +453,7 @@ public class ServerManager {
 
 	public static RServices createR(String name) throws Exception {
 		return createR(null, false, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null, System.getProperty("application_type"), null);
+				.getLocalRmiRegistryPort()), ServerDefaults._memoryMin, ServerDefaults._memoryMax, name, false, null, null, System.getProperty("application_type"), null, null);
 	}
 
 	private interface ProgessLoggerInterface {
@@ -459,14 +461,14 @@ public class ServerManager {
 	}
 
 	synchronized public static RServices createR(String RBinPath, boolean forceEmbedded, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, String applicationType, final Runnable rShutdownHook) throws Exception {
-		return createRInternal(RBinPath, forceEmbedded, keepAlive, codeServerHostIp, codeServerPort, namingInfo, memoryMinMegabytes, memoryMaxMegabytes, name, showProgress, codeUrls, logFile, applicationType, rShutdownHook, "org.kchine.r.server.MainRServer", true );		
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, String applicationType, final Runnable rShutdownHook, String forcedIP ) throws Exception {
+		return createRInternal(RBinPath, forceEmbedded, keepAlive, codeServerHostIp, codeServerPort, namingInfo, memoryMinMegabytes, memoryMaxMegabytes, name, showProgress, codeUrls, logFile, applicationType, rShutdownHook, forcedIP, "org.kchine.r.server.MainRServer", true );		
 	}
 	
 	
 	
 	synchronized public static RServices createRInternal(String RBinPath, boolean forceEmbedded, boolean keepAlive, String codeServerHostIp, int codeServerPort, Properties namingInfo,
-			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, String applicationType, final Runnable rShutdownHook, String mainClassName, boolean useCreationCallback) throws Exception {
+			int memoryMinMegabytes, int memoryMaxMegabytes, String name, final boolean showProgress, URL[] codeUrls, String logFile, String applicationType, final Runnable rShutdownHook, String forcedIP, String mainClassName, boolean useCreationCallback) throws Exception {
 
 		final JTextArea[] createRProgressArea = new JTextArea[1];
 		final JProgressBar[] createRProgressBar = new JProgressBar[1];
@@ -997,6 +999,10 @@ public class ServerManager {
 
 				if (useCreationCallback) {
 					command.add((isWindowsOs() ? "\"" : "") + "-Dlistener.stub=" + listenerStub + (isWindowsOs() ? "\"" : ""));
+				}
+				
+				if (forcedIP!=null && !forcedIP.equals("")) {
+					command.add((isWindowsOs() ? "\"" : "") + "-Dhost.ip.forced=" + forcedIP + (isWindowsOs() ? "\"" : ""));
 				}
 				
 				

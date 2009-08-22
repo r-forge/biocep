@@ -998,7 +998,7 @@ public abstract class RListener {
 								r = ServerManager.createR(props.getProperty("r.binary"), useEmbeddedR, false, codeServerHost, codeServerPort, props, props
 										.get("memorymin") == null ? ServerDefaults._memoryMin : Integer.decode(props.getProperty("memorymin")), props
 										.get("memorymax") == null ? ServerDefaults._memoryMax : Integer.decode(props.getProperty("memorymax")), name[0], false,
-										null, null, System.getProperty("application_type"), null);
+										null, null, System.getProperty("application_type"), null,"127.0.0.1");
 
 								r.consoleSubmit("setwd('" + DirectJNI.getInstance().getRServices().getWorkingDirectory().replace('\\', '/') + "')");								
 								r.consoleSubmit("father=rlink.make('rmi',c('stub="+DirectJNI.getInstance().getRServices().getStub()+"'))");

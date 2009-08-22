@@ -88,6 +88,8 @@ import org.kchine.r.REnvironment;
 import org.kchine.r.REnvironmentRef;
 import org.kchine.r.RFactor;
 import org.kchine.r.RFactorRef;
+import org.kchine.r.RFunction;
+import org.kchine.r.RFunctionRef;
 import org.kchine.r.RInteger;
 import org.kchine.r.RIntegerRef;
 import org.kchine.r.RList;
@@ -100,6 +102,8 @@ import org.kchine.r.RNamedArgument;
 import org.kchine.r.RNumeric;
 import org.kchine.r.RNumericRef;
 import org.kchine.r.RObject;
+import org.kchine.r.RRaw;
+import org.kchine.r.RRawRef;
 import org.kchine.r.RS3;
 import org.kchine.r.RS3Ref;
 import org.kchine.r.RUnknown;
@@ -963,6 +967,19 @@ public class DirectJNI {
 			}
 			e.rniEval(e.rniParse("rm(" + resultTemp + ")", 1), 0);
 
+		} else if (obj instanceof RRaw) {
+			
+			String temp = newTemporaryVariableName();
+			String resulatVar = newTemporaryVariableName();
+			e.rniAssign(temp, e.rniPutIntArray(((RRaw)obj).getValue()) , 0);
+			if (obj instanceof RFunction || obj instanceof RUnknown) { 
+				e.rniEval(e.rniParse(resulatVar+"<-unserialize(as.raw("+temp+"))", 1), 0);
+			}  else {
+				e.rniEval(e.rniParse(resulatVar+"<-as.raw("+temp+")", 1), 0);
+			}
+			resultId = e.rniEval(e.rniParse(resulatVar, 1), 0);			
+			e.rniEval(e.rniParse("rm(" + temp + ","+ resulatVar + ")", 1), 0);
+			
 		} else {
 
 			String rclass = DirectJNI._s4BeansMappingRevert.get(obj.getClass().getName());
@@ -1144,7 +1161,7 @@ public class DirectJNI {
 						result = new RS3(rlist.getValue(), rlist.getNames(), unionrclass);						
 					}
 				} else {
-					throw new NoMappingAvailable("No mapping available for the object of class : " + Arrays.toString(unionrclass));
+					result = new RUnknown(e.rniGetIntArray(e.rniEval(e.rniParse("as.integer(serialize(" + expression + ",NULL))", 1), 0)));					
 				}				
 			}
 
@@ -1169,6 +1186,7 @@ public class DirectJNI {
 
 			case CLOSXP:
 				typeStr = "closures";
+				result = new RFunction(e.rniGetIntArray(e.rniEval(e.rniParse("as.integer(serialize(" + expression + ",NULL))", 1), 0)));
 				break;
 
 			case ENVSXP:
@@ -1448,17 +1466,18 @@ public class DirectJNI {
 				typeStr = "weak reference";
 				break;
 
-			case RAWSXP:
-				typeStr = "raw bytes";
+			case RAWSXP:				
+				typeStr = "raw bytes";								
+				result = new RRaw(e.rniGetIntArray(e.rniEval(e.rniParse("as.integer(" + expression + ")", 1), 0)));
 				break;
-
 			case S4SXP:
 
 				Class<?> s4Java_class = null;
 				try {
 					s4Java_class = DirectJNI._mappingClassLoader.loadClass(DirectJNI._s4BeansMapping.get(rclass));
 				} catch (Exception ex) {
-					throw new NoMappingAvailable("No mapping available for the object of class : " + rclass);
+					result = new RUnknown(e.rniGetIntArray(e.rniEval(e.rniParse("as.integer(serialize(" + expression + ",NULL))", 1), 0)));
+					break;					
 				}
 
 				long slotsId = e.rniEval(e.rniParse("getSlots(\"" + rclass + "\")", 1), 0);
@@ -1483,7 +1502,7 @@ public class DirectJNI {
 				break;
 
 			case FUNSXP:
-				typeStr = "Closure or Builtin";
+				typeStr = "Closure or Builtin";				
 				break;
 
 			default:
@@ -1522,6 +1541,15 @@ public class DirectJNI {
 		}
 	}
 
+	private RObject call(boolean resultAsReference, String varName, RFunction method, Object... args) throws Exception {		
+		String functionName=newTemporaryVariableName();
+		try {			
+			_rEngine.rniAssign(functionName, putObject(method), 0);			
+			return call(resultAsReference, varName, functionName, args);			
+		} finally {
+			_rEngine.rniEval(_rEngine.rniParse("rm("+functionName+")", 1), 0);
+		}
+	}
 	private RObject call(boolean resultAsReference, String varName, String methodName, Object... args) throws Exception {
 
 		Rengine e = _rEngine;
@@ -1684,8 +1712,17 @@ public class DirectJNI {
 		} else {
 
 			switch (rtype) {
+			
 			case ENVSXP:
 				javaClassName = REnvironmentRef.class.getName();
+				break;
+
+			case CLOSXP:
+				javaClassName = RFunctionRef.class.getName();
+				break;
+
+			case RAWSXP:				
+				javaClassName = RRawRef.class.getName();
 				break;
 
 			case LGLSXP:
@@ -2605,6 +2642,183 @@ public class DirectJNI {
 			return DirectJNI.this.convert(objHolder[0]);
 		}
 
+		//*******************************************************
+		
+		
+		public RObject call(final RFunction method, final Object... args) throws RemoteException {
+
+			long[] variablePointersBefore = getVariablePointersBefore();
+
+			final RObject[] objHolder = new RObject[1];
+			final Exception[] exceptionHolder = new Exception[1];
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						objHolder[0] = DirectJNI.this.call(false, null, method, args);
+						// broadcast(e);
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+
+			fireVariableChangedEvents(variablePointersBefore);
+
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+			return objHolder[0];
+		}
+
+		public void callAndAssign(final String varName, final RFunction method, final Object... args) throws RemoteException {
+
+			long[] variablePointersBefore = getVariablePointersBefore();
+
+			final Exception[] exceptionHolder = new Exception[1];
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						DirectJNI.this.call(false, varName, method, args);
+						// broadcast(e);
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+
+			fireVariableChangedEvents(variablePointersBefore);
+
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+
+		}
+
+		public RObject callAndGetReference(final RFunction method, final Object... args) throws RemoteException {
+
+			long[] variablePointersBefore = getVariablePointersBefore();
+
+			final RObject[] objHolder = new RObject[1];
+			final Exception[] exceptionHolder = new Exception[1];
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						objHolder[0] = DirectJNI.this.call(true, null, method, args);
+						// broadcast(e);
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+
+			fireVariableChangedEvents(variablePointersBefore);
+
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+			return objHolder[0];
+		}
+
+		public RObject callAndGetObjectName(final RFunction method, final Object... args) throws RemoteException {
+
+			long[] variablePointersBefore = getVariablePointersBefore();
+
+			final RObject[] objHolder = new RObject[1];
+			final Exception[] exceptionHolder = new Exception[1];
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						objHolder[0] = DirectJNI.this.call(true, null, method, args);
+						// broadcast(e);
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+
+			fireVariableChangedEvents(variablePointersBefore);
+
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+
+			try {
+				String refClassName = objHolder[0].getClass().getName();
+				ObjectNameInterface objectName = (ObjectNameInterface) _mappingClassLoader.loadClass(
+						refClassName.substring(0, refClassName.length() - "Ref".length()) + "ObjectName").newInstance();
+				objectName.setRObjectName(PROTECT_VAR_PREFIXE + ((ReferenceInterface) objHolder[0]).getRObjectId());
+				objectName.setRObjectEnvironment(PENV);
+				return (RObject) objectName;
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RemoteException("", e);
+			}
+		}
+
+		public Object callAndConvert(final RFunction method, final Object... args) throws RemoteException {
+
+			long[] variablePointersBefore = getVariablePointersBefore();
+
+			final RObject[] objHolder = new RObject[1];
+			final Exception[] exceptionHolder = new Exception[1];
+			_lastStatus = runR(new org.kchine.r.server.ExecutionUnit() {
+				public void run(Rengine e) {
+					try {
+						objHolder[0] = DirectJNI.this.call(false, null, method, args);
+						// broadcast(e);
+					} catch (Exception ex) {
+						exceptionHolder[0] = ex;
+					}
+				}
+			});
+
+			fireVariableChangedEvents(variablePointersBefore);
+
+			if (exceptionHolder[0] != null) {
+				log.error(_lastStatus);
+				if (exceptionHolder[0] instanceof RemoteException) {
+					throw (RemoteException) exceptionHolder[0];
+				} else {
+					throw new RemoteException("Exception Holder", (Throwable) exceptionHolder[0]);
+				}
+			} else if (!_lastStatus.equals("")) {
+				log.info(_lastStatus);
+			}
+
+			return DirectJNI.this.convert(objHolder[0]);
+		}
+		
+		
+		//*******************************************************
+		
 		public void freeReference(final RObject refObj) throws RemoteException {
 			if (!(refObj instanceof ReferenceInterface))
 				throw new RemoteException("not an object reference");
