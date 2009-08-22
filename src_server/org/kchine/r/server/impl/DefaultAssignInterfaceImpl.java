@@ -26,6 +26,7 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import org.apache.commons.logging.Log;
 import org.kchine.r.RArray;
+import org.kchine.r.RChar;
 import org.kchine.r.RDataFrame;
 import org.kchine.r.REnvironment;
 import org.kchine.r.RFactor;
@@ -118,7 +119,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					result[0] = ((RList) DirectJNI.getInstance().getObjectFrom("attributes("+rootvar + slotsPath+")"));
+					result[0] = ((RList) DirectJNI.getInstance().getObjectFrom("attributes("+rootvar + slotsPath+")", false));
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 				} catch (Exception ex) {
 					exceptionHolder[0] = ex;
@@ -138,16 +139,15 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 		DirectJNI.getInstance().runR(new org.kchine.r.server.ExecutionUnit() {
 			public void run(Rengine e) {
 				try {
-					
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
-					String argvar = DirectJNI.getInstance().newTemporaryVariableName();
+					String argvar = DirectJNI.getInstance().newTemporaryVariableName();					
 					e.rniAssign(rootvar, rObjectId, 0);
 					if (attrs != null) {
 						e.rniAssign(argvar, DirectJNI.getInstance().putObject(attrs), 0);
 					} else {
 						e.rniEval(e.rniParse(argvar + "<-NULL", 1), 0);
 					}
-					e.rniEval(e.rniParse("attributes(" + rootvar + slotsPath + ")<-" + argvar, 1), 0);					
+					e.rniEval(e.rniParse("attributes(" + rootvar + slotsPath + ")<-" + argvar, 1), 0);
 					result[0] = e.rniEval(e.rniParse(rootvar, 1), 0);
 					e.rniEval(e.rniParse("rm(" + rootvar + "," + argvar + ")", 1), 0);
 					
@@ -642,7 +642,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					result[0] = ((RArray) DirectJNI.getInstance().getObjectFrom(rootvar + slotsPath)).getValue();
+					result[0] = ((RArray) DirectJNI.getInstance().getObjectFrom(rootvar + slotsPath, true)).getValue();
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 				} catch (Exception ex) {
 					exceptionHolder[0] = ex;
@@ -742,7 +742,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					result[0] = (RList) DirectJNI.getInstance().getObjectFrom("dimnames(" + rootvar + slotsPath + ")");
+					result[0] = (RList) DirectJNI.getInstance().getObjectFrom("dimnames(" + rootvar + slotsPath + ")", true);
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 				} catch (Exception ex) {
 					exceptionHolder[0] = ex;
@@ -913,7 +913,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					result[0] = ((RDataFrame) DirectJNI.getInstance().getObjectFrom(rootvar + slotsPath)).getData();
+					result[0] = ((RDataFrame) DirectJNI.getInstance().getObjectFrom(rootvar + slotsPath, true)).getData();
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 				} catch (Exception ex) {
 					exceptionHolder[0] = ex;
@@ -1011,7 +1011,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					result[0] = ((RList) DirectJNI.getInstance().getObjectFrom(rootvar + slotsPath)).getValue();
+					result[0] = ((RList) DirectJNI.getInstance().getObjectFrom(rootvar + slotsPath, true)).getValue();
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 				} catch (Exception ex) {
 					exceptionHolder[0] = ex;
@@ -1064,7 +1064,7 @@ public class DefaultAssignInterfaceImpl implements AssignInterface {
 				try {
 					String rootvar = DirectJNI.getInstance().newTemporaryVariableName();
 					e.rniAssign(rootvar, rObjectId, 0);
-					result[0] = ((REnvironment) DirectJNI.getInstance().getObjectFrom(rootvar + slotsPath)).getData();
+					result[0] = ((REnvironment) DirectJNI.getInstance().getObjectFrom(rootvar + slotsPath, true)).getData();
 					e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 				} catch (Exception ex) {
 					exceptionHolder[0] = ex;

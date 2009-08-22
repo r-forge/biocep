@@ -1080,10 +1080,10 @@ public class DirectJNI {
 	}
 
 	// public for internal use only (DefaultAssignInterface Use)
-	public RObject getObjectFrom(String expression) throws Exception {
+	public RObject getObjectFrom(String expression, boolean setAttributes ) throws Exception {
 		if (isNull(expression))
 			return null;
-		return getObjectFrom(expression, expressionClass(expression),true);
+		return getObjectFrom(expression, expressionClass(expression),setAttributes);
 
 	}
 
@@ -1234,7 +1234,7 @@ public class DirectJNI {
 					}
 					((RArray) result).setDim(e.rniGetIntArray(e.rniGetAttr(expressionId, "dim")));
 					((RArray) result).setValue(vector);
-					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")"));
+					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")",true));
 				} else {
 					result = vector;
 				}
@@ -1263,7 +1263,7 @@ public class DirectJNI {
 					result = rclass.equals("matrix") ? new RMatrix() : new RArray();
 					((RArray) result).setDim(e.rniGetIntArray(e.rniGetAttr(expressionId, "dim")));
 					((RArray) result).setValue(vector);
-					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")"));
+					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")", true));
 
 				} else if (rclass.equals("factor")) {
 					String[] levels = e.rniGetStringArray(e.rniGetAttr(expressionId, "levels"));
@@ -1296,7 +1296,7 @@ public class DirectJNI {
 					result = rclass.equals("matrix") ? new RMatrix() : new RArray();
 					((RArray) result).setDim(e.rniGetIntArray(e.rniGetAttr(expressionId, "dim")));
 					((RArray) result).setValue(vector);
-					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")"));
+					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")", true));
 				} else {
 					result = vector;
 				}
@@ -1328,7 +1328,7 @@ public class DirectJNI {
 					result = rclass.equals("matrix") ? new RMatrix() : new RArray();
 					((RArray) result).setDim(e.rniGetIntArray(e.rniGetAttr(expressionId, "dim")));
 					((RArray) result).setValue(vector);
-					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")"));
+					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")",true));
 				} else {
 					result = vector;
 				}
@@ -1358,7 +1358,7 @@ public class DirectJNI {
 					result = rclass.equals("matrix") ? new RMatrix() : new RArray();
 					((RArray) result).setDim(e.rniGetIntArray(e.rniGetAttr(expressionId, "dim")));
 					((RArray) result).setValue(vector);
-					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")"));
+					((RArray) result).setDimnames((RList) getObjectFrom("dimnames(" + expression + ")",true));
 
 				} else {
 					result = vector;
@@ -1657,7 +1657,7 @@ public class DirectJNI {
 			e.rniAssign(rootvar, refObj.getRObjectId(), 0);
 			String refLabel = rootvar + refObj.getSlotsPath();
 			setFields(refLabel, refObj);
-			RObject result = getObjectFrom(refLabel);
+			RObject result = getObjectFrom(refLabel, true);
 			e.rniEval(e.rniParse("rm(" + rootvar + ")", 1), 0);
 			return result;
 		} else {
@@ -1793,7 +1793,7 @@ public class DirectJNI {
 
 			RObject result = null;
 			if (!resultAsReference) {
-				result = getObjectFrom(resultvar);
+				result = getObjectFrom(resultvar, true);
 			} else {
 				String rclass = expressionClass(resultvar);
 				
@@ -2680,7 +2680,7 @@ public class DirectJNI {
 				public void run(Rengine e) {
 					try {
 						robjHolder[0] = DirectJNI.this.getObjectFrom(((ObjectNameInterface) objectName).getRObjectEnvironment() + "$"
-								+ ((ObjectNameInterface) objectName).getRObjectName());
+								+ ((ObjectNameInterface) objectName).getRObjectName(), true);
 					} catch (Exception ex) {
 						exceptionHolder[0] = ex;
 					}
