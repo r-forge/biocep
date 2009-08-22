@@ -66,10 +66,10 @@ public interface AssignInterface extends Remote {
 	public int[] getIndexNA(long rObjectId, String slotsPath) throws RemoteException;
 
 	public long setIndexNA(long rObjectId, String slotsPath, int[] indexNA) throws RemoteException;
+		
+	public RList getAttributes(long rObjectId, String slotsPath) throws RemoteException;
 
-	public String getOutputMsg(long rObjectId, String slotsPath) throws RemoteException;
-
-	public long setOutputMsg(long rObjectId, String slotsPath, String msg) throws RemoteException;
+	public long setAttributes(long rObjectId, String slotsPath, RList attr) throws RemoteException;
 
 	public RObject getObjectFromReference(RObject refObj) throws RemoteException;
 

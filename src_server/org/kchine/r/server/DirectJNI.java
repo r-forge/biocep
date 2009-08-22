@@ -1036,9 +1036,14 @@ public class DirectJNI {
 			}
 
 		}
-
-		if (((RObject) obj).getOutputMsg() != null)
-			e.rniSetAttr(resultId, "comment", e.rniPutString(((RObject) obj).getOutputMsg()));
+			
+		if (((RObject) obj).getAttributes()!=null) {
+			String[] aNames=((RObject) obj).getAttributes().getNames();
+			for (int i=0; i<aNames.length; ++i) {
+				e.rniSetAttr(resultId, aNames[i], putObject( ((RObject) obj).getAttributes().getValue()[i] ) );
+			}		
+		}
+		
 		return resultId;
 	}
 
@@ -1078,7 +1083,7 @@ public class DirectJNI {
 	public RObject getObjectFrom(String expression) throws Exception {
 		if (isNull(expression))
 			return null;
-		return getObjectFrom(expression, expressionClass(expression));
+		return getObjectFrom(expression, expressionClass(expression),true);
 
 	}
 
@@ -1095,8 +1100,8 @@ public class DirectJNI {
 		_rEngine.rniEval(_rEngine.rniParse(expression, n), 0);
 	}
 
-	private RObject getObjectFrom(String expression, String rclass) throws NoMappingAvailable, Exception {
-		// log.info(".... quering for =" + expression + " rclass="+rclass);
+	private RObject getObjectFrom(String expression, String rclass, boolean setAttributes) throws NoMappingAvailable, Exception {
+		log.info(".... quering for =" + expression + " rclass="+rclass);
 		Rengine e = _rEngine;
 		long expressionId = e.rniEval(e.rniParse(expression, 1), 0);
 		RObject result = null;
@@ -1112,7 +1117,7 @@ public class DirectJNI {
 			// log.info(">>> union r class=" + unionrclass );
 			if (unionrclass.length==1) {
 				
-				RObject o = getObjectFrom(expression, unionrclass[0]);	
+				RObject o = getObjectFrom(expression, unionrclass[0],true);	
 				if (rmode != S4SXP) {
 					if (DirectJNI._s4BeansMapping.get(unionrclass) != null) {
 	
@@ -1131,11 +1136,11 @@ public class DirectJNI {
 				if (rmode==VECSXP) {
 					HashSet<String> unionClassSet=new HashSet<String>();for (int i=0; i<unionrclass.length;++i) unionClassSet.add(unionrclass[i]);
 					if (unionClassSet.contains("data.frame")) {
-						result = getObjectFrom(expression, "data.frame");	
+						result = getObjectFrom(expression, "data.frame",true);	
 					} else if (unionClassSet.contains("list")) {
-						result = getObjectFrom(expression, "list");	
+						result = getObjectFrom(expression, "list",true);	
 					} else {					
-						RList rlist=(RList)getObjectFrom(expression, "list");
+						RList rlist=(RList)getObjectFrom(expression, "list",true);
 						result = new RS3(rlist.getValue(), rlist.getNames(), unionrclass);						
 					}
 				} else {
@@ -1174,7 +1179,7 @@ public class DirectJNI {
 				for (int i = 0; i < vars.length; ++i) {
 					String varname = expression + "$" + vars[i];
 					String varclass = expressionClass(varname);
-					data.put(vars[i], (RObject) getObjectFrom(varname, varclass));
+					data.put(vars[i], (RObject) getObjectFrom(varname, varclass,true));
 				}
 
 				result = new REnvironment();
@@ -1234,9 +1239,8 @@ public class DirectJNI {
 					result = vector;
 				}
 
-				long commentId = e.rniGetAttr(expressionId, "comment");
-				if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
-					result.setOutputMsg(e.rniGetStringArray(commentId)[0]);
+				if (setAttributes && (e.rniGetBoolArrayI(e.rniEval(e.rniParse("!is.null(attributes(" + expression + "))", 1), 0))[0] == 1) ) {
+					result.setAttributes((RList)getObjectFrom("attributes("+expression+")", "list", false));
 				}
 
 				break;
@@ -1268,9 +1272,8 @@ public class DirectJNI {
 					result = vector;
 				}
 
-				long commentId = e.rniGetAttr(expressionId, "comment");
-				if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
-					result.setOutputMsg(e.rniGetStringArray(commentId)[0]);
+				if (setAttributes && (e.rniGetBoolArrayI(e.rniEval(e.rniParse("!is.null(attributes(" + expression + "))", 1), 0))[0] == 1) ) {
+					result.setAttributes((RList)getObjectFrom("attributes("+expression+")", "list", false));
 				}
 
 				break;
@@ -1298,9 +1301,8 @@ public class DirectJNI {
 					result = vector;
 				}
 
-				long commentId = e.rniGetAttr(expressionId, "comment");
-				if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
-					result.setOutputMsg(e.rniGetStringArray(commentId)[0]);
+				if (setAttributes && (e.rniGetBoolArrayI(e.rniEval(e.rniParse("!is.null(attributes(" + expression + "))", 1), 0))[0] == 1) ) {
+					result.setAttributes((RList)getObjectFrom("attributes("+expression+")", "list", false));
 				}
 
 				break;
@@ -1331,9 +1333,8 @@ public class DirectJNI {
 					result = vector;
 				}
 
-				long commentId = e.rniGetAttr(expressionId, "comment");
-				if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
-					result.setOutputMsg(e.rniGetStringArray(commentId)[0]);
+				if (setAttributes && (e.rniGetBoolArrayI(e.rniEval(e.rniParse("!is.null(attributes(" + expression + "))", 1), 0))[0] == 1) ) {
+					result.setAttributes((RList)getObjectFrom("attributes("+expression+")", "list", false));
 				}
 
 				break;
@@ -1363,11 +1364,10 @@ public class DirectJNI {
 					result = vector;
 				}
 
-				long commentId = e.rniGetAttr(expressionId, "comment");
-				if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
-					result.setOutputMsg(e.rniGetStringArray(commentId)[0]);
+				if (setAttributes && (e.rniGetBoolArrayI(e.rniEval(e.rniParse("!is.null(attributes(" + expression + "))", 1), 0))[0] == 1) ) {
+					result.setAttributes((RList)getObjectFrom("attributes("+expression+")", "list", false));
 				}
-
+				
 				break;
 			}
 
@@ -1400,7 +1400,7 @@ public class DirectJNI {
 					for (int i = 0; i < objects.length; ++i) {
 						String varname = expression + "[[" + (i + 1) + "]]";
 						if (!isNull(varname)) {
-							objects[i] = getObjectFrom(varname, expressionClass(varname));
+							objects[i] = getObjectFrom(varname, expressionClass(varname), true);
 						}
 					}
 				}
@@ -1423,11 +1423,12 @@ public class DirectJNI {
 						result = new RS3(rlist.getValue(), rlist.getNames(), e.rniGetStringArray(e.rniEval(e.rniParse("class(" + expression + ")", 1), 0)));
 				}
 
-				long commentId = e.rniGetAttr(expressionId, "comment");
-				if (commentId != 0 && e.rniExpType(commentId) == STRSXP) {
-					result.setOutputMsg(e.rniGetStringArray(commentId)[0]);
-				}
-
+				
+				
+				if (setAttributes && (e.rniGetBoolArrayI(e.rniEval(e.rniParse("!is.null(attributes(" + expression + "))", 1), 0))[0] == 1) ) {
+					result.setAttributes((RList)getObjectFrom("attributes("+expression+")", "list", false));
+				}			
+				
 				break;
 			}
 
@@ -1465,7 +1466,7 @@ public class DirectJNI {
 				String[] slotsRClasses = e.rniGetStringArray(slotsId);
 				Object[] params = new Object[slots.length];
 				for (int i = 0; i < slots.length; ++i) {
-					params[i] = getObjectFrom(expression + "@" + slots[i], slotsRClasses[i]);
+					params[i] = getObjectFrom(expression + "@" + slots[i], slotsRClasses[i], true);
 				}
 
 				Constructor<?> constr = null;

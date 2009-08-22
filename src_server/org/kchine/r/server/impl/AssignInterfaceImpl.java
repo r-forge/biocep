@@ -121,12 +121,12 @@ public class AssignInterfaceImpl extends java.rmi.server.UnicastRemoteObject imp
 		return DirectJNI.getInstance().getDefaultAssignInterface().setIndexNA(rObjectId, slotsPath, indexNA);
 	}
 
-	public String getOutputMsg(long rObjectId, String slotsPath) throws RemoteException {
-		return DirectJNI.getInstance().getDefaultAssignInterface().getOutputMsg(rObjectId, slotsPath);
+	public RList getAttributes(long rObjectId, String slotsPath) throws RemoteException {
+		return DirectJNI.getInstance().getDefaultAssignInterface().getAttributes(rObjectId, slotsPath);
 	}
 
-	public long setOutputMsg(long rObjectId, String slotsPath, String msg) throws RemoteException {
-		return DirectJNI.getInstance().getDefaultAssignInterface().setOutputMsg(rObjectId, slotsPath, msg);
+	public long setAttributes(long rObjectId, String slotsPath, RList attrs) throws RemoteException {
+		return DirectJNI.getInstance().getDefaultAssignInterface().setAttributes(rObjectId, slotsPath, attrs);
 	}
 
 	public RVector getArrayValue(long rObjectId, String slotsPath) throws RemoteException {

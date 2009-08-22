@@ -4,13 +4,15 @@
  */
 
 package org.kchine.r;
+
 public class RObject implements java.io.Serializable{
-	String outputMsg;
-	public void setOutputMsg(String msg) {
-		outputMsg=msg;
+	RList attributes;
+
+	public RList getAttributes() {
+		return attributes;
 	}
 
-	public String getOutputMsg() {
-		return outputMsg;
+	public void setAttributes(RList attributes) {
+		this.attributes = attributes;
 	}
 }

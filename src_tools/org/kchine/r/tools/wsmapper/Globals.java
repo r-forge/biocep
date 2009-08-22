@@ -321,7 +321,7 @@ public class Globals {
 									+ "		map.put(options[i].substring(0,equalIdx),options[i].substring(equalIdx+1));"
 									+ "	}"
 									+ "}"
-									+ "map.put(\"urls\", new java.net.URL[]{org.kchine.r.server.http.frontend.InterceptorServlet.getRMappingUrl()});"
+									+ ""
 									+ "try {return org.kchine.r.server.http.RHttpProxy.logOn(System.getProperty(\"http.frontend.url\"), session, login, pwd, map);} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 									+ "}");
 
@@ -548,6 +548,16 @@ public class Globals {
 					outputWriterWebservice
 					.println("\npublic byte[] getPdf(String session, String script, int width, int height) throws Exception {"
 							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getPdf\", new Class[]{String.class, int.class, int.class}, new Object[]{script,width,height});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
+					.println("\npublic byte[] getPng(String session, String script, int width, int height) throws Exception {"
+							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getPng\", new Class[]{String.class, int.class, int.class}, new Object[]{script,width,height});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
+					.println("\npublic byte[] getJpeg(String session, String script, int width, int height) throws Exception {"
+							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getJpeg\", new Class[]{String.class, int.class, int.class}, new Object[]{script,width,height});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 							+ "}");
 					
 					outputWriterWebservice
