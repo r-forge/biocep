@@ -20,6 +20,8 @@
  */
 import java.io.RandomAccessFile;
 import org.apache.commons.logging.Log;
+import org.kchine.r.RList;
+import org.kchine.r.RObject;
 import org.kchine.r.server.DirectJNI;
 import org.kchine.r.server.RServices;
 import org.kchine.r.server.graphics.GDDevice;
@@ -35,17 +37,37 @@ public class BridgeBasics {
 
 
 	public static void main(String args[]) throws Exception {
-	
+		RServices rs = DirectJNI.getInstance().getRServices();
+		RList ro1 = 
+			  
+			(RList)rs.getObject("structure(list(1,2), caption = 'foo')");
+			RObject ro2 = 
+			   rs.getReference("structure(list(1,2), caption = 'foo')");
+			System.out.println(rs.callAndConvert("str", ro1));
+			System.out.println(rs.callAndConvert("str", ro2));
+			
 		
-		final ScilabServices r = (ScilabServices)ServerManager.createR("toto");
-		r.scilabExec("disp(7+9)");
-		r.die();
+		
+		/*
+		
+		RServices rs =
+			ServerManager.createR("toto"); 
+		
+			RObject ro1 = 
+			   rs.getObject("structure(list(1,2), caption = \"foo\")");
+			RObject ro2 = 
+			   rs.getReference("structure(list(1,2), caption = \"foo\")");
+			System.out.println(rs.callAndConvert("str", ro1));
+			System.out.println(rs.callAndConvert("str", ro2));
+		
+		
+		rs.die();
 		
 		if (true) return;
+		*/
 		
-		final RServices rs = DirectJNI.getInstance().getRServices();
-		GDDevice device=rs.newDevice(400, 400);
-		
+		rs = DirectJNI.getInstance().getRServices();
+		GDDevice device=rs.newDevice(400, 400);		
 		rs.consoleSubmit("plot(pressure)");
 		System.out.println(rs.getStatus());
 		byte[] buffer=device.getPng();

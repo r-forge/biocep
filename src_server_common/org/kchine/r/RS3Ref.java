@@ -173,20 +173,22 @@ public class RS3Ref extends RS3 implements org.kchine.r.server.ReferenceInterfac
 
 	
 	@Override
-	public String getOutputMsg() {
+	public RList getAttributes() {
 		try {
-			return _assignInterface.getOutputMsg(_rObjectIdHolder[0], _slotsPath);
+			return _assignInterface.getAttributes(_rObjectIdHolder[0], _slotsPath);
 		} catch (Exception e) {
 			throw new RuntimeException(Utils.getStackTraceAsString(e));
 		}
+
 	}
 
 	@Override
-	public void setOutputMsg(String msg) {
+	public void setAttributes(RList attrs) {
 		try {
-			_rObjectIdHolder[0] = _assignInterface.setOutputMsg(_rObjectIdHolder[0], _slotsPath, msg);
+			_rObjectIdHolder[0] = _assignInterface.setAttributes(_rObjectIdHolder[0], _slotsPath, attrs);
 		} catch (Exception e) {
 			throw new RuntimeException(Utils.getStackTraceAsString(e));
 		}
 	}
+	
 }
