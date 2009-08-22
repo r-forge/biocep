@@ -1454,7 +1454,7 @@ public abstract class RListener {
 				return new String[] { "NOK", convertToPrintCommand("Bad Cell Location") };
 			}
 
-			final String trstring = ImportInfo.getImportInfo(DirectJNI.getInstance().getObjectFrom(".PrivateEnv$spreadsheet.put.value")).getTabString();
+			final String trstring = ImportInfo.getImportInfo(DirectJNI.getInstance().getObjectFrom(".PrivateEnv$spreadsheet.put.value", true)).getTabString();
 			final int startRowFinal = startRow;
 			final int startColFinal = startCol;
 			new Thread(new Runnable(){

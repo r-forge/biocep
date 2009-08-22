@@ -11,7 +11,7 @@
 package org.kchine.r;
 import java.util.Arrays;
 
-public class RList extends RObject {
+public class RList extends RObject  {
     protected RObject[] value=new RObject[0];
     protected String[] names;
     
@@ -81,9 +81,11 @@ public class RList extends RObject {
         StringBuffer res=new StringBuffer("RList {");
         res.append("name= "+Arrays.toString(names));
         res.append(", value= "+Arrays.deepToString(value));
+        res.append(", attrs= "+attributes);
         res.append(" }");
         return res.toString();
-    } 
+    }
+    
       
 }
         
