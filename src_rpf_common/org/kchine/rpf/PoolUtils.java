@@ -206,9 +206,10 @@ public class PoolUtils {
 				if (System.getProperty("host.ip.forced")!=null && !System.getProperty("host.ip.forced").equals("")) {
 					_hostIp=System.getProperty("host.ip.forced");
 				} else {
-					if (isAmazonCloud()) {					
-						_hostIp=getAMIHostIp();
-					} else {				
+					//if (isAmazonCloud()) {					
+					//	_hostIp=getAMIHostIp();
+					//} else 
+					{				
 						if (publicIPUnavilable()) {
 							String IPAddressFromNetworkInterfaces = getIPAddressFromNetworkInterfaces();
 							if (IPAddressFromNetworkInterfaces != null)
