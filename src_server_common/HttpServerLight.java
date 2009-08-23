@@ -231,9 +231,9 @@ public class HttpServerLight {
 				}
 
 				for (int i = 0; i < warNames.size(); ++i) {
-					File warfile = new File(warNames.elementAt(i));
+					File warfile = new File(ServerManager.INSTALL_DIR+warNames.elementAt(i));
 					if (!warfile.exists()) {
-						System.out.println("couldn't find the war file :" + args[i]);
+						System.out.println("couldn't find the war file :" + warNames.elementAt(i));
 						System.exit(0);
 					}
 
