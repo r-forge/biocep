@@ -4,6 +4,9 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -30,7 +33,7 @@ import static org.kchine.rpf.PoolUtils.getHostIp;
 public class HttpServerLight {
 
 	public static void main(String[] args) throws Exception {
-		
+
 		if (System.getProperty("cloud.service") != null && System.getProperty("cloud.service").equals("ec2")) {
 			System.setProperties(PoolUtils.getAMIUserData());
 		}
@@ -82,20 +85,20 @@ public class HttpServerLight {
 
 		}
 
-		new Thread(new Runnable() {
-			public void run() {
+		if (System.getProperty("workers") != null && !System.getProperty("workers").equals("")) {
+			new Thread(new Runnable() {
+				public void run() {
+					int workers = 0;
 
-				try {
-					System.setProperty("create", "true");
-					System.setProperty("node.host", "127.0.0.1");
-					System.setProperty("node.ip", "127.0.0.1");
-					DbRegistry.main(null);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+					try {
+						System.setProperty("create", "true");
+						System.setProperty("node.host", "127.0.0.1");
+						System.setProperty("node.ip", "127.0.0.1");
+						DbRegistry.main(null);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 
-				int workers = 0;
-				if (System.getProperty("workers") != null) {
 					try {
 						workers = Integer.decode(System.getProperty("workers"));
 					} catch (Exception e) {
@@ -118,10 +121,10 @@ public class HttpServerLight {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}
 
-			}
-		}).start();
+				}
+			}).start();
+		}
 
 		if (System.getProperty("pools.provider.factory") == null || System.getProperty("pools.provider.factory").equals("")) {
 			System.setProperty("pools.provider.factory", "org.kchine.rpf.db.ServantsProviderFactoryDB");
@@ -213,6 +216,39 @@ public class HttpServerLight {
 			wac.setContextPath(contextPath);
 			wac.setWar(ServerManager.INSTALL_DIR + "/" + "rws.war");
 			_virtualizationServer.addHandler(wac);
+		}
+
+		if (System.getProperty("warurls") != null && !System.getProperty("warurls").equals("")) {
+
+			try {
+
+				Vector<String> warNames = new Vector<String>();
+				StringTokenizer st = new StringTokenizer(System.getProperty("warurls"), ";");
+				while (st.hasMoreElements()) {
+					String warUrl = (String) st.nextElement();
+					warNames.add(warUrl.substring(warUrl.lastIndexOf('/') + 1, warUrl.length()));
+					cacheJar(new URL(warUrl), ServerManager.INSTALL_DIR, LOG_PRGRESS_TO_SYSTEM_OUT, false);
+				}
+
+				for (int i = 0; i < warNames.size(); ++i) {
+					File warfile = new File(warNames.elementAt(i));
+					if (!warfile.exists()) {
+						System.out.println("couldn't find the war file :" + args[i]);
+						System.exit(0);
+					}
+
+					String contextPath = "/" + warfile.getName();
+					contextPath = contextPath.substring(0, contextPath.length() - ".war".length());
+					WebAppContext wac = new WebAppContext();
+					wac.setContextPath(contextPath);
+					wac.setWar(warfile.getAbsolutePath());
+					_virtualizationServer.addHandler(wac);
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 		}
 
 		System.out.println("+ going to start virtualization http server port : " + port);
