@@ -654,6 +654,10 @@ public class DirectJNI {
 
 	// public for internal use only
 	public long putObject(Object obj) throws Exception {
+		return putObject(obj, null);
+	}
+	// public for internal use only	
+	public long putObject(Object obj, Class<?>[] classHolder) throws Exception {
 
 		Rengine e = _rEngine;
 
@@ -1061,6 +1065,7 @@ public class DirectJNI {
 			}		
 		}
 		
+		if (classHolder!=null) classHolder[0]=obj.getClass();
 		return resultId;
 	}
 
@@ -1544,8 +1549,17 @@ public class DirectJNI {
 	private RObject call(boolean resultAsReference, String varName, RFunction method, Object... args) throws Exception {		
 		String functionName=newTemporaryVariableName();
 		try {			
-			_rEngine.rniAssign(functionName, putObject(method), 0);			
-			return call(resultAsReference, varName, functionName, args);			
+			if (method instanceof ReferenceInterface) {
+				ReferenceInterface mRef = (ReferenceInterface) method;
+				if (mRef.getAssignInterface().equals(_ai)) {
+					_rEngine.rniAssign(functionName, mRef.getRObjectId(), 0);					
+				} else {
+					_rEngine.rniAssign(functionName, putObject(mRef.extractRObject()), 0);					
+				}
+			} else {
+				_rEngine.rniAssign(functionName, putObject(method), 0);
+			}
+			return call(resultAsReference, varName, functionName, args);
 		} finally {
 			_rEngine.rniEval(_rEngine.rniParse("rm("+functionName+")", 1), 0);
 		}
@@ -1695,9 +1709,11 @@ public class DirectJNI {
 	};
 
 	private ReferenceInterface putObjectAndGetReference(final Object obj) throws Exception {
-		long resultId = putObject(obj);
+		Class<?>[] classHolder=new Class<?>[1];
+		long resultId = putObject(obj, classHolder);
 		protectSafe(resultId);
-		Class<?> javaClass = DirectJNI._mappingClassLoader.loadClass(obj.getClass().getName() + "Ref");
+		
+		Class<?> javaClass = DirectJNI._mappingClassLoader.loadClass(classHolder[0].getName() + "Ref");
 		ReferenceInterface result = (ReferenceInterface) javaClass.getConstructor(new Class[] { long.class, String.class }).newInstance(
 				new Object[] { resultId, "" });
 		result.setAssignInterface(_ai);

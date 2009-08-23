@@ -627,11 +627,11 @@ public class Globals {
 						.println("\npublic void _exportStandardTypesToWSDL(RObject robject, "
 								+ " RDataFrame rdataframe, RList rlist, RS3 rs3, REnvironment renvironment,"
 								+ " RFactor rfactor, RUnknown runknown, RArray rarray, RMatrix rmatrix, RVector rvector, RNumeric rnumeric, RInteger rinteger,"
-								+ " RChar rchar, RComplex rcomplex, RLogical rlogical, RRaw rraw, RFunction,"
+								+ " RChar rchar, RComplex rcomplex, RLogical rlogical, RRaw rraw, RFunction rfunction,"
 								+ " RNamedArgument rnamedargument, RObjectName robjectname,"
 								+ " RDataFrameObjectName rdataframeobjectname, RListObjectName rlistobjectname, RS3ObjectName rs3objectname, REnvironmentObjectName renvironmentobjectname,"
 								+ " RFactorObjectName rfactorobjectname, RUnknownObjectName runknownobjectname, RArrayObjectName rarrayobjectname, RMatrixObjectName rmatrixobjectname, RNumericObjectName rnumericobjectname, RIntegerObjectName rintegerobjectname,"
-								+ " RCharObjectName rcharobjectname, RComplexObjectName rcomplexobjectname, RLogicalObjectName rlogicalobjectname, RRawObjectName rrawobjectname"
+								+ " RCharObjectName rcharobjectname, RComplexObjectName rcomplexobjectname, RLogicalObjectName rlogicalobjectname, RRawObjectName rrawobjectname, RFunctionObjectName rfunctionobjectname"
 
 								+ "){}");
 

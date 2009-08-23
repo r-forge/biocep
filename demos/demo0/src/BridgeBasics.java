@@ -22,6 +22,8 @@ import java.io.RandomAccessFile;
 import org.apache.commons.logging.Log;
 import org.kchine.r.RChar;
 import org.kchine.r.RFunction;
+import org.kchine.r.RFunctionObjectName;
+import org.kchine.r.RFunctionRef;
 import org.kchine.r.RList;
 import org.kchine.r.RObject;
 import org.kchine.r.RRaw;
@@ -42,15 +44,12 @@ public class BridgeBasics {
 
 	public static void main(String args[]) throws Exception {
 		RServices rs = DirectJNI.getInstance().getRServices();
+		rs.consoleSubmit("k=function(x){x*5}");
 		
-		rs.consoleSubmit("setClass('foo', representation(a = 'character', b = 'numeric'));setClass('bar', representation(d = 'numeric', c = 'numeric'));setClass('baz', contains = c('foo', 'bar'))");
-		rs.consoleSubmit("x <- new('baz', a = 'xxx', b = 5, c = 10)");		
-		RObject o=rs.getObject("x");
-		System.out.println("////////////////////////////////"+o);
-		rs.consoleSubmit("rm(x)");		
-		rs.putAndAssign(o, "y");	
 		
-		System.out.println("////////////////////////////////"+rs.print("y"));
+		System.out.println("////////////////////////////////"+rs.callAndConvert(new RFunctionObjectName("k"), 45));
+		
+		
 		
 		//rs.putAndAssign(new RUnknown(o.getValue()), "b");
 		//System.out.println("-------------------------------"+rs.print("h"));

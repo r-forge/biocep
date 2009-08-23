@@ -1128,6 +1128,7 @@
 		<if><not><isset property="naming.mode"/></not><then><property name="naming.mode" value=""/></then></if>
 		<if><not><isset property="soapenabled"/></not><then><property name="soapenabled" value=""/></then></if>
 		<if><not><isset property="port"/></not><then><property name="port" value=""/></then></if>
+		<if><not><isset property="warurls"/></not><then><property name="warurls" value=""/></then></if>
 		
 		<java maxmemory="256m" classname="HttpServerLight"
 			fork="true" spawn="${spawn}" >
@@ -1198,7 +1199,8 @@
 			<jvmarg value="-Dnaming.mode=${naming.mode}"/>
 			<jvmarg value="-Dsoapenabled=${soapenabled}"/>
 			<jvmarg value="-Dport=${port}"/>
-				
+			<jvmarg value="-Dwarurls=${warurls}"/>
+			
 			
 		</java>
 		
