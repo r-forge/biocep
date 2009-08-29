@@ -116,7 +116,8 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 
 		HttpSession session = null;
 		Object result = null;
-
+        
+        
 		try {
 			final String command = request.getParameter("method");
 			do {
@@ -153,6 +154,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					HashMap<String, Object> options = (HashMap<String, Object>) PoolUtils.hexToObject(request.getParameter("options"));
 					if (options == null) options = new HashMap<String, Object>();
 					System.out.println("options:" + options);
+										
 
 					RPFSessionInfo.get().put("LOGIN", login);
 					RPFSessionInfo.get().put("REMOTE_ADDR", request.getRemoteAddr());
@@ -174,7 +176,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						e.printStackTrace();
 					}
 					
-
+					boolean privateEngineMode=false;
 					RServices r = null;
 					URL[] codeUrls = null;
 
@@ -323,8 +325,10 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 										System.out.println("CODE URL->" + Arrays.toString(codeUrls));
 										//String 
 										r = ServerManager.createR(System.getProperty("r.binary"),false, false, PoolUtils.getHostIp(), LocalHttpServer.getLocalHttpServerPort(), ServerManager.getRegistryNamingInfo(PoolUtils.getHostIp(), LocalRmiRegistry
-												.getLocalRmiRegistryPort()), memoryMin, memoryMax, privateName, false, codeUrls,null,(_webAppMode?"javaws":"standard"),null,"127.0.0.1");
+												.getLocalRmiRegistryPort()), memoryMin, memoryMax, privateName, false, codeUrls,null,(_webAppMode?"javaws":"standard"),null,"127.0.0.1");										
 									}
+									
+									privateEngineMode=true;
 								}
 
 							} else {
@@ -439,6 +443,39 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 						} finally {
 							if (_rkit != null && _safeModeEnabled) ((ExtendedReentrantLock)_rkit.getRLock()).rawUnlock();
 						}
+					}
+					
+					
+					if (privateEngineMode) {
+						
+						if (options.get("newdevice")!=null) {
+							GDDevice deviceProxy = null;
+							GDDevice[] dlist=r.listDevices();
+							if (dlist==null || dlist.length==0) {
+								deviceProxy=r.newDevice(480, 480);				
+							} else {
+								deviceProxy=dlist[0];
+							}							
+							String deviceName = deviceProxy.getId();
+							session.setAttribute(deviceName, deviceProxy);
+							session.setAttribute("maindevice", deviceProxy);
+							saveSessionAttributes(session);					
+						}
+						
+						if (options.get("newgenericcallbackdevice")!=null) {
+							GenericCallbackDevice genericCallBackDevice=null;
+							GenericCallbackDevice[] clist=r.listGenericCallbackDevices();
+							if (clist==null || clist.length==0) {
+								genericCallBackDevice=r.newGenericCallbackDevice();
+							} else {
+								genericCallBackDevice=clist[0];
+							}
+							String genericCallBackDeviceName = genericCallBackDevice.getId();
+							session.setAttribute(genericCallBackDeviceName, genericCallBackDevice);
+							session.setAttribute("maingenericcallbackdevice", genericCallBackDevice);
+							saveSessionAttributes(session);
+						}
+						
 					}
 
 					result = session.getId();
@@ -684,6 +721,7 @@ public class CommandServlet extends javax.servlet.http.HttpServlet implements ja
 					try {
 						if (_rkit != null && _safeModeEnabled) ((ExtendedReentrantLock)_rkit.getRLock()).rawLock();
 						GenericCallbackDevice genericCallBackDevice = ((RServices) session.getAttribute("R")).newGenericCallbackDevice();
+						
 						String genericCallBackDeviceName = genericCallBackDevice.getId();
 						session.setAttribute(genericCallBackDeviceName, genericCallBackDevice);
 						saveSessionAttributes(session);
