@@ -40,6 +40,7 @@ import org.kchine.r.RLogical;
 import org.kchine.r.RMatrix;
 import org.kchine.r.RNumeric;
 import org.kchine.r.server.DirectJNI;
+import org.kchine.r.server.RAction;
 import org.kchine.r.server.Utils;
 import org.kchine.rpf.PoolUtils;
 
@@ -559,6 +560,43 @@ public class Globals {
 					.println("\npublic byte[] getJpeg(String session, String script, int width, int height) throws Exception {"
 							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"R\", \"getJpeg\", new Class[]{String.class, int.class, int.class}, new Object[]{script,width,height});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
 							+ "}");
+
+					
+					outputWriterWebservice
+					.println("\npublic int resizeMainDevice(String session, int width, int height) throws Exception {"
+							+ "try {org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"maindevice\", \"fireSizeChangedEvent\", new Class[]{int.class, int.class}, new Object[]{width,height}); return 1;} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
+					.println("\npublic byte[] getMainDevicePng(String session) throws Exception {"
+							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"maindevice\", \"getPng\", new Class[0], new Object[0]);} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
+					.println("\npublic byte[] getMainDeviceJpeg(String session) throws Exception {"
+							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"maindevice\", \"getJpeg\", new Class[0], new Object[0]);} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+
+					outputWriterWebservice
+					.println("\npublic byte[] getMainDeviceBmp(String session) throws Exception {"
+							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"maindevice\", \"getBmp\", new Class[0], new Object[0]);} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");					
+
+					outputWriterWebservice
+					.println("\npublic byte[] getMainDevicePdf(String session) throws Exception {"
+							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"maindevice\", \"getPdf\", new Class[0], new Object[0]);} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
+					.println("\npublic byte[] getMainDeviceFromImageIOWriter(String session, String format) throws Exception {"
+							+ "try {return (byte[])org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"maindevice\", \"getFromImageIOWriter\", new Class[]{String.class}, new Object[]{format});} catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
+					outputWriterWebservice
+					.println("\npublic java.util.Vector<org.kchine.r.server.RAction> getMainGenericDeviceActions(String session, int maxNbrRactions) throws Exception {"
+							+ "try { return (java.util.Vector<org.kchine.r.server.RAction>)org.kchine.r.server.http.RHttpProxy.invoke(System.getProperty(\"http.frontend.url\"), session, \"maingenericcallbackdevice\", \"popRActions\", new Class[]{int.class}, new Object[]{maxNbrRactions}); } catch (org.kchine.r.server.http.frontend.TunnelingException te) { te.printStackTrace();throw new Exception(getStackTraceAsString(te));}"
+							+ "}");
+					
 					
 					outputWriterWebservice
 					.println("\npublic void scilabPutAndAssign(String session, Object obj, String name) throws Exception { "
@@ -631,7 +669,7 @@ public class Globals {
 								+ " RNamedArgument rnamedargument, RObjectName robjectname,"
 								+ " RDataFrameObjectName rdataframeobjectname, RListObjectName rlistobjectname, RS3ObjectName rs3objectname, REnvironmentObjectName renvironmentobjectname,"
 								+ " RFactorObjectName rfactorobjectname, RUnknownObjectName runknownobjectname, RArrayObjectName rarrayobjectname, RMatrixObjectName rmatrixobjectname, RNumericObjectName rnumericobjectname, RIntegerObjectName rintegerobjectname,"
-								+ " RCharObjectName rcharobjectname, RComplexObjectName rcomplexobjectname, RLogicalObjectName rlogicalobjectname, RRawObjectName rrawobjectname, RFunctionObjectName rfunctionobjectname"
+								+ " RCharObjectName rcharobjectname, RComplexObjectName rcomplexobjectname, RLogicalObjectName rlogicalobjectname, RRawObjectName rrawobjectname, RFunctionObjectName rfunctionobjectname, org.kchine.r.server.RAction raction, org.kchine.r.server.RConsoleAction rconsoleaction"
 
 								+ "){}");
 

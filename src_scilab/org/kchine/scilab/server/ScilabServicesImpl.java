@@ -22,8 +22,6 @@ public class ScilabServicesImpl implements ScilabServices{
 
 	public ScilabServicesImpl() {
 		
-		new Exception().printStackTrace();
-		
 		try {
 			scilabSetWorkingDirectory(DirectJNI.getInstance().getRServices().getWorkingDirectory());
 		} catch (Exception e) {
