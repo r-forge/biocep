@@ -1095,6 +1095,16 @@ public class RServantImpl extends ManagedServantAbstract implements RServices, S
 		DirectJNI.getInstance().getRServices().pythonSet(name, Value);
 	}
 
+	
+	public Object invoke(String className, String staticMethodName, java.lang.Class<?>[] argumentClasses, Object[] argumentObjects) throws RemoteException {
+		return DirectJNI.getInstance().getRServices().invoke(className, staticMethodName, argumentClasses, argumentObjects);
+	}	;
+    
+	public void resetInvoker() throws RemoteException {
+		DirectJNI.getInstance().getRServices().resetInvoker();
+	}
+	
+	
 	public String groovyExecFromResource(String resource) throws RemoteException {
 		return DirectJNI.getInstance().getRServices().groovyExecFromResource(resource);
 	}

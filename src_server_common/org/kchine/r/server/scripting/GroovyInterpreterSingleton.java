@@ -14,6 +14,8 @@ public class GroovyInterpreterSingleton {
 	public static GroovyInterpreter _groovy = null;
 	private static Integer lock = new Integer(0);
 
+	public static void reset() {_groovy=null;}
+	
 	public static GroovyInterpreter getInstance() {
 		if (_groovy != null)
 			return _groovy;

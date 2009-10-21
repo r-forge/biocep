@@ -30,7 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-
+import java.lang.reflect.InvocationTargetException;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -1122,7 +1122,8 @@ public class DirectJNI {
 		_rEngine.rniEval(_rEngine.rniParse(expression, n), 0);
 	}
 
-	private RObject getObjectFrom(String expression, String rclass, boolean setAttributes) throws NoMappingAvailable, Exception {
+
+		private RObject getObjectFrom(String expression, String rclass, boolean setAttributes) throws NoMappingAvailable, Exception {
 		log.info(".... quering for =" + expression + " rclass="+rclass);
 		Rengine e = _rEngine;
 		long expressionId = e.rniEval(e.rniParse(expression, 1), 0);
@@ -1137,7 +1138,9 @@ public class DirectJNI {
 			String[] unionrclass = e.rniGetStringArray(e.rniEval(e.rniParse("class(" + expression + ")", 1), 0));
 			System.out.println("Union Class : "+Arrays.toString(unionrclass));
 			// log.info(">>> union r class=" + unionrclass );
-			if (unionrclass.length==1) {
+			if (rclass.equals("formula")) {
+				result = new RUnknown(e.rniGetIntArray(e.rniEval(e.rniParse("as.integer(serialize(" + expression + ",NULL))", 1), 0)));
+			} else if (unionrclass.length==1) {
 				
 				RObject o = getObjectFrom(expression, unionrclass[0],true);	
 				if (rmode != S4SXP) {
@@ -1520,7 +1523,7 @@ public class DirectJNI {
 
 		return result;
 	}
-
+	
 	public static boolean hasDistributedReferences(ReferenceInterface arg) {
 		try {
 			for (int i = 0; i < arg.getClass().getSuperclass().getDeclaredFields().length; ++i) {
@@ -4422,6 +4425,28 @@ public class DirectJNI {
 		public void pythonSet(String name, Object Value) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
+		
+		
+		public Object invoke(String className, String staticMethodName, java.lang.Class<?>[] argumentClasses, Object[] argumentObjects) throws RemoteException {
+	    	try {	    		
+	    		
+	    		ClassLoader cl=org.kchine.r.server.scripting.GroovyInterpreterSingleton.getInstance().getClassLoader();
+	    		Class<?> c=cl.loadClass(className);
+	    		return c.getMethod(staticMethodName,argumentClasses).invoke(null, argumentObjects);
+	    		
+	    	} catch (InvocationTargetException ite) {
+				throw new RemoteException("",ite.getCause());				
+			} catch (Exception e) {
+				throw new RemoteException("",e);
+			}
+	    	
+		};
+	   
+		public void resetInvoker() throws RemoteException {
+			org.kchine.r.server.scripting.GroovyInterpreterSingleton.reset();
+			org.kchine.r.server.scripting.GroovyInterpreterSingleton.getInstance();
+		}
+
 
 		public Object groovyEval(String expression) throws RemoteException {
 			throw new UnsupportedOperationException("Not supported yet.");

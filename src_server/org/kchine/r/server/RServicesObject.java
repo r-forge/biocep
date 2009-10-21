@@ -832,4 +832,9 @@ public class RServicesObject implements RServices {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+		public Object invoke(String objectName, String staticMethodName, java.lang.Class<?>[] argumentClasses, Object[] argumentObjects) throws RemoteException {return null;};
+	
+	public void resetInvoker() throws RemoteException {}
+
 }
