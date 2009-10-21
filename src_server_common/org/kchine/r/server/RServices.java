@@ -215,7 +215,11 @@ public interface RServices extends ManagedServant {
 	public Object pythonGetAndConvert(String name) throws RemoteException;
 	public void pythonSet(String name, Object Value) throws RemoteException;	
 	public String getPythonStatus() throws RemoteException;
-		
+	
+	public Object invoke(String className, String staticMethodName, Class<?>[] argumentClasses, Object[] argumentObjects) throws RemoteException;	
+	public void resetInvoker() throws RemoteException;
+
+
 	public String groovyExec(String groovyCommand) throws RemoteException;	
 	public String groovyExecFromWorkingDirectoryFile(String fileName) throws RemoteException;	
 	public String groovyExecFromResource(String resource) throws RemoteException;
