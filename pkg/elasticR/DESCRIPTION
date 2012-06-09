@@ -1,0 +1,13 @@
+Package: elasticR
+Version: 1.0
+Date: 2010-01-11
+Title: Elastic-R
+Author: Karim Chine
+Maintainer: Karim Chine <karim.chine@polytechnique.org>
+Description: Distributed Computing on the cloud.
+Depends: R (>= 2.10.0), rJava (>= 0.7-0)
+SystemRequirements: Java (>= 1.5)
+License: 
+Packaged: 2010-11-01 15:54:00 UTC; karim
+Repository: 
+Date/Publication: 2010-11-30 06:20:00
